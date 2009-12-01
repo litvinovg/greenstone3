@@ -1,0 +1,173 @@
+<head><title>FAQ for JavaGDBM</title>
+</head>
+
+<h1>FAQ for JavaGDBM</h1>
+<p><pre>$Id$</pre>
+<p><a href="http://www.pharos.com.au/gdbm/"><b>Home page</b></a> |
+<a href="mailto:mbp@pharos.com.au"><b>mbp@pharos.com.au</b></a>
+
+<p><b>This is not an official publication of Pharos.  There is no
+warranty of any kind on this software or document.</b>
+
+<h3>Is this a JDBC driver?</h3>
+
+<p>(Alain Magloire)
+
+<p>No. JDBC seems mainly intended for interfaces to relational
+databases, and GDBM is not a relational database. 
+
+<p>However, JDBC does permit use of a subset to interface to
+non-relational databases.  Implementing this might be interesting: let
+me know if it's useful to you.
+
+<h3>Does JavaGDBM understand SQL?</h3>
+
+<p>(Alain Magloire)
+
+<p>No, JavaGDBM is intended to store on-disk hash tables.  They solve
+a different class of problem to that appropriate for SQL and
+relational databases.
+
+<h3>What type of database should I use?</h3>
+
+<p>Broadly, options for data storage in Java include
+
+<ul>
+<li>A hash file through JavaGDBM.
+<li>A relational database through JDBC
+<li>An object-oriented database
+<li>Serialization to a file
+</ul>
+
+<p>Make sure you choose the right tools: there is no single `best' answer.
+
+<h3>Are you maintaining GDBM?</h3>
+
+<p>No.  I understand that GDBM is still maintained by the FSF.
+
+<h3>Does it work on NT?</h3>
+
+<p>It should, but I haven't tried it.  You'll need a C compiler to
+build the native library.  Let me know if you try.
+
+<h3>Why does the test harness report exceptions</h3>
+
+<p>The test harness may report messages such as
+
+<pre>
+caught: au.com.pharos.gdbm.GdbmException: File open error: No such file or
+directory? (gdbmjava.c:101)
+</pre>
+
+<p>These are expected exceptions: the test harness is making sure that
+exceptions are thrown when they should be.
+
+<h3>I was trying to compile the Java GDBM distribution and it says gdbm.h not found</h3>
+
+<p>(Sandeep Kumar)
+
+<ol>
+<li>Make sure you have the GDBM library installed on your system.  
+If the library is not installed, you should be able to find it at 
+<a href="http://www.gnu.org/">www.gnu.org</a>
+
+<li>Make sure your compiler is configured to find the libraries and
+include files.
+
+</ol>
+
+<h3><tt>GdbmFile.h</tt> is missing</h3>
+
+<p>(Paul Matthews)
+
+<p><tt>GdbmFile.h</tt> is build by <tt>javah</tt> when the library is
+built.
+
+<h3>What is the best source to learn Java?</h3>
+
+<p>(Celil Germeyan)
+
+<p>Personally, I recommend the excellent Java series of books from
+<a href="http://www.ora.com/info/java/bibliography.html/">O'Reilly and
+Associates</a> and the
+<a href="http://java.sun.com/docs/books/index.html">Javasoft/Addison
+Wesley</a> books.
+
+<h3>I get a `not ok 40' message running the test</h3>
+
+<p>(Steve Waldman)
+
+<p>If you find a bug, either have a look at the code yourself, or
+send e-mail to 
+<a href="mailto:mbp@pharos.com.au"><tt>mbp@pharos.com.au</tt></a>.  
+There's no warranty on JavaGDBM, but I will try to respond to your
+mail and problem.
+
+<h3>I get linker errors on Solaris</h3>
+
+<p>(Alex Soto)
+
+<pre>
+Hi,
+
+    I'm hoping to use your JavaGDBM api for my application, but I'm
+having some problems compiling the libgdbmjava.so.  Here is a partial
+listing of the errors:
+
+gcc -o libgdbmjava.so -shared gdbmjava.o -lgdbm
+Text relocation remains                       referenced
+    against symbol                  offset      in file
+free                                0x258
+/usr/local/lib/libgdbm.a(gdbmreorg.o)
+free                                0xd0
+/usr/local/lib/libgdbm.a(gdbmclose.o)
+free                                0xb8
+/usr/local/lib/libgdbm.a(gdbmclose.o)
+free                                0x218
+[snipped]
+
+I have used the libgdbm.a lib before, and don't believe there is a
+problem with it.  I'm compiling to Solaris 2.6, using JDK 1.1.4.
+</pre>
+
+<p>The solution turned out to be that the gdbm native library
+must be compiled with the <tt>-fpic</tt> flag to cause the compiler to
+generate position-independant code.  
+
+<h3>What happens if a reader tries to open the database while a writer is doing something?</h3>
+
+<p>(Rich Neill)
+
+<p>Access will be denied until the writer releases its lock.  
+
+<p>JavaGDBM uses a shared-read/exclusive-write protocol at the OS
+level.  However, multiple Java threads can access a file concurrently.
+
+<h3>What platforms does JavaGDBM run on?</H3>
+
+<p>It should run on any platform that supports JDK1.1 or higher, JNI
+(Java Native Interface), and GDBM.  JavaGDBM is known to run on 
+
+<ul>
+<li>Linux/i386
+<li>Solaris/SPARC and Solaris/i86
+<li>AIX 4
+</ul>
+
+<p>If you have any information on other platforms, please let me know.
+
+<h3>You don't anticipate going Pure Java soon, do you?</h3>
+
+<p>(Brian Thorstad)
+
+<p>It's on the `long-term' TODO list.  I'd like to do it, but don't have
+any date in mind.
+
+<h3>Acknowledgements</h3>
+
+<p>Everybody who's sent in questions or comments.
+
+<p>Redhat and Javasoft, and the authors of GDBM, Linux, gcc, autoconf,
+and other software used in building JavaGDBM.
+
+</html>

@@ -1,0 +1,50 @@
+<!ENTITY nbsp "&#160;">
+<!ENTITY copy "&#169;">
+<!ENTITY mdash "&#151;">
+<!ENTITY ouml "&#214;">
+<!ENTITY dollar "&#36;" >
+<!ENTITY Eacute "&#201;" >
+<!ENTITY eacute "&#233;" >
+<!ENTITY uacute "&#250;">
+<!ENTITY aacute "&#225;">
+<!ENTITY oacute "&#243;">
+<!ENTITY Eacute "&#201;">
+<!ENTITY iacute "&#237;">
+<!ENTITY agrave "&#224;">
+<!ENTITY egrave "&#232;">
+<!ENTITY igrave "&#236;">
+<!ENTITY ograve "&#242;">
+<!ENTITY ugrave "&#249;">
+<!ENTITY aelig "&#230;">
+<!ENTITY acirc "&#226;">
+<!ENTITY ecirc "&#234;">
+<!ENTITY icirc "&#238;">
+<!ENTITY ocirc "&#244;">
+<!ENTITY ucirc "&#251;">
+<!ENTITY ntilde "&#241;">
+<!ENTITY ccedil "&#231;">
+<!ENTITY shy "&#173;">
+<!ENTITY pound "&#163;">
+<!ENTITY percnt "&#37;">
+<!ENTITY percent "&#37;">
+<!ENTITY iuml "&#239;">
+<!ENTITY Iuml "&#207;">
+<!ENTITY amacr "&#257;">
+<!ENTITY Amacr "&#256;">
+<!ENTITY emacr "&#275;">
+<!ENTITY Emacr "&#274;">
+<!ENTITY omacr "&#333;">
+<!ENTITY imacr "&#299;">
+<!ENTITY Imacr "&#298;">
+<!ENTITY Omacr "&#332;">
+<!ENTITY umacr "&#363;">
+<!ENTITY Umacr "&#362;">
+<!ENTITY oslash "&#248;">
+<!ENTITY euml "&#235;">
+<!ENTITY Euml "&#203;">
+<!ENTITY uuml "&#252;">
+<!ENTITY frac14 "&#188;">
+<!ENTITY frac34 "&#190;">
+<!ENTITY half "&#189;">
+<!ENTITY frac12 "&#189;">
+

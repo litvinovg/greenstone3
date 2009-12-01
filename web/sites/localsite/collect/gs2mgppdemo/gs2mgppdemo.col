@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE GathererCollection [
+  <!ELEMENT GathererCollection (Argument*, GathererConfig, BuildConfig)>
+  <!ELEMENT GathererConfig    (Arguments*)>
+  <!ELEMENT BuildConfig       (Build, Import)>
+  <!ELEMENT Build             (Arguments*)>
+  <!ELEMENT Import            (Arguments*)>
+  <!ELEMENT Argument          (#PCDATA)>
+  <!ATTLIST Argument
+            name              CDATA #REQUIRED
+				enabled           CDATA "true">
+]>
+<GathererCollection>
+    <Argument name="built">false</Argument>
+    <Argument name="imported">true</Argument>
+    <GathererConfig/>
+    <BuildConfig>
+        <Build/>
+        <Import/>
+    </BuildConfig>
+</GathererCollection>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml-stylesheet type="text/xsl" href="home.xsl"?>
+ 
+<page lang="en" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/gsf">
+  <pageRequest action="p" lang="en" output="html" subaction="home" to="" type="page" uid="1" />
+  <pageResponse from="" type="describe">
+    <collectionList>
+      <collection name="gs2mgppdemo">
+        <displayItem assigned="true" lang="en" name="description">This is a demonstration collection for the Greenstone3 digital library software. It contains a small subset (11 books) of the Humanitarian and Development Libraries. It is a Greenstone2 collection, built with MGPP, which provides form based searching. The Greenstone2 configuration files have been converted to Greenstone3 equivalents, enabling it to be served using Greenstone3.</displayItem>
+
+        <displayItem assigned="true" lang="en" name="smallicon">gs2mgppdemo_sm.gif</displayItem>
+
+        <displayItem assigned="true" lang="en" name="icon">gs2mgppdemo.gif</displayItem>
+
+        <displayItem assigned="true" lang="en" name="name">Greenstone2 MGPP demo collection</displayItem>
+
+        <serviceList>
+          <service name="Identify" />
+          <service name="ListRecords" />
+          <service name="ListIdentifiers" />
+
+          <service name="ListSets" />
+          <service name="ListMetadataFormats" />
+          <service name="GetRecord" />
+          <service name="TextQuery" type="query" />
+          <service name="FieldQuery" type="query" />
+          <service name="AdvancedFieldQuery" type="query" />
+          <service name="DocumentStructureRetrieve" type="retrieve" />
+          <service name="DocumentMetadataRetrieve" type="retrieve" />
+          <service name="DocumentContentRetrieve" type="retrieve" />
+
+          <service name="ClassifierBrowse" type="browse" />
+          <service name="ClassifierBrowseMetadataRetrieve" type="retrieve" /></serviceList>
+
+        <metadataList>
+          <metadata lang="en" name="creator">greenstone@cs.waikato.ac.nz</metadata>
+
+          <metadata lang="en" name="maintainer" />
+          <metadata lang="en" name="public">true</metadata>
+
+          <metadata name="numDocs">11</metadata>
+
+          <metadata name="buildType">mgpp</metadata>
+
+          <metadata name="httpPath">http://localhost:8080/greenstone3/sites/localsite/collect/gs2mgppdemo</metadata>
+
+          <metadata name="tidyoption">untidy</metadata>
+        </metadataList>
+
+        <pluginList>
+          <plugin name="GAPlug" />
+          <plugin name="HTMLPlug">
+                <option name="-description_tags" />
+            </plugin>
+
+          <plugin name="MetadataXMLPlug" />
+          <plugin name="ArcPlug" />
+          <plugin name="RecPlug" /></pluginList>
+
+      </collection>
+    </collectionList>
+
+    <serviceClusterList />
+    <siteList />
+    <serviceList>
+      <service name="AddItem" type="gather" />
+      <service name="DisplayList" type="gather" />
+      <service name="ItemNum" type="gather" />
+
+      <service name="DeleteItems" type="gather" />
+      <service name="DeleteItem" type="gather" />
+      <service name="SendMail" type="gather" />
+      <service name="TextQuery" type="query">
+        <displayItem name="name">Cross collection search</displayItem>
+
+        <displayItem name="submit">Search</displayItem>
+
+        <displayItem name="description">Search over multiple collections</displayItem>
+
+        <paramList>
+          <param default="all" name="collection" type="enum_multi">
+            <displayItem name="name">Collections to search in</displayItem>
+
+            <option name="all">
+              <displayItem name="name">All collections</displayItem>
+            </option>
+
+            <option name="gs2mgppdemo">
+              <displayItem name="name">gs2mgppdemo: Greenstone2 MGPP demo collection</displayItem>
+            </option>
+          </param>
+
+          <param name="query" type="string">
+            <displayItem name="name">Query string</displayItem>
+          </param>
+
+        </paramList>
+      </service>
+
+      <service name="DocumentMetadataRetrieve" type="retrieve" /></serviceList>
+
+    <uiItemList>
+      <uiItem lang="en" name="footer">
+	Powered by Greenstone
+    </uiItem>
+    </uiItemList>
+
+    <metadataList>
+      <metadataItem lang="en" name="siteDescription"> 
+	This is just a random site for testing stuff
+  </metadataItem>
+
+      <metadataItem name="siteAdmin"> dnk2@cs.waikato.ac.nz </metadataItem>
+
+      <metadataItem lang="en" name="siteName">Dave&apos;s Development Site</metadataItem>
+
+    </metadataList>
+
+    <Skin skinLocation="/research/dnk2/greenstone/greenstone3/web/skins/classic" /></pageResponse>
+</page>
+

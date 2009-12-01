@@ -1,0 +1,25 @@
+## greenstone home
+gsdl3.home=@gsdl3home@
+gsdl3.version=@gsdl3version@
+
+# tomcat info
+tomcat.server=@tomcat.server@
+tomcat.port=@tomcat.port@
+tomcat.context=greenstone3
+
+## Proxy setup - set these if you are behind a firewall and you want services that access the internet
+# The proxy server name 
+proxy.host=
+# The proxy server port
+proxy.port=
+# A user name to use when talking to the proxy server 
+proxy.user=
+# A password to use when talking to the proxy server 
+proxy.password=
+
+#outgoing mail setup
+#mail.smtp.host=smtp.myisp.com
+#mail.smtp.username=ispusername
+#mail.smtp.password=isppassword
+#mail.from=ispusername@myisp.com
+

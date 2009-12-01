@@ -1,0 +1,228 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{times,epsfig}
+
+\newenvironment{bulletedlist}%
+{\begin{list}{$\bullet$}{\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}}}%
+{\end{list}}
+
+
+\begin{document}
+
+\title{Some hints for developers}
+
+\maketitle
+
+\section{Java code}
+
+the java code is found in gsdl3/src/java/org/greenstone/gsdl3
+util has various utility classes, service has the services, action has the actions, build has the building code, etc.
+
+\section{Working with XML}
+
+We use the DOM model for handling XML. This involves Documents, Nodes, Elements etc. Node is the basic thing in the tree, all others inherit from this. A Document represents a whole document, and is a kind of container for all the nodes. Elements and Nodes are not supposed to exist outside of the context of a document, so you have to have a document to create them. The document is not the top level node in the tree, to get this, use Document.getDocumentElement(). If you create nodes etc but dont append them to something already in the document tree, they will be separate - but they still know who their owner document is.
+
+There is a utility class called XMLConverter - this creates new Documents, and converts Strings or files to Documents.
+eg:
+XMLConverter converter = new XMLConverter();
+Document doc = converter.newDOM();
+
+File stylesheet = new File(``query.xsl'');
+Document style = converter.getDOM(stylesheet);
+
+String message = ``<message><request type='cgi'/></message>'';
+Document m = converter.getDOM(message);
+
+To output a document as a String, use converter.getString(doc);
+
+
+To add nodes and stuff to an empty document - create them, then append to the tree
+
+Document doc = converter.newDOM();
+Element e = doc.createElement(``message'');
+doc.appendChild(e);
+
+Note, you can only append one node to a document - this will become the toplevel node. After that, you can append nodes to child nodes as you like, but a document is only allowed one top level node.
+
+DOM006 Hierarchy request error: happens if you have more than one root node in your document
+
+\section{Working with XSLT}
+
+* adding html to an xml doc:
+
+eg I have a text node with html inside it inside a resource element
+to add that to a new XML doc, I use
+{\em <xsl:value-of select='resource'>\/}
+
+if the output mode is xml or html, this will escape any special characters
+ie $<$ and $>$ etc
+
+use
+{\em <xsl:value-of disable-output-escaping="yes" select='resource'>\/}
+instead.
+
+* including an xml doc into a stylesheet:
+
+{\em <xsl:variable name='import' select='document(``newdoc.xml'')'/>\/}
+
+then can use the info:
+
+{\em <xsl:value-of select='\$import/element'/>\/}
+
+* selecting an ancestor:
+
+ the ancestor axis contains the parent of the context node, and its
+ parent and so on. to pick one node among these:
+ ancestor::elem-name. I dont know how this works if there are two
+ nodes with the same name in the axis.
+
+* basic XSLT elements
+\begin{quote}\begin{footnotesize}\begin{verbatim}
+<xsl:template match='xxx' name='yyy'/>
+
+<xsl:apply-templates select='xxx'/>
+<xsl:call-templates name='yyy'/>
+
+<xsl:variable name='doc' select='document("layout.xml")'/>
+
+<xsl:value-of select='$doc/chapter1'/> $
+\end{verbatim}\end{footnotesize}\end{quote}
+
+* using namespaces
+If you are using the same namespace in more than one file, eg in the source xml and in the stylesheet, make sure that the URI for the xmlns:xxx thingy is the same in both cases---otherwise the names dont match. This includes http:// on the front.
+
+\subsection{What can I do to speed up XSL transformations?}
+
+This information taken from the Xalan FAQS page.
+
+\begin{bulletedlist}
+
+\item Use a Templates object (with a different Transformers for each
+transformation) to perform multiple transformations with the same set
+of stylesheet instructions (see Multithreading).
+
+\item Set up your stylesheets to function efficiently.
+
+\item Don't use "//" (descendant axes) patterns near the root of a
+large document.
+
+\item Use xsl:key elements and the key() function as an efficient way
+to retrieve node sets.
+
+\item Where possible, use pattern matching rather than xsl:if or
+xsl:when statements.
+
+\item xsl:for-each is fast because it does not require pattern matching.
+
+\item Keep in mind that xsl:sort prevents incremental processing.
+
+\item When you create variables,
+{\em <xsl:variable name="fooElem" select="foo"/>\/} is usually faster
+than \\
+{\em <xsl:variable name="fooElem"><xsl:value-of-select="foo"/></xsl:variable>\/}.
+
+\item Be careful using the last() function.
+
+\item The use of index predicates within match patterns can be expensive.
+
+\item Decoding and encoding is expensive.
+
+\item For the ultimate in server-side scalability, perform transform
+operations on the client. For examples, see appletXMLtoHTML and
+get-todo-list.
+
+\end{bulletedlist}
+
+\section{Java gdbm}
+
+To talk to gdbm, a jni wrapper called java-gdbm is used. It was
+obtained from:\\ {\tt
+http://aurora.rg.iupui.edu/~schadow/dbm-java/pip/gdbm/}
+
+It uses packing objects to convert to and from an array of bytes (in
+gdbm file) from and to java objects. In my GDBMWrapper class I use
+StringPacking - uese UTF-8 encoding. but some stuff came out funny. so
+I had to changes the from\_bytes method in StringPacking.java to use
+new String(raw, "UTF-8") instead of new String(raw). this seems to
+work.
+
+Note---if we use this gdbm stuff to create the file too, may need to
+alter the to-bytes method.
+
+The makefile in j-gdbm is crap---it tries to get stuff from its
+original CVS tree.  I have created a new Makefile---in my-j-gdbm
+directory.  this stuff needs to go into cvs probably.
+
+* I dont think {\em <xsl:with-param name='xxx' select='true'/>\/} is
+the same as {\em <xsl:with-param name='xxx'>true</xsl:with-param>\/}
+use the second one.
+
+
+\section{Resources}
+
+Contents for 'The Java Native Interface Programmer's Guide and
+Specification' on-line\\ {\tt
+http://java.sun.com/docs/books/jni/html/jniTOC.html}
+
+Java Native Interface Specification\\
+{\tt http://java.sun.com/j2se/1.4/docs/guide/jni/spec/jniTOC.doc.html}
+
+JNI Documentation Contents\\
+{\tt http://java.sun.com/j2se/1.4/docs/guide/jni/index.html}
+
+another JNI page\\
+{\tt http://mindprod.com/jni.html}
+
+Java 1.4 api index\\
+{\tt http://java.sun.com/j2se/1.4/docs/api/index.html}
+
+Java tutorial index\\
+{\tt http://java.sun.com/docs/books/tutorial/index.html}
+
+Safari books online - has java, XML, XSLT, etc books\\
+{\tt http://proquest.safaribooksonline.com/mainhom.asp?home}
+
+Java 1.4 i18n FAQ\\
+{\tt http://www.sun.com/developers/gadc/faq/java/java1.4.html}
+
+Java and XSLT page\\
+{\tt http://www.javaolympus.com/java/Java\%20and\%20XSLT.html}
+
+Xalan-Java overview\\
+{\tt http://xml.apache.org/xalan-j/overview.html}
+
+Tomcat documentation index\\
+{\tt http://jakarta.apache.org/tomcat/tomcat-4.0-doc/index.html}
+
+Servlet and JSP tutorial\\
+{\em http://www.apl.jhu.edu/~hall/java/Servlet-Tutorial/\/}
+
+Core Servlets and JavaServer Pages, book by Marty Hall. download the
+pdf from here (try before you buy link)\\ {\tt
+http://www.coreservlets.com/}
+
+J-gdbm page\\
+{\em http://aurora.rg.iupui.edu/~schadow/dbm-java/pip/gdbm/\/}
+
+Stuarts page of links\\
+{\em http://www.cs.waikato.ac.nz/~nzdl/gsdl3/\/}
+
+a good basic xslt tutorial\\
+{\tt http://www.zvon.org/xxl/XSLTutorial/Books/Output/contents.html}
+
+JAXP (java api for xml processing) package overview\\
+{\tt http://java.sun.com/xml/jaxp/dist/1.1/docs/api/overview-summary.html}
+
+DeveloperWorks, xml zone\\
+{\tt http://www-106.ibm.com/developerworks/xml/}
+
+xslt.com\\
+{\tt http://www.xslt.com/}
+
+jeni tennison's xslt pages\\
+{\tt http://www.jenitennison.com/xslt/}
+
+apaches xml tools\\
+{\tt http://xml.apache.org/}
+
+
+\end{document}

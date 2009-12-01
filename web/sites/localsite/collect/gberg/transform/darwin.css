@@ -1,0 +1,342 @@
+/*This is darwin.css*/
+
+ gutblurb{
+  display:none;
+ }
+
+ markupblurb
+  {
+  display:none;
+
+  }
+ endgutblurb{
+  display:none;
+ }
+
+ para,sect1,sect2,sect3,sect4,simplesect{
+  display:block;
+  }
+
+
+ title1,item,chapter,chapnum,chapsummary,desc,def,letter
+{
+  display:block;
+  }
+
+ blockquote,footnote,note,list,deflist,blockgraphic{
+  display:block;
+  }
+
+ quote,emph,ital,reference,date,place,name,graphic,misc{
+  display:inline;
+  }
+
+  acknowledge{
+  display:block;
+  text-align:center;
+  font-size:8pt;
+  font-family:arial,sans-serif;
+  margin-top:8pt;
+  margin-bottom:12pt;
+  }
+
+ htitlepage title1{
+  display:block;
+  text-align:center;
+  font-size:16pt;
+  font-family:arial,sans-serif;
+  margin-top:8pt;
+  margin-bottom:12pt;
+  }
+
+ htitlepage subtitle{
+  display:block;
+  text-align:center;
+  font-size:14pt;
+  font-family:arial,sans-serif;
+  margin-top:8pt;
+  margin-bottom:12pt;
+  }
+
+  htitlepage author{
+  display:block;
+  text-align:center;
+  font-size:14pt;
+  font-family:arial,sans-serif;
+  margin-top:8pt;
+  margin-bottom:12pt;
+  }
+
+  epigraph{
+  display:block;
+  text-align:center;
+  font-size:12pt;
+  margin-top:8pt;
+  margin-bottom:12pt;
+  }
+
+
+  epigraph blockquote{
+  display:block;
+  text-align:left;
+  font-size:12pt;
+  margin-top:8pt;
+  margin-left:24pt;
+  margin-right:24pt;
+  margin-bottom:12pt;
+  }
+
+  epigraph attrib{
+  display:block;
+  text-align:left;
+  font-size:12pt;
+  margin-top:8pt;
+  margin-right:24pt;
+  margin-left:24pt;
+  margin-bottom:12pt;
+  }
+
+ titlepage title1{
+  display:block;
+  text-align:center;
+  font-size:16pt;
+  font-family:arial,sans-serif;
+  margin-top:8pt;
+  margin-bottom:12pt;
+  }
+
+  titlepage para{
+  display:block;
+  text-align:center;
+  font-size:12pt;
+  font-family:arial,sans-serif;
+  margin-top:8pt;
+  margin-bottom:12pt;
+  }
+
+  titlepage line{
+  display:block;
+  text-align:center;
+  font-size:12pt;
+  font-family:arial,sans-serif;
+  margin-top:8pt;
+  margin-bottom:12pt;
+  }
+
+  titlepage subtitle{
+  display:block;
+  text-align:center;
+  font-size:14pt;
+  font-family:arial,sans-serif;
+  margin-top:8pt;
+  margin-bottom:12pt;
+  }
+
+
+
+  titlepage author{
+  display:block;
+  text-align:center;
+  font-size:14pt;
+  font-family:arial,sans-serif;
+  margin-top:8pt;
+  margin-bottom:12pt;
+  }
+
+ titlepage partnum{
+  display:block;
+  text-align:center;
+  font-size:16pt;
+  font-family:arial,sans-serif;
+  margin-top:8pt;
+  margin-bottom:12pt;
+  }
+
+ dedication title1{
+  display:block;
+  text-align:center;
+  font-size:16pt;
+  font-family:arial,sans-serif;
+  margin-top:8pt;
+  margin-bottom:12pt;
+  }
+
+  toc title1{
+  display:block;
+  text-align:left;
+  font-size:14pt;
+  font-family:arial,sans-serif;
+  margin-top:12pt;
+  margin-left:24pt;
+  margin-bottom:12pt;
+  }
+
+  toc subtitle{
+  display:block;
+  text-align:left;
+  font-weight:bold;
+  font-size:13pt;
+  font-family:arial,sans-serif;
+  margin-top:12pt;
+  margin-left:24pt;
+  margin-bottom:12pt;
+  }
+
+
+  toc item{
+  display:block;
+  text-align:left;
+  font-size:12pt;
+  font-family:arial,sans-serif;
+  margin-top:12pt;
+  margin-left:36pt;
+  margin-bottom:12pt;
+  }
+
+
+  toc def{
+  display:block;
+  text-align:left;
+  font-size:12pt;
+  font-family:times new roman,serif;
+  margin-top:12pt;
+  margin-left:48pt;
+  margin-right:24pt;
+
+  margin-bottom:12pt;
+  }
+
+  toc desc{
+  display:block;
+  text-align:left;
+  font-size:10pt;
+  font-family:arial,sans-serif;
+  margin-top:12pt;
+  margin-left:42pt;
+  margin-bottom:12pt;
+  }
+
+ preface title1{
+  display:block;
+  text-align:left;
+  font-size:14pt;
+  font-family:arial,sans-serif;
+  margin-top:12pt;
+  margin-left:12pt;
+  margin-bottom:12pt;
+  }
+
+  introduction title1{
+  display:block;
+  text-align:left;
+  font-size:14pt;
+  font-family:arial,sans-serif;
+  margin-top:12pt;
+  margin-left:12pt;
+  margin-bottom:12pt;
+  }
+
+  salut,sig,para{
+  display:block;
+  text-align:left;
+  font-size:12pt;
+  font-family:times new roman,serif;
+  margin-top:12pt;
+  margin-left:24pt;
+  margin-right:24pt;
+  margin-bottom:12pt;
+  }
+
+  poem{
+  display:block;
+  text-align:left;
+  font-size:12pt;
+  margin-left:24pt;
+  margin-top:18pt;
+  margin-bottom:18pt;
+  }
+
+  line{
+  display:block;
+  text-align:left;
+  font-size:12pt;
+  margin-left:24pt;
+  margin-right:24pt;
+  }
+
+  chapter title1{
+  display:block;
+  text-align:left;
+  font-size:14pt;
+  font-family:arial,sans-serif;
+  margin-top:12pt;
+  margin-left:12pt;
+  margin-bottom:12pt;
+  }
+
+  chapter chapnum{
+  display:block;
+  text-align:center;
+  font-size:14pt;
+  font-family:arial,sans-serif;
+  margin-top:12pt;
+  margin-bottom:12pt;
+  }
+
+  chapter chapsummary{
+  display:block;
+  text-align:left;
+  font-size:12pt;
+  font-style:italic;
+  font-family:times new roman,serif;
+  margin-top:12pt;
+  margin-left:48pt;
+  margin-right:36pt;
+  margin-bottom:12pt;
+  }
+
+  chapter blockquote para{
+  display:block;
+  text-align:left;
+  font-size:11pt;
+  
+  margin-top:8pt;
+  margin-left:48pt;
+  margin-right:48pt;
+  margin-bottom:12pt;
+  }
+
+
+  index item{
+  display:block;
+  text-align:left;
+  font-size:12pt;
+  font-family:times new roman,serif;
+  margin-top:8pt;
+  margin-left:12pt;
+  margin-bottom:8pt;
+  }
+
+  index title1{
+  display:block;
+  text-align:left;
+  font-size:14pt;
+  font-family:arial,sans-serif;
+  margin-top:12pt;
+  margin-left:12pt;
+  margin-bottom:12pt;
+  }
+
+  list item{
+  color:black;
+  display:block;
+  text-align:left;
+  font-size:12pt;
+  font-family:times new roman,serif;
+  margin-top:8pt;
+  margin-left:48pt;
+  margin-bottom:8pt;
+  }
+
+
+

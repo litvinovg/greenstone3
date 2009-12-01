@@ -1,0 +1,8 @@
+<!-- set allowLinking to true if you want to use symlinks to files or directories outside the docBase directory -->
+<!-- set reloadable to false for a production version. if true, automatically reloads the webapp if it detects changes in classes or lib directories -->
+<!-- see http://tomcat.apache.org/tomcat-5.5-doc/config/context.html for more Context attributes -->
+<Context path="/greenstone3" 
+  docBase="@gsdl3webhome@" 
+  debug="1" reloadable="true" 
+  allowLinking="false">
+</Context>

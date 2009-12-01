@@ -1,0 +1,1853 @@
+<?xml version="1.0"?>
+<!-- ====================================================================== 
+     March 2005                                                    
+
+     Greenstone3 build and install script
+                  
+     kjdon                                                                
+     ====================================================================== -->
+<project name="greenstone3" default="usage" basedir=".">
+  <echo>os.name: ${os.name}</echo>
+
+  <!-- ============ classpath =================== -->
+  <path id="project.classpath">
+    <fileset dir="lib/java">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+  
+  <!-- ============ self defined tasks =================== -->
+  <taskdef name="mysetproxy" classname="org.greenstone.anttasks.MySetProxy" classpathref="project.classpath"/>
+  <taskdef name="getuserandpassword" classname="org.greenstone.anttasks.MyGetUserAndPassword" classpathref="project.classpath"/>
+  <taskdef name="rsr" classname="org.greenstone.anttasks.RegexSearchReplace" classpathref="project.classpath"/>
+  <taskdef name="svn" classname="org.tigris.subversion.svnant.SvnTask" classpathref="project.classpath"/>
+  <taskdef name="if" classname="ise.antelope.tasks.IfTask" classpathref="project.classpath"/>
+  <taskdef name="try" classname="ise.antelope.tasks.TryTask" classpathref="project.classpath"/>
+ 
+  <!-- ===================== Property Definitions =========================== -->
+  
+  <!--
+
+  Each of the following properties are used in the build script.
+  Values for these properties are set by the first place they are
+  defined, from the following list:
+
+  * Definitions on the "ant" command line (ant -Dfoo=bar compile).
+
+  * Definitions from a "build.properties" file in the top level
+  source directory of this application.
+
+  * Definitions from a "build.properties" file in the user's
+  home directory.
+
+  * Default definitions in this build.xml file.
+
+  You will note below that property values can be composed based on the
+  contents of previously defined properties.  This is a powerful technique
+  that helps you minimize the number of changes required when your development
+  environment is modified.  Note that property composition is allowed within
+  "build.properties" files as well as in the "build.xml" script.
+
+  -->
+
+  <!-- create build.properties if it has not been created yet -->
+  <if>
+    <bool><not><available file="build.properties"/></not></bool>
+    <copy file="build.properties.in" tofile="build.properties"/>
+  </if>
+
+  <!-- create the packages dir if it has not been created yet -->
+  <mkdir dir="packages"/>
+  
+  <!--the first three properties have to be put on the top to be used by build.properties-->
+  <property name="gs2build.home" value="${basedir}${file.separator}gs2build"/>
+  <property name="src.packages.home" value="${basedir}/src/packages"/>
+  <property name="flax.svn.root" value="http://svn.greenstone.org/flax"/>
+
+  <property file="build.properties"/>
+  <if><bool><available file="${user.home}/build.properties"/></bool>
+    <property file="${user.home}/build.properties"/>
+  </if>
+
+  <!-- now we've read in properties, apply defaults -->
+  <property name="disable.collection.building" value="false"/>
+
+  <!-- get properties from the environment -->
+  <property environment="env"/>
+
+  <!-- get the filesets defining components and executables -->
+  <import file="resources/xml/components.xml"/>
+  <import file="resources/xml/executables.xml"/>
+    
+  <!-- version properties for external packages -->
+  <!-- for Java versions < 1.4, we print out the message that Java is too old.
+	For Java 1.4, we use Tomcat 5.5, for Java5 and higher, we use Tomcat 6.0-->
+  <condition property="tomcat.version" value="apache-tomcat-5.5.25" else="apache-tomcat-6.0.20"> 
+    <equals arg1="1.4" arg2="${ant.java.version}"/>
+  </condition>
+  <condition property="tomcat.version.major" value="5" else="6"> 
+    <equals arg1="1.4" arg2="${ant.java.version}"/>
+  </condition>
+
+
+
+  <property name="axis.zip.version" value="axis-bin-1_2_1.zip"/>
+  <property name="axis.dir.version" value="axis-1_2_1"/>
+  <property name="sqlite.targz.version" value="sqlite-amalgamation-3.5.9.tar.gz"/>
+
+  <property name="build.home" value="${basedir}/build"/>
+  <property name="src.home" value="${basedir}/src/java"/>
+  <property name="packages.home" value="${basedir}/packages"/>
+  <!-- this may be set in build.properties, eg if you move the web dir to 
+  tomcats webapps directory -->
+  <property name="web.home" value="${basedir}/web"/>
+  <!-- jar files needed by applets go here -->
+  <property name="web.applet" value="${web.home}/applet"/>
+
+  <!-- jar files needed by the servlet (and extra ones) go here -->
+  <property name="web.lib" value="${web.home}/WEB-INF/lib"/>
+  <!-- other files needed by the servlet go here -->
+  <property name="web.classes" value="${web.home}/WEB-INF/classes"/>
+  <!--- flax: the WordNet home -->
+  <property name="wn.home" value="${web.home}/WEB-INF/classes/flax/WordNet"/>
+
+  <!-- jni libraries and java wrappers go here -->
+  <property name="lib.jni" value="${basedir}/lib/jni"/>
+
+  <!-- other jar files needed for installation (but not runtime) go here -->
+  <property name="lib.java" value="${basedir}/lib/java"/>
+  
+  <property name="javadocs" value="${basedir}/docs/javadoc"/>
+
+  <property name="app.name"      value="greenstone3"/>
+  <property name="app.path"      value="/${app.name}"/>
+
+   <property name="admin.dir"      value="${basedir}/admin"/>
+
+  <!-- defaults - set these on the command line or in build.properties or they will take these default values-->
+  <property name="app.version" value="trunk"/>
+  <property name="branch.path" value="trunk"/>
+  <property name="branch.revision" value="HEAD"/>
+
+  <!--constants -->
+  <property name="svn.root" value="http://svn.greenstone.org"/>
+
+  <!-- catalina home is set to tomcat basedir if already installed, otherwise
+  use greenstone's tomcat -->
+  <condition property="catalina.home" value="${tomcat.installed.path}" else="${packages.home}/tomcat"> 
+    <and>
+      <isset property="tomcat.installed.path"/>
+      <not>
+      <equals arg1="" arg2="${tomcat.installed.path}"/>
+      </not>
+    </and>
+  </condition>
+  
+  <property name="os.linux" value="Linux"/> 
+  <property name="os.mac" value="Mac OS X"/>
+  <property name="os.solaris" value="SunOS"/>
+  <property name="os.unix" value="${os.linux},${os.mac},${os.solaris}"/>
+  <property name="os.windows" value="Windows 95,Windows 98,Windows 2000,Windows 2003,Windows XP,Windows NT,Windows ME,Windows Vista"/> <!-- check this!!!-->
+
+  <!-- this is true for linux and macs -->
+  <condition property="current.os.isunix">
+    <os family="unix"/>
+  </condition>
+  
+  <condition property="current.os.isunixnotmac">
+    <and>
+      <os family="unix"/>
+      <not>
+	<os family="mac"/>
+      </not>
+    </and>
+  </condition>
+  
+  <condition property="current.os.ismac">
+    <os family="mac"/>
+  </condition>
+  
+  <condition property="current.os.iswindows">
+    <os family="windows"/>
+  </condition>
+
+  <!-- is there a better way to do this?? what about solaris?? -->
+  <condition property="os.bin.dir" value="windows">
+    <os family="windows"/>
+  </condition>
+  <condition property="os.bin.dir" value="darwin">
+    <os family="mac"/>
+  </condition>
+  <condition property="os.bin.dir" value="linux">
+    <and>
+      <os family="unix"/>
+      <not>
+	<os family="mac"/>
+      </not>
+    </and>
+  </condition>
+  
+  
+  <condition property="collection.building.disabled">
+    <and>
+      <isset property="disable.collection.building"/>
+      <istrue value="${disable.collection.building}"/>
+    </and>
+  </condition>
+
+  <condition property="collection.building.enabled">
+    <not>
+      <istrue value="${disable.collection.building}"/>
+    </not>
+  </condition>
+  
+  <condition property="collection.building.enabled.windows">
+    <and>
+      <istrue value="${collection.building.enabled}"/>
+      <isset property="current.os.iswindows"/>
+    </and>
+  </condition>
+  
+  <condition property="collection.building.enabled.unix">
+    <and>
+      <istrue value="${collection.building.enabled}"/>
+      <isset property="current.os.isunix"/>
+    </and>
+  </condition>
+  
+  <condition property="static.arg" value="LDFLAGS=-static" else=" ">
+    <isset property="compile.static"/>
+  </condition>
+  
+  <!-- where is search4j tool -->
+  <condition property="search4j.exec" value="bin/search4j.exe" else="bin/search4j"> 
+    <isset property="current.os.iswindows"/>
+  </condition>
+
+  
+  <!-- ============= Base dirs for each package and component ============ -->
+  <property name="src.gsdl3.home" value="${src.home}/org/greenstone/gsdl3"/>
+  <property name="anttasks.home" value="${src.home}/org/greenstone/anttasks"/>
+  <property name="gli.home" value="${basedir}/gli"/>
+  <property name="javagdbm.home" value="${src.packages.home}/javagdbm"/>
+
+  <condition property="common.src.home" value="${basedir}/common-src" else="${gs2build.home}/common-src">
+    <istrue value="${disable.collection.building}"/>
+  </condition>
+  
+  <property name="build.src.home" value="${gs2build.home}/build-src"/>
+  <property name="gdbm.home" value="${common.src.home}/packages/gdbm"/>
+  <property name="mg.home" value="${common.src.home}/indexers/mg"/>
+  <property name="mgpp.home" value="${common.src.home}/indexers/mgpp"/>
+  <property name="lucene.home" value="${common.src.home}/indexers/lucene-gs"/>
+
+  <!--  ==================== Compilation Control Options ==================== -->
+
+  <!--
+
+  These properties control option settings on the Javac compiler when it
+  is invoked using the <javac> task.
+
+  compile.debug        Should compilation include the debug option?
+
+  compile.deprecation  Should compilation include the deprecation option?
+
+  compile.optimize     Should compilation include the optimize option?
+
+  -->
+
+  <property name="compile.debug"       value="true"/>
+  <property name="compile.deprecation" value="true"/>
+  <property name="compile.optimize"    value="true"/>
+
+  <!--
+
+  Rather than relying on the CLASSPATH environment variable, Ant includes
+  features that makes it easy to dynamically construct the classpath you
+  need for each compilation.  The example below constructs the compile
+  classpath to include the servlet.jar file, as well as the other components
+  that Tomcat makes available to web applications automatically, plus anything
+  that you explicitly added.
+
+  -->
+  
+  <!-- All elements that Tomcat 5 exposes to applications -->
+  <path id="tomcat5">
+    <pathelement location="${catalina.home}/common/classes"/>
+    <fileset dir="${catalina.home}/common/endorsed">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="${catalina.home}/common/lib">
+      <include name="*.jar"/>
+    </fileset>
+    <!-- seems to be empty, but will leave in just in case some people make use of this to customise their install: -->
+    <pathelement location="${catalina.home}/shared/classes"/>
+    <fileset dir="${catalina.home}/shared/lib">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+  
+  <!-- All elements that Tomcat 6 exposes to applications -->
+  <path id="tomcat6">
+    <fileset dir="${catalina.home}/lib">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+  
+  <path id="compile.classpath">
+    <!-- Include all jar files and libraries in our jni lib directory -->
+    <pathelement location="${lib.jni}"/>
+    <fileset dir="${lib.jni}">
+      <include name="*.jar"/>
+    </fileset>
+    <!-- Include all jar files in our web lib directory -->
+    <pathelement location="${web.lib}"/>
+    <fileset dir="${web.lib}">
+      <include name="*.jar"/>
+    </fileset>
+    
+    <pathelement location="${lib.java}"/>
+    <fileset dir="${lib.java}">
+      <include name="*.jar"/>
+    </fileset>
+    
+    <!-- include the jar files from the source packages -->
+    <!-- mg and mgpp get installed into lib/jni but they may not be there yet
+    so we add them in by name -->
+    <pathelement location="${lib.jni}/mg.jar"/>
+    <pathelement location="${lib.jni}/mgpp.jar"/>
+    
+    <!-- Include all elements that Tomcat exposes to applications -->
+    <path refid="tomcat${tomcat.version.major}"/>
+    
+  </path>
+
+  <path id="local.tomcat.classpath">
+    <!-- explicitly include the jni java wrappers in the classpath -->
+    <pathelement location="${lib.jni}"/>
+    <fileset dir="${lib.jni}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+  
+  <path id="local.tomcat.path">
+    <pathelement location="${basedir}/bin/script"/>
+    <pathelement location="${basedir}/bin"/>
+    <pathelement location="${lib.jni}"/>
+    <pathelement path="${env.PATH}"/>
+    <pathelement path="${env.Path}"/>
+    <pathelement path="${wn.home}/bin"/>
+  </path>
+
+  <target name="test-setup">
+    <echo>ant java version=${ant.java.version}</echo>
+    <echo>is unix : ${current.os.isunix}</echo>
+    <echo>is mac : ${current.os.ismac}</echo>
+    <echo>is unixnotmac : ${current.os.isunixnotmac}</echo>
+    <echo>is windows : ${current.os.iswindows}</echo>
+    <echo>os.unix: ${os.unix}</echo>
+  </target>
+  
+  <!-- ==================== Primary and Global Targets ============================= -->
+
+  <target name="prepare" depends="accept-properties,init,prepare-core,prepare-packages,prepare-common-src,prepare-collection-building,prepare-tomcat,prepare-axis,prepare-web,prepare-collections, prepare-flax"
+    description="Use this when you first checkout the code: 'ant prepare install'. This will do some additional subversion checkouts and downloads, so you need to be online to run this.">
+
+    <!-- make sure .sh files are executable -->
+    <chmod dir="${basedir}" perm="ugo+rx" 
+      includes="*.sh"/>
+    <chmod dir="${basedir}/bin/script" perm="ugo+rx" 
+      includes="*.sh,*.pl"/>
+  </target>
+
+  <!-- install-common-src and install-collection-building are mutually exclusive and either one or the other will be done depending on whether collection building is enabled or not -->
+  <target name="install" depends="init,install-common-src,install-collection-building,install-runtime"
+    description="Install Greenstone 3. Use this when you first checkout the code: 'ant prepare new-install'."/>
+
+  <target name="install-common-src" depends="init" 
+    description="Install (configure, compile, install) only the common-src package (shared code from Greenstone 2). " >
+    <antcall target="configure-common-src"/>
+    <antcall target="compile-common-src"/>
+    <antcall target="install-auxiliary-jar-files"/>
+    <antcall target="install-jni-files"/>
+  </target>
+
+  <target name="install-collection-building" depends="init" if="collection.building.enabled"
+    description="Install (configure, compile, install) the Greenstone 2 collection building package." >
+    <antcall target="configure-collection-building"/>
+    <antcall target="tweak-makefiles" />
+    <antcall target="compile-collection-building"/>
+  </target>
+    
+
+  <target name="install-runtime" depends="init,configure,configure-packages,configure-core,compile-web,compile-packages,compile-core,compile-classpath-jars"
+    description="Install (configure, compile, install) the runtime system. Needs either common-src or collection-building to have been installed first." />
+    
+  <target name="svnupdate" depends="init,svnupdate-packages,svnupdate-core,svnupdate-common-src,svnupdate-collection-building,svnupdate-web"
+    description="Do a `svn update` for all sources. Doesn't recompile the code. You need to be online to run this."/>
+  
+  <target name="configure" depends="init,configure-tomcat,configure-web"
+    description="Configure the installation (not the C++ code). Includes setting up config files. Should be re-run if you change the build.properties file."/>
+
+  <target name="clean" depends="init,clean-packages,clean-core,clean-common-src,clean-collection-building,clean-classpath-jars"
+    description="Remove all old compiled code. Includes runtime and collection-building if necessary"/>
+  
+  <target name="distclean" depends="init,distclean-packages,clean-core,distclean-common-src,distclean-collection-building,clean-classpath-jars"
+    description="Remove all compiled code and also any Makefiles etc generated during configure-c++. Includes runtime and collection-building as necessary"/>
+  
+  <target name="update" depends="init,svnupdate,clean,install"
+    description="Update (thru Subversion) all the source (including common-src or collection-building, and runtime), then clean, and re-install. To do this without any SVN updates, run it like 'ant -Dnosvn.mode=yes update'"/>
+
+  <target name="start" depends="init,start-tomcat"
+    description="Startup the Tomcat server." >
+    <echo>${app.name} (${app.version}) server running using Apache Tomcat and Java</echo> 
+    <echo>Tomcat: ${catalina.home}</echo> 
+    <echo>Java  : ${java.home}</echo>
+    <echo>URL   : http://${tomcat.server}:${tomcat.port}${app.path}/</echo>
+    <!-- assuming that index.html is not needed here -->   
+  </target>
+
+  <target name="stop" depends="init,stop-tomcat" 
+    description="Shutdown the Tomcat server."/>
+  
+  <target name="restart" description="Shutdown and restart Tomcat"  depends="init,stop,start"/>
+
+
+  <!-- =========== Help targets ===================================  -->
+  
+  <property name="install-command" value="ant [options] prepare install"/>
+  
+  <target name="usage" description="Print a help message">
+    <echo message="  Execute 'ant -projecthelp' for a list of targets."/>
+    <echo message="  Execute 'ant -help' for Ant help."/>
+    <echo>To install Greenstone3, run '${install-command}'. 
+      There are properties defined in build.properties. The install process will ask you if these properties are set correctly. To avoid this prompt, use the '-Dproperties.accepted=yes' option.
+      To log the output, use the '-logfile build.log' option.
+      The README.txt file has more information about the ant targets and install process.
+    </echo>
+  </target>
+  
+  <target name="help" depends="usage" description="Print a help message"/>
+  
+  <target name="debug" depends="init" description="Display all the currently used properties">
+    <echoproperties/>
+  </target>
+
+  <!-- ====== initialization and setup targets ================== -->
+
+  <target name="accept-properties" unless="properties.accepted">
+    <input addproperty="properties.ok" validargs="y,n">The following properties (among others) are being used from a build.properties file found in this directory:
+      tomcat.server=${tomcat.server}
+      tomcat.port=${tomcat.port} 
+      tomcat.installed.path=${tomcat.installed.path} (this is the location of Tomcat's base dir if it is already installed)
+      proxy.host=${proxy.host}
+      proxy.port=${proxy.port}
+      disable.collection.building=${disable.collection.building}
+      If these are not acceptable, please change them and rerun this target. Continue [y/n]?
+    </input>
+    <condition property="do.abort"> 
+      <equals arg1="n" arg2="${properties.ok}"/>
+    </condition>
+    <fail if="do.abort">Build aborted by user. Please change your properties settings and re-run the target</fail>
+  </target>
+  
+  <!-- this sets up some initial properties -->
+  <target name="init">
+
+    <!-- has the gs3-setup script been run?? -->
+    <condition property="gs3-setup-not-done">
+      <not>
+	<isset property="env.GSDL3HOME"/>
+      </not>
+    </condition>
+
+    <!--<fail if="gs3-setup-not-done" message="please run 'gs3-setup' (Windows) or 'source gs3-setup.sh' (Linux/Mac) before running this target."/>-->
+    
+    <condition property="java.too.old">
+      <or>
+        <equals arg1="1.1" arg2="${ant.java.version}"/>
+        <equals arg1="1.2" arg2="${ant.java.version}"/>
+        <equals arg1="1.3" arg2="${ant.java.version}"/>
+      </or>
+    </condition>
+    <fail if="java.too.old" message="You need Java 1.4 or greater to run Greenstone 3"/>
+    
+    <available file="${basedir}/gli" property="gli.present"/>
+    <available file="${basedir}/common-src" property="common.src.present"/>
+    <available file="${basedir}/gs2build" property="gs2build.present"/>
+
+    <condition property="tomcat.islocal">
+      <or>
+        <not><isset property="tomcat.installed.path"/></not>
+        <equals arg1="" arg2="${tomcat.installed.path}"/>
+      </or>
+    </condition>
+    
+    <echo>tomcat.port = ${tomcat.port}</echo>
+
+    <condition property="proxy.present">
+      <and>
+        <isset property="proxy.host"/>
+        <not><equals arg1="" arg2="${proxy.host}"/></not>
+      </and>
+    </condition>
+
+    <!--
+    the next block checks if the bundled tomcat is present in the 'packages' directory,
+    and checks for the lethal combination of tomcat 6 and java 1.4. Test for
+    tomcat6 is based on the presence of a file inserted by greenstone into the tomcat6
+    download, as there is no other surefire way to check tomcat version under java 1.4
+    -->
+    <condition property="packages.tomcat.ispresent" value="true" else="false">
+      <available file="packages/tomcat"/>
+    </condition>
+    <condition property="packages.tomcat.istomcat6" value="true" else="false">
+      <available file="packages/tomcat/tomcat6.txt"/>
+    </condition>
+    <if>
+      <bool>
+        <and>
+          <istrue value="${packages.tomcat.ispresent}"/>
+          <istrue value="${packages.tomcat.istomcat6}"/>
+          <equals arg1="1.4" arg2="${ant.java.version}"/>
+        </and>
+      </bool>
+      <fail>Your Java (version 1.4) is too old to work with the bundled Apache Tomcat (version 6). Please upgrade to Java version 1.5 or greater. Alternatively, you may remove the bundled Apache Tomcat from the 'packages' folder and then run 'ant prepare-tomcat'.</fail>
+    </if>
+
+  </target>
+
+  <target name="setup-proxy" depends="init" if="proxy.present">
+    <condition property="ask.user">
+      <or>
+        <equals arg1="" arg2="${proxy.user}"/>
+        <equals arg1="" arg2="${proxy.password}"/>
+      </or>
+    </condition>
+    
+    <getuserandpassword message="Using proxy: ${proxy.host}:${proxy.port}" if="ask.user" username="${proxy.user}" userproperty="proxy.username" pwordproperty="proxy.password"/>
+    <mysetproxy proxyhost="${proxy.host}" proxyport="${proxy.port}" proxyuser="${proxy.username}" proxypassword="${proxy.password}"/>
+  </target>
+  
+  <!-- ========== Web app Targets ================================ -->
+  
+  <target name="prepare-web" depends="init">
+    <mkdir dir="${web.home}/applet"/>
+    <mkdir dir="${web.home}/logs"/>
+  </target>
+  
+  <!-- if we are using java 1.5+, we need the xalan.jar file in web/WEB-INF/lib,  but if we are using java 1.4, we can't have it there -->
+  <target name="configure-java-version" depends="init"
+    description="Activates or deactivates some jar libraries as needed depending on your java version">
+
+    <available property="have.xalan.jar" file="${web.lib}/xalan.jar"/>
+    <condition property="need.xalan.jar">
+      <or>
+        <equals arg1="1.5" arg2="${ant.java.version}"/>
+        <equals arg1="1.6" arg2="${ant.java.version}"/>
+      </or>
+    </condition>
+
+    <!-- if they have xalan.jar but dont need it -->
+    <if>
+      <bool>
+        <and>
+          <isset property="have.xalan.jar"/>
+          <not><isset property="need.xalan.jar"/></not>
+        </and>
+      </bool>
+      <antcall target="deactivate-xalan-jar"/>
+    </if>
+
+    <!-- if they need xalan.jar but dont have it -->
+    <if>
+      <bool>
+        <and>
+          <not><isset property="have.xalan.jar"/></not>
+          <isset property="need.xalan.jar"/>
+        </and>
+      </bool>
+      <antcall target="activate-xalan-jar"/>
+    </if>
+
+  </target>
+  
+  <target name="activate-xalan-jar">
+    <echo>activating xalan.jar</echo>
+    <copy file="${web.lib}/xalan.jar.tmp" tofile="${web.lib}/xalan.jar"/>
+    <if>
+      <bool>
+	<and>
+	  <isset property="current.os.ismac"/>
+	  <available file="${catalina.home}/common/endorsed" type="dir"/>
+	</and>
+      </bool>
+      <copy file="${web.lib}/xalan.jar.tmp" tofile="${catalina.home}/common/endorsed/xalan.jar"/> 
+    </if>
+  </target>
+
+  <target name="deactivate-xalan-jar">
+    <echo>deactivating xalan.jar</echo>
+    <delete file="${web.lib}/xalan.jar"/>
+    <!-- should we be deleting common/endorsed/xalan.jar on mac?? -->
+  </target>
+
+
+  <target name="prepare-collections" depends="init">
+    <property name="collect.dir" value="${web.home}/sites/localsite/collect"/>
+    <property name="index.zip" value="index.zip"/>
+
+    <echo message="installing collections..."/>
+    <antcall target="gs2mgdemo-install"/>
+    <antcall target="gs2mgppdemo-install"/>
+    <antcall target="gberg-install"/>
+  </target>
+
+  <target name="gs2mgdemo-prepare" if="collect.dir">
+    <property name="gs2mgdemo.dir" value="${collect.dir}/gs2mgdemo"/>
+
+    <condition property="gs2mgdemo.present">
+      <and>
+        <available file="${gs2mgdemo.dir}/${index.zip}"/>
+      </and>
+    </condition>
+  </target>
+
+  <target name="gs2mgdemo-install" if="gs2mgdemo.present" depends="gs2mgdemo-prepare">
+    <echo> installing gs2mgdemo</echo>
+    <unzip dest="${gs2mgdemo.dir}" src="${gs2mgdemo.dir}/${index.zip}" />
+    <echo>collection gs2mgdemo installed</echo>
+  </target>
+
+  <target name="gs2mgppdemo-prepare" if="collect.dir">
+    <property name="gs2mgppdemo.dir" value="${collect.dir}/gs2mgppdemo"/>
+ 
+    <condition property="gs2mgppdemo.present">
+      <and>
+        <available file="${gs2mgppdemo.dir}/${index.zip}"/>
+      </and>
+    </condition>
+  </target>
+
+  <target name="gs2mgppdemo-install" if="gs2mgppdemo.present" depends="gs2mgppdemo-prepare">
+    <unzip dest="${gs2mgppdemo.dir}" src="${gs2mgppdemo.dir}/${index.zip}" />
+    <echo>collection gs2mgppdemo installed</echo>
+  </target>    
+
+  <target name="gberg-prepare" if="collect.dir">
+    <property name="gberg.dir" value="${collect.dir}/gberg"/>
+    <available file="${gberg.dir}/index/${index.zip}" property="gberg.present"/>
+  </target>
+
+  <target name="gberg-install" if="gberg.present" depends="gberg-prepare">
+    <unzip dest="${gberg.dir}/index" src="${gberg.dir}/index/${index.zip}"/>
+    <echo>collection gberg installed</echo>
+  </target>
+
+  <target name="configure-web" depends="init"
+    description="Configure only the web app config files">
+    <!-- we want a unix path in the global.properties file -->
+    <pathconvert targetos="unix" property="src.gsdl3.home.unix">
+      <path path="${web.home}"/>
+    </pathconvert>
+    <filter token="gsdl3home" value="${src.gsdl3.home.unix}"/>
+    <filter token="gsdl3version" value="${app.version}"/>
+    <filter token="tomcat.server" value="${tomcat.server}"/>
+    <filter token="tomcat.port" value="${tomcat.port}"/>
+    <copy file="${basedir}/resources/java/global.properties.in" tofile="${web.classes}/global.properties" filtering="true" overwrite="true"/>
+    <copy file="${basedir}/resources/java/log4j.properties.in" tofile="${web.classes}/log4j.properties" filtering="true" overwrite="true"/>
+    <chmod file="${web.classes}/global.properties" perm="600"/>
+    <chmod file="${web.classes}/log4j.properties" perm="600"/>
+  </target>
+
+  <target name="compile-web" depends="init">
+    <javac srcdir="${web.classes}"
+      destdir="${web.classes}"
+      debug="${compile.debug}"
+      deprecation="${compile.deprecation}"
+      optimize="${compile.optimize}">
+      <classpath><path refid="compile.classpath"/></classpath>
+    </javac>
+  </target>
+
+  <target name="compile-classpath-jars" depends="init">
+    <if><bool><available file="admin/cp.mf"/></bool>
+      <jar destfile="admin/cp.jar" manifest="admin/cp.mf"/>
+    </if>
+    <if><bool><available file="${lib.java}/cp.mf"/></bool>
+      <jar destfile="${lib.java}/cp.jar" manifest="${lib.java}/cp.mf"/>
+    </if>
+    <if><bool><available file="${lib.jni}/cp.mf"/></bool>
+      <jar destfile="${lib.jni}/cp.jar" manifest="${lib.jni}/cp.mf"/>
+    </if>
+    <if><bool><available file="${web.lib}/cp.mf"/></bool>
+      <jar destfile="${web.lib}/cp.jar" manifest="${web.lib}/cp.mf"/>
+    </if>
+    <jar destfile="cp.jar">
+      <manifest>
+        <attribute name="Class-Path" value="server.jar admin/cp.jar lib/java/cp.jar lib/jni/cp.jar web/WEB-INF/lib/cp.jar"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="clean-classpath-jars" depends="init">
+    <delete file="admin/cp.jar"/>
+    <delete file="${lib.java}/cp.jar"/>
+    <delete file="${lib.jni}/cp.jar"/>
+    <delete file="${web.lib}/cp.jar"/>
+    <delete file="cp.jar"/>
+  </target>
+
+
+  <target name="svnupdate-web" unless="nosvn.mode">
+    <exec executable="svn">
+      <arg value="update"/>
+      <arg value="${web.home}"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+  </target>
+
+  <target name="update-web" depends="init,svnupdate-web,configure-web"
+    description="update only the web stuff (config files)"/>
+
+  <!-- ======================= Tomcat Targets ========================== -->
+  
+  <!-- this target downloads and installs Tomcat -->
+  <!-- we download tomcat (version 6 for Java 1.5 and later, version 5 for Java 1.4 plus the 1.4 compatibility package). -->
+  <target name="prepare-tomcat" depends="init,setup-proxy" if="tomcat.islocal"
+    description="downloads the appropriate version of Tomcat (Tomcat 5 if using Java 1.4, Tomcat 6 if using Java 1.5 or higher). If you want to change which version of Java you are using between 1.4 and 1.5/6 then you need to run prepare-tomcat">
+    <if>
+      <bool>
+        <not><available file="${packages.home}/tomcat/.flagfile"/></not>
+      </bool>
+
+      <!-- check that packages dir is there -->
+      <mkdir dir="${packages.home}"/>
+      <get src="http://www.greenstone.org/gs3files/${tomcat.version}.zip"
+        dest="${packages.home}/${tomcat.version}.zip"
+        usetimestamp="true"/>
+      <unzip src="${packages.home}/${tomcat.version}.zip" 
+        dest="${packages.home}"/>
+      
+      <!-- If we are using Java 1.4, we'd be using tomcat 5.5 in which case 
+      we would need to have the tomcat compat package to work with Java 1.4-->
+      <if>
+	<bool><equals arg1="1.4" arg2="${ant.java.version}"/></bool>
+	<get src="http://www.greenstone.org/gs3files/${tomcat.version}-compat.zip"
+	  dest="${packages.home}/${tomcat.version}-compat.zip"
+	  usetimestamp="true"/>
+	<unzip src="${packages.home}/${tomcat.version}-compat.zip" 
+	  dest="${packages.home}"/>
+      </if>
+      
+      <!-- delete any existing tomcat -->
+      <delete dir="${packages.home}/tomcat"/>
+      <move todir="${packages.home}/tomcat">
+        <fileset dir="${packages.home}/${tomcat.version}"/>
+      </move>
+      <copy file="${basedir}/resources/tomcat/setclasspath.bat"
+        tofile="${packages.home}/tomcat/bin/setclasspath.bat"
+        overwrite="true"/>
+      <copy file="${basedir}/resources/tomcat/setclasspath.sh"
+        tofile="${packages.home}/tomcat/bin/setclasspath.sh"
+        overwrite="true"/>
+      <!-- make sure we have execute permission for the .sh files -->
+      <chmod dir="${packages.home}/tomcat/bin" perm="ugo+rx" 
+        includes="*.sh"/>   
+
+      <echo file="${packages.home}/tomcat/.flagfile">
+        the timestamp of this file is the time that tomcat was extracted from the zip files.
+        it is used to figure out whether the files need to be refreshed or not in `ant prepare-tomcat`
+      </echo>
+
+      <!-- this is not strictly a prepare tomcat thing, but if one changes
+      Java, then they need to change tomcat as well, so might as well call 
+      it here -->
+      <antcall target="configure-java-version"/>
+      <else>
+        <echo>Tomcat has been prepared, will not prepare</echo>
+        <echo>Delete ${packages.home}/tomcat/.flagfile to force refresh</echo>
+      </else>
+
+    </if>
+
+  </target>
+  
+  <target name="configure-tomcat" depends="init,configure-tomcat-local,configure-tomcat-external"/>
+  
+  <target name="configure-tomcat-local" depends="init" if="tomcat.islocal">
+    <!-- re-setup the server.xml file -->
+    <copy file="${basedir}/resources/tomcat/server_tomcat${tomcat.version.major}.xml"
+		tofile="${packages.home}/tomcat/conf/server.xml" overwrite="true">
+      <filterset>
+        <filter token="port" value="${tomcat.port}"/>
+        <filter token="shutdown-port" value="${tomcat.shutdown.port}"/>
+      </filterset>
+    </copy>
+    <!-- set up the greenstone3 context -->
+    <copy file="${basedir}/resources/tomcat/greenstone3.xml" tofile="${packages.home}/tomcat/conf/Catalina/localhost/greenstone3.xml" overwrite="true">
+      <filterset>
+        <filter token="gsdl3webhome" value="${web.home}"/>
+      </filterset>
+    </copy>
+  </target>
+
+  <target name="configure-tomcat-external" depends="init" unless="tomcat.islocal">
+    <!-- re-setup the server.xml file -->
+    <!-- need to edit the config file, or do we get the user to do this???-->
+  </target>
+  
+  <target name="start-tomcat" description="Startup only Tomcat" depends="init" if="tomcat.islocal">
+    <property name="tomcat.classpath" refid="local.tomcat.classpath"/>
+    <property name="tomcat.path" refid="local.tomcat.path"/>
+    <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx400M"/>
+    <exec executable="${catalina.home}/bin/startup.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false" failonerror="true">
+      <!--<env key="GSDLOS" value="linux"/> do we need this?? -->
+      <env key="GSDL3HOME" value="${basedir}"/>
+      <env key="PATH" path="${tomcat.path}"/>
+      <env key="CATALINA_OPTS" value="${catalina.opts}"/>
+      <env key="CATALINA_HOME" value="${catalina.home}"/>
+      <env key="CLASSPATH" path="${tomcat.classpath}"/>
+      <env key="LD_LIBRARY_PATH" path="${env.LD_LIBRARY_PATH}:${lib.jni}"/>
+      <env key="DYLD_LIBRARY_PATH" path="${env.DYLD_LIBRARY_PATH}:${lib.jni}:${gdbm.home}/lib"/> <!-- for mac os --> <!-- need gdbm here??-->
+      <env key="WNHOME" path="${wn.home}"/>
+    </exec>
+    <exec executable="${catalina.home}/bin/startup.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="true" failonerror="true">
+      <env key="GSDLOS" value="windows"/>
+      <env key="GSDL3HOME" value="${basedir}"/>
+      <env key="Path" path="${tomcat.path}"/>
+      <env key="PATH" path="${tomcat.path}"/>
+      <env key="CATALINA_OPTS" value="${catalina.opts}"/>
+      <env key="CATALINA_HOME" value="${catalina.home}"/>
+      <env key="CLASSPATH" path="${tomcat.classpath}"/>
+    </exec>
+    <!-- wait for the server to startup in case other targets need it running -->
+    <waitfor maxwait="5" maxwaitunit="second">
+      <and>
+        <socket server="${tomcat.server}" port="${tomcat.port}"/>
+        <http url="http://${tomcat.server}:${tomcat.port}${app.path}/index.html"/>
+      </and>
+    </waitfor>
+  </target>
+
+  <!-- windows: do we want to launch a webrowser?? -->
+  <!-- shouldn't this test whether anything is running first? -->
+  <target name="stop-tomcat" description="Shutdown only Tomcat" depends="init" if="tomcat.islocal">
+    <exec executable="${catalina.home}/bin/shutdown.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false" failonerror="true">
+      <env key="CATALINA_HOME" value="${catalina.home}"/>
+    </exec>
+    <exec executable="${catalina.home}/bin/shutdown.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="false" failonerror="true">
+      <env key="CATALINA_HOME" value="${catalina.home}"/>
+    </exec>
+  </target>
+
+  <target name="restart-tomcat" description="Shutdown and restart only Tomcat" depends="init,stop-tomcat,start-tomcat"/>
+
+  <target name="setup-catalina-ant-tasks">
+    <!-- Configure the custom Ant tasks for the Tomcat Manager application -->
+    <taskdef name="deploy"    classname="org.apache.catalina.ant.DeployTask"
+      classpath="${catalina.home}/server/lib/catalina-ant.jar"/>
+    <taskdef name="list"      classname="org.apache.catalina.ant.ListTask"
+      classpath="${catalina.home}/server/lib/catalina-ant.jar"/>
+    <taskdef name="reload"    classname="org.apache.catalina.ant.ReloadTask"
+      classpath="${catalina.home}/server/lib/catalina-ant.jar"/>
+    <taskdef name="resources" classname="org.apache.catalina.ant.ResourcesTask"
+      classpath="${catalina.home}/server/lib/catalina-ant.jar"/>
+    <taskdef name="roles"     classname="org.apache.catalina.ant.RolesTask"
+      classpath="${catalina.home}/server/lib/catalina-ant.jar"/>
+    <taskdef name="start"     classname="org.apache.catalina.ant.StartTask"
+      classpath="${catalina.home}/server/lib/catalina-ant.jar"/>
+    <taskdef name="stop"      classname="org.apache.catalina.ant.StopTask"
+      classpath="${catalina.home}/server/lib/catalina-ant.jar"/>
+    <taskdef name="undeploy"  classname="org.apache.catalina.ant.UndeployTask"
+      classpath="${catalina.home}/server/lib/catalina-ant.jar"/>
+  </target>
+
+
+  <!-- ======================= ant Targets ============================ --> 
+  <target name="prepare-ant" depends="init">
+    <if>
+      <bool>
+        <not><available file="${packages.home}/ant/.flagfile"/></not>
+      </bool>
+
+      <get src="http://www.greenstone.org/gs3files/apache-ant-1.7.0-bin.zip"
+        dest="${packages.home}/apache-ant-1.7.0-bin.zip"
+        usetimestamp="true"/>
+      <unzip src="${packages.home}/apache-ant-1.7.0-bin.zip"
+        dest="${packages.home}"/>
+      <move todir="${packages.home}/ant">
+        <fileset dir="${packages.home}/apache-ant-1.7.0"/>
+      </move>
+      <echo file="${packages.home}/ant/.flagfile">
+        the timestamp of this file is the time that ant was extracted from the zip files.
+        it is used to figure out whether the files need to be refreshed or not in `ant prepare-ant`
+      </echo>
+
+      <else>
+        <echo>Ant has been prepared, will not prepare</echo>
+        <echo>Delete ${packages.home}/ant/.flagfile to force refresh</echo>
+      </else>
+
+    </if>
+  </target>
+
+  <!-- ======================= Axis Targets ============================ -->  
+  
+  <target name="prepare-axis" depends="init">
+
+    <if>
+      <bool>
+        <not><available file="${packages.home}/axis/.flagfile"/></not>
+      </bool>
+
+      <get src="http://www.greenstone.org/gs3files/${axis.zip.version}"
+        dest="${packages.home}/${axis.zip.version}"
+        usetimestamp="true"/>
+      <unzip src="${packages.home}/${axis.zip.version}"
+        dest="${packages.home}"/>
+      <move todir="${packages.home}/axis">
+        <fileset dir="${packages.home}/${axis.dir.version}"/>
+      </move>
+      <!-- install axis into greenstone web app -->
+      <copy todir="${web.lib}">
+        <fileset dir="${packages.home}/axis/webapps/axis/WEB-INF/lib">
+          <include name="*.jar"/>
+        </fileset>
+      </copy>
+      <copy todir="${web.home}">
+        <fileset dir="${packages.home}/axis/webapps/axis/">
+          <include name="*.jsp"/>
+          <include name="*.jws"/>
+        </fileset>
+      </copy>
+      <copy tofile="${web.home}/axis.html" file="${packages.home}/axis/webapps/axis/index.html"/>
+      <copy todir="${web.classes}">
+        <fileset dir="${packages.home}/axis/webapps/axis/WEB-INF/classes">
+          <include name="*.properties"/>
+        </fileset>
+      </copy>
+      <echo file="${packages.home}/axis/.flagfile">
+        the timestamp of this file is the time that axis was extracted from the zip files.
+        it is used to figure out whether the files need to be refreshed or not in `ant prepare-axis`
+      </echo>
+
+      <else>
+        <echo>Axis has been prepared, will not prepare</echo>
+        <echo>Delete ${packages.home}/axis/.flagfile to force refresh</echo>
+      </else>
+
+    </if>
+  </target>
+
+  <target name="soap-deploy-site" depends="init,get-sitename,get-siteuri,get-webservices,create-deployment-files,deploy-site"
+    description="Deploy a SOAP web service for a local Greenstone site. Tomcat must be running for this to work."/>
+    
+    <target name="deploy-site">
+    <java classname="org.apache.axis.client.AdminClient">
+      <classpath refid="compile.classpath"/>
+      <arg value="-l"/>
+      <arg value="http://${tomcat.server}:${tomcat.port}${app.path}/servlet/AxisServlet"/>
+      <arg file="${basedir}/resources/soap/deploy.wsdd"/>
+    </java>
+    <delete file="${basedir}/resources/soap/deploy.wsdd"/> <!--clean up, no longer used-->
+  </target>
+  
+  <target name="soap-undeploy-site" depends="get-undeploy-service-name"
+    description="Undeploy a SOAP web service for a local Greenstone site. Tomcat must be running for this to work.">
+    <filter token="servicesname" value="${axis.undeploy.servicename}"/>
+    <copy file="${basedir}/resources/soap/undeploy-site.wsdd.template"
+      tofile="${basedir}/resources/soap/undeploy.wsdd"
+      filtering="true"
+      overwrite="true"/>
+    <java classname="org.apache.axis.client.AdminClient">
+      <classpath refid="compile.classpath"/>
+      <arg value="-l"/>
+      <arg value="http://${tomcat.server}:${tomcat.port}${app.path}/servlet/AxisServlet"/>
+      <arg file="${basedir}/resources/soap/undeploy.wsdd"/>
+    </java>
+    <delete file="${basedir}/resources/soap/undeploy.wsdd"/> <!--clean up, no longer used-->
+  </target>  
+
+  <!-- this target used to deploy the default web service SOAPServer (base.webservice.name) on the localsite server
+  with the default servicename of localsite-->
+  <target name="deploy-localsite" depends="init" 
+    description="Deploy the SOAP server for localsite. Will start and stop Tomcat.">
+    <antcall target="start-tomcat"/>
+    <echo>Deploying ${base.webservice.name} web services for localsite under service name: localsite</echo>
+    <antcall target="create-deployment-files">
+      <param name="axis.sitename" value="localsite"/>
+      <param name="axis.servicesname" value="${base.webservice.name}"/>
+      <param name="axis.siteuri" value="localsite"/>
+    </antcall>
+    <antcall target="deploy-site">
+      <param name="axis.sitename" value="localsite"/>
+      <param name="axis.servicesname" value="${base.webservice.name}"/>
+      <param name="axis.siteuri" value="localsite"/>
+    </antcall>
+    <echo>The Greenstone server has been started up. If you do not want it running, please type: ant stop.</echo>
+  </target>
+    
+  <target name="get-sitename" unless="axis.sitename">
+    <input addproperty="axis.sitename" defaultvalue="localsite">What site do you want to deploy services for?
+Press Enter for default:localsite</input>
+  </target>
+
+  <target name="get-undeploy-service-name" unless="axis.undeploy.servicename">
+    <input addproperty="axis.undeploy.servicename" defaultvalue="localsite">Please enter the full name of the service you wish to undeploy.
+To find out which web services you've got deployed, point your browser to http://HOST:PORT/greenstone3/services 
+Or press Enter for undeploying the default:localsite /&gt;</input>
+     <echo>Name of service to undeploy: ${axis.undeploy.servicename}</echo>
+  </target>
+
+  <target name="get-webservices" unless="axis.servicesname">
+    <input addproperty="axis.servicesname" defaultvalue="${base.webservice.name}">Which set of web services do you want to deploy?
+Choose from: ${web.services.list}
+Or press Enter for default:${base.webservice.name} /&gt;</input>
+    <echo>${axis.servicesname}</echo>
+  </target>
+
+  <target name="get-siteuri" depends="get-sitename,get-webservices" unless="axis.siteuri">
+    <input addproperty="axis.siteuri" defaultvalue="${axis.servicesname}${axis.sitename}">What name do you want the service to have? (Press Enter for default:${axis.servicesname}${axis.sitename})</input>
+    <echo>Site: ${axis.sitename}, services: ${axis.servicesname}, servicesname: ${axis.siteuri}</echo>
+  </target>
+
+  <target name="set-soapmethod" description="Determines whether the service in the wsdd should have the style attribute set to message or the provider attribute set to java:RPC"  if="axis.servicesname">
+   <condition property="soap.method" value="provider='java:MSG' style='message' use='literal'">
+      <equals arg1="${axis.servicesname}" arg2="${base.webservice.name}"/>
+    </condition>
+   
+   <!--everything else defaults to java:RPC at present-->
+   <condition property="soap.method" value="provider='java:RPC'">
+     <not>
+      <equals arg1="${axis.servicesname}" arg2="${base.webservice.name}"/>
+    </not>
+    </condition>
+  </target>
+    
+  <target name="create-deployment-files" depends="set-soapmethod" if="axis.sitename">
+    <filter token="sitename" value="${axis.sitename}"/>
+    <filter token="siteuri" value="${axis.siteuri}"/>
+    <filter token="servicesname" value="${axis.servicesname}"/>
+    <filter token="soapmethod" value="${soap.method}"/>
+    <copy file="${basedir}/resources/soap/site.wsdd.template"
+      tofile="${basedir}/resources/soap/deploy.wsdd"
+      filtering="true"
+      overwrite="true"/>
+    <!-- create the java files and compile them -->
+    <copy file="${basedir}/resources/java/${axis.servicesname}.java.in"
+      tofile="${src.gsdl3.home}/${axis.servicesname}${axis.sitename}.java"
+      filtering="true"
+      overwrite="true"/>
+    <mkdir dir="${build.home}"/>
+    <javac srcdir="${src.home}"
+      destdir="${build.home}" 
+      debug="${compile.debug}"
+      deprecation="${compile.deprecation}"
+      optimize="${compile.optimize}">
+      <classpath refid="compile.classpath"/>
+      <include name="org/greenstone/gsdl3/${axis.servicesname}${axis.sitename}.java" />
+    </javac>
+    <mkdir dir="${web.classes}/org/greenstone/gsdl3"/>
+    <copy file="${build.home}/org/greenstone/gsdl3/${axis.servicesname}${axis.sitename}.class" 
+      tofile="${web.classes}/org/greenstone/gsdl3/${axis.servicesname}${axis.sitename}.class"
+      overwrite="true" />
+  </target>
+  
+
+  <!-- ====================== Core targets ============================== -->
+  <!-- core targets refer to the core gsdl3 java src -->
+  
+  <target name="prepare-core"/>
+  
+  <target name="configure-core"/>
+
+  <target name="update-core" depends="init,svnupdate-core,clean-core,compile-core"
+    description="Update only the Greenstone core" />
+  
+  <target name="svnupdate-core" unless="nosvn.mode">
+    <exec executable="svn">
+      <arg value="update"/>
+      <arg value="${basedir}"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+  </target>
+
+  <target name="clean-core"
+    description="Clean only the Greenstone core">
+    <!-- should this delete the gsdl3.jar from web/WEB-INF?? -->
+    <delete dir="${build.home}"/>
+  </target>
+
+  <target name="compile-core" depends="init" 
+    description="Compile only the Greenstone core">
+    <mkdir dir="${build.home}"/>
+    <javac srcdir="${src.home}"
+      destdir="${build.home}"
+      debug="${compile.debug}"
+      deprecation="${compile.deprecation}"
+      optimize="${compile.optimize}">
+      <classpath>
+        <path refid="compile.classpath"/>
+      </classpath>
+    </javac>
+    <jar destfile="${build.home}/gsdl3.jar">
+      <fileset dir="${build.home}">
+        <include name="org/greenstone/gsdl3/**"/>
+        <include name="org/flax/**"/>
+        <exclude name="**/Test.class"/>
+      </fileset>
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+      </manifest>
+    </jar>
+    <copy file="${build.home}/gsdl3.jar" todir="${web.lib}"/>
+    <!-- copy the localsite server in case we need it -->
+    <copy file="${build.home}/org/greenstone/gsdl3/${base.webservice.name}localsite.class" tofile="${web.classes}/org/greenstone/gsdl3/${base.webservice.name}localsite.class" />
+
+    <!-- Greenstone Administrator Interface -->
+    <jar destfile="${build.home}/GAI.jar">
+      <fileset dir="${build.home}">
+        <include name="org/greenstone/admin/**"/>
+      </fileset>
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+      </manifest>
+    </jar>
+    <copy file="${build.home}/GAI.jar" todir="${web.lib}"/>
+    <copy file="${build.home}/GAI.jar" todir="${admin.dir}"/>
+    <jar destfile="${build.home}/phind.jar">
+      <fileset dir="${build.home}">
+        <include name="org/greenstone/applet/phind/**"/>
+      </fileset>
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+      </manifest>
+    </jar>
+    <mkdir dir="${web.applet}"/>
+    <copy file="${build.home}/phind.jar" todir="${web.applet}"/>
+    <!-- phind also needs xercesImpl.jar and xml-apis.jar to be in web/applet -->
+    <if>
+      <bool><istrue value="${tomcat.islocal}"/></bool>
+      <copy file="${web.lib}/xercesImpl.jar" todir="${web.applet}"/>
+      <copy file="${web.lib}/xml-apis.jar" todir="${web.applet}"/>
+    </if>
+
+
+    <!-- skip anttasks for now
+    <jar destfile="${build.home}/anttasks.jar">
+      <fileset dir="${build.home}">
+        <include name="org/greenstone/anttasks/**"/>
+      </fileset>
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+      </manifest>
+    </jar>
+    <copy file="${build.home}/anttasks.jar" todir="${basedir}/lib/java"/>-->
+    <jar destfile="${build.home}/gsdl3test.jar">
+      <fileset dir="${build.home}">
+        <include name="org/greenstone/gsdl3/**/*Test.class"/>
+        <include name="org/greenstone/testing/**"/>
+      </fileset>
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+      </manifest>
+    </jar>
+    <jar destfile="${build.home}/server.jar">
+      <fileset dir="${build.home}">
+        <include name="org/greenstone/server/**"/>
+      </fileset>
+      <fileset file="${basedir}/resources/java/server.properties"/>
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+      </manifest>
+    </jar>
+    <copy file="${build.home}/server.jar" todir="${basedir}"/>
+  </target>
+  
+  <!-- ================== Packages targets ================================ -->
+  <!-- these targets refer to the greenstone source packages - these need 
+  updating less often, so are in  separate targets to the core -->
+  <target name="prepare-packages" depends="init"/>
+  
+  <target name="update-packages" depends="init,svnupdate-packages,configure-packages,clean-packages,compile-packages"
+    description="Update only the source packages"/>
+
+  <target name="svnupdate-packages" unless="nosvn.mode"> 
+    <exec executable="svn">
+      <arg value="update"/>
+      <arg value="${src.packages.home}"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+  </target>
+
+  
+  <target name="configure-packages" depends="init,configure-javagdbm" 
+    description="Configure only the packages."/>
+  
+  <target name="configure-javagdbm">
+    <echo>
+      Configuring JavaGDBM
+    </echo>
+    
+    <exec executable="${javagdbm.home}/configure" os="${os.unix}" dir="${javagdbm.home}" failonerror="true">
+      <arg value="--prefix=${basedir}"/>
+      <arg value="--libdir=${lib.jni}"/>
+      <arg value="--with-gdbm=${gdbm.home}"/>
+    </exec>    
+  </target>
+
+  <target name="clean-packages" depends="init,clean-javagdbm" description="Clean only the packages"/>
+
+  <target name="clean-javagdbm" depends="init">
+    <exec executable="make" os="${os.unix}"
+      dir="${javagdbm.home}" failonerror="true">
+      <arg value="clean"/>
+    </exec>
+  </target>
+  
+  <target name="distclean-packages" depends="init,distclean-javagdbm" description="Distclean only the packages"/>
+
+  <target name="distclean-javagdbm" depends="init">
+    <exec executable="make" os="${os.unix}"
+      dir="${javagdbm.home}" failonerror="true">
+      <arg value="distclean"/>
+    </exec>
+  </target>
+  
+  <target name="compile-packages" description="Compile only the source packages">
+    
+    <!-- unix: -->
+    <echo>compile javagdbm</echo>
+    <exec executable="make" os="${os.unix}" dir="${javagdbm.home}" failonerror="true"/>
+    <exec executable="make" os="${os.unix}" dir="${javagdbm.home}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+
+    <!-- windows: just the java stuff. -->
+    <echo>Windows: compile javagdbm (java only)</echo>
+    <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true">
+      <arg value="compile"/>
+      <arg value="javaonly"/>
+    </exec>
+
+    <!-- install the jar file -->
+    <echo>Install the javagdbm jar file</echo>
+    <copy file="${javagdbm.home}/javagdbm.jar" todir="${lib.jni}"/>
+
+
+    <!-- Search4j -->
+    <antcall target="compile-search4j"/>
+  </target>
+
+  <target name="compile-search4j">
+
+    <!-- windows -->
+    <if><bool><istrue value="${current.os.iswindows}"/></bool>
+      <exec executable="nmake" dir="${src.packages.home}/search4j" failonerror="true">
+        <arg value="/f"/>
+        <arg value="win32.mak"/>
+        <arg value='BINDIR="${basedir}\bin"'/>
+      </exec>
+      <exec executable="nmake" dir="${src.packages.home}/search4j" failonerror="true">
+        <arg value="/f"/>
+        <arg value="win32.mak"/>
+        <arg value="install"/>
+        <arg value='BINDIR="${basedir}\bin"'/>
+      </exec>
+
+    <!-- unix -->
+    <else><if><bool><istrue value="${current.os.isunix}"/></bool>
+      <exec executable="${src.packages.home}/search4j/configure" dir="${src.packages.home}/search4j" failonerror="true">
+        <arg value="--bindir=${basedir}/bin"/>
+        <arg value="${static.arg}"/>
+      </exec>
+      <exec executable="make" dir="${src.packages.home}/search4j" failonerror="true"/>
+      <exec executable="make" dir="${src.packages.home}/search4j" failonerror="true">
+        <arg value="install"/>
+      </exec>
+
+    <!-- else warn -->
+    <else>
+      <fail>this target does not support the current os</fail>
+
+    </else></if></else></if>
+
+  </target>
+
+  <target name="install-auxiliary-jar-files" depends="init">
+    <copy file="${mg.home}/mg.jar" todir="${lib.jni}"/>
+    <copy file="${mgpp.home}/mgpp.jar" todir="${lib.jni}"/>
+    <copy file="${lucene.home}/LuceneWrapper.jar" todir="${web.lib}"/>    
+  </target>
+  
+  <target name="install-jni-files" depends="init,install-jni-files-linux,install-jni-files-windows,install-jni-files-macos"/>
+
+  <target name="install-jni-files-linux" depends="init" if="current.os.isunixnotmac">
+    <copy file="${mg.home}/jni/libmgretrievejni.so" todir="${lib.jni}"/>
+    <copy file="${mg.home}/jni/libmgsearchjni.so" todir="${lib.jni}"/>
+    <copy file="${mg.home}/jni/libmgpassjni.so" todir="${lib.jni}"/>
+    <copy file="${mgpp.home}/jni/libmgppretrievejni.so" todir="${lib.jni}"/>
+    <copy file="${mgpp.home}/jni/libmgppsearchjni.so" todir="${lib.jni}"/>
+    <copy file="${mgpp.home}/jni/libmgpppassjni.so" todir="${lib.jni}"/>
+  </target>
+  <target name="install-jni-files-windows" depends="init" if="current.os.iswindows">
+    <copy file="${mg.home}/jni/mgretrievejni.dll" todir="${lib.jni}"/>
+    <copy file="${mg.home}/jni/mgsearchjni.dll" todir="${lib.jni}"/>
+    <copy file="${mg.home}/jni/mgpassjni.dll" todir="${lib.jni}"/>
+    <copy file="${mgpp.home}/jni/mgppretrievejni.dll" todir="${lib.jni}"/>
+    <copy file="${mgpp.home}/jni/mgppsearchjni.dll" todir="${lib.jni}"/>
+    <copy file="${mgpp.home}/jni/mgpppassjni.dll" todir="${lib.jni}"/>
+  </target>
+  <target name="install-jni-files-macos" depends="init" if="current.os.ismac">
+    <copy file="${mg.home}/jni/libmgretrievejni.jnilib" todir="${lib.jni}"/>
+    <copy file="${mg.home}/jni/libmgsearchjni.jnilib" todir="${lib.jni}"/>
+    <copy file="${mg.home}/jni/libmgpassjni.jnilib" todir="${lib.jni}"/>
+    <copy file="${mgpp.home}/jni/libmgppretrievejni.jnilib" todir="${lib.jni}"/>
+    <copy file="${mgpp.home}/jni/libmgppsearchjni.jnilib" todir="${lib.jni}"/>
+    <copy file="${mgpp.home}/jni/libmgpppassjni.jnilib" todir="${lib.jni}"/>
+  </target>
+  
+  <!-- ========common-src targets =================================-->
+  <!-- these are used to get common-src (for indexers, gdbm, sqlite etc) when
+  collection building is not enabled -->
+
+  <target name="update-common-src" depends="init" if="collection.building.disabled">
+  </target>
+
+  <target name="svnupdate-common-src" depends="init" if="collection.building.disabled" unless="nosvn.mode">
+    <exec executable="svn">
+      <arg value="update"/>
+      <arg value="${common.src.home}"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+  </target>
+
+  <target name="prepare-common-src" depends="init" if="collection.building.disabled" unless="common.src.present">
+    <antcall target="checkout-common-src"/>
+    <antcall target="unzip-windows-packages"/>
+  </target>
+
+  <target name="checkout-common-src" depends="init" if="collection.building.disabled" unless="nosvn.mode">
+    <echo>checking out common-src</echo>
+    <exec executable="svn">
+      <arg value="checkout"/>
+      <arg value="${svn.root}/gsdl/trunk/common-src"/>
+			<arg value="common-src"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+  </target>
+    
+  <target name="configure-common-src" depends="init">
+    <exec executable="${common.src.home}/configure" os="${os.unix}"
+      dir="${common.src.home}" failonerror="true">
+      <arg value="--prefix=${gs2build.home}"/> <!-- what value to use?? -->
+      <arg value="--bindir=${gs2build.home}/bin/${os.bin.dir}"/> <!-- what value to use?? -->
+      <arg line="${static.arg}"/>
+    </exec>
+  </target>
+
+  <target name="clean-common-src" depends="init">
+    <!-- unix:  -->
+    <exec executable="make" os="${os.unix}" dir="${common.src.home}" failonerror="true">
+      <arg value="clean"/>
+    </exec>
+    <!-- windows: -->    
+    <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
+      <arg value="/f"/>
+      <arg value="win32.mak"/>
+      <arg value="clean"/>
+      <arg value="GSDLHOME=${gs2build.home}"/>
+    </exec>
+  </target>
+  <target name="distclean-common-src" depends="init">
+    <!-- unix:  -->
+    <exec executable="make" os="${os.unix}" dir="${common.src.home}" failonerror="true">
+      <arg value="distclean"/>
+    </exec>
+    <!-- windows: distclean = clean + remove configure products (remove makefiles). But on Windows there is no removing makefiles, so we just call clean -->    
+    <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
+      <arg value="/f"/>
+      <arg value="win32.mak"/>
+      <arg value="clean"/>
+      <arg value="GSDLHOME=${gs2build.home}"/>
+    </exec>
+  </target>
+  <target name="compile-common-src" depends="init">
+    <!-- unix: -->
+    <exec executable="make" os="${os.unix}" dir="${common.src.home}" failonerror="true">
+    </exec>
+    <!-- windows: -->
+    <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
+      <arg value="/f"/>
+      <arg value="win32.mak"/>
+      <arg value="GSDLHOME=${gs2build.home}"/>
+    </exec>
+  </target>
+  
+  <!-- ======= collection-building targets ===========================-->
+
+  <target name="update-collection-building" if="collection.building.enabled" 
+    depends="init,svnupdate-collection-building,gs2build-edit-setup-bat,configure-common-src,clean-common-src,compile-common-src,configure-collection-building,clean-collection-building,compile-collection-building"
+    description="Update (SVN update, configure, compile etc) only the collection building components"/>
+
+  <target name="svnupdate-collection-building" if="collection.building.enabled" depends="init,svnupdate-gs2build,svnupdate-gli" unless="nosvn.mode"
+    description="SVN update the collection building components">
+  </target>
+
+  <target name="prepare-collection-building" depends="init,prepare-gs2build,prepare-gli" if="collection.building.enabled">
+  </target>
+
+  <target name="configure-collection-building" depends="init,configure-build-src" if="collection.building.enabled"
+    description="Configure the collection building components">
+  </target>
+
+  <target name="clean-collection-building" depends="init,clean-gli,clean-build-src" 
+    description="Clean only the collection building components" 
+    if="collection.building.enabled"/>
+
+  <target name="distclean-collection-building" depends="init,clean-build-src,distclean-build-src" 
+    description="Distclean only the collection building components" 
+    if="collection.building.enabled"/>
+
+  <target name="compile-collection-building" depends="init,compile-build-src,compile-gli" if="collection.building.enabled"
+    description="Compile only the collection building components">
+    <!-- make install for common-src -->
+    <!-- unix: -->
+    <exec executable="make" os="${os.unix}" dir="${common.src.home}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+      
+    <!-- windows: -->
+    <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
+      <arg value="/f"/>
+      <arg value="win32.mak"/>
+      <arg value="install"/>    
+    </exec>
+
+    <!-- install gs2build indexers for windows -->
+      <if>
+	<bool><istrue value="${current.os.iswindows}"/></bool> 
+	<copy todir="${gs2build.home}/bin/windows">
+	  <fileset dir="${gs2build.home}/common-src/indexers/bin">
+	    <include name="*.*"/>
+	  </fileset>
+	</copy>
+      </if>
+
+    <!-- LuceneWrapper jar file not installed by default -->
+    <mkdir dir="${gs2build.home}/bin/java"/>
+    <copy file="${lucene.home}/LuceneWrapper.jar" todir="${gs2build.home}/bin/java"/>
+
+  </target>
+
+  <!-- ============== gli targets ================================= -->
+  <target name="svnupdate-gli" if="collection.building.enabled" depends="init" unless="nosvn.mode">
+
+    <exec executable="svn">
+      <arg value="update"/>
+      <arg value="${gli.home}"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+
+    <exec executable="svn">
+      <arg value="export"/>
+      <arg value="${svn.root}/gsdl/${branch.path}/cgi-bin/gliserver.pl"/>
+      <arg value="${svn.root}/gsdl/${branch.path}/cgi-bin/gsdlCGI.pm"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+
+  </target>
+
+  <target name="prepare-gli" depends="init" if="collection.building.enabled" unless="gli.present">
+    <!-- checkout -->
+    <if><bool><not><istrue value="${nosvn.mode}"/></not></bool>
+
+    <exec executable="svn">
+      <arg value="checkout"/>
+      <arg value="${gli.home}"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+
+    <exec executable="svn">
+      <arg value="export"/>
+      <arg value="${svn.root}/gsdl/${branch.path}/cgi-bin/gliserver.pl"/>
+      <arg value="${svn.root}/gsdl/${branch.path}/cgi-bin/gsdlCGI.pm"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+
+    </if>
+  </target>
+  
+  <target name="clean-gli" depends="init" if="collection.building.enabled">
+    <!-- gli -->
+    <property name="gli.home" value="${basedir}/gli"/>
+    <!-- linux -->
+    <exec executable="clean.sh" os="${os.unix}" dir="${gli.home}"
+      resolveExecutable="true" failonerror="true"/>
+    <!-- windows -->
+    <exec executable="clean.bat" os="${os.windows}" dir="${gli.home}"
+      resolveExecutable="true" failonerror="true"/>
+  </target>
+ 
+  <target name="compile-gli" depends="init" if="collection.building.enabled">
+    <!-- gli -->
+    <property name="gli.home" value="${basedir}/gli"/>
+
+    <!-- linux -->
+    <exec executable="makegli.sh" os="${os.unix}" dir="${gli.home}" resolveExecutable="true" failonerror="true"/>
+    <!--remote gli-->
+    <exec executable="makejar.sh" os="${os.unix}" dir="${gli.home}"
+      resolveExecutable="true" failonerror="true"/>
+    <!-- windows -->
+    <exec executable="makegli.bat" os="${os.windows}" dir="${gli.home}" resolveExecutable="true" failonerror="true"/>
+    <!--remote gli-->
+    <exec executable="makejar.bat" os="${os.windows}" dir="${gli.home}"
+      resolveExecutable="true" failonerror="true"/> 
+    <copy file="${gli.home}/GLIServer.jar" todir="${gs2build.home}/bin/java" />
+  </target>
+
+  <target name="gli" description="Run the Greenstone Librarian Interface" depends="init" if="collection.building.enabled">
+    <exec executable="${basedir}/gli/gli.sh" os="${os.linux},${os.solaris}" dir="${basedir}/gli" spawn="true" failonerror="true">
+      <env key="gsdl3path" path="${basedir}"/>
+      <env key="gsdlpath" path="${gs2build.home}"/>
+    </exec>
+    <exec executable="${basedir}/gli/gli.sh" os="${os.mac}" dir="${basedir}/gli" spawn="true" failonerror="true">
+      <env key="gsdl3path" path="${basedir}"/>
+      <env key="gsdlpath" path="${gs2build.home}"/>
+      <env key="DYLD_LIBRARY_PATH" path="${env.DYLD_LIBRARY_PATH}:${gdbm.home}/lib"/>
+    </exec>
+    <exec executable="${basedir}/gli/gli.bat" os="${os.windows}" dir="${basedir}/gli" spawn="true" failonerror="true">
+      <env key="GSDL3PATH" path="${basedir}"/>
+      <env key="GSDLPATH" path="${gs2build.home}"/>
+    </exec>
+    <echo>Running GLI from Ant means that you don't get to see any of the terminal output. If you have problems with GLI and want to see the output, please run the script gli.sh/bat from the greenstone3/gli directory.
+    </echo>
+  </target>
+
+  <!-- ================ gs2build targets =========================== -->
+
+  <target name="svnupdate-gs2build" if="collection.building.enabled" depends="init" unless="nosvn.mode">
+    <echo>svn updating gs2build</echo>
+    <exec executable="svn">
+      <arg value="update"/>
+      <arg value="${gs2build.home}"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+  </target>
+    
+  <target name="prepare-gs2build" depends="init" if="collection.building.enabled" unless="gs2build.present">
+    <antcall target="checkout-gs2build"/>
+    <antcall target="unzip-windows-packages"/>
+    <antcall target="checkout-winbin"/>
+    <antcall target="get-windows-binaries"/>
+    <antcall target="delete-winbin"/>
+  </target>
+
+  <target name="checkout-gs2build" depends="init" if="collection.building.enabled" unless="nosvn.mode">
+    <echo>checking out gs2build</echo>
+    <exec executable="svn">
+      <arg value="checkout"/>
+      <arg value="${svn.root}/gs2build"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+
+  </target>
+
+  <target name="checkout-winbin" depends="init" if="current.os.iswindows" 
+    unless="nosvn.mode">
+
+    <exec executable="svn">
+      <arg value="checkout"/>
+      <arg value="${svn.root}/other-projects/trunk/winbin"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+
+  </target>
+
+  <target name="update-winbin" depends="init" if="current.os.iswindows" unless="nosvn.mode">
+    <exec executable="svn">
+      <arg value="update"/>
+      <arg value="winbin"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+    </exec>
+
+  </target>
+  
+  <target name="get-windows-binaries" depends="init" if="collection.building.enabled.windows">
+    <move todir="${gs2build.home}/bin/windows" failonerror="false">
+      <fileset dir="${basedir}/winbin/bin"/>
+    </move>
+  </target>
+
+  <target name="delete-winbin" depends="init" if="collection.building.enabled.windows">
+    <delete dir="${basedir}/winbin"/>
+  </target>
+  
+  <target name="unzip-windows-packages" depends="init" if="current.os.iswindows">  
+    <unzip src="${common.src.home}/packages/windows/crypt/crypt.zip"
+      dest="${common.src.home}/packages/windows/crypt"/>
+    <unzip src="${common.src.home}/packages/windows/expat/expat.zip"
+      dest="${common.src.home}/packages/windows/expat"/>
+    <untar compression="gzip" 
+      src="${common.src.home}/packages/sqlite/${sqlite.targz.version}"
+      dest="${common.src.home}/packages/sqlite"/>
+    <unzip src="${common.src.home}/indexers/packages/windows/iconv/iconv.zip"
+      dest="${common.src.home}/indexers/packages/windows/iconv"/>
+  </target>
+    
+  <target name="gs2build-edit-setup-bat" if="collection.building.enabled.windows">
+    <!-- we want a windows path in the setup.bat file -->
+    <pathconvert targetos="windows" property="gs2build.home.windows">
+      <path path="${gs2build.home}"/>
+    </pathconvert>
+    <move file="${gs2build.home}/setup.bat" tofile="${gs2build.home}/setup-tmp.bat">
+      <filterset>
+        <filter token="gsdlhome" value="${gs2build.home.windows}"/>
+      </filterset>
+    </move>  
+    <move file="${gs2build.home}/setup-tmp.bat" tofile="${gs2build.home}/setup.bat" />
+  </target>
+  
+ 
+  <target name="clean-build-src" depends="init" if="collection.building.enabled">
+    <!-- unix:  -->
+    <exec executable="make" os="${os.unix}" dir="${build.src.home}" failonerror="true">
+      <arg value="clean"/>
+    </exec>
+    <!-- windows: -->    
+    <exec executable="nmake" dir="${build.src.home}" os="${os.windows}" failonerror="true">
+      <arg value="/f"/>
+      <arg value="win32.mak"/>
+      <arg value="clean"/>
+      <arg value="GSDLHOME=${gs2build.home}"/>
+    </exec>
+  </target>
+  
+  
+  <target name="distclean-build-src" depends="init,clean-build-src" if="collection.building.enabled">
+    <!-- unix:  -->
+    <exec executable="make" os="${os.unix}" dir="${build.src.home}" failonerror="true">
+      <arg value="distclean"/>
+    </exec>
+    <!-- windows: distclean = clean + remove configure products (remove makefiles). But on Windows there is no removing makefiles, so we just call clean -->    
+    <exec executable="nmake" dir="${build.src.home}" os="${os.windows}" failonerror="true">
+      <arg value="/f"/>
+      <arg value="win32.mak"/>
+      <arg value="clean"/>
+      <arg value="GSDLHOME=${gs2build.home}"/>
+    </exec>
+  </target>
+ 
+  <target name="configure-build-src" depends="init" if="collection.building.enabled"
+    description="Configure the build-src component">
+    <exec executable="${build.src.home}/configure" os="${os.unix}"
+      dir="${build.src.home}" failonerror="true">
+      <arg value="--prefix=${gs2build.home}"/>
+      <arg line="${static.arg}"/>
+    </exec>
+  </target>
+
+  <!-- common-src is done separately and needs to be compiled first -->
+  <target name="compile-build-src" depends="init" if="collection.building.enabled">
+    
+    <exec executable="make" dir="${build.src.home}" os="${os.unix}" failonerror="true"/>
+    <exec executable="make" dir="${build.src.home}" os="${os.unix}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+
+    <!-- run the setup script -->
+    <!-- <exec executable="${compile.windows.c++.setup}" os="${os.windows}" failonerror="true"/>-->
+      <!--Above does not work: even though vcvars.bat executes, the env changes it makes don't get saved. Need user to run vcvars.bat first before calling ant--> 
+      <exec executable="nmake" dir="${build.src.home}" os="${os.windows}" failonerror="true">
+        <arg value="/f"/>
+        <arg value="win32.mak"/>
+	<arg value="GSDLHOME=${gs2build.home}"/>
+      </exec>
+      <exec executable="nmake" dir="${build.src.home}" os="${os.windows}" failonerror="true">
+        <arg value="/f"/>
+        <arg value="win32.mak"/>
+        <arg value="install"/>
+	<arg value="GSDLHOME=${gs2build.home}"/>
+      </exec>
+  </target>
+  
+
+  <!-- ======================== TESTING Targets ========================= -->
+  
+  <target name="test" description="Run the (incomplete) JUnit test suite "
+    depends="init">
+    <mkdir dir="${basedir}/test"/>
+    <junit printsummary="withOutAndErr"
+      errorproperty="test.failed"
+      failureproperty="test.failed"
+      fork="${junit.fork}">
+      <formatter type="plain"/>
+      <classpath>
+        <pathelement location="${build.home}/gsdl3test.jar"/>
+        <path refid="compile.classpath"/>
+      </classpath>
+      <test name="${testcase}" if="testcase"/>
+      <batchtest todir="${basedir}/test" unless="testcase">
+        <fileset dir="${build.home}" includes="**/*Test.class" />
+      </batchtest>
+    </junit>
+    <echo>
+      *********************************************
+      Test output can be found in directory 'test'
+      *********************************************
+    </echo>
+  </target>
+
+  <!-- ======================== FLAX Targets ========================= -->
+  <target name="prepare-flax" description="check out flax source code from another repository" if="install.flax">
+    <echo>checking out flax ...</echo>
+    <mkdir dir="${basedir}/src/java/org/flax"/>
+    <mkdir dir="${basedir}/src/java/org/greenstone/gsdl3/flax"/>
+    <mkdir dir="${web.home}/WEB-INF/classes/flax"/>
+    <mkdir dir="${web.home}/interfaces/flax"/>
+    <mkdir dir="${web.home}/interfaces/flaxmodule"/>
+    <mkdir dir="${web.home}/sites/flax"/>
+    <mkdir dir="${basedir}/flax-resources"/>
+    <mkdir dir="${basedir}/flax-lib"/>
+    <svn>
+      <checkout url="${flax.checkout.path}/src/java/org/flax/"  
+        destPath="${basedir}/src/java/org/flax"/>
+      <checkout url="${flax.checkout.path}/src/java/org/greenstone/gsdl3/flax/" 
+        destPath="${basedir}/src/java/org/greenstone/gsdl3/flax"/>
+      <checkout url="${flax.checkout.path}/web/WEB-INF/classes/flax/" 
+        destPath="${web.home}/WEB-INF/classes/flax"/>
+      <checkout url="${flax.checkout.path}/web/interfaces/flax/" 
+        destPath="${web.home}/interfaces/flax"/>
+      <checkout url="${flax.checkout.path}/web/interfaces/flaxmodule/" 
+        destPath="${web.home}/interfaces/flaxmodule"/>
+      <checkout url="${flax.checkout.path}/web/sites/flax/" 
+        destPath="${web.home}/sites/flax"/>
+      <checkout url="${flax.checkout.path}/flax-resources"
+        destPath="${basedir}/flax-resources"/>
+      <checkout url="${flax.checkout.path}/lib"
+        destPath="${basedir}/flax-lib"/>
+    </svn>
+    <echo>prepare flax files...</echo>
+    <move file="${web.home}/WEB-INF/web.xml" tofile="${web.home}/WEB-INF/web.xml.greenstone3backup"/>
+    <antcall target="flax-copy-files" />
+  </target>
+
+  <target name="update-flax" description="update flax from repository">
+    <echo>updating flax ...</echo>
+    <svn>
+      <update dir="${basedir}/src/java/org/flax"/>
+      <update dir="${basedir}/src/java/org/greenstone/gsdl3/flax"/>
+      <update dir="${web.home}/WEB-INF/classes/flax"/>
+      <update dir="${web.home}/interfaces/flax"/>
+      <update dir="${web.home}/interfaces/flaxmodule"/>
+      <update dir="${web.home}/sites/flax"/>
+    </svn>
+    <antcall target="flax-copy-files" />
+  </target>
+  
+  <target name="flax-copy-files" description="copy some flax files into the appropriate greenstone3 directories">
+    <echo>copying flax files ...</echo>
+    <copy file="${web.home}/WEB-INF/classes/flax/web.xml" todir="${web.home}/WEB-INF" overwrite="true" />
+    <!-- A configuration file containing web service binding information for the axis engine -->
+    <copy file="${web.home}/WEB-INF/classes/flax/server-config.wsdd" todir="${web.home}/WEB-INF" overwrite="true" />
+    <!-- A static web service wsdl file which is queried by soap client. The reason this file is used (instead of the dynamically generated version) is in case any redirects are used in the Apache configuration (e.g., flax.nzdl.org:80 redirects to harakeke:8080) -->
+    <copy file="${basedir}/flax-resources/FlaxWebService.wsdl" tofile="${web.home}/FlaxWebService.wsdl" filtering="true" overwrite="true">
+    	<filterset>
+            <filter token="flaxpublicserver" value="${tomcat.server}"/>
+            <filter token="flaxpublicport" value="${tomcat.port}"/>
+    	</filterset>	
+    </copy>
+    <copy file="${basedir}/flax-lib/opennlp-tools-1.3.0.jar" todir="${web.home}/WEB-INF/lib" overwrite="true" />    
+    <copy todir="${web.home}/interfaces/flaxmodule/transform" overwrite="true">
+        <fileset dir="${web.home}/interfaces/flaxmodule/transformmodule" excludes="**/.svn" />        
+    </copy>
+  </target>
+
+
+  <target name="compile-javadocs">
+    <javadoc packagenames="org.greenstone.*"
+           sourcepath="src/java"
+           defaultexcludes="yes"
+           destdir="docs/javadoc"
+           author="true"
+           version="true"
+           use="true"
+           windowtitle="Greenstone3 API">
+    <doctitle><![CDATA[<h1>Greenstone3 API</h1>]]></doctitle>
+    </javadoc>
+  </target>
+
+<!-- ========== Some distribution targets ======================== -->
+  <target name="remove-source">
+    <delete includeEmptyDirs="true">
+      <fileset dir="." defaultexcludes="false">
+        <patternset refid="greenstone3.source.component"/>
+     </fileset>
+    </delete>
+  </target>
+
+  <target name="dist-tidy"
+    description="'tidies-up' a greenstone3 installation for distribution.">
+
+    <!-- delete unneeded things -->
+    <delete dir="${packages.home}/axis"/>
+    <delete><fileset dir="${packages.home}" includes="*.zip"/></delete>
+    <delete file="README-SVN.txt"/>
+    <delete file="build.properties.in"/>
+
+    <!-- delete source files -->
+    <antcall target="remove-source"/>
+
+    <!-- create empty directories -->
+    <mkdir dir="${web.home}/applet"/>
+    <mkdir dir="${web.home}/logs"/>
+
+    <!-- os specific tidy-ups -->
+    <!-- linux, mac -->
+    <if><bool><istrue value="${current.os.isunix}"/></bool>
+      <delete><fileset dir="." includes="*.bat"/></delete>
+      <delete><fileset dir="gli" includes="*.bat"/></delete>
+      <delete><fileset dir="gs2build" includes="*.bat"/></delete>
+      <delete><fileset dir="bin/script" includes="*.bat"/></delete>
+      <delete file="${basedir}/gs2build/win32cfg.h"/>
+      <delete file="${basedir}/gs2build/win32.mak"/>
+      <delete dir="${basedir}/winutil"/>
+      <delete failonerror="false"><fileset dir="${lib.jni}" includes="*.dll"/></delete>
+
+    <!-- windows -->
+    <else><if><bool><istrue value="${current.os.iswindows}"/></bool>
+      <delete><fileset dir="." includes="*.sh,*.bash,*.csh"/></delete>
+      <delete><fileset dir="gli" includes="*.sh,*.bash,*.csh"/></delete>
+      <delete><fileset dir="gs2build" includes="*.sh,*.bash,*.csh"/></delete>
+      <delete><fileset dir="bin/script" includes="*.sh,*.bash,*.csh"/></delete>
+    </if></else></if>
+
+  </target>
+
+  <!-- fix up executable permissions for binary release -->
+  <target name="fix-execute-permissions">
+    <echo>Setting binaries to executable</echo>
+    <chmod perm="775">
+      <fileset dir="."><patternset refid="greenstone3.executables"/></fileset>
+    </chmod>
+  </target>
+  
+  <!-- fix up executable permissions for source code release -->
+  <target name="fix-execute-permissions-source">
+    <chmod perm="775">
+      <fileset dir="."><patternset refid="greenstone3.source.executables"/></fileset>
+    </chmod>
+  </target>
+
+
+  <!-- ============= tweaks for making compilation static ========== -->  
+  <target name="tweak-makefiles" depends="init" if="compile.static">
+    <antcall target="rtftohtml-add-static" />
+  </target>
+    
+  <target name="rtftohtml-add-static" depends="init" if="collection.building.enabled">
+    <rsr file="${gs2build.home}/build-src/packages/rtftohtml/rtftohtml_src/Makefile" pattern="-o rtftohtml(.{2})EXEEXT(.{1})" replacement="-o rtftohtml$1EXEEXT$2 -static" />
+  </target>
+    
+</project>

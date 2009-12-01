@@ -1,0 +1,529 @@
+<!--This is bookfrag DTD-->
+
+<!--entity declarations-->
+<!--#############################################-->
+
+<!ENTITY % stdatts 
+"ref   IDREF  #IMPLIED
+ id    ID     #IMPLIED
+ type  CDATA  #IMPLIED
+ role  CDATA  #IMPLIED
+ class CDATA  #IMPLIED"
+>
+
+<!ENTITY % inline.class "|quote|emph|ital|reference|date|place|name|graphic|txterr|mkuperr|misc ">
+
+<!ENTITY % block.class "|letter|blockquote|footnote|note|list|deflist|table|blockgraphic">
+
+
+<!-- the top level element-->
+<!--##############################################-->
+
+<!ELEMENT book (acknowledge?,meta*,frontmatter?,bookbody,backmatter?,endmeta*)>
+
+<!--begin top level element declarations-->
+<!--##############################################-->
+
+
+<!--the acknowledge element is for a simple statement 
+designed to be placed at the beginning of the visible document.
+Suggested content:
+  Name of Book
+  Author
+  PG and HWG blurb
+  Original Transcriber + date
+  Marker 
+  e.g.
+  "Origin of the Species by Charles Darwin
+  A project of Project Gutenberg and the HTML Writers Guild.
+  Transcribed by  
+  Markup by Frank Boumphrey. Jan 22 2000"
+  -->
+
+<!ELEMENT acknowledge (#PCDATA %inline.class;)*>
+<!ATTLIST acknowledge
+  %stdatts;
+>
+
+<!--the meta tags are here to provide a means for comment 
+at either the very beginning or end of the document-->
+<!ELEMENT meta EMPTY>
+<!ATTLIST meta
+   content  CDATA  #REQUIRED
+   id       ID     #IMPLIED
+>
+
+<!ELEMENT endmeta EMPTY >
+<!ATTLIST endmeta
+   content  CDATA  #REQUIRED
+   id       ID     #IMPLIED
+>
+
+
+
+<!--the bookbody element contains the body of the book it can 
+consist of either part or chapter divisions-->
+
+<!ELEMENT bookbody (part*|chapter*)>
+
+<!--
+the backmatter element contains the backmatter of the book -->
+
+<!ELEMENT backmatter ((appendix|index|glossary|biblio|note)*,colophon?)>
+
+<!--The endmeta tag is groupedwith its twin meta-->
+
+
+<!--end top level element declarations-->
+
+<!--begin frontmatter element declarations-->
+<!--##############################################-->
+
+<!ELEMENT frontmatter (htitlepage|copypage|epigraph|titlepage|
+                toc|acksect|dedication|preface|introduction|miscfm)*>
+
+<!ELEMENT htitlepage (#PCDATA|title|subtitle|author|para|poem|song %inline.class;)*>
+<!ATTLIST htitlepage
+  %stdatts;
+>
+
+<!ELEMENT copypage (#PCDATA|para|poem|song|note %inline.class;)*>
+<!ATTLIST copypage
+  %stdatts;
+>
+
+<!ELEMENT epigraph (#PCDATA|para|poem|song|note|blockquote %inline.class;)*>
+<!ATTLIST epigraph
+  %stdatts;
+>
+
+
+<!ELEMENT titlepage (#PCDATA|partnum|title|subtitle|author|pubinfo|para|poem|song|note|line %inline.class;)*>
+<!ATTLIST titlepage
+  %stdatts;
+>
+
+<!ELEMENT pubinfo (#PCDATA|para|line %inline.class;)*>
+<!ATTLIST pubinfo
+  %stdatts;
+>
+
+
+<!ELEMENT toc (#PCDATA|title|subtitle|subsubtitle|item|list|deflist %inline.class;)*>
+<!--use type or role to describe toctype="other"-->
+<!ATTLIST toc
+  toctype (contents|maps|graphics|tables|other) "contents" 
+  %stdatts;
+>
+
+<!ELEMENT acksect (#PCDATA|para|poem|song|note %inline.class;)*>
+<!ATTLIST acksect
+  %stdatts;
+>
+
+<!ELEMENT dedication (#PCDATA|title|para|poem|song|note %inline.class;)*>
+<!ATTLIST dedication
+  %stdatts;
+>
+
+
+<!ELEMENT preface ((title|chapheader)?,(para|poem|song|sect1|simplesect %block.class;)*,endchap?,preauthor?)>
+<!ATTLIST preface  %stdatts;
+>
+
+<!ELEMENT introduction ((title|chapheader)?,(para|poem|song|sect1|simplesect %block.class;)*,endchap?)>
+<!ATTLIST introduction  %stdatts;
+>
+
+<!ELEMENT miscfm (#PCDATA|para|poem|song|note %inline.class;)*>
+<!ATTLIST miscfm
+  %stdatts;
+>
+
+<!ELEMENT preauthor (#PCDATA|author %inline.class;)*>
+<!ATTLIST preauthor
+  %stdatts;
+>
+
+
+
+<!--end frontmatter element declarations-->
+
+<!--begin bookbody element declarations-->
+<!--##############################################-->
+
+
+<!ELEMENT part (acknowledge?,(titlepage|toc|htitlepage)*,chapter*)>
+<!ATTLIST part
+  %stdatts;
+>
+
+<!ELEMENT chapter ((title|chapheader)?,(para|poem|song|sect1|simplesect|page %block.class;)*,endchap?)>
+<!ATTLIST chapter  %stdatts;
+>
+
+<!--end bookbody element declarations-->
+
+<!--the lowerlevel bookbody elements-->
+<!--##############################################-->
+
+<!--the chapter heading elements-->
+<!--##############################################-->
+
+
+
+
+<!ELEMENT title (#PCDATA %inline.class;)*>
+<!ATTLIST title
+  %stdatts;
+>
+
+<!ELEMENT subtitle (#PCDATA %inline.class;)*>
+<!ATTLIST subtitle
+  %stdatts;
+>
+
+<!ELEMENT subsubtitle (#PCDATA %inline.class;)*>
+<!ATTLIST subsubtitle
+  %stdatts;
+>
+
+
+
+<!--validity constraint. Only one title,chapnum and chapsummary -->
+<!ELEMENT chapheader (title|subtitle|chapnum|chapsummary|blockquote|para|note)*>
+<!ATTLIST chapheader
+  %stdatts;
+>
+
+
+<!ELEMENT chapnum (#PCDATA %inline.class;)*>
+<!ATTLIST chapnum
+  %stdatts;
+>
+
+<!ELEMENT chapsummary (#PCDATA %inline.class;)*>
+<!ATTLIST chapsummary
+  %stdatts;
+>
+
+
+<!--begin backmatter element declarations-->
+<!--##############################################-->
+
+<!--end backmatter element declarations-->
+
+<!ELEMENT index (title|item|list|deflist|note)*>
+<!ATTLIST index
+  indtype (contents|authors|firstlines|tables|other) "contents" 
+  %stdatts;
+>
+
+<!ELEMENT glossary (title|item|list|deflist|note)*>
+<!ATTLIST glossary  
+  %stdatts;
+>
+
+<!ELEMENT biblio (title|item|list|deflist|note)*>
+<!ATTLIST biblio  
+  %stdatts;
+>
+
+
+<!ELEMENT appendix ((title|chapheader)?,(para|poem|song|sect1|simplesect %block.class;)*,endchap?)>
+<!ATTLIST appendix  %stdatts;
+>
+
+<!ELEMENT colophon (#PCDATA|para|poem|song %inline.class;)*>
+<!ATTLIST colophon
+  %stdatts;
+>
+
+<!--the block elements-->
+<!--##############################################-->
+
+
+<!--validity constraint. Only one title per paragraph-->
+<!ELEMENT para (#PCDATA|title %inline.class;)*>
+<!ATTLIST para
+  %stdatts;
+>
+
+<!ELEMENT simplesect (title,(subtitle|para|poem|song %block.class;)*)>
+<!ATTLIST simplesect
+  %stdatts;
+>
+
+<!ELEMENT sect1 (title,(sect2|simplesect|para|poem|song %block.class;)*)>
+<!ATTLIST sect1
+  %stdatts;
+>
+
+<!ELEMENT sect2 (title,(sect3|simplesect|subtitle|para|poem|song  %block.class;)*)>
+<!ATTLIST sect2
+  %stdatts;
+>
+
+<!ELEMENT sect3 (title,(sect4|simplesect|subtitle|para|poem|song  %block.class;)*)>
+<!ATTLIST sect3
+  %stdatts;
+>
+
+<!ELEMENT sect4 (title,(simplesect|subtitle|para|poem|song  %block.class;)*)>
+<!ATTLIST sect4
+  %stdatts;
+>
+
+<!ELEMENT page (#PCDATA %inline.class;)*>
+<!ATTLIST page
+  %stdatts;
+>
+
+<!ELEMENT misc (#PCDATA %inline.class;)*>
+<!ATTLIST misc
+  %stdatts;
+>
+
+
+
+<!ELEMENT blockquote (title?,(para|poem|song)*,attrib?)>
+<!ATTLIST blockquote
+  %stdatts;
+>
+
+<!ELEMENT attrib (#PCDATA %inline.class;)*>
+<!ATTLIST attrib
+  %stdatts;
+>
+
+<!ELEMENT caption (#PCDATA %inline.class;)*>
+<!ATTLIST caption
+  %stdatts;
+>
+<!--##############################################-->
+<!--poetry and songs in the text-->
+<!ELEMENT poem (#PCDATA|title|subtitle|verse|line|note|footnote %inline.class;)*>
+<!ATTLIST poem
+  %stdatts;
+>
+
+<!ELEMENT song (#PCDATA|title|subtitle|verse|line|note|footnote %inline.class;)*>
+<!ATTLIST song
+  %stdatts;
+>
+
+
+<!ELEMENT verse (title|subtitle|line|note)*>
+<!ATTLIST verse
+  %stdatts;
+>
+
+<!ELEMENT line (#PCDATA %inline.class;)*>
+<!ATTLIST line
+  %stdatts;
+>
+
+
+<!--validity constraint: Only one title per poem or per verse-->
+
+<!--end of poetry in the text-->
+
+<!--letter module-->
+
+<!ELEMENT letter (address|to|from|salut|sig|title|subtitle|para|poem|song|line|note)*>
+<!ATTLIST letter
+  %stdatts;
+>
+
+<!ELEMENT address (#PCDATA|para|line %inline.class;)*>
+<!ATTLIST address
+  %stdatts;
+>
+
+<!ELEMENT to (#PCDATA|para|line %inline.class;)*>
+<!ATTLIST to
+  %stdatts;
+>
+
+
+<!ELEMENT from (#PCDATA|para|line %inline.class;)*>
+<!ATTLIST from
+  %stdatts;
+>
+
+
+<!ELEMENT salut (#PCDATA|para|line %inline.class;)*>
+<!ATTLIST salut
+  %stdatts;
+>
+
+
+<!ELEMENT sig (#PCDATA|para|line %inline.class;)*>
+<!ATTLIST sig
+  %stdatts;
+>
+
+
+<!--end letters module-->
+<!--endchap-->
+<!--##############################################-->
+<!--
+  Endchap should only be used when there is a 
+  considerable ammount of material to be organized.
+  For the occasional note footnote and note will suffice
+-->
+
+<!ELEMENT endchap (para %block.class;)*>
+<!ATTLIST endchap  %stdatts;
+>
+
+<!--lists-->
+<!--##############################################-->
+
+
+<!ELEMENT list (title?,(list|item)*)>
+<!ATTLIST list
+  %stdatts;
+>
+
+<!ELEMENT item (#PCDATA|para|poem|song|simplesect %block.class; %inline.class;)*>
+<!ATTLIST item
+  %stdatts;
+>
+
+<!ELEMENT deflist (title?,(item,desc?,def*)*)>
+<!ATTLIST deflist
+  %stdatts;
+>
+
+<!ELEMENT desc (#PCDATA %inline.class;)*>
+<!ATTLIST desc
+  %stdatts;
+>
+
+<!ELEMENT def (#PCDATA %inline.class;)*>
+<!ATTLIST def
+  %stdatts;
+>
+<!--end lists-->
+<!--table element-->
+<!--##############################################-->
+
+
+<!ELEMENT table (title?,row*,caption?)>
+<!ATTLIST table
+  %stdatts;
+>
+
+<!ELEMENT row (cell)*>
+<!ATTLIST row
+  %stdatts;
+>
+
+<!ELEMENT cell (#PCDATA %block.class; %inline.class;)*>
+<!ATTLIST cell
+  %stdatts;
+>
+
+<!--end table-->
+
+<!--graphics-->
+<!--##############################################-->
+
+<!--
+  Note that the required desc attribute is added 
+  text composed by the marker.
+-->
+
+<!ELEMENT graphic EMPTY >
+<!ATTLIST graphic
+  desc CDATA #REQUIRED
+  href CDATA #REQUIRED
+  %stdatts;
+>
+
+<!ELEMENT blockgraphic (title?,graphic,caption?)>
+<!ATTLIST blockgraphic
+  %stdatts;
+>
+
+
+<!--the inline elements-->
+<!--##############################################-->
+
+
+
+<!ELEMENT footnote (#PCDATA %inline.class;)*>
+<!ATTLIST footnote
+  %stdatts;
+>
+
+<!ELEMENT note (#PCDATA %inline.class;)*>
+<!ATTLIST note
+  %stdatts;
+>
+
+
+<!ELEMENT quote (#PCDATA %inline.class;)*>
+<!ATTLIST quote
+  %stdatts;
+>
+
+<!ELEMENT emph (#PCDATA %inline.class;)*>
+<!ATTLIST emph
+  %stdatts;
+>
+
+<!ELEMENT ital (#PCDATA %inline.class;)*>
+<!ATTLIST ital
+  %stdatts;
+>
+
+<!ELEMENT reference (#PCDATA %inline.class;)*>
+<!ATTLIST reference
+  %stdatts;
+>
+
+<!ELEMENT author (#PCDATA %inline.class;)*>
+<!ATTLIST author
+  %stdatts;
+>
+
+<!ELEMENT date (#PCDATA %inline.class;)*>
+<!ATTLIST date
+  %stdatts;
+>
+
+<!ELEMENT place (#PCDATA %inline.class;)*>
+<!ATTLIST place
+  %stdatts;
+>
+
+<!ELEMENT name (#PCDATA %inline.class;)*>
+<!ATTLIST name
+  %stdatts;
+>
+
+
+<!--use to enclose the text you think is in error
+optional explanation if error is not obvious-->
+<!ELEMENT txterr (#PCDATA)*>
+<!ATTLIST txterr
+  explain  CDATA  #IMPLIED
+  %stdatts;
+>
+
+<!--an explanation is required-->
+<!ELEMENT mkuperr EMPTY>
+<!ATTLIST mkuperr
+  explain  CDATA  #REQUIRED
+  %stdatts;
+>
+
+<!--added as titlepage content  Feb/6/00-->
+<!ELEMENT partnum (#PCDATA %inline.class;)*>
+<!ATTLIST partnum
+  %stdatts;
+>
+
+<!--End of bookfrag dtd-->

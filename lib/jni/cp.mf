@@ -1,0 +1,1 @@
+Class-Path: javagdbm.jar mg.jar mgpp.jar

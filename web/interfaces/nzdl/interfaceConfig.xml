@@ -1,0 +1,27 @@
+<interfaceConfig baseInterface="gs2">
+  <actionList>
+    <action name='p' class='PageAction'>
+      <subaction name='home' xslt='home.xsl'/>
+      <subaction name='about' xslt='about.xsl'/>
+      <subaction name='gsdl' xslt='gsdl.xsl'/>
+      <subaction name='help' xslt='help.xsl'/>
+      <subaction name='pref' xslt='pref.xsl'/>
+      <subaction name='nav' xslt='nav.xsl'/>
+      <subaction name="html" xslt="html.xsl"/>
+      <subaction name='abexpl' xslt='abexpl.xsl'/>
+    </action>
+    <action name='q' class='QueryAction' xslt='query.xsl'/>
+    <action name='b' class='GS2BrowseAction' xslt='classifier.xsl'/>
+    <action name='a' class='AppletAction' xslt='applet.xsl'/>
+    <action name='d' class='DocumentAction' xslt='document.xsl'/>
+    <action name='pr' class='ProcessAction' xslt='process.xsl'/>
+    <action name='s' class='SystemAction' xslt='system.xsl'/>
+  </actionList>
+  <languageList>
+    <language name='en' displayname='English' default_encoding='utf-8'/>
+    <language name='fr' displayname='French' default-encoding='utf-8'/>
+  </languageList>
+  <optionList>
+    <option name="highlightQueryTerms" value="true"/>
+  </optionList>
+</interfaceConfig>

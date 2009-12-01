@@ -1,0 +1,67 @@
+<collectionConfig xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat" xmlns:xslt="http://www.w3.org/1999/XSL/Transform">>
+  <metadataList>
+    <!-- email address of collection creator -->
+    <metadata name="creator"></metadata>
+  </metadataList>
+  <displayItemList>
+    <!-- Display name of collection -->
+    <displayItem name='name' lang='en'></displayItem>
+    <!-- Display description of collection -->
+    <displayItem name='description' lang='en'></displayItem>
+    <!-- Icon name for collection home page -->
+    <displayItem name='icon' lang='en'></displayItem>
+    <!-- Icon name for library home page -->
+    <displayItem name='smallicon' lang='en'></displayItem>
+  </displayItemList>
+  <recognise>
+    <docType name="HTML"/>
+    <docType name="Text"/>
+    <docType name="Metadata"/>
+    <docType name="JPEG"/>
+  </recognise>
+  <search type="mg" name="mgsearch">
+    <index name="doctext">
+      <field>text</field>
+      <level>document</level>
+      <displayItem name='name' lang="en">entire documents</displayItem>
+      <displayItem name='name' lang="fr">documents entiers</displayItem>
+      <displayItem name='name' lang="es">documentos enteros</displayItem>
+    </index>
+    <!-- section level text index -->
+    <!-- <index name="sectext">
+    <field>text</field>
+    <level>section</level>
+      <displayItem name='name' lang="en">chapters</displayItem>
+      <displayItem name='name' lang="fr">chapitres</displayItem>
+      <displayItem name='name' lang="es">capítulos</displayItem>
+    </index>-->
+    <!-- section level title index -->
+    <!--<index name="sectitle">
+      <field>Title</field>
+      <level>section</level>
+      <displayItem name='name' lang="en">section titles</displayItem>
+      <displayItem name='name' lang="fr">titres des sections</displayItem>
+      <displayItem name='name' lang="es">títulos de las secciones</displayItem>
+    </index>-->
+    <!-- default format -->
+    <format>
+      <gsf:template match="documentNode"><td valign='top'><gsf:link><gsf:icon/></gsf:link></td><td><gsf:metadata name='Title'/></td></gsf:template>
+    </format>
+  </search>
+  <browse>
+    <classifier name="CLTit" type="AZList" horizontalAtTop='true'>
+      <field>Title</field>
+      <sort>Title</sort>
+      <displayItem name='name' lang='en'>Titles</displayItem>
+    </classifier>
+  </browse>
+  <display>
+    <format>
+      <!-- set to true if have cover images -->
+      <gsf:option name="coverImages" value="false"/>
+      <!-- set to true if have sectioned documents -->
+      <gsf:option name="documentTOC" value="false"/>
+    </format>
+  </display>
+</collectionConfig>
+

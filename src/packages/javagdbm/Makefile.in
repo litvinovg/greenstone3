@@ -1,0 +1,25 @@
+# Main Makefile for Java GDBM
+# Katherine Don
+
+SUBDIRS = java jni
+MDEFINES = 
+
+all install clean:
+	for subdir in $(SUBDIRS); do \
+	echo making $@ in $$subdir; \
+	(cd $$subdir && $(MAKE) $(MDEFINES) $@) || exit 1; \
+	done
+
+javaonly:
+	cd java && $(MAKE) $(MDEFINES) all
+
+installjava:
+	cd java && $(MAKE) $(MDEFINES) install
+
+distclean: 
+	rm -f Makefile config.cache config.log config.status ;\
+	for subdir in $(SUBDIRS); do \
+	echo making $@ in $$subdir; \
+	(cd $$subdir && $(MAKE) $(MDEFINES) $@) || exit 1; \
+	done	
+

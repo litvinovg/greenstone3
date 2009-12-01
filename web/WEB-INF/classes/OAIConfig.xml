@@ -1,0 +1,57 @@
+<!--
+    This is the configuration file for the OAI server. The property values in this file are repository-wise
+-->
+<OAIConfig>       
+	 <!-- The name of this oai repository, which is human readable. -->
+         <repositoryName>greenstone.org</repositoryName>
+	 <!-- The base url to request metadata from this repository.
+            TODO: this element should be determined and overriden dynamically given the osi request url in OAIServer.java. -->
+         <baseURL>http://www.greenstone.org/greenstone3/oaiserver</baseURL>
+	 <!-- The version of OAI specification this repository supports. -->
+         <protocolVersion>1.1</protocolVersion>
+	 <!-- A UTC date time that is the guaranteed lower limit of all datestamps recording changes, midifications etc. in the repository
+              This element is not necessary in this file since the earliest datestamp is dynamically found out by searching thru all oai collections in the repository to get the earliest built time amongst the collections.
+         <earliestDatestamp>1970-01-01</earliestDatestamp>
+	 -->
+         <!-- The manner in which the repository supports the notion of deleted records -->
+         <deletedRecord>no</deletedRecord>
+	 <!-- The granularity of the datestamp -->
+         <granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
+	 <!-- The repository maintainer email address -->
+         <adminEmail>greenstone@cs.waikato.ac.nz</adminEmail>
+   <!-- Information above this line goes into the response to the Identify request -->
+         
+	 <!-- The time period in which a newly generated resumption token will remain valid, specified in second. Hence, the default
+              value 7200 is equivalent to 2 hours.        
+              If the resumeAfter parameter is less than 0, this value will not be used.
+         -->
+         <resumptionTokenExpiration>7200</resumptionTokenExpiration>
+	 <!-- How many sets/identifiers/records to send for the request before issuing a resumption token. A value less than 0 indicates that a complete list of records will be returned. -->
+         <resumeAfter>-1</resumeAfter>
+         <!-- These field names will be used when there is no any mapping provided in the collectionConfig.xml and OAIConfig.xml -->
+         <DCmetadataNames>dc.Title,dc.Creator,dc.Subject,dc.Description,dc.Publisher,dc.Contributor,dc.Date,dc.Type,dc.Format,dc.Identifier,dc.Source,dc.Language,dc.Relation,dc.Coverage,dc.Rights</DCmetadataNames>
+         <!-- a list of metadata formats supported by this repository -->
+         <ListMetadataFormats>
+            <metadataFormat metadataPrefix="oai_dc">
+                <metadataPrefix>oai_dc</metadataPrefix>
+                <schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
+                <metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
+            <mappingList>
+        <!-- 
+        This mapping will be used when there is no mapping provided in the collectionConfig.xml for the oai_dc metadata format.
+        The mapping is in the form: <publicly supported metadata name>,<mapped metadata name>, short as <A>,<B> 
+        The first metadata name is medatory; if there is no mapped name followed, then the first name must be used by the records and
+        searchable in the database, otherwise it is the mapped name stored in the database. The number of mapping elements matches the
+        number of external metadata of the records. If only one name is present, the returned metadata will use this name plus the retrieved value;
+        if both <A>,<B> are present, the returned metadata will use <A>'s name plus <B>'s value retrieved from database.
+        
+        **Bear in mind: if this mapping list is not present, the standard dc. metadata names (15 in total) will be used to retrieve metadata in the database.
+        -->
+            <mapping>dc.Title,dls.Title</mapping>
+            <mapping>dc.Subject,dls.Subject</mapping>  
+            <mapping>dc.Language,dls.Language</mapping>  
+            <mapping>dc.Organization,dls.Organization</mapping>  
+           </mappingList>
+        </metadataFormat>
+         </ListMetadataFormats>
+</OAIConfig>

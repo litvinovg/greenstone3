@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml-stylesheet type="text/xsl" href="style.xsl"?>
+
+<page lang="en" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/gsf">
+  <pageRequest action="b" lang="en" output="html" to="" type="page" uid="1">
+    <paramList>
+      <param name="rt" value="r" />
+      <param name="s" value="ClassifierBrowse" />
+      <param name="c" value="paho" />
+      <param name="cl" value="CL2" /></paramList>
+  </pageRequest>
+
+  <pageResponse>
+    <service name="ClassifierBrowse" type="browse">
+      <displayItem name="name">Browse</displayItem>
+
+      <displayItem name="description">Browse pre-defined classification hierarchies</displayItem>
+
+      <classifierList>
+        <classifier content="Title" name="CL1">
+          <displayItem name="name">titles</displayItem>
+
+          <displayItem name="description">Browse by Title</displayItem>
+        </classifier>
+
+        <classifier content="Subject" name="CL2">
+          <displayItem name="name">subjects</displayItem>
+
+          <displayItem name="description">Browse by Subject</displayItem>
+        </classifier>
+
+        <classifier content="Organization" name="CL3">
+          <displayItem name="name">organisations</displayItem>
+
+          <displayItem name="description">Browse by Organisation</displayItem>
+        </classifier>
+      </classifierList>
+    </service>
+
+    <classifier name="CL2" nodeID="CL2">
+      <classifierNode nodeID="CL2.1">
+        <metadataList>
+          <metadata name="Title">ESPAÑOL</metadata>
+        </metadataList>
+      </classifierNode>
+
+      <classifierNode nodeID="CL2.2">
+        <metadataList>
+
+          <metadata name="Title">ENGLISH</metadata>
+        </metadataList>
+      </classifierNode>
+    </classifier>
+
+    <languageList>
+    <language name="en">
+      <displayItem name="name">English</displayItem>
+
+    </language>
+    <language name="fr">
+      <displayItem name="name">Français</displayItem>
+    </language>
+    <language name="es">
+      <displayItem name="name">Español</displayItem>
+    </language>
+    <language name="jp">
+
+      <displayItem name="name">????</displayItem>
+    </language>
+  </languageList>
+
+    <collection name="paho">
+      <displayItem lang="en" name="smallicon">pahosml.gif</displayItem>
+
+      <displayItem lang="en" name="description">The Virtual Disaster Library was developed in November 1999, by PAHO/WHO (Pan American Health Organization / Regional Office of the World Health Organization). It contains 250 publications (25,000 pages) of experiences, ideas and solutions to advance the cause of disaster reduction.</displayItem>
+
+      <displayItem lang="en" name="name">Virtual Disaster Library</displayItem>
+
+      <displayItem lang="en" name="icon">paho.gif</displayItem>
+
+      <serviceList>
+        <service name="DocumentStructureRetrieve" type="retrieve" />
+        <service name="DocumentMetadataRetrieve" type="retrieve" />
+        <service name="DocumentContentRetrieve" type="retrieve" />
+
+        <service name="ClassifierBrowse" type="browse">
+          <displayItem name="name">Browse</displayItem>
+
+          <displayItem name="description">Browse pre-defined classification hierarchies</displayItem>
+
+          <classifierList>
+            <classifier content="Title" name="CL1">
+              <displayItem name="name">titles</displayItem>
+
+              <displayItem name="description">Browse by Title</displayItem>
+            </classifier>
+
+            <classifier content="Subject" name="CL2">
+              <displayItem name="name">subjects</displayItem>
+
+              <displayItem name="description">Browse by Subject</displayItem>
+            </classifier>
+
+            <classifier content="Organization" name="CL3">
+              <displayItem name="name">organisations</displayItem>
+
+              <displayItem name="description">Browse by Organisation</displayItem>
+            </classifier>
+          </classifierList>
+        </service>
+
+        <service name="ClassifierBrowseMetadataRetrieve" type="retrieve" />
+        <service name="TextQuery" type="query">
+          <displayItem name="name">Text Search</displayItem>
+
+          <displayItem name="submit">Search</displayItem>
+
+          <displayItem name="description">Full text and/or metadata search service</displayItem>
+        </service>
+
+      </serviceList>
+
+      <metadataList>
+        <metadata name="creator">kjm18@cs.waikato.ac.nz</metadata>
+
+        <metadata name="public">true</metadata>
+
+        <metadata name="numDocs">272</metadata>
+
+        <metadata name="buildType">mg</metadata>
+
+        <metadata name="httpPath">http://localhost:8080/greenstone3/sites/localsite/collect/paho</metadata>
+
+        <metadata name="tidyoption">untidy</metadata>
+      </metadataList>
+
+      <pluginList /></collection>
+
+    <cssFileList>
+      <cssFile path="./ui/skins/oran/css/oran.css" />
+      <cssFile path="./sites/localsite/collect/paho/ui/css/style.css" /></cssFileList>
+
+    <jsFileList>
+      <jsFile path="./ui/skins/oran/js/scripts.js" /></jsFileList>
+
+    <uiItemList>
+      <uiItem lang="en" name="siteFooter">
+  		Powered by Greenstone
+  	</uiItem>
+
+      <uiItem name="collectionFooter">
+			Powered by Greenstone.
+    </uiItem>
+
+      <uiItem name="siteHeader">
+  		<metadataItem name="siteName" />
+  	</uiItem>
+
+      <uiItem inherit="false" lang="en" name="collectionAbout">
+      <p>
+
+        <metadataItem name="collectionDescription" /> 
+      </p>
+
+      <h1> About PAHO </h1>
+      <div class="rightBox">
+       <img src="./sites/localsite/collect/paho/ui/img/paho.gif"> </img>
+      </div> 
+
+      <p>
+	The <a href="http://www.paho.org/">Pan American Health Organization (PAHO)</a> is an international public health 	 agency with 100 years of experience in working to improve health and living standards of the countries of the 		Americas. It serves as the specialized organization for health of the Inter-American System. It also serves as the 		Regional Office for the Americas of the World Health Organization and enjoys international recognition as part of 		the United Nations system.
+      </p>
+
+      <h1> About WHO </h1>
+
+      <div class="rightBox">
+       <img src="./sites/localsite/collect/paho/ui/img/who.gif" style="padding: 5px"> </img>
+      </div>
+      <p>
+	The <a href="http://www.who.int">World Health Organization (WHO)</a> is the directing and coordinating authority for 		health within the United Nations system. It is responsible for providing leadership on global health matters,
+        shaping the health research agenda, setting norms and standards, articulating evidence-based policy options, 
+        providing technical support to countries and monitoring and assessing health trends.
+      </p>
+
+      <p style="text-align:center">
+	<img src="./sites/localsite/collect/paho/ui/img/disaster.jpg"> </img>
+      </p>
+    </uiItem>
+
+      <uiItem name="collectionHeader">
+    	<metadataItem name="siteName" />/<metadataItem name="collectionName" />
+    </uiItem>
+
+      <uiItem lang="en" name="siteAbout">
+    	<h1> About this site </h1>
+		  <p> <metadataItem name="siteDescription" /> </p>
+		  <p> I wish I had a lorem ipsum thingie right now... ah well, wikipedias entry on lorum ipsum will do the trick.</p>
+		  <h1> Lorem Ipsum </h1>
+
+		  <p>
+			  In publishing and graphic design, lorem ipsum is standard placeholder text used to demonstrate the graphic
+			  elements of a document or visual presentation, such as font, typography, and layout. Lorem ipsum also serves 
+			  as placeholder text in mock-ups of visual design projects before the actual words are inserted into the finished
+			  product. When used in this manner, it is often called greeking.
+		  </p>
+		  <p>
+				Even though using &quot;lorem ipsum&quot; often arouses curiosity due to its resemblance to classical Latin, it is not 
+				intended to have meaning. Where text is visible in a document, people tend to focus on the textual content 
+				rather than upon overall presentation, so publishers use lorem ipsum when displaying a typeface or design in 
+				order to direct the focus to presentation. &quot;Lorem ipsum&quot; also approximates a typical distribution of letters 
+				in English, which helps to shift the focus to presentation.
+		  </p>
+		  <p>
+
+				The most common lorem ipsum text reads as follows:
+		  </p>
+		  <p><em>
+				Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore 
+				magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo 
+				consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+				Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. 
+			</em></p>
+    </uiItem>
+    </uiItemList>
+
+    <metadataList>
+      <metadataItem lang="en" name="siteDescription"> 
+	This is just a random site for testing stuff
+  </metadataItem>
+
+      <metadataItem name="collectionDocuments">250</metadataItem>
+
+      <metadataItem name="siteAdmin"> dnk2@cs.waikato.ac.nz </metadataItem>
+
+      <metadataItem name="collectionBuilt">19 December 1999</metadataItem>
+
+      <metadataItem lang="en" name="collectionName">Virtual Disaster Library</metadataItem>
+
+      <metadataItem name="collectionPages">25,000</metadataItem>
+
+      <metadataItem lang="en" name="siteName">Dave&apos;s Development Site</metadataItem>
+
+      <metadataItem lang="en" name="collectionDescription"> 
+	The Virtual Disaster Library was developed in November 1999, by PAHO/WHO 
+        (Pan American Health Organization / Regional Office of the World Health Organization). 
+        It contains <metadataItem name="collectionDocuments" /> publications (<metadataItem name="collectionPages" /> pages) 
+        of experiences, ideas and solutions to advance the cause of disaster reduction.
+  </metadataItem>
+
+    </metadataList>
+
+    <Skin skinLocation="/research/dnk2/greenstone/greenstone3/web/ui/skins/oran" /></pageResponse>
+</page>
+

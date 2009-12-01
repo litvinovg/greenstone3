@@ -1,0 +1,11 @@
+<siteConfig 
+  xmlns:gsf='http://www.greenstone.org/greenstone3/schema/ConfigFormat' 
+  xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>
+  <siteList localSiteName="gateway">
+    <!-- a site element needs name and type, then either an addess attribute where the URL of the server can be accessed, or a localSite attribute, which specifies to use the local server on a local site. This second method is just for testing. The address of a SOAP server deployed by axis in greenstone would be like http://{tomcat_server}:{tomcat_port}/gsdl3/services/{site_name} -->
+    <site name="localsite" localSite="localsite" type="soap"/>
+  </siteList>
+  <serviceClusterList/>
+  <serviceRackList/>
+</siteConfig>
+

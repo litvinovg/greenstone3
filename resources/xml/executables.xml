@@ -1,0 +1,26 @@
+<!-- an ant project containing authoritative definitions of the components of greenstone3 -->
+<project name="executables">
+
+	<!-- executables - files that need to be marked as executable in a binary greenstone3 installation  -->
+	<patternset id="greenstone3.executables">
+		<include name="*.sh"/>
+		<include name="bin/*"/>
+		<include name="bin/script/*"/>
+                <include name="admin/*.sh"/>
+		<include name="gs2build/bin/linux/*"/>
+		<include name="gs2build/bin/darwin/*"/>
+		<include name="gs2build/bin/script/*"/>
+		<include name="gli/*.sh"/>
+		<include name="packages/ant/bin/ant"/>
+	</patternset>
+
+	<!-- source.executables - files that need to be marked as executable in the source code  -->
+	<patternset id="greenstone3.source.executables">
+		<include name="gs2build/**/configure"/>
+		<include name="gs2build/common-src/packages/gdbm/gdbm-1.8.3/mkinstalldirs"/>
+		<include name="src/packages/javagdbm/**/configure"/>
+		<include name="src/packages/search4j/**/configure"/>
+	</patternset>
+
+</project>
+

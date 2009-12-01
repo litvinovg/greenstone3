@@ -1,0 +1,63 @@
+# Makefile for the native parts of the au.com.pharos.gdbm
+# Java package.
+# Modified by kjdon 2005
+
+# Copyright (C) 1997 by Pharos IP Pty Ltd
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+#srcdir=@srcdir@
+libdir=@libdir@
+
+CC=@CC@
+CFLAGS=-c @CFLAGS@ @COMPAT32BITFLAGS@ $(INC) -DWRAPPER_VERSION=\"$(WRAPPER_VERSION)\" 
+#PKG=@PKG@
+GDBM_LIBS=@GDBM_LIBPATH@ -lgdbm
+LIBS= $(GDBM_LIBS) @LIBS@
+LDFLAGS = @LDFLAGS@ @COMPAT32BITFLAGS@
+JNIFLAGS=@JNIFLAGS@
+JNISUFFIX=@JNISUFFIX@
+JNIINC=@JNIINC@
+INC=-I. -I$(JAVA_HOME)/include @GDBM_INCLUDE@ @JNIINC@
+
+
+# TODO: Build versioned shared libraries?
+
+# TODO: Build shared libraries in a way that will work on different
+# platforms -- mbp
+
+WRAPPER_VERSION=0005
+NATIVE_LIB=libgdbmjava.$(JNISUFFIX)
+
+all: $(NATIVE_LIB)
+
+$(NATIVE_LIB): GdbmFile.h gdbmjava.o Makefile
+	$(CC) $(LDFLAGS) $(JNIFLAGS) -o $(NATIVE_LIB) gdbmjava.o $(LIBS)
+
+gdbmjava.o: gdbmjava.c	
+	$(CC) $(INC) $(CFLAGS) $?
+
+# no easy way to tell if a class file has changed or not
+#GdbmFile.h: 
+#	$(javah) -o GdbmFile.h -jni $(PKG).GdbmFile 
+
+clean:	
+	rm -f  *.o $(NATIVE_LIB) 
+
+distclean: clean
+	rm -f Makefile
+
+install: 
+	cp $(NATIVE_LIB) $(libdir)/

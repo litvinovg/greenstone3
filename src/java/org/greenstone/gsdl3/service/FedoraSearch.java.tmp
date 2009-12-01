@@ -1,0 +1,302 @@
+package org.greenstone.gsdl3.service;
+
+// Greenstone classes
+import org.greenstone.gsdl3.util.*;
+
+//Fedora Web Services classes
+import fedora.client.utility.AutoFinder;
+import fedora.client.APIAStubFactory;
+import fedora.client.Downloader;
+import fedora.server.access.FedoraAPIA;
+import fedora.server.types.gen.FieldSearchQuery;
+import fedora.server.types.gen.FieldSearchResult;
+import fedora.server.types.gen.ListSession;
+import fedora.server.types.gen.ObjectFields;
+import fedora.server.types.gen.Condition;
+import fedora.server.types.gen.ComparisonOperator;
+
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.transform.Templates;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+
+// XML classes
+import org.w3c.dom.Element; 
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList; 
+
+//Java classes
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
+import java.io.File;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
+import java.net.URL;
+import java.net.Authenticator;
+import java.net.MalformedURLException;
+import java.lang.Object;
+
+import org.apache.log4j.*;
+
+/**
+ *
+ *
+ */
+
+public class FedoraSearch
+    extends AbstractSearch {
+    
+     static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.FedoraSearch.class.getName());
+    // the services on offer
+    // these strings must match what is found in the properties file
+    protected static final String FIELD_PARAM = "fields";
+    
+    //Parameters connect to Proxy Server
+    private String proxyUser = null;
+    private String proxyPassword = null;
+    
+    private int maxResult, matchNum;
+    
+    protected String fedora_server_url = null;
+    
+    public FedoraSearch()
+    {
+    }
+    
+    //Configure FedoraSearch Service
+    public boolean configure(Element info, Element extra_info) 
+    { 
+	Element server_elem = (Element)GSXML.getChildByTagName(info, "fedoraServer");
+	if (server_elem == null) {
+	    logger.error("no fedoraServer element found");
+	    return false;
+	}
+	fedora_server_url = server_elem.getAttribute("url");
+	logger.info("Fedora Server:" + fedora_server_url);
+
+	if (fedora_server_url.equals("")) {
+	    logger.error("no url for the fedoraServer element");
+	    return false;
+	}
+	Element tq_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+	tq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
+	tq_service.setAttribute(GSXML.NAME_ATT, TEXT_QUERY_SERVICE);
+	this.short_service_info.appendChild(tq_service);
+	//does_paging = true;
+	
+	// add some format info to service map if there is any
+	String path = GSPath.appendLink(GSXML.SEARCH_ELEM, GSXML.FORMAT_ELEM);
+	Element format = (Element) GSXML.getNodeByPath(extra_info, path);
+	if (format != null) {
+	    this.format_info_map.put(TEXT_QUERY_SERVICE, this.doc.importNode(format, true));
+	}
+	return true;
+    }
+    
+    /** Process a text query - implemented by concrete subclasses */
+    protected Element processTextQuery(Element request) {
+	// Create a new (empty) result message
+	Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	result.setAttribute(GSXML.FROM_ATT, TEXT_QUERY_SERVICE);
+	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
+	
+	Element doc_node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
+	result.appendChild(doc_node_list);
+	
+	Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+	if (param_list == null) {
+	    logger.error("TextQuery request had no paramList.");
+	    return result;  // Return the empty result
+	}
+	
+	// Process the request parameters
+	HashMap params = GSXML.extractParams(param_list, false);
+	
+	// Make sure a query has been specified
+	String query = (String) params.get(QUERY_PARAM);
+	if (query == null || query.equals("")) {
+	    return result;  // Return the empty result
+	}
+	//Check Max number of Documents hit
+	String maxDocs = (String) params.get(MAXDOCS_PARAM);
+       	String hits_per_page = (String) params.get(HITS_PER_PAGE_PARAM);
+	
+	//Check the start_page number
+	String start_page = (String) params.get(START_PAGE_PARAM);	
+
+	// tidy whitespace
+	//query = query.replaceAll("\\s+", "+");
+	matchNum = 0;
+	maxResult = 20;
+
+	try {
+	    //Search Fedora Server
+	    String host = "toetoe";
+	    int port = 8200;
+	    String user = "fedoraAdmin";
+	    String pass = "fedoraAdmin";
+	    
+	    AutoFinder finder=new AutoFinder(host, port, user, pass);
+
+	    String[] fieldsArray = new String[] {"pid", "label", "fType", "bDef",
+						 "bMech", "cModel", "state", "ownerId", "cDate", "mDate",
+						 "dcmDate", "title", "creator", "subject", "description",
+						 "publisher", "contributor", "date", "type", "format",
+						 "identifier", "source", "language", "relation", "coverage",
+						 "rights"};
+	    
+	    String match_fields = join(fieldsArray, "|");
+	    
+	    FieldSearchQuery query_fedora=fedoraSearch(query, match_fields);
+	    
+            FieldSearchResult result_fedora = finder.findObjects(fieldsArray, maxResult, query_fedora);
+	    
+	    while (result_fedora != null) {
+		logger.info("Search Result:" + result_fedora.getResultList().length);
+		for (int i=0; i<result_fedora.getResultList().length; i++) {
+		    ObjectFields o = result_fedora.getResultList()[i];
+		    matchNum++;
+		    String pid = o.getPid();
+		    String fedora_url = fedora_server_url +"/fedora/get/" + pid;
+		    String label = o.getLabel();
+		    String[] creator = o.getCreator();
+		    String[] subject = o.getSubject();
+		    String[] publisher = o.getPublisher();
+		    String[] contributor = o.getContributor();
+		    String[] title = o.getTitle();
+		    String[] description = o.getDescription();
+		    String[] format = o.getFormat();
+		    String[] identifier = o.getIdentifier();
+		    String[] source = o.getSource();
+		    String[] language = o.getLanguage();
+
+		    Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+		    doc_node_list.appendChild(doc_node);
+		    
+		    Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+		    doc_node.appendChild(metadata_list);
+		    
+		    if (fedora_url != null) {
+			GSXML.addMetadata(this.doc, metadata_list, "URL", fedora_url);
+		    }
+		    if (o.getDescription() != null) {
+			GSXML.addMetadata(this.doc, metadata_list, "Description", description[0]);
+		    }
+		    if (title[0] != null) {
+			GSXML.addMetadata(this.doc, metadata_list, "Title", title[0]);
+		    }
+		}
+		ListSession sess=result_fedora.getListSession();
+		if (sess!=null) {
+		    result_fedora = finder.resumeFindObjects(sess.getToken());
+		} else {
+		    result_fedora = null;
+		}
+	    }
+	} catch (Exception e) {
+	    logger.error("ERROR: " + e.getClass().getName()
+			       + ((e.getMessage()==null) ? "" : ": " + e.getMessage()));
+	}
+    	
+	Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+	result.appendChild(metadata_list);
+	
+	// Add a metadata element specifying the number of matching documents
+	//logger.info("FedoraSearch Number of Documents:" + matchNum);
+	GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", ""+matchNum);
+	
+	return result;
+    }
+
+    protected FieldSearchQuery fedoraSearch(String query_terms, String matchFields) {
+
+	FieldSearchQuery fedora_query=new FieldSearchQuery();
+	try {
+	    // check if query contains any fields name (pid, label, fType....)
+	    if (query_terms.matches("^("+ matchFields+").+")){
+		logger.info("Implementing Specific Query....");
+
+		List conditions=fedora.server.search.Condition.getConditions(query_terms);
+		
+		Condition[] cond=new Condition[conditions.size()];
+		for (int i=0; i<conditions.size(); i++) {
+		    fedora.server.search.Condition c = (fedora.server.search.Condition) conditions.get(i);
+		    try {
+			String operator = transOperator(c.getOperator().getAbbreviation());
+			cond[i] = new Condition();
+			cond[i].setProperty(c.getProperty());
+			cond[i].setOperator(ComparisonOperator.fromValue(operator));
+			cond[i].setValue(c.getValue());
+		    } catch (Exception e){
+			e.printStackTrace();
+		    }
+		}
+		fedora_query.setConditions(cond);
+	    } else {
+		logger.info("Implementing Simple Query...");
+		fedora_query.setTerms(query_terms);
+	    }
+	} catch (Exception e){
+	    e.printStackTrace();
+	}
+	return fedora_query;
+    }
+    
+    protected void getIndexData(ArrayList index_ids, ArrayList index_names,String lang){
+       	index_ids.add("kw");
+	index_ids.add("au");	
+	index_ids.add("su");	
+	index_ids.add("ti");
+	index_ids.add("de");
+	index_ids.add("fu");
+	index_names.add(getTextString("param."+FIELD_PARAM+".kw", lang)); 
+	index_names.add(getTextString("param."+FIELD_PARAM+".au", lang));
+	index_names.add(getTextString("param."+FIELD_PARAM+".su", lang));
+	index_names.add(getTextString("param."+FIELD_PARAM+".ti", lang));
+	index_names.add(getTextString("param."+FIELD_PARAM+".de", lang));
+	index_names.add(getTextString("param."+FIELD_PARAM+".fu", lang));
+    }
+    
+    protected String getDocType (String node_id){
+	return node_id;
+    }
+    protected boolean hasChildren(String node_id){
+	return false;
+    }
+
+    protected boolean hasParent(String node_id){
+	return false;
+    }
+    private String transOperator(String operator){
+	String oper_char ="";
+	if (operator == "~") {
+	    oper_char = "has";
+	} else if (operator == "=") {
+	    oper_char = "eq";
+	} else if (operator == ">"){
+	    oper_char = "gt";
+	} else if (operator == ">="){
+	    oper_char = "ge";
+	} else if (operator == "<"){
+	    oper_char = "lt";
+   	} else if (operator == "<="){
+	    oper_char = "le";
+	}
+	return oper_char;
+    }
+    protected String join( String[] array, String delim ) {
+        String j = "";
+        for ( int i=0; i<array.length; i++ ) {
+            if (i!=0) j += delim;
+            j += array[i];
+        }
+        return j;
+    }
+}

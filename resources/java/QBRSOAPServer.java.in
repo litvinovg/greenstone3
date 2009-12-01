@@ -1,0 +1,827 @@
+/**
+ *#########################################################################
+ * QBRSOAPServer.java.in: a template for a SOAPServer providing
+ * basic Query, Browse, Retrieve web services for Greenstone 3.
+ * Part of the Greenstone digital library suite from the New Zealand 
+ * Digital Library Project at the University of Waikato, New Zealand.
+ * <BR><BR>
+ * Copyright (C) 2008 New Zealand Digital Library Project
+ * <BR><BR>
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * <BR><BR>
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * <BR><BR>
+ * @author ak19
+ * based on Katherine Don's SOAPServer@sitename@ template file. 
+ *########################################################################
+ */
+
+package org.greenstone.gsdl3;
+
+import java.io.File;
+import java.io.InputStream;
+
+import java.util.Properties;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.Iterator;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+
+import org.greenstone.gsdl3.core.MessageRouter;
+import org.greenstone.gsdl3.util.GlobalProperties;
+import org.greenstone.gsdl3.util.GSFile;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
+
+import org.apache.log4j.Logger; // Import log4j classes
+
+/* 
+ * Add to $GSDLHOME/web/WEB-INF/server-config.wsdd:
+ * <service name="GS3WebServices" provider="java:RPC">
+ * <parameter name="allowedMethods" value="*"/>
+ * <parameter name="className" value="org.greenstone.gs3services.GS3WebServices"/>
+ * </service>
+*/
+
+/** Class that provides the basic Query, Browse and Retrieve (QBR) web service
+ * operations for Greenstone 3.
+ * It contains a MessageRouter that carries out all the tasks by calling the 
+ * appropriate Greenstone functionality for each request message passed to it, 
+ * and returning a response message.
+ *  
+ * All response messages are returned from the MessageRouter to clients invoking   
+ * the web services. All return values are strings that represent XML messages.
+ * 
+ * Method help() reads from the file QBRWebServicesHelp.properties to list the web 
+ * service operations available. Method helpWithMethod(String methodName) 
+ * reads from the same file to display a description of the requested operation.
+ * (These method descriptions are mostly the same as those in the Javadoc
+ * comments.)
+ * 
+ * NOTE: The folder containing this web service class' properties helpFile 
+ * should be on the classpath. (QBRWebServicesHelp.properties)
+ * @author ak19
+*/
+public class QBRSOAPServer@sitename@ {
+	/** site_name the MessageRouter works with, here set to "localsite" */
+	protected String site_name = "@sitename@";
+
+	/** Message Router object to pass requests messages to and which 
+	 * will process them.*/
+	protected MessageRouter mr = null;
+	
+	/** Container Document to create XML Nodes */
+	protected Document doc=null;
+	/** A converter class to parse XML and create Docs */
+	protected XMLConverter converter=null;
+
+	/** The Logger for this class */
+	private static Logger LOG = Logger.getLogger(QBRSOAPServer@sitename@.class);
+	
+	/** Error message loading helpFile. Remains at "" if everything is fine */
+	protected static String helpErrormessage = "";
+	/** Properties map with mappings from methodname to help 
+	 * description string. */ 
+	protected static Properties properties;
+	/** The help properties file describing the web service operations */
+	protected static String helpFile = "QBRWebServicesHelp.properties";
+	
+	// static code block to initialise the help Properties from the helpFile
+	static {
+		properties = new Properties();
+		// load the properties file from a location with respect to the 
+		// the Web Service .class file
+		InputStream input = null;
+		try {	
+			// load the properties file from a location with respect to the 
+			// the Web Service .class file
+			input 
+			= QBRSOAPServer@sitename@.class.getClassLoader().getResourceAsStream(
+					helpFile);
+			if(input == null) {
+				helpErrormessage = "Cannot find file " + helpFile + " to load.";
+				LOG.warn(helpErrormessage);
+			} else {
+				properties.load(input);
+				input.close();
+			}
+		} catch(Exception e) {
+			helpErrormessage = "Exception loading properties from help file " 
+				+ helpFile + "\n" + e.getMessage();
+			LOG.warn("Exception loading properties from help file " 
+				+ helpFile + "\n" + e.getMessage());
+		}
+	}
+	
+	
+	/* Describe subset options for the various Greenstone3 modules */
+	protected static final String mrSubsetOptions = // messageRouter 
+		"collectionList serviceClusterList serviceList siteList"; 
+	protected static final String csSubsetOptions = // collections and serviceClusters 
+		"metadataList serviceList displayItemList";
+	protected static final String serviceSubsetOptions = // services
+		"paramList displayItemList";
+	protected static final String docStructureOptions =
+		"entire ancestors parent siblings children descendants"; // note the spelling
+	protected static final String docStructureInfo =
+		"numSiblings siblingPosition numChildren";
+	protected static final String browseStructureOptions = 
+		"ancestors parent siblings children descendants"; // note the spelling
+	
+		
+	/** Constructor that initializes the web services' MessageRouter object 
+	 * Reads from GlobalProperties to get gsdl3_home and set the sitename. */
+	public QBRSOAPServer@sitename@() {
+	    String gsdl3_home = GlobalProperties.getGSDL3Home();
+		if (gsdl3_home == null || gsdl3_home.equals("")) {
+		    LOG.error(
+		    	"Couldn't access GSDL3Home from GlobalProperties.getGSDL3HOME,"
+		    	+ "can't initialize the SOAP Server.");
+		    return;
+		}
+		
+		String site_home = GSFile.siteHome(gsdl3_home, this.site_name);
+		
+		File site_file = new File(site_home);
+		if (!site_file.isDirectory()) {
+		    LOG.error("The site directory "+site_file.getPath()
+		    	+" doesn't exist. Can't initialize the SOAP Server.");
+		    return;
+		} 
+		this.converter = new XMLConverter();
+		this.doc = this.converter.newDOM();
+		
+		mr = new MessageRouter();
+		mr.setSiteName(this.site_name);
+		mr.configure();
+    }
+	
+	/* (1) DESCRIBE MESSAGES, manual pages 35-41 */
+	/** Sends a describe message to the MessageRouter.
+	 * @param lang is the language of the display content in the response.
+	 * @param subsetOption are the requested list of items to return in the 
+	 * response. For the Message Router this can be collectionList, 
+	 * serviceClusterList, serviceList, siteList 
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - pages 35-41</a>
+	*/
+	public String describe(String lang, String subsetOption) 
+	{
+		return describe("", lang, subsetOption, mrSubsetOptions);
+	}
+	
+	/** For sending Describe messages to ServiceClusters.
+	 * @param serviceCluster is the name of the Service Cluster that this describe 
+	 * request is sent to. 
+	 * @param lang is the language of the display content in the response
+	 * @param subsetOption is the requested list of items to return in the response
+	 * For Service Clusters this can be metadataList, serviceList, displayItemList.
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - pages 35-41</a>
+	 */
+	public String describeServiceCluster(
+			String serviceCluster, String lang, String subsetOption)
+	{
+		return describe(serviceCluster, lang, subsetOption, csSubsetOptions);
+	}
+	
+	/** For sending Describe messages to Collections.
+	 * @param collection is the name of the Collection that this describe request 
+	 * is sent to. 
+	 * @param lang is the language of the display content in the response
+	 * @param subsetOption is the requested list of items to return in the response
+	 * For Collections this can be metadataList, serviceList and displayItemList.
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - pages 35-41</a>
+	 */
+	public String describeCollection(
+			String collection, String lang, String subsetOption)
+	{
+		return describe(collection, lang, subsetOption, csSubsetOptions);
+	}
+	
+	/**
+	 * For sending a describe message to a Collection's Service.
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - pages 35-41</a>
+	 * @param collection is the name of the Collection whose service 
+	 * this describe request is sent to.
+	 * @param service is the name of the Service (of that collection) to
+	 * which this describe request is sent.
+	 * @param lang is the language of the display content in the response
+	 * @param subsetOption is the requested list of items to return in the response
+	 * For Services this can be paramList, displayItemList */
+	public String describeCollectionService(String collection, String service, 
+			String lang, String subsetOption) 
+	{
+		return describe(collection + "/" + service, 
+				lang, subsetOption, serviceSubsetOptions);
+	}
+	
+	/** 
+	 * For sending a describe message to a Service hosted by the Message Router 
+	 * (no collection).
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - pages 35-41</a>
+	 * @param service is the name of the MessageRouter's Service to which this 
+	 * describe request is sent.
+	 * @param lang is the language of the display content in the response
+	 * @param subsetOption is the requested list of items to return in the response
+	 * For Services this can be paramList, displayItemList 
+	*/
+	public String describeService(
+			String service, String lang, String subsetOption) 
+	{
+		return describe(service, lang, subsetOption, serviceSubsetOptions);
+	}
+	
+	/** For sending a describe message.
+	 * If public, this method would give full access: a describe message that 
+	 * lets the user specify all the details of who the receiver is, and what 
+	 * details are requested. 
+	 * @param to - the Greenstone module (MessageRouter, Collection, 
+	 * ServiceCluster or (Collection-)Service to send this describe message to.
+	 * (The module asked to describe itself.) 
+	 * @param lang - the language of the display content in the response.
+	 * @param subsetOption - the set of elements of the describe response that
+	 * are requested. These vary depending on the GS3 module asked to describe
+	 * itself.
+	 * @param validSubsetOptions - the list of subsetOptions that are allowed
+	 * for the module this describe message is sent to. Parameter subsetOption
+	 * has to be among the list of validSubsetOptions.
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - pages 35-41</a>
+	*/ 
+	protected String describe(String to, String lang, 
+			String subsetOption, String validSubsetOptions)
+	{
+		// Create message element: <message></message>
+		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		// <message><request lang="en" to="" type="describe" uid="" /></message>
+		Element request = GSXML.createBasicRequest(
+				this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, lang, "");
+		
+		// Check if only a subset of this Module Interface's data is asked
+		// to be described
+		if(!subsetOption.equals("")) {
+			// Now deal with the value for subset param:
+			// only deal with valid params for subset of to-ModuleInterface
+			if(validSubsetOptions.indexOf(subsetOption) == -1)
+				return error("Invalid List to be described. Choose one of:\n"
+					+ validSubsetOptions);
+			
+			// else, append <paramList>
+			// <param name="subset" value="subsetOption" /></paramList>
+			Element paramList = this.doc.createElement(
+					GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+			// append <param name="subset" value=paramValue />
+			// createParam(Document, name, value); 
+			// Name needs to be "subset", but this can be either GSXML.SUBSET_PARAM
+			// or GSXML.SYSTEM_SUBSET_ATT. It's the first one probably.
+			paramList.appendChild(GSXML.createParameter(
+							this.doc, GSXML.SUBSET_PARAM, subsetOption));
+			request.appendChild(paramList);
+		}
+		message.appendChild(request);
+		
+		// Send it off to the Message Router and return the response
+		return this.processInternal(message);
+	}
+
+	/* (2) Process-type message, QUERY-TYPE SERVICES - p.45 */
+	/** For executing a (process-type message) query-type service.
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - page 45</a>
+	 * @param collection is the name of the Collection whose query service this  
+	 * query-process request is sent to. If "", then the Message Router is assumed.
+	 * @param service is the name of the Query Service (of that collection) to  
+	 * which  this request is sent.
+	 * @param lang is the language of the display content in the response
+	 * @param nameToValsMap is a Map of the (fieldname, value) pairs for the 
+	 * parameters of the query. The field names should be those recognised by 
+	 * Greenstone 3. That is, the names must exist for the (Collection-)Service Query that this 
+	 * message is sent To (as given in 'to' argument). 
+	 * For names of Greenstone-accepted arguments,
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Actions_and_Arguments">Greenstone wiki - Actions and Arguments</a>
+	*/
+	public String query(String collection, String service, 
+			String lang, Map nameToValsMap) 
+	{ 	
+		// <paramList></paramList>
+		Element paramList = this.doc.createElement(
+				GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+		// <param>s: creating parameters of (name, value) pairs
+		Set entrySet = nameToValsMap.entrySet();
+		Iterator i = entrySet.iterator();
+		while(i.hasNext()) {
+			Entry entry = (Entry)i.next();
+			String name = (String)entry.getKey();
+			String value = (String)entry.getValue();
+			paramList.appendChild(GSXML.createParameter(
+					this.doc, name, value));
+		}
+
+		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element request = GSXML.createBasicRequest(
+				this.doc, GSXML.REQUEST_TYPE_PROCESS, 
+				collection+"/"+service, lang, "");
+		
+		request.appendChild(paramList);
+		message.appendChild(request);
+		
+		// Send it off to the Message Router and return the response
+		return this.processInternal(message);	
+	}
+
+        /** 
+	 * This method is used to perform the most basic query:
+	 * it assumes defaults for all other parameters and provides only
+	 * the query string. It is built on top of a TextQuery.
+	 * @param collection is the Greenstone collection to be searched
+	 * @param lang is the preferred language of the display content in 
+	 * the response to be returned.
+	 * @param query is the string to be sought in the Greenstone collection
+	 * @return a Greenstone 3 XML response message for the query specifying 
+	 * the search results.
+	 */
+	public String basicQuery(String collection, String lang, String query) {
+		// The basicQuery is built on top of the TextQuery service
+		final String queryService = "TextQuery";
+		
+		// (1) describe request on the TextQuery
+		String queryDescription = describeCollectionService(
+				collection, queryService, "en", "paramList"); // just get paramList
+		//System.out.println(queryDescription);
+		
+		Document doc = this.converter.getDOM(queryDescription);
+		NodeList nl = doc.getElementsByTagName(
+				GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+		
+		Element paramList = null;
+		if(nl.getLength() <= 0) { // no paramList in textQuery description means
+				// no query field either: that means we can't continue
+			return this.error("BasicQuery is not available for this collection" 
+				+ " as it provides no TextQuery service.");
+		} //else
+		
+		paramList = (Element)nl.item(0);
+		nl = paramList.getElementsByTagName(GSXML.PARAM_ELEM);
+		if(nl.getLength() <= 0) { // no params, means no query field, so return
+			return this.error("BasicQuery is not available for this collection.");
+		}
+		
+		// (2) get the defaults for each parameter and use that to set
+		// the defaults
+		Map params = new HashMap(nl.getLength()); // field name to value map
+		for(int i = 0; i < nl.getLength(); i++) {
+			Element param = (Element)nl.item(i);
+			String paramName = param.getAttribute(GSXML.NAME_ATT);
+			String def = param.getAttribute(GSXML.DEFAULT_ATT);
+			if(def.equals("")) { 
+				// if there's no default, the field must want the query String
+				params.put(paramName, query);
+			} else { // there is a default, use the default for this param
+				params.put(paramName, def);
+			}
+		}
+		
+		// (3) Perform the query using defaults and return the response
+		return this.query(collection, queryService, lang, params);
+	}
+
+		
+	/* (3) RETRIEVE PROCESS METHODS - Manual, pp.47-49 */
+	/** DocumentContentRetrieve request sent to a collection's 
+	 * DocumentContentRetrieve service (see manual, p.48)
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - page 48</a>
+	 * @param collection is the name of the Collection whose 
+	 * DocumentContentRetrieve is requested 
+	 * @param lang is the language of the display content in the response 
+	 * @param docNodeIDs is the list of documentNodeIDs for which the
+	 * content ought to be retrieved. */
+	public String retrieveDocumentContent(
+			String collection, String lang, String[] docNodeIDs) 
+	{
+		// creating <documentNodeList></documentNodeList>
+		Element docNodeList = this.doc.createElement(
+				GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
+		
+		// creating subelements: <documentNode nodeID="..." />
+		for(int i = 0; i < docNodeIDs.length; i++) {
+			Element docNode = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+			docNode.setAttribute(GSXML.NODE_ID_ATT, docNodeIDs[i]);
+			docNodeList.appendChild(docNode);
+		}
+
+		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element request = GSXML.createBasicRequest(
+				doc, GSXML.REQUEST_TYPE_PROCESS, 
+				collection+"/DocumentContentRetrieve", lang, "");
+		
+		// create an empty <paramlist /> element (as example in manual)
+		Element paramlist = doc.createElement(
+				GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+		
+		request.appendChild(paramlist);
+		request.appendChild(docNodeList);
+		message.appendChild(request);
+
+		// Send it off to the Message Router and return the response
+		return this.processInternal(message);
+	}
+	
+	/** DocumentStructureRetrieve request sent to a collection's 
+	 * DocumentStructureRetrieve service (manual pp.48, 49) to retrieve
+	 * the entire document structure.
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - pages 48, 49</a>
+	 * @param collection is the name of the Collection whose 
+	 * DocumentStructureRetrieve is requested 
+	 * @param lang is the language of the display content in the response 
+	 * @param docNodeIDs is the list of documentNodeIDs for which the
+	 * entire structure ought to be retrieved. */
+	public String retrieveEntireDocumentStructure(String collection, 
+			String lang, String[] docNodeIDs) 
+	{
+		return retrieveDocumentStructure(collection, lang, docNodeIDs, 
+				new String[] { "entire" }, null);
+	}
+	
+	/** DocumentStructureRetrieve request sent to a collection's 
+	 * DocumentStructureRetrieve service (manual pp.48, 49) to retrieve
+	 * the specified part of the document's structure.
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - pages 48, 49</a>
+	 * @param collection is the name of the Collection whose 
+	 * DocumentStructureRetrieve is requested 
+	 * @param lang is the language of the display content in the response 
+	 * @param docNodeIDs is the list of documentNodeIDs for which the
+	 * structure ought to be retrieved. 
+	 * @param structure specifies what structure information needs to
+	 * be retrieved. The values can be one or more of ancestors, parent, 
+	 * siblings, children, descendants (<b>note spelling</b>), entire.
+	 * @param info - for specifying extra information to be retrieved. 
+	 * Possible values for info parameters are numSiblings, siblingPosition, 
+	 * numChildren */
+	public String retrieveDocumentStructure(String collection, String lang,
+			String[] docNodeIDs, String[] structure, String[] info)
+	{
+		// creating subelements: <documentNode nodeID="..." />
+		Element docNodeList = this.doc.createElement(
+				GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
+		for(int i = 0; i < docNodeIDs.length; i++) {
+			Element docNode = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+			docNode.setAttribute(GSXML.NODE_ID_ATT, docNodeIDs[i]);
+			docNodeList.appendChild(docNode);
+		} 
+		
+		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element request = GSXML.createBasicRequest(
+				doc, GSXML.REQUEST_TYPE_PROCESS, 
+				collection+"/DocumentStructureRetrieve", lang, "");
+		
+		// Create the <paramlist></paramlist> element of param elements,
+		// if any; and only if values are legal (that is, if they occur in  
+		// static Strings docStructureOptions and docStructureInfo):
+		// <param name="structure" value = "structure[i]">
+		// <param name="info" value = "info[i]">
+		Element paramList = doc.createElement(
+				GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+		
+		if(structure != null) {
+			for(int i = 0; i < structure.length; i++) {
+				if(docStructureOptions.indexOf(structure[i]) != -1) {
+					paramList.appendChild(GSXML.createParameter(
+							this.doc, "structure", structure[i]));					
+				}
+			} 
+		}
+		if(info != null) {
+			for(int i = 0; i < info.length; i++) {
+				if(docStructureInfo.indexOf(info[i]) != -1) {
+					paramList.appendChild(GSXML.createParameter(
+							this.doc, "info", info[i]));
+				}
+			}
+		}
+		
+		// paramList is allowed to be empty and may indeed be empty:
+		request.appendChild(paramList);
+		request.appendChild(docNodeList);
+		message.appendChild(request);
+		
+		// Send it off to the Message Router and return the response
+		return this.processInternal(message);
+	}
+	
+	/* Retrieve for Doc Metadata: explained in the manual on page 47 */
+	/** DocumentMetadataRetrieve request sent to a collection's 
+	 * DocumentMetadataRetrieve service to retrieve all of a document's metadata. 
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - page 47</a>
+	 * @param collection is the name of the Collection whose 
+	 * DocumentMetadataRetrieve is requested 
+	 * @param lang is the language of the display content in the response 
+	 * @param docNodeIDs is the list of documentNodeIDs for which the
+	 * structure ought to be retrieved. 
+	*/
+	public String retrieveAllDocumentMetadata(String collection, String lang,
+			String[] docNodeIDs) 
+	{
+		// See bottom of manual p.44 for the fact that "all" is used
+		// as the metaName value when retrieving all metadata for a doc
+		return retrieveDocumentMetadata(collection, lang, docNodeIDs, 
+				new String[]{ "all" });
+	}
+	
+	/** DocumentMetadataRetrieve service to retrieve some specific 
+	 * metadata values of a document. (Manual on page 47.)
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - page 47</a>
+	 * @param collection is the name of the Collection whose 
+	 * DocumentContentRetrieve is requested 
+	 * @param lang is the language of the display content in the response 
+	 * @param docNodeIDs is the list of documentNodeIDs for which the
+	 * structure ought to be retrieved.
+	 * @param metaNames is a list of metadata names which are requested  
+	 * to be fetched for the specified documents */
+	public String retrieveDocumentMetadata(String collection, String lang,
+			String[] docNodeIDs, String[] metaNames)
+	{
+		return metadataRetrieve(collection+"/DocumentMetadataRetrieve",
+				lang, docNodeIDs, metaNames, GSXML.DOC_NODE_ELEM);
+	}
+
+	/** Retrieve all classification Metadata for browsing (sent to the 
+	 * ClassifierBrowseMetadataRetrieve service).
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - pages 47, 48</a>
+	 * @param collection is the name of the Collection whose 
+	 * ClassifierBrowseMetadataRetrieve service is called 
+	 * @param categoryName - name of the browsing category, usually
+	 * ClassifierBrowse. (If left as "", then it defaults to ClassifierBrowse) 
+	 * @param lang is the language of the display content in the response 
+	 * @param nodeIDs is the list of document or classifier NodeIDs 
+	 * for which the metadata ought to be retrieved.*/
+	public String retrieveAllBrowseMetadata(String collection, 
+			String categoryName, String lang, String[] nodeIDs) 
+	{
+		if(categoryName.equals(""))
+			categoryName = "ClassifierBrowse";
+		// See bottom of manual p.47 for the fact that "all" is used as 
+		// the metaName value when retrieving all metadata for a classifier
+		return metadataRetrieve(collection+"/"+categoryName+"MetadataRetrieve", 
+				lang, nodeIDs, new String[]{ "all" }, GSXML.CLASS_NODE_ELEM);
+	}
+	
+	/** ClassifierBrowseMetadataRetrieve service to retrieve some specific 
+	 * metadata values of a document. 
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - pages 47, 48</a>
+	 * @param collection is the name of the Collection whose 
+	 * ClassifierBrowseMetadataRetrieve service is called
+	 * @param categoryName - name of the browsing category, usually
+	 * ClassifierBrowse. (If left as "", then it defaults to ClassifierBrowse) 
+	 * @param lang is the language of the display content in the response 
+	 * @param nodeIDs is the list of document or classifier NodeIDs 
+	 * for which the metadata ought to be retrieved.
+	 * @param metaNames is a list of metadata names which are requested  
+	 * to be fetched for the specified documents or classifiers */
+	public String retrieveBrowseMetadata(String collection, String categoryName,  
+			String lang, String[] nodeIDs, String[] metaNames) 
+	{
+		if(categoryName.equals(""))
+			categoryName = "ClassifierBrowse";
+		return metadataRetrieve(collection+"/"+categoryName+"MetadataRetrieve", 
+				lang, nodeIDs, metaNames, GSXML.CLASS_NODE_ELEM);
+	}
+	
+	/** Performs a metadata retrieve for documents and (browse) classification 
+	 * hierarchies. Sends a Document- or ClassifierBrowse- MetadataRetrieve message 
+	 * to the Document- or ClassifierBrowse- MetadataRetrieve service.
+	 * @param to - the Document- or ClassifierBrowse- MetadataRetrieve service to
+	 * send this metadata retrieve message to.
+	 * @param lang - the language of the display content in the response
+	 * @param nodeIDs - the list of (document or classifier) nodeIDs for which
+	 * to retrieve the metadata for
+	 * @param metaNames - a list specifiying the names of the metadata items 
+	 * to be retrieved for each nodeID. E.g. "Title", but a list is allowed.
+	 * @param NODE_ELEM - either of GSXML's names for the &lt;documentNode&gt; or 
+	 * &lt;classifierNode&gt; elements.
+	*/
+	protected String metadataRetrieve(String to, String lang, 
+			String[] nodeIDs, String[] metaNames, final String NODE_ELEM)
+	{
+		// create the <paramlist></paramlist> element of param elements:  
+		// <param name="metadata" value = "metaName[i]">
+		Element metadataParamList = this.doc.createElement(
+				GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+		for(int i = 0; i < metaNames.length; i++) {
+			metadataParamList.appendChild(GSXML.createParameter(
+					this.doc, GSXML.METADATA_ELEM, metaNames[i]));
+		}
+		
+		// creating subelements: <documentNode nodeID="..." />
+		// or <classifierNode nodeID="..." />
+		Element nodeList = this.doc.createElement(
+				NODE_ELEM+GSXML.LIST_MODIFIER);
+		for(int i = 0; i < nodeIDs.length; i++) {
+			Element docNode = this.doc.createElement(NODE_ELEM);
+			docNode.setAttribute(GSXML.NODE_ID_ATT, nodeIDs[i]);
+			nodeList.appendChild(docNode);
+		} 
+		
+		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element request = GSXML.createBasicRequest(doc, 
+				GSXML.REQUEST_TYPE_PROCESS, to, lang, "");
+		
+		request.appendChild(metadataParamList);
+		request.appendChild(nodeList);
+		message.appendChild(request);
+		
+		// Send it off to the Message Router and return the response
+		return this.processInternal(message);
+	}
+	
+	/* (4) Classifier BROWSE PROCESS METHODS - p.46 */
+	/** To send a browse request for all the descendants of a classifier node.
+	 * Useful for getting the entire structure of a top-level &lt;classificationNode&gt;
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - page 46</a>
+	 * @param collection is the name of the Collection whose browse Classifier
+	 * Browse Service is called
+	 * @param browseService is the name of the (Classifier) Browse Service (of 
+	 * the given collection) to which this request message is sent. 
+	 * @param lang is the language of the display content in the response 
+	 * @param classifierNodeIDs is an array of classifierNodeIDs for which the
+	 * structures ought to be retrieved.
+	*/
+	public String browseDescendants(String collection, String browseService, 
+			String lang, String[] classifierNodeIDs) 
+	{
+		// We are at the top level, we want all the descendants:
+		// <param name="structure" value = "descendants">
+		// <classifierNodeList><classifier nodeID="CLx" /></classifierNodeList>
+		return browse(collection, browseService, lang,   
+				classifierNodeIDs, 
+				new String[] {"descendants"}); // note the spelling
+	}
+	
+	/** To send a browse request for specific parts of a classifier node 
+	 * (children, ancestors, descendants). Useful for getting specific parts
+	 * of the structure of a top-level &lt;classificationNode&gt;.
+	 * @see <a href="http://wiki.greenstone.org/wiki/index.php/Greenstone3">The Greenstone 3 Developer's Manual - page 46</a> 
+	 * @param collection is the name of the Collection whose browse Classifier
+	 * Browse Service is called
+	 * @param browseService is the name of the (Classifier) Browse Service (of 
+	 * the given collection) to which this request message is sent. 
+	 * @param lang is the language of the display content in the response 
+	 * @param classifierNodeIDs is the list of classifierNodeIDs for which the
+	 * structure ought to be retrieved.
+	 * @param structureParams the list of parameters indicating what structure 
+	 * information is requested. Accepted values are ancestors, parent, siblings,
+	 * children, descendants.
+	*/
+	public String browse(String collection, String browseService, String lang, 
+			String[] classifierNodeIDs, String[] structureParams) 
+	{
+		if(browseService.equals(""))
+			browseService = "ClassifierBrowse";
+		
+		// Create message element: <message></message>
+		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		// <message><request lang="en" to="" type="process" uid="" /></message>
+		Element request = GSXML.createBasicRequest(this.doc,
+			GSXML.REQUEST_TYPE_PROCESS, collection+"/"+browseService, lang, "");
+		
+		// <param name="structure" value = "structureParams[i]">
+		Element paramList = this.doc.createElement(
+				GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+		for(int i = 0; i < structureParams.length; i++) {
+			// check it is a valid structure parameter
+			if(browseStructureOptions.indexOf(structureParams[i]) != -1) {
+				paramList.appendChild(GSXML.createParameter(
+						this.doc, "structure", structureParams[i]));
+			}
+		}
+		
+		// <classifierNodeList><classifier nodeID="CLx" />
+		// 		<classifier nodeID="CLy" /></classifierNodeList> 
+		// where CLx and CLy are given in the parameter classifierNodeIDs
+		Element classifierNodeList = this.doc.createElement(
+				GSXML.CLASS_NODE_ELEM+GSXML.LIST_MODIFIER);
+		for(int i = 0; i < classifierNodeIDs.length; i++) {
+			Element classifier = this.doc.createElement(GSXML.CLASS_NODE_ELEM);
+			classifier.setAttribute(GSXML.NODE_ID_ATT, classifierNodeIDs[i]);
+			classifierNodeList.appendChild(classifier);
+		}
+		
+		// now finish constructing the request message:
+		request.appendChild(paramList);
+		request.appendChild(classifierNodeList);
+		message.appendChild(request);
+		
+		// Send it off to the Message Router and return the response
+		return this.processInternal(message);
+	}
+	
+	/** Called by most other methods in order to send the constructed message
+	 * to the Greenstone's MessageRouter, intercept the response and return it.
+	 * @param message is the XML message Element to send to GS3's MessageRouter.
+	 * @return the XML response in String format. */
+	protected String processInternal(Element message) {
+	        if(LOG.isDebugEnabled()) { // or LOG.isEnabledFor(Level.DEBUG). 
+		                           // Testing for this improves efficiency
+		    LOG.debug(this.converter.getPrettyString(message));
+		}
+		
+		// Let the messagerouter process the request message and get the response
+		Element response = XMLConverter.nodeToElement(mr.process(message)); 
+		      // won't be null except when Node returned is not an element
+		      // otherwise, MR always returns some response
+
+		// Return it as a String formatted for display
+		String responseMsg = this.converter.getPrettyString(response); 
+		                  // this.converter.getString(response);
+
+		// In order to avoid "Content is not allowed in prolog" exception on the 
+		// web services' client end (problem encountered in GS mailing list), need 
+		// to make sure no characters (incl spaces) preceed the  XML sent back 
+		// from here. It may also require the <?xml?> tag at the very start.
+		if(responseMsg.charAt(0) == ' ') {
+		    responseMsg = responseMsg.trim();
+		}
+		
+		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+responseMsg;
+	}
+	
+	/** Creates a String response message to represent an XML error response  
+	 * message using the error specified in the message parameter. A String is 
+	 * created because this method ensures that a response message is reliably 
+	 * constructed (no exceptions are thrown) that can be sent to clients.
+	 * @param errorMessage - the errormessage to be conveyed
+	 * @return an XML response message containing an GS3 error element. */
+	protected String error(String errorMessage) {
+		StringBuffer buf = new StringBuffer("<" + GSXML.MESSAGE_ELEM + ">");
+		buf.append("<" + GSXML.RESPONSE_ELEM + " " 
+				+ GSXML.FROM_ATT + "=\"" + "Greenstone 3 Web Services\"" + ">");
+		buf.append("<" + GSXML.ERROR_ELEM + " " 
+			+ GSXML.ERROR_TYPE_ATT + "=\""+ GSXML.ERROR_TYPE_OTHER + "\"" + ">");
+		buf.append(errorMessage+"\n");
+		buf.append("</" + GSXML.ERROR_ELEM + ">");
+		buf.append("</" + GSXML.RESPONSE_ELEM + ">");
+		buf.append("</" + GSXML.MESSAGE_ELEM + ">");
+		return buf.toString();
+	}
+
+	/*
+	Look in file QBRWebServicesHelp.properties
+	- Have a properties file that maps methodname to help string specific
+	to the method.
+	- Read it all in statically at the start of the class, into a Properties Map.
+	- When this method is called, display the usage: "help methodname"
+	and list all the available methods by going over the keys in the Map.
+	- When the helpWithMethod(String methodname) method is called, return the 
+	value of the Map for the methodname key. This value would be the help
+	description for that method.		
+	*/
+	/** @return a help string for listing all the web service methods. */
+	public static String help() {
+		if(!helpErrormessage.equals("")) {
+			return helpErrormessage;
+		}
+		
+		StringBuffer helpString = new StringBuffer(
+				"USAGE: helpWithMethod(String <method name>)\n");
+		helpString.append(
+				"\nNearly all the web service operations return a String\n"); 
+		helpString.append(
+				"representing a Greenstone 3 XML response message.\n");
+		helpString.append("\nA list of all the method names: \n");
+		
+		Enumeration props = properties.keys();
+		while(props.hasMoreElements()){
+			String methodName = (String)props.nextElement();
+			helpString.append("\t");
+			helpString.append(methodName);
+			helpString.append("\n");
+		}
+		
+		return helpString.toString();
+	}
+	
+	/** @param methodname is the name of the method to be described.  
+	 * @return a help string for the given method, explaining what the method
+	 * does, what parameters it expects and their types and what it returns.
+	*/
+	public static String helpWithMethod(String methodname) {
+		if(!helpErrormessage.equals("")) {
+			return helpErrormessage;
+		}
+		// else we can get the method's description from the properties
+		// map loaded from the QBRWebServicesHelp.properties file:
+		String helpString = properties.getProperty(methodname,
+			"No description for " + methodname); // if the method does not exist
+		
+		return helpString;
+	}
+} // end web service class

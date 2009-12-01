@@ -1,0 +1,3 @@
+The ant tasks that were in here are useful for more than just Greenstone3, so I
+have moved them to the other-projects directory
+(http://svn.greenstone.org/other-projects/trunk/anttasks).

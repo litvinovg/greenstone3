@@ -1,0 +1,230 @@
+package org.greenstone.gsdl3.service;
+
+// Greenstone classes
+import org.greenstone.gsdl3.util.*;
+
+//Google Web Services API classes
+//import com.google.soap.search.GoogleSearch;
+import com.google.soap.search.GoogleSearchFault;
+import com.google.soap.search.GoogleSearchResult;
+import com.google.soap.search.GoogleSearchResultElement;
+import com.google.soap.search.GoogleSearchDirectoryCategory;
+
+// XML classes
+import org.w3c.dom.Element; 
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList; 
+
+//Java classes
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.io.File;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
+import java.net.URL;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
+import java.net.MalformedURLException;
+import java.lang.Object;
+
+import org.apache.log4j.*;
+
+/**
+ *
+ * @author <a href="mailto:chi@cs.waikato.ac.nz">Chi-Yu Huang</a>
+ *
+ */
+
+public class GoogleSearch
+    extends AbstractSearch {
+    
+     static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.GoogleSearch.class.getName());
+     
+    //Parameters connect to Proxy Server
+    private boolean using_proxy = false;
+    private String proxy_host = null;
+    private int proxy_port;
+    private String proxy_user = null;
+    private char [] proxy_passwd = null;
+
+    // google key
+    private String client_key = null;
+    
+    public GoogleSearch()
+    {
+    }
+	    
+    //Configure GoogleSearch Service
+    public boolean configure(Element info, Element extra_info) 
+    { 
+	if (!super.configure(info, extra_info)) {
+	    return false;
+	}
+	logger.info("Configuring GoogleSearch");
+	Element server_elem = (Element)GSXML.getChildByTagName(info, "googleServer");
+	if (server_elem == null) {
+	    logger.error("no googleServer element found");
+	    return false;
+	}
+	
+	client_key = server_elem.getAttribute("key");
+	if (client_key.equals("")) {
+	    logger.error("no client_key for the googleServer element");
+	    return false;
+	}
+	
+	does_paging = true;
+	does_chunking = false;
+
+	// are we behind a proxy??
+	// all the details should have been set up by the Message Router
+	proxy_host = System.getProperty("http.proxyHost");
+	if (proxy_host != null && !proxy_host.equals("")) {
+	    using_proxy = true;
+	    try {
+		proxy_port = Integer.parseInt(System.getProperty("http.proxyPort").trim());
+	    } catch (Exception e) {
+		logger.error("couldn't get proxy port, defaulting to 80");
+		proxy_port = 80;
+	    }
+	    PasswordAuthentication pa = Authenticator.requestPasswordAuthentication(proxy_host, null, proxy_port, "http", "", null);
+	    proxy_user = pa.getUserName();
+	    proxy_passwd = pa.getPassword();
+	}
+	return true;
+    }
+    
+    /** Process a text query - implemented by concrete subclasses */
+    protected Element processTextQuery(Element request) {
+	
+	//Connect to Google Web API service
+	com.google.soap.search.GoogleSearch search = new com.google.soap.search.GoogleSearch();
+
+	// Set mandatory attributes
+	search.setKey(client_key);
+
+	// proxy??
+	if (using_proxy) {
+	    search.setProxyHost(proxy_host);
+	    search.setProxyPort(proxy_port);
+	    search.setProxyUserName(proxy_user);
+	    search.setProxyPassword(new String(proxy_passwd));
+	}
+
+	//set optional attributes
+	search.setSafeSearch(true);
+	
+	// Create a new (empty) result message
+	Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	result.setAttribute(GSXML.FROM_ATT, TEXT_QUERY_SERVICE);
+	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
+	Element doc_node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
+	result.appendChild(doc_node_list);
+	Element query_metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+	result.appendChild(query_metadata_list);
+
+	Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+	if (param_list == null) {
+	    logger.error("TextQuery request had no paramList.");
+	    return result;  // Return the empty result
+	}
+
+	// Process the request parameters
+	HashMap params = GSXML.extractParams(param_list, false);
+
+	// Make sure a query has been specified
+	String query = (String) params.get(QUERY_PARAM);
+	if (query == null || query.equals("")) {
+	    logger.error("TextQuery request had no query string.");
+	    return result;  // Return the empty result
+	}
+       	// tidy whitespace
+	query = query.replaceAll("\\s+", "+");
+	
+	search.setQueryString(query);
+
+	//Check hits_per_page
+	int hits_per_page;
+	try {
+	    hits_per_page = Integer.parseInt(((String)params.get(HITS_PER_PAGE_PARAM)).trim());
+	} catch (Exception e) {
+	    logger.error("couldn't get hits per page param, defaulting to 10");
+	    hits_per_page = 10;
+	}
+	//Check the start_page number
+	int start_page;
+	try {
+	    start_page = Integer.parseInt(((String) params.get(START_PAGE_PARAM)).trim());
+	} catch (Exception e) {
+	    logger.error("couldn't get start page param, defaulting to 1");
+	    start_page = 1;
+	}
+	
+	//Invoke Actual Search
+	
+	// Google only allows 10 hits per request
+	int loop = hits_per_page/10;
+	int remainder = hits_per_page%10;
+	int google_start_page = (start_page-1)*hits_per_page;
+	int pages_per_loop;
+	for (int j=0; j < loop; j++){
+	    if (j < (loop-1) || remainder == 0) {
+		pages_per_loop = 10;
+	    } else {
+		pages_per_loop = remainder;
+	    }
+	    search.setMaxResults(pages_per_loop); 
+	    search.setStartResult(google_start_page);
+	    google_start_page = google_start_page + pages_per_loop;
+	    GoogleSearchResult google_result;
+	    try{
+		google_result = search.doSearch();
+	    } catch (GoogleSearchFault ex) {
+		logger.error("the call to the Google Web APIs failed:" + ex.toString());
+		// add the error to the result
+		return result;
+	    }
+	    if (j==0) {
+		
+		//Total amount of documents Google Search returned
+		// only need to do this on the first loop
+		
+		long numdocs_matched = google_result.getEstimatedTotalResultsCount();	    
+		GSXML.addMetadata(this.doc, query_metadata_list, "numDocsMatched", ""+numdocs_matched);
+		
+	    }
+	    GoogleSearchResultElement[] details = google_result.getResultElements();
+	    for (int i=0; i<details.length; i++){
+		Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+		doc_node_list.appendChild(doc_node);
+		
+		Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+		doc_node.appendChild(metadata_list);
+		
+		String google_url = details[i].getURL();  
+		String google_title = details[i].getTitle();
+		String google_snippet = details[i].getSnippet();
+		if (google_url !=null) {
+		    GSXML.addMetadata(this.doc, metadata_list, "URL", google_url);
+		}
+		if (google_title != null) {
+		    GSXML.addMetadata(this.doc, metadata_list, "Title", google_title);
+		}
+		if (google_snippet != null) {
+		    GSXML.addMetadata(this.doc, metadata_list, "Snippet", google_snippet);
+		}
+	    }
+	} // for each loop
+	return result;
+    }
+    
+    protected void getIndexData(ArrayList index_ids, ArrayList index_names,String lang){
+       	index_ids.add("idx");
+	index_names.add("Google main index");
+    }
+    
+}

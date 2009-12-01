@@ -1,0 +1,365 @@
+/* greenstone 2 style for greenstone3 */
+
+
+a:link { color: #006666; } 
+
+a:hover { color: #cc9900; }
+
+a:visited { color: #666633; } 
+
+body {
+  padding:0;
+  margin:0;
+  font-family: sans-serif, arial, helvetica;   
+  background-image: url('../images/chalk.gif');
+  background-color: #fff; 
+  color: #000000 
+}
+
+/* this contains everything - all the other divs */
+#page-wrapper {
+  margin: 0 3em 0 5em;
+  padding: 0;
+}
+
+#banner {
+  margin: 0 0 5px 0;
+  padding:0;
+ 
+}
+
+/* this div contains the bannerlinks and bannertitle paragraphs */
+div.pageinfo {
+  float: right;
+  text-align: right;
+  padding: 0;
+  margin:0 0 3px 0;	
+  width: 50%;
+}
+
+/* home, help, preferences links */
+p.bannerlinks {
+  font-family: sans-serif, arial, helvetica;
+  font-size: 10pt;
+  font-weight: bold;
+  margin:0;
+  padding:0;
+}
+
+/* the title set by the receptionist based on the page action */
+p.bannertitle {
+  font-family: sans-serif, arial, helvetica;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 10px 0 0 0;
+  text-transform: lowercase;
+  white-space: nowrap;
+  padding: 6px 2px 10px 0px;
+  background-repeat: repeat-y;
+  background-position: top right; 
+  background-image: url('../images/banner_bg.png');  
+ 
+ }
+
+
+/* home, help, preferences links */
+p.bannerlinks {
+  font-family: sans-serif, arial, helvetica;
+  font-size: 10pt;
+  font-weight: bold;
+  margin:0;
+  padding:0;
+}
+
+/* the image for the collection, shown in the banner */
+div.collectimage {
+  text-align: left;
+  #height: 100%; /* for IE5/6 to make containing div the full height */
+  float: left;
+  width: 45%;
+  padding:0;
+  margin:0;
+  background-image: url('../images/banner_bg.png');
+  background-repeat: repeat-y;
+}
+
+p.collectiontitle {
+  font-family: sans-serif, arial, helvetica;
+  font-size: 24px;
+  font-weight: bold;
+  text-transform: lowercase;
+  white-space: nowrap;
+  padding: 8px 0px 12px 2px;
+  background-repeat: repeat-y;
+  background-position: top left; 
+  margin:0;
+}
+
+a.collectiontitle {
+  color: black;
+  text-decoration: none;
+}
+
+/* make sure this is shown under the other divs (which may be floating) */
+div.bannerextra {
+   clear: both;
+}
+
+/* bg image set in style macro */
+div.divbar { /* for "select a collection" */
+  background-image: url('../images/bg_green.png'); 
+  font-family: arial;
+  font-size: 10pt;
+  font-weight: bold;
+  border: 0;
+  width: 100%; /* for ns4 */
+}
+
+/* bg image set in style macro */
+div.navbar {
+  background-image: url('../images/bg_green.png'); 	
+  min-width: 500px;
+  white-space: nowrap;
+  font-family: sans-serif, arial, helvetica;
+  font-size: 10pt;
+  font-weight: bold;
+  text-transform: lowercase;
+  border: 0;
+  width: 100%; /* for ns4 */
+}
+
+
+p.navbar { /* opt navbar text inside a divbar div */
+  text-align: center; 
+  margin: 0;
+  padding: 0;	
+}
+
+/* bg image set in style macro */
+a.navlink {
+  vertical-align: top; 
+  padding: 0 10px; 
+  color: black;
+  text-decoration: none;
+  background-image: url('../images/bg_off.png');
+  margin: 0 0 0 20px;
+}
+
+/* bg image set in style macro */
+a.navlink_sel {
+  vertical-align: top;
+  padding: 0 10px;
+  color: black;
+  text-decoration: none;
+  background-image: url('../images/bg_green.png'); 	
+}
+
+a.navlink:visited {
+  color: black;
+}
+
+/* for the nav_ns4.dm macro only (for netscape4 support) */
+a.navlink_ns4 {
+  background-color: #e8d9b1;
+}
+
+a.navlink:hover { 
+   background-image: url('../images/bg_on.png');
+ }
+
+span.narspace{
+  padding:0;
+  margin: 0 0 0 20px;		
+}
+
+div.document {
+  padding: 5px 0 0 0;
+  margin:0;
+}
+
+span.textselect { white-space: nowrap; }
+
+div.documenttext { clear: both; } /* come after any floating divs */
+
+div.heading_title {
+ font-size: 16pt;
+ font-weight: bold;
+
+} /* alternate to cover image */
+
+div.heading_image { float: left; } /* optional cover image */
+
+div.document div.buttons {
+   /* anything that holds buttons... toc_buttons but also continue button */
+   width: 100px; /* each button (inside its own div) can overflow this */
+}
+
+div#toc_buttons { /* expand/contract etc "buttons" */
+  clear: left; /* don't put next to another float on our left-hand side */
+  float: left;
+  margin: 0 15px 5px 0; 
+}
+
+div.button {
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1.2em;
+  /*background: #ffeecc; */
+  background: #f7e7c5;
+  margin: 1px;
+  border: 1px solid #eeddbb;
+  text-align: center;
+  vertical-align: middle;
+  height: 30px; /* IE6 and NS4 treat width/height as min-width/min-height */
+  width: 110px;
+}
+
+*>div.button { /* for other browsers - IE6 doesn't apply this */
+  height: auto;
+  width: auto;
+  min-height: 30px; 
+  min-width: 110px;
+}
+
+span.button {}
+span.button a { text-decoration: none; color: black; }
+span.button a:hover { /* IE6 doesn't do :hover for things that aren't <A> */
+  background: #eeddbb;
+}
+
+/* new added */
+div.formheading{
+  font-size: 16pt;
+  font-weight: bold;
+  margin: .5em 0 0;
+  padding:0;
+}
+
+table{table-layout:auto;}
+tr{overflow:hidden;}
+td{overflow:hidden;}
+
+td.col1{width:25%;}
+td.col2{width:15;}
+td.col3{width:75%;}
+
+div.documentarrows{
+  clear: both; 
+  margin: 0 0 0 0;
+  padding: 1em 0 0 0;   
+}
+
+img.lessarrow{
+  float:left;
+  border: none;  
+}
+
+img.morearrow{
+  float:right;
+  border:none; 
+}
+
+img.lessarrowrtl{
+  float:right;
+  border: none;  
+}
+
+img.morearrowrtl{
+  float:left;
+  border:none; 
+}
+
+div#documentinfo { 
+  float:left;
+  padding-right: 10px;
+  margin:0;
+ } 
+
+ul#docbuttons li {
+  display: block;
+  font-size: 11px;
+  font-weight: bold;
+  background: #f7e7c5;
+  margin: 1px;
+  border: 1px solid #eeddbb;
+  text-align: center;
+  vertical-align: middle;
+  height: 30px; /* IE6 and NS4 treat width/height as min-width/min-height */
+    
+}
+
+div#toc{
+ float: left;	
+}
+
+ul#tocnodes li{
+ margin: 0;
+ padding: 5px 0 0 0;
+ display:block;
+}
+
+ul.tocnode {
+  margin:0;
+  padding:5px 0 0 20px;
+}
+
+ul.tocnode  a{
+ margin: 0;
+ padding:0 5px 0 0;
+ }
+
+span.bold{
+  font-weight: bold;	   
+}
+
+
+div.simplehelp li {
+ margin:0;
+ display:block;
+}
+
+# some stuff from gs3 interface core.css
+
+ul#collectionlist {
+  list-style-type:none;
+  margin:0;
+  padding:0;
+}
+
+ul#collectionlist li {
+  display:block;
+  padding:0;
+  margin: .2em 0 0 0;
+  overflow:hidden;
+}
+
+
+ul#collectionlist img{
+  margin:0;
+  padding:0;
+  width: 150px;
+  height: 45px;
+  border: 1px solid black;
+  background-image: url('../images/collectimg_bg.png');
+  background-repeat: repeat-y;
+  overflow:hidden
+}
+
+ul#collectionlist li a.noimage{
+  display: block;
+  margin:0;
+  width: 145px;
+  height: 40px;
+  border: 1px solid black;
+  background-image: url('../images/collectimg_bg.png');
+  background-repeat: repeat-y;
+  overflow:hidden; padding-left:5px; padding-right:0; padding-top:5px; padding-bottom:0
+
+}
+
+ul#collectionlist li a{
+  font-size: 16px;
+  color: #000000;
+  text-decoration: none;  
+  font-weight: bold;
+}

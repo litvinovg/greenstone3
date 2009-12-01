@@ -1,0 +1,31 @@
+# Makefile for Java part of JavaGDBM
+# Katherine Don, 2005
+
+JAVAC = $(JAVA_HOME)/bin/javac
+JAVAH = $(JAVA_HOME)/bin/javah
+JAR = $(JAVA_HOME)/bin/jar
+
+JAVAGDBMHOME=../
+JAVACLASSDIR=./classes
+JAVASRCDIR=.
+JAVACOPTIONS= -deprecation -g -O
+JAVACLASSPATH=$(JAVACLASSDIR):
+
+all: setup compile
+
+setup:
+	mkdir -p $(JAVACLASSDIR)
+
+compile: setup
+	$(JAVAC) -d $(JAVACLASSDIR) -sourcepath $(JAVASRCDIR) $(JAVACOPTIONS) au/com/pharos/*/*.java
+	$(JAVAH) -o $(JAVAGDBMHOME)/jni/GdbmFile.h -classpath $(JAVACLASSPATH) au.com.pharos.gdbm.GdbmFile
+	$(JAR) cf $(JAVAGDBMHOME)/javagdbm.jar -C $(JAVACLASSDIR) au
+
+clean:
+	rm -rf $(JAVACLASSDIR) $(JAVAGDBMHOME)/javagdbm.jar $(JAVAGDBMHOME)/jni/GdbmFile.h 
+
+install:
+
+distclean: clean
+	rm -f Makefile
+

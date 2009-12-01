@@ -1,0 +1,30 @@
+#!/bin/sh
+echo "Constructing collections ..."
+ 
+if [ "x$GSDLHOME" = "x" ] ; then
+  echo "You must have GSDLHOME set for building to work"
+  exit
+fi
+ 
+if [ "x$GSDL3HOME" = "x" ] ; then
+  echo "You must have GSDL3HOME set for building to work"
+  exit
+fi
+ 
+if [ "x$GSDLOS" = "x" ] ; then
+  echo "You must have GSDLOS set for building to work"
+  exit
+fi
+ 
+
+# -Xms32M          To set minimum memory
+# -Xmx32M          To set maximum memory
+# -verbose:gc      To set garbage collection messages
+# -Xincgc          For incremental garbage collection
+# -Xprof           Function call profiling
+# -Xloggc:<file>   Write garbage collection log
+ 
+echo "running java -DGSDLHOME=$GSDLHOME -DGSDLOS=$GSDLOS -DGSDL3HOME=$GSDL3HOME -DPATH=$PATH org.greenstone.gsdl3.build.ConstructCollection  $*"
+java -DGSDLHOME=$GSDLHOME -DGSDLOS=$GSDLOS -DGSDL3HOME=$GSDL3HOME -DPATH=$PATH org.greenstone.gsdl3.build.ConstructCollection  $*
+ 
+echo "Done!"

@@ -1,0 +1,11 @@
+<buildConfig> 
+  <metadataList/>
+  <serviceRackList>                                                            
+    <serviceRack name="IViaSearch">
+    <iViaServer url="http://infomine.ucr.edu"/>
+    </serviceRack>
+    <serviceRack name="IViaRetrieve">
+    <iViaServer url="http://infomine.ucr.edu"/>
+    </serviceRack>
+  </serviceRackList>
+</buildConfig>

@@ -1,0 +1,21 @@
+TODO for JavaGDBM
+$Id$
+
+Short-term
+
+ - Fix reported bugs
+
+Medium-term
+
+ - Modify the Makefile and configuration code to make sure JavaGDBM
+   builds on more different systems.
+
+ - Add support for non-default block sizes and other options.
+
+ - Offer more developer documentation.
+
+Long-term
+
+ - Rewrite the native code in Java to make the system 100% Pure.
+ - Offer precompiled binaries(?)
+

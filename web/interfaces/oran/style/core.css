@@ -1,0 +1,701 @@
+html {
+	height: 100%;
+	margin-bottom: 1px;
+}
+body {
+	font-family: sans-serif;
+	padding: 20px;
+	margin: 0;
+	color: #444;
+	background-color: #eae4d9;
+}
+
+#container {	position: relative;
+	margin: 0 auto 20px auto;
+	max-width: 1000px;
+	padding: 0;
+	line-height: 160%;
+/*	background: url('../images/layout/containerLeft.png') scroll repeat-y left top;*/
+	background-color: #fff;
+	border: 1px solid #c8c3b9;
+}
+#container2 {
+	/* background: url('../images/layout/containerRight.png') scroll repeat-y right top; */
+}
+/*
+#container3 {
+	background: url('../images/layout/containerTop.png') scroll repeat-x left top;
+}
+#container4 {
+	background: url('../images/layout/containerBottom.png') scroll repeat-x left bottom;
+	padding: 10px;
+}
+*/
+
+#banner {
+	background: transparent url('../images/gsdlhead.gif') scroll no-repeat left top;
+	padding: 10px 20px 30px 20px;
+	min-height: 80px;
+	max-height: 110px;
+	position: relative;
+}
+
+#content {
+	padding: 1em;
+	min-height: 300px;
+	/* background-color: #ff0; */
+}
+
+#rightSidebar {
+	border: 1px solid #cdc;
+	padding: 10px;
+	width: 25%;
+	min-width: 180px;
+	float: right;
+	margin: 0 0 10px 20px;
+	/* background-color: #f0f; */
+}
+
+#quickSearch {
+}
+
+
+#collectionLinks {
+	position: relative;
+}
+
+.collectionLink {
+	display: block;
+	width: 140px;
+	height: 100px;
+	float: left;
+	border: 1px solid #888;
+	margin: 0 20px 20px 0;
+	font-size: 150%;
+	color: #444;
+	text-decoration: none;
+	background: url(../images/collectionIconStripe.gif) scroll no-repeat 0 0;
+	padding: 20px;
+}
+collectionLinkImage {
+	float: left;
+}
+
+#footer {
+	position: relative;
+	display: block;
+	height: 30px;
+	background: transparent url('../images/gsdlhead.gif') scroll no-repeat left top;
+	margin: 0 auto;
+	text-align: center;
+	vertical-align: middle;
+	font-size: 70%;
+	color: #fff;
+}
+
+
+
+/* some text should not be rendered as it is just there for search engines */
+#collectionLinks a b {
+	display: none;
+}
+
+/* make sure h1s and h2s are readable on the green banner */
+#breadcrumbs, #banner h2, #breadcrumbs a, #banner h2 a {
+	color: #fff;
+}
+body.dAction #banner h2 {
+	max-width: 600px;
+	font-size: 100%;
+}
+
+#breadcrumbs {
+	margin: 0 0 10px 0;
+	height: 30px;
+	line-height: 30px;
+}
+#banner h2 {
+	margin: 0 0 10px 1em;
+}
+
+
+/* css to make the tabs work */
+#nav {
+	position: absolute;
+	width: auto;
+	bottom: 0;
+	right: 0;
+	list-style: none;
+	margin:0;
+	padding: 0 15px 0 0;
+	font-size: 14px;
+}
+
+#nav li {
+	float: right;
+	color: #fff;
+	background: transparent url('../images/tab-right.png') scroll no-repeat 100% -100px;
+	margin: 0 5px 0 0;
+	padding: 0 8px 0 0;
+}
+
+#nav a {
+	display: block;
+	float: left;
+
+	background: transparent url('../images/tab-left.png') no-repeat scroll 0 -100px;
+	margin:0;
+	padding: 5px 4px 3px 10px;
+	font-weight: normal;
+	color: #fff;
+	text-decoration: none;
+	line-height: 1;
+}
+
+#nav li:hover, #nav li.current { background-position: 100% 0; }
+#nav li:hover a, #nav li.current a { background-position: 0 0; cursor:default; }
+
+
+/* css to make the page links work (home, help, preference) */
+#bannerLinks {
+	width: auto;
+	position: absolute;
+	list-style: none;
+	margin:0;
+	top: 15px;
+	right: 0;
+	padding: 0 15px 0 0;
+	text-transform: lowercase;
+}
+
+#bannerLinks li {
+	float: right;
+	margin: 0;
+	background: transparent url('../images/tab-right.gif') no-repeat scroll 100% -50px;
+	padding: 0 2px 0 0;
+}
+
+#bannerLinks a {
+	display: block;
+	float: left;
+	display: table-cell;
+	min-width: 1em;
+	margin:0;
+	padding: 5px 5px 3px 10px;
+	font-weight: normal;
+	text-align: center;
+	color: #fff;
+	text-decoration: none;
+	line-height: 1;
+}
+
+#bannerLinks li.current a {
+	cursor: default;
+}
+
+#bannerLinks li:hover, #bannerLinks li.current { background-position: 100% 0; }
+
+#bannerLinks li.current a { text-decoration: underline; background-position: 0 0;}
+#bannerLinks img.spacer { display: table-cell; }
+
+
+/* css to make the classifier list pretty */
+.navList {
+	margin: 0 0 10px 0;
+	padding: 0;
+	background-color: #0a0;
+}
+
+.navList ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.navList li {
+	float: left;
+	margin: 0 0 0 20px;
+	cursor: pointer;
+	color: #fff;
+}
+.navList li a, .navList li span {
+	padding: 0 1em;
+	display: block;
+	text-decoration: none;
+	color: #fff;
+}
+
+.navList li.current {
+	background-color: #efea6e;
+	color: #444;
+	cursor: default;
+}
+
+.navList li.current a, .navList li.current span {
+	color: #444;
+	cursor: default;
+}
+
+/* style the search and classifier results */
+#results {
+	margin: 0;
+	padding: 0;
+	/* border: 1px solid #f00; */
+}
+
+#results ul {
+	margin: 0 0 0 20px;
+	padding: 0;
+}
+
+#results li {
+	list-style: none;
+	margin: 0 0 .2em 0;
+	/* border: 1px solid #00f; */
+}
+
+#results li a {
+	padding: 3px 3px 3px 28px;
+	background-repeat: no-repeat;
+	background-position: 0 .1em;
+}
+
+
+#results .document a { background-image: url('../images/book.png'); }
+#results .document a:visited { background-image: url('../images/book-visited.png'); color: #999; }
+
+#results .shelf>a { background-image: url('../images/bookshelf.png'); }
+
+/* corners of the banner */
+/*
+.corner {
+	position: absolute;
+	background-image: url('../images/layout/corners.png');
+	background-repeat: no-repeat;
+	width: 20px;
+	height: 20px;
+}
+
+#cornerTopLeft {
+	left: 0; top: 0;
+	background-position: 0 0;
+}
+#cornerTopRight {
+	right: 0; top: 0;
+	background-position: -20px 0;
+}
+#cornerBottomLeft {
+	left: 0; bottom: 0;
+	background-position: 0 -20px;
+}
+#cornerBottomRight {
+	right: 0; bottom: 0;
+	background-position: -20px -20px;
+}
+*/
+.clear {
+	clear: both;
+}
+
+
+a:link, a:hover, a:active, a:visited { color: #050; }
+
+/*
+
+ul li>select, ul li>input {
+  padding: 0;
+  margin-left:5px;
+}
+
+
+
+div#banner ul, ul#resultlist, ul#tocnodes, ul#docbuttons, ul.tocnode, ul#bannerlist, ul#navbarlist, ul#collectionlist, ul#servicelist, ul#classifierlist, ul#classifiernodelist, ul#queryitemlist{
+  list-style-type:none;
+  margin:0;
+  padding:0;
+}
+
+div#banner ul li, ul#bannerlist li, ul#navbarlist li {
+  display: inline;
+  margin:0;
+  padding:0;	
+}
+
+
+
+div#banner p {
+  margin:0;
+  padding: 0;
+  float:left;
+  font-size: 16px;
+  text-align: left;
+  overflow:hidden	
+}
+
+div#banner p a {
+  background-image: url('../images/banner_bg.png');
+  background-repeat: repeat-y;
+}
+
+
+div#banner ul{
+  margin:0;
+  padding:0; 
+  float:right; 
+  font-size: 12px;  
+}
+
+div#banner a{
+  text-decoration: none;
+  color:#000000;
+}
+
+
+
+ul#bannerlist li a {
+  padding: 0 10px 0 10px; 
+  text-decoration: none;
+}
+
+ul#bannerlist li a:link, ul#bannerlist li a:visited
+{
+ background-color: #DEE79C;
+ background-image: url('../images/bg_off.png');
+ text-decoration: none
+}
+
+ul#bannerlist li a:hover{
+ background-color: #FFFF66;
+ background-image: url('../images/bg_on.png') ;
+ text-decoration: none
+}
+
+
+div#navbar{
+  clear:both;
+}
+
+ul#navbarlist{
+  margin:0;
+  padding:0; 
+  list-style-type: none; 
+  text-align:center;
+  width: 100%;
+  font-size: 80%;
+  background-image: url('../images/bg_green.png');	  
+  background-color: #99CC99
+ }
+
+ul#navbarlist li a {
+  padding: 0 20px 0 20px; 
+  margin: 0;
+  color: #000000; 
+  text-decoration: none;
+}
+
+ul#navbarlist li a:link, ul#navbarlist li a:visited{
+   background-image: url('../images/bg_off.png') ;
+ }
+
+ul#navbarlist li a:hover{
+  background-image: url('../images/bg_on.png') ;
+}
+
+
+ul#collectionlist li, ul#servicelist li{
+  display:block;
+  padding:0;
+  margin: .2em 0 0 0;
+  overflow:hidden;
+}
+
+
+ul#collectionlist img{
+  margin:0;
+  padding:0;
+  width: 150px;
+  height: 45px;
+  border: 1px solid black;
+  background-image: url('../images/collectimg_bg.png');
+  background-repeat: repeat-y;
+  overflow:hidden
+}
+
+ul#collectionlist li a.noimage{
+  display: block;
+  margin:0;
+  width: 145px;
+  height: 40px;
+  border: 1px solid black;
+  background-image: url('../images/collectimg_bg.png');
+  background-repeat: repeat-y;
+  overflow:hidden; padding-left:5px; padding-right:0; padding-top:5px; padding-bottom:0
+
+}
+
+ul#collectionlist li a{
+  font-size: 16px;
+  color: #000000;
+  text-decoration: none;  
+  font-weight: bold;
+}
+
+ul#servicelist li a{
+  margin:0 .5em 0 0;
+}
+
+ul#queryitemlist li{
+  display:block;
+  margin: .2em 0 .2em 0;
+}
+
+ul#classifierlist li{
+  list-style: none;
+  margin: 0 0 5px 0;
+  padding: 0;
+  display: block;
+  color:#000;
+}
+
+ul#classifierlist li#activeclassifier{
+  font-weight:bold;
+  padding: 0 0 0 5px;
+  margin:0 0 5px 0;
+}
+
+ ul#classifierlist li a:link, ul#classifierlist li a:visited  
+{
+   display:block;
+   margin:0;
+   background-image: url('../images/bg_off.png');
+   text-decoration: none; 
+   color:#000;
+   width:100%; padding-left:5px; padding-right:0; padding-top:2px; padding-bottom:2px
+ } 
+
+ul#classifierlist li a:hover, ul#classifierlist li a:active
+{
+  display:block;
+  margin:0;
+  background-image: url('../images/bg_on.png');
+  text-decoration: none; padding-left:5px; padding-right:0; padding-top:2px; padding-bottom:2px
+  
+}
+
+ul#classifierlist{
+   float:left;
+   font-size: 14px;
+   text-align: left;
+   width: 15%;
+   margin:0;
+   padding:0;
+}
+
+div#classifiers{
+  float:left;
+  width: 75%;
+  margin:0;
+  padding:0 0 0 10px;
+ }
+
+ul#classifiernodelist li{
+  list-style: none;
+  margin: 0;
+  padding: 5px 0 0 0;
+  display: block;
+ }
+
+ul.childrenlist{
+  margin: 0 0 0 0;
+  padding: 0 0 0 20px;
+  display: block;
+  width: 100%;
+}
+
+div#content{
+ clear: both;
+ overflow: hidden;
+ margin: .2em 0 0 0;
+}
+
+/* bg image set in style macro */
+div.divbar { 
+  clear: both; 
+  background-image: url('../images/bg_green.png'); 
+  width: 100%; 
+  text-align: center;
+  font-size:80%
+}
+
+
+/** query form style**/
+div#queryform{
+
+}
+
+/** search result style */
+div#terminfo{
+
+}
+
+div#matchdocs{
+
+}
+
+div.resultnavigation{
+ margin: 0;
+ padding:0;
+}
+
+ul#resultlist li{
+  display:block;
+}
+
+
+
+div#documentheading{
+  font-size: 16pt;
+  font-weight: bold;
+}
+
+div#documentinfo { 
+  float:left;
+  padding:0;
+  margin:0;
+  width:24%;
+} 
+
+div#toc{
+  float:left;
+  text-align:left;
+  width:60%;
+  padding:0;
+  margin:0; 
+}
+
+ul#docbuttons li {
+   display: block;
+  font-size: 11px;
+  font-weight: bold;
+  background: #f7e7c5;
+  margin: 1px;
+  border: 1px solid #eeddbb;
+  text-align: center;
+  vertical-align: middle;
+  height: 30px; /* IE6 and NS4 treat width/height as min-width/min-height */
+  width: 110px;
+}
+
+
+ul#tocnodes li{
+ margin: 0;
+ padding: 5px 0 0 0;
+ display:block;
+}
+
+ul.tocnode {
+  margin:0;
+  padding:5px 0 0 20px;
+}
+
+ul.tocnode  a{
+ margin: 0;
+ padding:0 5px 0 0;
+ }
+
+span.bold{
+  font-weight: bold;	   
+}
+
+div.documentarrows{
+  margin: 0 0 0 0;
+  padding: 1em 0 0 0;   
+}
+
+img.lessarrow{
+  float:left;
+  border: none;  
+}
+
+img.morearrow{
+  float:right;
+  border:none; 
+}
+
+div.formheading{
+  font-size: 16pt;
+  font-weight: bold;
+  margin: .5em 0 0;
+  padding:0;
+}
+
+ul#presprefs li, ul#berrybasketprefs li, ul#searchprefs li{
+  display: block;
+} 
+
+
+div.phrasebrowse{
+  text-align:center;
+  padding:0;
+  margin: .5em 0 .5em 0;   
+}
+
+div.QuickSearch {
+  float: right;
+}
+
+#coverImage {
+	text-align: center;
+}
+
+/* ----- TABLE OF CONTENTS ------ */
+#tableOfContents {
+	margin: 0;
+	padding: 0;
+	font-size: 80%;
+}
+
+#tableOfContents li {
+	list-style: none;
+	margin: 0;
+	padding: 2px;
+	background-color: #fff;
+}
+
+#tableOfContents li a {
+	color: #444;
+}
+
+#tableOfContents li.current {
+	background-color: #090;
+}
+#tableOfContents li.current a {
+	color: #fff;
+}
+
+#tableOfContents li.current li {
+	background-color: #fff;
+}
+
+#tableOfContents li.current li a {
+	color: #444;
+}
+
+#tableOfContents ul {
+	padding: 0 0 0 20px;
+}
+
+/* -------- SEARCH ------- */
+.paramLabel {
+	float: left;
+	min-width: 250px;
+}
+.paramValue {
+	float: left;
+}
+
+
+table{
+	border-collapse:collapse;border-spacing:0;
+}
+

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xsl:stylesheet version="1.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:java="http://xml.apache.org/xslt/java"
+	xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
+	extension-element-prefixes="java util"
+	exclude-result-prefixes="java util">
+	
+	<!-- style includes global params interface_name, library_name -->
+	<xsl:include href="style.xsl"/>
+	
+	<xsl:output method="html"/>	
+	
+	<!-- the main page layout template is here -->
+	<xsl:template match="page">
+		<html>
+			<head>
+				<title>
+					<!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
+					<xsl:call-template name="pageTitle"/><xsl:text> </xsl:text>
+				</title>
+
+				<xsl:call-template name="globalStyle"/>
+				<xsl:call-template name="pageStyle"/>
+
+			</head>
+			<body>
+	<xsl:attribute name="dir"><xsl:call-template name="direction"/></xsl:attribute>
+	<div id="page-wrapper">
+		<xsl:call-template name="response" />
+		<xsl:call-template name="greenstoneFooter"/>
+	</div>
+			</body>
+		</html>
+	</xsl:template>
+
+	<xsl:template name="pageTitle">
+		<xsl:value-of select="/page/pageResponse/*/displayItem[@name='name']"/>
+	</xsl:template>
+
+	<!-- page specific style goes here -->
+	<xsl:template name="pageStyle"/>
+
+	<xsl:template match="pageResponse">
+		<xsl:variable name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
+		<xsl:apply-templates select="collection|serviceCluster"><xsl:with-param name="collName" select="$collName"/></xsl:apply-templates>
+	</xsl:template>
+	
+	<xsl:template match="collection|serviceCluster">
+		<xsl:param name="collName"/>
+		<xsl:call-template name="standardPageBanner">
+			<xsl:with-param name="collName" select="$collName"/>
+		</xsl:call-template>
+		<xsl:call-template name="navigationBar">
+			<xsl:with-param name="collName" select="$collName"/>
+		</xsl:call-template>		 
+		<div id="content"> 
+			<xsl:value-of select="displayItem[@name='description']" disable-output-escaping="yes"/>
+			<xsl:apply-templates select="serviceList">
+	<xsl:with-param name="collName" select="$collName"/>
+			</xsl:apply-templates>
+		</div>
+	</xsl:template>
+	
+	
+	<xsl:template match="serviceList">
+		<xsl:param name="collName"/>
+		<h3><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'about.services')"/></h3>
+		<xsl:choose>
+			<xsl:when test="service">
+	<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'about.servicehelp')"/>
+			</xsl:when>
+			<xsl:otherwise>
+	<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'about.noservices')"/>
+			</xsl:otherwise>
+		</xsl:choose>
+		
+		<xsl:if test="service">
+			<ul id="servicelist">		
+	<xsl:for-each select="service">
+		<xsl:variable name="action"><xsl:choose>
+				<xsl:when test="@type='query'">q</xsl:when>
+				<xsl:when test="@type='browse'">b</xsl:when>
+				<xsl:when test="@type='process'">pr</xsl:when>
+				<xsl:when test="@type='applet'">a</xsl:when>
+				<xsl:otherwise>DO_NOT_DISPLAY</xsl:otherwise>
+			</xsl:choose></xsl:variable>
+		<xsl:if test="$action !='DO_NOT_DISPLAY'">
+			<li><a href="{$library_name}?a={$action}&amp;rt=d&amp;s={@name}&amp;c={$collName}"><xsl:value-of select="displayItem[@name='name']"/></a><xsl:value-of select="displayItem[@name='description']"/></li>
+		</xsl:if>
+		</xsl:for-each>
+			</ul> 
+		</xsl:if> 
+	</xsl:template>
+
+</xsl:stylesheet>	
+

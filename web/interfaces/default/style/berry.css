@@ -1,0 +1,317 @@
+
+
+div.globalwrapper{
+  font-family: sans-serif, arial, helvetica;
+  margin: 0 2em 0 4em; 
+  padding:0;
+ 
+}
+
+div#content{
+  font-family: sans-serif, arial, helvetica;
+  margin: 0.5em 0 0.5em 0;
+  padding: 0; 
+
+}
+
+div.banner{
+ margin:0;
+ padding:0;
+
+}
+
+div.pageinfo{
+  float:right;
+  text-align: right;
+  padding: 0;
+  margin:0 0 3px 0;	
+  width: 50%;
+}
+
+div.basketimage{
+  float:left;
+  width: 45%;
+  padding:0;
+  margin:0;
+
+}
+
+
+div.bannerextra {
+   clear: both;
+   padding: 0.2em 0 0 0;
+}
+
+/* home, help, preferences links */
+p.bannerlinks {
+  font-weight: bold;
+  margin:0;
+  padding:0;
+}
+
+
+p.bannertitle {
+  font-family: sans-serif, arial, helvetica;
+  font-size: 24px;
+  font-weight: bold;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0.5em 0 0.5em 0em;
+  background: url("../images/tile13.jpeg") 0 0 repeat-y;
+ 
+}
+
+
+a.navlink{
+  vertical-align: top;
+  padding: 0.2em 0.5em 0 0;
+  color: black;
+  text-decoration: none; 
+  background-image: url("../images/bg_off.png");
+ }
+
+a.navlink:hover {
+   background-image: url("../images/bg_on.png");
+ }
+
+p.navbar{
+  text-align: center;
+   background: url("../images/bg_green.png") 0 0 repeat-x;
+   font-weight: bold;
+}
+
+span.navlink{
+   margin:0 3em  0 3em;
+   padding:0 0.5em 0 0.5em;
+   background-image: url("../images/bg_off.png");
+   cursor: pointer;
+}
+
+span.navlink:hover {
+   background-image: url("../images/bg_on.png");
+ }
+
+img#trashbin{
+ float:right;
+}
+
+span.berryradio{
+ cursor: pointer;
+ margin:0 3em  0 3em;
+ font-weight: bold;
+}
+
+.berrycheck{
+ font-size: 80%;  
+ cursor: pointer;
+ font-weight: bold;
+ margin: 0 0 0 0.5em;
+}
+
+#urlcheck{
+ float: left;
+ padding: 0;
+ margin: 0;
+ 
+}
+
+.pick {
+  visibility:hidden;
+}
+
+div#berrybasket {
+   float:right;
+   font-family:sans-serif;
+   height:120px;
+   width: 100px;
+   padding: 4px 5px 4px 4px;
+   background-color:#E0F0E0;
+   background: url("../images/berrybasket.png") 0 0 no-repeat;
+   margin:0;
+   font-size:100%;
+   text-align:center;
+   #border:1px solid #2E8B57;	
+   z-index:10;
+   cursor: pointer;
+ }
+
+div#baskethandle {
+  padding: 0;
+  cursor:move;
+  height: 30px;
+  width:auto;
+  #background-color:#eeeeee;
+   background:transparent;
+   margin:0 ;
+  }
+
+div#berries {
+  text-align:left;
+  height: auto;
+  margin: 0;
+  padding:0;
+  overflow: hidden;   
+}
+
+
+p#documentberries {
+   font-weight: bold;
+   font-size:90%;
+}
+
+.documentberry {
+  margin:0 2em 0 0;
+  padding:0;
+  visibility:hidden;
+}
+
+
+#doclist{
+  margin: 0;
+ 
+}
+
+.content{
+ font-family:sans-serif;
+ text-align:left;
+}
+
+li.berryitem {
+   padding: 0;
+   margin: 0 ;
+   color: black;
+   font-size: 90%;
+}
+
+li.berrydoc {
+  font-size: 90%;
+  cursor: pointer;
+  padding: 0 ;
+  margin: 0 1em 0 0; 
+}
+
+a.expandcontract {
+  font-size: 90%;
+  color: red
+}
+
+
+.item {
+  font-size: 90%;
+ 
+}
+
+a.fullview:visited{
+ color:red;
+}
+
+a#hideview:visited{
+ color:red;
+}
+
+a.fullview{
+  float:left;
+  font-size: 90%;
+  margin: 0 0 0 20px;
+  padding:0;
+  cursor: pointer;
+  color:red;  
+  text-decoration:none;
+ }
+
+a#hideView{
+  float:right;
+  font-size: 90%;
+  margin:0 20px 0 0;
+  padding:0;
+  color: red;
+  cursor: pointer;
+  text-decoration:none;
+}
+
+
+.berrydelete{
+   font-family:sans-serif;
+   background-color:#E0F0E0;
+   border:1px solid #2E8B57;   
+   padding: 4px  4px 4px 4px; 
+   font-weight: bold;
+   cursor: pointer;
+   width: 6em;
+   color: red;
+   font-size: 90%;
+}
+
+.sendbutton{
+   font-family:sans-serif;
+   background-color:#E0F0E0;
+   border:1px solid #2E8B57;   
+   padding: 4px  4px 4px 4px; 
+   font-weight: bold;
+   cursor: pointer;
+   width: 5em;
+   font-size: 90%;
+   margin: 1em 0 0 0;
+}
+
+.berrybutton{
+   font-family:sans-serif;
+   background-color:#E0F0E0;
+   border:1px solid #2E8B57;   
+   padding: 4px  4px 4px 4px; 
+   font-weight: bold;
+   cursor: pointer;
+   width: 10em;
+   font-size: 90%;
+}
+
+.mailinput {
+  border:1px solid #2E8B57; 
+  width: 20em;
+  height: 1.5em;
+  font-size: 90%
+}
+
+.mailitem{
+   text-align: left;
+ }
+
+
+textarea#pretextarea {
+  font-family:sans-serif;
+  border:1px solid #2E8B57; 
+  width: 100%;
+  height: 25em;
+  font-size: 90%;
+  margin: 0.5em 0 0 0;
+  padding:0;
+}
+
+div#trashbin{
+   float: right;
+   height: 60px;
+   width:  55px;
+   padding: 0;
+   background: url("../images/trash-empty.png") 0 0 no-repeat;
+   margin:0;
+   z-index:10;
+}
+
+div#binhandle{
+ height: 60px;
+ width:  55px;
+ cursor: move;
+}
+
+span.extralink {
+  cursor:pointer;
+  font-size:80%;
+  font-weight:bold;
+  margin:0 2em 0 0;
+  color:black;
+}
+
+span.extralink:hover {
+   color: #2E8B57;
+}
+

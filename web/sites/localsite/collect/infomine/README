@@ -1,0 +1,105 @@
+This collection talks to the iVia installation at INFOMINE, Riverside, 
+California. The software should work with any iVia installation. 
+
+Cgi scripts are called to do searching of and retrieval from the database. 
+All three are fairly generic CGI scripts; iVia's "theming" ability is used to
+ get the data back in the format we want-- there is a gsdl3 theme. 
+
+To create a new collection that talks to an iVia database, you need to create 
+the two configuration files, collectionConfig.xml, and buildConfig.xml. 
+The collectionConfig.xml needs to contain any display information for the 
+collection, and any metadata that is available. Also it can contain format 
+information for document display or search result lists if the default is 
+not useful.
+
+The buildConfig.xml file needs to specify the IViaProxy serviceRack 
+class. Inside this element should be the url of the iVia installation that
+you want to connect to. Here is an example:
+
+<buildConfig> 
+  <metadataList/>
+  <serviceRackList>                                                            
+    <serviceRack name="IViaProxy">
+      <iViaServer url="http://infominehelper.ucr.edu"/>
+    </serviceRack>
+  </serviceRackList>
+</buildConfig>
+
+
+The following describes the iVia cgi scripts.
+
+For performing a search:
+************************
+
+  <serverhome>/cgi-bin/canned_search
+
+Parameters:
+  Required parameters: theme=gsdl3&query=xxx
+  Useful parameters: no_of_records_per_page=10&start_page_no=1&fields='kw,su'
+  Other parameters: http://infomine.ucr.edu/help/adders/index.php?section=11
+  Example: http://infomine.ucr.edu/cgi-bin/canned_search?query=tree&
+              theme=gsdl3&no_of_records_per_page=10&start_page_no=1
+
+Fields include Title (ti), Subject (su), Keyword (kw), Author (au), 
+Description (de) and full text (fu). 'all' will search all fields.
+It's possible to do uch more advanced searches including phrase searching 
+and bolean queries.
+
+The canned_search result page will look something like this:
+  Resources: 58
+  Ids:  1015 22128 1730 6020 2981 1014 20147 2097 46569 4360
+
+For getting an HTML representation of a record:
+***********************************************
+
+  <serverhome>/cgi-bin/view_record
+
+Parameters:
+  Required parameters: theme=gsdl3&record_id=x
+  Example: http://infomine.ucr.edu/cgi-bin/view_record?theme=gsdl3&
+                record_id=2097
+
+The result page will be an HTML fragment; specifically, it will be an HTML
+table.  Again, the formatting is quite flexible.  There's one current
+problem: a lot of the data is displayed as hypertext links to new infomine
+searches; This should be changed eventually.
+
+For now, the Greenstone services process the records, replacing infomine 
+links with Greenstone links where possible. 
+
+For getting metadata for a set of records:
+******************************************
+
+  <serverhome>/cgi-bin/view_record_set
+
+Parameters:
+  Required parameters: theme=gsdl3&record_id_list=id1,id2,id3
+  Optional parameter: field_list=f1,f2,f3
+  Example: http://infomine.ucr.edu/cgi-bin/view_record_set?theme=gsdl3&
+                record_id_list=1015,2128,1730&field_list=url,title
+
+The result will look like this:
+
+  Record: 1015
+  url: http://www.fruit.affrc.go.jp/index-e.html
+  title: National Institute of Fruit Tree Science (Japan)
+
+  Record: 2128
+  url: http://www.publish.csiro.au/journals/ajb/
+  title: Australian Journal of Botany
+
+  Record: 1730
+  url: http://usda.mannlib.cornell.edu/reports/erssor/specialty/fts-bb/
+  title: Fruit and Tree Nuts : USDA Economics and Statistics System
+
+There are many different metadata fields that can be requested, including
+keywords, subjects, ivia_description, access, expert_created, foreign_source,
+foreign_id, and so on.  
+
+Note that the metadata always fits on one line (whitespace is explicitly
+normalised to space) to make parsing easier.  Generally, the metadata is
+in ISO-8859-15 format (i.e. ISO-8859-1 plus the Euro currency symbol). 
+Metadata is usually plain text, though the description field may contain
+HTML entities and limited set of HTML elements (bold tags, italic tags,
+links, and a few others).
+

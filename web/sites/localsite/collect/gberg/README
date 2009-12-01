@@ -1,0 +1,57 @@
+The Sample XML texts collection.
+
+This README provides directions on how to rebuild the collection if necessary, 
+and how to create a new collection using this method.
+
+Building the gberg collection (linux):
+
+Starting from the gberg directory (where this README file is located):
+cd java
+javac *.java
+cd ..
+java -classpath $CLASSPATH:./java BuildXMLColl $GSDL3HOME/web/sites/localsite gberg
+mv building index
+cp etc/buildConfig.xml index
+cp import/*.dtd $GSDL3HOME/resources/dtd/
+
+The building process:
+
+There are two stages, import and build.
+Importing goes through the xml documents in the import directory and adds 
+gs3:id attributes to indexable nodes. Building makes another pass though the 
+documents, indexing any indexable nodes, and assigning them node ids. Node 
+ids are made up of several parts: document id, scope, tag name, gs3:id. 
+Document id refers to the work, and is generated from the original document 
+filename. For example, origin.xml becomes origin. The scope part is optional. 
+Tag name is the name of the node that is to be indexed, and gs3:id is its id.
+
+The class XMLTagInfo provides two methods, isIndexable and isScopable, and is 
+used to determine which tags provide scope, and which tags should be indexed. 
+This is the only part of the build code that is specific to the documents in 
+the collection.
+
+Indexable nodes are those that should be indexed individually. When a search 
+is done, these are the units that will be returned. For instance, suppose a 
+collection contains books with chapters and sections of chapters. To have 
+searching and retrieval at chapter level, the chapter nodes would be made 
+indexable. Alternatively, making the section nodes indexable would provide 
+searching at the smaller section level instead.
+
+Scopable nodes are not necessarily indexed, but are recorded as part of the 
+id as a scope. This is to speed up searching for the appropriate tag during 
+retrieval. Scopeable tags should only occur once per document.
+
+Building other collections:
+
+To use the java building stuff for other XML document collections, you can 
+just modify the XMLTagInfo.java file to include the appropriate tag names for 
+your XML documents. Then put import documents into the import directory, and 
+run the BuildXMLColl program as above. Configuration files will need to be 
+created for the collection (etc/collectionConfig.xml and 
+index/buildConfig.xml).
+
+The Greenstone runtime software has problems locating DTDs, so any DTDs for 
+your collection should be placed in the collection's resources directory.
+If DTD files are shared between collections, they can go into the 
+WEB-INF/classes directory (in gsdl3/web or tomcat/webapps/gsdl3, depending on 
+your setup).

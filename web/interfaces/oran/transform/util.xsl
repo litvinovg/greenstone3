@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:xslt="http://www.w3.org/1999/XSL/Transform"
+	xmlns:gslib="http://www.greenstone.org/XSL/Library"
+	xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
+	xmlns:util="http://org.greenstone.gsdl3.util.XSLTUtil"
+	exclude-result-prefixes="util gslib gsf xslt">
+
+	<!-- some global parameters - these are set by whoever is invoking the transformation -->
+  <xsl:param name="interface_name"/>
+  <xsl:param name="library_name"/>
+
+  <!-- every pages ....................................................................... -->
+	<xsl:template name="siteName"><xsl:value-of select="/page/pageResponse/metadataList/metadata[@name='siteName']"/></xsl:template>
+	<xsl:template name="siteLink"><a href="./{$library_name}"><xsl:call-template name="siteName"/><xsl:text> </xsl:text></a></xsl:template>
+
+  	<xsl:variable name="a"><xsl:value-of select="/page/pageRequest/paramList/param[@name='a']/@value"/>		</xsl:variable>
+	<xsl:variable name="collections" select="/page/pageResponse/collectionList/collection"/>
+
+	<xsl:variable name="berrybasketswitch"><xsl:value-of select="/page/pageRequest/paramList/param[@name='berrybasket']/@value"/></xsl:variable>
+	<xsl:variable name="berryBasketOn" select="/page/pageRequest/paramList/param[@name='berrybasket' and @value='on']"/>
+
+	<!-- template to get the name of the current collection -->
+	<xsl:template name="collectionName">
+		<xsl:choose>
+			<xsl:when test="/page/pageResponse/collection"><xsl:value-of select="/page/pageResponse/collection/displayItem[@name='name']"/></xsl:when>
+			<xsl:otherwise>All Collections</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
+	<xsl:template name="collectionNameShort">
+		<xsl:value-of select="/page/pageResponse/collection/@name"/>
+	</xsl:template>
+
+	<xsl:template name="collectionNameLinked">
+		<xsl:if test="/page/pageResponse/collection">
+			<a>
+				<xsl:attribute name="href">./<xsl:value-of select="$library_name"/>?a=p&amp;sa=about&amp;c=<xsl:call-template name="collectionNameShort"/></xsl:attribute>
+				<xsl:call-template name="collectionName"/>
+			</a>
+		</xsl:if>
+	</xsl:template>
+
+	<!-- text to get the name of the current service ("Browse","Search" etc) -->
+	<xsl:template name="serviceName">
+		<xsl:value-of select="/page/pageResponse/service/displayItem[@name='name']"/>
+	</xsl:template>
+
+	<xsl:template name="textDirectionAttribute">
+		<xsl:attribute name="dir">
+			<xsl:choose>
+				<xsl:when test="/page/@lang='ar' or /page/@lang='fa' or /page/@lang='he' or /page/@lang='ur' or /page/@lang='ps' or /page/@lang='prs'">rtl</xsl:when>
+				<xsl:otherwise>ltr</xsl:otherwise>
+			</xsl:choose>
+		</xsl:attribute>
+	</xsl:template>
+
+	<xsl:template name="actionClass">
+		<xsl:attribute name="class"><xsl:value-of select="/page/pageRequest/@action"/>Action <xsl:if test="/page/pageRequest/@subaction"><xsl:value-of select="/page/pageRequest/@subaction"/>Subaction</xsl:if></xsl:attribute>
+	</xsl:template>
+
+	<!-- username, if logged in -->
+	<!--
+	<xsl:template name="username">
+		<xsl:if test="$un_s!=''">
+			<xsl:if test="$asn!='' and $asn!='0'">
+			<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.username')"/>  :  <xsl:value-of select="$un_s"/>
+			</xsl:if>
+		</xsl:if>
+	</xsl:template>
+	-->
+
+    <xsl:template name="defaultDividerBar">
+   <xsl:param name='text'/>
+      <xsl:choose>
+      <xsl:when test="$text">
+	 <div class="divbar"><xsl:value-of select="$text"/></div>
+      </xsl:when>
+      <xsl:otherwise>
+	 <div class="divbar"><xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text></div>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+
+    <xsl:template match="error">
+    Error: <xsl:value-of select="."/>
+  </xsl:template>
+
+
+<xsl:template name="displayErrorsIfAny">
+      <xsl:if test="descendant::error">
+      <script language="Javascript">
+	<xsl:text disable-output-escaping="yes">
+	  function removeAllChildren(node) {
+	    while (node.hasChildNodes()) {
+	      node.removeChild(node.firstChild);
+	    }
+	  }
+
+	  function toggleHideError(obj) {
+	    if (obj.style.display == "none") {
+	      obj.style.display = "";
+	      hide_link = document.getElementById("hide");
+	      removeAllChildren(hide_link);
+	      hide_link.appendChild(document.createTextNode("</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'hide_error')"/><xsl:text disable-output-escaping="yes">"));
+	    } else {
+	      obj.style.display = "none";
+	      hide_link = document.getElementById("hide");
+	      removeAllChildren(hide_link);
+	      hide_link.appendChild(document.createTextNode("</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'show_error')"/><xsl:text disable-output-escaping="yes">"));
+	    }
+	  }
+	</xsl:text>
+      </script>
+      <p align='right'><a id="hide" href="javascript:toggleHideError(error);"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'show_error')"/></a></p>
+      <div id="error" style="display: none;">
+	<xsl:apply-templates select="descendant::error"/>
+      </div>
+    </xsl:if>
+</xsl:template>
+
+
+	<xsl:template name="noTextBar">
+		<xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+	</xsl:template>
+	
+	
+	<xsl:template name="poweredByGS3TextBar">
+		<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gs3power')"/>
+	</xsl:template>
+
+	<xsl:template name="rightArrow"><xsl:text disable-output-escaping="yes"> &amp;raquo; </xsl:text></xsl:template>
+
+
+
+	<!-- site home ....................................................................... -->
+
+<xsl:template name="siteHomePageTitle">
+ <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
+<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/><xsl:text> </xsl:text>
+</xsl:template>
+
+
+    <xsl:template name="selectACollectionTextBar">
+  	 <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.select_a_collection')"/>
+  </xsl:template>
+	<xsl:template name="crossCollectionQuickSearchForm">
+		<xsl:apply-templates select="serviceList/service[@name='TextQuery']"/>
+	</xsl:template>
+	
+	<xsl:template match="service[@name='TextQuery']">
+		<form name="QuickSearch" method="get" action="{$library_name}">
+			<input type="hidden" name="a" value="q"/>
+			<input type="hidden" name="rt" value="rd"/>
+			<input type="hidden" name="s" value="{@name}"/>
+			<input type="hidden" name="s1.collection" value="all"/>
+			<input type="text" name="s1.query" size="20"/>
+			<input type="submit"><xsl:attribute name="value"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.quick_search')"/></xsl:attribute></input>
+		</form>
+	</xsl:template>
+
+	<xsl:template name="collectionLinkWithImage">
+		<xsl:choose>
+			<xsl:when test="displayItem[@name='icon']">
+				<a href="{$library_name}?a=p&amp;sa=about&amp;c={@name}">
+					<img class="collectionLinkImage">
+						<xsl:attribute name="alt"></xsl:attribute>
+						<xsl:attribute name="src">sites/localsite/collect/<xsl:value-of select="@name"/>/images/<xsl:value-of select="displayItem[@name='icon']"/></xsl:attribute>
+					</img>
+<!--
+					<div class="collectionLink">
+						<xsl:attribute name="style">background-image: url(/sites/localsite/collect/<xsl:value-of select="@name"/>/images/<xsl:value-of select="displayItem[@name='icon']"/>);</xsl:attribute>
+						<xsl:value-of select="displayItem[@name='name']"/>
+					</div>
+-->
+				</a>
+			</xsl:when>
+			<xsl:otherwise>
+				<a href="{$library_name}?a=p&amp;sa=about&amp;c={@name}">
+					<div class="collectionLink">
+						<xsl:value-of select="displayItem[@name='name']"/>
+					</div>
+				</a>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
+
+	<xsl:template name="serviceClusterList">
+		<xsl:apply-templates select="serviceClusterList"/>
+	</xsl:template>
+	
+	  <xsl:template match="serviceClusterList">
+	    <xsl:for-each select="serviceCluster">
+	      <a href="{$library_name}?a=p&amp;sa=about&amp;c={@name}"><xsl:value-of select='@name'/><xsl:value-of select="displayItem[@name='name']"/></a>
+	    </xsl:for-each>
+	  </xsl:template>
+
+	
+	<xsl:template name="serviceLink">
+		<div class="paramLabel"><a href="{$library_name}?a=q&amp;rt=d&amp;s={@name}"><xsl:value-of select="displayItem[@name='name']"/></a></div>
+		<div class="paramValue"><xsl:value-of select="displayItem[@name='description']"/></div>
+		<br class="clear"/>
+	</xsl:template>
+
+
+   <xsl:template name="authenticationLink">
+   <xsl:for-each select="serviceList/service[@type='authen']">
+      <li><a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s={@name}&amp;s1.aup=Login&amp;s1.un=&amp;s1.asn="><xsl:value-of select="displayItem[@name='name']"/></a><xsl:value-of select="displayItem[@name='description']"/></li></xsl:for-each>
+  </xsl:template>
+   <xsl:template name="libraryInterfaceLink">
+   <li><a href="{$library_name}?a=p&amp;sa=gli4gs3"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.librarian_interface')"/></a></li>
+  </xsl:template>
+<xsl:template name="greenstoneLogoAlternateText">
+<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/>
+</xsl:template>
+
+<!-- about page - collection home ....................................................................... -->
+<xsl:variable name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
+<xsl:param name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
+<xsl:param name="pageType"/>
+<xsl:variable name="this-element" select="/page/pageResponse/collection|/page/pageResponse/serviceCluster"/>
+<xsl:variable name="this-service" select="/page/pageResponse/service/@name"/>
+
+
+<xsl:template name="aboutCollectionPageTitle">
+ <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
+<xsl:value-of select="/page/pageResponse/collection/displayItem[@name='name']"/><xsl:text> </xsl:text>
+</xsl:template>
+
+	
+<xsl:template name="collectionHomeLinkWithLogoIfAvailable">
+<a href="{$library_name}?a=p&amp;sa=about&amp;c={$collName}">
+	  <xsl:choose>
+	    <xsl:when test="$this-element/displayItem[@name='icon']">
+	      <img border="0">
+		<xsl:attribute name="src">
+		  <xsl:value-of select="$this-element/metadataList/metadata[@name='httpPath']"/>/images/<xsl:value-of select="$this-element/displayItem[@name='icon']"/>
+		</xsl:attribute>	
+		<xsl:attribute name="alt">
+		  <xsl:value-of select="$this-element/displayItem[@name='name']"/>
+		</xsl:attribute>
+		<xsl:attribute name="title">
+		  <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'aboutpage')"/>
+		</xsl:attribute>
+	      </img>
+	    </xsl:when>
+	    <xsl:otherwise>
+	      <xsl:value-of select="$this-element/displayItem[@name='name']"/>
+	    </xsl:otherwise>
+	  </xsl:choose>
+	</a>
+</xsl:template>
+
+
+<xsl:template name="homeButtonTop">
+<a href="{$library_name}?a=p&amp;sa=home"><xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_tip')"/></xsl:attribute>
+<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_b')"/></a>
+</xsl:template>
+
+
+<xsl:template name="helpButtonTop">
+    <xsl:choose>
+      <xsl:when test="$pageType='help'">
+	<li><a><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></a></li>
+      </xsl:when>
+      <xsl:otherwise>
+	<li><a href="{$library_name}?a=p&amp;sa=help&amp;c={$collName}"><xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_tip')"/></xsl:attribute>
+	    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/>
+	  </a></li>
+      </xsl:otherwise>
+    </xsl:choose>
+</xsl:template>
+
+
+	<xsl:template name="preferencesButtonTop">
+		<xsl:choose>
+			<xsl:when test="$pageType='pref'">
+				<li><a><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/></a></li>
+			</xsl:when>
+			<xsl:otherwise>
+				<li><a href="{$library_name}?a=p&amp;sa=pref&amp;c={$collName}"><xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_tip')"/></xsl:attribute>
+					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/>
+				</a></li>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+
+	<xsl:template name="servicesNavigationBar">
+		<xsl:for-each select="$this-element/serviceList/service">
+			<xsl:variable name="action"><xsl:choose>
+				<xsl:when test="@name=$this-service">CURRENT</xsl:when>
+				<xsl:when test="@type='query'">q</xsl:when>
+				<xsl:when test="@type='browse'">b</xsl:when>
+				<xsl:when test="@type='process'">pr</xsl:when>
+				<xsl:when test="@type='applet'">a</xsl:when>
+				<xsl:otherwise>DO_NOT_DISPLAY</xsl:otherwise>
+			</xsl:choose></xsl:variable>
+			<xsl:choose>
+				<xsl:when test="$action='CURRENT'">
+					<li><a><xsl:value-of select="displayItem[@name='name']"/></a></li>
+				</xsl:when>
+				<xsl:when test="$action !='DO_NOT_DISPLAY'">
+					<li><a href="{$library_name}?a={$action}&amp;rt=d&amp;s={@name}&amp;c={$collName}"><xsl:if test="displayItem[@name='description']"><xsl:attribute name='title'><xsl:value-of select="displayItem[@name='description']"/></xsl:attribute></xsl:if><xsl:value-of select="displayItem[@name='name']"/></a></li>
+				</xsl:when>
+			</xsl:choose>
+		</xsl:for-each>
+	</xsl:template>
+
+
+	<xsl:template name="collectionDescriptionTextAndServicesLinks">
+		<xsl:apply-templates select="pageResponse/collection|serviceCluster"/>
+	</xsl:template>
+
+	<xsl:template match="collection|serviceCluster">
+		<xsl:value-of select="displayItem[@name='description']" disable-output-escaping="yes"/>
+		<xsl:apply-templates select="serviceList">
+			<xsl:with-param name="collName" select="$collName"/>
+		</xsl:apply-templates>
+	</xsl:template>
+
+
+	<xsl:template match="serviceList">
+		<xsl:param name="collName"/>
+		<h3><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'about.services')"/></h3>
+		<p>
+			<xsl:choose>
+				<xsl:when test="service">
+					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'about.servicehelp')"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'about.noservices')"/>
+				</xsl:otherwise>
+			</xsl:choose>
+		</p>
+
+		<xsl:if test="service">
+			<div id="servicelist">
+				<xsl:for-each select="service">
+					<xsl:sort select="position()" order="descending" data-type="number"/>
+
+					<xsl:variable name="action"><xsl:choose>
+						<xsl:when test="@type='query'">q</xsl:when>
+						<xsl:when test="@type='browse'">b</xsl:when>
+						<xsl:when test="@type='process'">pr</xsl:when>
+						<xsl:when test="@type='applet'">a</xsl:when>
+						<xsl:otherwise>DO_NOT_DISPLAY</xsl:otherwise>
+					</xsl:choose></xsl:variable>
+					<xsl:if test="$action != 'DO_NOT_DISPLAY'">
+						<div class="paramLabel"><a href="{$library_name}?a={$action}&amp;rt=d&amp;s={@name}&amp;c={$collName}"><xsl:value-of select="displayItem[@name='name']"/></a></div>
+						<div class="paramLabel"><xsl:value-of select="displayItem[@name='description']"/></div>
+						<br class="clear"/>
+					</xsl:if>
+				</xsl:for-each>
+			</div>
+		</xsl:if>
+	</xsl:template>
+
+
+
+<!-- classifier page ............................................................................ -->
+
+<xsl:template name="collapsedNavigationTab">
+	<xsl:param name="type"/>
+	<xsl:variable name="isCurrent" select="/page/pageResponse/service[@type=$type]"/>
+	<li>
+		<xsl:if test="$isCurrent">
+			<xsl:attribute name="class">current</xsl:attribute>
+		</xsl:if>
+		<a>
+			<xsl:if test="service[@name=$type]/displayItem[@name='description']"><xsl:attribute name='title'><xsl:value-of select="service[@name=$type]/displayItem[@name='description']"/></xsl:attribute></xsl:if>
+			<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=q&amp;rt=d&amp;s=<xsl:value-of select="service[@type=$type]/@name"/>&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/></xsl:attribute>
+			<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, $type)"/>
+		</a>
+	</li>
+</xsl:template>
+
+<xsl:template name="navigationTab">
+
+	<xsl:variable name="isCurrent" select="@name=/page/pageResponse/service/@name"/>
+
+	<xsl:variable name="action"><xsl:choose>
+		<xsl:when test="@type='query'">q</xsl:when>
+		<xsl:when test="@type='browse'">b</xsl:when>
+		<xsl:when test="@type='process'">pr</xsl:when>
+		<xsl:when test="@type='applet'">a</xsl:when>
+		<xsl:otherwise>DO_NOT_DISPLAY</xsl:otherwise>
+	</xsl:choose></xsl:variable>
+
+	<xsl:if test="$action!='DO_NOT_DISPLAY'">
+		<li>
+			<xsl:if test="$isCurrent">
+				<xsl:attribute name="class">current</xsl:attribute>
+			</xsl:if>
+			<a>
+				<xsl:if test="displayItem[@name='description']">
+					<xsl:attribute name='title'><xsl:value-of select="displayItem[@name='description']"/></xsl:attribute>
+				</xsl:if>
+				<xsl:choose>
+					<xsl:when test="classifierList/classifier/@name">
+						<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=<xsl:value-of select="$action"/>&amp;rt=s&amp;s=<xsl:value-of select="@name"/>&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;cl=<xsl:value-of select="classifierList/classifier/@name"/></xsl:attribute>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=<xsl:value-of select="$action"/>&amp;rt=d&amp;s=<xsl:value-of select="@name"/>&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/></xsl:attribute>
+					</xsl:otherwise>
+				</xsl:choose>
+				<xsl:value-of select="displayItem[@name='name']"/>
+			</a>
+		</li>
+	</xsl:if>
+
+</xsl:template>
+
+
+<xsl:template name="classifierLink">
+	<xsl:if test="@name=/page/pageResponse/classifier/@name"><xsl:attribute name="class">current</xsl:attribute></xsl:if>
+	<a href="{$library_name}?a=b&amp;rt=r&amp;s={/page/pageResponse/service/@name}&amp;c={/page/pageResponse/collection/@name}&amp;cl={@name}">
+		<xsl:value-of select="displayItem[@name='description']"/>
+	</a>
+</xsl:template>
+
+<!-- query page ............................................................................ -->
+
+	<xsl:template name="indexName">
+		<xsl:value-of select="/page/pageResponse/service/displayItem[@name='name']"/>
+	</xsl:template>
+
+<xsl:template name="queryPageCollectionName">
+	<xsl:choose><xsl:when test="/page/pageResponse/collection"><gslib:aboutCollectionPageTitle/></xsl:when><xsl:otherwise>Cross-Collection</xsl:otherwise></xsl:choose>
+</xsl:template>
+
+
+
+
+
+<!--
+BERRY BASKET TEMPLATES
+These get used on many different pages to add the
+berry basket function to the site
+-->
+
+<!-- put the drag&drop berry basket on the page -->
+<xsl:template name="berryBasket">
+	<xsl:if test="$berryBasketOn">
+		<div id="berrybasket" class="hide">
+			<span>Berry Basket</span>
+			<span id="berryBasketExpandCollapseLinks" style="display: none;">
+				<a id="berryBasketExpandLink" href="javascript:showBasket()">Expand</a>
+				<a id="berryBasketCollapseLink" style="display: none;" href="javascript:hideBasket()">Collapse</a>
+			</span>
+			<div id="baskethandle"><span><xsl:text> </xsl:text></span></div>
+			<div id ="berries"><span><xsl:text> </xsl:text></span></div>
+		</div>
+	</xsl:if>
+</xsl:template>
+
+<!-- include the required javascript and css for berry baskets -->
+<xsl:template name="berryBasketHeadTags">
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/YAHOO.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/event.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/connection.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/dom.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/dragdrop.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/ygDDPlayer.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/ygDDOnTop.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/berrybasket.js"><xsl:text> </xsl:text></script>
+	<link rel="stylesheet" href="interfaces/{$interface_name}/style/berry.css" type="text/css"/>
+</xsl:template>
+
+<!--
+create a little berry which can be drag&dropped onto the berry basket
+used on classifier and search result pages
+-->
+<xsl:template name="documentBerryForClassifierOrSearchPage">
+	<xsl:if test="$berryBasketOn">
+		<img class="pick" src="interfaces/{$interface_name}/images/berry.png" alt="in basket" width="15" height="15" border="0">
+			<xsl:attribute name="id"><xsl:value-of select="/page/pageResponse/collection/@name"/>:<xsl:value-of select="@nodeID"/></xsl:attribute>
+		</img>
+	</xsl:if>
+</xsl:template>
+
+<!--
+create little berrys which can be drag&dropped onto the berry basket
+used on the document page
+-->
+<xsl:template name="documentBerryForDocumentPage">
+    <xsl:variable name="selectedNode"><xsl:value-of select="/page/pageResponse/document/@selectedNode"/></xsl:variable>
+    <xsl:variable name="rootNode"><xsl:value-of select="/page/pageResponse/document/documentNode[@nodeType='root']/@nodeID"/></xsl:variable>
+
+	<xsl:if test="$berryBasketOn">	
+		<div id="documentberries">
+			<img class='pick' id="{/page/pageResponse/collection/@name}:{$rootNode}" src="interfaces/{$interface_name}/images/berry.png" alt="in basket" width="15" height="15" border="0"/>
+			<span id="{/page/pageResponse/collection/@name}:{$rootNode}:root" class="documentberry">the whole document</span>
+
+			<xsl:if test="$selectedNode != $rootNode">
+				<img class='pick'  id="{/page/pageResponse/collection/@name}:{$selectedNode}" src="interfaces/{$interface_name}/images/berry.png" alt="in basket" width="15" height="15" border="0"/>
+				<span id="{/page/pageResponse/collection/@name}:{$selectedNode}:section" class="documentberry">the current section</span>
+			</xsl:if>
+		</div>
+	</xsl:if>
+</xsl:template>
+
+
+<!-- document page -->
+<xsl:template name="documentTitle">
+	<xsl:value-of select="/page/pageResponse/document/documentNode/metadataList/metadata[@name='Title']"/>
+</xsl:template>
+
+
+<xsl:template name="coverImage">
+	<img><xsl:attribute name='src'><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']"/>/index/assoc/<xsl:value-of select="metadataList/metadata[@name='archivedir']"/>/cover.jpg</xsl:attribute></img>
+</xsl:template>
+
+<xsl:template name="previousNextButtons">
+	<!-- prev -->
+	<a>
+		<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@selectedNode"/>.pp&amp;sib=1&amp;p.s=<xsl:value-of select='/page/pageRequest/paramList/param[@name="p.s"]/@value'/>&amp;p.sa=<xsl:value-of select='/page/pageRequest/paramList/param[@name="p.sa"]/@value'/>&amp;p.a=<xsl:value-of select='/page/pageRequest/paramList/param[@name="p.a"]/@value'/></xsl:attribute>
+		<img class="lessarrow" src="interfaces/{$interface_name}/images/previous.png"/>
+	</a>
+
+	<!-- next -->
+	<a>
+		<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@selectedNode"/>.np&amp;sib=1&amp;p.s=<xsl:value-of select='/page/pageRequest/paramList/param[@name="p.s"]/@value'/>&amp;p.sa=<xsl:value-of select='/page/pageRequest/paramList/param[@name="p.sa"]/@value'/>&amp;p.a=<xsl:value-of select='/page/pageRequest/paramList/param[@name="p.a"]/@value'/></xsl:attribute>
+		<img class="morearrow" src="interfaces/{$interface_name}/images/next.png"/>
+	</a>
+
+</xsl:template>
+
+
+</xsl:stylesheet>

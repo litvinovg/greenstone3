@@ -1,0 +1,66 @@
+#### properties file for Greenstone3 building using ANT. See the README for more 
+#### information
+
+## Tomcat installation
+# Set this to the internet/intranet name of the machine that Tomcat is/will be 
+# run on. localhost is fine for accessing the server from the local machine, 
+# but not remotely
+tomcat.server=localhost
+# The port number that tomcat is/will be run on
+tomcat.port=8080
+# Tomcat's shutdown port - this may need to be changed if you are running two or more Tomcats
+tomcat.shutdown.port=8005
+# If tomcat is already running, enter the path to the base directory here
+tomcat.installed.path=
+# uncomment the following if you have moved the greenstone3 web directory to tomcats webapps dir 
+#web.home=${tomcat.installed.path}/webapps/greenstone3
+
+## Collection building options
+# uncomment if you don't want to have collection building enabled
+#disable.collection.building=true
+
+## Greenstone 3 server program options
+# does running the server automatically start up Tomcat and a browser
+server.auto.start=false
+# default servlet to start with
+server.default.servlet=/library
+
+##Browser setup
+browser.path=
+
+## Proxy setup - Greenstone installation will attempt to download extra packages. Set the proxy information here if you are behind a firewall.
+# The proxy server name 
+proxy.host=
+# The proxy server port
+proxy.port=
+# A user name to use when talking to the proxy server (optional, will prompt if not entered here)
+proxy.user=
+# A password to use when talking to the proxy server (optional, will prompt if not entered here)
+proxy.password=
+
+## java compilation properties - for javac
+# Should compilation include the debug option?
+compile.debug=true
+# Should compilation include the deprecation option?
+compile.deprecation=true
+# Should compilation include the optimize option?
+compile.optimize=true
+
+## should compilation be static?? - used for distributions
+#compile.static=true
+
+## windows c++ compilation
+# The following property does not help in build.xml. 
+# The user needs to run Visual Studio's vcvars32.bat script from the
+# MSDOS prompt before compiling Greenstone3 (before "ant prepare install")
+#compile.windows.c++.setup=C:/Program Files/Microsoft Visual Studio/VC98/Bin/VCVARS32.BAT
+
+##Flax stuff##
+##uncomment if you want to install flax
+#install.flax=true
+flax.checkout.path=${flax.svn.root}/trunk/flaxmain
+
+##Web services related constants##
+base.webservice.name=SOAPServer
+##listing and description of all the web services deployable on GS3##
+web.services.list=${base.webservice.name} for Greenstone3's core web services, QBR${base.webservice.name} for Query, Browse and Retrieve services

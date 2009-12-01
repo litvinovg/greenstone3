@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE Configuration [
+  <!ELEMENT Configuration  (GathererConfig, Other, DirectoryMappings, Associations)>
+  <!ELEMENT GathererConfig (Argument*)>
+  <!ELEMENT Argument       (#PCDATA)>
+  <!ATTLIST Argument
+            name           CDATA #REQUIRED>
+  <!ELEMENT Other          (Info*)>
+  <!ELEMENT Info           (Name, Desc, Arguments)>
+  <!ELEMENT Arguments      (Option*)>
+  <!ELEMENT Option         (Name, Desc, Type, Required, Default?, List?)>
+  <!ELEMENT Type           (#PCDATA)>
+  <!ELEMENT Required       (#PCDATA)>
+  <!ELEMENT Default        (#PCDATA)>
+  <!ELEMENT List           (Value*)>
+  <!ELEMENT Value          (Name, Desc?)>
+  <!ELEMENT Name           (#PCDATA)>
+  <!ELEMENT Desc           (#PCDATA)>
+  <!ELEMENT DirectoryMappings (Mapping*)>
+  <!ELEMENT Mapping           (#PCDATA)>
+  <!ATTLIST Mapping 
+            name              CDATA #REQUIRED
+	    file              CDATA #REQUIRED>
+  <!ELEMENT Associations (Entry*)>
+  <!ELEMENT Entry (#PCDATA)>
+  <!ATTLIST Entry
+            extension CDATA #REQUIRED>
+]>
+
+<Configuration version="2.53a">
+  <GathererConfig>
+    <!-- ***** General Options: apply globally to the GAI execution. ***** -->
+    <!-- The location and size of the main Gatherer window. -->
+    <Argument name="general.bounds">0, 0, 800, 600</Argument>
+    <!-- Are we expected to produce a debug file. Can be overidden at start up. default = [false] -->
+    <Argument name="general.debug">false</Argument>
+    <!-- The standard font used in the Gatherer. [Verdana, BOLD, 12] -->
+    <Argument name="general.font">Verdana, BOLD, 12</Argument>
+    <Argument name="general.library_url"/>
+    <Argument name="general.locale">en_NZ</Argument>
+    <!-- How many folders deep should we recurse before suspecting a cyclic path? [40] -->
+    <Argument name="general.max_folder_depth">40</Argument>
+    <!-- The mode controls what level a detail is presented to the user - ranging from a basic, no regex, no perl experience up to complete details for all processes. The values, ranging from lowest to highest detail, are: 1 = Assistant, 2 = Librarian, 3 = Systems, 4 = Expert [default 2]-->
+    <Argument name="general.mode">2</Argument>
+    <Argument name="general.open_collection"></Argument>
+    <!-- The application launching command used when previewing the collection. [default -blank-] -->
+    <Argument name="general.preview_program"></Argument>
+    <Argument name="general.proxy_host"></Argument>
+    <Argument name="general.proxy_port"></Argument>
+    <Argument name="general.show_file_size">false</Argument>
+    <!-- Do we expect to connect to the internet via a proxy server. [false] -->
+    <Argument name="general.use_proxy">false</Argument>
+    <Argument name="general.view_extracted_metadata">true</Argument>
+
+    <!-- Colouring -->
+    <Argument name="coloring.button_background">218, 237, 252</Argument>
+    <Argument name="coloring.button_foreground">0, 0, 0</Argument>
+    <Argument name="coloring.button_selected_background">128, 180, 216</Argument>
+    <Argument name="coloring.button_selected_foreground">255, 255, 255</Argument>
+    <Argument name="coloring.collection_heading_background">176, 208, 176</Argument>  
+    <Argument name="coloring.collection_heading_foreground">0, 0, 0</Argument>
+    <Argument name="coloring.collection_selection_background">128, 180, 216</Argument>
+    <Argument name="coloring.collection_selection_foreground">0, 0, 0</Argument>
+    <Argument name="coloring.collection_tree_background">224, 240, 224</Argument>
+    <Argument name="coloring.collection_tree_foreground">0, 0, 0</Argument>
+    <Argument name="coloring.collection_noneditable_background">192, 192, 192</Argument>
+    <Argument name="coloring.collection_noneditable_foreground">0, 0, 0</Argument>
+    <Argument name="coloring.disabled">206, 206, 206</Argument>
+    <Argument name="coloring.editable_background">255, 255, 255</Argument>
+    <Argument name="coloring.editable_foreground">0, 0, 0</Argument>
+    <Argument name="coloring.error_background">255, 0, 0</Argument>
+    <Argument name="coloring.error_foreground">0, 0, 0</Argument>
+    <Argument name="coloring.scrollbar_background">192, 192, 192</Argument>
+    <Argument name="coloring.scrollbar_foreground">255, 255, 255</Argument>
+    <Argument name="coloring.workspace_heading_background">128, 180, 216</Argument>
+    <Argument name="coloring.workspace_heading_foreground">0, 0, 0</Argument>
+    <Argument name="coloring.workspace_selection_background">176, 208, 176</Argument>
+    <Argument name="coloring.workspace_selection_foreground">0, 0, 0</Argument>
+    <Argument name="coloring.workspace_tree_background">218, 237, 252</Argument>
+    <Argument name="coloring.workspace_tree_foreground">0, 0, 0</Argument>
+
+    <!-- Mirroring -->
+    <!-- Mirroring has many particular options. These show the default settings. -->
+   <!-- <Argument name="mirroring.depth">0</Argument>
+    <Argument name="mirroring.no_parents">true</Argument>
+    <Argument name="mirroring.other_hosts">false</Argument>
+    <Argument name="mirroring.overwrite">false</Argument>
+    <Argument name="mirroring.page_requisites">true</Argument>
+    <Argument name="mirroring.quiet">true</Argument>
+    <Argument name="mirroring.remove_failed">false</Argument>-->
+
+    <!-- Warnings -->
+    <!-- Warnings can be disabled by the user. -->
+    <Argument name="warning.CollectionBuilt">true</Argument>
+    <Argument name="warning.DirectoryLevelMetadata">true</Argument>
+    <Argument name="warning.ExtractedMetadata">true</Argument>
+    <Argument name="warning.InheritedMetadata">true</Argument>
+    <Argument name="warning.MissingEXEC">true</Argument>
+    <Argument name="warning.MissingGSDL">true</Argument>
+    <Argument name="warning.MissingPERL">true</Argument>
+    <Argument name="warning.MissingWGET">true</Argument>
+    <Argument name="warning.NoMetadataSetsSelected">true</Argument>
+    <Argument name="warning.NoPluginExpectedToProcessFile">true</Argument>
+    <Argument name="warning.OldWGET">true</Argument>
+    <Argument name="warning.TitleClashes">true</Argument>
+
+    <!-- Workflow -->
+    <!-- Disabling a view here will cause it to be hidden from the Gatherer display. -->
+    <Argument name="admin.conf">true</Argument>
+    <Argument name="admin.ext">true</Argument> 
+    <Argument name="admin.monitor">true</Argument>
+    <Argument name="admin.log">true</Argument> 
+
+    <Argument name="GEMS.Preferences.Selected_Languages">en</Argument>
+  </GathererConfig>
+
+  <Other/>
+  <DirectoryMappings/>
+  <Associations>
+    <Entry extension="doc"/>
+    <Entry extension="gif"/>
+    <Entry extension="htm"/>
+    <Entry extension="html"/>
+    <Entry extension="jpg"/>
+    <Entry extension="jpeg"/>
+    <Entry extension="pdf"/>
+    <Entry extension="png"/>
+    <Entry extension="ps"/>
+    <Entry extension="rtf"/>
+    <Entry extension="txt"/>
+    <Entry extension="text"/>
+  </Associations>
+</Configuration>

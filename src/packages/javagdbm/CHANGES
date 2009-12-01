@@ -1,0 +1,26 @@
+Release 0006 1998-03-06
+ - Added FAQ.html
+
+Release 0005 1997-10-30
+ - Deserializing objects from databases is implemented properly
+ - Added the Closeable interface
+ - Fixed link to home page in documentation
+
+Release 0004 1997-10-24
+ - Fixed bug in autoconfig script
+
+Release 0003 1997-10-24
+ - Release-management and CVS restructurings
+
+Release 0002 1997-10-23
+ - Much more developer documentation in javadoc format
+ - Support for Serialization and QuotedVector packing
+ - Packing objects now have consistent names
+ - New distribution page, separate from mbp's home page
+ - Moved all the code into packages which use the standard Java naming
+   conventions: au.com.pharos.gdbm
+
+Release 0001 1997-10-03
+ - Functional JNI-based interface
+ - Scanty documentation
+ - GPL release disclaimer from jdg

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<buildConfig xmlns:gsf="http://www.greenstone.org/configformat" >
+  <metadataList>
+    <metadata name="numDocs">4</metadata>
+    <metadata name="buildType">lucene</metadata>
+  </metadataList>
+  <serviceRackList>
+    <serviceRack name="GutBookRetrieve">
+      <paramList>
+	<param name="tocXSLT" value="produce-toc"/>
+	<param name="documentEncoding" value="UTF-8"/>
+	<param name="documentRootTag" value="book"/>
+      </paramList>
+    </serviceRack>
+    <serviceRack name="LuceneSearch"/>
+  </serviceRackList>
+</buildConfig>

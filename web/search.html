@@ -1,0 +1,224 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+<title>AJAX GS3 Search</title>
+<META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+<style type="text/css">
+<!-- 
+BODY, P, LI { font-family: sans-serif; } 
+H2 {font-size: 90%;}
+BUTTON {font-size: 0.8em; margin: 0 1em; color: red;}
+#searchArea {background-color:white; }
+#resultArea {background-color:white; padding: 0em 0em;}
+#resultSummary {font-size: 80%; padding: 0.2 em 0.2em;}
+#resultSummary P {padding: 0.2em 0.3em;}
+#query {padding: 0.1em 0.5em; width: 400px; height: 150px; background-color:#d3d3d3;}
+#timing {float:right; width: 250px; border: thin solid #d3d3d3; padding: 0.2em 0.2em; display: none;}
+#resultList {	list-style-image: none; 
+						list-style-type: square;
+						font-size: 85%; padding: 1em 0em 1em 2em;}
+#resultList LI {padding: 0.3em 0em; }
+-->
+</style>
+<script type="text/javascript" src="xmlextras.js">
+</script> 
+<script type="text/javascript" src="gs_ajax_utils.js">
+</script> 
+<script type="text/javascript">
+<!--
+
+localsiteServerAddress = "/gsdl3/services/localsite";
+libraryAddress = "/gsdl3/library";
+function loadAsync(sUri, SOAPMessage, callbackFunction) {
+   var xmlHttp = XmlHttp.create();
+   var async = true;
+   xmlHttp.open("POST", sUri, async);
+   xmlHttp.onreadystatechange = function () {
+      if (xmlHttp.readyState == 4){
+		var result = xmlHttp.responseText;
+			//getTitle2(xmlHttp.responseXML, xmlHttp.responseText);
+			eval(callbackFunction);
+    }     
+   }
+   xmlHttp.setRequestHeader("SOAPAction", " ");
+   xmlHttp.setRequestHeader("Content-Type", "Content-Type: text/xml; charset=utf-8");
+ 
+   xmlHttp.send(SOAPMessage);
+}
+
+
+function ajaxSearch() {
+
+searchStartTime = new Date();
+
+resultList = document.getElementById('resultList');
+removeAllChildren(resultList);
+resultSummary = document.getElementById('resultSummary');
+removeAllChildren(resultSummary);
+
+/*
+for (i=0; i < 10; i++) {
+    listElement = document.createElement('li');
+    anchor = document.createElement('a');
+    anchor.setAttribute('href', url);
+    anchor.appendChild(document.createTextNode(  text));
+    listElement.appendChild(anchor);
+    resultList.appendChild(listElement);
+}
+*/
+
+queryText = document.getElementById('queryText').value;
+
+maxdocs = newElementAtt('param', '', new Array('name', 'value'), new Array('maxDocs', '100') ) ;
+level = newElementAtt('param', '', new Array('name', 'value'), new Array('level', 'Sec') ) ;
+indexValue = newElementAtt('param', '', new Array('name', 'value'), new Array('index', 'ZZ') ) ;
+matchMode = newElementAtt('param', '', new Array('name', 'value'), new Array('matchMode', 'some') ) ;
+query = newElementAtt('param', '', new Array('name', 'value'), new Array('query', queryText) ) ;
+caseValue = newElementAtt('param', '', new Array('name', 'value'), new Array('case', '1') ) ;
+sortBy = newElementAtt('param', '', new Array('name', 'value'), new Array('sortBy', '1') ) ;
+stem = newElementAtt('param', '', new Array('name', 'value'), new Array('stem', '1') ) ;
+
+
+paramList = newElement('paramList', maxdocs + level + indexValue + matchMode + query + caseValue + sortBy + stem);
+
+collection = document.getElementById('collectionText').value;
+request = newElementAtt('request', paramList, new Array('lang', 'to', 'type', 'uid'), new Array('en',collection + '/TextQuery', 'process', '1'  ) );
+message = newElement('message', request );
+soapMessage = messageToSOAP(message);
+loadAsync(localsiteServerAddress, soapMessage, 'getResults(xmlHttp.responseXML)');
+}
+
+function getResults(xmlDoc) {
+idsReturnedTime = new Date();
+    metadataList = xmlDoc.getElementsByTagName('metadata');
+    for (i=0; i < metadataList.length; i++) {
+    	metadata = metadataList[i];
+    	if (isElement(metadata)) {
+		  nameAtt = metadata.getAttribute('name')
+    		if ( nameAtt == 'numDocsMatched') {
+    			numDocsMatched = getText(metadata);
+    		}
+    		if (nameAtt == 'numDocsReturned') {
+    			numDocsReturned = getText(metadata);
+    		}
+    		if (nameAtt  == 'query') {
+    			query = getText(metadata);
+    		}
+    	}
+    }
+    
+    resultSummary = document.getElementById('resultSummary');
+    para = document.createElement('p');
+    para.appendChild(document.createTextNode('Query: ' + query + ' Number of Matching Docs: ' + numDocsMatched + ' Number of returned documents: ' + numDocsReturned));
+    resultSummary.appendChild(para);
+    
+    documentNodeList = xmlDoc.getElementsByTagName('documentNode');
+    	
+    for (i=0; i < documentNodeList.length; i++) {
+    	documentNode = documentNodeList[i];
+    	if (isElement(documentNode)) {
+    		docIDArray[i] = documentNode.getAttribute('nodeID');
+    	}
+    }
+   
+    var docsList = '';
+    for (i=0; i < docIDArray.length; i++) {
+    	docsList += newElementAtt1('documentNode', '', 'nodeID', docIDArray[i]);
+    }
+	
+    docNodeList = newElement('documentNodeList', docsList);
+	collection = document.getElementById('collectionText').value;
+    param = newElementAtt('param', '', new Array('name', 'value'), new Array('metadata', 'Title') );
+    paramList = newElement('paramList', param);
+	request = newElementAtt('request', paramList + docNodeList, new Array('lang', 'to', 'type', 'uid'), new Array('en',collection + '/DocumentMetadataRetrieve', 'process', '1'  ) );
+    message = newElement('message', request ); 
+    soapMessage = messageToSOAP(message);
+	//alert(soapMessage);
+    loadAsync(localsiteServerAddress, soapMessage, 'displayResults(xmlHttp.responseXML)');
+}
+
+
+function displayResults(xmlDoc) {
+	metadataReturnedTime = new Date();
+	url1 = libraryAddress+'?a=d&d=';
+	url2 = '&c=' + document.getElementById('collectionText').value + '&dt=hierarchy';
+	resultList = document.getElementById('resultList');
+    metadataList = xmlDoc.getElementsByTagName('metadata');
+	//alert('in display results ' + metadataList.length + xmlDoc.xml);
+        for (i=0; i < metadataList.length; i++) {
+			  //alert('in display results ' + i);
+        	metadata = metadataList[i];
+        	if (isElement(metadata)) {
+        		if (metadata.getAttribute('name') == 'Title') {
+					
+          		  listElement = document.createElement('li');
+                anchor = document.createElement('a');
+                anchor.setAttribute('href', url1 + docIDArray[i] + url2);
+                anchor.appendChild(document.createTextNode(getText(metadata)) );
+                listElement.appendChild(anchor);
+                resultList.appendChild(listElement);
+        		}   		
+        	}
+        }
+			finishedTime = new Date();
+			displayTime();
+			
+}
+
+function displayTime() {
+searchStart = document.getElementById('searchStart');
+idsReturned = document.getElementById('idsReturned');
+metadataReturned = document.getElementById('metadataReturned');
+//removeAllChildren(searchStart);
+//searchStart.appendChild(document.createTextNode(searchStartTime.getMilliseconds() + ' ms'))
+removeAllChildren(idsReturned);
+idsReturned.appendChild(document.createTextNode(idsReturnedTime.getMilliseconds() - searchStartTime.getMilliseconds()+ ' ms'))
+removeAllChildren(metadataReturned);
+metadataReturned.appendChild(document.createTextNode(metadataReturnedTime.getMilliseconds() - idsReturnedTime.getMilliseconds()+ ' ms'))
+//alert(searchStartTime.getMilliseconds() + ' ' + idsReturnedTime.getMilliseconds() + ' ' + metadataReturnedTime.getMilliseconds() + ' ' + ' ' + finishedTime.getMilliseconds());
+}
+
+
+var docIDArray = new Array();
+var searchStartTime, idsReturnedTime, metadataReturnedTime, finishedTime;
+
+
+
+
+// -->
+</script>
+</head>
+<body>
+
+
+
+<div id="searchArea">
+
+<div id="timing">
+<p><strong>Timing</strong></p>
+<table border="0" cellpadding="0" cellspacing="0" summary="">
+<!-- <tr><td>Search started:</td><td id="searchStart"></td></tr> -->
+<tr><td>Time to get IDs:</td><td id="idsReturned"></td></tr>
+<tr><td>Time to get Metadata:</td><td id="metadataReturned"></td></tr>
+</table>
+</div> 
+
+<div id="query"><h2>Search a Greenstone 3 Collection</h2>
+<form action="">
+<p><label for="collectionText">GS3 Collection:</label>
+<input id="collectionText" type="text" value="gs2mgppdemo"/></p>
+
+<p><input id="queryText" type="text" /><input id="searchButton" type="submit" value="Search" onclick="ajaxSearch();return false;"></input></p>
+
+</form></div>
+</div>
+
+<div id="resultArea">
+<div id="resultSummary"></div>
+<ul id="resultList"></ul>
+</div>
+ 
+</body>
+</html>
