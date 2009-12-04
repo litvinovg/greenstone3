@@ -1720,39 +1720,44 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <mkdir dir="${web.home}/sites/flax"/>
     <mkdir dir="${basedir}/flax-resources"/>
     <mkdir dir="${basedir}/flax-lib"/>
-    <svn>
-      <checkout url="${flax.checkout.path}/src/java/org/flax/"  
-        destPath="${basedir}/src/java/org/flax"/>
-      <checkout url="${flax.checkout.path}/src/java/org/greenstone/gsdl3/flax/" 
-        destPath="${basedir}/src/java/org/greenstone/gsdl3/flax"/>
-      <checkout url="${flax.checkout.path}/web/WEB-INF/classes/flax/" 
-        destPath="${web.home}/WEB-INF/classes/flax"/>
-      <checkout url="${flax.checkout.path}/web/interfaces/flax/" 
-        destPath="${web.home}/interfaces/flax"/>
-      <checkout url="${flax.checkout.path}/web/interfaces/flaxmodule/" 
-        destPath="${web.home}/interfaces/flaxmodule"/>
-      <checkout url="${flax.checkout.path}/web/sites/flax/" 
-        destPath="${web.home}/sites/flax"/>
-      <checkout url="${flax.checkout.path}/flax-resources"
-        destPath="${basedir}/flax-resources"/>
-      <checkout url="${flax.checkout.path}/lib"
-        destPath="${basedir}/flax-lib"/>
-    </svn>
-    <echo>prepare flax files...</echo>
+    <exec executable="svn"><arg value="checkout"/><arg value="${flax.checkout.path}/src/java/org/flax"/> 
+      <arg value="src/java/org/flax"/></exec> 
+    <exec executable="svn"><arg value="checkout"/><arg value="${flax.checkout.path}/src/java/org/greenstone/gsdl3/flax"/> 
+      <arg value="src/java/org/greenstone/gsdl3/flax"/></exec> 
+    <exec executable="svn"><arg value="checkout"/><arg value="${flax.checkout.path}/web/WEB-INF/classes/flax"/> 
+      <arg value="${web.home}/WEB-INF/classes/flax"/></exec> 
+    <exec executable="svn"><arg value="checkout"/><arg value="${flax.checkout.path}/web/interfaces/flax"/> 
+      <arg value="${web.home}/interfaces/flax"/></exec> 
+    <exec executable="svn"><arg value="checkout"/><arg value="${flax.checkout.path}/web/interfaces/flaxmodule"/> 
+      <arg value="${web.home}/interfaces/flaxmodule"/></exec> 
+    <exec executable="svn"><arg value="checkout"/><arg value="${flax.checkout.path}/web/sites/flax"/> 
+      <arg value="${web.home}/sites/flax"/></exec> 
+    <exec executable="svn"><arg value="checkout"/><arg value="${flax.checkout.path}/flax-resources"/> 
+      <arg value="flax-resources"/></exec> 
+    <exec executable="svn"><arg value="checkout"/><arg value="${flax.checkout.path}/lib"/> 
+      <arg value="flax-lib"/></exec> 
     <move file="${web.home}/WEB-INF/web.xml" tofile="${web.home}/WEB-INF/web.xml.greenstone3backup"/>
     <antcall target="flax-copy-files" />
   </target>
 
   <target name="update-flax" description="update flax from repository">
     <echo>updating flax ...</echo>
-    <svn>
-      <update dir="${basedir}/src/java/org/flax"/>
-      <update dir="${basedir}/src/java/org/greenstone/gsdl3/flax"/>
-      <update dir="${web.home}/WEB-INF/classes/flax"/>
-      <update dir="${web.home}/interfaces/flax"/>
-      <update dir="${web.home}/interfaces/flaxmodule"/>
-      <update dir="${web.home}/sites/flax"/>
-    </svn>
+    <exec executable="svn"><arg value="update"/>
+      <arg value="src/java/org/flax"/></exec> 
+    <exec executable="svn"><arg value="update"/>
+      <arg value="src/java/org/greenstone/gsdl3/flax"/></exec> 
+    <exec executable="svn"><arg value="update"/>
+      <arg value="${web.home}/WEB-INF/classes/flax"/></exec> 
+    <exec executable="svn"><arg value="update"/>
+      <arg value="${web.home}/interfaces/flax"/></exec> 
+    <exec executable="svn"><arg value="update"/>
+      <arg value="${web.home}/interfaces/flaxmodule"/></exec> 
+    <exec executable="svn"><arg value="update"/>
+      <arg value="${web.home}/sites/flax"/></exec> 
+    <exec executable="svn"><arg value="update"/>
+      <arg value="flax-resources"/></exec> 
+    <exec executable="svn"><arg value="update"/>
+      <arg value="flax-lib"/></exec> 
     <antcall target="flax-copy-files" />
   </target>
   
