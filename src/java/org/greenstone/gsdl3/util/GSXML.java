@@ -138,6 +138,7 @@ public class GSXML {
   public static final String CLASSIFIER_CONTENT_ATT = "content";
   public static final String ERROR_TYPE_ATT = "type";
   public static final String COLLECT_TYPE_ATT = "ct";
+  public static final String HIDDEN_ATT = "hidden";
   
   // document stuff
   public static final String DOC_TYPE_ATT = "docType";
