@@ -136,6 +136,7 @@
 	  <ul id="navbarlist">
 	    <xsl:for-each select="$this-element/serviceList/service">
 	      <xsl:variable name="action"><xsl:choose>
+		  <xsl:when test="@hidden='true'">DO_NOT_DISPLAY</xsl:when>
 		  <xsl:when test="@name=$this-service">CURRENT</xsl:when>
 		  <xsl:when test="@type='query'">q</xsl:when>
 		  <xsl:when test="@type='browse'">b</xsl:when>
