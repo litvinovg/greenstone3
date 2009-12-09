@@ -204,6 +204,8 @@ public class ServiceCluster
 	}	
 	
 	// do the service racks
+	// empty the service map in case this is a reconfigure
+	clearServices();
 	Element service_rack_list = (Element)GSXML.getChildByTagName(service_cluster_info, GSXML.SERVICE_CLASS_ELEM+GSXML.LIST_MODIFIER);
 	if (service_rack_list == null) {
 	    // is this an error? could you ever have a service cluster
@@ -273,16 +275,17 @@ public class ServiceCluster
 	
 	return true;
     }
+
     
+  protected void clearServices() {
+    service_map.clear();
+    this.service_list = this.doc.createElement(GSXML.SERVICE_ELEM+GSXML.LIST_MODIFIER);
+  }
     /** creates and configures all the services - extra_info is some more xml 
 that is passed to teh service  - eg used for coll config files for Collection
     */
     protected boolean configureServiceRack(Element service_rack_list, 
 					   Element extra_info) {
-
-	// empty the service map in case this is a reconfigure
-	service_map.clear();
-	this.service_list = this.doc.createElement(GSXML.SERVICE_ELEM+GSXML.LIST_MODIFIER);
 
 	// create all the services
 	NodeList nodes = service_rack_list.getElementsByTagName(GSXML.SERVICE_CLASS_ELEM);
@@ -606,7 +609,7 @@ that is passed to teh service  - eg used for coll config files for Collection
 	}
 	if (subset.equals(GSXML.SERVICE_ELEM+GSXML.LIST_MODIFIER)) {
 	    Element service_rack_list = (Element)GSXML.getChildByTagName(cluster_config_elem, GSXML.SERVICE_CLASS_ELEM+GSXML.LIST_MODIFIER);
-	    
+	    clearServices();
 	    return configureServiceRack(service_rack_list, null);
 	} else if (subset.equals(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER)) {
 	    this.metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);

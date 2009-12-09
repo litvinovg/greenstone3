@@ -60,7 +60,7 @@ public class Collection
     /** An element containing the serviceRackList element of buildConfig.xml, used to determine whether it contains
      *  the OAIPMH serviceRack 
      */
-    protected Element service_rack_list = null;
+    //protected Element service_rack_list = null;
     
     protected XMLTransformer transformer = null;
     /** same as setClusterName */
@@ -107,12 +107,9 @@ public class Collection
 	// process the metadata and display items
 	findAndLoadInfo(coll_config_xml, build_config_xml);
 	
-	// now do the services	
-	Element service_list = (Element)GSXML.getChildByTagName(build_config_xml, GSXML.SERVICE_CLASS_ELEM+GSXML.LIST_MODIFIER);
-	configureServiceRack(service_list, coll_config_xml);
+	// now do the services
+	configureServiceRacks(coll_config_xml, build_config_xml);
 
-	this.service_rack_list = service_list;
-  
 	return true;
 	
     }
@@ -132,14 +129,7 @@ public class Collection
      *  11/06/2007 xiao
      */
     public boolean hasOAI() {
-      if (service_rack_list == null) return false;  
-      Element oai_service_rack = GSXML.getNamedElement(service_rack_list, GSXML.SERVICE_CLASS_ELEM,
-                            OAIXML.NAME, OAIXML.OAIPMH);
-      if (oai_service_rack == null) {
-        logger.info("No oai for collection: " + this.cluster_name);
-        return false;
-      }
-      return true;//oai_service_rack == null;
+      return has_oai;
     }
     /** 
      * load in the collection config file into a DOM Element 
@@ -178,7 +168,7 @@ public class Collection
 	    build_config_elem = build_config_doc.getDocumentElement();
 	}
   
-  lastmodified = build_config_file.lastModified();
+	lastmodified = build_config_file.lastModified();
   
 	return build_config_elem;
     }
@@ -243,7 +233,31 @@ public class Collection
 
     }
 
-    protected boolean resolveMacros(Element display_list) {
+  protected boolean configureServiceRacks(Element coll_config_xml, 
+					  Element build_config_xml){
+    clearServices();
+    Element service_list = (Element)GSXML.getChildByTagName(build_config_xml, GSXML.SERVICE_CLASS_ELEM+GSXML.LIST_MODIFIER);
+    configureServiceRack(service_list, coll_config_xml);
+    
+    // Check for oai
+    Element oai_service_rack = GSXML.getNamedElement(service_list, GSXML.SERVICE_CLASS_ELEM, OAIXML.NAME, OAIXML.OAIPMH);
+    if (oai_service_rack == null) {
+	  has_oai = false;
+	  logger.info("No oai for collection: " + this.cluster_name);
+	  
+    } else {
+      has_oai = true;
+    }
+    
+    // collection Config may also contain manually added service racks
+    service_list = (Element)GSXML.getChildByTagName(coll_config_xml, GSXML.SERVICE_CLASS_ELEM+GSXML.LIST_MODIFIER);
+    if (service_list != null) {
+      configureServiceRack(service_list, coll_config_xml);
+    }
+    return true;
+  }
+  
+  protected boolean resolveMacros(Element display_list) {
 	if (display_list==null) return false;
 	NodeList displaynodes = display_list.getElementsByTagName(GSXML.DISPLAY_TEXT_ELEM);
 	if (displaynodes.getLength()>0) { 
@@ -268,14 +282,12 @@ public class Collection
 	Element coll_config_elem = loadCollConfigFile();
 	Element build_config_elem = loadBuildConfigFile();
 	if (coll_config_elem == null||build_config_elem == null) {
-	    // wont be able to do any of teh requests
+	    // wont be able to do any of the requests
 	    return false;
 	}    
 	
 	if (subset.equals(GSXML.SERVICE_ELEM+GSXML.LIST_MODIFIER)) {
-	    Element service_rack_list = (Element)GSXML.getChildByTagName(build_config_elem, GSXML.SERVICE_CLASS_ELEM+GSXML.LIST_MODIFIER);
-	    
-	    return configureServiceRack(service_rack_list, coll_config_elem);
+	  return configureServiceRacks(coll_config_elem, build_config_elem);
 	} 
 
 	if (subset.equals(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER) || subset.equals(GSXML.DISPLAY_TEXT_ELEM+GSXML.LIST_MODIFIER) || subset.equals(GSXML.PLUGIN_ELEM+GSXML.LIST_MODIFIER)) {
