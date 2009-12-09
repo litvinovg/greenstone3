@@ -100,31 +100,35 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
     public synchronized ArrayList executeQuery(String query_statement){
 	//the database hasn't been correct yet
     	ArrayList results = new ArrayList();
-    try{	
-    	
-    	if (statement == null){
+	ResultSet rs = null;
+	try{	
+	    
+	    if (statement == null){
     		logger.info("the database hasn't been correct yet");
     		return new ArrayList();
-    	}
-	
-    	ResultSet rs = statement.executeQuery(query_statement);
-    	ResultSetMetaData rsmd = rs.getMetaData();
-    	int numOfColumns = rsmd.getColumnCount();
-    	while(rs.next()){
-	       HashMap arow = new HashMap();
-	       for(int i = 1; i <= numOfColumns ; i++){
-	    	   arow.put(rsmd.getColumnName(i).toLowerCase(), rs.getObject(i));
-	       }
-	       results.add(arow);  
-	   }
+	    }
+	    
+	    rs = statement.executeQuery(query_statement);
+	    ResultSetMetaData rsmd = rs.getMetaData();
+	    int numOfColumns = rsmd.getColumnCount();
+	    while(rs.next()){
+		HashMap arow = new HashMap();
+		for(int i = 1; i <= numOfColumns ; i++){
+		    arow.put(rsmd.getColumnName(i).toLowerCase(), rs.getObject(i));
+		}
+		results.add(arow);  
+	    }
+
+	    rs.close();
+	   
 	}
 	catch(SQLException sqle){
 	    logger.debug("Database Error occured when executeQuery " + query_statement,sqle);
 	    return results;
 	}
 	catch(Exception e){    		
-		logger.debug(e);
-		return null;
+	    logger.debug(e);
+	    return null;
 	}
 	return results;
     }
@@ -142,8 +146,7 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
     		}
     		logger.debug(stat);
     		rs = statement.executeQuery(stat);
-    		
-    		logger.info("sql stat="+stat+ " result="+rs);
+   	      	logger.info("sql stat="+stat+ " result="+rs);
     	}
     	catch(SQLException sqle){
     		logger.info("Database Error occured when execute query " + stat, sqle);
@@ -168,7 +171,8 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
     		}
 
     		rs = statement.execute(stat);
-//    		connection.commit();
+		statement.close();
+		//    		connection.commit();
     	}
     	catch(SQLException sqle){    		
     		logger.debug("Database Error occured when execute query " + stat, sqle);
@@ -193,8 +197,9 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
     		
     		//either the row count of INSERT, UPDATE OR DELETE statement, or 0 if the statement returns nothing
     		rs = statement.executeUpdate(stat);
+		statement.close();
 //    		connection.commit();
-    		logger.debug("sql stat="+stat+ " result="+rs);
+		logger.debug("sql stat="+stat+ " result="+rs);
     	}
     	catch(SQLException sqle){    		
     		logger.debug("Database Error occured when execute query " + stat, sqle);
@@ -213,10 +218,18 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
      */
     public void check4Table(String stat) throws SQLException {
     	statement.executeQuery(stat);
+	statement.close();
     }
 
     public void closeConnection(String databasepath){
-	sqlServer.disconnect(databasepath);
+	try{
+	    statement.close();
+	    connection.close();
+	    sqlServer.disconnect(databasepath);
+	}
+	catch(SQLException sqle){
+	    logger.debug("Database Error occured when close connection " + databasepath, sqle);
+	}
     }
   
  }
