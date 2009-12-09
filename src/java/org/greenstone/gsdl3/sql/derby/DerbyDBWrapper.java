@@ -23,7 +23,6 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
     protected SQLServer sqlServer = null;
     protected SQLStatements sqlState = null;
     protected Connection connection = null; 
-    protected Statement statement = null;
     protected static Logger logger = Logger.getLogger(org.greenstone.gsdl3.sql.derby.DerbyDBWrapper.class.getName());
 
 
@@ -57,13 +56,12 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
     }
 
     public boolean openConnection(String databasepath){
-	connection = sqlServer.connect(databasepath);
-	
-	if (connection == null) return false;
+	if(connection != null) return true;
 
+	connection = sqlServer.connect(databasepath);
+	if (connection == null) return false;
 	try{
-		connection.setAutoCommit(false);	
-		statement = connection.createStatement();
+	    connection.setAutoCommit(true);	
 	}
 	catch(SQLException sqle){
 	    logger.debug("Database Error occured when creating a statement object",sqle);
@@ -73,23 +71,17 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
     }
 
     public boolean openAndCreateConnection(String databasepath){
+	if(connection != null) return true;
     	connection = sqlServer.connectAndCreate(databasepath);
-
+	
     	if (connection == null) {
     		logger.error("sql connection is null. database path="+databasepath);
     		return false;
     	}
 
     	try{
-    		connection.setAutoCommit(true);	
-    		//by passing the two arguments, the ResultSet returned from executeQuery is updatable
-    		statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-        	if (statement == null) {
-        		logger.error("statement is null");
-        		return false;
-        	}
-
-    	}
+	    connection.setAutoCommit(true);	
+	}
     	catch(SQLException sqle){
     		logger.debug("Database Error occured when creating a statement object",sqle);
     		return false;
@@ -102,13 +94,9 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
     	ArrayList results = new ArrayList();
 	ResultSet rs = null;
 	try{	
-	    
-	    if (statement == null){
-    		logger.info("the database hasn't been correct yet");
-    		return new ArrayList();
-	    }
-	    
-	    rs = statement.executeQuery(query_statement);
+	    //by passing the two arguments, the ResultSet returned from executeQuery is updatable
+	    Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+	   rs = statement.executeQuery(query_statement);
 	    ResultSetMetaData rsmd = rs.getMetaData();
 	    int numOfColumns = rsmd.getColumnCount();
 	    while(rs.next()){
@@ -118,9 +106,7 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
 		}
 		results.add(arow);  
 	    }
-
-	    rs.close();
-	   
+	    statement.close();
 	}
 	catch(SQLException sqle){
 	    logger.debug("Database Error occured when executeQuery " + query_statement,sqle);
@@ -139,7 +125,10 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
      */
     public synchronized ResultSet queryResultSet(String stat){
     	ResultSet rs = null;
+	//by passing the two arguments, the ResultSet returned from executeQuery is updatable
+
     	try{	       	
+	    	Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
     		if (statement == null){
     			logger.info("Null sql statement provided.");
     			return null;
@@ -164,7 +153,9 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
      */
     public synchronized boolean execute(String stat) {
     	boolean rs;
+
     	try{	       	
+	    Statement statement = connection.createStatement();
     		if (statement == null){
     			logger.info("statement is null.");
     			return false;
@@ -172,8 +163,7 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
 
     		rs = statement.execute(stat);
 		statement.close();
-		//    		connection.commit();
-    	}
+	}
     	catch(SQLException sqle){    		
     		logger.debug("Database Error occured when execute query " + stat, sqle);
     		return false;
@@ -189,7 +179,8 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
      */
     public synchronized boolean executeUpdate(String stat) {
     	int rs;
-    	try{	       	
+	try{	       	
+	    Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
     		if (statement == null){
     			logger.info("statement is null.");
     			return false;
@@ -198,7 +189,6 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
     		//either the row count of INSERT, UPDATE OR DELETE statement, or 0 if the statement returns nothing
     		rs = statement.executeUpdate(stat);
 		statement.close();
-//    		connection.commit();
 		logger.debug("sql stat="+stat+ " result="+rs);
     	}
     	catch(SQLException sqle){    		
@@ -217,15 +207,18 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
      * Same as the method 'execute' except throws SQLException
      */
     public void check4Table(String stat) throws SQLException {
-    	statement.executeQuery(stat);
+	Statement statement = connection.createStatement();
+   	statement.executeQuery(stat);
 	statement.close();
     }
 
     public void closeConnection(String databasepath){
 	try{
-	    statement.close();
-	    connection.close();
-	    sqlServer.disconnect(databasepath);
+	    if(connection != null){
+		connection.close();
+		connection = null;
+		sqlServer.disconnect(databasepath);
+	    }
 	}
 	catch(SQLException sqle){
 	    logger.debug("Database Error occured when close connection " + databasepath, sqle);
