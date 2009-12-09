@@ -262,6 +262,12 @@ return
 fi
 setGS3ENV
 
+if test -e gs2build/setup.bash ; then 
+  echo ""
+  echo "Sourcing gs2build/setup.bash"
+  cd gs2build ; source setup.bash ; cd ..
+fi
+
 if test -e ext ; then
   for gsdl_ext in ext/* ; do
     if [ -d $gsdl_ext ] ; then 
@@ -280,6 +286,8 @@ if test -e local ; then
     echo "Sourcing local/gs3-setup.sh"
     cd local ; source gs3-setup.sh ; cd ..
   fi
+
+  # Consider moving these into the local/gs3-setup.sh file
 
   PATH=$GSDL3SRCHOME/local/bin:$PATH
   export PATH

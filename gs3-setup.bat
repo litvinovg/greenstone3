@@ -52,6 +52,34 @@ if exist %TMP%\setcp.bat del %TMP%\setcp.bat
 set GS_CP_SET=yes
 :skipSetCp
 
+:: ---- if gs2build is there, run its setup.bat file ----
+
+if exist gs2build\setup.bat (
+  echo.
+  echo Running gs2build\setup.bat
+  cd gs2build
+  call setup.bat 
+  cd ..
+)
+
+:: ---- Check for any setup files in ext or local folders ----
+if exist ext (
+    for /D %%e IN ("ext/*") do (
+        cd ext\%%e
+        if EXIST setup.bat call setup.bat
+        cd ..\..
+    )
+)
+
+
+if exist local\gs3-setup.bat (
+  echo.
+  echo Running local\gs3-setup.bat
+  cd local
+  call gs3-setup.bat 
+  cd ..
+)
+
 :: ---- Search for java ----
 set JAVA_MIN_VERSION=1.5.0_00
 set HINT=%CD%\packages\jre
