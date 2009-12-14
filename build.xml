@@ -231,7 +231,7 @@
   <property name="gli.home" value="${basedir}/gli"/>
   <property name="javagdbm.home" value="${src.packages.home}/javagdbm"/>
 
-  <condition property="common.src.home" value="${basedir}/common-src" else="${gs2build.home}/common-src">
+  <condition property="common.src.home" value="${basedir}/common-src" else="${gs2build.home}${file.separator}common-src">
     <istrue value="${disable.collection.building}"/>
   </condition>
   
