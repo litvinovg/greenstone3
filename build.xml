@@ -801,7 +801,7 @@
     <property name="tomcat.classpath" refid="local.tomcat.classpath"/>
     <property name="tomcat.path" refid="local.tomcat.path"/>
     <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx400M"/>
-    <exec executable="${catalina.home}/bin/startup.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false" failonerror="true">
+    <exec executable="${catalina.home}/bin/startup.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
       <!--<env key="GSDLOS" value="linux"/> do we need this?? -->
       <env key="GSDL3HOME" value="${basedir}"/>
       <env key="PATH" path="${tomcat.path}"/>
@@ -812,7 +812,7 @@
       <env key="DYLD_LIBRARY_PATH" path="${env.DYLD_LIBRARY_PATH}:${lib.jni}:${gdbm.home}/lib"/> <!-- for mac os --> <!-- need gdbm here??-->
       <env key="WNHOME" path="${wn.home}"/>
     </exec>
-    <exec executable="${catalina.home}/bin/startup.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="true" failonerror="true">
+    <exec executable="${catalina.home}/bin/startup.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="true">
       <env key="GSDLOS" value="windows"/>
       <env key="GSDL3HOME" value="${basedir}"/>
       <env key="Path" path="${tomcat.path}"/>
@@ -833,10 +833,10 @@
   <!-- windows: do we want to launch a webrowser?? -->
   <!-- shouldn't this test whether anything is running first? -->
   <target name="stop-tomcat" description="Shutdown only Tomcat" depends="init" if="tomcat.islocal">
-    <exec executable="${catalina.home}/bin/shutdown.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false" failonerror="true">
+    <exec executable="${catalina.home}/bin/shutdown.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
       <env key="CATALINA_HOME" value="${catalina.home}"/>
     </exec>
-    <exec executable="${catalina.home}/bin/shutdown.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="false" failonerror="true">
+    <exec executable="${catalina.home}/bin/shutdown.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="false">
       <env key="CATALINA_HOME" value="${catalina.home}"/>
     </exec>
   </target>
@@ -1516,16 +1516,16 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
 
   <target name="gli" description="Run the Greenstone Librarian Interface" depends="init" if="collection.building.enabled">
-    <exec executable="${basedir}/gli/gli.sh" os="${os.linux},${os.solaris}" dir="${basedir}/gli" spawn="true" failonerror="true">
+    <exec executable="${basedir}/gli/gli.sh" os="${os.linux},${os.solaris}" dir="${basedir}/gli" spawn="true">
       <env key="gsdl3path" path="${basedir}"/>
       <env key="gsdlpath" path="${gs2build.home}"/>
     </exec>
-    <exec executable="${basedir}/gli/gli.sh" os="${os.mac}" dir="${basedir}/gli" spawn="true" failonerror="true">
+    <exec executable="${basedir}/gli/gli.sh" os="${os.mac}" dir="${basedir}/gli" spawn="true">
       <env key="gsdl3path" path="${basedir}"/>
       <env key="gsdlpath" path="${gs2build.home}"/>
       <env key="DYLD_LIBRARY_PATH" path="${env.DYLD_LIBRARY_PATH}:${gdbm.home}/lib"/>
     </exec>
-    <exec executable="${basedir}/gli/gli.bat" os="${os.windows}" dir="${basedir}/gli" spawn="true" failonerror="true">
+    <exec executable="${basedir}/gli/gli.bat" os="${os.windows}" dir="${basedir}/gli" spawn="true">
       <env key="GSDL3PATH" path="${basedir}"/>
       <env key="GSDLPATH" path="${gs2build.home}"/>
     </exec>
