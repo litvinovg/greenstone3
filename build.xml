@@ -1343,6 +1343,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       dir="${common.src.home}" failonerror="true">
       <arg value="--prefix=${gs2build.home}"/> <!-- what value to use?? -->
       <arg value="--bindir=${gs2build.home}/bin/${os.bin.dir}"/> <!-- what value to use?? -->
+      <arg value="--enable-jni"/>
       <arg line="${static.arg}"/>
     </exec>
   </target>
@@ -1376,12 +1377,14 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <target name="compile-common-src" depends="init">
     <!-- unix: -->
     <exec executable="make" os="${os.unix}" dir="${common.src.home}" failonerror="true">
+      <arg value="with-jni"/>
     </exec>
     <!-- windows: -->
     <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
       <arg value="/f"/>
       <arg value="win32.mak"/>
       <arg value="GSDLHOME=${gs2build.home}"/>
+      <arg value="ENABLE_JNI=1"/>
     </exec>
   </target>
   
@@ -1415,14 +1418,15 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <!-- make install for common-src -->
     <!-- unix: -->
     <exec executable="make" os="${os.unix}" dir="${common.src.home}" failonerror="true">
-      <arg value="install"/>
+      <arg value="install-with-jni"/>
     </exec>
       
     <!-- windows: -->
     <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
       <arg value="/f"/>
       <arg value="win32.mak"/>
-      <arg value="install"/>    
+      <arg value="install"/>
+      <arg value="ENABLE_JNI=1"/>
     </exec>
 
     <!-- install gs2build indexers for windows -->
