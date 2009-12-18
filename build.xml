@@ -1428,6 +1428,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="win32.mak"/>
       <arg value="install"/>
       <arg value="ENABLE_JNI=1"/>
+      <arg value="USE_SQLITE=0"/>
     </exec>
 
     <!-- install gs2build indexers for windows -->
