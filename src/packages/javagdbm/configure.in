@@ -58,6 +58,16 @@ else
     COMPAT32BITFLAGS=
   fi
 fi
+
+# Only need compat32bitflag if using MG or MGPP
+if test "$ENABLE_MG" = "0" ; then
+  COMPAT32BITFLAGS=
+else
+  if test "$ENABLE_MGPP" = "0" ; then
+    COMPAT32BITFLAGS=
+  fi
+fi
+
 export COMPAT32BITFLAGS
 AC_SUBST(COMPAT32BITFLAGS)
 
