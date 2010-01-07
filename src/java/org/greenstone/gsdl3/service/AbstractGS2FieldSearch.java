@@ -19,7 +19,6 @@ package org.greenstone.gsdl3.service;
 
 
 // Greenstone classes
-import org.greenstone.mgpp.*;
 import org.greenstone.gsdl3.util.*;
 
 // XML classes
