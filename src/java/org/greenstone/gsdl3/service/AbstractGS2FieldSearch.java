@@ -68,9 +68,8 @@ abstract public class AbstractGS2FieldSearch
     // some stuff for config files
     protected static final String SEARCH_TYPE_ELEM = "searchType";
     protected static final String SEARCH_TYPE_PLAIN = "plain";
-    protected static final String SEARCH_TYPE_FORM = "form";
-    protected static final String SEARCH_TYPE_FORM_SIMPLE = "simple";
-    protected static final String SEARCH_TYPE_FORM_ADVANCED = "advanced";
+    protected static final String SEARCH_TYPE_SIMPLE_FORM = "simpleform";
+    protected static final String SEARCH_TYPE_ADVANCED_FORM = "advancedform";
 
     protected static final String DEFAULT_LEVEL_ELEM = "defaultLevel";
     protected static final String DEFAULT_DB_LEVEL_ELEM = "defaultDBLevel";
@@ -113,43 +112,7 @@ abstract public class AbstractGS2FieldSearch
 	if (!super.configure(info, extra_info)){
 	    return false;
 	}
-	// the generic config has set up the text query service, but we may not want it
-	Element search_type_list = (Element) GSXML.getChildByTagName(info, SEARCH_TYPE_ELEM + GSXML.LIST_MODIFIER);
-	if (search_type_list == null) {
-	    // assume form and plain
-	    this.plain_search = true;
-	    this.simple_form_search = true;
-	    this.advanced_form_search = true;
-	} else {
-	    NodeList types = search_type_list.getElementsByTagName(SEARCH_TYPE_ELEM);
-	    for (int i=0; i<types.getLength(); i++) {
-		Element t = (Element)types.item(i);
-		String type_name = t.getAttribute(GSXML.NAME_ATT);
-		if (type_name.equals(SEARCH_TYPE_PLAIN)) {
-		    this.plain_search = true;
-		} else if (type_name.equals(SEARCH_TYPE_FORM)) {
-		    String type_type = t.getAttribute(GSXML.TYPE_ATT);
-		    if (type_type.equals("")) {
-			this.simple_form_search = true;
-			this.advanced_form_search = true;
-		    } else if (type_type.equals(SEARCH_TYPE_FORM_SIMPLE)) {
-			this.simple_form_search = true;
-		    } else if (type_type.equals(SEARCH_TYPE_FORM_ADVANCED)) {
-			this.advanced_form_search = true;
-			
-		    }
-		}
-	    }
-	}
-
-	if (!this.plain_search) {
-	    // need to remove the TextQuery service
-	    Element tq_service = GSXML.getNamedElement(short_service_info, GSXML.SERVICE_ELEM, GSXML.NAME_ATT, TEXT_QUERY_SERVICE);
-	    short_service_info.removeChild(tq_service);
-	    
-	}
-
-       
+      
 	// Get the default level out of <defaultLevel> (buildConfig.xml)
 	Element def = (Element) GSXML.getChildByTagName(info, DEFAULT_LEVEL_ELEM);
 	if (def != null) {
@@ -170,12 +133,43 @@ abstract public class AbstractGS2FieldSearch
 	    this.default_db_level = "Sec";
 	}
 	
-	// get display info from extra info - for levels
+	// get stuff from from extra info (which is collectionConfig.xml)
 	if (extra_info !=null) {
+
+	  // the search element
+	  Element config_search = (Element)GSXML.getChildByTagName(extra_info, GSXML.SEARCH_ELEM);
+	  
+	  NodeList search_types = config_search.getElementsByTagName(SEARCH_TYPE_ELEM);
+	  if (search_types == null) {
+	    // none specified, assume plain only
+	    this.plain_search = true;
+	  }
+	  else {
+	    for (int i=0; i<search_types.getLength(); i++) {
+	      Element t = (Element)search_types.item(i);
+	      String type_name = t.getAttribute(GSXML.NAME_ATT);
+	      if (type_name.equals(SEARCH_TYPE_PLAIN)) {
+		this.plain_search = true;
+	      } else if (type_name.equals(SEARCH_TYPE_SIMPLE_FORM)) {
+		this.simple_form_search = true;
+	      } else if (type_name.equals(SEARCH_TYPE_ADVANCED_FORM)) {
+		this.advanced_form_search = true;
+	      }
+	    }
+	  } 
+	  
+	  // AbstractGS2Search has set up the text query service, but we may not want it
+	  if (!this.plain_search) {
+	    // need to remove the TextQuery service
+	    Element tq_service = GSXML.getNamedElement(short_service_info, GSXML.SERVICE_ELEM, GSXML.NAME_ATT, TEXT_QUERY_SERVICE);
+	    short_service_info.removeChild(tq_service);
+	    
+	  } 
+
 	    Document owner = info.getOwnerDocument();
     
 	    NodeList levels = info.getElementsByTagName(GSXML.LEVEL_ELEM);
-	    Element config_search = (Element)GSXML.getChildByTagName(extra_info, GSXML.SEARCH_ELEM);
+	    
 	    
 	    for (int i=0; i<levels.getLength();i++) {
 		Element lev = (Element)levels.item(i);
@@ -198,8 +192,12 @@ abstract public class AbstractGS2FieldSearch
 		    }
 		}
 	    } // for each level
+	} else {
+	  // for soem reason we don't have the collectionConfig file. assume plain only
+	  this.plain_search = true;
 	}
- 
+	
+	
 	// the format info is the same for all services
 	Element format_info = (Element)format_info_map.get(TEXT_QUERY_SERVICE);
 	
