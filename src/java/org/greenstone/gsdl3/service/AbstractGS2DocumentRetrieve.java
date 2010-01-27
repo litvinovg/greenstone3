@@ -46,8 +46,8 @@ import org.apache.log4j.*;
 /** Implements the generic retrieval and classifier services for GS2 
  * collections.
  *
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
- * @author <a href="mailto:mdewsnip@cs.waikato.ac.nz">Michael Dewsnip</a>
+ * @author Katherine Don
+ * @author Michael Dewsnip
  */
 
 public abstract class AbstractGS2DocumentRetrieve
