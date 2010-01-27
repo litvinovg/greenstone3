@@ -240,7 +240,8 @@ public abstract class ServiceRack
 			    response = (Element)m.invoke(this, args);
 			    
 			} catch (Exception e) {
-			    logger.error("Trying to call a processService type method (process"+to+") on a subclass("+this.getClass().getName()+"), but an exception happened:"+e.toString());
+			  logger.error("Trying to call a processService type method (process"+to+") on a subclass("+this.getClass().getName()+"), but an exception happened:"+e.toString(), e);
+			    
 			    error_string.append("Trying to call a processService type method (process"+to+") on a subclass("+this.getClass().getName()+"), but an exception happened:"+e.toString());
 			}
 		    } else {
