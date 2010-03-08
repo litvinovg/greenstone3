@@ -109,6 +109,9 @@ public class GS2MGPPRetrieve
     			doc_content = resolveTextMacros(doc_content, doc_id, lang);
     		}
     		
+		// remove the <Doc></Doc> and <Sec></Sec> tags
+		//doc_content = doc_content.replace("<Doc>", "").replace("</Doc>", "").replace("<Sec>", "").replace("</Sec>", "");
+		doc_content = doc_content.replaceAll("</?(Doc|Sec)>", "");
     	} catch (Exception e) {
     		logger.info("exception happended with mgpp_src.getDocument()" + e);
     		doc_content = "this is the content for section hash id "+ doc_id+", mgpp doc num "+doc_num+"\n";
