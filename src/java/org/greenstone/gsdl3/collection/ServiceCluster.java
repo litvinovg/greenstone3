@@ -213,7 +213,7 @@ public class ServiceCluster
 	    logger.error("cluster has no service racks!!");
 	} else {
 	    
-	    if (!configureServiceRack(service_rack_list, null)) {
+	    if (!configureServiceRackList(service_rack_list, null)) {
 		logger.error("couldn't configure the  service racks!!");
 		return false;
 	    }
@@ -284,7 +284,7 @@ public class ServiceCluster
     /** creates and configures all the services - extra_info is some more xml 
 that is passed to teh service  - eg used for coll config files for Collection
     */
-    protected boolean configureServiceRack(Element service_rack_list, 
+    protected boolean configureServiceRackList(Element service_rack_list, 
 					   Element extra_info) {
 
 	// create all the services
@@ -610,7 +610,7 @@ that is passed to teh service  - eg used for coll config files for Collection
 	if (subset.equals(GSXML.SERVICE_ELEM+GSXML.LIST_MODIFIER)) {
 	    Element service_rack_list = (Element)GSXML.getChildByTagName(cluster_config_elem, GSXML.SERVICE_CLASS_ELEM+GSXML.LIST_MODIFIER);
 	    clearServices();
-	    return configureServiceRack(service_rack_list, null);
+	    return configureServiceRackList(service_rack_list, null);
 	} else if (subset.equals(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER)) {
 	    this.metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
 	    Element metadata_list = (Element)GSXML.getChildByTagName(cluster_config_elem, GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
