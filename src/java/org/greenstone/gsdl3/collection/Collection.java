@@ -39,7 +39,6 @@ import org.apache.log4j.*;
  * a ServiceCluster - it has local data that the services use.
  *
  * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
- * @version $Revision$
  * @see ModuleInterface
  */
 public class Collection 
@@ -237,22 +236,22 @@ public class Collection
 					  Element build_config_xml){
     clearServices();
     Element service_list = (Element)GSXML.getChildByTagName(build_config_xml, GSXML.SERVICE_CLASS_ELEM+GSXML.LIST_MODIFIER);
-    configureServiceRack(service_list, coll_config_xml);
-    
-    // Check for oai
-    Element oai_service_rack = GSXML.getNamedElement(service_list, GSXML.SERVICE_CLASS_ELEM, OAIXML.NAME, OAIXML.OAIPMH);
-    if (oai_service_rack == null) {
-	  has_oai = false;
-	  logger.info("No oai for collection: " + this.cluster_name);
-	  
-    } else {
-      has_oai = true;
-    }
-    
+    configureServiceRackList(service_list, coll_config_xml);
+        
     // collection Config may also contain manually added service racks
     service_list = (Element)GSXML.getChildByTagName(coll_config_xml, GSXML.SERVICE_CLASS_ELEM+GSXML.LIST_MODIFIER);
     if (service_list != null) {
-      configureServiceRack(service_list, coll_config_xml);
+      configureServiceRackList(service_list, build_config_xml);
+      
+      // Check for oai
+      Element oai_service_rack = GSXML.getNamedElement(service_list, GSXML.SERVICE_CLASS_ELEM, OAIXML.NAME, OAIXML.OAIPMH);
+      if (oai_service_rack == null) {
+	has_oai = false;
+	logger.info("No oai for collection: " + this.cluster_name);
+	
+      } else {
+	has_oai = true;
+      }
     }
     return true;
   }
