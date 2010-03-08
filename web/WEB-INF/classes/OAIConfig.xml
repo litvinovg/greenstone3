@@ -3,7 +3,7 @@
 -->
 <OAIConfig>       
 	 <!-- The name of this oai repository, which is human readable. -->
-         <repositoryName></repositoryName>
+         <repositoryName>Greenstone3 OAI repository</repositoryName>
 	 <!-- The base url to request metadata from this repository.
             TODO: this element should be determined and overriden dynamically given the osi request url in OAIServer.java. -->
          <baseURL>http://your-domain-name/greenstone3/oaiserver</baseURL>
