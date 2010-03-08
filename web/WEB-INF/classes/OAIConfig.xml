@@ -20,6 +20,10 @@
 	 <!-- The repository maintainer email address -->
          <adminEmail></adminEmail>
    <!-- Information above this line goes into the response to the Identify request -->
+  <!-- set to no if you don't want a stylesheet to be specified in the OAI output -->
+  <useOAIStylesheet>yes</useOAIStylesheet>
+  <!-- uncomment and set value if you want to use a different stylesheet to the default interfaces/oai/oai2.xsl -->
+   <!--<OAIStylesheet></OAIStylesheet> -->
          
 	 <!-- The time period in which a newly generated resumption token will remain valid, specified in second. Hence, the default
               value 7200 is equivalent to 2 hours.        
