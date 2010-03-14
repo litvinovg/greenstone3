@@ -76,7 +76,9 @@
         <format><gsf:option name="TOC" value="true"/></format>
     </display>
     <replaceListRef id="gs2-standard"/>
-    <OAI>
+  <serviceRackList>
+    <!-- comment out the following serviceRack if you want to disable OAI for this collection -->
+    <serviceRack name="OAIPMH">
         <ListMetadataFormats>
             <!--What metadata sets to support is collection specific. To support other metadata schema, simply add a metadataFormat element here.
       The support of unqualified Dublin Core metadata set is mendatory in the oai specification.
@@ -102,5 +104,6 @@
                 </mappingList>
             </metadataFormat>
         </ListMetadataFormats>
-    </OAI>
+    </serviceRack> 
+  </serviceRackList>
 </CollectionConfig>
