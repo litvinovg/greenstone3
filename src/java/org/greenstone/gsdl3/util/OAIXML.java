@@ -72,6 +72,8 @@ public class OAIXML {
     public static final String RESUMPTION_TOKEN_EXPIRATION = "resumptionTokenExpiration";
     public static final String IDENTIFIER = "identifier";
 
+    public static final String USE_STYLESHEET = "useOAIStylesheet";
+    public static final String STYLESHEET = "OAIStylesheet";
     // words used to compose oai responses
     public static final String ADMIN_EMAIL = "adminEmail";
     public static final String BAD_ARGUMENT = "badArgument";
@@ -352,32 +354,7 @@ public class OAIXML {
     public static long getTokenExpiration() {
       return token_expiration*1000;
     }
-    /** Read in collectionConfig.xml which contains the metadata format information and
-     *  the metadata format mapping
-     */ 
-    public static Element getCollectionConfigXML(String site_name, String coll_name) {
-      init();
-      
-      Element coll_config = null;
-     
-      // The system environment variable $GSDL3HOME does not contain the file separator 
-      File coll_config_file = new File(GlobalProperties.getGSDL3Home() + FILE_SEPARATOR +
-          "sites" + FILE_SEPARATOR + site_name + FILE_SEPARATOR + "collect" +FILE_SEPARATOR
-          + coll_name + FILE_SEPARATOR + "etc" + FILE_SEPARATOR + "collectionConfig.xml");
-      if (!coll_config_file.exists()) {
-        logger.error(" collection config file: "+coll_config_file.getPath()+" not found!");
-        return null;
-      }
-      Document coll_config_doc = parseXMLFile(coll_config_file);
-      if (coll_config_doc != null) {
-        coll_config = coll_config_doc.getDocumentElement();
-      } else {
-        logger.error("Fail to parse collectionConfig.xml of collection: " + coll_config_file.getPath());
-        return null;
-      }   
-            
-      return coll_config;
-    }
+
     /** TODO: returns a basic response for appropriate oai version
      *  
      */
