@@ -60,8 +60,7 @@ public class OAIPMH extends ServiceRack {
   
   protected String site_name = "";
   protected String coll_name = "";
-  protected Element coll_config_xml = null;
-  
+ 
   /** constructor */
   public OAIPMH() {
 
@@ -71,7 +70,9 @@ public class OAIPMH extends ServiceRack {
     super.cleanUp();//??
     this.coll_db.closeDatabase();
   }
-  /** configure this service */
+  /** configure this service 
+  info is the OAIPMH service rack from collectionConfig.xml, and 
+  extra_info is buildConfig.xml */
   public boolean configure(Element info, Element extra_info) {
     if (!super.configure(info, extra_info)){
       logger.info("Configuring ServiceRack.java returns false.");
@@ -79,42 +80,47 @@ public class OAIPMH extends ServiceRack {
     }
     
     //get the names from ServiceRack.java
-    site_name = this.router.getSiteName();
-    coll_name = this.cluster_name;
-    //get the collection-specific configurations from collectionConfig.xml
-    coll_config_xml = OAIXML.getCollectionConfigXML(site_name, coll_name);
+    this.site_name = this.router.getSiteName();
+    this.coll_name = this.cluster_name;
     
     logger.info("Configuring OAIPMH...");
-    // this call passes the indexStem in of ServiceRack element in buildConfig.xml to the super class.
+
     this.config_info = info;
     
-    // the index stem is either specified in the buildConfig.xml file or uses the collection name
-    Element index_stem_elem = (Element) GSXML.getChildByTagName(info, GSXML.INDEX_STEM_ELEM);
-    String index_stem = null;
-    if (index_stem_elem != null) {
-      index_stem = index_stem_elem.getAttribute(GSXML.NAME_ATT);
+    // the index stem is either specified in the buildConfig.xml file (extra_info) or uses the collection name
+    Element metadata_list = (Element) GSXML.getChildByTagName(extra_info, GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+    String index_stem = "";
+    String infodb_type = "";
+    if (metadata_list != null) {
+      
+      Element index_stem_elem = (Element) GSXML.getNamedElement(metadata_list, GSXML.METADATA_ELEM, GSXML.NAME_ATT, "indexStem");
+      
+      if (index_stem_elem != null) {
+	index_stem = GSXML.getNodeText(index_stem_elem);
+      }
+
+      Element infodb_type_elem = (Element) GSXML.getNamedElement(metadata_list, GSXML.METADATA_ELEM, GSXML.NAME_ATT, "infodbType");
+      if (infodb_type_elem != null) {
+	infodb_type = GSXML.getNodeText(infodb_type_elem);
+      }
+
     }
+
     if (index_stem == null || index_stem.equals("")) {
       index_stem = this.cluster_name;
     }
-  
-    // find out what kind of database we have
-    Element database_type_elem = (Element) GSXML.getChildByTagName(info, GSXML.DATABASE_TYPE_ELEM);
-    String database_type = null;
-    if (database_type_elem != null) {
-      database_type = database_type_elem.getAttribute(GSXML.NAME_ATT);
+    if (infodb_type == null || infodb_type.equals("")) {
+      infodb_type = "gdbm"; // the default
     }
-    if (database_type == null || database_type.equals("")) {
-      database_type = "gdbm"; // the default
-    }
-    coll_db = new SimpleCollectionDatabase(database_type);
+
+    coll_db = new SimpleCollectionDatabase(infodb_type);
     if (coll_db == null) {
-      logger.error("Couldn't create the collection database of type "+database_type);
+      logger.error("Couldn't create the collection database of type "+infodb_type);
       return false;
     }
     
     // Open database for querying
-    String coll_db_file = GSFile.collectionDatabaseFile(this.site_home, this.cluster_name, index_stem, database_type);
+    String coll_db_file = GSFile.collectionDatabaseFile(this.site_home, this.cluster_name, index_stem, infodb_type);
     if (!this.coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.READ)) {
       logger.error("Could not open collection database!");
       return false;
@@ -394,12 +400,6 @@ public class OAIPMH extends ServiceRack {
       logger.error("metadata prefix is not supported.");
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
     }
-// Another way of doing the same job!    
-//    HashMap prefix_map = OAIXML.getChildrenMapByTagName(coll_config_xml, OAIXML.METADATA_PREFIX);
-//    if(!prefix_map.contains(prefix)) {
-//      logger.error("metadata prefix is not supported.");
-//      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
-//    }
     
     //get a list of identifiers (it contains a list of strings)
     ArrayList oid_list = getChildrenIds(OAIXML.BROWSELIST);
@@ -451,8 +451,7 @@ public class OAIPMH extends ServiceRack {
    *  return null if not found.
    */
   private Element getMetadataFormatElement(String prefix) {
-    Element oai = (Element)GSXML.getChildByTagName(this.coll_config_xml, OAIXML.OAI);
-    Element list_meta_format = (Element)GSXML.getChildByTagName(oai, OAIXML.LIST_METADATA_FORMATS);
+    Element list_meta_format = (Element)GSXML.getChildByTagName(this.config_info, OAIXML.LIST_METADATA_FORMATS);
     Element metadata_format = GSXML.getNamedElement(list_meta_format, OAIXML.METADATA_FORMAT, OAIXML.METADATA_PREFIX, prefix);
     return metadata_format;
   }
@@ -536,7 +535,7 @@ public class OAIPMH extends ServiceRack {
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.OAI_SERVICE_UNAVAILABLE, ""));
     }
     
-    NodeList meta_list = getMetadataFormatList(this.coll_config_xml);
+    NodeList meta_list = getMetadataFormatList();
     if (meta_list == null || meta_list.getLength() == 0) {
       logger.error("No metadata format is present in collectionConfig.xml");
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.NO_METADATA_FORMATS, ""));
@@ -568,9 +567,8 @@ public class OAIPMH extends ServiceRack {
   /** return the ListMetadataFormats element in collectionConfig.xml
    *  Currently, it will only contain one metadata format: oai_dc
    */
-  protected NodeList getMetadataFormatList(Element coll_config_xml) {
-    Element oai_elem = (Element)GSXML.getChildByTagName(coll_config_xml, OAIXML.OAI);
-    Element list_meta_formats = (Element)GSXML.getChildByTagName(oai_elem, OAIXML.LIST_METADATA_FORMATS);
+  protected NodeList getMetadataFormatList() {
+    Element list_meta_formats = (Element)GSXML.getChildByTagName(this.config_info, OAIXML.LIST_METADATA_FORMATS);
     return GSXML.getChildrenByTagName(list_meta_formats, OAIXML.METADATA_FORMAT);
   }
   /** @param metadata_format - the metadataFormat element in collectionConfig.xml
@@ -683,10 +681,10 @@ public class OAIPMH extends ServiceRack {
         first_name = second_name = names;
       }
       if(key.equals(second_name)) {
-        String meta_value = info.getInfo(key);
+	String meta_value = info.getInfo(key);
         name_value[0] = first_name;
-        name_value[1] = meta_value;
-        return name_value;
+	name_value[1] = meta_value;
+	return name_value;
       }
     }
     return null;
@@ -697,7 +695,7 @@ public class OAIPMH extends ServiceRack {
     
     for(int i=0; i<metadata_names.length; i++) {
       String[] name_value = getMetadata(info, metadata_names[i]);
-      if(name_value != null) {
+      if(name_value != null) { 
         map.put(name_value[0], name_value[1]);
         empty_map = false;
       }
