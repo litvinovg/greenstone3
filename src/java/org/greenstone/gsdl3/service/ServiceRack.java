@@ -52,8 +52,7 @@ import org.apache.log4j.*;
  * for example, the TextQuery service would be invoked by 
  * processTextQuery(Element request)
  *
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
- * @version $Revision$
+ * @author Katherine Don
  */
 public abstract class ServiceRack
     implements ModuleInterface
