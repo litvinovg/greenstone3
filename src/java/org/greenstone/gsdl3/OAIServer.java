@@ -73,6 +73,10 @@ public class OAIServer extends HttpServlet {
   /** The name of the site with which we will finally be dealing, whether it is a local site or a remote site through a communicator.*/
   protected String site = "";
   
+  // do we output the stylesheet processing instruction?
+  protected boolean use_oai_stylesheet = true;
+  protected String oai_stylesheet = "interfaces/oai/oai2.xsl";
+
   static Logger logger = Logger.getLogger(org.greenstone.gsdl3.OAIServer.class.getName());
   
   /** initialise the servlet
@@ -172,8 +176,30 @@ public class OAIServer extends HttpServlet {
     // pass it to the receptionist
     this.recept.configure(oai_config);
     
+    // also, we have something we want to get from here - useOAIStylesheet
+    this.configure(oai_config);
   }//end of init()
   
+  private void configure(Element oai_config) {
+    Element use_stylesheet_elem = (Element)GSXML.getChildByTagName(oai_config, OAIXML.USE_STYLESHEET);
+    if (use_stylesheet_elem != null) {
+      String value = GSXML.getNodeText(use_stylesheet_elem);
+      if (value.equals("no")) {
+	this.use_oai_stylesheet = false;
+      }
+    }
+    if (this.use_oai_stylesheet) {
+      // now see if there is a custom stylesheet specified
+      Element stylesheet_elem = (Element)GSXML.getChildByTagName(oai_config, OAIXML.STYLESHEET);
+      if (stylesheet_elem != null) {
+	String value = GSXML.getNodeText(stylesheet_elem);
+	if (!value.equals("")) {
+	  oai_stylesheet = value;
+	}
+      }
+      
+    }
+  }
   private void initVerbs() {
     verb_set = new HashSet();
     verb_set.add(OAIXML.GET_RECORD);
@@ -265,8 +291,11 @@ public class OAIServer extends HttpServlet {
         verb_elem = OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, "");
       } 
       xml_response.appendChild(verb_elem);
-      //this line never got displayed
-      //out.println("<?xml version='1.0' encoding='UTF-8' ?>");
+
+      out.println("<?xml version='1.0' encoding='UTF-8' ?>");
+      if (this.use_oai_stylesheet) {
+	out.println("<?xml-stylesheet type='text/xsl' href='"+this.oai_stylesheet+"' ?>\n");
+      }
       out.println(this.converter.getPrettyString(xml_response));
       return;
     }//end of if(validate
@@ -317,6 +346,10 @@ public class OAIServer extends HttpServlet {
       } else {
         GSXML.copyAllChildren(xml_response, verb_elem);
       }
+    }
+    out.println("<?xml version='1.0' encoding='UTF-8' ?>");
+    if (this.use_oai_stylesheet) {
+      out.println("<?xml-stylesheet type='text/xsl' href='"+this.oai_stylesheet+"' ?>\n");
     }
     out.println (this.converter.getPrettyString (xml_response));
     return; 
