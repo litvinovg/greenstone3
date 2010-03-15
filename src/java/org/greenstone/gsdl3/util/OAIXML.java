@@ -88,7 +88,6 @@ public class OAIXML {
     public static final String COMPRESSION = "compression";
     public static final String CURSOR = "cursor";
     public static final String DATESTAMP = "datestamp";
-    public static final String DC_METADATA_NAMES = "DCMetadataNames";
     public static final String DELETED_RECORD = "deletedRecord";
     public static final String DESCRIPTION = "description";
     public static final String EARLIEST_DATESTAMP = "earliestDatestamp";
@@ -316,6 +315,26 @@ public class OAIXML {
       granularity = granularity.replaceAll("YYYY", "yyyy").replaceAll("DD", "dd").replaceAll("hh", "HH");
       return oai_config_elem;
     }
+
+  public static String[] getMetadataMapping(Element metadata_format) {
+
+    if (metadata_format == null) {
+      return null;
+    }
+    NodeList mappings = metadata_format.getElementsByTagName(MAPPING);
+    int size = mappings.getLength();
+    if (size == 0) {
+      logger.info("No metadata mappings are provided in OAIConfig.xml."); 
+      return null;
+    }
+    String[] names = new String[size];
+    for (int i=0; i<size; i++) {
+      names[i] = GSXML.getNodeText((Element)mappings.item(i)).trim();
+    }
+    return names;      
+    
+  }
+  
     public static String[] getGlobalMetadataMapping(String prefix) {
       Element list_meta_formats = (Element)GSXML.getChildByTagName(oai_config_elem, LIST_METADATA_FORMATS);
       if(list_meta_formats == null) {
@@ -325,31 +344,9 @@ public class OAIXML {
       if(metadata_format == null) {
         return null;
       }
-    NodeList mappings = metadata_format.getElementsByTagName(MAPPING);
-    int size = mappings.getLength();
-    if (size == 0) {
-        logger.info("No metadata mappings are provided in OAIConfig.xml."); 
-        return null;
+      return getMetadataMapping(metadata_format);
     }
-    String[] names = new String[size];
-    for (int i=0; i<size; i++) {
-      names[i] = GSXML.getNodeText((Element)mappings.item(i)).trim();
-    }
-    return names;      
-    }
-  public static String[] getDublinCoreNames() {
-    // read the standard Dublin Core metadata names
-    //<DCmetadataNames>dc.Title,dc.Creator,dc.Subject,dc.Description,dc.Publisher,dc.Contributor,dc.Date,dc.Type,dc.Format,dc.Identifier,dc.Source,dc.Language,dc.Relation,dc.Coverage,dc.Rights</DCmetadataNames>
-    Element dc_metadata_names = (Element)GSXML.getChildByTagName(oai_config_elem, DC_METADATA_NAMES);
-    if(dc_metadata_names == null) {
-      logger.error("Dublin Core metadata names are not provided.");
-      return null;
-    }
-    String names = GSXML.getNodeText(dc_metadata_names).trim();
-    return names.split(",");
-//    String[] str = {"dc.Title","dc.Creator","dc.Subject","dc.Description","dc.Publisher","dc.Contributor","dc.Date","dc.Type","dc.Format","dc.Identifier","dc.Source","dc.Language","dc.Relation","dc.Coverage","dc.Rights"};
-//    return str;
-  }
+
     
     public static long getTokenExpiration() {
       return token_expiration*1000;
@@ -516,9 +513,10 @@ public class OAIXML {
       //examples of tag_name: dc, oai_dc:dc, etc.
       Element oai = response_doc.createElement(tag_name);
       if (version.equals(OAI_VERSION2)) {
-        oai.setAttribute("xmlns", "http://www.openarchives.org/OAI/2.0/");
+        oai.setAttribute("xmlns:oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc/");
+        oai.setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
         oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/2.0 \n http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd");
+        oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ \n http://www.openarchives.org/OAI/2.0/oai_dc.xsd");
       } else {
         oai.setAttribute("xmlns", "ttp://www.openarchives.com/OAI/1.1/");
         oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
