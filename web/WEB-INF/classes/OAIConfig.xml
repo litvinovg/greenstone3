@@ -32,8 +32,6 @@
   <resumptionTokenExpiration>7200</resumptionTokenExpiration>
   <!-- How many sets/identifiers/records to send for the request before issuing a resumption token. A value less than 0 (e.g. -1) indicates that a complete list of records will be returned. -->
   <resumeAfter>250</resumeAfter>
-  <!-- These field names will be used when there is no any mapping provided in the collectionConfig.xml and OAIConfig.xml -->
-  <DCmetadataNames>dc.Title,dc.Creator,dc.Subject,dc.Description,dc.Publisher,dc.Contributor,dc.Date,dc.Type,dc.Format,dc.Identifier,dc.Source,dc.Language,dc.Relation,dc.Coverage,dc.Rights</DCmetadataNames>
   <!-- a list of metadata formats supported by this repository -->
   <ListMetadataFormats>
     <metadataFormat metadataPrefix="oai_dc">
@@ -42,19 +40,25 @@
       <metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
       <mappingList>
         <!-- 
-        This mapping will be used when there is no mapping provided in the collectionConfig.xml for the oai_dc metadata format.
-        The mapping is in the form: <publicly supported metadata name>,<mapped metadata name>, short as <A>,<B> 
-        The first metadata name is medatory; if there is no mapped name followed, then the first name must be used by the records and
-        searchable in the database, otherwise it is the mapped name stored in the database. The number of mapping elements matches the
-        number of external metadata of the records. If only one name is present, the returned metadata will use this name plus the retrieved value;
-        if both <A>,<B> are present, the returned metadata will use <A>'s name plus <B>'s value retrieved from database.
-        
-        **Bear in mind: if this mapping list is not present, the standard dc. metadata names (15 in total) will be used to retrieve metadata in the database.
+        This is the default mapping for dc metadata. It can be overridden for a collection by adding a mappingList into the oai_dc metadataFormat element in the collection's collectionConfig.xml file.
+        The mapping is in the form: <publicly supported metadata name>,<greenstone metadata name>, (<A>,<B>). B metadata from a document will be mapped to A. 
+        The first metadata name is mandatory; if there is no greenstone name following, then the first name will be looked for in the documents. 
         -->
-	<mapping>dc.Title,dls.Title</mapping>
-	<mapping>dc.Subject,dls.Subject</mapping>  
-	<mapping>dc.Language,dls.Language</mapping>  
-	<mapping>dc.Organization,dls.Organization</mapping>  
+	<mapping>dc:title,dc.Title</mapping>
+	<mapping>dc:creator,dc.Creator</mapping>
+	<mapping>dc:subject,dc.Subject</mapping>
+	<mapping>dc:description,dc.Description</mapping>
+	<mapping>dc:publisher,dc.Publisher</mapping>
+	<mapping>dc:contributor,dc.Contributor</mapping>
+	<mapping>dc:date,dc.Date</mapping>
+	<mapping>dc:type,dc.Type</mapping>
+	<mapping>dc:format,dc.Format</mapping>
+	<mapping>dc:identifier,dc.Identifier</mapping>
+	<mapping>dc:source,dc.Source</mapping>
+	<mapping>dc:language,dc.Language</mapping>
+	<mapping>dc:relation,dc.Relation</mapping>
+	<mapping>dc:coverage,dc.Coverage</mapping>
+	<mapping>dc:rights,dc.Rights</mapping>
       </mappingList>
     </metadataFormat>
   </ListMetadataFormats>
