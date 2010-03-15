@@ -80,30 +80,21 @@
     <!-- comment out the following serviceRack if you want to disable OAI for this collection -->
     <serviceRack name="OAIPMH">
         <ListMetadataFormats>
-            <!--What metadata sets to support is collection specific. To support other metadata schema, simply add a metadataFormat element here.
-      The support of unqualified Dublin Core metadata set is mendatory in the oai specification.
+	<!--What metadata sets to support is collection specific. To support other metadata schema, simply add a metadataFormat element here.
+	The support of unqualified Dublin Core metadata set is mendatory in the oai specification.
       -->
-            <metadataFormat metadataPrefix="oai_dc">
-                <metadataPrefix>oai_dc</metadataPrefix>
-                <schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
-                <metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
-                <mappingList>
-                    <!-- 
-	  The mapping is in the form: <publicly supported metadata name>,<mapped metadata name>, short as <A>,<B> 
-	  The first metadata name is medatory; if there is no mapped name followed, then the first name must be used by the records and
-	  searchable in the database, otherwise it is the mapped name stored in the database. The number of mapping elements matches the
-	  number of external metadata of the records. If only one name is present, the returned metadata will use this name plus the retrieved value;
-	  if both <A>,<B> are present, the returned metadata will use <A>'s name plus <B>'s value retrieved from database.
-	  
-	  **Bear in mind: if this mapping list is not present, the standard dc. metadata names (15 in total) will be used to retrieve metadata in the database.
-	  -->
-                    <mapping>dc.Title,dls.Title</mapping>
-                    <mapping>dc.Subject,dls.Subject</mapping>
-                    <mapping>dc.Language,dls.Language</mapping>
-                    <mapping>dc.Organization,dls.Organization</mapping>
-                </mappingList>
-            </metadataFormat>
-        </ListMetadataFormats>
+	<metadataFormat metadataPrefix="oai_dc">
+	  <metadataPrefix>oai_dc</metadataPrefix>
+	  <schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
+	  <metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
+	  <!--   a custom mapping as this collection doesn't have dc metadata -->     <mappingList>
+	    <mapping>dc:title,dls.Title</mapping>
+	    <mapping>dc:subject,dls.Subject</mapping>
+	    <mapping>dc:language,dls.Language</mapping>
+	    <mapping>dc:publisher,dls.Organization</mapping>
+	  </mappingList>
+	</metadataFormat>
+      </ListMetadataFormats>
     </serviceRack> 
   </serviceRackList>
 </CollectionConfig>
