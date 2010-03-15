@@ -477,20 +477,25 @@ public class OAIPMH extends ServiceRack {
         }
         //create the <metadata> element
         //OAIXML.oai_version is read from OAIConfig.xml and its default value is "2.0"
+	Element metadata = OAIXML.createElement(OAIXML.METADATA);
         Element prfx_str_elem = OAIXML.getMetadataPrefixElement(prfx_str, OAIXML.oai_version);
-        String[] metadata_names = getMetadataNames(metadata_format);
-        HashMap meta_map = getInfoByNames(info, metadata_names);
-        ArrayList meta_list = new ArrayList(meta_map.entrySet());
-        for (int j=0; j<meta_list.size(); j++) {
-          Entry men = (Entry)meta_list.get(j);
-          String meta_name = (String)men.getKey();
-          String meta_value = (String)men.getValue();
-          Element e = OAIXML.createElement(meta_name);
-          GSXML.setNodeText(e, meta_value);
-          prfx_str_elem.appendChild(e);
-        }
-        Element metadata = OAIXML.createElement(OAIXML.METADATA);
         metadata.appendChild(prfx_str_elem);
+        String[] metadata_names = getMetadataNameMapping(metadata_format);
+        HashMap meta_map = getInfoByNames(info, metadata_names);
+	if (meta_map == null) {
+	  return metadata;
+	}
+	ArrayList meta_list = new ArrayList(meta_map.entrySet());
+	for (int j=0; j<meta_list.size(); j++) {
+	  Entry men = (Entry)meta_list.get(j);
+	  String meta_name = (String)men.getKey();
+	  //meta_name = meta_name.replace('.', ':'); // namespace separator should be : for oai
+	  String meta_value = (String)men.getValue();
+	  Element e = OAIXML.createElement(meta_name);
+	  GSXML.setNodeText(e, meta_value);
+	  prfx_str_elem.appendChild(e);
+	}
+	
         return metadata;
   }
   /** create a header element used when processing requests like ListRecords/GetRecord/ListIdentifiers
@@ -546,7 +551,7 @@ public class OAIPMH extends ServiceRack {
     
     for (int i=0; i<meta_list.getLength(); i++) {
       Element metadata_format = (Element)meta_list.item(i);
-      String[] metadata_names = getMetadataNames(metadata_format);
+      String[] metadata_names = getMetadataNameMapping(metadata_format);
       if (containsMetadata(info, metadata_names) == true) {
         has_meta_format = true;
         Element meta_fmt = OAIXML.createElement(OAIXML.METADATA_FORMAT);
@@ -573,28 +578,14 @@ public class OAIPMH extends ServiceRack {
   }
   /** @param metadata_format - the metadataFormat element in collectionConfig.xml
    */
-  protected String[] getMetadataNames(Element metadata_format) {
-    String[] names = null;
-    
-    //read the mappingList element
-    Element mapping_list = (Element)GSXML.getChildByTagName(metadata_format, OAIXML.MAPPING_LIST);
-    if (mapping_list == null) {
-      logger.info("No metadata mappings are provided in collectionConfig.xml. Use the standard Dublin Core names.");
-      names = OAIXML.getGlobalMetadataMapping(metadata_format.getAttribute(OAIXML.METADATA_PREFIX));
-      
-      return (names != null)? names : OAIXML.getDublinCoreNames();
+  protected String[] getMetadataNameMapping(Element metadata_format) {
+  
+    String[] names = OAIXML.getMetadataMapping(metadata_format);
+    if (names != null) {
+      return names;
     }
-    NodeList mappings = GSXML.getChildrenByTagName(mapping_list, OAIXML.MAPPING);
-    int size = mappings.getLength();
-    if (size == 0) {
-        logger.info("No metadata mappings are provided in collectionConfig.xml. \n Return standard DC names.");
-        // read the standard Dublin Core metadata names
-        return OAIXML.getDublinCoreNames();
-    }
-    names = new String[size];
-    for (int i=0; i<size; i++) {
-      names[i] = GSXML.getNodeText((Element)mappings.item(i)).trim();
-    }
+    logger.info("No metadata mappings are provided in collectionConfig.xml. Try for global mapping");
+    names = OAIXML.getGlobalMetadataMapping(metadata_format.getAttribute(OAIXML.METADATA_PREFIX));
     return names;
   }
 
@@ -690,6 +681,10 @@ public class OAIPMH extends ServiceRack {
     return null;
   }
   protected HashMap getInfoByNames(DBInfo info, String[] metadata_names) {
+
+    if (metadata_names == null) {
+      return null;
+    }
     HashMap map = new HashMap();
     boolean empty_map = true;
     
