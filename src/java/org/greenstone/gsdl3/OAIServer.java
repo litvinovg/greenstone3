@@ -257,7 +257,6 @@ public class OAIServer extends HttpServlet {
   }
   public void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-    PrintWriter out = response.getWriter();
     logUsageInfo(request);
     //out.println("url="+request.getRequestURL());// /oaiserver    
     //out.println("query="+request.getQueryString());// is /greenstone3
@@ -265,6 +264,7 @@ public class OAIServer extends HttpServlet {
     // oai always requires the content type be text/xml
     request.setCharacterEncoding("UTF-8");
     response.setContentType("text/xml;charset=UTF-8");
+    PrintWriter out = response.getWriter();
     
     //
     String lang = request.getParameter(GSParams.LANGUAGE);
