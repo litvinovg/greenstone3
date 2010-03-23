@@ -18,15 +18,15 @@ If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "r
 		<admin_ui>org.greenstone.admin.gui.Mat</admin_ui> 
 		<sequence_list>
 		<step action="Download" label="Download" method="svn" status="true">
-			<source>http://svn.greenstone.org/other-projects/trunk/greenstone3-extension/mat</source>
+			<source>http://svn.greenstone.org/gs3-extensions/mat/trunk/</source>
 		</step>
-		<step action="Install_option" label="Install options" status="false">
+		<step action="Install_option" label="Install options" status="true">
 			prepare installation
 		</step>
-		<step action="Install" label="Install" status="false">
+		<step action="Install" label="Install" status="true">
 			<command>ant compile</command>
 		</step>
-		<step action="Uninstall" label="Uninstall" status="false">
+		<step action="Uninstall" label="Uninstall" status="true">
 			<command>ant uninstall</command>
 		</step>
 	</sequence_list>
