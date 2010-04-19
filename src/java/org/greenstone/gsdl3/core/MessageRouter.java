@@ -1029,10 +1029,12 @@ public class MessageRouter implements  ModuleInterface {
           if (action.equals(GSXML.SYSTEM_TYPE_DEACTIVATE)) {
             success = deactivateModule(module_type, module_name);
             if (success) {
-              Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, module_type+": "+module_name+" deactivated");
+              Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, module_type+": "+module_name+" deactivated", 
+            		  GSXML.SYSTEM_TYPE_DEACTIVATE, GSXML.SUCCESS);
               response.appendChild(s);
             } else {
-              Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, module_type+": "+module_name+" could not be deactivated");
+              Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, module_type+": "+module_name+" could not be deactivated",
+            		  GSXML.SYSTEM_TYPE_DEACTIVATE, GSXML.ERROR);
               response.appendChild(s);
             }
             
@@ -1048,10 +1050,12 @@ public class MessageRouter implements  ModuleInterface {
               success = activateServiceClusterByName(module_name);
             }
             if (success) {
-              Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, module_type+": "+module_name+" activated");
+              Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, module_type+": "+module_name+" activated",
+            		  GSXML.SYSTEM_TYPE_ACTIVATE, GSXML.SUCCESS);
               response.appendChild(s);
             } else {
-              Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, module_type+": "+module_name+" could not be activated");
+              Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, module_type+": "+module_name+" could not be activated",
+            		  GSXML.SYSTEM_TYPE_ACTIVATE, GSXML.ERROR);
               response.appendChild(s);
             }
           }
