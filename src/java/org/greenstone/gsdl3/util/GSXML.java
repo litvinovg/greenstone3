@@ -238,6 +238,10 @@ public class GSXML {
    public static final String AUTHEN_NODE_ELEM="authenticationNode";
    public static final String USER_NODE_ELEM="userNode";
 
+   //for configure action results
+   public static final String SUCCESS = "success";
+   public static final String ERROR = "error";
+   
   /** takes a list of elements, and returns an array of strings
    * of the values of attribute att_name */
   public static String [] getAttributeValuesFromList(Element list,
@@ -631,6 +635,16 @@ public class GSXML {
     
   }
   
+  public static Element createTextElement(Document owner, String elem_name,
+		    String text, String att_name, String att_value) {
+		    Element e = owner.createElement(elem_name);
+		    e.setAttribute(att_name, att_value);
+		    Text t = owner.createTextNode(text);
+		    e.appendChild(t);
+		    return e;
+		    
+		  }
+		  
   public static Element createDisplayTextElement(Document owner,
     String text_name,
     String text) {
