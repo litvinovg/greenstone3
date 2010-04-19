@@ -130,8 +130,12 @@ public class GDBMWrapper
   public void closeDatabase() {
     try {
       if (db_ != null) {
-	db_.close();
-	db_ = null;
+       db_.close();
+       db_ = null;
+	    if(System.getProperty("os.name").startsWith("Windows")) {
+	    	//Hack: force Windows to let go of the gdb file
+	    	System.gc();
+	    }
       }
     } catch (GdbmException e) {
       // should never get here - close never actually throws an exception
