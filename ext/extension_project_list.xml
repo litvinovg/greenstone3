@@ -1,34 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<extension_list>
-	<extension>
-		<name>Metadata Quality Tool</name>
-		<group>Java / Web</group> 
-		<file_stem>Mat</file_stem>
-		<description>The quality of metadata in a digital library is an important factor in ensuring access for end-users.  As collections grow in size maintaining quality through manual methods becomes increasingly difficult for repository managers. The tool is built as an extension to the Greenstone3 digital library software.
-		
-This extension requires Java Development Kit (JDK) 1.4 or higher. If you do do have JDK installed on your computer, you can download it from Sun (http://java.sun.com/). 
+<extension_list baseURL="http://svn.greenstone.org/gs3-extensions/">
+  <extension>
+    <name>Metadata Quality Tool</name>
+    <group>Java / Web</group> 
+    <file_stem>mat</file_stem>
+    <description>The quality of metadata in a digital library is an important factor in ensuring access for end-users.  As collections grow in size maintaining quality through manual methods becomes increasingly difficult for repository managers. The tool is built as an extension to the Greenstone3 digital library software.
 
+This extension requires Java Development Kit (JDK) 1.4 or higher. If you do do have JDK installed on your computer, you can download it from Sun (http://java.sun.com/). 
+      
 How to download Greenstone extension behind a HTTP proxy?
 By default SVNKit uses proxy settings from the servers configuration file that is located in the default SVN run-time configuration area. Default configuration area is located at ~/.subversion on Linux and OS X and at C:\Documents and Settings\userName\Application Data\Subversion on Windows. You may read more on Subversion client configuration files at Subversion Book (from http://svnkit.com/kb/user-guide-config-settings.html).
-
+      
 This extension uses the JFreecChart to generate visualisation. JFreeChart is a free (LGPL) chart library for the Java(tm) platform. You can read more on JFreechart website (http://www.jfree.org/jfreechart/). 
-
+      
 If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "root/web/sites/localsite/collect". The root is Greenstone3 directory.
-</description>
-		<admin_ui>org.greenstone.admin.gui.Mat</admin_ui> 
-		<sequence_list>
-		<step action="Download" label="Download" method="svn" status="true">
-			<source>http://svn.greenstone.org/gs3-extensions/mat/trunk/</source>
-		</step>
-		<step action="Install_option" label="Install options" status="true">
-			prepare installation
-		</step>
-		<step action="Install" label="Install" status="true">
-			<command>ant compile</command>
-		</step>
-		<step action="Uninstall" label="Uninstall" status="true">
-			<command>ant uninstall</command>
-		</step>
-	</sequence_list>
-	</extension>	
+    </description>
+    <base_ext>org.greenstone.admin.guiext.mat.Mat</base_ext> 
+    <sequence_list>
+<!--  <step id="getMat" action="download" label="Download Extension">
+	<mainSource method="svn">http://svn.greenstone.org/gs3-extensions/mat/trunk/</mainSource>
+      </step> -->
+      <step id="installOptions" action="properties" label="Install options" dependsOn="AUTOMATIC_DOWNLOAD">
+	<optionList id="Mat" label="Mat options">
+	  <option id="User_Name" label="User name"/>
+	  <option id="Password" label="Password"/>
+	  <option id="Tomcat_Port" label="Tomcat port"/>
+	  <option id="JVM_Version" label="Java Virtual Machine version"/>
+	</optionList>
+<!--	<optionList id="ol2" label="Test options set 2" file="other.properties">
+	  <option id="t3" label="Test 3">Test 3</option>
+	  <option id="t4" label="Test 4"/>
+	</optionList> -->
+      </step>
+      <step id="install" action="button" label="Install" dependsOn="installOptions">
+	<command>
+	  <os name="default">ant compile</os>
+        </command>
+      </step>
+      <step id="controlPanel" action="panel" label="Control Panel" dependsOn="install">
+	<class>org.greenstone.admin.guiext.mat.ControlPanel</class>
+      </step>
+      <step id="uninstall" action="button" label="Uninstall" dependsOn="install" rollbackTo="install">
+	<command>
+	  <os name="default">ant clean</os>
+	</command>
+      </step>
+<!--  <step id="remove" action="remove" label="Remove Extension" dependsOn="getMat" rollbackTo="getMat">
+	<command>
+	  <os name="default"/>
+	</command>
+      </step> -->
+    </sequence_list>
+  </extension>
+<!--  <extension>
+    <name>Sam's Test Extension</name>
+    <group>Java / Web</group>
+    <file_stem>STE</file_stem>
+    <description>A test extension to help make extensions better!</description>
+    <base_ext>org.greenstone.admin.guiext.ste.STE</base_ext>
+    <sequence_list>
+      <step id="getSTE" action="download" label="Download" method="svn">
+	<mainSource method="svn">http://svn.greenstone.org/gs3-extensions/ste/trunk/</mainSource>
+      </step>
+      <step id="installOptions" action="properties" label="Install options" dependsOn="getSTE">
+	<optionList label="Test options set 1">
+	  <option label="Test 1">Test 1</option>
+	  <option label="Test 2"/>
+	</optionList>
+      </step>
+      <step id="install" action="button" label="Install" dependsOn="installOptions">
+	<command>
+	  <os name="default">ant compile</os>
+        </command>
+      </step>
+      <step id="uninstall" action="button" label="Uninstall" dependsOn="install" rollbackTo="installOptions">
+	<command>
+	  <os name="default">ant uninstall</os>
+        </command>
+      </step>
+      <step id="delete" action="button" label="Delete" dependsOn="getSTE" rollbackTo="getSTE">
+	<command>
+	  <os name="default">ant delete</os>
+        </command>
+      </step>
+    </sequence_list>
+  </extension>-->
 </extension_list>
