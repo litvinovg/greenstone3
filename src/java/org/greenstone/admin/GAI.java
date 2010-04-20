@@ -39,6 +39,7 @@ import javax.swing.text.*;
 
 import org.greenstone.gsdl3.util.Dictionary;
 import org.greenstone.admin.gui.SetServerPane;
+import org.greenstone.gsdl3.util.GSPath;
 
 /** Containing the top-level "core" for the GAI(Greenstone Administrator
  * Interface) this class is the common core for the GAI application and 
@@ -85,6 +86,42 @@ public class GAI
 	ga_man  = new GAIManager(screen_size);
 	ga_man.display();
 
+    }
+
+    public static String getGSDL3Home(){
+	
+	String gsdl3Home = gsdl3_web_home;
+	String os = "linux";
+	
+	if(System.getProperty("os.name").toLowerCase().indexOf("windows")!=-1){
+	    gsdl3Home = gsdl3Home.replaceAll("\\\\", "/");
+	    os = "windows";
+	}
+		
+	gsdl3Home = GSPath.removeLastLink(gsdl3Home);
+	
+	if(os.equals("windows")){
+	    gsdl3Home = gsdl3Home.replaceAll("/", "\\\\");
+	}
+	return gsdl3Home;
+    }
+
+    public static String getGSDL3ExtensionHome(){
+	String gsdl3ExtHome = gsdl3_web_home;
+	String os = "linux";
+
+	if(System.getProperty("os.name").toLowerCase().indexOf("windows")!=-1){
+	    gsdl3ExtHome = gsdl3ExtHome.replaceAll("\\\\", "/");
+	    os = "windows";
+	}
+	
+	gsdl3ExtHome = GSPath.removeLastLink(gsdl3ExtHome);
+	gsdl3ExtHome += "/ext";
+	
+	if(os.equals("windows")){
+	    gsdl3ExtHome = gsdl3ExtHome.replaceAll("/", "\\\\");
+	}
+	return gsdl3ExtHome;
     }
     
     public static void main (String[] args){

@@ -33,7 +33,7 @@ import org.greenstone.admin.gui.TabbedPane;
 import org.greenstone.admin.gui.MenuBar;
 import org.greenstone.admin.gui.LogPane;
 import org.greenstone.admin.gui.ConfPane;
-import org.greenstone.admin.gui.ExtPane;
+import org.greenstone.admin.guiext.ExtPane;
 
 //import java AWT classes
 import java.awt.*;
@@ -125,8 +125,9 @@ public class GAIManager
 	    	    
 	    //set up the ext Pane
 	    if (Configuration.get("admin.ext")){
-	    ext_pane = new ExtPane();
-    	    ext_pane.display();
+		ext_pane = new ExtPane();
+
+		ext_pane.display();
 		tab_pane.addTab("Extensions", EXT_ICON, ext_pane);
 		tab_pane.setEnabledAt(tab_pane.indexOfComponent(ext_pane),Configuration.get("admin.ext"));
 	    }
