@@ -282,7 +282,7 @@ public class GS2BrowseAction extends Action {
 	
 	// process the metadata requests
 	Element metadata_response = (Element)this.mr.process(metadata_message);
-        if (did_classifier) {
+	if (did_classifier) {
 	    // the classifier one will be the first response
 	    // add the metadata lists for each node back into the 
 	    // page_classifier nodes
@@ -292,10 +292,10 @@ public class GS2BrowseAction extends Action {
             if (pathNode ==null){
 	        return page_response; 
 	    }
-	    NodeList meta_response_cls = pathNode.getChildNodes();
+	    //NodeList meta_response_cls = (Element)pathNode.getChildNodes(); // can't handle empty elements from converting formatted strings (with empty newlines) into XML
+	    NodeList meta_response_cls = ((Element)pathNode).getElementsByTagName(GSXML.CLASS_NODE_ELEM);
 	    for (int i = 0; i < cl_nodes.getLength(); i++) {
 		GSXML.mergeMetadataLists(cl_nodes.item(i), meta_response_cls.item(i));
-		
 	    }
 	}
 
