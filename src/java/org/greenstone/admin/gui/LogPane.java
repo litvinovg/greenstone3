@@ -112,7 +112,7 @@ public class LogPane
 	//log_pane.setSize(LOGPANE_SIZE);
 	
 	// Log_list
-	String[] log_files = { "Tomcat log file", "Log file 2", "Log file 3"};
+	String[] log_files = { "Tomcat log file", "Extension log file", "Log file 3"};
 	log_list = new JList(log_files);
 	log_list.setBorder(BorderFactory.createLoweredBevelBorder());
 	log_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -356,10 +356,11 @@ public class LogPane
 		    reload_button.setEnabled(true);
 		    clear_button.setEnabled(true);
 		} else if (log_list.getSelectedIndex () == 1) {
-		    log_textarea.setText("");
-		    JOptionPane.showMessageDialog((Component) null,"This file has not been defined yet");	
-		    clear_button.setEnabled(false);
-		    reload_button.setEnabled(false);
+		    log_file = new File (GAI.getGSDL3ExtensionHome() + File.separatorChar + "logs" + File.separatorChar + "ext.log");
+		    String filename = log_file.getPath();
+		    updateLogsContent(filename);
+		    clear_button.setEnabled(true);
+		    reload_button.setEnabled(true);
 		} else if (log_list.getSelectedIndex () == 2) {
 		    log_textarea.setText("");
 		    JOptionPane.showMessageDialog((Component) null,"This file has not been defined yet");	
