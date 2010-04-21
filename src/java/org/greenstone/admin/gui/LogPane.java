@@ -92,7 +92,8 @@ public class LogPane
     /*The pane which contains the controls for log files */
     private JPanel control_pane = null;
 
-    private File log_file = null;
+    private ArrayList logFiles = new ArrayList();
+    private File currentlySelectedFile = null;
       
     /** The various sizes for the screen layout*/
     static private Dimension MIN_SIZE = new Dimension( 90,  90);
@@ -101,7 +102,10 @@ public class LogPane
 
     //Constructor
     public LogPane() {
-	
+
+	logFiles.add(new File (GAI.tomcat_home+File.separatorChar+"logs"+File.separatorChar+"catalina.out"));
+	logFiles.add(new File (GAI.getGSDL3ExtensionHome() + File.separatorChar + "logs" + File.separatorChar + "ext.log"));
+
 	// create all the necessary panes
 	control_pane = new JPanel();
 	button_pane = new JPanel();
@@ -209,13 +213,43 @@ public class LogPane
 	logContent_pane.add(logContent_label, BorderLayout.NORTH);
 	logContent_pane.add(control_pane, BorderLayout.SOUTH);
 	
+	JPanel filterPanel = new JPanel();
+	filterPanel.setLayout(new BorderLayout());
+
+	JTextField filterField = new JTextField();
+	filterPanel.add(filterField, BorderLayout.CENTER);
+	
+	JButton filterButton = new JButton("Filter");
+	filterButton.addActionListener(new FilterButtonListener(filterField));
+	filterPanel.add(filterButton, BorderLayout.EAST);
+
+	JPanel contentFilterPanel = new JPanel();
+	contentFilterPanel.setLayout(new BorderLayout());
+	contentFilterPanel.add(logContent_pane, BorderLayout.CENTER);
+	contentFilterPanel.add(filterPanel, BorderLayout.NORTH);
+
 	main_log_pane.add(logList_pane, JSplitPane.LEFT);
-	main_log_pane.add(logContent_pane, JSplitPane.RIGHT);
+	main_log_pane.add(contentFilterPanel, JSplitPane.RIGHT);
 	main_log_pane.setDividerLocation(LIST_SIZE.width - 10);
 	
 	this.setLayout(new BorderLayout());
 	this.add(main_log_pane, BorderLayout.CENTER);
 	//this.add(control_pane, BorderLayout.SOUTH);
+    }
+
+    public class FilterButtonListener implements ActionListener
+    {
+	JTextField _filterField = null;
+
+	public FilterButtonListener(JTextField filterField)
+	{
+	    _filterField = filterField;
+	}
+	
+	public void actionPerformed(ActionEvent e)
+	{
+	    readFile(currentlySelectedFile.getPath(), _filterField.getText());
+	}
     }
 
     /** Called whenever this pane gains focus, this method ensures that the various 
@@ -299,19 +333,19 @@ public class LogPane
 	    // Remember that for lower thresholds the above doesn't work, so try this instead
 	    reload_button.setEnabled(true);
 	    clear_button.setEnabled(true);
-	    updateLogsContent(log_file.getPath());
+	    updateLogsContent(currentlySelectedFile.getPath());
 	}
     }
     
     private class ClearButtonListener
 	implements ActionListener {
 	public void actionPerformed(ActionEvent event) {
-	    if (!log_file.exists()){
-		JOptionPane.showMessageDialog((Component) null,log_file.getPath() + " log file does not exist");
+	    if (!currentlySelectedFile.exists()){
+		JOptionPane.showMessageDialog((Component) null,currentlySelectedFile.getPath() + " log file does not exist");
 		return;
 	    } else {
 		ClearLogFilePrompt cfp  = new ClearLogFilePrompt();
-		boolean file_cleared = cfp.display(log_file);
+		boolean file_cleared = cfp.display(currentlySelectedFile);
 		if (file_cleared) {
 		    log_textarea.setText("");
 		}
@@ -321,23 +355,25 @@ public class LogPane
     }
     
     public void updateLogsContent(String filename){
-	if (!log_file.exists()){ 
+	if (!currentlySelectedFile.exists()){ 
 	    log_textarea.setText("");
 	    JOptionPane.showMessageDialog((Component) null, filename+" log file does not exist");  
 	    clear_button.setEnabled(false);
 	} else {
-	    readFile(filename);
+	    readFile(filename, "");
 	}
     }
 
-    public void readFile (String filename) {
+    public void readFile (String filename, String filter) {
 	log_textarea.setText("");
 	String fileLine;
 	try {
 	    BufferedReader in = new BufferedReader(new FileReader(filename));
 	    while ((fileLine = in.readLine()) != null) {
-		log_textarea.append(fileLine);
-		log_textarea.append("\n");
+		if(fileLine.contains(filter)){
+		    log_textarea.append(fileLine);
+		    log_textarea.append("\n");
+		}
 	    }
 	} catch (Exception e) {
 	    e.printStackTrace();
@@ -350,13 +386,15 @@ public class LogPane
 		if (log_list.getSelectedIndex() == -1){
 		    //no selection
 		} else if (log_list.getSelectedIndex () == 0 ) {
-		    log_file = new File (GAI.tomcat_home+File.separatorChar+"logs"+File.separatorChar+"catalina.out");
+		    File log_file = (File)logFiles.get(0);
+		    currentlySelectedFile = log_file;
 		    String filename = log_file.getPath();
 		    updateLogsContent(filename);
 		    reload_button.setEnabled(true);
 		    clear_button.setEnabled(true);
 		} else if (log_list.getSelectedIndex () == 1) {
-		    log_file = new File (GAI.getGSDL3ExtensionHome() + File.separatorChar + "logs" + File.separatorChar + "ext.log");
+		    File log_file = (File)logFiles.get(1);
+		    currentlySelectedFile = log_file;
 		    String filename = log_file.getPath();
 		    updateLogsContent(filename);
 		    clear_button.setEnabled(true);
