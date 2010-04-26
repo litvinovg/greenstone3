@@ -146,7 +146,8 @@ public class DownloadStep extends Step
 		    svnCheckout.setEventHandler(new SVNCheckoutEventHandler());
 		    svnCheckout.setIgnoreExternals(false);
 
-		    if(!currentSource.getFolder().equals("")){
+		    //The i != 0 enforces that the mainSource should always go to the default download location
+		    if(i != 0 && !currentSource.getFolder().equals("")){
 			destinationFolder = currentSource.getFolder();
 		    }
 		    else{
