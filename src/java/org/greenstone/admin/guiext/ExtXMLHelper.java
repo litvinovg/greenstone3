@@ -6,7 +6,6 @@ import org.w3c.dom.Node;
 
 public class ExtXMLHelper
 {
-    static public final String EXTENSION_LIST = "extension_list";
     static public final String EXTENSION = "extension";
     static public final String GROUP = "group";
     static public final String BASE_EXT = "base_ext";

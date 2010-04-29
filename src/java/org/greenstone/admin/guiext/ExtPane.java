@@ -48,9 +48,6 @@ public class ExtPane extends JPanel  {
     /** The panel that contains the log content. */
     protected static JPanel extensionContent_pane =  null;
 
-    /** The List showing all the log files concerned. */
-    //protected JList extension_list=null;
-
     /** The label at the top of the logList_pane. */
     protected JLabel extensionList_label =  null;
       
@@ -72,14 +69,6 @@ public class ExtPane extends JPanel  {
 
     protected JPanel button_pane = null;
     
-    /** Buttons */
-    //protected JButton download_button = null;
-    //protected static JButton pre_configure_button = null;
-    //protected JButton install_button = null;
-    //protected JButton post_configure_button = null;
-    //protected JButton uninstall_button = null;
-    //protected JButton switch_button = null;
-
     protected static JPanel control_pane = null;
 
     protected JPanel main_content_pane = null;
@@ -413,9 +402,6 @@ public class ExtPane extends JPanel  {
 	    NodeList nameList = projectNode.getElementsByTagName(ExtXMLHelper.NAME);
 	    String name = nameList.item(0).getChildNodes().item(0).getNodeValue();
 	    
-	    NodeList uiList = projectNode.getElementsByTagName(ExtXMLHelper.BASE_EXT);
-	    String admin_ui = uiList.item(0).getChildNodes().item(0).getNodeValue();
-
 	    //Maybe recode this? //xxxxx
 	    try{
 		extensionInformation.put(name, alist);
