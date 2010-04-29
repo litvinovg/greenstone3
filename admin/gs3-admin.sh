@@ -9,22 +9,11 @@ echo
 echo
 
 ##  -------- Run the Greenstone Administrator Interface --------
+# Need to run this script from its own directory instead of whichever directory it may be called from
 
-# This script must be run from within the directory in which it lives
-thisdir=`pwd`
-if [ ! -f "${thisdir}/gs3-admin.sh" ]; then
-    if [ "$gailang" == "es" ]; then
-        echo "Este guiСn deberА ejecutarse desde el directorio en el que reside."
-    elif [ "$gailang" == "fr" ]; then
-	echo "Ce script doit Йtre exИcutИ Ю partir du rИpertoire dans lequel il se trouve."
-    elif [ "$gailang" == "ru" ]; then
-	echo "Этот скрипт должен быть взят из директории, в которой он расположен"
-    else
-	echo "This script must be run from the directory in which it resides."
-    fi
-    exit 1
-fi
-
+thisdir="`dirname \"$0\"`"
+thisdir="`cd \"$thisdir\" && pwd`"
+cd "$thisdir"
 
 ##  ---- Determine GSDL3HOME ----
 gsdl3path=
