@@ -8,8 +8,7 @@ public class ExtXMLHelper
 {
     static public final String EXTENSION = "extension";
     static public final String GROUP = "group";
-    static public final String BASE_EXT = "base_ext";
-    static public final String FILE_STEM = "file_stem";
+    static public final String FILE_STEM = "fileStem";
     static public final String NAME = "name";
     static public final String DOWNLOAD = "download";
     static public final String MAIN_SOURCE = "mainSource";
@@ -22,7 +21,7 @@ public class ExtXMLHelper
     static public final String DESTINATION = "destination";
     static public final String DESCRIPTION = "description";
     static public final String PROPERTY = "property";
-    static public final String SEQUENCE_LIST = "sequence_list";
+    static public final String SEQUENCE_LIST = "sequenceList";
     static public final String STEP ="step";
     static public final String COMMAND ="command";
     static public final String CALLBACK ="callback";

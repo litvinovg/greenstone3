@@ -24,7 +24,6 @@ public class ExtensionInformation
     protected String _group = null;
     protected String _fileStem = null;
     protected String _description = null;
-    protected String _baseExt = null;
     protected String _baseURL = null;
     protected SequenceList _sequenceList= null;
     protected boolean _guiExtLoaded = false;
@@ -37,7 +36,6 @@ public class ExtensionInformation
 	    _group = ExtXMLHelper.getValueFromSingleElement(extensionElement, ExtXMLHelper.GROUP, true);
 	    _fileStem = ExtXMLHelper.getValueFromSingleElement(extensionElement, ExtXMLHelper.FILE_STEM, true);
 	    _description = ExtXMLHelper.getValueFromSingleElement(extensionElement, ExtXMLHelper.DESCRIPTION, true);
-	    _baseExt = ExtXMLHelper.getValueFromSingleElement(extensionElement, ExtXMLHelper.BASE_EXT, true);
 	    _baseURL = baseURL;
 	    _sequenceList = new SequenceList(ExtXMLHelper.getSingleChildElement(extensionElement, ExtXMLHelper.SEQUENCE_LIST, true), this);
 	}
@@ -70,41 +68,10 @@ public class ExtensionInformation
     {
 	return _description;
     }
- 
-    public String getBaseClassName()
-    {
-	return _baseExt;
-    }
 
     public SequenceList getSequenceList()
     {
 	return _sequenceList;
-    }
-
-    public Object getExtObject()
-    {
-	loadGuiExtFile();
-	Class extClass = null;
-	try{
-	    extClass = Class.forName(_baseExt);
-	}
-	catch(Exception ex){
-	    System.err.println("Could not create the extension class used for callback methods, either the class name is incorrect or the class does not exist inside the guiext.jar file");
-	}
-	Constructor classConstructor = null;
-	Object classObj = null;
-	
-	try{
-	    classConstructor = extClass.getConstructor(new Class[0]);
-	    classObj = classConstructor.newInstance(new Object[0]);
-	}
-	catch(Exception ex){
-	    ex.printStackTrace();
-	    System.err.println("Could not create the extension class used for callback methods, either the class name is incorrect or the class does not exist inside the guiext.jar file");
-	    return null;
-	}
-	
-	return classObj;
     }
 
     public void loadExternalJar(String filename){

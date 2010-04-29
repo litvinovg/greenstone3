@@ -14,14 +14,14 @@ public class Option
 	_parent = parent;
 
 	if(optionElement != null){
-	    _name = optionElement.getAttribute("label");
-	    if(_name == null || _name.equals("")){
-		System.err.println("This option element does not have a label");
-	    }
-
 	    _id = optionElement.getAttribute("id");
 	    if(_id == null || _id.equals("")){
 		System.err.println("This option element does not have an id");
+	    }
+
+	    _name = optionElement.getAttribute("label");
+	    if(_name == null || _name.equals("")){
+		_name = id;
 	    }
 	    
 	    _value = ExtXMLHelper.getValueFromSingleElement(optionElement, false);
