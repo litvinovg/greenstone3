@@ -21,7 +21,7 @@ public class Option
 
 	    _name = optionElement.getAttribute("label");
 	    if(_name == null || _name.equals("")){
-		_name = id;
+		_name = _id;
 	    }
 	    
 	    _value = ExtXMLHelper.getValueFromSingleElement(optionElement, false);
