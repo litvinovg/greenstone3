@@ -110,9 +110,19 @@ public class Command implements Runnable
 
     public String getCommandForCurrentOS()
     {
-	String command = (String)_osCommands.get(System.getProperty("os.name"));
+	String currentos = System.getProperty("os.name");
+
+	String command = (String)_osCommands.get(currentos);
 	if(command != null){
 	    return command;
+	}
+	
+	if(currentos.contains("Windows")){
+	    command = (String)_osCommands.get("Windows");
+	    
+	    if(command != null){
+		return command;
+	    }   
 	}
 	return (String)_osCommands.get("default");
     }
