@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<extension_list baseURL="http://svn.greenstone.org/gs3-extensions/">
+<extensionList baseURL="http://svn.greenstone.org/gs3-extensions/">
   <extension>
     <name>Metadata Quality Tool</name>
     <group>Java / Web</group> 
-    <file_stem>mat</file_stem>
+    <fileStem>mat</fileStem>
     <description>The quality of metadata in a digital library is an important factor in ensuring access for end-users.  As collections grow in size maintaining quality through manual methods becomes increasingly difficult for repository managers. The tool is built as an extension to the Greenstone3 digital library software.
 
 This extension requires Java Development Kit (JDK) 1.4 or higher. If you do do have JDK installed on your computer, you can download it from Sun (http://java.sun.com/). 
@@ -15,8 +15,7 @@ This extension uses the JFreecChart to generate visualisation. JFreeChart is a f
       
 If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "root/web/sites/localsite/collect". The root is Greenstone3 directory.
     </description>
-    <base_ext>org.greenstone.admin.guiext.mat.Mat</base_ext> 
-    <sequence_list>
+    <sequenceList>
 <!--  <step id="getMat" action="download" label="Download Extension">
 	<mainSource method="svn">http://svn.greenstone.org/gs3-extensions/mat/trunk/</mainSource>
       </step> -->
@@ -50,7 +49,7 @@ If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "r
 	  <os name="default"/>
 	</command>
       </step> -->
-    </sequence_list>
+    </sequenceList>
   </extension>
 <!--  <extension>
     <name>Sam's Test Extension</name>
@@ -85,4 +84,4 @@ If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "r
       </step>
     </sequence_list>
   </extension>-->
-</extension_list>
+</extensionList>
