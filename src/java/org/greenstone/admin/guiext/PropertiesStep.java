@@ -18,6 +18,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 
@@ -113,7 +114,9 @@ public class PropertiesStep extends Step
 		Option[] options = currentList.getOptions();		
 
 		JTable propertiesTable = new JTable(new CustomTableModel(new String[]{"Setting", "Value"}, options));
-		
+		//The line below is necessary as the default grid colour on mac is white, which makes the lines invisible.
+		propertiesTable.setGridColor(Color.BLACK);
+
 		if(_tables[i] == null){
 		    _tables[i] = propertiesTable;
 		}
