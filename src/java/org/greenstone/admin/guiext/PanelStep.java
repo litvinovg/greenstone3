@@ -58,7 +58,7 @@ public class PanelStep extends Step
 		return;
 	    }
 		
-	    _parent.getParent().changeExtPane(((BasePanel)(classObj)).getControlPanel());
+	    _parent.getParent().changeExtPane(((BasePanel)(classObj)).getPanel());
 
 	    _parent.registerStepCompletion(PanelStep.this);
 	}

@@ -4,5 +4,5 @@ import javax.swing.JPanel;
 
 public interface BasePanel
 {
-    public JPanel getControlPanel();
+    public JPanel getPanel();
 }
