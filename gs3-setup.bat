@@ -143,14 +143,14 @@ goto end
 echo GSDL3SRCHOME : %GSDL3SRCHOME%
 echo GSDL3HOME    : %GSDL3HOME%
 echo JAVA         : %RUNJAVA%
-if "%ANT_HOME%" == "" (
+if "!ANT_HOME!" == "" (
    echo.
    echo ANT_HOME is not yet set.
    echo Please make sure you have Ant version 1.7.1 or higher installed
    echo Then set ANT_HOME to the ant installation folder
    echo and add the path to its bin folder to the PATH
 ) else (
-   echo ANT_HOME     : %ANT_HOME%
+   echo ANT_HOME     : !ANT_HOME!
 )
 echo.
 
