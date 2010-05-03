@@ -1,15 +1,13 @@
-@echo off
 
+@echo off
 
 :: If you wish to use a JDK instead of the provided JRE then please use the line below
 :: e.g. set _JDK_HOME=C:\Program Files\Java\jdk1.6.0_10
 set _JDK_HOME=
 
-
-
+pushd "%CD%"
+CD /D "%~dp0"
 set GAILANG=en
-
-
 
 set PROGNAME=Greenstone Administrator Interface 
 set PROGABBR=GAI
@@ -19,18 +17,6 @@ if "%GLILANG%" == "en" echo %PROGNAME% (%PROGABBR%)
 if "%GLILANG%" == "en" echo Copyright (C) 2005, New Zealand Digital Library Project, University Of Waikato
 if "%GLILANG%" == "en" echo %PROGABBR% comes with ABSOLUTELY NO WARRANTY; for details see LICENSE.txt
 if "%GLILANG%" == "en" echo This is free software, and you are welcome to redistribute it
-
-::  -------- Run the Greenstone Administrator Interface --------
-
-::  This script must be run from within the directory in which it lives
-if exist gs3-admin.bat goto setvars
-    if "%GAILANG%" == "en" echo This script must be run from the directory in which it resides.
-    if "%GAILANG%" == "es" echo Este gui�n deber� ejecutarse desde el directorio en el que reside.
-    if "%GLILANG%" == "es" echo Este gui�n deber� ejecutarse desde el directorio en el que reside.
-    if "%GLILANG%" == "fr" echo Ce script doit �tre ex�cut� � partir du r�pertoire dans lequel il se trouve.
-    if "%GLILANG%" == "ru" echo ���� ��ਯ� ������ ���� ���� �� ��४��ਨ, � ����ன �� ��ᯮ�����
-    goto exit
-
 
 ::  ---- Determine GSDL3HOME ----
 :setvars
@@ -68,13 +54,6 @@ java -cp "%CLASSPATH%" org.greenstone.admin.GAI "%GSDL3SRCHOME%" "%GSDL3HOME%"
 
 :exit
 echo.
-pause
-
+popd
 :done
 :: ---- Clean up ----
-
-
-
-
-
-
