@@ -1,7 +1,5 @@
 @echo off
 
-setlocal enabledelayedexpansion
-
 set java_min_version=1.5.0_00
 
 if exist gs3-setup.bat goto start
@@ -93,6 +91,8 @@ if exist bin\search4j.exe (
   for /F "tokens=*" %%r in ('bin\search4j.exe -r -p "%HINT%" -m %JAVA_MIN_VERSION%') do set FOUNDJREHOME=%%r
 )
 
+setlocal enabledelayedexpansion
+
 if DEFINED FOUNDJAVAHOME  (
   set JAVA_HOME=!FOUNDJAVAHOME!
   set PATH=!FOUNDJAVAHOME!\bin;!PATH!
@@ -153,4 +153,14 @@ if "%ANT_HOME%" == "" (
    echo ANT_HOME     : %ANT_HOME%
 )
 echo.
+
+endlocal
+
+set PATH=%PATH%
+set GSDL3HOME=%GSDL3HOME%
+set GSDL3SRCHOME=%GSDL3SRCHOME%
+set JAVA_HOME=%JAVA_HOME%
+set JRE_HOME=%JRE_HOME%
+set ANT_HOME=%ANT_HOME%
+
 :end
