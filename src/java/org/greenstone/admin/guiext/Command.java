@@ -58,8 +58,39 @@ public class Command implements Runnable
 	File workingDirectory = new File(_parent.getParent().getParent().getExtensionDirectory());
 	Process commandLineProc = null;
 	try{
-	    messageArea.append("\nExecuting \"" + command + "\" on the command line\n");
-	    commandLineProc = Runtime.getRuntime().exec(command, null, workingDirectory);
+	    commandLineProc = null;
+	    
+	    if(System.getProperty("os.name").contains("Windows")){
+		String[] args = new String[3];
+		args[0] = "cmd.exe";
+		args[1] = "/C";
+		args[2] = command;
+
+		String allArgs = new String();
+		for(int i = 0; i < args.length; i++){
+		    if(i != 0){allArgs += " ";}
+		    allArgs += args[i];
+		}
+
+		messageArea.append("\nExecuting \"" + allArgs + "\" on the command line\n");
+
+		commandLineProc = Runtime.getRuntime().exec(args, null, workingDirectory);
+	    }
+	    else{
+		String[] args = new String[3];
+		args[0] = "sh";
+		args[1] = "-c";
+		args[2] = command;
+
+		String allArgs = new String();
+		for(int i = 0; i < args.length; i++){
+		    if(i != 0){allArgs += " ";}
+		    allArgs += args[i];
+		}
+
+		messageArea.append("\nExecuting \"" + allArgs + "\" on the command line\n");
+		commandLineProc = Runtime.getRuntime().exec(args, null, workingDirectory);
+	    }
 	    
 	    BufferedReader stdInput = new BufferedReader(new InputStreamReader(commandLineProc.getInputStream()));
 	    BufferedReader errInput = new BufferedReader(new InputStreamReader(commandLineProc.getErrorStream()));
