@@ -16,9 +16,6 @@ This extension uses the JFreecChart to generate visualisation. JFreeChart is a f
 If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "root/web/sites/localsite/collect". The root is Greenstone3 directory.
     </description>
     <sequenceList>
-<!--  <step id="getMat" action="download" label="Download Extension">
-	<mainSource method="svn">http://svn.greenstone.org/gs3-extensions/mat/trunk/</mainSource>
-      </step> -->
       <step id="installOptions" action="properties" label="Install options" dependsOn="AUTOMATIC_DOWNLOAD">
 	<optionList id="Mat" label="Mat options">
 	  <option id="User_Name" label="User name"/>
@@ -26,10 +23,6 @@ If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "r
 	  <option id="Tomcat_Port" label="Tomcat port"/>
 	  <option id="JVM_Version" label="Java Virtual Machine version"/>
 	</optionList>
-<!--	<optionList id="ol2" label="Test options set 2" file="other.properties">
-	  <option id="t3" label="Test 3">Test 3</option>
-	  <option id="t4" label="Test 4"/>
-	</optionList> -->
       </step>
       <step id="install" action="button" label="Install" dependsOn="installOptions">
 	<command>
@@ -44,11 +37,6 @@ If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "r
 	  <os name="default">ant clean</os>
 	</command>
       </step>
-<!--  <step id="remove" action="remove" label="Remove Extension" dependsOn="getMat" rollbackTo="getMat">
-	<command>
-	  <os name="default"/>
-	</command>
-      </step> -->
     </sequenceList>
   </extension>
   <extension>
