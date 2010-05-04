@@ -51,37 +51,18 @@ If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "r
       </step> -->
     </sequenceList>
   </extension>
-<!--  <extension>
-    <name>Sam's Test Extension</name>
+  <extension>
+    <name>EKit HTML Editor</name>
     <group>Java / Web</group>
-    <file_stem>STE</file_stem>
-    <description>A test extension to help make extensions better!</description>
-    <base_ext>org.greenstone.admin.guiext.ste.STE</base_ext>
-    <sequence_list>
-      <step id="getSTE" action="download" label="Download" method="svn">
-	<mainSource method="svn">http://svn.greenstone.org/gs3-extensions/ste/trunk/</mainSource>
-      </step>
-      <step id="installOptions" action="properties" label="Install options" dependsOn="getSTE">
-	<optionList label="Test options set 1">
-	  <option label="Test 1">Test 1</option>
-	  <option label="Test 2"/>
-	</optionList>
-      </step>
-      <step id="install" action="button" label="Install" dependsOn="installOptions">
+    <fileStem>ekit</fileStem>
+    <description>An HTML editor for GLI</description>
+    <sequenceList>
+      <step id="run" action="button" label="Run EKit" dependsOn="AUTOMATIC_DOWNLOAD">
 	<command>
-	  <os name="default">ant compile</os>
-        </command>
+	  <os name="Windows">ekit.bat</os>
+	  <os name="default">./ekit.sh</os>
+	</command>
       </step>
-      <step id="uninstall" action="button" label="Uninstall" dependsOn="install" rollbackTo="installOptions">
-	<command>
-	  <os name="default">ant uninstall</os>
-        </command>
-      </step>
-      <step id="delete" action="button" label="Delete" dependsOn="getSTE" rollbackTo="getSTE">
-	<command>
-	  <os name="default">ant delete</os>
-        </command>
-      </step>
-    </sequence_list>
-  </extension>-->
+    </sequenceList>
+  </extension>
 </extensionList>
