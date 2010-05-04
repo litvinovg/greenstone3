@@ -59,8 +59,7 @@ If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "r
     <sequenceList>
       <step id="run" action="button" label="Run EKit" dependsOn="AUTOMATIC_DOWNLOAD">
 	<command>
-	  <os name="Windows">ekit.bat</os>
-	  <os name="default">./ekit.sh</os>
+	  <os name="default">java -jar ekit.jar</os>
 	</command>
       </step>
     </sequenceList>
