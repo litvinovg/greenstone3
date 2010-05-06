@@ -11,9 +11,9 @@ public class BaseProperty {
 
     public final String WEB_PORT;
 
-    public final String WIN_9X_OPEN_COMMAND = "command.com /c start %1";
-    public final String WIN_OPEN_COMMAND = "cmd.exe /c start \"\" %1";
-    public final String MAC_OPEN_COMMAND = "open %1";
+    public static final String WIN_9X_OPEN_COMMAND = "command.com /c start %1";
+    public static final String WIN_OPEN_COMMAND = "cmd.exe /c start \"\" %1";
+    public static final String MAC_OPEN_COMMAND = "open %1";
 
     public final String BROWSER_PATH = "browser.path";
 

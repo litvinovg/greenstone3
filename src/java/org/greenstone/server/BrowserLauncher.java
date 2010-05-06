@@ -39,12 +39,12 @@ public class BrowserLauncher
 	if(Misc.isWindows()) {
 	    // we use cmd and start
 	    if (Misc.isWindows9x()) {
-		this.command = BaseServer.Property.WIN_9X_OPEN_COMMAND;//"command.com /c start \""+url+"\"";
+		this.command = BaseProperty.WIN_9X_OPEN_COMMAND;//"command.com /c start \""+url+"\"";
 	    } else {
-		this.command = BaseServer.Property.WIN_OPEN_COMMAND;//"cmd.exe /c start \"\" \""+url+"\"";
+		this.command = BaseProperty.WIN_OPEN_COMMAND;//"cmd.exe /c start \"\" \""+url+"\"";
 	    }
 	} else if (Misc.isMac()) {
-	    this.command = BaseServer.Property.MAC_OPEN_COMMAND; // "open %1"
+	    this.command = BaseProperty.MAC_OPEN_COMMAND; // "open %1"
 	} else {
 	     // we try to look for a browser
  	    for (int i=0; i<default_browsers.length; i++) {
