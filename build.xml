@@ -147,7 +147,7 @@
   <property name="os.mac" value="Mac OS X"/>
   <property name="os.solaris" value="SunOS"/>
   <property name="os.unix" value="${os.linux},${os.mac},${os.solaris}"/>
-  <property name="os.windows" value="Windows 95,Windows 98,Windows 2000,Windows 2003,Windows XP,Windows NT,Windows ME,Windows Vista"/> <!-- check this!!!-->
+  <property name="os.windows" value="Windows 95,Windows 98,Windows 2000,Windows 2003,Windows XP,Windows NT,Windows ME,Windows Vista,Windows 7"/> <!-- check this!!!-->
 
   <!-- this is true for linux and macs -->
   <condition property="current.os.isunix">
