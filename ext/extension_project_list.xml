@@ -68,7 +68,7 @@ If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "r
       </step>
       <step id="install" action="button" label="Compile" dependsOn="download">
 	<command>
-	  <os name="default">./CASCADE-MAKE.sh &gt; output.log</os>
+	  <os name="default">./CASCADE-MAKE.sh</os>
 	  <os name="Windows">CASCADE-MAKE</os>
 	</command>
       </step>
