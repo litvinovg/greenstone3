@@ -93,25 +93,14 @@ public class Command implements Runnable
 	    }
 	    
 	    BufferedReader stdInput = new BufferedReader(new InputStreamReader(commandLineProc.getInputStream()));
-	    BufferedReader errInput = new BufferedReader(new InputStreamReader(commandLineProc.getErrorStream()));
-	    String s= "";
-	    
-	    while ((s = stdInput.readLine()) != null) {
-		messageArea.append(s + "\n");
-		messageArea.setSelectionEnd(messageArea.getDocument().getLength());
-	    }  
-	    
-	    boolean error = false;
-	    while ((s = errInput.readLine()) != null){
-		messageArea.append(s + "\n");
-		error = true;
-	    }  
-	    
-	    if(error){
-		JOptionPane.showMessageDialog(new JFrame(), "There was an error while running the command line process");	
-		_parent.threadError();
-		return;
-	    }
+
+	    Thread stdPrinter = new PrinterThread(messageArea, stdInput);
+	    stdPrinter.start();
+
+	    BufferedReader stdError = new BufferedReader(new InputStreamReader(commandLineProc.getErrorStream()));
+
+	    Thread errPrinter = new PrinterThread(messageArea, stdError);
+	    errPrinter.start();
 	    
 	    int success = commandLineProc.waitFor();
 	    
@@ -156,5 +145,32 @@ public class Command implements Runnable
 	    }   
 	}
 	return (String)_osCommands.get("default");
+    }
+
+    public class PrinterThread extends Thread
+    {
+	JTextArea _messageArea = null;
+	BufferedReader _output = null;
+
+	public PrinterThread(JTextArea messageArea, BufferedReader output)
+	{
+	    _messageArea = messageArea;
+	    _output = output;
+	}
+	
+	public void run()
+	{
+	    String s = "";
+
+	    try{
+		while ((s = _output.readLine()) != null) {
+		    _messageArea.append(s + "\n");
+		    _messageArea.setSelectionEnd(_messageArea.getDocument().getLength());
+		}  
+	    }
+	    catch(Exception ex){
+		ex.printStackTrace();
+	    }
+	}
     }
 }
