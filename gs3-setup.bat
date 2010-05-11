@@ -45,9 +45,14 @@ if exist "!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\bin\*.*" set PATH=!GSD
 if exist "!GSDL3SRCHOME!\gs2build\bin\windows\imagemagick\*.*" set PATH=!GSDL3SRCHOME!\gs2build\bin\windows\imagemagick;!PATH!
 
 :: a little dynamic set cp stuff
-if exist !TMP!\setcp.bat del !TMP!\setcp.bat
-for %%j in (!TOMCAT_HOME!\common\endorsed\*.jar) do echo set CLASSPATH=%%CLASSPATH%%;%%j>> !TMP!\setcp.bat
-for %%j in (!TOMCAT_HOME!\lib\*.jar) do echo set CLASSPATH=%%CLASSPATH%%;%%j>> !TMP!\setcp.bat
+if exist "!TMP!\setcp.bat" del "!TMP!\setcp.bat"
+
+:: http://ss64.com/nt/for_cmd.html, how to deal with spaces in the file list in a for command
+:: Note that TOMCAT_HOME\common\endorsed only exists for Tomcat 5, not Tomcat 6
+:: (where it contains xercesImpl.jar and xml-apis.jar which aren't there in Tomcat 6)
+if exist "!TOMCAT_HOME!\common\endorsed\*.jar" for /f %%j in ('dir/b ^"!TOMCAT_HOME!\common\endorsed\*.jar^"') do echo set CLASSPATH=%%CLASSPATH%%;%%TOMCAT_HOME%%\common\endorsed\%%j>> !TMP!\setcp.bat
+for /f %%j in ('dir/b ^"!TOMCAT_HOME!\lib\*.jar^"') do echo set CLASSPATH=%%CLASSPATH%%;%%TOMCAT_HOME%%\lib\%%j>> !TMP!\setcp.bat
+
 if exist !TMP!\setcp.bat call !TMP!\setcp.bat
 if exist !TMP!\setcp.bat del !TMP!\setcp.bat
 
@@ -143,12 +148,13 @@ goto end
 echo GSDL3SRCHOME : !GSDL3SRCHOME!
 echo GSDL3HOME    : !GSDL3HOME!
 echo JAVA         : !RUNJAVA!
+
 if "!ANT_HOME!" == "" (
    echo.
    echo ANT_HOME is not yet set.
    echo Please make sure you have Ant version 1.7.1 or higher installed
    echo Then set ANT_HOME to the ant installation folder
-   echo and add the path to its bin folder to the PATH
+   echo and add the path to its bin folder to the PATH environment variable
 ) else (
    echo ANT_HOME     : !ANT_HOME!
 )
@@ -157,14 +163,6 @@ echo.
 :: End localisation of variables that started with the set local/set enabledelayedexpansion command
 :: Restore global variables that would otherwise be lost at script's end due to their having been initialised in a 
 :: set local/set enabledelayedexpansion section. See http://ss64.com/nt/endlocal.html
-endlocal & set RUNJAVA=%RUNJAVA%
-
-set PATH=%PATH%
-set GSDL3HOME=%GSDL3HOME%
-set GSDL3SRCHOME=%GSDL3SRCHOME%
-set JAVA_HOME=%JAVA_HOME%
-set JRE_HOME=%JRE_HOME%
-set ANT_HOME=%ANT_HOME%
-set RUNJAVA=%RUNJAVA%
+endlocal & set RUNJAVA=%RUNJAVA%& set PATH=%PATH%& set GSDL3HOME=%GSDL3HOME%& set GSDL3SRCHOME=%GSDL3SRCHOME%& set JAVA_HOME=%JAVA_HOME%& set JRE_HOME=%JRE_HOME%& set ANT_HOME=%ANT_HOME%& set CLASSPATH=%CLASSPATH%
 
 :end
