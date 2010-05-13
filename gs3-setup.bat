@@ -122,25 +122,25 @@ if exist "!HINT!\bin\java.exe" (
 if exist "!JAVA_HOME!\bin\java.exe" (
   set PATH=!JAVA_HOME!\bin;!PATH!
   set RUNJAVA=!JAVA_HOME!\bin\java.exe
-  echo Using java at !JAVA_HOME!
-  echo WARNING: Greenstone has not checked the version number of this java installation
-  echo          The source distribution of Greenstone3 requires java 1.5 or greater
-  echo          SVN users may still use java 1.4
+  echo Using Java at !JAVA_HOME!
+  echo WARNING: Greenstone has not checked the version number of this Java installation
+  echo          The source distribution of Greenstone3 requires Java 1.5 or greater
+  echo          SVN users may still use Java 1.4
   goto summaryThenEnd
 )
 
 if exist "!JRE_HOME!\bin\java.exe" (
   set PATH=!JRE_HOME!\bin;!PATH!
   set RUNJAVA=!JRE_HOME!\bin\java.exe
-  echo Using java at !JRE_HOME!
+  echo Using Java at !JRE_HOME!
   echo WARNING: Greenstone has not checked the version number of this Java installation
   echo          The source distribution of Greenstone3 requires Java 1.5 or greater
-  echo          SVN users may still use java 1.4
+  echo          SVN users may still use Java 1.4
   goto summaryThenEnd
 )
 
-echo ERROR: Failed to locate java
-echo        Please set JAVA_HOME or JRE_HOME to point to an appropriate java
+echo ERROR: Failed to locate Java
+echo        Please set JAVA_HOME or JRE_HOME to point to an appropriate Java
 goto end
 
 :summaryThenEnd
@@ -153,7 +153,7 @@ if "!ANT_HOME!" == "" (
    echo.
    echo ANT_HOME is not yet set.
    echo Please make sure you have Ant version 1.7.1 or higher installed
-   echo Then set ANT_HOME to the ant installation folder
+   echo Then set ANT_HOME to the Ant installation folder
    echo and add the path to its bin folder to the PATH environment variable
 ) else (
    echo ANT_HOME     : !ANT_HOME!
