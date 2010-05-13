@@ -1,4 +1,4 @@
-package org.greenstone.server;
+package org.greenstone.util;
 
 /** Verbatim copy of what's in GLI's org.greenstone.gatherer.util */
 

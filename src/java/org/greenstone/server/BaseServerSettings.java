@@ -11,6 +11,8 @@ import org.w3c.dom.*;
 
 import org.apache.log4j.*;
 
+import org.greenstone.util.ScriptReadWrite;
+
 public abstract class BaseServerSettings extends JDialog implements ActionListener
 {
     static Logger logger = Logger.getLogger(BaseServerSettings.class.getName());

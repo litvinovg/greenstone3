@@ -12,6 +12,9 @@ import javax.swing.JOptionPane;
 
 import org.apache.log4j.*;
 
+import org.greenstone.util.RunTarget;
+import org.greenstone.util.BrowserLauncher;
+
 import org.greenstone.gsdl3.util.Dictionary;
 
 public abstract class BaseServer 

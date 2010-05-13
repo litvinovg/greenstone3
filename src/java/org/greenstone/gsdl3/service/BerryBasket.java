@@ -29,9 +29,9 @@ import java.util.Iterator;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSPath;
-import org.greenstone.gsdl3.util.GlobalProperties;
 
 import java.net.InetAddress;
 import java.util.Properties;

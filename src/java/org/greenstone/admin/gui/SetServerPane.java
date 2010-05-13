@@ -54,7 +54,7 @@ import java.awt.event.MouseEvent;
 import java.net.*;
 import java.sql.*;
 
-import org.greenstone.admin.Configuration;
+import org.greenstone.util.Configuration;
 import org.greenstone.core.ParsingProgress;
 import org.greenstone.admin.GAI;
 

@@ -9,8 +9,10 @@ import javax.swing.*;
 
 import org.w3c.dom.*;
 
+import org.greenstone.util.ScriptReadWrite;
+
+import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.util.GSXML;
-import org.greenstone.gsdl3.util.GlobalProperties;
 import org.greenstone.gsdl3.util.XMLConverter;
 
 import org.greenstone.server.BaseServerSettings;

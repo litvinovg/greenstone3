@@ -18,6 +18,8 @@
  */
 package org.greenstone.gsdl3.util;
 
+import org.greenstone.util.GlobalProperties;
+
 import org.w3c.dom.*;
 import java.io.*;
 import java.net.*;

@@ -47,7 +47,7 @@ import javax.swing.tree.*;
 
 import org.greenstone.admin.GAIManager;
 import org.greenstone.admin.GAI;
-import org.greenstone.admin.Configuration;
+import org.greenstone.util.Configuration;
 
 /** The Log pane is to view the status of relevant log files in GSIII
  * @author Chi-Yu Huang, Greenstone Digital Library, University of Waikato

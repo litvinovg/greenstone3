@@ -10,7 +10,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.greenstone.gsdl3.util.GSPath;
-import org.greenstone.gsdl3.util.GlobalProperties;
+import org.greenstone.util.GlobalProperties;
 import org.w3c.dom.*;
 
 import org.greenstone.admin.GAI;

@@ -3,6 +3,7 @@ package org.greenstone.gsdl3.core;
 import java.io.File;
 import java.util.HashMap;
 
+import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.util.*;
 import org.w3c.dom.*;
 

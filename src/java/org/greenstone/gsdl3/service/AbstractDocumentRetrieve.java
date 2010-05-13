@@ -21,12 +21,12 @@
 package org.greenstone.gsdl3.service;
 
 // Greenstone classes
+import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.core.GSException;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.MacroResolver;
 import org.greenstone.gsdl3.util.OID;
-import org.greenstone.gsdl3.util.GlobalProperties;
 import org.greenstone.gsdl3.util.GSConstants;
 
 // XML classes

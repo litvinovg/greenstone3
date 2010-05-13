@@ -17,7 +17,7 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-package org.greenstone.gsdl3.util;
+package org.greenstone.util;
 
 import java.util.HashMap;
 import java.util.Set;

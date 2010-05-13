@@ -2,6 +2,7 @@ package org.greenstone.gsdl3.service;
 
 // Greenstone classes
 import org.greenstone.gsdl3.core.GSException;
+import org.greenstone.util.Misc;
 import org.greenstone.gsdl3.util.*;
 
 // XML classes

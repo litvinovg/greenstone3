@@ -16,7 +16,7 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-package org.greenstone.gsdl3.util;
+package org.greenstone.util;
 
 import java.util.Properties;
 import java.io.File;
@@ -28,7 +28,7 @@ import org.apache.log4j.*;
 public class GlobalProperties {
 
 
-    static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.GlobalProperties.class.getName());
+    static Logger logger = Logger.getLogger(org.greenstone.util.GlobalProperties.class.getName());
     private static Properties properties = null;
     private static String properties_filename = "global.properties";
     private static String gsdl3_home = null;
@@ -65,7 +65,7 @@ public class GlobalProperties {
         try {
 
 
-            InputStream in = Class.forName("org.greenstone.gsdl3.util.GlobalProperties").getClassLoader().getResourceAsStream(properties_filename);
+            InputStream in = Class.forName("org.greenstone.util.GlobalProperties").getClassLoader().getResourceAsStream(properties_filename);
             if (in != null) {
             logger.debug("loading global properties");
             properties.load(in);

@@ -3,9 +3,11 @@ package org.greenstone.server;
 
 import java.io.File;
 
+import org.greenstone.util.RunAnt;
+
 import org.greenstone.server.BaseServer;
 import org.greenstone.server.BaseProperty;
-import org.greenstone.gsdl3.util.GlobalProperties;
+import org.greenstone.util.GlobalProperties;
 
 public class Server3 extends BaseServer
 {

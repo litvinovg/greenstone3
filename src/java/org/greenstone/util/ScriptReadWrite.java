@@ -1,4 +1,4 @@
-package org.greenstone.server;
+package org.greenstone.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

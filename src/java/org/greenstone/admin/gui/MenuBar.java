@@ -42,7 +42,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 import org.greenstone.admin.GAI;
-import org.greenstone.admin.Configuration;
+import org.greenstone.util.Configuration;
 
 /** The menu bar for the Administration tools main GUI. 
  * @author Chi-Yu Huang, Greenstone Digital Library, University of Waikato

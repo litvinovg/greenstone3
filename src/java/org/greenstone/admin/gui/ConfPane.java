@@ -55,11 +55,12 @@ import java.sql.*;
 
 import org.greenstone.admin.GAI;
 import org.greenstone.admin.GAIManager;
-import org.greenstone.admin.Configuration;
 import org.greenstone.admin.gui.ThreadControl;
 //import org.greenstone.admin.gui.ConfSettingTableModel;
 import org.greenstone.admin.gui.SiteConfSetting;
 import org.greenstone.core.ParsingProgress;
+
+import org.greenstone.util.Configuration;
 import org.greenstone.gsdl3.util.GSFile;
 
 /** The Configuration pane is to view the status of relevant configure files in GSIII

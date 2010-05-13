@@ -20,7 +20,7 @@
 package org.greenstone.gsdl3;
 
 import org.greenstone.gsdl3.core.MessageRouter;
-import org.greenstone.gsdl3.util.GlobalProperties;
+import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.XMLConverter;

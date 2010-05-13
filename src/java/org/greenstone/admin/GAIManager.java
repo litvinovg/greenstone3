@@ -35,6 +35,8 @@ import org.greenstone.admin.gui.LogPane;
 import org.greenstone.admin.gui.ConfPane;
 import org.greenstone.admin.guiext.ExtPane;
 
+import org.greenstone.util.Configuration;
+
 //import java AWT classes
 import java.awt.*;
 import java.awt.event.*;
@@ -86,6 +88,8 @@ public class GAIManager
 	 * instead have it, we can try to bring the modal dialog to the front*/
 	//this.addFocusListener(new GAIGUIFocusListener());	
 	//display();
+	Image img = Toolkit.getDefaultToolkit().getImage("admin32.png");
+	this.setIconImage(img);
     }
 
     private class GAIGUIFocusListener

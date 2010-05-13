@@ -1,4 +1,4 @@
-package org.greenstone.server;
+package org.greenstone.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 import org.apache.log4j.*;
 
 class StreamGobbler{
-    static Logger logger = Logger.getLogger(org.greenstone.server.StreamGobbler.class.getName());
+    static Logger logger = Logger.getLogger(org.greenstone.util.StreamGobbler.class.getName());
     
     public static void logError(InputStream in)
       {

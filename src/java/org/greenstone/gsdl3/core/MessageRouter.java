@@ -18,6 +18,7 @@
  */
 package org.greenstone.gsdl3.core;
 
+import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.util.*;
 import org.greenstone.gsdl3.service.*;
 import org.greenstone.gsdl3.comms.*;

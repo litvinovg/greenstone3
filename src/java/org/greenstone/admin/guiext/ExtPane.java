@@ -25,9 +25,10 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.greenstone.admin.GAIManager;
 import org.greenstone.admin.GAI;
-import org.greenstone.admin.Configuration;
+
+import org.greenstone.util.Configuration;
+import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.util.GSPath;
-import org.greenstone.gsdl3.util.GlobalProperties;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

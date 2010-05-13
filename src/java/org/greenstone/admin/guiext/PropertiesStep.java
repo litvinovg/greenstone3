@@ -30,7 +30,7 @@ import java.io.FileOutputStream;
 
 import org.w3c.dom.Element;
 
-import org.greenstone.admin.Configuration;
+import org.greenstone.util.Configuration;
 import org.greenstone.admin.LoggedMessageArea;
 
 public class PropertiesStep extends Step

@@ -1,6 +1,6 @@
-package org.greenstone.server;
+package org.greenstone.util;
 
-import org.greenstone.server.RunTarget;
+import org.greenstone.util.RunTarget;
 
 public class RunMake extends RunTarget 
 {

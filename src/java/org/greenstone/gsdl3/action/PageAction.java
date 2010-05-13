@@ -1,5 +1,6 @@
 package org.greenstone.gsdl3.action;
 
+import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.core.ModuleInterface;
 import org.greenstone.gsdl3.util.*;
 //XML classes

@@ -37,6 +37,7 @@ import javax.swing.*;
 import javax.swing.plaf.*;
 import javax.swing.text.*;
 
+import org.greenstone.util.Configuration;
 import org.greenstone.gsdl3.util.Dictionary;
 import org.greenstone.admin.gui.SetServerPane;
 import org.greenstone.gsdl3.util.GSPath;

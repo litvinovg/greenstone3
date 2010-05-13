@@ -11,6 +11,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 import org.greenstone.server.BaseServerSettings;
+import org.greenstone.util.ScriptReadWrite;
 
 public class Server2Settings extends BaseServerSettings
 {

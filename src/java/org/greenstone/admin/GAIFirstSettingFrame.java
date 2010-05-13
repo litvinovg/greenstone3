@@ -48,6 +48,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
 
+import org.greenstone.util.Configuration;
 import org.greenstone.core.ParsingProgress;
 import org.greenstone.admin.gui.SetServerPane;
 import org.greenstone.admin.GAI;

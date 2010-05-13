@@ -1,16 +1,17 @@
-package org.greenstone.server;
+package org.greenstone.util;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.greenstone.gsdl3.util.Misc;
+import org.greenstone.server.BaseProperty;
+import org.greenstone.util.Misc;
 import org.apache.log4j.*;
 
 public class BrowserLauncher 
     extends Thread {
     private String url = "about:blank" ;
-    static Logger logger = Logger.getLogger(org.greenstone.server.BrowserLauncher.class.getName());
+    static Logger logger = Logger.getLogger(org.greenstone.util.BrowserLauncher.class.getName());
     private String[] default_browsers = new String[]{"firefox","mozilla"};
     private String command = "";
     private int state = -1; //0: launch success, 1: launch failed 
