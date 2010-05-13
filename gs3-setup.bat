@@ -133,8 +133,8 @@ if exist "!JRE_HOME!\bin\java.exe" (
   set PATH=!JRE_HOME!\bin;!PATH!
   set RUNJAVA=!JRE_HOME!\bin\java.exe
   echo Using java at !JRE_HOME!
-  echo WARNING: Greenstone has not checked the version number of this java installation
-  echo          The source distribution of Greenstone3 requires java 1.5 or greater
+  echo WARNING: Greenstone has not checked the version number of this Java installation
+  echo          The source distribution of Greenstone3 requires Java 1.5 or greater
   echo          SVN users may still use java 1.4
   goto summaryThenEnd
 )
