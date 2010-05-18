@@ -1102,6 +1102,17 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       </manifest>
     </jar>
     <copy file="${build.home}/gsdl3.jar" todir="${web.lib}"/>
+
+    <jar destfile="${build.home}/gutil.jar">
+      <fileset dir="${build.home}">
+        <include name="org/greenstone/util/**"/>
+      </fileset>
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+      </manifest>
+    </jar>
+    <copy file="${build.home}/gutil.jar" todir="${web.lib}"/>
+
     <!-- copy the localsite server in case we need it -->
     <copy file="${build.home}/org/greenstone/gsdl3/${base.webservice.name}localsite.class" tofile="${web.classes}/org/greenstone/gsdl3/${base.webservice.name}localsite.class" />
 
