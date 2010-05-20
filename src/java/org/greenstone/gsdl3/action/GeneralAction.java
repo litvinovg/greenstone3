@@ -26,20 +26,6 @@ public class GeneralAction extends Action {
 	String lang = request.getAttribute(GSXML.LANG_ATT);
 	String uid = request.getAttribute(GSXML.USER_ID_ATT);
 
-	//A shortcut action serving the flax web page requests
-	if(request.getAttribute(GSXML.SUBACTION_ATT).equals(GSXML.FLAX_PAGE_GENERATION)
-			&& request.getAttribute(GSXML.TO_ATT).equals(GSXML.FLAX_PAGE_GENERATION)) {
-		//
-		Element mr_info_response = (Element) this.mr.process(message);
-		Node flaxPageNode = (mr_info_response.getElementsByTagName(GSXML.FLAX_PAGE)).item(0);
-		//logger.info(" raw page="+this.converter.getString(flaxPageNode));
-		if(flaxPageNode != null){
-		    page_response.appendChild((Element)this.doc.importNode(flaxPageNode, true));
-		}
-		addSiteMetadata(result, lang, uid);
-		return result;
-	}
-	
 	// get the param list
 	Element cgi_param_list = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 	HashMap params = GSXML.extractParams(cgi_param_list, false);
