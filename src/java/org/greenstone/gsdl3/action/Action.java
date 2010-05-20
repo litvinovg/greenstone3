@@ -142,7 +142,7 @@ abstract public class Action {
      * @param  lang      the current language
      * @param  uid       the current user id
      */
-    void addSiteMetadata( Element element, String lang, String uid ) {
+    protected void addSiteMetadata( Element element, String lang, String uid ) {
         //ADD SITE METADATA
         Element metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", lang, uid);
         //create a hashmap of params
