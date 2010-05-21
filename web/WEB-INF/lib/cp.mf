@@ -3,4 +3,4 @@ Class-Path: LuceneWrapper.jar activation.jar axis-ant.jar
  commons-logging-1.0.4.jar derby.jar gsdl3.jar jaxp.jar 
  jaxrpc.jar js.jar junit.jar log4j-1.2.8.jar lucene-1.4.1.jar 
  mail.jar saaj.jar wsdl4j-1.5.1.jar xercesImpl.jar 
- xmlsec-1.2.1.jar
+ xmlsec-1.2.1.jar gutil.jar
