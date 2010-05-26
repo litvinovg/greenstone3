@@ -218,6 +218,19 @@
   <condition property="static.arg" value="LDFLAGS=-static" else=" ">
     <isset property="compile.static"/>
   </condition>
+
+  <condition property="gs2.opt.args" value= " " else="--disable-mg --disable-mgpp --disable-accentfold --disable-gdbm --disable-sqlite">
+    <istrue value="${with.jni}"/>
+  </condition>
+  <condition property="gs2.compile.target" value="with-jni" else="without-jni">
+    <istrue value="${with.jni}"/>
+  </condition>
+  <condition property="gs2.install.target" value="install-with-jni" else="install-without-jni">
+    <istrue value="${with.jni}"/>
+  </condition>
+  <condition property="gs2.windows.enablejni" value="1" else="0">
+    <istrue value="${with.jni}"/>
+  </condition>
   
   <!-- where is search4j tool -->
   <condition property="search4j.exec" value="bin/search4j.exe" else="bin/search4j"> 
@@ -314,6 +327,7 @@
     <!-- include the jar files from the source packages -->
     <!-- mg and mgpp get installed into lib/jni but they may not be there yet
     so we add them in by name -->
+    <!-- *** is there any way to make this optional, based on ${with.jni}? -->
     <pathelement location="${lib.jni}/mg.jar"/>
     <pathelement location="${lib.jni}/mgpp.jar"/>
     
@@ -809,7 +823,7 @@
       <env key="CATALINA_HOME" value="${catalina.home}"/>
       <env key="CLASSPATH" path="${tomcat.classpath}"/>
       <env key="LD_LIBRARY_PATH" path="${env.LD_LIBRARY_PATH}:${lib.jni}"/>
-      <env key="DYLD_LIBRARY_PATH" path="${env.DYLD_LIBRARY_PATH}:${lib.jni}:${gdbm.home}/lib"/> <!-- for mac os --> <!-- need gdbm here??-->
+      <env key="DYLD_LIBRARY_PATH" path="${env.DYLD_LIBRARY_PATH}:${lib.jni}:${gdbm.home}/lib"/> <!-- for mac os --> <!-- need gdbm here these days ??-->
       <env key="WNHOME" path="${wn.home}"/>
     </exec>
     <exec executable="${catalina.home}/bin/startup.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="true">
@@ -1196,7 +1210,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <target name="configure-packages" depends="init,configure-javagdbm" 
     description="Configure only the packages."/>
   
-  <target name="configure-javagdbm">
+  <target name="configure-javagdbm" if="with.jni">
     <echo>
       Configuring JavaGDBM
     </echo>
@@ -1227,6 +1241,13 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
   
   <target name="compile-packages" description="Compile only the source packages">
+    <!-- javagdbm -->
+    <antcall target="compile-javagdbm"/>
+    <!-- Search4j -->
+    <antcall target="compile-search4j"/>
+  </target>
+
+  <target name="compile-javagdbm" description="Compile JavaGDBM" if="with.jni">
     
     <!-- unix: -->
     <echo>compile javagdbm</echo>
@@ -1245,10 +1266,6 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <!-- install the jar file -->
     <echo>Install the javagdbm jar file</echo>
     <copy file="${javagdbm.home}/javagdbm.jar" todir="${lib.jni}"/>
-
-
-    <!-- Search4j -->
-    <antcall target="compile-search4j"/>
   </target>
 
   <target name="compile-search4j">
@@ -1287,12 +1304,21 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
 
   <target name="install-auxiliary-jar-files" depends="init">
-    <copy file="${mg.home}/mg.jar" todir="${lib.jni}"/>
-    <copy file="${mgpp.home}/mgpp.jar" todir="${lib.jni}"/>
+
+    <if>
+      <bool><available file="${mg.home}/mg.jar"/></bool>
+      <copy file="${mg.home}/mg.jar" todir="${lib.jni}"/>
+    </if>
+
+    <if>
+      <bool><available file="${mgpp.home}/mg.jar"/></bool>
+      <copy file="${mgpp.home}/mgpp.jar" todir="${lib.jni}"/>
+    </if>
+
     <copy file="${lucene.home}/LuceneWrapper.jar" todir="${web.lib}"/>    
   </target>
   
-  <target name="install-jni-files" depends="init,install-jni-files-linux,install-jni-files-windows,install-jni-files-macos"/>
+  <target name="install-jni-files" depends="init,install-jni-files-linux,install-jni-files-windows,install-jni-files-macos" if="with.jni"/>
 
   <target name="install-jni-files-linux" depends="init" if="current.os.isunixnotmac">
     <copy file="${mg.home}/jni/libmgretrievejni.so" todir="${lib.jni}"/>
@@ -1354,7 +1380,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       dir="${common.src.home}" failonerror="true">
       <arg value="--prefix=${gs2build.home}"/> <!-- what value to use?? -->
       <arg value="--bindir=${gs2build.home}/bin/${os.bin.dir}"/> <!-- what value to use?? -->
-      <arg value="--enable-jni"/>
+      <arg line="${gs2.opt.args}"/>
       <arg line="${static.arg}"/>
     </exec>
   </target>
@@ -1388,15 +1414,15 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <target name="compile-common-src" depends="init">
     <!-- unix: -->
     <exec executable="make" os="${os.unix}" dir="${common.src.home}" failonerror="true">
-      <arg value="with-jni"/>
+      <arg value="${gs2.compile.target}"/>
     </exec>
     <!-- windows: -->
     <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
       <arg value="/f"/>
       <arg value="win32.mak"/>
       <arg value="GSDLHOME=${gs2build.home}"/>
-      <arg value="ENABLE_JNI=1"/>
-      <arg value="USE_SQLITE=0"/>
+      <arg value="ENABLE_JNI=${gs2.windows.enablejni}"/>
+      <arg value="USE_SQLITE=0"/> <!-- Why is this not on by default? -->
     </exec>
   </target>
   
@@ -1430,7 +1456,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <!-- make install for common-src -->
     <!-- unix: -->
     <exec executable="make" os="${os.unix}" dir="${common.src.home}" failonerror="true">
-      <arg value="install-with-jni"/>
+      <arg value="${gs2.install.target}"/>
     </exec>
       
     <!-- windows: -->
@@ -1438,8 +1464,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="/f"/>
       <arg value="win32.mak"/>
       <arg value="install"/>
-      <arg value="ENABLE_JNI=1"/>
-      <arg value="USE_SQLITE=0"/>
+      <arg value="ENABLE_JNI=${gs2.windows.enablejni}"/>
+      <arg value="USE_SQLITE=0"/> <!-- why is this not on by default? -->
     </exec>
 
     <!-- install gs2build indexers for windows -->
@@ -1671,6 +1697,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <exec executable="${build.src.home}/configure" os="${os.unix}"
       dir="${build.src.home}" failonerror="true">
       <arg value="--prefix=${gs2build.home}"/>
+      <arg line="${gs2.opt.args}"/>
       <arg line="${static.arg}"/>
     </exec>
   </target>
@@ -1881,3 +1908,4 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
     
 </project>
+

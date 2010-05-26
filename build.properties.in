@@ -46,8 +46,20 @@ compile.deprecation=true
 # Should compilation include the optimize option?
 compile.optimize=true
 
-## should compilation be static?? - used for distributions
+# Control whether or not JNI bindings are used
+#   e.g. MG, MG++ and GDBM and the like
+# Setting this false means these components are not available to the install
+# The expectation is that collections will be build from 100% Java components:
+#   e.g Lucene and JDBM
+# 
+# Ant 1.7.1 and before only test for *existence* so this needs to be commented
+# in or out to control whether jni is used or not
+with.jni=true
+
+## Control if compilation of gs2 is static or not. Used, for example, for distributions
+# Same issue as 'with.jni' for how this gets used in ant 1.7.1 and before
 #compile.static=true
+
 
 ## windows c++ compilation
 # The following property does not help in build.xml. 
