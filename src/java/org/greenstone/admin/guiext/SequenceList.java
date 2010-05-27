@@ -200,9 +200,14 @@ public class SequenceList
     public void updateButtons()
     {
 	loadExtensionStatesFromFile();
-	
+
 	ExtensionInformation currentExtension = _parent;
 	String fileStem = currentExtension.getFileStem();
+
+	File extDir = new File(currentExtension.getExtensionDirectory());
+	if(!extDir.exists()){
+	    rollbackTo("");
+	}
 	
 	for(int i = 0; i < _steps.size(); i++){
 	    Step currentStep = (Step)_steps.get(i);

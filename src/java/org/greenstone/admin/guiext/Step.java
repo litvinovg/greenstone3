@@ -9,17 +9,6 @@ import javax.swing.JButton;
 import javax.swing.JTextArea;
 import javax.swing.JPanel;
 
-/*
-if(_commonMessageArea == null){
-	    _commonMessageArea = new JTextArea();
-	    _commonMessageArea.setEditable(false);
-	    _commonMessageArea.setAutoscrolls(true);
-	    _commonMessageArea.setLineWrap(true);
-	    _commonMessageArea.setWrapStyleWord(true);
-	    _commonMessageArea.setMargin(new Insets(0,5,0,0));
-	}
-*/
-
 public class Step
 {
     protected SequenceList _parent = null;

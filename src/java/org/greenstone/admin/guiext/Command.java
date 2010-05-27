@@ -31,7 +31,7 @@ public class Command implements Runnable
 		    System.err.println("A <" + ExtXMLHelper.COMMAND + "> element does not have an \"os\" attribute");
 		}
 		else{
-		    _osCommands.put(os, ExtXMLHelper.getValueFromSingleElement(currentCommand, true));
+		    _osCommands.put(os, ExtXMLHelper.getValueFromSingleElement(currentCommand, false));
 		}
 	    }
 	}
