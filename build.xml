@@ -1311,7 +1311,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </if>
 
     <if>
-      <bool><available file="${mgpp.home}/mg.jar"/></bool>
+      <bool><available file="${mgpp.home}/mgpp.jar"/></bool>
       <copy file="${mgpp.home}/mgpp.jar" todir="${lib.jni}"/>
     </if>
 
