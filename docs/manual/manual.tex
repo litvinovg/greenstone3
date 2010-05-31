@@ -1547,6 +1547,7 @@ Browse type services are used for classification browsing. The request consists 
 
 Possible values for structure parameters are \gst{ancestors}, \gst{parent}, \gst{siblings}, \gst{children}, \gst{descendants}. The response gives, for each identifier in the request, a \gst{<nodeStructure>} element with all the requested structure put together into a hierarchy. The structure may include classifier and document nodes. 
 
+Structural info can also be requested in the \gst{paramList}, and will be returned in a \gst{<nodeStructureInfo>} element. (See the section on DocumentStructureRetrieve messages.)  Possible values for info parameters are \gst{numSiblings}, \gst{siblingPosition}, \gst{numChildren}. 
 
 \subsubsection{'retrieve'-type services}
 
