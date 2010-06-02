@@ -136,7 +136,7 @@ public class QBRSOAPServer@sitename@ {
 		"paramList displayItemList";
 	protected static final String docStructureOptions =
 		"entire ancestors parent siblings children descendants"; // note the spelling
-	protected static final String docStructureInfo =
+	protected static final String structureInfoOptions =
 		"numSiblings siblingPosition numChildren";
 	protected static final String browseStructureOptions = 
 		"ancestors parent siblings children descendants"; // note the spelling
@@ -486,7 +486,7 @@ public class QBRSOAPServer@sitename@ {
 		
 		// Create the <paramlist></paramlist> element of param elements,
 		// if any; and only if values are legal (that is, if they occur in  
-		// static Strings docStructureOptions and docStructureInfo):
+		// static Strings docStructureOptions and structureInfoOptions):
 		// <param name="structure" value = "structure[i]">
 		// <param name="info" value = "info[i]">
 		Element paramList = doc.createElement(
@@ -502,7 +502,7 @@ public class QBRSOAPServer@sitename@ {
 		}
 		if(info != null) {
 			for(int i = 0; i < info.length; i++) {
-				if(docStructureInfo.indexOf(info[i]) != -1) {
+				if(structureInfoOptions.indexOf(info[i]) != -1) {
 					paramList.appendChild(GSXML.createParameter(
 							this.doc, "info", info[i]));
 				}
@@ -663,7 +663,7 @@ public class QBRSOAPServer@sitename@ {
 		// <classifierNodeList><classifier nodeID="CLx" /></classifierNodeList>
 		return browse(collection, browseService, lang,   
 				classifierNodeIDs, 
-				new String[] {"descendants"}); // note the spelling
+				new String[] {"descendants"}, new String[] {""}); // note the spelling
 	}
 	
 	/** To send a browse request for specific parts of a classifier node 
@@ -680,9 +680,11 @@ public class QBRSOAPServer@sitename@ {
 	 * @param structureParams the list of parameters indicating what structure 
 	 * information is requested. Accepted values are ancestors, parent, siblings,
 	 * children, descendants.
+	 * @param infoParams - structural info is requested. Can be numSiblings, 
+	 * siblingPosition, numChildren
 	*/
 	public String browse(String collection, String browseService, String lang, 
-			String[] classifierNodeIDs, String[] structureParams) 
+			String[] classifierNodeIDs, String[] structureParams, String[] infoParams) 
 	{
 		if(browseService.equals(""))
 			browseService = "ClassifierBrowse";
@@ -702,6 +704,15 @@ public class QBRSOAPServer@sitename@ {
 				paramList.appendChild(GSXML.createParameter(
 						this.doc, "structure", structureParams[i]));
 			}
+		}
+
+		if(infoParams != null) {
+		    for(int i = 0; i < infoParams.length; i++) {
+			if(structureInfoOptions.indexOf(infoParams[i]) != -1) {
+			    paramList.appendChild(GSXML.createParameter(
+									this.doc, "info", infoParams[i]));
+			}
+		    }
 		}
 		
 		// <classifierNodeList><classifier nodeID="CLx" />
