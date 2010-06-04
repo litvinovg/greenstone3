@@ -1,2 +1,2 @@
 Class-Path: AntelopeTasks_3.4.2.jar anttasks.jar ganymed.jar svnant.jar
- svnClientAdapter.jar svnjavahl.jar svnkit.jar Java_svn.jar
+ svnClientAdapter.jar svnjavahl.jar svnkit.jar Java_svn.jar xmltask.jar
