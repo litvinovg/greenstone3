@@ -40,8 +40,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 
+import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.core.MessageRouter;
-import org.greenstone.gsdl3.util.GlobalProperties;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.XMLConverter;
@@ -134,12 +134,10 @@ public class QBRSOAPServer@sitename@ {
 		"metadataList serviceList displayItemList";
 	protected static final String serviceSubsetOptions = // services
 		"paramList displayItemList";
-	protected static final String docStructureOptions =
+	protected static final String structureOptions =
 		"entire ancestors parent siblings children descendants"; // note the spelling
 	protected static final String structureInfoOptions =
 		"numSiblings siblingPosition numChildren";
-	protected static final String browseStructureOptions = 
-		"ancestors parent siblings children descendants"; // note the spelling
 	
 		
 	/** Constructor that initializes the web services' MessageRouter object 
@@ -486,7 +484,7 @@ public class QBRSOAPServer@sitename@ {
 		
 		// Create the <paramlist></paramlist> element of param elements,
 		// if any; and only if values are legal (that is, if they occur in  
-		// static Strings docStructureOptions and structureInfoOptions):
+		// static Strings structureOptions and structureInfoOptions):
 		// <param name="structure" value = "structure[i]">
 		// <param name="info" value = "info[i]">
 		Element paramList = doc.createElement(
@@ -494,7 +492,7 @@ public class QBRSOAPServer@sitename@ {
 		
 		if(structure != null) {
 			for(int i = 0; i < structure.length; i++) {
-				if(docStructureOptions.indexOf(structure[i]) != -1) {
+				if(structureOptions.indexOf(structure[i]) != -1) {
 					paramList.appendChild(GSXML.createParameter(
 							this.doc, "structure", structure[i]));					
 				}
@@ -700,17 +698,17 @@ public class QBRSOAPServer@sitename@ {
 				GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 		for(int i = 0; i < structureParams.length; i++) {
 			// check it is a valid structure parameter
-			if(browseStructureOptions.indexOf(structureParams[i]) != -1) {
+			if(structureOptions.indexOf(structureParams[i]) != -1) {
 				paramList.appendChild(GSXML.createParameter(
 						this.doc, "structure", structureParams[i]));
 			}
 		}
 
-		if(infoParams != null) {
+		if(infoParams != null && !infoParams[0].equals("")) {
 		    for(int i = 0; i < infoParams.length; i++) {
 			if(structureInfoOptions.indexOf(infoParams[i]) != -1) {
 			    paramList.appendChild(GSXML.createParameter(
-									this.doc, "info", infoParams[i]));
+						this.doc, "info", infoParams[i]));
 			}
 		    }
 		}
