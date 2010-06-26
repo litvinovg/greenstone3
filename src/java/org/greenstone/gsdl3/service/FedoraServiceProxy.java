@@ -280,7 +280,6 @@ public class FedoraServiceProxy
 	}
 
 	Element response = getResponseAsDOM(fedoraServicesAPIA.retrieveDocumentMetadata(this.cluster_name, docIDs, metafields));
-	//logger.info("**** FedoraServiceProxy - Response from documentmetaretrieve: " + GSXML.nodeToFormattedString(response));
 	return (Element)response.getElementsByTagName(GSXML.RESPONSE_ELEM).item(0); 
     }
 
@@ -347,10 +346,12 @@ public class FedoraServiceProxy
 		info = info + param.getAttribute("value") + "|";
 	    }
 	}
+	///structure = structure + "siblings"; //test for getting with classifier browse structure: siblings
 	
 	Element response 
 	    = getResponseAsDOM(fedoraServicesAPIA.retrieveBrowseStructure(collection, "ClassifierBrowse", classifierIDs,
 									  new String[] {structure}, new String[] {info}));
+	///logger.error("**** FedoraServiceProxy - Response from retrieveBrowseStructure: " + GSXML.nodeToFormattedString(response));	
 	
 	return (Element)response.getElementsByTagName(GSXML.RESPONSE_ELEM).item(0);
     }
