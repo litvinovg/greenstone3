@@ -93,7 +93,6 @@ public abstract class AbstractBrowse
 	    }
 
 	}
-
  
         // check that there are classifiers specified
         Element class_list = (Element)GSXML.getChildByTagName(info, GSXML.CLASSIFIER_ELEM+GSXML.LIST_MODIFIER);
@@ -101,11 +100,11 @@ public abstract class AbstractBrowse
             // no classifiers specified
             return false;
         }
-	
+
 	// get the display and format elements from the coll config file for
 	// the classifiers
 	extractExtraClassifierInfo(info, extra_info);
-	
+
         // short_service_info_ - the browse one
         Element cb_service = this.doc.createElement(GSXML.SERVICE_ELEM);
         cb_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_BROWSE);
@@ -248,7 +247,7 @@ public abstract class AbstractBrowse
     }
 
     /** this looks for any classifier specific display or format info from extra_info and adds it in to the correct place in info */
-    protected boolean extractExtraClassifierInfo(Element info, Element extra_info) {
+    static boolean extractExtraClassifierInfo(Element info, Element extra_info) {
 	
 	if (extra_info == null) {
 	    return false;

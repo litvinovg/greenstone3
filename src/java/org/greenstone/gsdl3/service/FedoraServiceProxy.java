@@ -130,10 +130,9 @@ public class FedoraServiceProxy
 	// ServiceRack.getServiceList() requires this ServiceRack's services to be filled into the 
 	// short_service_info Element which needs to be done in this FedoraServiceProxy.configure().
 	
-
-	if(extra_info != null) {
-	    logger.error("extra_info is not null. May need to merge eventually with info. NOT YET IMPLEMENTED!");
-	}
+	// get the display and format elements from the coll config file for
+	// the classifiers
+	AbstractBrowse.extractExtraClassifierInfo(info, extra_info);
 
 	// Copied from IViaProxy.java:
 	String collection = fedoraServicesAPIA.describeCollection(this.cluster_name);
@@ -280,7 +279,6 @@ public class FedoraServiceProxy
 	    }
 	}
 
-	//Element response = getResponseAsDOM(fedoraServicesAPIA.retrieveDocumentMetadata(this.cluster_name, docIDs));
 	Element response = getResponseAsDOM(fedoraServicesAPIA.retrieveDocumentMetadata(this.cluster_name, docIDs, metafields));
 	//logger.info("**** FedoraServiceProxy - Response from documentmetaretrieve: " + GSXML.nodeToFormattedString(response));
 	return (Element)response.getElementsByTagName(GSXML.RESPONSE_ELEM).item(0); 
@@ -348,7 +346,7 @@ public class FedoraServiceProxy
 	    } else if(param.getAttribute("name").equals("info")) {
 		info = info + param.getAttribute("value") + "|";
 	    }
-	}	
+	}
 	
 	Element response 
 	    = getResponseAsDOM(fedoraServicesAPIA.retrieveBrowseStructure(collection, "ClassifierBrowse", classifierIDs,
@@ -540,7 +538,7 @@ public class FedoraServiceProxy
 	}
     } else { // documentnode
 	response = getResponseAsDOM(fedoraServicesAPIA.retrieveDocumentStructure(this.cluster_name, new String[]{doc_id},
-										     new String[]{"children"}, new String[]{"siblingPosition"}));
+										 new String[]{"children"}, new String[]{"siblingPosition"}));
 	String path = GSPath.createPath(new String[]{GSXML.RESPONSE_ELEM, GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER, 
 					      GSXML.DOC_NODE_ELEM, GSXML.NODE_STRUCTURE_ELEM, GSXML.DOC_NODE_ELEM});	
 	Element parentDocNode = (Element) GSXML.getNodeByPath(response, path);
