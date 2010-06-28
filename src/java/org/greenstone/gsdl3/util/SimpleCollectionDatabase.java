@@ -20,7 +20,7 @@ package org.greenstone.gsdl3.util;
 
 import org.apache.log4j.*;
 
-public class SimpleCollectionDatabase {
+public class SimpleCollectionDatabase implements OID.OIDTranslatable {
   
   static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.SimpleCollectionDatabase.class.getName());
 
@@ -135,91 +135,16 @@ public class SimpleCollectionDatabase {
     }
     return null;
   }
-  
-  /** translates relative oids into proper oids:
+
+  /** After OID.translateOID() is through, this method processes OID further 
+   * to translate relative oids into proper oids:
    * .pr (parent), .rt (root) .fc (first child), .lc (last child),
    * .ns (next sibling), .ps (previous sibling) 
    * .np (next page), .pp (previous page) : links sections in the order that you'd read the document
    * a suffix is expected to be present so test before using 
    */
-  public String translateOID(String oid) {
-
-    int p = oid.lastIndexOf('.');
-    if (p != oid.length()-3) {
-      logger.info("translateoid error: '.' is not the third to last char!!");
-      return oid;
-    }
-	
-    String top = oid.substring(0, p);
-    String suff = oid.substring(p+1);
-    // just in case we have multiple extensions, we must translate
-    // we process inner ones first
-    if (OID.needsTranslating(top)) {
-      top = translateOID(top);
-    }
-    if (suff.equals("pr")) {
-      return OID.getParent(top);
-    } 
-    if (suff.equals("rt")) {
-      return OID.getTop(top);
-    } 
-    if (suff.equals("np")) {
-      // try first child
-      String node_id = translateOID(top+".fc");
-      if (!node_id.equals(top)) {
-	return node_id;
-      }
-      // try next sibling
-      node_id = translateOID(top+".ns");
-      if (!node_id.equals(top)) {
-	return node_id;
-      }
-      // otherwise we keep trying parents sibling
-      String child_id = top;
-      String parent_id = OID.getParent(child_id);
-      while(!parent_id.equals(child_id)) {
-	node_id = translateOID(parent_id+".ns");
-	if (!node_id.equals(parent_id)) {
-	  return node_id;
-	}
-	child_id = parent_id;
-	parent_id = OID.getParent(child_id);
-      }
-      return top; // we couldn't get a next page, so just return the original
-    } 
-    if (suff.equals("pp")) {
-      String prev_sib = translateOID(top+".ps");
-      if (prev_sib.equals(top)) {
-	// no previous sibling, so return the parent
-	return OID.getParent(top);
-      }
-      // there is a previous sibling, so its either this section, or the last child of the last child..
-      String last_child = translateOID(prev_sib+".lc");
-      while (!last_child.equals(prev_sib)) {
-	prev_sib = last_child;
-	last_child = translateOID(prev_sib+".lc");
-      }
-      return last_child;
-    } 
-	
-    int sibling_num = 0;
-    if (suff.equals("ss")) {
-      // we have to remove the sib num before we get top
-      p = top.lastIndexOf('.');
-      sibling_num = Integer.parseInt(top.substring(p+1));
-      top = top.substring(0, p);
-    }
-	
-    // need to get info out of collection db -
-    String doc_id = top;
-    if (suff.endsWith("s")) {
-      doc_id = OID.getParent(top);
-      if (doc_id.equals(top)) {
-	// i.e. we are already at the top
-	return top;
-      }
-    }
-    DBInfo info = getInfo(doc_id);
+    public String processOID(String doc_id, String top, String suff, int sibling_num) {
+	DBInfo info = getInfo(doc_id);
     if (info==null) {
       logger.info("info is null!!");
       return top;
@@ -263,5 +188,5 @@ public class SimpleCollectionDatabase {
     }
 	
     return top;
-  }
+    }  
 }

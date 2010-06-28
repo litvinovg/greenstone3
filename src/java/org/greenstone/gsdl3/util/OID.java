@@ -18,11 +18,19 @@
  */
 package org.greenstone.gsdl3.util;
 
+import org.apache.log4j.*;
+
 /** utility class to handle greenstone OIDs
  *
  * based around OIDtools.h from gsdl
  */
 public class OID {
+
+    static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.OID.class.getName());
+
+    public interface OIDTranslatable {
+	public String processOID(String doc_id, String top, String suffix, int sibling_num);
+    }
     
     /** returns everything up to the first dot 
       if no dot, returns oid */
@@ -101,4 +109,97 @@ public class OID {
       }
       return child.startsWith(parent);
     }
+
+    
+  /** translates relative oids into proper oids:
+   * .pr (parent), .rt (root) .fc (first child), .lc (last child),
+   * .ns (next sibling), .ps (previous sibling) 
+   * .np (next page), .pp (previous page) : links sections in the order that you'd read the document
+   * a suffix is expected to be present so test before using
+   * Other classes can implement the method processOID of interface OIDTranslatable
+   * to process the oid further to handle siblings.
+   */
+    public static String translateOID(OIDTranslatable translator, String oid) {
+    int p = oid.lastIndexOf('.');
+    if (p != oid.length()-3) {
+      logger.info("translateoid error: '.' is not the third to last char!!");
+      return oid;
+    }
+	
+    String top = oid.substring(0, p);
+    String suff = oid.substring(p+1);
+
+    // just in case we have multiple extensions, we must translate
+    // we process inner ones first
+    if (OID.needsTranslating(top)) {
+	top = OID.translateOID(translator, top);
+    }
+    if (suff.equals("pr")) {
+      return OID.getParent(top);
+    } 
+    if (suff.equals("rt")) {
+      return OID.getTop(top);
+    } 
+    if (suff.equals("np")) {
+      // try first child
+
+      String node_id = OID.translateOID(translator, top+".fc");
+      if (!node_id.equals(top)) {
+	  return node_id;
+      }
+
+      // try next sibling
+      node_id = OID.translateOID(translator, top+".ns");
+      if (!node_id.equals(top)) {
+	  return node_id;
+      }
+      // otherwise we keep trying parents sibling
+      String child_id = top;
+      String parent_id = OID.getParent(child_id);
+      while(!parent_id.equals(child_id)) {
+	node_id = OID.translateOID(translator, parent_id+".ns");
+	if (!node_id.equals(parent_id)) {
+	  return node_id;
+	}
+	child_id = parent_id;
+	parent_id = OID.getParent(child_id);
+      }
+      return top; // we couldn't get a next page, so just return the original
+    } 
+    if (suff.equals("pp")) {
+      String prev_sib = OID.translateOID(translator, top+".ps");
+      if (prev_sib.equals(top)) {
+	// no previous sibling, so return the parent
+	return OID.getParent(top);
+      }
+      // there is a previous sibling, so it's either this section, or the last child of the last child
+      String last_child = OID.translateOID(translator, prev_sib+".lc");
+      while (!last_child.equals(prev_sib)) {
+	prev_sib = last_child;
+	last_child = OID.translateOID(translator, prev_sib+".lc");
+      }
+      return last_child;
+    } 
+	
+    int sibling_num = 0;
+    if (suff.equals("ss")) {
+      // we have to remove the sib num before we get top
+      p = top.lastIndexOf('.');
+      sibling_num = Integer.parseInt(top.substring(p+1));
+      top = top.substring(0, p);
+    }
+	
+    // need to get info out of Fedora
+    String doc_id = top;
+    if (suff.endsWith("s")) {
+      doc_id = OID.getParent(top);
+      if (doc_id.equals(top)) {
+	// i.e. we are already at the top
+	return top;
+      }
+    }
+    
+    return translator.processOID(doc_id, top, suff, sibling_num);
+
+  }
 }

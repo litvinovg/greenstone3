@@ -122,7 +122,7 @@ public abstract class AbstractGS2DocumentRetrieve
 
     /** if id ends in .fc, .pc etc, then translate it to the correct id */
     protected String translateId(String node_id) {
-	return this.coll_db.translateOID(node_id);
+	return OID.translateOID(this.coll_db, node_id); //return this.coll_db.translateOID(node_id);
     }
     
     /** if an id is not a greenstone id (an external id) then translate 

@@ -106,7 +106,7 @@ public class GS2Browse
 
     /** if id ends in .fc, .pc etc, then translate it to the correct id */
     protected String translateId(String node_id) {
-	return this.coll_db.translateOID(node_id);
+	return OID.translateOID(this.coll_db, node_id); //return this.coll_db.translateOID(node_id);
     }
 
     /** returns the document type of the doc that the specified node 
