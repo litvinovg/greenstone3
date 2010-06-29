@@ -4,5 +4,6 @@
 <Context path="/greenstone3" 
   docBase="@gsdl3webhome@" 
   debug="1" reloadable="true" 
+  @privilegedattribute@
   allowLinking="false">
 </Context>

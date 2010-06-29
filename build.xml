@@ -88,8 +88,9 @@
   <condition property="tomcat.version.major" value="5" else="6"> 
     <equals arg1="1.4" arg2="${ant.java.version}"/>
   </condition>
-
-
+  <condition property="privileged.attribute" value="privileged='true'" else=""> 
+    <equals arg1="6" arg2="${tomcat.version.major}"/>
+  </condition>
 
   <property name="axis.zip.version" value="axis-bin-1_2_1.zip"/>
   <property name="axis.dir.version" value="axis-1_2_1"/>
@@ -802,6 +803,7 @@
     <copy file="${basedir}/resources/tomcat/greenstone3.xml" tofile="${packages.home}/tomcat/conf/Catalina/localhost/greenstone3.xml" overwrite="true">
       <filterset>
         <filter token="gsdl3webhome" value="${web.home}"/>
+	<filter token="privilegedattribute" value ="${privileged.attribute}"/>
       </filterset>
     </copy>
   </target>
