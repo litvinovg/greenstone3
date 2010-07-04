@@ -1818,6 +1818,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     	</filterset>	
     </copy>
     <copy file="${basedir}/flax-lib/opennlp-tools-1.3.0.jar" todir="${web.home}/WEB-INF/lib" overwrite="true" />    
+    <copy file="${basedir}/flax-lib/cos.jar" todir="${web.home}/WEB-INF/lib" overwrite="true" />    
   </target>
 
 
