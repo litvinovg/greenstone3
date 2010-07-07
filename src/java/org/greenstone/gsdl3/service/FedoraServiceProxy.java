@@ -40,8 +40,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.File;
 import java.util.HashMap;
-import java.util.ResourceBundle;
 import java.util.Locale;
+import java.util.Properties;
+import java.util.ResourceBundle;
 import java.lang.reflect.Method;
 
 import org.apache.log4j.*;
@@ -110,8 +111,17 @@ public class FedoraServiceProxy
 	    // settings which get displayed in the connection dialog fields
 	    //final File propertiesFile = new File("gs3fedora.properties");
 	    //fedoraServicesAPIA = new FedoraServicesAPIA(propertiesFile);
+	    
+	    // Defaults. Read host and port from global.properties
+	    Properties globalProperties = new Properties();
+	    globalProperties.load(Class.forName("org.greenstone.util.GlobalProperties").getClassLoader().getResourceAsStream("global.properties"));
+	    String host = globalProperties.getProperty("tomcat.server", "localhost");
+	    String port = globalProperties.getProperty("tomcat.port", "8383");
+	    String protocol = "http";
+	    String username = "fedoraIntCallUser"; //"fedoraAdmin"
+	    String password = "changeme"; //"pounamu"
 
-	    fedoraServicesAPIA = new FedoraServicesAPIA("http", "localhost", 8383, "fedoraIntCallUser", "changeme");//"fedoraAdmin", "pounamu"
+	    fedoraServicesAPIA = new FedoraServicesAPIA(protocol, host, Integer.parseInt(port), username, password); //"fedoraAdmin", "pounamu"
 	} catch(org.greenstone.fedora.services.FedoraGS3Exception.CancelledException e) {
 	    // The user pressed cancel in the fedora services instantiation dlg
 	    return false;
