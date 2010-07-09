@@ -73,12 +73,22 @@ public class XMLTransformer {
    * @see javax.xml.transform.TransformerFactory
    */
     public XMLTransformer() {
-
 	// make sure we are using the xalan transformer
-	System.setProperty("javax.xml.transform.TransformerFactory", "org.apache.xalan.processor.TransformerFactoryImpl");
-	try {
-	    this.t_factory = org.apache.xalan.processor.TransformerFactoryImpl.newInstance();
 
+	// http://download.oracle.com/docs/cd/E17476_01/javase/1.5.0/docs/api/index.html?javax/xml/transform/TransformerFactory.html states that
+	// TransformerFactory.newInstance() looks in jar files for a Factory specified in META-INF/services/javax.xml.transform.TransformerFactory, 
+	// else it will use the "platform default"
+	// In this case: xalan.jar's META-INF/services/javax.xml.transform.TransformerFactory contains org.apache.xalan.processor.TransformerFactoryImpl
+	// as required.
+
+	// This means we no longer have to do a System.setProperty("javax.xml.transform.TransformerFactory", "org.apache.xalan.processor.TransformerFactoryImpl");
+	// followed by a this.t_factory = org.apache.xalan.processor.TransformerFactoryImpl.newInstance();
+	// The System.setProperty step to force the TransformerFactory implementation that gets used conflicts with
+	// Fedora (visiting the Greenstone server pages breaks the Greenstone-tomcat hosted Fedora pages) as Fedora 
+	// does not include the xalan.jar and therefore can't then find the xalan TransformerFactory explicitly set.
+
+	try {
+	    this.t_factory = TransformerFactory.newInstance();
 	} catch (Exception e) {
 	    logger.error("exception "+e.getMessage());
 	}

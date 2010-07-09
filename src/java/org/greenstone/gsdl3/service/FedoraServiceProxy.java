@@ -107,23 +107,44 @@ public class FedoraServiceProxy
 
 	// Try to instantiate a Fedora dl handle
 	try {
-	    // The properties file containing the initial digital library connection
-	    // settings which get displayed in the connection dialog fields
-	    //final File propertiesFile = new File("gs3fedora.properties");
-	    //fedoraServicesAPIA = new FedoraServicesAPIA(propertiesFile);
-	    
-	    // Defaults. Read host and port from global.properties
+	    // Fedora connection settings defaults. 
+	    // Read host and port from global.properties, since by default, we expect the Greenstone server to be used
 	    Properties globalProperties = new Properties();
 	    globalProperties.load(Class.forName("org.greenstone.util.GlobalProperties").getClassLoader().getResourceAsStream("global.properties"));
 	    String host = globalProperties.getProperty("tomcat.server", "localhost");
 	    String port = globalProperties.getProperty("tomcat.port", "8383");
 	    String protocol = "http";
 	    String username = "fedoraIntCallUser"; //"fedoraAdmin"
-	    String password = "changeme"; //"pounamu"
+	    String password = "changeme"; //"<user password>"
 
-	    fedoraServicesAPIA = new FedoraServicesAPIA(protocol, host, Integer.parseInt(port), username, password); //"fedoraAdmin", "pounamu"
+	    // See if buildConfig.xml overrides any of the defaults
+	    // info is the <serviceRack> Element from buildConfig.xml (extra_info are the Elements of collectionConfig.xml)
+
+	    NodeList nodes = info.getElementsByTagName("fedoraConnection");
+	    if(nodes != null && nodes.getLength() > 0) {
+
+		Element fedoraElement = (Element)nodes.item(0);
+		if(fedoraElement.hasAttribute("protocol")) {
+		    protocol = fedoraElement.getAttribute("protocol");
+		}		
+		if(fedoraElement.hasAttribute("host")) {
+		    host = fedoraElement.getAttribute("host");
+		}
+		if(fedoraElement.hasAttribute("port")) {
+		    port = fedoraElement.getAttribute("port");
+		}
+		if(fedoraElement.hasAttribute("username")) {
+		    username = fedoraElement.getAttribute("username");
+		}
+		if(fedoraElement.hasAttribute("password")) {
+		    password = fedoraElement.getAttribute("password");
+		}		
+	    }	
+
+	    fedoraServicesAPIA = new FedoraServicesAPIA(protocol, host, Integer.parseInt(port), username, password);
+
 	} catch(org.greenstone.fedora.services.FedoraGS3Exception.CancelledException e) {
-	    // The user pressed cancel in the fedora services instantiation dlg
+	    // The user pressed cancel in the fedora services instantiation dialog
 	    return false;
 	} catch(Exception e) {
 	    logger.error("Error instantiating the interface to the Fedora Repository:\n", e); // second parameter prints e's stacktrace
