@@ -92,8 +92,8 @@
     <equals arg1="6" arg2="${tomcat.version.major}"/>
   </condition>
 
-  <property name="axis.zip.version" value="axis-bin-1_2_1.zip"/>
-  <property name="axis.dir.version" value="axis-1_2_1"/>
+  <property name="axis.zip.version" value="axis-bin-1_4.zip"/>
+  <property name="axis.dir.version" value="axis-1_4"/>
   <property name="sqlite.targz.version" value="sqlite-amalgamation-3.5.9.tar.gz"/>
 
   <property name="build.home" value="${basedir}/build"/>
