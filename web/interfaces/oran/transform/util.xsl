@@ -11,6 +11,8 @@
   <xsl:param name="interface_name"/>
   <xsl:param name="library_name"/>
 
+  <xsl:include href="xml-to-string.xsl"/>
+
   <!-- every pages ....................................................................... -->
 	<xsl:template name="siteName"><xsl:value-of select="/page/pageResponse/metadataList/metadata[@name='siteName']"/></xsl:template>
 	<xsl:template name="siteLink"><a href="./{$library_name}"><xsl:call-template name="siteName"/><xsl:text> </xsl:text></a></xsl:template>

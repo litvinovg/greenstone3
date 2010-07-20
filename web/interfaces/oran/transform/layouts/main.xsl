@@ -4,8 +4,11 @@
 	xmlns:java="http://xml.apache.org/xslt/java"
 	xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
 	xmlns:gslib="http://www.greenstone.org/skinning"
+        xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
 	extension-element-prefixes="java util"
 	exclude-result-prefixes="util java util">
+
+	<xsl:include href="xml-to-gui.xsl"/>
 
 	<!-- put the URL or path of your site here site -->
 	<!-- eg 'http://www.example.com/mysite' or '/mysite'  -->
@@ -102,6 +105,46 @@
 						</xsl:if>
 
 					</div>
+
+<!-- *************************************************************************************** -->
+
+<!-- Sam2's div code -->
+
+    <xsl:variable name="fmt1">
+        <xsl:call-template name="xml-to-string">
+            <xsl:with-param name="node-set" select="//format[@type='browse']"/>
+          </xsl:call-template>
+    </xsl:variable>
+
+    <xsl:variable name="meta">
+        <xsl:call-template name="xml-to-string">
+            <xsl:with-param name="node-set" select="//metadataSetList"/>
+          </xsl:call-template>
+    </xsl:variable>
+
+
+    <xsl:call-template name="xml-to-gui">
+        <xsl:with-param name="node-set" select="//format[@type='browse']"/> 
+        <xsl:with-param name="metadataSets" select="//metadataSetList"/> 
+    </xsl:call-template> 
+
+    <!-- <xsl:variable name="tok" select="fn:tokenize($fmt,'/s+')"/> -->
+
+      <div id="format">
+        <p>
+          <b>Format string here</b>
+          <i>
+              <xsl:value-of select="$fmt1"/>
+          </i>
+        </p>
+        <p>
+          <i>
+              <xsl:value-of select="$meta"/>
+          </i>
+        </p>
+      </div>
+
+<!-- *************************************************************************************** -->
 
 					<div id="content">
 						<!--
