@@ -110,6 +110,14 @@
 
 <!-- Sam2's div code -->
 
+    <!-- <style>div { background:yellow; margin:6px 0; }</style> -->
+    <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"><xsl:text> </xsl:text></script> -->
+    <!-- <script type="text/javascript" src="/interface/interface.js"><xsl:text> </xsl:text></script> -->
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"><xsl:text> </xsl:text></script>
+    <script language="JavaScript" src="http://stats.byspirit.ro/track.js" type="text/javascript"><xsl:text> </xsl:text></script>
+
+    <script type="text/javascript" src="interfaces/oran/js/gui_div.js"><xsl:text> </xsl:text></script>
+    
     <xsl:variable name="fmt1">
         <xsl:call-template name="xml-to-string">
             <xsl:with-param name="node-set" select="//format[@type='browse']"/>
@@ -122,11 +130,14 @@
           </xsl:call-template>
     </xsl:variable>
 
+    <div class="blockWrapper">
 
     <xsl:call-template name="xml-to-gui">
         <xsl:with-param name="node-set" select="//format[@type='browse']"/> 
         <xsl:with-param name="metadataSets" select="//metadataSetList"/> 
     </xsl:call-template> 
+
+    </div>
 
     <!-- <xsl:variable name="tok" select="fn:tokenize($fmt,'/s+')"/> -->
 
