@@ -44,44 +44,10 @@ Recent changes:
         </xsl:apply-templates>
     </xsl:template>
 
-    <xsl:template match="gsf:choose-metadata" mode="xml-to-gui">
-        <xsl:param name="depth"/>
-        <xsl:param name="metadataSets"/>
-        
-        <div class="block" title="gsf:link">
-            <div class="header">
-                CHOOSE <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
-            </div>
-            <div class="content">
-                <xsl:apply-templates mode="xml-to-gui">
-                    <xsl:with-param name="depth" select="$depth"/>
-                    <xsl:with-param name="metadataSets" select="$metadataSets"/> 
-                </xsl:apply-templates>
-            </div>
-            <div class="footer">
-                END CHOOSE
-            </div>
-        </div>    
-    </xsl:template>
-
-    <xsl:template match="gsf:metadata" mode="xml-to-gui">
-        <xsl:param name="depth"/>
-        <xsl:param name="metadataSets"/>
-
-        <div class="block" title="gsf:link">
-            <div class="header">
-                METADATA <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
-            </div>
-            <div class="content">
-                <xsl:call-template name="meta-to-combo">
-                    <xsl:with-param name="metadataSets" select="$metadataSets"/>
-                    <xsl:with-param name="current" select="@name"/>
-                </xsl:call-template>
-            </div>
-        </div>
-    </xsl:template>
-
-<!-- **************************************************************** -->
+    
+    <!-- **************************************************************************** -->
+    <!-- COMBO BOX CREATION                                                           -->
+    <!-- **************************************************************************** -->
 
     <xsl:template name="meta-to-combo">
         <xsl:param name="metadataSets" select='.'/>
@@ -94,7 +60,7 @@ Recent changes:
             </xsl:choose>
         </xsl:variable>
 
-        <select> 
+        <select>
             <option value ="{$current_mod}" disabled="disabled" selected="{$current_mod}"><xsl:value-of select="$current_mod"/></option>
 
             <xsl:apply-templates select="$metadataSets" mode="meta-to-combo">
@@ -115,16 +81,16 @@ Recent changes:
     <xsl:template match="metadata" mode="meta-to-combo">
         <xsl:param name="set"/>
         <xsl:param name="current"/>
-    
+
         <xsl:variable name="meta"><xsl:value-of select="$set"/>.<xsl:value-of select="@name"/></xsl:variable>
 
         <!-- if this is the current value, then set combo box to this value -->
         <xsl:choose>
             <xsl:when test="$current = $meta">
-                <option value ="{$meta}" selected="{$meta}"><xsl:value-of select="$meta"/></option> 
+                <option value ="{$meta}" selected="{$meta}"><xsl:value-of select="$meta"/></option>
             </xsl:when>
             <xsl:otherwise>
-                <option value ="{$meta}"><xsl:value-of select="$meta"/></option> 
+                <option value ="{$meta}"><xsl:value-of select="$meta"/></option>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
@@ -136,14 +102,63 @@ Recent changes:
         </xsl:apply-templates>
     </xsl:template>
 
-<!-- **************************************************************** -->
 
+    <!-- **************************************************************************** -->
+
+
+    <!-- **************************************************************************** -->
+    <!-- GSF STATEMENTS                                                               -->
+    <!-- **************************************************************************** -->
+
+    
+    <!-- ********** GSF:CHOOSE-METADATA ********** -->
+    <xsl:template match="gsf:choose-metadata" mode="xml-to-gui">
+        <xsl:param name="depth"/>
+        <xsl:param name="metadataSets"/>
+        
+        <div class="gsf:choose-metadata block" title="gsf:choose-metadata" id="gsf:choose-metadata-{generate-id()}">
+            <!-- <div class="header"> -->
+                CHOOSE <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+            <!--</div>-->
+            <!--<div class="content">-->
+                <xsl:apply-templates mode="xml-to-gui">
+                    <xsl:with-param name="depth" select="$depth"/>
+                    <xsl:with-param name="metadataSets" select="$metadataSets"/> 
+                </xsl:apply-templates>
+            <!--</div>-->
+            <!--<div class="footer">-->
+                END CHOOSE
+            <!--</div>-->
+        </div>    
+    </xsl:template>
+
+
+    <!-- ********** GSF:METADATA ********** -->
+    <xsl:template match="gsf:metadata" mode="xml-to-gui">
+        <xsl:param name="depth"/>
+        <xsl:param name="metadataSets"/>
+
+        <div class="gsf:metadata block leaf" title="gsf:metadata" id="gsf:metadata-{generate-id()}">
+            <!--<div class="header">-->
+                METADATA 
+            <!--</div>-->
+            <!--<div class="content">-->
+                <xsl:call-template name="meta-to-combo">
+                    <xsl:with-param name="metadataSets" select="$metadataSets"/>
+                    <xsl:with-param name="current" select="@name"/>
+                </xsl:call-template>
+                <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+            <!--</div>-->
+        </div>
+    </xsl:template>
+
+
+    <!-- ********** GSF:LINK ********** -->
     <xsl:template match="gsf:link" mode="xml-to-gui">
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
         
-        <div class="block" title="gsf:link">
-            <div class="header">
+        <div class="gsf:link block" title="gsf:link" id="gsf:link-{generate-id()}">
                 LINK[type=
     	        <select>
                     <xsl:choose>
@@ -170,118 +185,114 @@ Recent changes:
                         </xsl:when>
                   </xsl:choose>
 	            </select>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
-            </div>
-            <div class="content">
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/> 
                 </xsl:apply-templates>
-            </div>
-            <div class="footer">
                 END LINK <br/>
-            </div>
         </div> 
     </xsl:template>
 
+
+    <!-- ********** GSF:TEMPLATE ********** -->
     <xsl:template match="gsf:template" mode="xml-to-gui">
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <div class="block" title="gsf:template">
-            <div class="header">
+        <div class="gsf:template block" title="gsf:template" id="gsf:template-{generate-id()}">
                 TEMPLATE[match=<xsl:value-of select="@match"/>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
-            </div>
-            <div class="content">
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/> 
                 </xsl:apply-templates>
-            </div>
-            <div class="footer">
                 END TEMPLATE <br/>
-            </div>
         </div>
     </xsl:template>
 
-    <xsl:template match="gsf:when" mode="xml-to-gui">
+    <!-- ********** GSF:SWITCH ********** -->
+    <xsl:template match="gsf:switch" mode="xml-to-gui">
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <div class="block" title="gsf:when"> 
-            <div class="header">
-                WHEN[test=<xsl:value-of select="@test"/>]<button>x</button> <br/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
-            </div>
-            <div class="content">
-                <xsl:apply-templates mode="xml-to-gui">
-                  <xsl:with-param name="depth" select="$depth"/>
-                  <xsl:with-param name="metadataSets" select="$metadataSets"/>
-                </xsl:apply-templates>
-            </div>
-            <div class="footer">
-                END WHEN
-            </div>
-        </div>
-    </xsl:template>
-
-    <xsl:template match="gsf:otherwise" mode="xml-to-gui">
-        <xsl:param name="depth"/>
-        <xsl:param name="metadataSets"/>
-
-        <div class="block" title="gsf:otherwise">
-            <div class="header">
-                OTHERWISE <button>x</button><br/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
-            </div>
-            <div class="content">
+        <div class="gsf:switch block" title="gsf:switch" id="gsf:switch-{generate-id()}">
+                SWITCH <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/>
                 </xsl:apply-templates>
-            </div>
-            <div class="footer">
-                END OTHERWISE
-            </div>       
+                END SWITCH
         </div>
     </xsl:template>
 
+
+    <!-- ********** GSF:WHEN ********** -->
+    <xsl:template match="gsf:when" mode="xml-to-gui">
+        <xsl:param name="depth"/>
+        <xsl:param name="metadataSets"/>
+
+        <div class="gsf:when block" title="gsf:when" id="gsf:when-{generate-id()}"> 
+                WHEN[test=<xsl:value-of select="@test"/>] <br/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+                <xsl:apply-templates mode="xml-to-gui">
+                  <xsl:with-param name="depth" select="$depth"/>
+                  <xsl:with-param name="metadataSets" select="$metadataSets"/>
+                </xsl:apply-templates>
+                END WHEN
+        </div>
+    </xsl:template>
+
+
+    <!-- ********** GSF:OTHERWISE ********** -->
+    <xsl:template match="gsf:otherwise" mode="xml-to-gui">
+        <xsl:param name="depth"/>
+        <xsl:param name="metadataSets"/>
+
+        <div class="gsf:otherwise block" title="gsf:otherwise" id="gsf:otherwise-{generate-id()}">
+                OTHERWISE <br/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+                <xsl:apply-templates mode="xml-to-gui">
+                    <xsl:with-param name="depth" select="$depth"/>
+                    <xsl:with-param name="metadataSets" select="$metadataSets"/>
+                </xsl:apply-templates>
+                END OTHERWISE
+        </div>
+    </xsl:template>
+
+
+    <!-- ********** GSF:ICON ********** -->
     <xsl:template match="gsf:icon" mode="xml-to-gui">
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <div class="block" title="gsf:link">
-            <div class="header">
-                ICON
-            </div>
-            <div class="content">
-              ICON[type=<xsl:value-of select="@type"/>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
-            </div>
+        <div class="gsf:icon block leaf" title="gsf:icon" id="gsf:icon-{generate-id()}">
+                ICON[type=
+                <select>
+                    <xsl:choose>
+                        <xsl:when test="@type='document'">
+                            <option value = "document" selected = "document">Document</option>
+                            <option value = "classifier">Classifier</option>
+                            <option value = "source">Source</option>
+                        </xsl:when>
+                        <xsl:when test="@type='classifier'">
+                            <option value = "classifier" selected = "classifier">Classifier</option>
+                            <option value = "document">Document</option>
+                            <option value = "source">Source</option>
+                        </xsl:when>
+                        <xsl:when test="@type='source'">
+                            <option value = "source" selected = "source">Source</option>
+                            <option value ="document">Document</option>
+                            <option value ="classifier">Classifier</option>
+                        </xsl:when>
+                  </xsl:choose>
+                </select>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
         </div>
     </xsl:template>
 
-    <xsl:template match="gsf:switch" mode="xml-to-gui">
-        <xsl:param name="depth"/>
-        <xsl:param name="metadataSets"/>
-        
-        <div class="block" title="gsf:switch">
-            <div class="content">
-                SWITCH <button>x</button><br/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
-            </div>
-            <div class="content">
-                <xsl:apply-templates mode="xml-to-gui">
-                    <xsl:with-param name="depth" select="$depth"/>
-                    <xsl:with-param name="metadataSets" select="$metadataSets"/> 
-                </xsl:apply-templates>
-            </div>
-            <div class="footer">
-                END SWITCH
-            </div>
-        </div>
-    </xsl:template>
 
+    <!-- ********** GSF:DEFAULT ********** -->
     <xsl:template match="gsf:default" mode="xml-to-gui">
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <div class="block" title="gsf:link">
+        <div class="block" title="gsf:default" id="gsf:default-{generate-id()}">
             <div class="header">
                 DEFAULT <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
             </div>
@@ -297,35 +308,37 @@ Recent changes:
         </div>
     </xsl:template>
 
+
+    <!-- ********** TEXT ********** -->
     <xsl:template match="text()" mode="xml-to-gui">
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
         
-        <div class="block" title="gsf:link">
-            <div class="header">
+        <div class="block leaf" title="gsf:text" id="gsf:text-{generate-id()}">
                 TEXT <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
-            </div>
-            <div class="content">
                 <xsl:variable name="rawtext"><xsl:value-of select="."/></xsl:variable>
                 TEXT = <input type="text" name="rawtextinput" size="10" value="{$rawtext}"/><br/>
-            </div>
         </div>
     </xsl:template>
 
+
+    <!-- ********** TABLE ********** -->
     <xsl:template match="td" mode="xml-to-gui">
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <xsl:text>&lt;td</xsl:text>valign=<xsl:value-of select="@valign"/><xsl:text>&gt;</xsl:text><br/>
-
-        <xsl:apply-templates mode="xml-to-gui">
-            <xsl:with-param name="depth" select="$depth"/>
-            <xsl:with-param name="metadataSets" select="$metadataSets"/> 
-        </xsl:apply-templates>
-        
-        <xsl:text>&lt;/td&gt;</xsl:text><br/><br/>
+        <div class="table block" title="gsf:table" id="gsf:table-{generate-id()}">
+                <xsl:text>&lt;td</xsl:text>valign=<xsl:value-of select="@valign"/><xsl:text>&gt;</xsl:text><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+                <xsl:apply-templates mode="xml-to-gui">
+                    <xsl:with-param name="depth" select="$depth"/>
+                    <xsl:with-param name="metadataSets" select="$metadataSets"/> 
+                </xsl:apply-templates>
+                <xsl:text>&lt;/td&gt;</xsl:text><br/><br/>
+        </div>
     </xsl:template>
 
+
+    <!-- ********** BREAK ********** -->
     <xsl:template match="br" mode="xml-to-gui">
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
@@ -338,6 +351,8 @@ Recent changes:
         </xsl:apply-templates>
     </xsl:template>
 
+
+    <!-- ********** MATCH ALL ********** -->
     <xsl:template match="*" mode="xml-to-gui">
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>

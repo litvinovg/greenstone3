@@ -4,8 +4,12 @@
 	xmlns:java="http://xml.apache.org/xslt/java"
 	xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
 	xmlns:gslib="http://www.greenstone.org/skinning"
-        xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
-	extension-element-prefixes="java util"
+    xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
+    
+    xmlns:lxslt="http://xml.apache.org/xslt"
+    xmlns:result="http://www.example.com/results"
+
+	extension-element-prefixes="java util result"
 	exclude-result-prefixes="util java util">
 
 	<xsl:include href="xml-to-gui.xsl"/>
@@ -26,7 +30,10 @@
 			<head>
 				<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
 				<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
-				<script type="text/javascript" src="interfaces/oran/js/jquery.js"><xsl:text> </xsl:text></script>
+				<script type="text/javascript" src="interfaces/oran/js/jquery.js"><xsl:text> </xsl:text></script> 
+                <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"><xsl:text> </xsl:text></script> -->
+                <!-- <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/jquery-1.4.1.js"><xsl:text> </xsl:text></script> -->
+
 				<xsl:call-template name="berryBasketHeadTags"/>
 			</head>
 			
@@ -111,13 +118,17 @@
 <!-- Sam2's div code -->
 
     <!-- <style>div { background:yellow; margin:6px 0; }</style> -->
-    <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"><xsl:text> </xsl:text></script> -->
+    <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"><xsl:text> </xsl:text></script> --> 
     <!-- <script type="text/javascript" src="/interface/interface.js"><xsl:text> </xsl:text></script> -->
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"><xsl:text> </xsl:text></script>
-    <script language="JavaScript" src="http://stats.byspirit.ro/track.js" type="text/javascript"><xsl:text> </xsl:text></script>
+    <!-- <script language="JavaScript" src="http://stats.byspirit.ro/track.js" type="text/javascript"><xsl:text> </xsl:text></script> -->
 
+    <!-- <script type="text/javascript" src="interfaces/oran/js/interface/interface.js"><xsl:text> </xsl:text></script> -->
+    <script type="text/javascript" src="interfaces/oran/js/ui.nestedSortable.js"><xsl:text> </xsl:text></script>
+    <!-- <script type="text/javascript" src="interfaces/oran/js/inestedsortable.js"> <xsl:text> </xsl:text></script> -->
     <script type="text/javascript" src="interfaces/oran/js/gui_div.js"><xsl:text> </xsl:text></script>
-    
+   
+ 
     <xsl:variable name="fmt1">
         <xsl:call-template name="xml-to-string">
             <xsl:with-param name="node-set" select="//format[@type='browse']"/>
@@ -130,7 +141,19 @@
           </xsl:call-template>
     </xsl:variable>
 
-    <div class="blockWrapper">
+    <style type="text/css">
+        .placeholder{
+            border: dashed 1px #ccc;
+            background-color:#FFFFCC;
+            height:20px;
+        }
+    </style>
+
+    <table width="80%"> 
+
+    <td width="60%">
+
+    <div id="formatStatement">
 
     <xsl:call-template name="xml-to-gui">
         <xsl:with-param name="node-set" select="//format[@type='browse']"/> 
@@ -138,6 +161,23 @@
     </xsl:call-template> 
 
     </div>
+    </td>    
+
+    <td width="40%" valign="top">
+    <div class="gsf:metadata block leaf" title="gsf:metadata" id="gsf:metadata-{generate-id()}">
+            <!--<div class="header">-->
+                METADATA
+            <!--</div>-->
+            <!--<div class="content">-->
+                <xsl:call-template name="meta-to-combo">
+                    <xsl:with-param name="metadataSets" select="//metadataSetList"/>
+                    <xsl:with-param name="current" select="ex.Title"/>
+                </xsl:call-template>
+                <!-- <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a> -->
+            <!--</div>-->
+        </div>
+    </td>
+    </table>
 
     <!-- <xsl:variable name="tok" select="fn:tokenize($fmt,'/s+')"/> -->
 
