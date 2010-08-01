@@ -812,7 +812,8 @@
     <!-- re-setup the server.xml file -->
     <!-- need to edit the config file, or do we get the user to do this???-->
   </target>
-  
+ 
+<!-- Another way: http://ptrthomas.wordpress.com/2006/03/25/how-to-start-and-stop-tomcat-from-ant/ -->
   <target name="start-tomcat" description="Startup only Tomcat" depends="init" if="tomcat.islocal">
     <property name="tomcat.classpath" refid="local.tomcat.classpath"/>
     <property name="tomcat.path" refid="local.tomcat.path"/>
@@ -843,6 +844,20 @@
         <socket server="${tomcat.server}" port="${tomcat.port}"/>
         <http url="http://${tomcat.server}:${tomcat.port}${app.path}/index.html"/>
       </and>
+    </waitfor>
+  </target>
+
+  <!--ant task http: http://www.jajakarta.org/ant/ant-1.6.1/docs/ja/manual/api/org/apache/tools/ant/taskdefs/condition/Http.html-->
+  <target name="reconfigure" description="Reconfigure the message router">
+    <waitfor maxwait="5" maxwaitunit="second">
+      <http url="http://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet}?a=s&amp;sa=c"/>
+    </waitfor>
+  </target>
+
+  <!--Command-line args to Ant: http://www.jguru.com/faq/view.jsp?EID=471794-->
+  <target name="reconfigure-collection" description="Reconfigure the collection">
+    <waitfor maxwait="5" maxwaitunit="second">
+      <http url="http://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet}?a=s&amp;sa=c&amp;sc=${collection}"/>
     </waitfor>
   </target>
 
