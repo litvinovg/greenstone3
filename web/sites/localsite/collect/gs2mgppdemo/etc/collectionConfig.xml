@@ -39,9 +39,7 @@
             <option name="casefold"/>
             <option name="stem"/>
         </indexOption>
-        <searchType name="plain"/>
-        <searchType name="simpleform"/>
-        <searchType name="advancedform"/>
+        <format name="searchType">plain,form</format>
         <format><gsf:template match="documentNode"><td valign="top"><gsf:link type="document"><gsf:icon type="document"/></gsf:link></td><td><gsf:switch><gsf:metadata name="Title" select="ancestors" separator=": "/><gsf:when test="exists"><gsf:metadata name="Title" select="ancestors" separator=": "/>:</gsf:when></gsf:switch><gsf:link type="document"><gsf:metadata name="Title"/></gsf:link></td></gsf:template></format>
     </search>
     <import>
@@ -83,25 +81,4 @@
         <format><gsf:option name="TOC" value="true"/></format>
     </display>
     <replaceListRef id="gs2-standard"/>
-  <serviceRackList>
-    <!-- comment out the following serviceRack if you want to disable OAI for this collection -->
-    <serviceRack name="OAIPMH">
-        <ListMetadataFormats>
-	<!--What metadata sets to support is collection specific. To support other metadata schema, add another metadataFormat element here.
-	The support of unqualified Dublin Core metadata set is mandatory in the oai specification.
-      -->
-	<metadataFormat metadataPrefix="oai_dc">
-	  <metadataPrefix>oai_dc</metadataPrefix>
-	  <schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
-	  <metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
-	  <!--   a custom mapping as this collection doesn't have dc metadata -->     <mappingList>
-	    <mapping>dc:title,dls.Title</mapping>
-	    <mapping>dc:subject,dls.Subject</mapping>
-	    <mapping>dc:language,dls.Language</mapping>
-	    <mapping>dc:publisher,dls.Organization</mapping>
-	  </mappingList>
-	</metadataFormat>
-      </ListMetadataFormats>
-    </serviceRack> 
-  </serviceRackList>
 </CollectionConfig>

@@ -30,7 +30,9 @@
 			<head>
 				<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
 				<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
-				<script type="text/javascript" src="interfaces/oran/js/jquery.js"><xsl:text> </xsl:text></script> 
+				<!-- <script type="text/javascript" src="interfaces/oran/js/jquery.js"><xsl:text> </xsl:text></script> --> 
+                <script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.min.js"><xsl:text> </xsl:text></script>
+                <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8.2.custom.min.js"><xsl:text> </xsl:text></script>
                 <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"><xsl:text> </xsl:text></script> -->
                 <!-- <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/jquery-1.4.1.js"><xsl:text> </xsl:text></script> -->
 
@@ -120,11 +122,11 @@
     <!-- <style>div { background:yellow; margin:6px 0; }</style> -->
     <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"><xsl:text> </xsl:text></script> --> 
     <!-- <script type="text/javascript" src="/interface/interface.js"><xsl:text> </xsl:text></script> -->
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"><xsl:text> </xsl:text></script>
+    <!-- <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"><xsl:text> </xsl:text></script> -->
     <!-- <script language="JavaScript" src="http://stats.byspirit.ro/track.js" type="text/javascript"><xsl:text> </xsl:text></script> -->
 
     <!-- <script type="text/javascript" src="interfaces/oran/js/interface/interface.js"><xsl:text> </xsl:text></script> -->
-    <script type="text/javascript" src="interfaces/oran/js/ui.nestedSortable.js"><xsl:text> </xsl:text></script>
+    <!-- <script type="text/javascript" src="interfaces/oran/js/ui.nestedSortable.js"><xsl:text> </xsl:text></script> -->
     <!-- <script type="text/javascript" src="interfaces/oran/js/inestedsortable.js"> <xsl:text> </xsl:text></script> -->
     <script type="text/javascript" src="interfaces/oran/js/gui_div.js"><xsl:text> </xsl:text></script>
    
@@ -147,9 +149,18 @@
             background-color:#FFFFCC;
             height:20px;
         }
+
+        .resizable { width: 150px; height: 150px; padding: 0.5em; } 
+
+        <!-- .gsf_metadata { border: solid 2px #0000BB; background-color: #440077; } -->
+
+        <!-- .gsf_choose-metadata { border: solid 1px #000000; background-color: #223344; } -->
     </style>
 
-    <table width="80%"> 
+    <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/themes/base/jquery-ui.css"/> 
+
+
+    <table width="100%" border="1"> 
 
     <td width="60%">
 
@@ -163,19 +174,17 @@
     </div>
     </td>    
 
+
     <td width="40%" valign="top">
-    <div class="gsf:metadata block leaf" title="gsf:metadata" id="gsf:metadata-{generate-id()}">
-            <!--<div class="header">-->
-                METADATA
-            <!--</div>-->
-            <!--<div class="content">-->
-                <xsl:call-template name="meta-to-combo">
-                    <xsl:with-param name="metadataSets" select="//metadataSetList"/>
-                    <xsl:with-param name="current" select="ex.Title"/>
-                </xsl:call-template>
-                <!-- <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a> -->
-            <!--</div>-->
-        </div>
+        <h2> Elements to add </h2>
+        <div class="elementType css_gsf_template" title="gsf:metadata">NEW GSF:TEMPLATE</div>
+        <div class="elementType css_gsf_choose-metadata" title="gsf:metadata">NEW GSF:CHOOSE-METADATA</div>
+        <div class="elementType css_gsf_metadata" title="gsf:metadata">NEW GSF:METADATA</div>
+        <br/>
+        <div class="elementType css_table" title="gsf:metadata">NEW TABLE</div>
+        <div class="elementType css_tr" title="gsf:metadata">NEW TABLE ROW</div>
+        <div class="elementType css_td" title="gsf:metadata">NEW TABLE COLUMN</div>
+
     </td>
     </table>
 

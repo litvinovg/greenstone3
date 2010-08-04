@@ -15,87 +15,104 @@ $(document).ready(function(){
     $('a.minmax').bind('click', toggleContent);
     $('a.remove').bind('click', removeContent);
 
-    /*    
-    $('div.blockWrapper').NestedSortable(
-    {
-        accept: 'block',
-        helperclass: 'sortHelper',
-        activeclass :   'sortableactive',
-        hoverclass :    'sortablehover',
-
-        // Restricts sort start click to the specified element.
-        handle: 'div.header',
-        onStart : function()
-            {
-                $.iAutoscroller.start(this, document.getElementsByTagName('body'));
+    $(".elementType").draggable({
+            connectToSortable: '.gsf_template',
+            helper: 'clone',
+            revert: 'invalid',
+            //start: function(event, ui) { ui.item.addClass('replaceMe');},
+            stop: function(event, ui) {
+                console.log("Stopped dragging - do we want to create element?"+ui.helper);
+                ui.helper.addClass('replaceMe');
             },
-            onStop : function()
-            {
-                $.iAutoscroller.stop();
-            }
-    }
-    );
+        });
+
+    /*
+    $('.elementType').sortable({
+            cursor: 'pointer',
+            tolerance: 'pointer',
+            //placeholder:'placeholder',
+            connectWith:'.gsf_template',
+            //cancel: '.elementType',
+            
+            start: function(event, ui) {
+                        $(this).clone().insertAfter(this);;
+            },
+
+    });
     */
+    
+     function templateAdded() {
+         var item = $('.elementType');
+         // do something with "item" - its your new pretty cloned dropped item ;]
+         item.replaceWith('<h2>REPLACED</h2>');  
+         //item.addClass( 'added' );
+     };    
  
-     
     $('#formatStatement').sortable({
-            'cursor':'pointer',
-            'tolerance': 'pointer',
-            'items':'.gsf\\:template',
-            'placeholder':'placeholder',
+            cursor: 'pointer',
+            tolerance: 'pointer',
+            items: '.gsf_template',
+            placeholder:'placeholder'
             //'nested':'div'
     });
     
-    $('.gsf\\:template').sortable({
+    $('.gsf_template').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
-            'items':'.table, .gsf\\:choose-metadata, .gsf\\:metadata',
-            'placeholder':'placeholder'
+            'items':'.table, .gsf_choose-metadata, .gsf_metadata',
+            'placeholder':'placeholder',
             //'nested':'.gsf:metadata'
+            stop: function(event, ui) {
+                if (ui.item.hasClass("elementType") && ui.item.hasClass('css_gsf_template')) {
+                        ui.item.replaceWith(gsf_metadata_element); //'<div class="element element-txt">This text box has been added!</div>');
+                        //ui.item.style.border = 
+                }
+            }
+
+            //receive: function(event, ui) { 
+            //    console.log("I have received an item");
+                //var item = $('.ui_sortable/.elementType');
+            //    var item = $('.div/.elementType'); //css_gsf_template not(.gsf_template)');
+            //    console.log(item);
+                //item.replaceWith('<h2>REPLACED</h2>');
+            //}
+
     });
 
-    $('.table').sortable({
+    $('.td').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
-            'items':'.leaf .gsf\\:choose-metadata, .gsf\\:link, .gsf\\:switch',
+            'items':'.leaf .gsf_choose-metadata, .gsf_link, .gsf_switch',
             'placeholder':'placeholder'
             //'nested':'.gsf:metadata'
     });
  
-    $('.gsf\\:choose-metadata').sortable({
+    $('.gsf_choose-metadata').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
-            'items':'.gsf\\:metadata',
+            'items':'.gsf_metadata',
             'placeholder':'placeholder',
-            'connectWith':'.gsf\\:choose-metadata'
+            'connectWith':'.gsf_choose-metadata'
             //'nested':'.gsf:metadata'
     });
     
-    $('.gsf\\:link').sortable({
+    $('.gsf_link').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
-            'items':'.gsf\\:icon',
+            'items':'.gsf_icon',
             'placeholder':'placeholder'
             //'nested':'.gsf:metadata'
     });
 
-    $('.gsf\\:switch').sortable({
+    $('.gsf_switch').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
-            'items':'.gsf\\:metadata, .gsf\\:when, .gsf\\otherwise',
+            'items':'.gsf_metadata, .gsf_when, .gsf_otherwise',
             'placeholder':'placeholder'
             //'nested':'.gsf:metadata'
     });
 
-    $('.gsf\\:when').sortable({
-            'cursor':'pointer',
-            'tolerance': 'pointer',
-            'items':'.leaf',
-            'placeholder':'placeholder'
-            //'nested':'.gsf:metadata'
-    });
-
-    $('.gsf\\:otherwise').sortable({
+    $('.gsf_when').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
             'items':'.leaf',
@@ -103,37 +120,26 @@ $(document).ready(function(){
             //'nested':'.gsf:metadata'
     });
 
-    /* 
-    $('div.blockWrapper').sortable(
-        {
-            accept: 'block',
-            helperclass: 'sortHelper',
-            activeclass :   'sortableactive',
-            hoverclass :    'sortablehover',
+    $('.gsf_otherwise').sortable({
+            'cursor':'pointer',
+            'tolerance': 'pointer',
+            'items':'.leaf',
+            'placeholder':'placeholder'
+            //'nested':'.gsf:metadata'
+    });
 
-            // Restricts sort start click to the specified element.
-            handle: 'div.header',
+    //$(".resizable").resizable({containment: 'parent', alsoResize:'parent'});
 
-            // This is the way the reordering behaves during drag. Possible values: 'intersect', 'pointer'. In some setups, 'pointer' is more natural.
-            // * intersect: draggable overlaps the droppable at least 50%
-            // * pointer: mouse pointer overlaps the droppable
-            tolerance: 'pointer',
-            //containment: 'parent',
-            nested: 'div',
-            onChange : function(ser)
-            {
-            },
-            onStart : function()
-            {
-                $.iAutoscroller.start(this, document.getElementsByTagName('body'));
-            },
-            onStop : function()
-            {
-                $.iAutoscroller.stop();
-            }
-        }
-    );
-    */
+    $('.tr').equalHeights();
+
+    $(".td").resizable({
+                alsoResize: 'parent',
+                //containment: 'parent',
+                handles: 'e,s',
+                stop: function(event, ui) {
+                        $(this).parent().parent().equalHeights();
+                }, });
+
 
     $(".block").mouseover(function() 
     {
@@ -174,4 +180,42 @@ function serialize(s)
     alert(serial.hash);
 };
 
+/*-------------------------------------------------------------------- 
+ * JQuery Plugin: "EqualHeights"
+ * by:  Scott Jehl, Todd Parker, Maggie Costello Wachs (http://www.filamentgroup.com)
+ *
+ * Copyright (c) 2008 Filament Group
+ * Licensed under GPL (http://www.opensource.org/licenses/gpl-license.php)
+ *
+ * Description: Compares the heights or widths of the top-level children of a provided element 
+        and sets their min-height to the tallest height (or width to widest width). Sets in em units 
+        by default if pxToEm() method is available.
+ * Dependencies: jQuery library, pxToEm method  (article: 
+        http://www.filamentgroup.com/lab/retaining_scalable_interfaces_with_pixel_to_em_conversion/)                              
+ * Usage Example: $(element).equalHeights();
+        Optional: to set min-height in px, pass a true argument: $(element).equalHeights(true);
+ * Version: 2.0, 08.01.2008
+--------------------------------------------------------------------*/
+
+// Modified to get children of children ie. tr -> td -> div
+
+$.fn.equalHeights = function(px) {
+    console.log("EQUAL HEIGHTS");
+    $(this).each(function(){
+        var currentTallest = 0;
+        console.log($(this).children());
+        console.log($(this).children().children());
+        //$(this).children().children().each(function(i){
+        //    console.log($(this));
+        //    console.log("THIS HEIGHT="+$(this).height()+ " CURRENT TALLEST="+ currentTallest);
+            //if ($(this).height() > currentTallest) { currentTallest = $(this).height(); }
+            //if ($(this).height() > currentTallest) { currentTallest = $(this).height(); }
+        //});
+        //if (!px || !Number.prototype.pxToEm) currentTallest = currentTallest.pxToEm(); //use ems unless px is specified
+        // for ie6, set height since min-height isn't supported
+        //if ($.browser.msie && $.browser.version == 6.0) { $(this).children().children().css({'height': $(this).currentTallest}); }
+        $(this).children().children().css({'height': $(this).height()}); //currentTallest}); 
+    });
+    return this;
+};
 

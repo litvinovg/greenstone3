@@ -9,6 +9,8 @@
   <!-- some global parameters - these are set by whoever is invoking the transformation -->
   <xsl:param name="interface_name"/>
   <xsl:param name="library_name"/>
+
+  <xsl:include href="xml-to-string.xsl"/>
   
   <!-- every pages ................................................. -->
   

@@ -95,13 +95,40 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
     </init-param>
     <init-param>
       <param-name>receptionist_class</param-name>
-      <param-value>SkinnedReceptionist</param-value>
+      <param-value>DefaultReceptionist</param-value>
     </init-param>
     <init-param>
       <param-name>default_lang</param-name>
       <param-value>en</param-value>
     </init-param>
   </servlet>
+
+  <servlet>^M
+    <servlet-name>Format</servlet-name>^M
+    <description>A new skin engine still in development based on the standard gsdl3 library program</description>^M
+    <servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>^M
+    <init-param>^M
+      <param-name>library_name</param-name>^M
+      <param-value>format</param-value>^M
+    </init-param>^M
+    <init-param>^M
+      <param-name>site_name</param-name>^M
+      <param-value>localsite</param-value>^M
+    </init-param>^M
+    <init-param>^M
+      <param-name>interface_name</param-name>^M
+      <param-value>oran</param-value>^M
+    </init-param>^M
+    <init-param>^M
+      <param-name>receptionist_class</param-name>^M
+      <param-value>FormatReceptionist</param-value>^M
+    </init-param>^M
+    <init-param>^M
+      <param-name>default_lang</param-name>^M
+      <param-value>en</param-value>^M
+    </init-param>^M
+  </servlet>^M
+
   
   <servlet>
     <servlet-name>gs2-library</servlet-name>
@@ -282,6 +309,12 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
     <servlet-name>dev</servlet-name>
     <url-pattern>/dev</url-pattern>
   </servlet-mapping>
+
+  <servlet-mapping>^M
+    <servlet-name>Format</servlet-name>^M
+    <url-pattern>/format</url-pattern>^M
+  </servlet-mapping>^M
+
   <servlet-mapping>
     <servlet-name>gs2-library</servlet-name>
     <url-pattern>/library</url-pattern>
