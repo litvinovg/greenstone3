@@ -8,11 +8,13 @@
     
     xmlns:lxslt="http://xml.apache.org/xslt"
     xmlns:result="http://www.example.com/results"
+    xmlns:exsl="http://exslt.org/common"
 
-	extension-element-prefixes="java util result"
+	extension-element-prefixes="java util result exsl"
 	exclude-result-prefixes="util java util">
 
 	<xsl:include href="xml-to-gui.xsl"/>
+	<xsl:include href="xml-to-gui-templates.xsl"/>
 
 	<!-- put the URL or path of your site here site -->
 	<!-- eg 'http://www.example.com/mysite' or '/mysite'  -->
@@ -119,18 +121,13 @@
 
 <!-- Sam2's div code -->
 
-    <!-- <style>div { background:yellow; margin:6px 0; }</style> -->
-    <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"><xsl:text> </xsl:text></script> --> 
-    <!-- <script type="text/javascript" src="/interface/interface.js"><xsl:text> </xsl:text></script> -->
-    <!-- <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"><xsl:text> </xsl:text></script> -->
-    <!-- <script language="JavaScript" src="http://stats.byspirit.ro/track.js" type="text/javascript"><xsl:text> </xsl:text></script> -->
-
-    <!-- <script type="text/javascript" src="interfaces/oran/js/interface/interface.js"><xsl:text> </xsl:text></script> -->
-    <!-- <script type="text/javascript" src="interfaces/oran/js/ui.nestedSortable.js"><xsl:text> </xsl:text></script> -->
-    <!-- <script type="text/javascript" src="interfaces/oran/js/inestedsortable.js"> <xsl:text> </xsl:text></script> -->
     <script type="text/javascript" src="interfaces/oran/js/gui_div.js"><xsl:text> </xsl:text></script>
    
- 
+    <xsl:call-template name="xml-to-gui-templates">
+        <xsl:with-param name="node-set" select="test"/>
+        <xsl:with-param name="metadataSets" select="//metadataSetList"/>
+    </xsl:call-template>
+
     <xsl:variable name="fmt1">
         <xsl:call-template name="xml-to-string">
             <xsl:with-param name="node-set" select="//format[@type='browse']"/>
@@ -151,18 +148,19 @@
         }
 
         .resizable { width: 150px; height: 150px; padding: 0.5em; } 
+        
+        .block { margin-left: 10px; border-left: dashed 1px black;}
 
         <!-- .gsf_metadata { border: solid 2px #0000BB; background-color: #440077; } -->
 
-        <!-- .gsf_choose-metadata { border: solid 1px #000000; background-color: #223344; } -->
+        <!-- .gsf_choose_metadata { border: solid 1px #000000; background-color: #223344; } -->
     </style>
 
     <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/themes/base/jquery-ui.css"/> 
 
-
     <table width="100%" border="1"> 
 
-    <td width="60%">
+    <td width="75%">
 
     <div id="formatStatement">
 
@@ -175,15 +173,21 @@
     </td>    
 
 
-    <td width="40%" valign="top">
+    <td width="25%" valign="top">
         <h2> Elements to add </h2>
-        <div class="elementType css_gsf_template" title="gsf:metadata">NEW GSF:TEMPLATE</div>
-        <div class="elementType css_gsf_choose-metadata" title="gsf:metadata">NEW GSF:CHOOSE-METADATA</div>
-        <div class="elementType css_gsf_metadata" title="gsf:metadata">NEW GSF:METADATA</div>
+        <div class="element_type_gsf_template css_gsf_template" title="gsf:template">NEW GSF:TEMPLATE</div>
+        <div class="element_type_gsf_choose_metadata css_gsf_choose_metadata" title="gsf:choose-metadata">NEW GSF:CHOOSE-METADATA</div>
+        <div class="element_type_gsf_metadata css_gsf_metadata" title="gsf:metadata">NEW GSF:METADATA</div>
+        <div class="element_type_gsf_link css_gsf_link" title="gsf:link">NEW GSF:LINK</div>
+        <div class="element_type_gsf_switch css_gsf_switch" title="gsf:switch">NEW GSF:SWITCH</div>
+        <div class="element_type_gsf_when css_gsf_when" title="gsf:when">NEW GSF:WHEN</div>
+        <div class="element_type_gsf_otherwise css_gsf_otherwise" title="gsf:otherwise">NEW GSF:OTHERWISE</div>
+        <div class="element_type_gsf_icon css_gsf_icon" title="gsf:icon">NEW GSF:ICON</div>
         <br/>
-        <div class="elementType css_table" title="gsf:metadata">NEW TABLE</div>
-        <div class="elementType css_tr" title="gsf:metadata">NEW TABLE ROW</div>
-        <div class="elementType css_td" title="gsf:metadata">NEW TABLE COLUMN</div>
+        <div class="element_type_text css_text" title="text">TEXT</div>
+        <div class="element_type_table css_table" title="gsf:table">NEW TABLE</div>
+        <div class="element_type_tr css_tr" title="gsf:row">NEW TABLE ROW</div>
+        <div class="element_type_td css_td" title="gsf:column">NEW TABLE COLUMN</div>
 
     </td>
     </table>

@@ -117,13 +117,12 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <div class="gsf_choose-metadata css_gsf_choose-metadata block" title="gsf:choose-metadata">
+        <div class="gsf_choose_metadata css_gsf_choose_metadata block" title="gsf:choose-metadata">
                 CHOOSE <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/> 
                 </xsl:apply-templates>
-                END CHOOSE
         </div>   
     </xsl:template>
 
@@ -133,29 +132,11 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <xsl:variable name="one">
         <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata">METADATA <xsl:call-template name="meta-to-combo">
                         <xsl:with-param name="metadataSets" select="$metadataSets"/>
                         <xsl:with-param name="current" select="@name"/>
                      </xsl:call-template> <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
         </div>
-        </xsl:variable>
-
-      
-        <xsl:variable name="meta">
-        <xsl:call-template name="xml-to-string">
-            <xsl:with-param name="node-set" select="exsl:node-set($one)"/>
-        </xsl:call-template>
-        </xsl:variable>
-
-        <xsl:copy-of select="$one"/>
-
-        <br/>
-        <script type="text/javascript">
-            gsf_metadata_element = <xsl:text disable-output-escaping="yes">'</xsl:text><xsl:copy-of select="$one" disable-output-escaping="yes"/><xsl:text disable-output-escaping="yes">';</xsl:text> 
-
-        </script>
-
     </xsl:template>
 
 
@@ -195,7 +176,6 @@ Recent changes:
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/> 
                 </xsl:apply-templates>
-                END LINK <br/>
         </div> 
     </xsl:template>
 
@@ -214,8 +194,8 @@ Recent changes:
             <!-- </xsl:for-each> -->
 
 
-        <div class="gsf_template block" title="gsf:template">
-                TEMPLATE[match=<xsl:value-of select="@match"/>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+        <div class="gsf_template css_gsf_template block" title="gsf:template">
+                TEMPLATE[match=<input type="text" name="rawtextinput" size="10" value="{@match}"/>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
                 <table border="1">
                 <tr class="tr">
                 <xsl:apply-templates mode="xml-to-gui">
@@ -224,8 +204,7 @@ Recent changes:
                 </xsl:apply-templates>
                 </tr>
                 </table>
-                END TEMPLATE <br/>
-        </div>
+        </div><br/>
     </xsl:template>
 
     <!-- ********** GSF:SWITCH ********** -->
@@ -233,13 +212,12 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <div class="gsf_switch block" title="gsf:switch">
+        <div class="gsf_switch css_gsf_switch block" title="gsf:switch">
                 SWITCH <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/>
                 </xsl:apply-templates>
-                END SWITCH
         </div>
     </xsl:template>
 
@@ -249,13 +227,12 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <div class="gsf_when block" title="gsf:when"> 
+        <div class="gsf_when css_gsf_when block" title="gsf:when"> 
                 WHEN[test=<xsl:value-of select="@test"/>] <br/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
                 <xsl:apply-templates mode="xml-to-gui">
                   <xsl:with-param name="depth" select="$depth"/>
                   <xsl:with-param name="metadataSets" select="$metadataSets"/>
                 </xsl:apply-templates>
-                END WHEN
         </div>
     </xsl:template>
 
@@ -265,13 +242,12 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <div class="gsf_otherwise block" title="gsf:otherwise">
+        <div class="gsf_otherwise css_gsf_otherwise block" title="gsf:otherwise">
                 OTHERWISE <br/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/>
                 </xsl:apply-templates>
-                END OTHERWISE
         </div>
     </xsl:template>
 
@@ -281,7 +257,7 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <div class="gsf_icon block leaf" title="gsf:icon">
+        <div class="gsf_icon css_gsf_icon block leaf" title="gsf:icon">
                 ICON[type=
                 <select>
                     <xsl:choose>
@@ -317,7 +293,6 @@ Recent changes:
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/>
                 </xsl:apply-templates>
-                END DEFAULT
         </div>
     </xsl:template>
 
@@ -328,9 +303,8 @@ Recent changes:
         <xsl:param name="metadataSets"/>
         
         <div class="block leaf" title="gsf:text">
-                TEXT <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
                 <xsl:variable name="rawtext"><xsl:value-of select="."/></xsl:variable>
-                TEXT = <input type="text" name="rawtextinput" size="10" value="{$rawtext}"/><br/>
+                TEXT = <input type="text" name="rawtextinput" size="10" value="{$rawtext}"/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
         </div>
     </xsl:template>
 
