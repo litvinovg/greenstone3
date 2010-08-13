@@ -1198,6 +1198,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <jar destfile="${build.home}/server.jar">
       <fileset dir="${build.home}">
         <include name="org/greenstone/server/**"/>
+        <include name="org/greenstone/util/**"/>
       </fileset>
       <fileset file="${basedir}/resources/java/server.properties"/>
       <manifest>
