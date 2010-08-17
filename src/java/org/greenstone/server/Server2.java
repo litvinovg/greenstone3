@@ -50,25 +50,49 @@ public class Server2 extends BaseServer
 	    try {
 		// wait for a connection
 		connection = serverSocket.accept();
+		boolean stop = false;
 
 		// read input
 		try {
 		    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 		    String line = null;
-		    if((line = reader.readLine()) != null) {
+		    while((line = reader.readLine()) != null) {
 			if(line.equals("QUIT")) {
+			    stop = true;			    
 			    // Server2.this.recordSuccess("In QuitListener - line is QUIT");
 			    reader.close();
 			    reader = null;
 			    serverSocket.close();
 			    serverSocket = null;
+			    break;
+			} else if(line.equals("RECONFIGURE")) {
+			    server_control_.displayMessage(dictionary.get("ServerControl.Configuring"));
+			    reconfigRequired();
+			} else if(line.equals("RESTART")) {
+
+			    // If the GSI is set to NOT autoenter/autostart the server, then write url=URL_PENDING out to the file.
+			    // When the user finally presses the Enter Library button and so has started up the server, the correct
+			    // url will be written out to the configfile.
+			    if(config_properties.getProperty(BaseServer.Property.AUTOSTART, "").equals("0")) {
+				if(config_properties.getProperty("url") == null) {
+				    config_properties.setProperty("url", URL_PENDING);
+				    ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
+				    ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
+				    scriptReadWrite.replaceOrAddLine(fileLines, "url", URL_PENDING, true);
+				    scriptReadWrite.writeOutFile(config_properties_file, fileLines);
+				}
+			    }
+
+			    autoStart();
 			}
 		    }
 		} catch(Exception e) {
 		    Server2.this.recordError("Exception in QuitListener thread.");
 		} finally {
-		    Server2.this.stop();
-		    System.exit(0);
+		    if(stop) {
+			Server2.this.stop();
+			System.exit(0);
+		    }
 		}
 	    } catch(IOException ioe) {
 		Server2.this.recordError("Server2.QuitListener: Unable to make the connection with the client socket." + ioe);
