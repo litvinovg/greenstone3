@@ -161,6 +161,36 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
   </servlet>
   
   <servlet>
+    <servlet-name>nzdl-library</servlet-name>
+    <description>gsdl3 library program</description>
+    <servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
+    <init-param>
+      <param-name>library_name</param-name>
+      <param-value>nzdl</param-value>
+    </init-param>
+    <init-param>
+      <param-name>site_name</param-name>
+      <param-value>nzdl</param-value>
+    </init-param>
+    <init-param>
+      <param-name>interface_name</param-name>
+      <param-value>nzdl</param-value>
+    </init-param>
+    <init-param>
+      <param-name>default_lang</param-name>
+      <param-value>en</param-value>
+    </init-param>
+    <init-param>
+      <param-name>params_class</param-name>
+      <param-value>NZDLParams</param-value>
+    </init-param>
+    <init-param>
+      <param-name>session_expiration</param-name>
+      <param-value>600</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
     <servlet-name>gateway</servlet-name>
     <description>gsdl3 library based on gateway site and default interface. It uses SOAP to talk to localsite</description>
     <servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
@@ -300,6 +330,10 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
       <url-pattern>/oaiserver</url-pattern>
 </servlet-mapping>
 
+    <servlet-mapping>
+      <servlet-name>nzdl-library</servlet-name>
+      <url-pattern>/nzdl</url-pattern>
+    </servlet-mapping>
   <servlet-mapping>
     <servlet-name>tester</servlet-name>
     <url-pattern>/testing</url-pattern>

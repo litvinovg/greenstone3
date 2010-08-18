@@ -33,7 +33,7 @@
 				<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
 				<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
 				<!-- <script type="text/javascript" src="interfaces/oran/js/jquery.js"><xsl:text> </xsl:text></script> --> 
-                <script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.min.js"><xsl:text> </xsl:text></script>
+                <script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.js"><xsl:text> </xsl:text></script>
                 <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8.2.custom.min.js"><xsl:text> </xsl:text></script>
                 <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"><xsl:text> </xsl:text></script> -->
                 <!-- <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/jquery-1.4.1.js"><xsl:text> </xsl:text></script> -->
@@ -151,6 +151,9 @@
         
         .block { margin-left: 10px; border-left: dashed 1px black;}
 
+        .droppable { background-color: #99dd99;}
+        .droppable_hl { border: dashed 1px #ccc; background-color:#FFFFCC; }
+
         <!-- .gsf_metadata { border: solid 2px #0000BB; background-color: #440077; } -->
 
         <!-- .gsf_choose_metadata { border: solid 1px #000000; background-color: #223344; } -->
@@ -175,7 +178,7 @@
 
     <td width="25%" valign="top">
         <h2> Elements to add </h2>
-        <div class="element_type_gsf_template css_gsf_template" title="gsf:template">NEW GSF:TEMPLATE</div>
+        <div class="element_type_gsf_template css_gsf_template" title="gsf:template">NEW GSF:TEMPLATE MATCH</div>
         <div class="element_type_gsf_choose_metadata css_gsf_choose_metadata" title="gsf:choose-metadata">NEW GSF:CHOOSE-METADATA</div>
         <div class="element_type_gsf_metadata css_gsf_metadata" title="gsf:metadata">NEW GSF:METADATA</div>
         <div class="element_type_gsf_link css_gsf_link" title="gsf:link">NEW GSF:LINK</div>

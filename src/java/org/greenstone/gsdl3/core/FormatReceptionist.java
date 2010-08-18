@@ -173,8 +173,11 @@ public class FormatReceptionist extends TransformingReceptionist {
 
     Element coverage_metadata = (Element)GSXML.getNodeByPath(info_response, "response/metadataSetList");
     logger.error("************ This should be metadata set list="+this.converter.getString(coverage_metadata));
-    coverage_metadata = (Element)this.doc.importNode(coverage_metadata, true);
-    coll_description.appendChild(coverage_metadata);
+    if(coverage_metadata != null)
+    {
+        coverage_metadata = (Element)this.doc.importNode(coverage_metadata, true);
+        coll_description.appendChild(coverage_metadata);
+    }
 	
     }
 }

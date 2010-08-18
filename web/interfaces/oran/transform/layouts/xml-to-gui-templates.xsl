@@ -45,10 +45,10 @@ Recent changes:
 
     <!-- ********** GSF:METADATA ********** -->
         <xsl:variable name="metadata">
-        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata">METADATA <xsl:call-template name="meta-to-combo">
+        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata"><xsl:call-template name="meta-to-combo">
                         <xsl:with-param name="metadataSets" select="$metadataSets"/>
                         <xsl:with-param name="current" select="ex.title"/>
-                     </xsl:call-template> <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a></div>
+                     </xsl:call-template><a href="#" class="remove">[x]</a></div>
         </xsl:variable>
 
         <script type="text/javascript">
@@ -74,7 +74,7 @@ Recent changes:
     <!-- ********** GSF:TEMPLATE ********** -->
 
         <xsl:variable name="template">
-        <div class="gsf_template block" title="gsf:template">TEMPLATE[match=<input type="text" name="rawtextinput" size="10"/>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a><table border="1"><tr class="tr"></tr></table></div><br/>
+        <div class="gsf_template block" title="gsf:template">MATCH=<input type="text" name="rawtextinput" size="10"/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a><table border="1"><tr class="tr"></tr></table></div><br/>
         </xsl:variable>
 
         <script type="text/javascript">

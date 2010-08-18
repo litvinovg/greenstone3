@@ -132,10 +132,10 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata">METADATA <xsl:call-template name="meta-to-combo">
+        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata"><xsl:call-template name="meta-to-combo">
                         <xsl:with-param name="metadataSets" select="$metadataSets"/>
                         <xsl:with-param name="current" select="@name"/>
-                     </xsl:call-template> <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+                     </xsl:call-template><a href="#" class="remove">[x]</a>
         </div>
     </xsl:template>
 
@@ -195,14 +195,21 @@ Recent changes:
 
 
         <div class="gsf_template css_gsf_template block" title="gsf:template">
-                TEMPLATE[match=<input type="text" name="rawtextinput" size="10" value="{@match}"/>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
-                <table border="1">
+                MATCH=<input type="text" name="rawtextinput" size="10" value="{@match}"/><xsl:choose>
+                    <xsl:when test="not(@mode)"> <!-- parameter has not been supplied -->
+                    </xsl:when>
+                    <xsl:otherwise>MODE=<input type="text" name="rawtextinput" size="10" value="{@mode}"/></xsl:otherwise>
+                    </xsl:choose><a href="#" class="minmax">[+]</a><a href="#" class="remove">[x]</a>
+                <table class="table" border="1">
+                <tbody>
                 <tr class="tr">
+                <td class="droppable" width="10px"/>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/> 
                 </xsl:apply-templates>
                 </tr>
+                </tbody>
                 </table>
         </div><br/>
     </xsl:template>
@@ -228,7 +235,7 @@ Recent changes:
         <xsl:param name="metadataSets"/>
 
         <div class="gsf_when css_gsf_when block" title="gsf:when"> 
-                WHEN[test=<xsl:value-of select="@test"/>] <br/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+                WHEN[test=<xsl:value-of select="@test"/>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
                 <xsl:apply-templates mode="xml-to-gui">
                   <xsl:with-param name="depth" select="$depth"/>
                   <xsl:with-param name="metadataSets" select="$metadataSets"/>
@@ -326,6 +333,7 @@ Recent changes:
                 <!-- <xsl:text>&lt;/td&gt;</xsl:text><br/><br/> -->
             </div>
         </td>
+        <td class="droppable" width="10px"/>
     </xsl:template>
 
 
