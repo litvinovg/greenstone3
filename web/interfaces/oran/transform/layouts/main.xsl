@@ -34,7 +34,8 @@
 				<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
 				<!-- <script type="text/javascript" src="interfaces/oran/js/jquery.js"><xsl:text> </xsl:text></script> --> 
                 <script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.js"><xsl:text> </xsl:text></script>
-                <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8.2.custom.min.js"><xsl:text> </xsl:text></script>
+                <!-- <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8.2.custom.min.js"><xsl:text> </xsl:text></script> -->
+                <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.js"><xsl:text> </xsl:text></script>
                 <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"><xsl:text> </xsl:text></script> -->
                 <!-- <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/jquery-1.4.1.js"><xsl:text> </xsl:text></script> -->
 
@@ -146,6 +147,8 @@
             background-color:#FFFFCC;
             height:20px;
         }
+
+        .header { background-color: #AFCCAF; border: solid 1px #117711;}
 
         .resizable { width: 150px; height: 150px; padding: 0.5em; } 
         

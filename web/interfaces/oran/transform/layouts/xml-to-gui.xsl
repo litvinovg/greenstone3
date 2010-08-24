@@ -118,7 +118,7 @@ Recent changes:
         <xsl:param name="metadataSets"/>
 
         <div class="gsf_choose_metadata css_gsf_choose_metadata block" title="gsf:choose-metadata">
-                CHOOSE <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+        <table class="header"><tbody><tr><td>CHOOSE</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/> 
@@ -132,10 +132,14 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata"><xsl:call-template name="meta-to-combo">
+        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata">
+            <xsl:variable name="combo">
+                <xsl:call-template name="meta-to-combo">
                         <xsl:with-param name="metadataSets" select="$metadataSets"/>
                         <xsl:with-param name="current" select="@name"/>
-                     </xsl:call-template><a href="#" class="remove">[x]</a>
+                     </xsl:call-template>
+            </xsl:variable>
+        <table class="header"><tbody><tr><td><xsl:copy-of select="$combo"/></td><td><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
         </div>
     </xsl:template>
 
@@ -146,6 +150,7 @@ Recent changes:
         <xsl:param name="metadataSets"/>
 
         <div class="gsf_link css_gsf_link block" title="gsf:link">
+        <xsl:variable name="link">
                 LINK[type=
     	        <select>
                     <xsl:choose>
@@ -171,7 +176,9 @@ Recent changes:
                             <option value ="classifier">Classifier</option>
                         </xsl:when>
                   </xsl:choose>
-	            </select>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+	            </select>]
+        </xsl:variable>
+        <table class="header"><tbody><tr><td><xsl:copy-of select="$link"/></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/> 
@@ -195,11 +202,17 @@ Recent changes:
 
 
         <div class="gsf_template css_gsf_template block" title="gsf:template">
-                MATCH=<input type="text" name="rawtextinput" size="10" value="{@match}"/><xsl:choose>
+            <xsl:variable name="mode">
+                <xsl:choose>
                     <xsl:when test="not(@mode)"> <!-- parameter has not been supplied -->
                     </xsl:when>
                     <xsl:otherwise>MODE=<input type="text" name="rawtextinput" size="10" value="{@mode}"/></xsl:otherwise>
-                    </xsl:choose><a href="#" class="minmax">[+]</a><a href="#" class="remove">[x]</a>
+                </xsl:choose>
+            </xsl:variable>
+    
+                    <!-- <a href="#" class="minmax">[+]</a><a href="#" class="remove">[x]</a><a href="#" class="remove"><img src="interfaces/oran/images/green_button_close.png" alt="[x]" title="Click me to remove"/></a><a href="[myhref]" class="ui-state-default ui-corner-all"><span class="ui-icon ui-icon-home" style="float:left;"></span>Home</a> -->
+            <table class="header"><tbody><tr><td>MATCH=<input type="text" name="rawtextinput" size="10" value="{@match}"/></td><td><xsl:copy-of select="$mode"/></td><td><a href="#" class="minmax ui-icon ui-icon-plusthick" title="Click me to expand">[+]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
+
                 <table class="table" border="1">
                 <tbody>
                 <tr class="tr">
@@ -220,7 +233,7 @@ Recent changes:
         <xsl:param name="metadataSets"/>
 
         <div class="gsf_switch css_gsf_switch block" title="gsf:switch">
-                SWITCH <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+                <table class="header"><tbody><tr><td>SWITCH</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/>
@@ -235,7 +248,7 @@ Recent changes:
         <xsl:param name="metadataSets"/>
 
         <div class="gsf_when css_gsf_when block" title="gsf:when"> 
-                WHEN[test=<xsl:value-of select="@test"/>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+                <table class="header"><tbody><tr><td>WHEN[test=<xsl:value-of select="@test"/>]</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
                 <xsl:apply-templates mode="xml-to-gui">
                   <xsl:with-param name="depth" select="$depth"/>
                   <xsl:with-param name="metadataSets" select="$metadataSets"/>
@@ -250,7 +263,7 @@ Recent changes:
         <xsl:param name="metadataSets"/>
 
         <div class="gsf_otherwise css_gsf_otherwise block" title="gsf:otherwise">
-                OTHERWISE <br/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+                <table><tbody><tr><td>OTHERWISE</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove">[x]</a></td><td><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/>
@@ -265,6 +278,7 @@ Recent changes:
         <xsl:param name="metadataSets"/>
 
         <div class="gsf_icon css_gsf_icon block leaf" title="gsf:icon">
+            <xsl:variable name="icon">
                 ICON[type=
                 <select>
                     <xsl:choose>
@@ -284,7 +298,9 @@ Recent changes:
                             <option value ="classifier">Classifier</option>
                         </xsl:when>
                   </xsl:choose>
-                </select>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+                </select>]
+                </xsl:variable>
+            <table class="header"><tbody><tr><td><xsl:copy-of select="$icon"/></td><td><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
         </div>
     </xsl:template>
 
@@ -295,7 +311,7 @@ Recent changes:
         <xsl:param name="metadataSets"/>
 
         <div class="block" title="gsf:default">
-                DEFAULT <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+                <table class="header"><tbody><tr><td>DEFAULT</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/>
@@ -311,7 +327,7 @@ Recent changes:
         
         <div class="block leaf" title="gsf:text">
                 <xsl:variable name="rawtext"><xsl:value-of select="."/></xsl:variable>
-                TEXT = <input type="text" name="rawtextinput" size="10" value="{$rawtext}"/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a>
+                <table class="header"><tbody><tr><td><input type="text" name="rawtextinput" size="10" value="{$rawtext}"/></td><td><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
         </div>
     </xsl:template>
 
@@ -333,7 +349,7 @@ Recent changes:
                 <!-- <xsl:text>&lt;/td&gt;</xsl:text><br/><br/> -->
             </div>
         </td>
-        <td class="droppable" width="10px"/>
+        <td class="droppable" width="10px" title="Drag a new column on to me"/>
     </xsl:template>
 
 
