@@ -158,8 +158,88 @@ public class TransformingReceptionist extends Receptionist{
     addExtraInfo(page);
     // transform the page using xslt
     Node transformed_page = transformPage(page);
+	
+	// if the user has specified they want only a part of the full page then subdivide it
+	boolean subdivide = false;
+	String excerptID = null;
+	String excerptTag = null;
+	Element request = (Element)GSXML.getChildByTagName(page, GSXML.PAGE_REQUEST_ELEM);
+    Element cgi_param_list = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+    if (cgi_param_list != null) {
+		  HashMap params = GSXML.extractParams(cgi_param_list, false);
+		  if((excerptID = (String)params.get("excerptid")) != null)
+		  {
+			subdivide = true;
+		  }
+		  if((excerptTag = (String)params.get("excerpttag")) != null)
+		  {
+			subdivide = true;
+		  }
+	}
+
+	if(subdivide)
+	{
+		Node subdivided_page = subdivide(transformed_page, excerptID, excerptTag);
+		if(subdivided_page != null)
+		{
+			return subdivided_page;
+		}
+	}
 		
-    return transformed_page;
+    return transformed_page; 
+  }
+  
+  protected Node subdivide(Node transformed_page, String excerptID, String excerptTag)
+  {
+	if(excerptID != null)
+	{
+		Node selectedElement = getNodeByIdRecursive(transformed_page, excerptID);
+		return selectedElement;
+	}
+	else if(excerptTag != null)
+	{
+		Node selectedElement = getNodeByTagRecursive(transformed_page, excerptTag);
+		return selectedElement;
+	}
+	return transformed_page;
+  }
+  
+  protected Node getNodeByIdRecursive(Node parent, String id)
+  {
+	if(parent.hasAttributes() && ((Element)parent).getAttribute("id").equals(id))
+	{
+		return parent;
+	}
+	
+	NodeList children = parent.getChildNodes();
+	for(int i = 0; i < children.getLength(); i++)
+	{
+		Node result = null;
+		if((result = getNodeByIdRecursive(children.item(i), id)) != null)
+		{
+			return result;
+		}
+	}
+	return null;
+  }
+  
+  protected Node getNodeByTagRecursive(Node parent, String tag)
+  {
+	if(parent.getNodeType() == Node.ELEMENT_NODE && ((Element)parent).getTagName().equals(tag))
+	{
+		return parent;
+	}
+	
+	NodeList children = parent.getChildNodes();
+	for(int i = 0; i < children.getLength(); i++)
+	{
+		Node result = null;
+		if((result = getNodeByTagRecursive(children.item(i), tag)) != null)
+		{
+			return result;
+		}
+	}
+	return null;
   }
     
   /** overwrite this to add any extra info that might be needed in the page before transformation */
@@ -170,7 +250,7 @@ public class TransformingReceptionist extends Receptionist{
    * before transforming */
   protected Node transformPage(Element page) {
 
-    logger.debug("page before transfomring:");
+    logger.debug("page before transforming:");
     logger.debug(this.converter.getPrettyString(page));
 
     Element request = (Element)GSXML.getChildByTagName(page, GSXML.PAGE_REQUEST_ELEM);
