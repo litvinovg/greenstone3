@@ -48,7 +48,7 @@
 
 				<div id="container"><div id="container2"><div id="container3"><div id="container4">
 
-					<div id="banner">
+					<div id="gs_banner">
 
 						<!-- show the title -->
 						<div id="breadcrumbs"><xsl:call-template name="breadcrumbs"/><xsl:text> </xsl:text></div>
@@ -216,7 +216,7 @@
 
 <!-- *************************************************************************************** -->
 
-					<div id="content">
+					<div id="gs_content">
 						<!--
 							show the content of the page.
 							to customise this part, edit the xsl file for the page you want to edit
@@ -225,7 +225,7 @@
 
 					</div>
 
-					<div id="footer">
+					<div id="gs_footer">
 						<xsl:call-template name="poweredByGS3TextBar"/>
 					</div>
 
