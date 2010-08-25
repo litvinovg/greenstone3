@@ -32,7 +32,7 @@ body {
 }
 */
 
-#banner {
+#gs_banner {
 	background: transparent url('../images/gsdlhead.gif') scroll no-repeat left top;
 	padding: 10px 20px 30px 20px;
 	min-height: 80px;
@@ -40,7 +40,7 @@ body {
 	position: relative;
 }
 
-#content {
+#gs_content {
 	padding: 1em;
 	min-height: 300px;
 	/* background-color: #ff0; */
@@ -81,7 +81,7 @@ collectionLinkImage {
 	float: left;
 }
 
-#footer {
+#gs_footer {
 	position: relative;
 	display: block;
 	height: 30px;
@@ -101,10 +101,10 @@ collectionLinkImage {
 }
 
 /* make sure h1s and h2s are readable on the green banner */
-#breadcrumbs, #banner h2, #breadcrumbs a, #banner h2 a {
+#breadcrumbs, #gs_banner h2, #breadcrumbs a, #gs_banner h2 a {
 	color: #fff;
 }
-body.dAction #banner h2 {
+body.dAction #gs_banner h2 {
 	max-width: 600px;
 	font-size: 100%;
 }
@@ -114,7 +114,7 @@ body.dAction #banner h2 {
 	height: 30px;
 	line-height: 30px;
 }
-#banner h2 {
+#gs_banner h2 {
 	margin: 0 0 10px 1em;
 }
 
