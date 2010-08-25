@@ -1658,8 +1658,6 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <target name="unzip-windows-packages" depends="init" if="current.os.iswindows">  
     <unzip src="${common.src.home}/packages/windows/crypt/crypt.zip"
       dest="${common.src.home}/packages/windows/crypt"/>
-    <unzip src="${common.src.home}/packages/windows/expat/expat.zip"
-      dest="${common.src.home}/packages/windows/expat"/>
     <untar compression="gzip" 
       src="${common.src.home}/packages/sqlite/${sqlite.targz.version}"
       dest="${common.src.home}/packages/sqlite"/>
