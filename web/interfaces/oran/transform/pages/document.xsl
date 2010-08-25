@@ -74,7 +74,7 @@
 				</div>
 				-->
 
-				<div class="documenttext"> 
+				<div id="gs-document-text" class="documenttext"> 
 					<xsl:for-each select="descendant-or-self::node()/nodeContent">
 						<h3><xsl:value-of disable-output-escaping="yes" select="../metadataList/metadata[@name='Title']"/></h3>
 						<xsl:for-each select="node()">
