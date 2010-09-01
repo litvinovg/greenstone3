@@ -35,7 +35,8 @@ Recent changes:
     
     <!-- ********** GSF:CHOOSE-METADATA ********** -->
         <xsl:variable name="choose_metadata">
-            <div class="gsf_choose_metadata css_gsf_choose_metadata block" title="gsf:choose-metadata">CHOOSE <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a></div>
+            <table class="header"><tbody><tr><td>CHOOSE</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
+            <div class="gsf_choose_metadata css_gsf_choose_metadata block" title="gsf:choose-metadata"><table class="header"><tbody><tr><td>CHOOSE</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
         </xsl:variable>
 
         <script type="text/javascript">

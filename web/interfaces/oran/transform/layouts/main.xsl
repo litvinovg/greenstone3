@@ -35,7 +35,8 @@
 				<!-- <script type="text/javascript" src="interfaces/oran/js/jquery.js"><xsl:text> </xsl:text></script> --> 
                 <script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.js"><xsl:text> </xsl:text></script>
                 <!-- <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8.2.custom.min.js"><xsl:text> </xsl:text></script> -->
-                <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.js"><xsl:text> </xsl:text></script>
+                <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/ui/jquery-ui.js"><xsl:text> </xsl:text></script>
+                <!-- <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.js"><xsl:text> </xsl:text></script> -->
                 <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"><xsl:text> </xsl:text></script> -->
                 <!-- <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/jquery-1.4.1.js"><xsl:text> </xsl:text></script> -->
 

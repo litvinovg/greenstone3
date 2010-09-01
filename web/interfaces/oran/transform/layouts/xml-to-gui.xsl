@@ -216,7 +216,7 @@ Recent changes:
                 <table class="table" border="1">
                 <tbody>
                 <tr class="tr">
-                <td class="droppable" width="10px"/>
+                <td class="droppable" width="10px"></td>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/> 
@@ -340,7 +340,9 @@ Recent changes:
 
         <!-- <td class="td block resizable" title="td" valign="{@valign}" style='overflow: hidden;'> -->
         <td valign="{@valign}" title="td">
-            <div class="td block" title="td-div">
+            <div class="td-div block" title="td-div">
+            <div class="neverempty block" style="height:50px">NEVER EMPTY</div>
+
             <!-- <xsl:text>&lt;td</xsl:text>valign=<xsl:value-of select="@valign"/><xsl:text>&gt;</xsl:text><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a> -->
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>

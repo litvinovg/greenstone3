@@ -46,7 +46,7 @@ $(document).ready(function(){
     });
 
     $(".element_type_gsf_metadata").draggable({
-            connectToSortable: '.gsf_choose_metadata, .gsf_template, .gsf_when, .gsf_otherwise, .td',
+            connectToSortable: '.gsf_choose_metadata, .gsf_when, .gsf_otherwise, .td-div',
             helper: 'clone',
             revert: 'invalid'
     });
@@ -131,11 +131,11 @@ function bind_tables()
 
     
     $('td').click(function () {
-         console.log('td click');
+         console.log('td click *');
          return false;
     });
 
-    $(".td").resizable({
+    $(".td-div").resizable({
                 alsoResize: 'parent',
                 //containment: 'parent',
                 handles: 'w,e',
@@ -151,18 +151,20 @@ function bind_tables()
             activate: function(event, ui) { $(this).addClass("droppable_hl");}, // console.log("droppable activated")},
             deactivate: function(event, ui) { $(this).removeClass("droppable_hl"); }, // console.log("droppable deactivated")},
             drop: function(event, ui) {
-                 var span = document.createElement("div");
-                 span.setAttribute("class","td");
-                 span.setAttribute("style","height:50px");
-                 span.setAttribute("style","display:block");
+                 var neverempty = document.createElement("div");
+                 neverempty.setAttribute("class","neverempty block");
+                 neverempty.setAttribute("style","height:50px");
+                 neverempty.setAttribute("style","display:block");
+                 var text = document.createTextNode('NEVER EMPTY');
+                 neverempty.appendChild(text);
                  var td = document.createElement("td");
                  var div = document.createElement("div"); // class=\"td block\" title=\"td-div\"");
                  div.setAttribute("title","td-div");
-                 div.setAttribute("class","td block");
+                 div.setAttribute("class","td-div block");
                  div.setAttribute("style","margin-left:0px");
                  div.setAttribute("width","25px");
                  td.appendChild(div);
-                 div.appendChild(span);
+                 div.appendChild(neverempty);
                  var sep = document.createElement("td");
                  sep.setAttribute("class","droppable");
                  sep.setAttribute("width","10px"); 
@@ -171,6 +173,7 @@ function bind_tables()
                  bind_tables();
                  resize_tables($(this));
                  bind_td_sortable();
+                 bind_block_mouseover();
                  //bind_all_sortables();
             }
         });
@@ -235,7 +238,7 @@ function bind_template_sortable()
 function bind_td_sortable()
 {
     console.log('function bind_td_sortable()');
-    $('.td').sortable({
+    $('.td-div').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
             'items':'.gsf_metadata, .gsf_choose_metadata, .gsf_link, .gsf_switch',
@@ -249,14 +252,15 @@ function bind_td_sortable()
 
     });
 
-    $('.td').click(function () {    
+    $('.td-div').click(function () {    
          console.log('td class click');
-         return false;
+         return true;
     });
 
 
 
 }
+
 
 function bind_choose_metadata_sortable()
 {
@@ -279,9 +283,10 @@ function bind_link_sortable()
     console.log('function bind_link_sortable()');
     $('.gsf_link').sortable({
             'cursor':'pointer',
-            'tolerance': 'pointer',
+            'tolerance': 'fit',
             'items':'.gsf_icon',
             'placeholder':'placeholder',
+            'connectWith':'.gsf_link',
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
                 if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_icon')) { replace_with(ui.item, gsf_icon_element); }
