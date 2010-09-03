@@ -220,6 +220,43 @@
     <isset property="compile.static"/>
   </condition>
 
+  <!-- If building a release then we want to adjust environment variables so that the support library can be see during compilation -->
+  <if><bool><isset property="use.support.lib"/></bool>
+	<if><bool><isset property="env.CFLAGS"/></bool>
+      <property name="cflags.arg" value="CFLAGS=-I${basedir}/ext/gnome-lib/include ${env.CFLAGS}"/>
+      <else>
+        <property name="cflags.arg" value="CFLAGS=-I${basedir}/ext/gnome-lib/include"/>
+      </else>
+    </if>
+    <else>
+      <property name="cflags.arg" value=" "/>
+    </else>
+  </if>
+
+  <if><bool><isset property="use.support.lib"/></bool>
+	<if><bool><isset property="env.CPPFLAGS"/></bool>
+      <property name="cppflags.arg" value="CPPFLAGS=-I${basedir}/ext/gnome-lib/include ${env.CPPFLAGS}"/>
+      <else>
+        <property name="cppflags.arg" value="CPPFLAGS=-I${basedir}/ext/gnome-lib/include"/>
+      </else>
+    </if>
+    <else>
+      <property name="cppflags.arg" value=" "/>
+    </else>
+  </if>
+
+  <if><bool><isset property="use.support.lib"/></bool>
+	<if><bool><isset property="env.CXXFLAGS"/></bool>
+      <property name="cxxflags.arg" value="CXXFLAGS=-I${basedir}/ext/gnome-lib/include ${env.CXXFLAGS}"/>
+      <else>
+        <property name="cxxflags.arg" value="CXXFLAGS=-I${basedir}/ext/gnome-lib/include"/>
+      </else>
+    </if>
+    <else>
+      <property name="cxxflags.arg" value=" "/>
+    </else>
+  </if>
+
   <condition property="gs2.opt.args" value= " " else="--disable-mg --disable-mgpp --disable-accentfold --disable-gdbm --disable-sqlite">
     <istrue value="${with.jni}"/>
   </condition>
@@ -1307,6 +1344,9 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <exec executable="${src.packages.home}/search4j/configure" dir="${src.packages.home}/search4j" failonerror="true">
         <arg value="--bindir=${basedir}/bin"/>
         <arg value="${static.arg}"/>
+        <env key="CFLAGS" value="${cflags.arg}"/>        
+        <env key="CPPFLAGS" value="${cppflags.arg}"/>
+        <env key="CXXFLAGS" value="${cxxflags.arg}"/>
       </exec>
       <exec executable="make" dir="${src.packages.home}/search4j" failonerror="true"/>
       <exec executable="make" dir="${src.packages.home}/search4j" failonerror="true">
@@ -1400,6 +1440,9 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="--bindir=${gs2build.home}/bin/${os.bin.dir}"/> <!-- what value to use?? -->
       <arg line="${gs2.opt.args}"/>
       <arg line="${static.arg}"/>
+      <env key="CFLAGS" value="${cflags.arg}"/>        
+      <env key="CPPFLAGS" value="${cppflags.arg}"/>
+      <env key="CXXFLAGS" value="${cxxflags.arg}"/>
     </exec>
   </target>
 
@@ -1433,6 +1476,9 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <!-- unix: -->
     <exec executable="make" os="${os.unix}" dir="${common.src.home}" failonerror="true">
       <arg value="${gs2.compile.target}"/>
+      <env key="CFLAGS" value="${cflags.arg}"/>        
+      <env key="CPPFLAGS" value="${cppflags.arg}"/>
+      <env key="CXXFLAGS" value="${cxxflags.arg}"/>
     </exec>
     <!-- windows: -->
     <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
@@ -1721,7 +1767,12 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <!-- common-src is done separately and needs to be compiled first -->
   <target name="compile-build-src" depends="init" if="collection.building.enabled">
     
-    <exec executable="make" dir="${build.src.home}" os="${os.unix}" failonerror="true"/>
+    <exec executable="make" dir="${build.src.home}" os="${os.unix}" failonerror="true">
+      <env key="CFLAGS" value="${cflags.arg}"/>        
+      <env key="CPPFLAGS" value="${cppflags.arg}"/>
+      <env key="CXXFLAGS" value="${cxxflags.arg}"/>
+    </exec>
+	
     <exec executable="make" dir="${build.src.home}" os="${os.unix}" failonerror="true">
       <arg value="install"/>
     </exec>
