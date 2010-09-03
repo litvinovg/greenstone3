@@ -223,9 +223,9 @@
   <!-- If building a release then we want to adjust environment variables so that the support library can be see during compilation -->
   <if><bool><isset property="use.support.lib"/></bool>
 	<if><bool><isset property="env.CFLAGS"/></bool>
-      <property name="cflags.arg" value="CFLAGS=-I${basedir}/ext/gnome-lib/include ${env.CFLAGS}"/>
+      <property name="cflags.arg" value="CFLAGS=-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CFLAGS}"/>
       <else>
-        <property name="cflags.arg" value="CFLAGS=-I${basedir}/ext/gnome-lib/include"/>
+        <property name="cflags.arg" value="CFLAGS=-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
       </else>
     </if>
     <else>
@@ -235,9 +235,9 @@
 
   <if><bool><isset property="use.support.lib"/></bool>
 	<if><bool><isset property="env.CPPFLAGS"/></bool>
-      <property name="cppflags.arg" value="CPPFLAGS=-I${basedir}/ext/gnome-lib/include ${env.CPPFLAGS}"/>
+      <property name="cppflags.arg" value="CPPFLAGS=-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CPPFLAGS}"/>
       <else>
-        <property name="cppflags.arg" value="CPPFLAGS=-I${basedir}/ext/gnome-lib/include"/>
+        <property name="cppflags.arg" value="CPPFLAGS=-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
       </else>
     </if>
     <else>
@@ -247,9 +247,9 @@
 
   <if><bool><isset property="use.support.lib"/></bool>
 	<if><bool><isset property="env.CXXFLAGS"/></bool>
-      <property name="cxxflags.arg" value="CXXFLAGS=-I${basedir}/ext/gnome-lib/include ${env.CXXFLAGS}"/>
+      <property name="cxxflags.arg" value="CXXFLAGS=-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CXXFLAGS}"/>
       <else>
-        <property name="cxxflags.arg" value="CXXFLAGS=-I${basedir}/ext/gnome-lib/include"/>
+        <property name="cxxflags.arg" value="CXXFLAGS=-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
       </else>
     </if>
     <else>
