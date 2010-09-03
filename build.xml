@@ -215,7 +215,7 @@
       <isset property="current.os.isunix"/>
     </and>
   </condition>
-  
+
   <condition property="static.arg" value="LDFLAGS=-static" else=" ">
     <isset property="compile.static"/>
   </condition>
@@ -223,9 +223,9 @@
   <!-- If building a release then we want to adjust environment variables so that the support library can be see during compilation -->
   <if><bool><isset property="use.support.lib"/></bool>
 	<if><bool><isset property="env.CFLAGS"/></bool>
-      <property name="cflags.arg" value="CFLAGS=-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CFLAGS}"/>
+      <property name="cflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CFLAGS}"/>
       <else>
-        <property name="cflags.arg" value="CFLAGS=-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
+        <property name="cflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
       </else>
     </if>
     <else>
@@ -235,9 +235,9 @@
 
   <if><bool><isset property="use.support.lib"/></bool>
 	<if><bool><isset property="env.CPPFLAGS"/></bool>
-      <property name="cppflags.arg" value="CPPFLAGS=-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CPPFLAGS}"/>
+      <property name="cppflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CPPFLAGS}"/>
       <else>
-        <property name="cppflags.arg" value="CPPFLAGS=-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
+        <property name="cppflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
       </else>
     </if>
     <else>
@@ -247,13 +247,25 @@
 
   <if><bool><isset property="use.support.lib"/></bool>
 	<if><bool><isset property="env.CXXFLAGS"/></bool>
-      <property name="cxxflags.arg" value="CXXFLAGS=-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CXXFLAGS}"/>
+      <property name="cxxflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CXXFLAGS}"/>
       <else>
-        <property name="cxxflags.arg" value="CXXFLAGS=-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
+        <property name="cxxflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
       </else>
     </if>
     <else>
       <property name="cxxflags.arg" value=" "/>
+    </else>
+  </if>
+
+  <if><bool><isset property="use.support.lib"/></bool>
+	<if><bool><isset property="env.LDFLAGS"/></bool>
+      <property name="ldflags.arg" value="-L${basedir}/ext/gnome-lib/${os.bin.dir}/lib ${env.LDFLAGS}"/>
+      <else>
+        <property name="ldflags.arg" value="-L${basedir}/ext/gnome-lib/${os.bin.dir}/lib"/>
+      </else>
+    </if>
+    <else>
+      <property name="ldflags.arg" value=" "/>
     </else>
   </if>
 
@@ -1344,9 +1356,6 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <exec executable="${src.packages.home}/search4j/configure" dir="${src.packages.home}/search4j" failonerror="true">
         <arg value="--bindir=${basedir}/bin"/>
         <arg value="${static.arg}"/>
-        <env key="CFLAGS" value="${cflags.arg}"/>        
-        <env key="CPPFLAGS" value="${cppflags.arg}"/>
-        <env key="CXXFLAGS" value="${cxxflags.arg}"/>
       </exec>
       <exec executable="make" dir="${src.packages.home}/search4j" failonerror="true"/>
       <exec executable="make" dir="${src.packages.home}/search4j" failonerror="true">
@@ -1439,7 +1448,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="--prefix=${gs2build.home}"/> <!-- what value to use?? -->
       <arg value="--bindir=${gs2build.home}/bin/${os.bin.dir}"/> <!-- what value to use?? -->
       <arg line="${gs2.opt.args}"/>
-      <arg line="${static.arg}"/>
+      <arg line="${static.arg} ${ldflags.arg}"/>
       <env key="CFLAGS" value="${cflags.arg}"/>        
       <env key="CPPFLAGS" value="${cppflags.arg}"/>
       <env key="CXXFLAGS" value="${cxxflags.arg}"/>
@@ -1479,6 +1488,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <env key="CFLAGS" value="${cflags.arg}"/>        
       <env key="CPPFLAGS" value="${cppflags.arg}"/>
       <env key="CXXFLAGS" value="${cxxflags.arg}"/>
+      <env key="LDFLAGS" value="${ldflags.arg}"/>
     </exec>
     <!-- windows: -->
     <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
@@ -1760,7 +1770,10 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       dir="${build.src.home}" failonerror="true">
       <arg value="--prefix=${gs2build.home}"/>
       <arg line="${gs2.opt.args}"/>
-      <arg line="${static.arg}"/>
+      <arg line="${static.arg} ${ldflags.arg}"/>
+      <env key="CFLAGS" value="${cflags.arg}"/>        
+      <env key="CPPFLAGS" value="${cppflags.arg}"/>
+      <env key="CXXFLAGS" value="${cxxflags.arg}"/>
     </exec>
   </target>
 
@@ -1771,6 +1784,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <env key="CFLAGS" value="${cflags.arg}"/>        
       <env key="CPPFLAGS" value="${cppflags.arg}"/>
       <env key="CXXFLAGS" value="${cxxflags.arg}"/>
+      <env key="LDFLAGS" value="${ldflags.arg}"/>
     </exec>
 	
     <exec executable="make" dir="${build.src.home}" os="${os.unix}" failonerror="true">
