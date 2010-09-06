@@ -1448,7 +1448,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="--prefix=${gs2build.home}"/> <!-- what value to use?? -->
       <arg value="--bindir=${gs2build.home}/bin/${os.bin.dir}"/> <!-- what value to use?? -->
       <arg line="${gs2.opt.args}"/>
-      <arg line="${static.arg} ${ldflags.arg}"/>
+      <arg line="${static.arg}"/>
+      <env key="LDFLAGS" value="${ldflags.arg}"/>
       <env key="CFLAGS" value="${cflags.arg}"/>        
       <env key="CPPFLAGS" value="${cppflags.arg}"/>
       <env key="CXXFLAGS" value="${cxxflags.arg}"/>
@@ -1770,7 +1771,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       dir="${build.src.home}" failonerror="true">
       <arg value="--prefix=${gs2build.home}"/>
       <arg line="${gs2.opt.args}"/>
-      <arg line="${static.arg} ${ldflags.arg}"/>
+      <arg line="${static.arg}"/>
+      <env key="LDFLAGS" value="${ldflags.arg}"/>
       <env key="CFLAGS" value="${cflags.arg}"/>        
       <env key="CPPFLAGS" value="${cppflags.arg}"/>
       <env key="CXXFLAGS" value="${cxxflags.arg}"/>
