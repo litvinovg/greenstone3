@@ -276,8 +276,13 @@
         <property name="path.arg" value="${basedir}/ext/gnome-lib/${os.bin.dir}/bin"/>
       </else>
     </if>
-    <else>
-      <property name="path.arg" value=" "/>
+    <else>    
+      <if><bool><isset property="env.PATH"/></bool>
+        <property name="path.arg" value="${env.PATH}"/>
+      <else>
+        <property name="path.arg" value=" "/>
+      </else
+      </if>
     </else>
   </if>
 
