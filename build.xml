@@ -222,7 +222,7 @@
 
   <!-- If building a release then we want to adjust environment variables so that the support library can be see during compilation -->
   <if><bool><isset property="use.support.lib"/></bool>
-	<if><bool><isset property="env.CFLAGS"/></bool>
+    <if><bool><isset property="env.CFLAGS"/></bool>
       <property name="cflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CFLAGS}"/>
       <else>
         <property name="cflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
@@ -234,7 +234,7 @@
   </if>
 
   <if><bool><isset property="use.support.lib"/></bool>
-	<if><bool><isset property="env.CPPFLAGS"/></bool>
+    <if><bool><isset property="env.CPPFLAGS"/></bool>
       <property name="cppflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CPPFLAGS}"/>
       <else>
         <property name="cppflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
@@ -246,7 +246,7 @@
   </if>
 
   <if><bool><isset property="use.support.lib"/></bool>
-	<if><bool><isset property="env.CXXFLAGS"/></bool>
+    <if><bool><isset property="env.CXXFLAGS"/></bool>
       <property name="cxxflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CXXFLAGS}"/>
       <else>
         <property name="cxxflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
@@ -258,7 +258,7 @@
   </if>
 
   <if><bool><isset property="use.support.lib"/></bool>
-	<if><bool><isset property="env.LDFLAGS"/></bool>
+    <if><bool><isset property="env.LDFLAGS"/></bool>
       <property name="ldflags.arg" value="-L${basedir}/ext/gnome-lib/${os.bin.dir}/lib ${env.LDFLAGS}"/>
       <else>
         <property name="ldflags.arg" value="-L${basedir}/ext/gnome-lib/${os.bin.dir}/lib"/>
@@ -266,6 +266,18 @@
     </if>
     <else>
       <property name="ldflags.arg" value=" "/>
+    </else>
+  </if>
+
+  <if><bool><isset property="use.support.lib"/></bool>
+    <if><bool><isset property="env.PATH"/></bool>
+      <property name="path.arg" value="${basedir}/ext/gnome-lib/${os.bin.dir}/bin:${env.PATH}"/>
+      <else>
+        <property name="path.arg" value="${basedir}/ext/gnome-lib/${os.bin.dir}/bin"/>
+      </else>
+    </if>
+    <else>
+      <property name="path.arg" value=" "/>
     </else>
   </if>
 
@@ -1453,6 +1465,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <env key="CFLAGS" value="${cflags.arg}"/>        
       <env key="CPPFLAGS" value="${cppflags.arg}"/>
       <env key="CXXFLAGS" value="${cxxflags.arg}"/>
+      <env key="PATH" value="${path.arg}"/>
     </exec>
   </target>
 
@@ -1776,6 +1789,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <env key="CFLAGS" value="${cflags.arg}"/>        
       <env key="CPPFLAGS" value="${cppflags.arg}"/>
       <env key="CXXFLAGS" value="${cxxflags.arg}"/>
+      <env key="PATH" value="${path.arg}"/>
     </exec>
   </target>
 
