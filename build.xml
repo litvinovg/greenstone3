@@ -279,9 +279,9 @@
     <else>    
       <if><bool><isset property="env.PATH"/></bool>
         <property name="path.arg" value="${env.PATH}"/>
-      <else>
-        <property name="path.arg" value=" "/>
-      </else
+        <else>
+          <property name="path.arg" value=" "/>
+        </else>
       </if>
     </else>
   </if>
