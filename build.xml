@@ -223,14 +223,14 @@
   <!-- If building a release then we want to adjust environment variables so that the support library can be see during compilation -->
   <if><bool><isset property="use.support.lib"/></bool>
     <if><bool><isset property="env.CFLAGS"/></bool>
-      <property name="cflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CFLAGS}"/>
+      <property name="cflags.arg" value="CFLAGS=&quot;-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CFLAGS}&quot;"/>
       <else>
-        <property name="cflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
+        <property name="cflags.arg" value="CFLAGS=&quot;-I${basedir}/ext/gnome-lib/${os.bin.dir}/include&quot;"/>
       </else>
     </if>
     <else>
       <if><bool><isset property="env.CFLAGS"/></bool>
-        <property name="cflags.arg" value="${env.CFLAGS}"/>
+        <property name="cflags.arg" value="CFLAGS=&quot;${env.CFLAGS}&quot;"/>
         <else>
           <property name="cflags.arg" value=" "/>
         </else>
@@ -240,14 +240,14 @@
 
   <if><bool><isset property="use.support.lib"/></bool>
     <if><bool><isset property="env.CPPFLAGS"/></bool>
-      <property name="cppflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CPPFLAGS}"/>
+      <property name="cppflags.arg" value="CPPFLAGS=&quot;-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CPPFLAGS}&quot;"/>
       <else>
-        <property name="cppflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
+        <property name="cppflags.arg" value="CPPFLAGS=&quot;-I${basedir}/ext/gnome-lib/${os.bin.dir}/include&quot;"/>
       </else>
     </if>
     <else>
       <if><bool><isset property="env.CPPFLAGS"/></bool>
-        <property name="cppflags.arg" value="${env.CPPFLAGS}"/>
+        <property name="cppflags.arg" value="CPPFLAGS=&quot;${env.CPPFLAGS}&quot;"/>
         <else>
           <property name="cppflags.arg" value=" "/>
         </else>
@@ -257,14 +257,14 @@
 
   <if><bool><isset property="use.support.lib"/></bool>
     <if><bool><isset property="env.CXXFLAGS"/></bool>
-      <property name="cxxflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CXXFLAGS}"/>
+      <property name="cxxflags.arg" value="CXXFLAGS=&quot;-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CXXFLAGS}&quot;"/>
       <else>
-        <property name="cxxflags.arg" value="-I${basedir}/ext/gnome-lib/${os.bin.dir}/include"/>
+        <property name="cxxflags.arg" value="CXXFLAGS=&quot;-I${basedir}/ext/gnome-lib/${os.bin.dir}/include&quot;"/>
       </else>
     </if>
     <else>
       <if><bool><isset property="env.CXXFLAGS"/></bool>
-        <property name="cxxflags.arg" value="${env.CXXFLAGS}"/>
+        <property name="cxxflags.arg" value="CXXFLAGS=&quot;${env.CXXFLAGS}&quot;"/>
         <else>
           <property name="cxxflags.arg" value=" "/>
         </else>
@@ -274,14 +274,14 @@
 
   <if><bool><isset property="use.support.lib"/></bool>
     <if><bool><isset property="env.LDFLAGS"/></bool>
-      <property name="ldflags.arg" value="-L${basedir}/ext/gnome-lib/${os.bin.dir}/lib ${env.LDFLAGS}"/>
+      <property name="ldflags.arg" value="LDFLAGS=&quot;-L${basedir}/ext/gnome-lib/${os.bin.dir}/lib ${env.LDFLAGS}&quot;"/>
       <else>
-        <property name="ldflags.arg" value="-L${basedir}/ext/gnome-lib/${os.bin.dir}/lib"/>
+        <property name="ldflags.arg" value="LDFLAGS=&quot;-L${basedir}/ext/gnome-lib/${os.bin.dir}/lib&quot;"/>
       </else>
     </if>
     <else>
       <if><bool><isset property="env.LDFLAGS"/></bool>
-        <property name="ldflags.arg" value="${env.LDFLAGS}"/>
+        <property name="ldflags.arg" value="LDFLAGS=&quot;${env.LDFLAGS}&quot;"/>
         <else>
           <property name="ldflags.arg" value=" "/>
         </else>
@@ -291,14 +291,14 @@
 
   <if><bool><isset property="use.support.lib"/></bool>
     <if><bool><isset property="env.PATH"/></bool>
-      <property name="path.arg" value="${basedir}/ext/gnome-lib/${os.bin.dir}/bin:${env.PATH}"/>
+      <property name="path.arg" value="PATH=&quot;${basedir}/ext/gnome-lib/${os.bin.dir}/bin:${env.PATH}&quot;"/>
       <else>
-        <property name="path.arg" value="${basedir}/ext/gnome-lib/${os.bin.dir}/bin"/>
+        <property name="path.arg" value="PATH=&quot;${basedir}/ext/gnome-lib/${os.bin.dir}/bin&quot;"/>
       </else>
     </if>
     <else>    
       <if><bool><isset property="env.PATH"/></bool>
-        <property name="path.arg" value="${env.PATH}"/>
+        <property name="path.arg" value="PATH=&quot;${env.PATH}&quot;"/>
         <else>
           <property name="path.arg" value=" "/>
         </else>
@@ -1486,11 +1486,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="--bindir=${gs2build.home}/bin/${os.bin.dir}"/> <!-- what value to use?? -->
       <arg line="${gs2.opt.args}"/>
       <arg line="${static.arg}"/>
-      <env key="LDFLAGS" value="${ldflags.arg}"/>
-      <env key="CFLAGS" value="${cflags.arg}"/>        
-      <env key="CPPFLAGS" value="${cppflags.arg}"/>
-      <env key="CXXFLAGS" value="${cxxflags.arg}"/>
-      <env key="PATH" value="${path.arg}"/>
+      <arg line="${ldflags.arg}"/>
+      <arg line="${cflags.arg}"/>        
+      <arg line="${cppflags.arg}"/>
+      <arg line="${cxxflags.arg}"/>
+      <arg line="${path.arg}"/>
     </exec>
   </target>
 
@@ -1524,10 +1524,6 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <!-- unix: -->
     <exec executable="make" os="${os.unix}" dir="${common.src.home}" failonerror="true">
       <arg value="${gs2.compile.target}"/>
-      <env key="CFLAGS" value="${cflags.arg}"/>        
-      <env key="CPPFLAGS" value="${cppflags.arg}"/>
-      <env key="CXXFLAGS" value="${cxxflags.arg}"/>
-      <env key="LDFLAGS" value="${ldflags.arg}"/>
     </exec>
     <!-- windows: -->
     <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
@@ -1810,11 +1806,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="--prefix=${gs2build.home}"/>
       <arg line="${gs2.opt.args}"/>
       <arg line="${static.arg}"/>
-      <env key="LDFLAGS" value="${ldflags.arg}"/>
-      <env key="CFLAGS" value="${cflags.arg}"/>        
-      <env key="CPPFLAGS" value="${cppflags.arg}"/>
-      <env key="CXXFLAGS" value="${cxxflags.arg}"/>
-      <env key="PATH" value="${path.arg}"/>
+      <arg line="${ldflags.arg}"/>
+      <arg line="${cflags.arg}"/>        
+      <arg line="${cppflags.arg}"/>
+      <arg line="${cxxflags.arg}"/>
+      <arg line="${path.arg}"/>
     </exec>
   </target>
 
@@ -1822,10 +1818,6 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <target name="compile-build-src" depends="init" if="collection.building.enabled">
     
     <exec executable="make" dir="${build.src.home}" os="${os.unix}" failonerror="true">
-      <env key="CFLAGS" value="${cflags.arg}"/>        
-      <env key="CPPFLAGS" value="${cppflags.arg}"/>
-      <env key="CXXFLAGS" value="${cxxflags.arg}"/>
-      <env key="LDFLAGS" value="${ldflags.arg}"/>
     </exec>
 	
     <exec executable="make" dir="${build.src.home}" os="${os.unix}" failonerror="true">
