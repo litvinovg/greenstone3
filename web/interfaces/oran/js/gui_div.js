@@ -34,13 +34,13 @@ $(document).ready(function(){
     })
 
     $(".element_type_text").draggable({
-            connectToSortable: '.gsf_otherwise',
+            connectToSortable: '.gsf_otherwise, .gsf_link',
             helper: 'clone',
             revert: 'invalid'
     });
     
     $(".element_type_gsf_choose_metadata").draggable({
-            connectToSortable: '.gsf_template',
+            connectToSortable: '.td-div',
             helper: 'clone',
             revert: 'invalid'
     });
@@ -52,14 +52,14 @@ $(document).ready(function(){
     });
 
     $(".element_type_gsf_link").draggable({
-            connectToSortable: '.gsf_template',
+            connectToSortable: '.td-div',
             helper: 'clone',
             revert: 'invalid'
     });
 
     // switch, when, otherwise, icon
     $(".element_type_gsf_switch").draggable({
-            connectToSortable: '.gsf_template',
+            connectToSortable: '.td-div',
             helper: 'clone',
             revert: 'invalid'
     });
@@ -87,6 +87,7 @@ $(document).ready(function(){
     /*               SORTABLES                */
     /******************************************/
 
+    bind_td_sortable();
     bind_all_sortables();
 
     $('#formatStatement').sortable({
@@ -182,7 +183,7 @@ function bind_tables()
 
 function replace_with(item, me)
 {
-    console.log('function replace_with(item, me)');
+    //console.log('function replace_with(item, me)');
     item.replaceWith(me); //'<div class="element element-txt">This text box has been added!</div>');
 
     resize_tables(item);
@@ -192,7 +193,7 @@ function replace_with(item, me)
 
 function resize_tables(item)
 {
-    console.log('function resize_tables(item)');
+    //console.log('function resize_tables(item)');
     var max_height = 0;
     (item.parents('.table')).each(function(index) {
         $(this).children().children().children().each(function() {
@@ -212,10 +213,10 @@ function resize_tables(item)
 
 function bind_template_sortable()
 {
-    console.log('function bind_template_sortable()');
+    //console.log('function bind_template_sortable()');
     $('.gsf_template').sortable({
             'cursor':'pointer',
-            'items':'.table, .gsf_choose_metadata, .gsf_metadata',
+            'items':'.table', //.gsf_choose_metadata, .gsf_metadata',
             'placeholder':'placeholder',
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
@@ -237,12 +238,12 @@ function bind_template_sortable()
 
 function bind_td_sortable()
 {
-    console.log('function bind_td_sortable()');
+    //console.log('function bind_td_sortable()');
     $('.td-div').sortable({
             'cursor':'pointer',
-            'tolerance': 'pointer',
             'items':'.gsf_metadata, .gsf_choose_metadata, .gsf_link, .gsf_switch',
             'placeholder':'placeholder',
+            'connectWith':'.td-div',
             //'nested':'.gsf:metadata'
             receive: function(event, ui) { alert("Attempted to receive"); },
             stop: function(event, ui) {
@@ -253,7 +254,7 @@ function bind_td_sortable()
     });
 
     $('.td-div').click(function () {    
-         console.log('td class click');
+         //console.log('td class click');
          return true;
     });
 
@@ -264,15 +265,15 @@ function bind_td_sortable()
 
 function bind_choose_metadata_sortable()
 {
-    console.log('function bind_choose_metadata_sortable()');
+    //console.log('function bind_choose_metadata_sortable()');
     $('.gsf_choose_metadata').sortable({
             'cursor':'pointer',
-            'tolerance': 'fit',
-            'items':'.gsf_metadata',
+            'items':'.gsf_metadata, .gsf_default',
             'placeholder':'placeholder',
             'connectWith':'.gsf_choose_metadata',
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
+                //alert("STOP");
                 if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
             }
     });
@@ -280,28 +281,30 @@ function bind_choose_metadata_sortable()
 
 function bind_link_sortable()
 {
-    console.log('function bind_link_sortable()');
+    //console.log('function bind_link_sortable()');
     $('.gsf_link').sortable({
             'cursor':'pointer',
-            'tolerance': 'fit',
-            'items':'.gsf_icon',
+            'tolerance': 'pointer',
+            'items':'.gsf_icon, .gsf_text',
             'placeholder':'placeholder',
             'connectWith':'.gsf_link',
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
                 if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_icon')) { replace_with(ui.item, gsf_icon_element); }
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_text')) { replace_with(ui.item, "<input type=\"text\" name=\"rawtextinput\" size=\"10\"/>"); }
             }
     });
 }
 
 function bind_switch_sortable()
 {
-    console.log('function bind_switch_sortable()');
+    //console.log('function bind_switch_sortable()');
     $('.gsf_switch').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
             'items':'.gsf_metadata, .gsf_when, .gsf_otherwise',
             'placeholder':'placeholder',
+            'connectWith':'.gsf_switch',
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
                 if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_when')) { replace_with(ui.item, gsf_when_element); }
@@ -312,7 +315,7 @@ function bind_switch_sortable()
 
 function bind_when_sortable()
 {
-    console.log('function bind_when_sortable()');
+    //console.log('function bind_when_sortable()');
     $('.gsf_when').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
@@ -327,7 +330,7 @@ function bind_when_sortable()
 
 function bind_otherwise_sortable()
 {
-    console.log('function bind_otherwise_sortable()');
+    //console.log('function bind_otherwise_sortable()');
     $('.gsf_otherwise').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
@@ -343,7 +346,7 @@ function bind_otherwise_sortable()
 
 function bind_block_mouseover()
 {
-    console.log('function bind_block_mouseover()');
+    //console.log('function bind_block_mouseover()');
     $(".block").mouseover(function()
     {
         $(this).parents().css("border", "");
@@ -363,7 +366,7 @@ function bind_minmax_remove()
 };
 
 var removeContent = (function () {
-    console.log('var removeContent = (function ()');
+    //console.log('var removeContent = (function ()');
         // this -> a -> td -> tr -> tbody -> table -> div
         $(this).parent().parent().parent().parent().parent().remove();
     });
@@ -371,7 +374,7 @@ var removeContent = (function () {
 
 var toggleContent = function(e)
 {
-    console.log('var toggleContent = function(e)');
+    //console.log('var toggleContent = function(e)');
     console.log('parent: ' + $(this).html());
     if ($(this).html() == '[+]'){ //targetContent.css('display') == 'none') {
         $(this).parent().parent().parent().parent().parent().children(".block,.table").slideDown(300);
@@ -394,7 +397,7 @@ function serialize(s)
 };
 
 function equalHeights(item, height) {
-    console.log('function equalHeights(item, height)');
+    //console.log('function equalHeights(item, height)');
     (item.parents('.table')).each(function(index) {
         $(this).children().children().children().each(function() {
             $(this).height(height);

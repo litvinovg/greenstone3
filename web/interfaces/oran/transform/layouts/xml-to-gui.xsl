@@ -310,7 +310,7 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <div class="block" title="gsf:default">
+        <div class="block gsf_default" title="gsf:default">
                 <table class="header"><tbody><tr><td>DEFAULT</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
@@ -325,7 +325,7 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
         
-        <div class="block leaf" title="gsf:text">
+        <div class="block leaf gsf_text" title="gsf:text">
                 <xsl:variable name="rawtext"><xsl:value-of select="."/></xsl:variable>
                 <table class="header"><tbody><tr><td><input type="text" name="rawtextinput" size="10" value="{$rawtext}"/></td><td><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
         </div>
