@@ -32,17 +32,47 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable {
   protected FlatDatabaseWrapper coll_db = null;
   
   public SimpleCollectionDatabase(String db_type) {
-    if (db_type.equalsIgnoreCase("gdbm")) {
-      this.coll_db = new GDBMWrapper();
-    }
-    else if (db_type.equalsIgnoreCase("jdbm")) {
-      this.coll_db = new JDBMWrapper();
-    }
-    else {
-      logger.error("Couldn't create SimpleCollectionDatabase of type "+db_type);
-    }   
+
+      // Access databaseWrapper through reflection (forName) so code
+      // can be more dynamic as to the database backends that are
+      // supported for this installation of Greenstone
+
+      String dbwrap_name = db_type.toUpperCase() + "Wrapper";
+      Class dbwrap_class = null;
+
+      try {
+	  String full_dbwrap_name = "org.greenstone.gsdl3.util."+dbwrap_name;
+	  dbwrap_class = Class.forName(full_dbwrap_name);
+      } 
+      catch(ClassNotFoundException e) {
+	  try {
+	      //try the dbwrap_name alone in case the package name is
+	      //already specified
+	      dbwrap_class = Class.forName(dbwrap_name);
+	  } 
+	  catch(ClassNotFoundException ae) {
+	      logger.error("Couldn't create SimpleCollectionDatabase of type "+db_type);
+	      logger.info(ae.getMessage());
+	  }
+      }
+
+      try {
+	  this.coll_db = (FlatDatabaseWrapper)dbwrap_class.newInstance();
+      }
+      catch(Exception e) {
+	      logger.error("Failed to call the constructor "+dbwrap_name+"()");
+      }
+
+
   }
   
+  public boolean databaseOK() {
+      // Previously failed to open database
+      // Most likely cause is that this installation of Greenstone3 has not 
+      // been compiled with support for this database type
+      return coll_db != null;
+  }
+
   /** open the database filename, with mode mode - uses the FlatDatabaseWrapper modes */
   public boolean openDatabase(String filename, int mode){
     return this.coll_db.openDatabase(filename, mode);
@@ -58,6 +88,13 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable {
   public DBInfo getInfo(String main_key) {
       //   logger.warn("All the entries of the db are:");
       //   this.coll_db.displayAllEntries();
+
+      
+    if (this.coll_db==null) {
+	// Most likely cause is that this installation of Greenstone3 has not 
+	// been compiled with support for this database type
+	return null;
+    }
 
     String key_info = this.coll_db.getValue(main_key);
     if (key_info == null || key_info.equals("")) {

@@ -42,8 +42,10 @@ public class JDBMWrapper
 
     static String TNAME = "greenstone";
 
-    RecordManager  recman_;
+    RecordManager  recman_ = null;
     HTree          hashtable_;
+
+    String db_filename_;
 
     static private PrintWriter utf8out = null;
 
@@ -73,7 +75,17 @@ public class JDBMWrapper
       // (no WRITER_CREATE)
       // => assume the database must exist
       boolean must_exist = true; // default
-      
+
+      if (recman_ != null) {
+	  String message = "openDatabase() called when the class already has a database open\n";
+	  message += "  Use closeDatabase before opening the next one.\n";
+	  message += "  Existing database file: " + db_filename_ + "\n";
+	  message += "  New database file:      " + db_filename + "\n";
+	  logger.warn(message);
+	  // consider closing it automatically?
+      }
+
+
       try {
 	  // create or open a record manager
 	  Properties props = new Properties();
@@ -90,6 +102,9 @@ public class JDBMWrapper
 	      
 	      if (must_exist) {
 		  recman_.close();
+		  recman_ = null;
+		  db_filename_ = null;
+
 		  System.err.println("Database table '" + TNAME +"' does not exist.");
 		  throw new IOException();
 	      }
@@ -105,6 +120,7 @@ public class JDBMWrapper
 	return false;
       }
 
+      db_filename_ = db_filename;
 
       return true;
   }
@@ -113,7 +129,11 @@ public class JDBMWrapper
   /** close the database associated with this wrapper */
   public void closeDatabase() {
       try {
-	  recman_.close();
+	  if (recman_ != null) {
+	      recman_.close();
+	      recman_ = null;
+	      db_filename_ = null;
+	  }
       }
       catch (IOException e) {	  
 	logger.error("Failed to close JDBM database");
