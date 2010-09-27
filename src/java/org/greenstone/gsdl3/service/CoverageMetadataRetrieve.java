@@ -91,7 +91,7 @@ public class CoverageMetadataRetrieve
       database_type = "gdbm"; // the default
     }
     coll_db = new SimpleCollectionDatabase(database_type);
-    if (coll_db == null) {
+    if (!coll_db.databaseOK()) {
       logger.error("Couldn't create the collection database of type "+database_type);
       return false;
     }
@@ -188,6 +188,12 @@ public class CoverageMetadataRetrieve
 
     /** This is the method that actually handles the MyDifferentService service */
     protected Element processCoverageMetadataRetrieve(Element request) {
+
+	
+    if (!this.coll_db.databaseOK()) {
+	logger.error("No valid database found\n");
+	return null;
+    }
 
     DBInfo collection_info = this.coll_db.getInfo("collection");
     

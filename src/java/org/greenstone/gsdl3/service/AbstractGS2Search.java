@@ -109,7 +109,7 @@ public abstract class AbstractGS2Search
 	  database_type = "gdbm"; // the default
 	}
 	coll_db = new SimpleCollectionDatabase(database_type);
-	if (coll_db == null) {
+	if (!coll_db.databaseOK()) {
 	  logger.error("Couldn't create the collection database of type "+database_type);
 	  return false;
 	}

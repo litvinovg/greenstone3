@@ -114,7 +114,7 @@ public class OAIPMH extends ServiceRack {
     }
 
     coll_db = new SimpleCollectionDatabase(infodb_type);
-    if (coll_db == null) {
+    if (!coll_db.databaseOK()) {
       logger.error("Couldn't create the collection database of type "+infodb_type);
       return false;
     }
