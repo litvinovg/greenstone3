@@ -318,6 +318,19 @@
   <condition property="gs2.windows.enablejni" value="1" else="0">
     <istrue value="${with.jni}"/>
   </condition>
+  <condition property="gs2.windows.enablemg" value="1" else="0">
+    <istrue value="${with.jni}"/>
+  </condition>
+  <condition property="gs2.windows.enablemgpp" value="1" else="0">
+    <istrue value="${with.jni}"/>
+  </condition>
+  <!-- Should accent folding not also be set here ?? -->
+  <condition property="gs2.windows.usegdbm" value="1" else="0">
+    <istrue value="${with.jni}"/>
+  </condition>
+  <condition property="gs2.windows.usesqlite" value="1" else="0">
+    <istrue value="${with.jni}"/>
+  </condition>
   
   <!-- where is search4j tool -->
   <condition property="search4j.exec" value="bin/search4j.exe" else="bin/search4j"> 
@@ -1422,7 +1435,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <copy file="${lucene.home}/LuceneWrapper.jar" todir="${web.lib}"/>    
   </target>
   
-  <target name="install-jni-files" depends="init,install-jni-files-linux,install-jni-files-windows,install-jni-files-macos" if="with.jni"/>
+  <target name="install-jni-files" depends="init" if="with.jni">
+    <antcall target="install-jni-files-linux"/>
+    <antcall target="install-jni-files-windows"/>
+    <antcall target="install-jni-files-macos"/>
+  </target>
 
   <target name="install-jni-files-linux" depends="init" if="current.os.isunixnotmac">
     <copy file="${mg.home}/jni/libmgretrievejni.so" todir="${lib.jni}"/>
@@ -1531,7 +1548,10 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="win32.mak"/>
       <arg value="GSDLHOME=${gs2build.home}"/>
       <arg value="ENABLE_JNI=${gs2.windows.enablejni}"/>
-      <arg value="USE_SQLITE=0"/> <!-- Why is this not on by default? -->
+      <arg value="ENABLE_MG=${gs2.windows.enablemg}"/>
+      <arg value="ENABLE_MGPP=${gs2.windows.enablemgpp}"/>
+      <arg value="USE_GDBM=${gs2.windows.usegdbm}"/>
+      <arg value="USE_SQLITE=${gs2.windows.usesqlite}"/>
     </exec>
   </target>
   
