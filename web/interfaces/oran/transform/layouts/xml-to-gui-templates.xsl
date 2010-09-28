@@ -46,10 +46,11 @@ Recent changes:
 
     <!-- ********** GSF:METADATA ********** -->
         <xsl:variable name="metadata">
-        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata"><xsl:call-template name="meta-to-combo">
+        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata"><table class="header"><tbody><tr><td><xsl:call-template name="meta-to-combo">
                         <xsl:with-param name="metadataSets" select="$metadataSets"/>
                         <xsl:with-param name="current" select="ex.title"/>
-                     </xsl:call-template><a href="#" class="remove">[x]</a></div>
+                     </xsl:call-template></td><td><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
+                    <!-- <a href="#" class="remove">[x]</a></div> -->
         </xsl:variable>
 
         <script type="text/javascript">

@@ -144,12 +144,13 @@
 
     <style type="text/css">
         .placeholder{
+            margin-left: 10px;
             border: dashed 1px #ccc;
             background-color:#FFFFCC;
             height:20px;
         }
 
-        .header { background-color: #AFCCAF; border: solid 1px #117711;}
+        .header { background-color: #AFCCAF; border: solid 1px #117711; padding: 10px;}
 
         .resizable { width: 150px; height: 150px; padding: 0.5em; } 
         

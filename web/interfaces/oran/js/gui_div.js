@@ -284,7 +284,7 @@ function bind_link_sortable()
     //console.log('function bind_link_sortable()');
     $('.gsf_link').sortable({
             'cursor':'pointer',
-            'tolerance': 'pointer',
+            //'tolerance': 'pointer',
             'items':'.gsf_icon, .gsf_text',
             'placeholder':'placeholder',
             'connectWith':'.gsf_link',
@@ -301,7 +301,7 @@ function bind_switch_sortable()
     //console.log('function bind_switch_sortable()');
     $('.gsf_switch').sortable({
             'cursor':'pointer',
-            'tolerance': 'pointer',
+            //'tolerance': 'pointer',
             'items':'.gsf_metadata, .gsf_when, .gsf_otherwise',
             'placeholder':'placeholder',
             'connectWith':'.gsf_switch',
@@ -318,7 +318,7 @@ function bind_when_sortable()
     //console.log('function bind_when_sortable()');
     $('.gsf_when').sortable({
             'cursor':'pointer',
-            'tolerance': 'pointer',
+            //'tolerance': 'pointer',
             'items':'.leaf',
             'placeholder':'placeholder',
             //'nested':'.gsf:metadata'
@@ -333,7 +333,7 @@ function bind_otherwise_sortable()
     //console.log('function bind_otherwise_sortable()');
     $('.gsf_otherwise').sortable({
             'cursor':'pointer',
-            'tolerance': 'pointer',
+            //'tolerance': 'pointer',
             'items':'.leaf',
             'placeholder':'placeholder',
             //'nested':'.gsf:metadata'
