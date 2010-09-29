@@ -216,6 +216,7 @@ function bind_template_sortable()
     //console.log('function bind_template_sortable()');
     $('.gsf_template').sortable({
             'cursor':'pointer',
+            'tolerance': 'pointer',
             'items':'.table', //.gsf_choose_metadata, .gsf_metadata',
             'placeholder':'placeholder',
             //'nested':'.gsf:metadata'
@@ -241,6 +242,7 @@ function bind_td_sortable()
     //console.log('function bind_td_sortable()');
     $('.td-div').sortable({
             'cursor':'pointer',
+            'tolerance': 'pointer',
             'items':'.gsf_metadata, .gsf_choose_metadata, .gsf_link, .gsf_switch',
             'placeholder':'placeholder',
             'connectWith':'.td-div',
@@ -268,6 +270,7 @@ function bind_choose_metadata_sortable()
     //console.log('function bind_choose_metadata_sortable()');
     $('.gsf_choose_metadata').sortable({
             'cursor':'pointer',
+            'tolerance': 'pointer',
             'items':'.gsf_metadata, .gsf_default',
             'placeholder':'placeholder',
             'connectWith':'.gsf_choose_metadata',
@@ -284,7 +287,7 @@ function bind_link_sortable()
     //console.log('function bind_link_sortable()');
     $('.gsf_link').sortable({
             'cursor':'pointer',
-            //'tolerance': 'pointer',
+            'tolerance': 'pointer',
             'items':'.gsf_icon, .gsf_text',
             'placeholder':'placeholder',
             'connectWith':'.gsf_link',
@@ -301,7 +304,7 @@ function bind_switch_sortable()
     //console.log('function bind_switch_sortable()');
     $('.gsf_switch').sortable({
             'cursor':'pointer',
-            //'tolerance': 'pointer',
+            'tolerance': 'pointer',
             'items':'.gsf_metadata, .gsf_when, .gsf_otherwise',
             'placeholder':'placeholder',
             'connectWith':'.gsf_switch',
@@ -318,7 +321,7 @@ function bind_when_sortable()
     //console.log('function bind_when_sortable()');
     $('.gsf_when').sortable({
             'cursor':'pointer',
-            //'tolerance': 'pointer',
+            'tolerance': 'pointer',
             'items':'.leaf',
             'placeholder':'placeholder',
             //'nested':'.gsf:metadata'
@@ -333,7 +336,7 @@ function bind_otherwise_sortable()
     //console.log('function bind_otherwise_sortable()');
     $('.gsf_otherwise').sortable({
             'cursor':'pointer',
-            //'tolerance': 'pointer',
+            'tolerance': 'pointer',
             'items':'.leaf',
             'placeholder':'placeholder',
             //'nested':'.gsf:metadata'

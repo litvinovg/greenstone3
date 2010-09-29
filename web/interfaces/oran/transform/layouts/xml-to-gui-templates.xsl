@@ -36,7 +36,7 @@ Recent changes:
     <!-- ********** GSF:CHOOSE-METADATA ********** -->
         <xsl:variable name="choose_metadata">
             <table class="header"><tbody><tr><td>CHOOSE</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
-            <div class="gsf_choose_metadata css_gsf_choose_metadata block" title="gsf:choose-metadata"><table class="header"><tbody><tr><td>CHOOSE</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
+            <div class="gsf_choose_metadata css_gsf_choose_metadata block" title="gsf:choose-metadata"><table class="header"><tbody><tr><td class="header">CHOOSE</td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
         </xsl:variable>
 
         <script type="text/javascript">
@@ -46,10 +46,10 @@ Recent changes:
 
     <!-- ********** GSF:METADATA ********** -->
         <xsl:variable name="metadata">
-        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata"><table class="header"><tbody><tr><td><xsl:call-template name="meta-to-combo">
+        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata"><table class="header"><tbody><tr><td class="header"><xsl:call-template name="meta-to-combo">
                         <xsl:with-param name="metadataSets" select="$metadataSets"/>
                         <xsl:with-param name="current" select="ex.title"/>
-                     </xsl:call-template></td><td><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
+                     </xsl:call-template></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
                     <!-- <a href="#" class="remove">[x]</a></div> -->
         </xsl:variable>
 
@@ -60,12 +60,12 @@ Recent changes:
 
     <!-- ********** GSF:LINK ********** -->
         <xsl:variable name="link">
-        <div class="gsf_link css_gsf_link block" title="gsf:link">LINK[type=<select>
+        <div class="gsf_link css_gsf_link block" title="gsf:link"><table class="header"><tbody><tr><td class="header">LINK<select>
         	                <option value = "document" selected = "document">Document</option>
 	                        <option value = "classifier">Classifier</option>
                             <option value = "source">Source</option>
                             <option value = "horizontal">Horizontal</option>
-	            </select>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a></div> 
+	            </select></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div> 
         </xsl:variable>
 
         <script type="text/javascript">
@@ -76,7 +76,7 @@ Recent changes:
     <!-- ********** GSF:TEMPLATE ********** -->
 
         <xsl:variable name="template">
-        <div class="gsf_template block" title="gsf:template">MATCH=<input type="text" name="rawtextinput" size="10"/><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a><table border="1"><tr class="tr"></tr></table></div><br/>
+        <div class="gsf_template block" title="gsf:template"><table class="header"><tbody><tr><td class="header">MATCH=<input type="text" name="rawtextinput" size="10"/></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table><table border="1"><tr class="tr"></tr></table></div><br/>
         </xsl:variable>
 
         <script type="text/javascript">
@@ -87,7 +87,7 @@ Recent changes:
     <!-- ********** GSF:SWITCH ********** -->
 
         <xsl:variable name="switch">
-        <div class="gsf_switch css_gsf_switch block" title="gsf:switch"> SWITCH <a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a></div>
+        <div class="gsf_switch css_gsf_switch block" title="gsf:switch"><table class="header"><tbody><tr><td class="header">SWITCH</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
         </xsl:variable>
 
         <script type="text/javascript">
@@ -98,7 +98,7 @@ Recent changes:
     <!-- ********** GSF:WHEN ********** -->
 
         <xsl:variable name="when">
-        <div class="gsf_when css_gsf_when block" title="gsf:when">WHEN[test=<input type="text" name="rawtextinput" size="10"/>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a></div>
+        <div class="gsf_when css_gsf_when block" title="gsf:when"><table class="header"><tbody><tr><td class="header">WHEN<input type="text" name="rawtextinput" size="10"/></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
         </xsl:variable>
 
         <script type="text/javascript">
@@ -108,7 +108,7 @@ Recent changes:
     <!-- ********** GSF:OTHERWISE ********** -->
 
         <xsl:variable name="otherwise">
-        <div class="gsf_otherwise css_gsf_otherwise block" title="gsf:otherwise">OTHERWISE<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a></div>
+        <div class="gsf_otherwise css_gsf_otherwise block" title="gsf:otherwise"><table class="header"><tbody><tr><td class="header">OTHERWISE</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
         </xsl:variable>
 
         <script type="text/javascript">
@@ -118,7 +118,7 @@ Recent changes:
     <!-- ********** GSF:ICON ********** -->
     
         <xsl:variable name="icon">
-        <div class="gsf_icon css_gsf_icon block leaf" title="gsf:icon"> ICON[type=<select><option value = "document" selected = "document">Document</option><option value = "classifier">Classifier</option><option value = "source">Source</option></select>]<a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a></div>
+        <div class="gsf_icon css_gsf_icon block leaf" title="gsf:icon"><table class="header"><tbody><tr><td class="header">ICON<select><option value = "document" selected = "document">Document</option><option value = "classifier">Classifier</option><option value = "source">Source</option></select></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
         </xsl:variable>
 
         <script type="text/javascript">

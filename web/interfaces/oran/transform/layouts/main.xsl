@@ -150,7 +150,7 @@
             height:20px;
         }
 
-        .header { background-color: #AFCCAF; border: solid 1px #117711; padding: 10px;}
+        .header { background-color: #AFCCAF; border: solid 1px #117711; padding: 5px;}
 
         .resizable { width: 150px; height: 150px; padding: 0.5em; } 
         
