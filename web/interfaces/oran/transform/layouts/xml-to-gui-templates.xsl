@@ -76,7 +76,7 @@ Recent changes:
     <!-- ********** GSF:TEMPLATE ********** -->
 
         <xsl:variable name="template">
-        <div class="gsf_template block" title="gsf:template"><table class="header"><tbody><tr><td class="header">MATCH=<input type="text" name="rawtextinput" size="10"/></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table><table border="1"><tr class="tr"></tr></table></div><br/>
+        <div class="gsf_template css_gsf_template block" title="gsf:template"><table class="header"><tbody><tr><td class="header">MATCH=<input type="text" name="rawtextinput" size="10"/></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table><table border="1"><tr class="tr"><td class="droppable" width="10px"></td></tr></table></div><br/>
         </xsl:variable>
 
         <script type="text/javascript">

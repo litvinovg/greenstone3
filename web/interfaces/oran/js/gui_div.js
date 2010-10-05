@@ -10,48 +10,57 @@ $(document).ready(function(){
     /******************************************/
 
     $(".element_type_gsf_template").draggable({
+            cursor: 'crosshair',
             connectToSortable: '#formatStatement',
             helper: 'clone',
             revert: 'invalid'
     });
 
     $(".element_type_table").draggable({
+            cursor: 'crosshair',
             connectToSortable: '.gsf_template',
             helper: 'clone',
             revert: 'invalid'
     });
 
     $(".element_type_tr").draggable({
+            cursor: 'crosshair',
             connectToSortable: '.gsf_table',
             helper: 'clone',
             revert: 'invalid'
     })
 
     $(".element_type_td").draggable({
+            cursor: 'crosshair',
             //connectToSortable: '.td',
             helper: 'clone',
             revert: 'invalid'
     })
 
     $(".element_type_text").draggable({
+            cursor: 'crosshair',
             connectToSortable: '.gsf_otherwise, .gsf_link',
             helper: 'clone',
             revert: 'invalid'
     });
     
     $(".element_type_gsf_choose_metadata").draggable({
+            cursor: 'crosshair',
             connectToSortable: '.td-div',
             helper: 'clone',
             revert: 'invalid'
     });
 
-    $(".element_type_gsf_metadata").draggable({
+    //$(".element_type_gsf_metadata").draggable({
+    $(".gsf_metadata").draggable({
+            cursor: 'crosshair',
             connectToSortable: '.gsf_choose_metadata, .gsf_when, .gsf_otherwise, .td-div',
             helper: 'clone',
             revert: 'invalid'
     });
 
     $(".element_type_gsf_link").draggable({
+            cursor: 'crosshair',
             connectToSortable: '.td-div',
             helper: 'clone',
             revert: 'invalid'
@@ -59,24 +68,28 @@ $(document).ready(function(){
 
     // switch, when, otherwise, icon
     $(".element_type_gsf_switch").draggable({
+            cursor: 'crosshair',
             connectToSortable: '.td-div',
             helper: 'clone',
             revert: 'invalid'
     });
 
     $(".element_type_gsf_when").draggable({
+            cursor: 'crosshair',
             connectToSortable: '.gsf_switch',
             helper: 'clone',
             revert: 'invalid'
     });
 
     $(".element_type_gsf_otherwise").draggable({
+            cursor: 'crosshair',
             connectToSortable: '.gsf_switch',
             helper: 'clone',
             revert: 'invalid'
     });
 
     $(".element_type_gsf_icon").draggable({
+            cursor: 'crosshair',
             connectToSortable: '.gsf_link',
             helper: 'clone',
             revert: 'invalid'
@@ -146,12 +159,22 @@ function bind_tables()
                         //$(this).parent().parent().equalHeights();
                 }, });
 
+    //$(".droppable").sortable({
+    //        'cursor':'pointer',
+    //        'tolerance': 'pointer',
+    //        'items':'.column, .td-div',
+    //        'placeholder':'placeholder'
+    //});
+
     $(".droppable").droppable({
             accept: '.element_type_td',
             tolerance: 'pointer', 
             activate: function(event, ui) { $(this).addClass("droppable_hl");}, // console.log("droppable activated")},
             deactivate: function(event, ui) { $(this).removeClass("droppable_hl"); }, // console.log("droppable deactivated")},
             drop: function(event, ui) {
+                //if ($(this).hasClass("ui-draggable"))
+                //if (ui.helper.hasClass("ui-draggable"))
+                //{
                  var neverempty = document.createElement("div");
                  neverempty.setAttribute("class","neverempty block");
                  neverempty.setAttribute("style","height:50px");
@@ -176,6 +199,14 @@ function bind_tables()
                  bind_td_sortable();
                  bind_block_mouseover();
                  //bind_all_sortables();
+                //}
+                //else
+                //{
+                //    console.log("Attempting to add");
+                    //$(this).appendTo(ui.draggable[0]);
+                //    $(this).prepend(ui.draggable[0]);
+                    //$(ui.draggable[0]).appendTo($(this));
+                //}
             }
         });
 
@@ -239,13 +270,41 @@ function bind_template_sortable()
 
 function bind_td_sortable()
 {
+
+    $('tr').sortable({
+            'cursor':'pointer',
+            'tolerance': 'intersect',
+            'items':'.column',
+            'placeholder':'placeholder_td',
+            'connectWith':'column'});
+
+    //$('.column').sortable({
+    //    connectWith:['.column'],
+    //    placeholder: 'placeholder',
+    //    items:'td-div'
+    //});
+
+
+    //$('.column').sortable({
+    //        'cursor':'pointer',
+    //        'tolerance': 'pointer',
+    //        'items':'.td-div',
+    //        'placeholder':'placeholder',
+    //        'connectWith':'.column'
+            //'nested':'.gsf:metadata'
+            //receive: function(event, ui) { alert("Attempted to receive"); },
+            //stop: function(event, ui) {
+            //    if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
+
+    //});
+
     //console.log('function bind_td_sortable()');
     $('.td-div').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
             'items':'.gsf_metadata, .gsf_choose_metadata, .gsf_link, .gsf_switch',
             'placeholder':'placeholder',
-            'connectWith':'.td-div',
+            //'connectWith':'.td-div',
             //'nested':'.gsf:metadata'
             receive: function(event, ui) { alert("Attempted to receive"); },
             stop: function(event, ui) {
@@ -277,7 +336,8 @@ function bind_choose_metadata_sortable()
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
                 //alert("STOP");
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
+                //if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
+                bind_all_sortables();
             }
     });
 }
@@ -353,7 +413,7 @@ function bind_block_mouseover()
     $(".block").mouseover(function()
     {
         $(this).parents().css("border", "");
-        $(this).css("border", "1px solid blue");
+        $(this).css("border", "2px solid blue");
         return false;
     }).mouseout(function(){
         $(this).css("border", "");
@@ -371,7 +431,8 @@ function bind_minmax_remove()
 var removeContent = (function () {
     //console.log('var removeContent = (function ()');
         // this -> a -> td -> tr -> tbody -> table -> div
-        $(this).parent().parent().parent().parent().parent().remove();
+        //$(this).parent().parent().parent().parent().parent().remove();
+        $(this).closest(".block").remove();
     });
 
 
@@ -380,12 +441,19 @@ var toggleContent = function(e)
     //console.log('var toggleContent = function(e)');
     console.log('parent: ' + $(this).html());
     if ($(this).html() == '[+]'){ //targetContent.css('display') == 'none') {
-        $(this).parent().parent().parent().parent().parent().children(".block,.table").slideDown(300);
+        //$(this).parent().parent().parent().parent().parent().children(".block,.table").slideDown(300);
+        //$(this).parents().children(".block,.table").stopPropagation().slideDown(300);
+        //var x = $(this).parent().parent().parent().parent().parent();
+        //var y = $(this).parent().parent().parent().parent().parent().children(".block,.table");
+        //var z = $(this).closest(".block").children(".table, .block");
+        $(this).closest(".block").children(".table, .block").slideDown(300);
         $(this).html('[-]');
         $(this).removeClass("ui-icon-plusthick");
         $(this).addClass("ui-icon-minusthick");
     } else {
-        $(this).parent().parent().parent().parent().parent().children(".block,.table").slideUp(300);
+        //$(this).parent().parent().parent().parent().parent().children(".block,.table").slideUp(300);
+        //$(this).parents().children(".block,.table").slideUp(300);
+        $(this).closest(".block").children(".table, .block").slideUp(300);
         $(this).html('[+]');
         $(this).removeClass("ui-icon-minusthick");
         $(this).addClass("ui-icon-plusthick");

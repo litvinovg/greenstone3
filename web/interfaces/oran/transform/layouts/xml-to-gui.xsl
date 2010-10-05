@@ -63,7 +63,7 @@ Recent changes:
         </xsl:variable>
 
         <select>
-            <option value ="{$current_mod}" disabled="disabled" selected="{$current_mod}"><xsl:value-of select="$current_mod"/></option>
+            <!-- <option value ="{$current_mod}" disabled="disabled" selected="{$current_mod}"><xsl:value-of select="$current_mod"/></option> -->
 
             <xsl:apply-templates select="$metadataSets" mode="meta-to-combo">
                 <xsl:with-param name="current" select="$current_mod"/>
@@ -337,7 +337,7 @@ Recent changes:
         
 
         <!-- <td class="td block resizable" title="td" valign="{@valign}" style='overflow: hidden;'> -->
-        <td valign="{@valign}" title="td">
+        <td class="column" valign="{@valign}" title="td">
             <div class="td-div block" title="td-div">
             <div class="neverempty block" style="height:50px">NEVER EMPTY</div>
 

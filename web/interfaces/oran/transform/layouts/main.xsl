@@ -143,18 +143,15 @@
     </xsl:variable>
 
     <style type="text/css">
-        .placeholder{
-            margin-left: 10px;
-            border: dashed 1px #ccc;
-            background-color:#FFFFCC;
-            height:20px;
-        }
+        .placeholder{margin-left: 10px; border: dashed 1px #ccc; background-color:#FFFFCC; height:20px; }
 
-        .header { background-color: #AFCCAF; border: solid 1px #117711; padding: 5px;}
+        .placeholder_td{margin-left: 10px; border: dashed 1px #ccc; background-color:#FFFFCC; width:20px; }
+
+        .header { background-color: #AFCCAF; border: solid 1px #117711; padding: 5px; padding-left: 10px;}
 
         .resizable { width: 150px; height: 150px; padding: 0.5em; } 
         
-        .block { margin-left: 10px; border-left: dashed 1px black;}
+        .block { margin-left: 15px; border-left: dashed 1px black;}
 
         .droppable { background-color: #99dd99;}
         .droppable_hl { border: dashed 1px #ccc; background-color:#FFFFCC; }
@@ -183,14 +180,27 @@
 
     <td width="25%" valign="top">
         <h2> Elements to add </h2>
-        <div class="element_type_gsf_template css_gsf_template" title="gsf:template">NEW GSF:TEMPLATE MATCH</div>
-        <div class="element_type_gsf_choose_metadata css_gsf_choose_metadata" title="gsf:choose-metadata">NEW GSF:CHOOSE-METADATA</div>
-        <div class="element_type_gsf_metadata css_gsf_metadata" title="gsf:metadata">NEW GSF:METADATA</div>
-        <div class="element_type_gsf_link css_gsf_link" title="gsf:link">NEW GSF:LINK</div>
-        <div class="element_type_gsf_switch css_gsf_switch" title="gsf:switch">NEW GSF:SWITCH</div>
-        <div class="element_type_gsf_when css_gsf_when" title="gsf:when">NEW GSF:WHEN</div>
-        <div class="element_type_gsf_otherwise css_gsf_otherwise" title="gsf:otherwise">NEW GSF:OTHERWISE</div>
-        <div class="element_type_gsf_icon css_gsf_icon" title="gsf:icon">NEW GSF:ICON</div>
+        <div class="header element_type_gsf_template css_gsf_template" title="gsf:template">TEMPLATE</div>
+        <!-- <script type="text/javascript">
+        <xsl:text disable-output-escaping="yes">
+        var index = gsf_template_element.indexOf("<div class=\"");
+        var a = gsf_template_element.slice(0, index + "<div class=\"".length);
+        var b = gsf_template_element.slice(index + "<div class=\"".length + 1);
+        var c = a.concat(".element_type_gsf_template", b);
+        document.write(c);
+        </xsl:text>
+        </script> -->
+        <div class="header element_type_gsf_choose_metadata css_gsf_choose_metadata" title="gsf:choose-metadata">CHOOSE-METADATA</div>
+        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata"><table class="header"><tbody><tr><td class="header"><xsl:call-template name="meta-to-combo">
+                        <xsl:with-param name="metadataSets" select="//metadataSetList"/>
+                        <xsl:with-param name="current" select="ex.Title"/>
+                     </xsl:call-template></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
+        <!-- <div class="header element_type_gsf_metadata css_gsf_metadata" title="gsf:metadata">METADATA</div> -->
+        <div class="header element_type_gsf_link css_gsf_link" title="gsf:link">LINK</div>
+        <div class="header element_type_gsf_switch css_gsf_switch" title="gsf:switch">SWITCH</div>
+        <div class="header element_type_gsf_when css_gsf_when" title="gsf:when">WHEN</div>
+        <div class="header element_type_gsf_otherwise css_gsf_otherwise" title="gsf:otherwise">OTHERWISE</div>
+        <div class="header element_type_gsf_icon css_gsf_icon" title="gsf:icon">ICON</div>
         <br/>
         <div class="element_type_text css_text" title="text">TEXT</div>
         <div class="element_type_table css_table" title="gsf:table">NEW TABLE</div>
@@ -202,7 +212,7 @@
 
     <!-- <xsl:variable name="tok" select="fn:tokenize($fmt,'/s+')"/> -->
 
-      <div id="format">
+    <!--  <div id="format">
         <p>
           <b>Format string here</b>
           <i>
@@ -214,7 +224,7 @@
               <xsl:value-of select="$meta"/>
           </i>
         </p>
-      </div>
+      </div> -->
 
 <!-- *************************************************************************************** -->
 
