@@ -37,7 +37,6 @@ import org.apache.log4j.*;
 
 /** Partially implements a generic classifier service
  *
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
  */
 public abstract class AbstractBrowse
     extends ServiceRack {
@@ -267,11 +266,16 @@ public abstract class AbstractBrowse
 	    //					       GSXML.NAME_ATT,
 	    //					       name);
             //now use the position to get the node - CL1 
-            int position = Integer.parseInt(name.substring(2));
+	    // assumes the same number of classifiers in collectionCOnfig as in buildConfig
+	    //            int position = Integer.parseInt(name.substring(2));
+	    
 	    Element node_extra = null;
             NodeList cls = config_browse.getElementsByTagName(GSXML.CLASSIFIER_ELEM);
-            if (position >0 && position <= cls.getLength()) {
-	        node_extra  = (Element) cls.item((position -1)); 
+            //if (position >0 && position <= cls.getLength()) {
+	    //    node_extra  = (Element) cls.item((position -1)); 
+	    //}
+	    if (i<cls.getLength()) {
+	      node_extra = (Element) cls.item(i);
 	    }
 
 	    if (node_extra == null) {
