@@ -36,6 +36,7 @@
                 <script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.js"><xsl:text> </xsl:text></script>
                 <!-- <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8.2.custom.min.js"><xsl:text> </xsl:text></script> -->
                 <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/ui/jquery-ui.js"><xsl:text> </xsl:text></script>
+                <script type="text/javascript" src="interfaces/oran/js/jquery.selectboxes.js"><xsl:text> </xsl:text></script>
                 <!-- <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.5/jquery-ui.js"><xsl:text> </xsl:text></script> -->
                 <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"><xsl:text> </xsl:text></script> -->
                 <!-- <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/jquery-1.4.1.js"><xsl:text> </xsl:text></script> -->
@@ -121,6 +122,11 @@
 
 <!-- *************************************************************************************** -->
 
+    <!-- <xsl:variable name="foo"> -->
+    <!-- <xsl:value-of select="/page/pageRequest/paramList[@name='formatedit']"/> -->
+
+    <xsl:if test="/page/pageRequest/paramList/param[(@name='formatedit') and (@value='1')]">
+
 <!-- Sam2's div code -->
 
     <script type="text/javascript" src="interfaces/oran/js/gui_div.js"><xsl:text> </xsl:text></script>
@@ -191,12 +197,18 @@
         </xsl:text>
         </script> -->
         <div class="header element_type_gsf_choose_metadata css_gsf_choose_metadata" title="gsf:choose-metadata">CHOOSE-METADATA</div>
-        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata"><table class="header"><tbody><tr><td class="header"><xsl:call-template name="meta-to-combo">
+        <div class="draggable_gsf_metadata gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata"><table class="header"><tbody><tr><td class="header"><xsl:call-template name="meta-to-combo">
                         <xsl:with-param name="metadataSets" select="//metadataSetList"/>
                         <xsl:with-param name="current" select="ex.Title"/>
                      </xsl:call-template></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
         <!-- <div class="header element_type_gsf_metadata css_gsf_metadata" title="gsf:metadata">METADATA</div> -->
-        <div class="header element_type_gsf_link css_gsf_link" title="gsf:link">LINK</div>
+        <!-- <div class="header element_type_gsf_link css_gsf_link" title="gsf:link">LINK</div> -->
+        <div class="draggable_gsf_link css_gsf_link block" title="gsf:link"><table class="header"><tbody><tr><td class="header">LINK<select>
+                            <option value = "document" selected = "document">Document</option>
+                            <option value = "classifier">Classifier</option>
+                            <option value = "source">Source</option>
+                            <option value = "horizontal">Horizontal</option>
+                </select></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
         <div class="header element_type_gsf_switch css_gsf_switch" title="gsf:switch">SWITCH</div>
         <div class="header element_type_gsf_when css_gsf_when" title="gsf:when">WHEN</div>
         <div class="header element_type_gsf_otherwise css_gsf_otherwise" title="gsf:otherwise">OTHERWISE</div>
@@ -212,19 +224,21 @@
 
     <!-- <xsl:variable name="tok" select="fn:tokenize($fmt,'/s+')"/> -->
 
-    <!--  <div id="format">
+    <div id="format">
         <p>
           <b>Format string here</b>
           <i>
               <xsl:value-of select="$fmt1"/>
           </i>
         </p>
-        <p>
+    </div>
+    <!--    <p>
           <i>
               <xsl:value-of select="$meta"/>
           </i>
         </p>
       </div> -->
+      </xsl:if>
 
 <!-- *************************************************************************************** -->
 

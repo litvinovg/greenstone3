@@ -5,6 +5,8 @@ $(document).ready(function(){
 
     console.log("Document ready function\n");
 
+    var CURRENT_SELECT_VALUE = "";
+
     /******************************************/
     /*              DRAGGABLES                */
     /******************************************/
@@ -52,14 +54,14 @@ $(document).ready(function(){
     });
 
     //$(".element_type_gsf_metadata").draggable({
-    $(".gsf_metadata").draggable({
+    $(".draggable_gsf_metadata").draggable({
             cursor: 'crosshair',
             connectToSortable: '.gsf_choose_metadata, .gsf_when, .gsf_otherwise, .td-div',
             helper: 'clone',
             revert: 'invalid'
     });
 
-    $(".element_type_gsf_link").draggable({
+    $(".draggable_gsf_link").draggable({
             cursor: 'crosshair',
             connectToSortable: '.td-div',
             helper: 'clone',
@@ -214,8 +216,37 @@ function bind_tables()
 
 function replace_with(item, me)
 {
+    // Search me for select
+    if(me.search("select") != -1)
+    {
+    // If select exists, then find CURRENT_SELECT_VALUE
+        var index = me.search(CURRENT_SELECT_VALUE);
+        if(index == -1)
+            console.log("Did not find " + CURRENT_SELECT_VALUE);
+        else
+            console.log("Found " + CURRENT_SELECT_VALUE + " at index " + index);    
+            index = index + CURRENT_SELECT_VALUE.length + 1;
+            console.log("Attempt inserting select at new index "+index);
+            a = me.substring(0,index);
+            b = me.substring(index);
+            me = a.concat("selected",b);
+    }
+
     //console.log('function replace_with(item, me)');
     item.replaceWith(me); //'<div class="element element-txt">This text box has been added!</div>');
+    //item.find('select').attr("value", CURRENT_SELECT_VALUE);
+
+
+    //if(select != null){
+    //    console.log("Attempting to select " + CURRENT_SELECT_VALUE);
+    //    console.log("length = "+select.length);
+    //    for(index = 0; index < select.length; index++) {
+    //          console.log(select[index].value);  
+    //       if(select[index].value == CURRENT_SELECT_VALUE)
+    //          console.log("Found "+CURRENT_SELECT_VALUE+" at index " + index);
+    //          select.selectedIndex = index;
+    //    }
+    // }
 
     resize_tables(item);
 
@@ -336,7 +367,15 @@ function bind_choose_metadata_sortable()
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
                 //alert("STOP");
-                //if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_metadata')) { 
+                    console.log("Current select value = "+CURRENT_SELECT_VALUE);
+                    var select = $(ui.item).find('select');
+                    var value = select.attr("value");
+                    console.log("We want this:"+value);
+
+                    replace_with(ui.item, gsf_metadata_element); 
+                    
+                }
                 bind_all_sortables();
             }
     });

@@ -89,7 +89,8 @@ Recent changes:
         <!-- if this is the current value, then set combo box to this value -->
         <xsl:choose>
             <xsl:when test="$current = $meta">
-                <option value ="{$meta}" selected="{$meta}"><xsl:value-of select="$meta"/></option>
+                <xsl:text disable-output-escaping="yes">&lt;option value="</xsl:text><xsl:value-of select="$meta"/><xsl:text disable-output-escaping="yes">" selected&gt;</xsl:text><xsl:value-of select="$meta"/><xsl:text disable-output-escaping="yes">&lt;/option&gt;</xsl:text>
+                <!-- <option value ="{$meta}" selected="selected"><xsl:value-of select="$meta"/></option> -->
             </xsl:when>
             <xsl:otherwise>
                 <option value ="{$meta}"><xsl:value-of select="$meta"/></option>
