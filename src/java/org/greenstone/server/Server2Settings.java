@@ -19,7 +19,7 @@ public class Server2Settings extends BaseServerSettings
     protected JCheckBox allowConnections;
     protected JRadioButton[] hostRadioButtons = new JRadioButton[4];
 
-    // 0 to 3: 0 is resolve (hostname) from local IP, 1 is local IP address, 2 is localhost, 3 is 127.0.0.1
+    // 0 to 3: 0 is resolved (hostname) from local IP, 1 is local IP address, 2 is localhost, 3 is 127.0.0.1
     protected int address_resolution_method = 2;
     protected int externalaccess = 0;
 
@@ -114,18 +114,22 @@ public class Server2Settings extends BaseServerSettings
 	
 	// work out the host (default is address_resolution_method 2: localhost)
 	String hostIP = "127.0.0.1";
+	String hosts = "";
 	InetAddress inetAddress = null;
 	try {
 	    inetAddress = InetAddress.getLocalHost();
+		hosts = inetAddress.getHostName();
 	    hostIP = inetAddress.getHostAddress(); // used for all cases unless an Exception is thrown here
 	} catch(UnknownHostException e) {
 	    logger.error(e);
 	    logger.info("Server2.java reload(): Defaulting host URL to localhost");
 	    hostIP = "127.0.0.1";
+	    hosts = "";
 	    address_resolution_method = 2;	    
 	}
 
 	newFileLines = scriptReadWrite.replaceOrAddLine(newFileLines, "hostIP", hostIP, true);
+	newFileLines = scriptReadWrite.replaceOrAddLine(newFileLines, "hosts", hosts, true);
 
 	// address resolution method - onSave() would have updated
 	// this value (or the UnknownHostException above might have)

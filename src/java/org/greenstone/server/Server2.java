@@ -134,6 +134,20 @@ public class Server2 extends BaseServer
 	    }
 	}
 	
+	// For some machines, localhost is not sufficient, 
+	// need hostname defined as well (e.g. Ubuntu 10.10)
+	InetAddress inetAddress = null;
+	try {
+	   	inetAddress = InetAddress.getLocalHost();
+		String hosts = inetAddress.getHostName();
+		ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
+		ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
+		scriptReadWrite.replaceOrAddLine(fileLines, "hosts", hosts, true);
+		scriptReadWrite.writeOutFile(config_properties_file, fileLines);
+	} catch(UnknownHostException e) {
+	   	// Unable to get hostname, need to try for the default localhost without it
+	}		
+
 	// If the GSI is set to NOT autoenter/autostart the server, then write url=URL_PENDING out to the file.
 	// When the user finally presses the Enter Library button and so has started up the server, the correct
 	// url will be written out to the configfile.
@@ -250,6 +264,7 @@ public class Server2 extends BaseServer
 		logger_.error(e);
 		logger_.info("Defaulting host IP to "+ host); // use the default		
 		address_resolution_method = 2;
+		inetAddress = null;
 	    }
 	    switch(address_resolution_method) {
 	    case 0:
