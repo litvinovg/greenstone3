@@ -46,7 +46,7 @@ $(document).ready(function(){
             revert: 'invalid'
     });
     
-    $(".element_type_gsf_choose_metadata").draggable({
+    $(".draggable_gsf_choose_metadata").draggable({
             cursor: 'crosshair',
             connectToSortable: '.td-div',
             helper: 'clone',
@@ -69,28 +69,28 @@ $(document).ready(function(){
     });
 
     // switch, when, otherwise, icon
-    $(".element_type_gsf_switch").draggable({
+    $(".draggable_gsf_switch").draggable({
             cursor: 'crosshair',
             connectToSortable: '.td-div',
             helper: 'clone',
             revert: 'invalid'
     });
 
-    $(".element_type_gsf_when").draggable({
+    $(".draggable_gsf_when").draggable({
             cursor: 'crosshair',
             connectToSortable: '.gsf_switch',
             helper: 'clone',
             revert: 'invalid'
     });
 
-    $(".element_type_gsf_otherwise").draggable({
+    $(".draggable_gsf_otherwise").draggable({
             cursor: 'crosshair',
             connectToSortable: '.gsf_switch',
             helper: 'clone',
             revert: 'invalid'
     });
 
-    $(".element_type_gsf_icon").draggable({
+    $(".draggable_gsf_icon").draggable({
             cursor: 'crosshair',
             connectToSortable: '.gsf_link',
             helper: 'clone',

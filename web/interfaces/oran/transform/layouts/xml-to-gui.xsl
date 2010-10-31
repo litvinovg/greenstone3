@@ -53,29 +53,68 @@ Recent changes:
 
     <xsl:template name="meta-to-combo">
         <xsl:param name="metadataSets" select='.'/>
-        <xsl:param name="current" select='.'/>
+        <xsl:param name="current" select='.'/> 
 
         <xsl:variable name="current_mod">
             <xsl:choose>
                 <xsl:when test="contains($current,'.')"><xsl:value-of select="$current"/></xsl:when>
-                <xsl:otherwise>ex.<xsl:value-of select="$current"/></xsl:otherwise>
+                <xsl:when test="$current!=''">ex.<xsl:value-of select="$current"/></xsl:when>
+                <xsl:otherwise>ex.Title</xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
 
-        <select>
-            <!-- <option value ="{$current_mod}" disabled="disabled" selected="{$current_mod}"><xsl:value-of select="$current_mod"/></option> -->
+        <xsl:variable name="exists">
+        <xsl:apply-templates select="$metadataSets" mode="search-meta-to-combo">
+            <xsl:with-param name="current" select="$current_mod"/> <!--<xsl:copy-of select="$current_mod"/></xsl:with-param> -->
+        </xsl:apply-templates>
+        </xsl:variable>
 
-            <xsl:apply-templates select="$metadataSets" mode="meta-to-combo">
-                <xsl:with-param name="current" select="$current_mod"/>
-            </xsl:apply-templates>
-        </select>
+        <xsl:choose>
+            <xsl:when test="$exists='TRUE'">
+                <select>
+                    <xsl:apply-templates select="$metadataSets" mode="meta-to-combo">
+                        <xsl:with-param name="current" select="$current_mod"/>
+                    </xsl:apply-templates>
+                </select>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$current_mod"/>
+            </xsl:otherwise>
+        </xsl:choose>
+
+    </xsl:template>
+
+    <xsl:template match="metadataSet" mode="search-meta-to-combo">
+        <xsl:param name="current"/>
+
+        <xsl:variable name="set"><xsl:value-of select="substring-before($current, '.')"/></xsl:variable>
+
+        <xsl:if test="@name=$set">
+        <xsl:apply-templates select="metadata" mode="search-meta-to-combo">
+            <!-- <xsl:with-param name="set" select="@name"/> --> <!-- name of the set -->
+            <xsl:with-param name="current" select="$current"/>
+        </xsl:apply-templates>
+        </xsl:if>
+    </xsl:template>
+
+    <xsl:template match="metadata" mode="search-meta-to-combo">
+        <xsl:param name="current"/>
+        <xsl:variable name="cur"><xsl:value-of select="substring-after($current, '.')"/></xsl:variable>
+        <xsl:if test="@name=$cur">TRUE</xsl:if>
+    </xsl:template>
+
+    <xsl:template match="*" mode="search-meta-to-combo">
+        <xsl:param name="current"/>
+        <xsl:apply-templates mode="search-meta-to-combo">
+            <xsl:with-param name="current" select="$current"/>
+        </xsl:apply-templates>
     </xsl:template>
 
     <xsl:template match="metadataSet" mode="meta-to-combo">
         <xsl:param name="current"/>
 
         <xsl:apply-templates mode="meta-to-combo">
-            <xsl:with-param name="set" select="@name"/>
+            <xsl:with-param name="set" select="@name"/> <!-- name of the set -->
             <xsl:with-param name="current" select="$current"/>
         </xsl:apply-templates>
     </xsl:template>
@@ -86,7 +125,6 @@ Recent changes:
 
         <xsl:variable name="meta"><xsl:value-of select="$set"/>.<xsl:value-of select="@name"/></xsl:variable>
 
-        <!-- if this is the current value, then set combo box to this value -->
         <xsl:choose>
             <xsl:when test="$current = $meta">
                 <xsl:text disable-output-escaping="yes">&lt;option value="</xsl:text><xsl:value-of select="$meta"/><xsl:text disable-output-escaping="yes">" selected&gt;</xsl:text><xsl:value-of select="$meta"/><xsl:text disable-output-escaping="yes">&lt;/option&gt;</xsl:text>
@@ -132,6 +170,8 @@ Recent changes:
     <xsl:template match="gsf:metadata" mode="xml-to-gui">
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
+
+        <!-- DEBUG metadata: <xsl:value-of select="@name"/>eol -->
 
         <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata">
             <xsl:variable name="combo">
@@ -192,15 +232,6 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-            <!-- CHILD = <xsl:value-of select="child[1]/@name"/> -->
-            <!-- CHILD = <xsl:value-of select="child::*[name()][1]"/> -->
-
-
-            <!-- <xsl:for-each select="child::*"> -->
-            <!-- <xsl:value-of select="name()"/> -->
-            <!-- </xsl:for-each> -->
-
-
         <div class="gsf_template css_gsf_template block" title="gsf:template">
             <xsl:variable name="mode">
                 <xsl:choose>
@@ -210,7 +241,6 @@ Recent changes:
                 </xsl:choose>
             </xsl:variable>
     
-                    <!-- <a href="#" class="minmax">[+]</a><a href="#" class="remove">[x]</a><a href="#" class="remove"><img src="interfaces/oran/images/green_button_close.png" alt="[x]" title="Click me to remove"/></a><a href="[myhref]" class="ui-state-default ui-corner-all"><span class="ui-icon ui-icon-home" style="float:left;"></span>Home</a> -->
             <table class="header"><tbody><tr><td class="header">MATCH=<input type="text" name="rawtextinput" size="10" value="{@match}"/></td><td class="header"><xsl:copy-of select="$mode"/></td><td class="header"><a href="#" class="minmax ui-icon ui-icon-plusthick" title="Click me to expand">[+]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
 
                 <table class="table" border="1">
@@ -263,7 +293,7 @@ Recent changes:
         <xsl:param name="metadataSets"/>
 
         <div class="gsf_otherwise css_gsf_otherwise block" title="gsf:otherwise">
-                <table class="header"><tbody><tr><td class="header">OTHERWISE</td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td class="header"><a href="#" class="remove">[x]</a></td><td><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
+                <table class="header"><tbody><tr><td class="header">OTHERWISE</td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td class="header"><a href="#" class="remove">[x]</a></td><td><a href="#" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/>

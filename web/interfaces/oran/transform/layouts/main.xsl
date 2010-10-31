@@ -186,33 +186,30 @@
 
     <td width="25%" valign="top">
         <h2> Elements to add </h2>
-        <div class="header element_type_gsf_template css_gsf_template" title="gsf:template">TEMPLATE</div>
-        <!-- <script type="text/javascript">
-        <xsl:text disable-output-escaping="yes">
-        var index = gsf_template_element.indexOf("<div class=\"");
-        var a = gsf_template_element.slice(0, index + "<div class=\"".length);
-        var b = gsf_template_element.slice(index + "<div class=\"".length + 1);
-        var c = a.concat(".element_type_gsf_template", b);
-        document.write(c);
-        </xsl:text>
-        </script> -->
-        <div class="header element_type_gsf_choose_metadata css_gsf_choose_metadata" title="gsf:choose-metadata">CHOOSE-METADATA</div>
-        <div class="draggable_gsf_metadata gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata"><table class="header"><tbody><tr><td class="header"><xsl:call-template name="meta-to-combo">
+        <!-- <div class="header element_type_gsf_template css_gsf_template" title="gsf:template">TEMPLATE</div> -->
+        <div class="draggable_gsf_template css_gsf_template block" title="gsf:template"><table class="header"><tbody><tr><td class="header">MATCH=<input type="text" name="rawtextinput" size="10"/></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table><table border="1"><tr class="tr"><td class="droppable" width="10px"></td></tr></table></div><br/>
+
+        <div class="draggable_gsf_choose css_gsf_choose_metadata block" title="gsf:choose-metadata"><table class="header"><tbody><tr><td class="header">CHOOSE</td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
+
+        <div class="draggable_gsf_metadata css_gsf_metadata block" title="gsf:metadata"><table class="header"><tbody><tr><td class="header"><xsl:call-template name="meta-to-combo">
                         <xsl:with-param name="metadataSets" select="//metadataSetList"/>
                         <xsl:with-param name="current" select="ex.Title"/>
                      </xsl:call-template></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
-        <!-- <div class="header element_type_gsf_metadata css_gsf_metadata" title="gsf:metadata">METADATA</div> -->
-        <!-- <div class="header element_type_gsf_link css_gsf_link" title="gsf:link">LINK</div> -->
+
         <div class="draggable_gsf_link css_gsf_link block" title="gsf:link"><table class="header"><tbody><tr><td class="header">LINK<select>
                             <option value = "document" selected = "document">Document</option>
                             <option value = "classifier">Classifier</option>
                             <option value = "source">Source</option>
                             <option value = "horizontal">Horizontal</option>
                 </select></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
-        <div class="header element_type_gsf_switch css_gsf_switch" title="gsf:switch">SWITCH</div>
-        <div class="header element_type_gsf_when css_gsf_when" title="gsf:when">WHEN</div>
-        <div class="header element_type_gsf_otherwise css_gsf_otherwise" title="gsf:otherwise">OTHERWISE</div>
-        <div class="header element_type_gsf_icon css_gsf_icon" title="gsf:icon">ICON</div>
+
+        <div class="draggable_gsf_switch css_gsf_switch block" title="gsf:switch"><table class="header"><tbody><tr><td class="header">SWITCH</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
+
+        <div class="draggable_gsf_when css_gsf_when block" title="gsf:when"><table class="header"><tbody><tr><td class="header">WHEN<xsl:value-of select="@test"/></td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table></div>
+
+        <div class="draggable_gsf_otherwise css_gsf_otherwise block" title="gsf:otherwise"><table class="header"><tbody><tr><td class="header">OTHERWISE</td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table></div>
+
+        <div class="draggable_gsf_icon css_gsf_icon block" title="gsf:icon"><table class="header"><tbody><tr><td class="header">ICON<select><option value = "document" selected = "document">Document</option><option value = "classifier">Classifier</option><option value = "source">Source</option></select></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
         <br/>
         <div class="element_type_text css_text" title="text">TEXT</div>
         <div class="element_type_table css_table" title="gsf:table">NEW TABLE</div>
@@ -221,8 +218,6 @@
 
     </td>
     </table>
-
-    <!-- <xsl:variable name="tok" select="fn:tokenize($fmt,'/s+')"/> -->
 
     <div id="format">
         <p>

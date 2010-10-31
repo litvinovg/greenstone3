@@ -35,7 +35,6 @@ Recent changes:
     
     <!-- ********** GSF:CHOOSE-METADATA ********** -->
         <xsl:variable name="choose_metadata">
-            <table class="header"><tbody><tr><td>CHOOSE</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
             <div class="gsf_choose_metadata css_gsf_choose_metadata block" title="gsf:choose-metadata"><table class="header"><tbody><tr><td class="header">CHOOSE</td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
         </xsl:variable>
 
@@ -46,12 +45,17 @@ Recent changes:
 
     <!-- ********** GSF:METADATA ********** -->
         <xsl:variable name="metadata">
-        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata"><table class="header"><tbody><tr><td class="header"><xsl:call-template name="meta-to-combo">
+        <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata">
+            <xsl:variable name="combo">
+                <xsl:call-template name="meta-to-combo">
                         <xsl:with-param name="metadataSets" select="$metadataSets"/>
-                        <xsl:with-param name="current" select="ex.title"/>
-                     </xsl:call-template></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
-                    <!-- <a href="#" class="remove">[x]</a></div> -->
-        </xsl:variable>
+                        <xsl:with-param name="current"/> 
+                     </xsl:call-template>
+            </xsl:variable>
+        <table class="header"><tbody><tr><td class="header"><xsl:copy-of select="$combo"/></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
+        </div>
+        
+        </xsl:variable> 
 
         <script type="text/javascript">
             gsf_metadata_element = <xsl:text disable-output-escaping="yes">'</xsl:text><xsl:copy-of select="$metadata"/><xsl:text disable-output-escaping="yes">';</xsl:text> 
