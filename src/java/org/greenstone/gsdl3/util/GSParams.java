@@ -49,6 +49,10 @@ public class GSParams {
 
     public static final String EXPAND_DOCUMENT = "ed";
     public static final String EXPAND_CONTENTS = "ec";
+
+  // used for filtering out a piece of the final page
+  public static final String EXCERPT_ID = "excerptid";
+  public static final String EXCERPT_TAG = "excerpttag";
     protected HashMap param_map = null;
     
     public GSParams() {
@@ -79,6 +83,10 @@ public class GSParams {
 	// ugly hack so we don't save the extlink param
 	addParameter("s0.ext", false);
 	addParameter(COLLECTION_TYPE,  true); // collection type - mg or mgpp
+
+	// filtering args must be specified each time
+	addParameter(EXCERPT_ID, false);
+	addParameter(EXCERPT_TAG, false);
     }
     
     public boolean addParameter(String name, boolean save) {
