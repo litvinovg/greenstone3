@@ -167,11 +167,11 @@ public class TransformingReceptionist extends Receptionist{
     Element cgi_param_list = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
     if (cgi_param_list != null) {
 		  HashMap params = GSXML.extractParams(cgi_param_list, false);
-		  if((excerptID = (String)params.get("excerptid")) != null)
+		  if((excerptID = (String)params.get(GSParams.EXCERPT_ID)) != null)
 		  {
 			subdivide = true;
 		  }
-		  if((excerptTag = (String)params.get("excerpttag")) != null)
+		  if((excerptTag = (String)params.get(GSParams.EXCERPT_TAG)) != null)
 		  {
 			subdivide = true;
 		  }
