@@ -22,7 +22,7 @@
 
 
 	<!-- the output format for this layout is html -->
-	<xsl:output method="html"/>  
+	<xsl:output method="html" omit-xml-declaration="yes"/>  
 
 	<!-- the main layout is defined here -->
 	<xsl:template match="/">
@@ -189,7 +189,7 @@
         <!-- <div class="header element_type_gsf_template css_gsf_template" title="gsf:template">TEMPLATE</div> -->
         <div class="draggable_gsf_template css_gsf_template block" title="gsf:template"><table class="header"><tbody><tr><td class="header">MATCH=<input type="text" name="rawtextinput" size="10"/></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table><table border="1"><tr class="tr"><td class="droppable" width="10px"></td></tr></table></div><br/>
 
-        <div class="draggable_gsf_choose css_gsf_choose_metadata block" title="gsf:choose-metadata"><table class="header"><tbody><tr><td class="header">CHOOSE</td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
+        <div class="draggable_gsf_choose_metadata css_gsf_choose_metadata block" title="gsf:choose-metadata"><table class="header"><tbody><tr><td class="header">CHOOSE</td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table></div>
 
         <div class="draggable_gsf_metadata css_gsf_metadata block" title="gsf:metadata"><table class="header"><tbody><tr><td class="header"><xsl:call-template name="meta-to-combo">
                         <xsl:with-param name="metadataSets" select="//metadataSetList"/>
@@ -211,14 +211,15 @@
 
         <div class="draggable_gsf_icon css_gsf_icon block" title="gsf:icon"><table class="header"><tbody><tr><td class="header">ICON<select><option value = "document" selected = "document">Document</option><option value = "classifier">Classifier</option><option value = "source">Source</option></select></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
         <br/>
-        <div class="element_type_text css_text" title="text">TEXT</div>
-        <div class="element_type_table css_table" title="gsf:table">NEW TABLE</div>
-        <div class="element_type_tr css_tr" title="gsf:row">NEW TABLE ROW</div>
-        <div class="element_type_td css_td" title="gsf:column">NEW TABLE COLUMN</div>
+        <div class="draggable_gsf_text css_text" title="text">TEXT</div>
+        <div class="draggable_table css_table" title="gsf:table">NEW TABLE</div>
+        <div class="draggable_tr css_tr" title="gsf:row">NEW TABLE ROW</div>
+        <div class="draggable_td css_td" title="gsf:column">NEW TABLE COLUMN</div>
 
     </td>
     </table>
 
+    <!--
     <div id="format">
         <p>
           <b>Format string here</b>
@@ -226,7 +227,7 @@
               <xsl:value-of select="$fmt1"/>
           </i>
         </p>
-    </div>
+    </div> -->
     <!--    <p>
           <i>
               <xsl:value-of select="$meta"/>
@@ -236,7 +237,10 @@
       </xsl:if>
 
 <!-- *************************************************************************************** -->
+<H2>Preview</H2>
+                    <!-- <iframe name="preview" id="iframe" width="98%" height="300">Your browser does not support iframes</iframe> -->
 
+                    <!-- <xsl:variable name="preview"> -->
 					<div id="gs_content">
 						<!--
 							show the content of the page.
@@ -245,6 +249,11 @@
 						<xsl:apply-templates select="/page"/>
 
 					</div>
+                    <!-- </xsl:variable> -->
+
+                    <!-- <script type="text/javascript">
+                        preview_html = <xsl:text disable-output-escaping="yes">'</xsl:text><xsl:copy-of select="$preview"/><xsl:text disable-output-escaping="yes">';</xsl:text>
+                    </script> -->
 
 					<div id="gs_footer">
 						<xsl:call-template name="poweredByGS3TextBar"/>

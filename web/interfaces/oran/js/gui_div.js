@@ -1,54 +1,146 @@
 
 console.log("Loading gui_div.js\n");
 
+var initialised_iframe = "false";
+/*
+$("#iframe").ready(function(){
+        console.log("iframe is ready ...");
+        var iframe = document.getElementById('iframe');
+        var iframe_document = iframe.document;
+
+        if(iframe.contentDocument)
+        {
+            iframe_document = iframe.contentDocument; // For NS6
+            console.log("Chose content document");
+        }
+        else if(iframe.contentWindow)
+        {
+            iframe_document = iframe.contentWindow.document; // For IE5.5 and IE6
+            console.log("Chose content window");
+        }
+
+        console.log(iframe_document.documentElement.innerHTML); //document.documentElement.outerHTML
+
+        $(iframe_document.documentElement.innerHTML).find('a').each(function() {
+            console.log("data "+$(this).data('href'));
+            console.log("getAttribute "+$(this).getAttribute('href'));
+            console.log("attr "+$(this).attr('href'));
+            console.log("this.href "+this.href);
+            var original = this.href; //$(this).attr('href');
+            // check if greenstone link ie. starts with format
+            //var original = $(this).data('href');
+            var modified = original.toString().concat("&excerptid=gs_content");
+            console.log(modified);
+            this.href = modified;
+            //$(this).attr('href',modified);
+            //$(this).data('href', modified);
+            //console.log($(this).attr('href'));
+            console.log("data "+$(this).data('href'));
+            console.log("getAttribute "+$(this).getAttribute('href'));
+            console.log("attr "+$(this).attr('href'));
+            console.log("this.href "+this.href);
+            console.log("**********");
+
+        });
+}); */
+
 $(document).ready(function(){
 
     console.log("Document ready function\n");
 
     var CURRENT_SELECT_VALUE = "";
 
+    /*
+    var iframe = document.getElementById('iframe');
+    var iframe_document = iframe.document;
+   
+    if(iframe.contentDocument)
+    {
+        iframe_document = iframe.contentDocument; // For NS6
+        console.log("Chose content document");
+    }
+    else if(iframe.contentWindow)
+    {
+        iframe_document = iframe.contentWindow.document; // For IE5.5 and IE6
+        console.log("Chose content window");
+    }
+    // Put the content in the iframe
+    if(initialised_iframe == "false")
+    {
+        console.log("Initialised iframe with preview html");
+        iframe_document.open();
+        iframe_document.writeln(preview_html); //.concat("&excerptid=gs_content"));
+        iframe_document.close(); 
+        initialised_iframe = "true";
+    }
+    
+    $(iframe_document.documentElement.innerHTML).find('a').each(function() {
+            console.log("data "+$(this).data('href'));
+            console.log("getAttribute "+this.getAttribute('href'));
+            console.log("attr "+$(this).attr('href'));
+            console.log("this.href "+this.href);
+            var original = this.href; //$(this).attr('href');
+            // check if greenstone link ie. starts with format
+            //var original = $(this).data('href');
+            var modified = original.toString().concat("&excerptid=gs_content");
+            console.log("*                      *");
+            console.log(modified);
+            console.log("*                      *");
+            //this.href = modified;
+            //$(this).attr('href',modified);
+            //$(this).data('href', modified);
+            $(this).attr({ 'href': modified });
+            //console.log($(this).attr('href'));
+            console.log("data "+$(this).data('href'));
+            console.log("getAttribute "+this.getAttribute('href'));
+            console.log("attr "+$(this).attr('href'));
+            console.log("this.href "+this.href);
+            console.log("***********************");
+    });
+    */
+
     /******************************************/
     /*              DRAGGABLES                */
     /******************************************/
 
-    $(".element_type_gsf_template").draggable({
+    $(".draggable_gsf_template").draggable({
             cursor: 'crosshair',
             connectToSortable: '#formatStatement',
             helper: 'clone',
             revert: 'invalid'
     });
 
-    $(".element_type_table").draggable({
+    $(".draggable_table").draggable({
             cursor: 'crosshair',
             connectToSortable: '.gsf_template',
             helper: 'clone',
             revert: 'invalid'
     });
 
-    $(".element_type_tr").draggable({
+    $(".draggable_tr").draggable({
             cursor: 'crosshair',
             connectToSortable: '.gsf_table',
             helper: 'clone',
             revert: 'invalid'
     })
 
-    $(".element_type_td").draggable({
+    $(".draggable_td").draggable({
             cursor: 'crosshair',
             //connectToSortable: '.td',
             helper: 'clone',
             revert: 'invalid'
     })
 
-    $(".element_type_text").draggable({
+    $(".draggable_text").draggable({
             cursor: 'crosshair',
-            connectToSortable: '.gsf_otherwise, .gsf_link',
+            connectToSortable: '.gsf_otherwise, .gsf_link, .gsf_choose, .gsf_when',
             helper: 'clone',
             revert: 'invalid'
     });
     
     $(".draggable_gsf_choose_metadata").draggable({
             cursor: 'crosshair',
-            connectToSortable: '.td-div',
+            connectToSortable: '.td-div, .gsf_link, .gsf_when, .gsf_otherwise',
             helper: 'clone',
             revert: 'invalid'
     });
@@ -56,14 +148,14 @@ $(document).ready(function(){
     //$(".element_type_gsf_metadata").draggable({
     $(".draggable_gsf_metadata").draggable({
             cursor: 'crosshair',
-            connectToSortable: '.gsf_choose_metadata, .gsf_when, .gsf_otherwise, .td-div',
+            connectToSortable: '.gsf_choose_metadata, .gsf_when, .gsf_otherwise, .gsf_link, .td-div',
             helper: 'clone',
             revert: 'invalid'
     });
 
     $(".draggable_gsf_link").draggable({
             cursor: 'crosshair',
-            connectToSortable: '.td-div',
+            connectToSortable: '.td-div, .gsf_when, .gsf_otherwise, .gsf_link',
             helper: 'clone',
             revert: 'invalid'
     });
@@ -71,7 +163,7 @@ $(document).ready(function(){
     // switch, when, otherwise, icon
     $(".draggable_gsf_switch").draggable({
             cursor: 'crosshair',
-            connectToSortable: '.td-div',
+            connectToSortable: '.td-div, .gsf_link',
             helper: 'clone',
             revert: 'invalid'
     });
@@ -284,11 +376,11 @@ function bind_template_sortable()
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
                 //if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('css_table')) { replace_with(ui.item, "<table border=\"1\" width=\"100%\" height=\"50px\"><tr><td><div class=\"td block\" title=\"td-div\">XXXXXXXXXXXXXXXXXXXXXXXX</div></td></tr></table>"); }
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_table')) { replace_with(ui.item, "<table class=\"table\" border=\"2\"></table>"); }
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_choose_metadata')) { replace_with(ui.item, gsf_choose_metadata_element); }
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_link')) { replace_with(ui.item, gsf_link_element); }
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_switch')) { replace_with(ui.item, gsf_switch_element); }
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_table')) { replace_with(ui.item, "<table class=\"table\" border=\"2\"></table>"); }
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_choose_metadata')) { replace_with(ui.item, gsf_choose_metadata_element); }
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_link')) { replace_with(ui.item, gsf_link_element); }
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_switch')) { replace_with(ui.item, gsf_switch_element); }
             }
     });
 
@@ -339,7 +431,14 @@ function bind_td_sortable()
             //'nested':'.gsf:metadata'
             receive: function(event, ui) { alert("Attempted to receive"); },
             stop: function(event, ui) {
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
+                // gsf metadata
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
+                // gsf choose metadata
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_choose_metadata')) { replace_with(ui.item, gsf_choose_metadata_element); }
+                // gsf link
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_link')) { replace_with(ui.item, gsf_link_element); }
+                // gsf switch
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_switch')) { replace_with(ui.item, gsf_switch_element); }
                 
             }
 
@@ -361,21 +460,18 @@ function bind_choose_metadata_sortable()
     $('.gsf_choose_metadata').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
-            'items':'.gsf_metadata, .gsf_default',
+            'items':'.gsf_metadata, .gsf_text, .gsf_default',
             'placeholder':'placeholder',
             'connectWith':'.gsf_choose_metadata',
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
-                //alert("STOP");
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_metadata')) { 
-                    console.log("Current select value = "+CURRENT_SELECT_VALUE);
-                    var select = $(ui.item).find('select');
-                    var value = select.attr("value");
-                    console.log("We want this:"+value);
+                // gsf metadata
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); } 
+                // gsf text
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_text')) { replace_with(ui.item, gsf_text_element); } 
+                // gsf default
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_default')) { replace_with(ui.item, gsf_default_element); } 
 
-                    replace_with(ui.item, gsf_metadata_element); 
-                    
-                }
                 bind_all_sortables();
             }
     });
@@ -387,13 +483,23 @@ function bind_link_sortable()
     $('.gsf_link').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
-            'items':'.gsf_icon, .gsf_text',
+            'items':'.leaf, .gsf_link, .gsf_switch, .gsf_choose',
             'placeholder':'placeholder',
             'connectWith':'.gsf_link',
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_icon')) { replace_with(ui.item, gsf_icon_element); }
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_text')) { replace_with(ui.item, "<input type=\"text\" name=\"rawtextinput\" size=\"10\"/>"); }
+                // gsf icon
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_icon')) { replace_with(ui.item, gsf_icon_element); }
+                // gsf text
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_text')) { replace_with(ui.item, "<input type=\"text\" name=\"rawtextinput\" size=\"10\"/>"); }
+                // gsf metadata
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); } 
+                // gsf link
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_link')) { replace_with(ui.item, gsf_link_element); }
+                // gsf switch
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_switch')) { replace_with(ui.item, gsf_switch_element); }
+                // gsf choose
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_choose_metadata')) { replace_with(ui.item, gsf_choose_metadata_element); }
             }
     });
 }
@@ -404,13 +510,19 @@ function bind_switch_sortable()
     $('.gsf_switch').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
-            'items':'.gsf_metadata, .gsf_when, .gsf_otherwise',
+            'items':'.gsf_metadata, .gsf_when, .gsf_otherwise, .gsf_text',
             'placeholder':'placeholder',
             'connectWith':'.gsf_switch',
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_when')) { replace_with(ui.item, gsf_when_element); }
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_otherwise')) { replace_with(ui.item, gsf_otherwise_element); }
+                // gsf when
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_when')) { replace_with(ui.item, gsf_when_element); }
+                // gsf otherwise
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_otherwise')) { replace_with(ui.item, gsf_otherwise_element); }
+                // gsf metadata
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); } 
+                // gsf text
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_text')) { replace_with(ui.item, gsf_text_element); } 
             }
     });
 }
@@ -421,11 +533,20 @@ function bind_when_sortable()
     $('.gsf_when').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
-            'items':'.leaf',
+            'items':'.leaf, .gsf_link, .gsf_choose',
             'placeholder':'placeholder',
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
+                // gsf metadata
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
+                // gsf icon
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_icon')) { replace_with(ui.item, gsf_icon_element); } 
+                // gsf text
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_text')) { replace_with(ui.item, gsf_text_element); } 
+                // gsf link
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_link')) { replace_with(ui.item, gsf_link_element); } 
+                // gsf choose
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_choose')) { replace_with(ui.item, gsf_choose_element); } 
             }
     });
 }
@@ -436,12 +557,20 @@ function bind_otherwise_sortable()
     $('.gsf_otherwise').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
-            'items':'.leaf',
+            'items':'.leaf, .gsf_link, .gsf_choose',
             'placeholder':'placeholder',
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
-                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_text')) { replace_with(ui.item, "<input type=\"text\" name=\"rawtextinput\" size=\"10\"/>"); }
+                // gsf metadata
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
+                // gsf text
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_text')) { replace_with(ui.item, "<input type=\"text\" name=\"rawtextinput\" size=\"10\"/>"); }
+                // gsf icon
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_icon')) { replace_with(ui.item, gsf_icon_element); } 
+                // gsf link
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_link')) { replace_with(ui.item, gsf_link_element); } 
+                // gsf choose
+                if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_choose')) { replace_with(ui.item, gsf_choose_element); } 
             }
     });
 }
