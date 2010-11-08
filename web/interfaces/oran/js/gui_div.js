@@ -43,14 +43,42 @@ $("#iframe").ready(function(){
 
         });
 }); */
-
+/*
+function loadXMLDoc()
+{
+    if (window.XMLHttpRequest)
+    {// code for IE7+, Firefox, Chrome, Opera, Safari
+        xmlhttp=new XMLHttpRequest();
+    }
+    else
+    {// code for IE6, IE5
+        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    
+    xmlhttp.onreadystatechange=function()
+    {  
+        console.log("state changed to " + xmlhttp.readyState);
+        console.log("status is " + xmlhttp.status);
+        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        {
+            console.log("get code");
+            console.log(xmlhttp.responseText);
+            document.getElementById("gs_content").innerHTML=xmlhttp.responseText;
+        }
+    }
+    
+    xmlhttp.open("GET","http://localhost:8080/greenstone3/format?a=b&rt=s&s=ClassifierBrowse&c=simpleht&cl=CL1&excerptid=gs_content",true);
+    //xmlhttp.open("GET","http://www.cs.waikato.ac.nz",true);
+    //xmlhttp.open("GET","http://wand.net.nz/~sjb48/index.html",true);
+    xmlhttp.send();
+}
+*/
 $(document).ready(function(){
 
     console.log("Document ready function\n");
 
     var CURRENT_SELECT_VALUE = "";
 
-    /*
     var iframe = document.getElementById('iframe');
     var iframe_document = iframe.document;
    
@@ -64,16 +92,38 @@ $(document).ready(function(){
         iframe_document = iframe.contentWindow.document; // For IE5.5 and IE6
         console.log("Chose content window");
     }
+
+    // Edit the hrefs in preview_html - search for <a href="format?a=b&rt=r&s=ClassifierBrowse&c=simpleht&cl=CL1.2">
+    var start_index = 0;
+    var end_index = 0;
+    while(start_index != -1)
+    {
+        start_index = preview_html.indexOf("href=\"format", start_index);
+        console.log("start index = " + start_index);
+        if(start_index != -1)
+        {
+            end_index = preview_html.indexOf("\">", start_index);
+            console.log("end_index = " + end_index);
+            a = preview_html.substring(0,end_index);
+            b = preview_html.substring(end_index);
+            preview_html = a.concat("&excerptid=gs_content", b);
+            console.log(preview_html);
+            start_index = end_index + "&excerptid=gs_content\">".length;
+        }
+    }
+
     // Put the content in the iframe
     if(initialised_iframe == "false")
     {
         console.log("Initialised iframe with preview html");
+        console.log(preview_html);
         iframe_document.open();
         iframe_document.writeln(preview_html); //.concat("&excerptid=gs_content"));
         iframe_document.close(); 
         initialised_iframe = "true";
     }
-    
+
+    /*    
     $(iframe_document.documentElement.innerHTML).find('a').each(function() {
             console.log("data "+$(this).data('href'));
             console.log("getAttribute "+this.getAttribute('href'));
@@ -131,9 +181,9 @@ $(document).ready(function(){
             revert: 'invalid'
     })
 
-    $(".draggable_text").draggable({
+    $(".draggable_gsf_text").draggable({
             cursor: 'crosshair',
-            connectToSortable: '.gsf_otherwise, .gsf_link, .gsf_choose, .gsf_when',
+            connectToSortable: '.td-div, .gsf_when, .gsf_otherwise, .gsf_link, .gsf_choose_metadata, .gsf_default',
             helper: 'clone',
             revert: 'invalid'
     });
@@ -184,7 +234,7 @@ $(document).ready(function(){
 
     $(".draggable_gsf_icon").draggable({
             cursor: 'crosshair',
-            connectToSortable: '.gsf_link',
+            connectToSortable: '.td-div, .gsf_link, .gsf_choose, .gsf_when, .gsf_otherwise',
             helper: 'clone',
             revert: 'invalid'
     });

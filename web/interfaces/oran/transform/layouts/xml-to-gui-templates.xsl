@@ -128,6 +128,20 @@ Recent changes:
         <script type="text/javascript">
             gsf_icon_element = <xsl:text disable-output-escaping="yes">'</xsl:text><xsl:copy-of select="$icon"/><xsl:text disable-output-escaping="yes">';</xsl:text>
         </script>
+
+    <!-- ******** TEXT ************ -->
+
+        <xsl:variable name="text">
+        <div class="block leaf gsf_text" title="gsf:text">
+                <xsl:variable name="rawtext"><xsl:value-of select="."/></xsl:variable>
+                <table class="header"><tbody><tr><td class="header"><input type="text" name="rawtextinput" size="10" value=""/></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
+        </div>
+        </xsl:variable>
+
+        <script type="text/javascript">
+            gsf_text_element = <xsl:text disable-output-escaping="yes">'</xsl:text><xsl:copy-of select="$text"/><xsl:text disable-output-escaping="yes">';</xsl:text>
+        </script>
+
     </xsl:template>
 
 </xsl:stylesheet>

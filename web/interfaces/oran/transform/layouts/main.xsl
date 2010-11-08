@@ -176,7 +176,7 @@
     <div id="formatStatement">
 
     <xsl:call-template name="xml-to-gui">
-        <xsl:with-param name="node-set" select="//format[@type='browse']"/> 
+        <xsl:with-param name="node-set" select="//format"/> <!-- [@type='browse']"/>  -->
         <xsl:with-param name="metadataSets" select="//metadataSetList"/> 
     </xsl:call-template> 
 
@@ -211,7 +211,7 @@
 
         <div class="draggable_gsf_icon css_gsf_icon block" title="gsf:icon"><table class="header"><tbody><tr><td class="header">ICON<select><option value = "document" selected = "document">Document</option><option value = "classifier">Classifier</option><option value = "source">Source</option></select></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
         <br/>
-        <div class="draggable_gsf_text css_text" title="text">TEXT</div>
+        <div class="draggable_gsf_text css_text" title="text"><table class="header"><tbody><tr><td class="header"><input type="text" name="rawtextinput" size="10" value=""/></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table></div>
         <div class="draggable_table css_table" title="gsf:table">NEW TABLE</div>
         <div class="draggable_tr css_tr" title="gsf:row">NEW TABLE ROW</div>
         <div class="draggable_td css_td" title="gsf:column">NEW TABLE COLUMN</div>
@@ -238,9 +238,10 @@
 
 <!-- *************************************************************************************** -->
 <H2>Preview</H2>
-                    <!-- <iframe name="preview" id="iframe" width="98%" height="300">Your browser does not support iframes</iframe> -->
+                    <iframe name="preview" id="iframe" width="98%" height="300">Your browser does not support iframes</iframe> 
 
-                    <!-- <xsl:variable name="preview"> -->
+                    <xsl:variable name="preview"> 
+                    <!-- <button type="button" onclick="loadXMLDoc()">Change Content</button> -->
 					<div id="gs_content">
 						<!--
 							show the content of the page.
@@ -249,11 +250,11 @@
 						<xsl:apply-templates select="/page"/>
 
 					</div>
-                    <!-- </xsl:variable> -->
+                    </xsl:variable>
 
-                    <!-- <script type="text/javascript">
+                    <script type="text/javascript">
                         preview_html = <xsl:text disable-output-escaping="yes">'</xsl:text><xsl:copy-of select="$preview"/><xsl:text disable-output-escaping="yes">';</xsl:text>
-                    </script> -->
+                    </script>
 
 					<div id="gs_footer">
 						<xsl:call-template name="poweredByGS3TextBar"/>

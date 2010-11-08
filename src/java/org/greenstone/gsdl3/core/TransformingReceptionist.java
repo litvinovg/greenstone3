@@ -194,11 +194,14 @@ public class TransformingReceptionist extends Receptionist{
 	if(excerptID != null)
 	{
 		Node selectedElement = getNodeByIdRecursive(transformed_page, excerptID);
+        modifyNodesByTagRecursive(selectedElement, "a");
 		return selectedElement;
 	}
 	else if(excerptTag != null)
 	{
-		Node selectedElement = getNodeByTagRecursive(transformed_page, excerptTag);
+        // define a list
+        
+		Node selectedElement = modifyNodesByTagRecursive(transformed_page, excerptTag);
 		return selectedElement;
 	}
 	return transformed_page;
@@ -241,7 +244,33 @@ public class TransformingReceptionist extends Receptionist{
 	}
 	return null;
   }
+ 
+  protected Node modifyNodesByTagRecursive(Node parent, String tag)
+  {
+    if(parent.getNodeType() == Node.ELEMENT_NODE && ((Element)parent).getTagName().equals(tag))
+    {
+        return parent;
+    }
     
+    NodeList children = parent.getChildNodes();
+    for(int i = 0; i < children.getLength(); i++)
+    {
+        Node result = null;
+        if((result = modifyNodesByTagRecursive(children.item(i), tag)) != null)
+        {
+            //return result;
+            //logger.error("Modify node value = "+result.getNodeValue()); //NamedItem("href"););
+            logger.error("BEFORE Modify node attribute = "+result.getAttributes().getNamedItem("href").getNodeValue());
+            String url = result.getAttributes().getNamedItem("href").getNodeValue();
+            url = url + "&excerptid=gs_content";
+            result.getAttributes().getNamedItem("href").setNodeValue(url);
+            logger.error("AFTER Modify node attribute = "+result.getAttributes().getNamedItem("href").getNodeValue());
+            
+        }
+    }
+    return null;
+  }
+
   /** overwrite this to add any extra info that might be needed in the page before transformation */
   protected void addExtraInfo(Element page) {}
 
