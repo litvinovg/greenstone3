@@ -2,6 +2,122 @@
 console.log("Loading gui_div.js\n");
 
 var initialised_iframe = "false";
+
+function createFormatStatement()
+{
+
+    var formatStatement = document.getElementById('formatStatement');
+    console.log(formatStatement);
+    if(formatStatement.hasChildNodes())
+    {
+        var formatstring = traverse(formatStatement, "");
+        console.log(formatstring);
+
+        // var children = $(formatStatement).children('div');
+        // for(var i=0; i < children.length; i++)
+        //    traverse(children[i], formatstring)
+     
+        /*
+        var children = formatStatement.childNodes; //[]getChildNodes();
+        var current;
+        for(var i = 0; i < formatStatement.childNodes.length; i++)
+        {
+            current = formatStatement.childNodes[i];
+            //console.log(current.nodeName);
+            //console.log(current.nodeType);
+            if(current.nodeName=='DIV')
+            {
+                //console.log(current);
+                //console.log(current.className);
+                var gsf = find_class(current);
+                console.log(gsf);
+            }
+        }
+        */
+    }
+}
+
+function traverse(node, formatstring)
+  {
+    //console.log("node=("+node.nodeName+","+node.nodeType+")");
+
+    if(node.nodeName=='DIV')
+    {
+        console.log("Found a div" +node.nodeName+","+node.nodeType);
+        formatstring = formatstring + find_class(node);
+        console.log(formatstring);
+    }
+
+    var children = $(node).children();
+    for(var i=0; i < children.length; i++)
+        formatstring = formatstring + traverse(children[i], formatstring);
+
+    return formatstring;
+  }
+        
+
+/*
+    console.log("node=("+node.nodeName+","+node.nodeType+")");
+
+    if(node.children.length == 0) //hasChildNodes()) 
+    {
+        console.log("No children so return");
+        return "";
+    }
+
+    if(node.nodeName=='DIV')
+    {
+        console.log("Found a div");
+        formatstring = formatstring + find_class(node);
+    }        
+    
+    for(var i = 0; i < node.children.length; i++)
+        return recursiveTraverse(node.children[i], formatstring);
+    
+
+    return formatstring;
+  }
+*/
+
+function find_class(current)
+{
+    var classes = current.className.split(' ');
+    var none = "";
+    for(var i = 0; i < classes.length; i++)
+    {
+        switch(classes[i])
+        {
+            case 'gsf_template':
+              return create_gsf_template(current);
+            default:
+            {
+              console.log("Class not found");
+              return none;
+            }
+        }
+    }
+}
+
+function create_gsf_template(current)
+{
+    // find match text which is an input with class match
+    var match = $(current).find('.match')[0].value;
+    console.log(match);
+    
+    // find mode text which is an input with class mode
+    var mode = $(current).find('.mode')[0].value;
+    console.log(mode);
+
+    // "<gsf:template match=\"classifierNode\" mode=\"horizontal\">"
+    var gsf = "<gsf:template match=\"" + match + "\"";
+    if(mode != "vertical")
+        gsf = gsf + " mode=\"" + mode + "\"";
+    gsf = gsf + ">";
+    
+    return gsf;
+
+}
+
 /*
 $("#iframe").ready(function(){
         console.log("iframe is ready ...");
@@ -106,11 +222,24 @@ $(document).ready(function(){
             console.log("end_index = " + end_index);
             a = preview_html.substring(0,end_index);
             b = preview_html.substring(end_index);
-            preview_html = a.concat("&excerptid=gs_content", b);
+            preview_html = a.concat("&excerptid=results", b);
             console.log(preview_html);
-            start_index = end_index + "&excerptid=gs_content\">".length;
+            start_index = end_index + "&excerptid=results\">".length;
         }
     }
+
+    // Split the html code in to three parts
+    var first_index = preview_html.indexOf("<ul id=\"results\"");
+    console.log("First index is "+first_index);
+    var second_index = preview_html.indexOf("</ul>", first_index) + "</ul>".length;
+    console.log("Second index is "+second_index);
+
+    var first_half = preview_html.substring(0, first_index);
+    var iframe_code = preview_html.substring(first_index, second_index);
+    var second_half = preview_html.substring(second_index);
+
+    //$('#my_categories').innerHTML = first_half.concat(second_half);
+    document.getElementById("my_categories").innerHTML = first_half.concat(second_half);
 
     // Put the content in the iframe
     if(initialised_iframe == "false")
@@ -118,7 +247,7 @@ $(document).ready(function(){
         console.log("Initialised iframe with preview html");
         console.log(preview_html);
         iframe_document.open();
-        iframe_document.writeln(preview_html); //.concat("&excerptid=gs_content"));
+        iframe_document.writeln(iframe_code); //.concat("&excerptid=gs_content"));
         iframe_document.close(); 
         initialised_iframe = "true";
     }

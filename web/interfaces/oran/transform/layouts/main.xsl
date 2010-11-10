@@ -173,6 +173,8 @@
 
     <td width="75%">
 
+    <button id="updateFormatStatement" type="button" onclick="createFormatStatement()">Update Format Statement</button>
+
     <div id="formatStatement">
 
     <xsl:call-template name="xml-to-gui">
@@ -238,6 +240,9 @@
 
 <!-- *************************************************************************************** -->
 <H2>Preview</H2>
+
+                    <div id="my_categories"><xsl:text> </xsl:text></div>
+
                     <iframe name="preview" id="iframe" width="98%" height="300">Your browser does not support iframes</iframe> 
 
                     <xsl:variable name="preview"> 
