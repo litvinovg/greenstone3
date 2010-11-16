@@ -11,6 +11,11 @@ import org.w3c.dom.Document;
 // other java stuff
 import java.io.File;
 import java.util.HashMap;
+import java.util.*;
+import java.io.StringReader;
+import org.xml.sax.InputSource;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.log4j.*;
 
@@ -54,7 +59,36 @@ public class SystemAction extends Action {
 	    system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_CONFIGURE);
 	    String info = (String)params.get(GSParams.SYSTEM_SUBSET);
 	    system.setAttribute(GSXML.SYSTEM_SUBSET_ATT, info);
-	
+    }
+    else if(subaction.equals("s")) { // save format statement
+         logger.error("Initiate save");
+         String format_string = (String)params.get("data");
+         logger.error("data="+format_string);
+         Iterator it = params.keySet().iterator();
+         while(it.hasNext())
+         {
+            logger.error("Param: "+it.next());
+         }	
+        Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            InputSource is = new InputSource( new StringReader( format_string ) );
+            Document d = builder.parse( is );
+            page_response.appendChild(d);
+        }
+        catch( Exception ex ) {
+            logger.error("There was an exception "+ex);
+        }
+
+        //Element child = this.doc.createElement("div"); //format_string);
+        //Node text = this.doc.createTextNode(format_string); //"<h1>Hi there and greetings!</h1>");
+        //child.innerHTML = "<h1>Hi there and greetings!</h1>";
+        //child.setNodeValue(format_string);
+        //child.appendChild(text);
+        result.appendChild(page_response);
+        return result;
 	} else {
 	    String name = (String)params.get(GSParams.SYSTEM_MODULE_NAME);
 	    String type = (String)params.get(GSParams.SYSTEM_MODULE_TYPE);

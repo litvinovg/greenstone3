@@ -6,12 +6,46 @@ var initialised_iframe = "false";
 function createFormatStatement()
 {
 
-    var formatStatement = document.getElementById('formatStatement');
-    console.log(formatStatement);
-    if(formatStatement.hasChildNodes())
-    {
-        var formatstring = traverse(formatStatement, "");
-        console.log(formatstring);
+    var formatStatement = document.getElementById('formatStatement').innerHTML;
+    //console.log(formatStatement);
+
+    //var myurl = 'http://localhost:8080/greenstone3/format?a=s&sa=s&t='+formatStatement;
+
+    //jQuery.post( url, [ data ], [ success(data, textStatus, XMLHttpRequest) ], [ dataType ] )
+
+    $.post("http://localhost:8080/greenstone3/format?a=s&sa=s", {data: formatStatement}, function(data) {
+        $('.result').innerHTML = data; //html(data);
+        console.log("Success, we have received data");
+        console.log(data);
+        }, 'html');
+
+/*
+    $.ajax({
+        type: "POST",
+        url: "http://localhost:8080/greenstone3/format?a=s&sa=s",
+        data: formatStatement,
+        processData: false,
+        success: function(data) {
+            //$('.result').html(data);
+            console.log("Success, we have received data");
+            //console.log(data);
+        }
+     });
+*/
+    /*
+    $.ajax({
+        url: myurl,
+        success: function(data) {
+            //$('.result').html(data);
+            console.log("Success, we have received data");
+            console.log(data);
+        }
+    });
+    */
+    //if(formatStatement.hasChildNodes())
+    //{
+        //var formatstring = traverse(formatStatement, "");
+        //console.log(formatstring);
 
         // var children = $(formatStatement).children('div');
         // for(var i=0; i < children.length; i++)
@@ -34,7 +68,7 @@ function createFormatStatement()
             }
         }
         */
-    }
+    //}
 }
 
 function traverse(node, formatstring)

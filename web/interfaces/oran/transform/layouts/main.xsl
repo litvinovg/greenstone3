@@ -261,6 +261,10 @@
                         preview_html = <xsl:text disable-output-escaping="yes">'</xsl:text><xsl:copy-of select="$preview"/><xsl:text disable-output-escaping="yes">';</xsl:text>
                     </script>
 
+                    <div id="result">
+                    Here
+                    </div>
+
 					<div id="gs_footer">
 						<xsl:call-template name="poweredByGS3TextBar"/>
 					</div>

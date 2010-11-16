@@ -235,12 +235,12 @@ Recent changes:
         <div class="gsf_template css_gsf_template block" title="gsf:template">
             <xsl:variable name="mode">
                 <xsl:choose>
-                    <xsl:when test="not(@mode)">MODE=<input class="mode" type="text" name="rawtextinput" size="10" value="vertical"/></xsl:when>
-                    <xsl:otherwise>MODE=<input class="mode" type="text" name="rawtextinput" size="10" value="{@mode}"/></xsl:otherwise>
+                    <xsl:when test="not(@mode)">MODE=<input class="mode" type="text" name="rawtextinput" size="10" value="vertical"></input></xsl:when>
+                    <xsl:otherwise>MODE=<input class="mode" type="text" name="rawtextinput" size="10" value="{@mode}"></input></xsl:otherwise>
                 </xsl:choose>
             </xsl:variable>
     
-            <table class="header"><tbody><tr><td class="header">MATCH=<input class="match" type="text" name="rawtextinput" size="10" value="{@match}"/></td><td class="header"><xsl:copy-of select="$mode"/></td><td class="header"><a href="#" class="minmax ui-icon ui-icon-plusthick" title="Click me to expand">[+]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
+            <table class="header"><tbody><tr><td class="header">MATCH=<input class="match" type="text" name="rawtextinput" size="10" value="{@match}"></input></td><td class="header"><xsl:copy-of select="$mode"/></td><td class="header"><a href="#" class="minmax ui-icon ui-icon-plusthick" title="Click me to expand">[+]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
 
                 <table class="table" border="1">
                 <tbody>
@@ -355,7 +355,7 @@ Recent changes:
         
         <div class="block leaf gsf_text" title="gsf:text">
                 <xsl:variable name="rawtext"><xsl:value-of select="."/></xsl:variable>
-                <table class="header"><tbody><tr><td class="header"><input type="text" name="rawtextinput" size="10" value="{$rawtext}"/></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
+                <table class="header"><tbody><tr><td class="header"><input type="text" name="rawtextinput" size="10" value="{$rawtext}"></input></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
         </div>
     </xsl:template>
 
