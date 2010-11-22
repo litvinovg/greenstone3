@@ -547,7 +547,7 @@ public class TransformingReceptionist extends Receptionist{
     String qualifiedName = "html";
     String publicID = "-//W3C//DTD HTML 4.01 Transitional//EN";
     String systemID = "http://www.w3.org/TR/html4/loose.dtd";
-		
+
     // Try to get the system and public ID from the current skin xsl document
     // otherwise keep the default values.
     Element root = skinAndLibraryDoc.getDocumentElement();

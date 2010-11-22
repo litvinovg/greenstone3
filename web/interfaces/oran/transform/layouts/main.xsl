@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+
 	xmlns:java="http://xml.apache.org/xslt/java"
 	xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
 	xmlns:gslib="http://www.greenstone.org/skinning"
@@ -22,7 +23,8 @@
 
 
 	<!-- the output format for this layout is html -->
-	<xsl:output method="html" omit-xml-declaration="yes"/>  
+    <!-- <xsl:output method="xml" version="1.0" encoding="UTF-8" doctype-public="-//W3C//DTD XHTML 1.1//EN" doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd" indent="yes" omit-xml-declaration="yes"/> -->
+	<xsl:output method="html" omit-xml-declaration="yes"/> 
 
 	<!-- the main layout is defined here -->
 	<xsl:template match="/">
@@ -129,6 +131,7 @@
 
 <!-- Sam2's div code -->
 
+    <script type="text/javascript" src="interfaces/oran/js/innerxhtml.js"><xsl:text> </xsl:text></script>
     <script type="text/javascript" src="interfaces/oran/js/gui_div.js"><xsl:text> </xsl:text></script>
    
     <xsl:call-template name="xml-to-gui-templates">
@@ -176,12 +179,13 @@
     <button id="updateFormatStatement" type="button" onclick="createFormatStatement()">Update Format Statement</button>
 
     <div id="formatStatement">
-
+        <div id="formatRoot">
+    
     <xsl:call-template name="xml-to-gui">
         <xsl:with-param name="node-set" select="//format"/> <!-- [@type='browse']"/>  -->
         <xsl:with-param name="metadataSets" select="//metadataSetList"/> 
     </xsl:call-template> 
-
+        </div>
     </div>
     </td>    
 

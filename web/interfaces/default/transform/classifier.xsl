@@ -60,30 +60,6 @@
       <xsl:with-param name="collName" select="$collName"/>
     </xsl:call-template>      
   
-    <!-- Sam's div code -->
-
-    <!-- <xsl:if test="/page/pageRequest[@name='output']='debug'"> -->
-
-    <xsl:variable name="fmt">
-	<xsl:call-template name="xml-to-string">
-            <xsl:with-param name="node-set" select="//format[@type='browse']"/>
-          </xsl:call-template>
-    </xsl:variable>
-
-    <!-- <xsl:variable name="tok" select="fn:tokenize($fmt,'/s+')"/> -->
-
-      <div id="format">
-        <p>
-	  <b>Format string here</b>
-	  <i>
-	      <xsl:value-of select="$fmt"/>
-	      <!-- <xsl:value-of select="$tok"/> -->
-	  </i>
-        </p>
-      </div>
-    <!-- </xsl:if> -->
-
-  
     <div id="content">
       <xsl:apply-templates select="service/classifierList">
         <xsl:with-param name="collName" select="$collName"/>

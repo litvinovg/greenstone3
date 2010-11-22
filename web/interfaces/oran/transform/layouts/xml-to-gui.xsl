@@ -195,23 +195,23 @@ Recent changes:
                 LINK<select>
                     <xsl:choose>
                         <xsl:when test="@type='document'">
-        	                <option value = "document" selected = "document">Document</option>
+        	                <option value = "document" selected = "selected">Document</option>
 	                        <option value = "classifier">Classifier</option>
                             <option value = "source">Source</option>
                         </xsl:when>
                         <xsl:when test="@type='classifier'">
-	                        <option value = "classifier" selected = "classifier">Classifier</option>
+	                        <option value = "classifier" selected = "selected">Classifier</option>
                             <option value = "document">Document</option>
                             <option value = "source">Source</option>
                         </xsl:when>
                         <xsl:when test="@type='source'">
-                	        <option value = "source" selected = "source">Source</option>
+                	        <option value = "source" selected = "selected">Source</option>
                             <option value ="document">Document</option>
                             <option value ="classifier">Classifier</option>
                         </xsl:when>
                         <xsl:when test="@type='horizontal'">
-                            <option value = "horizontal" selected = "horizontal">Horizontal</option>
-                            <option value = "source" selected = "source">Source</option>
+                            <option value = "horizontal" selected = "selected">Horizontal</option>
+                            <option value = "source">Source</option>
                             <option value ="document">Document</option>
                             <option value ="classifier">Classifier</option>
                         </xsl:when>
@@ -235,12 +235,12 @@ Recent changes:
         <div class="gsf_template css_gsf_template block" title="gsf:template">
             <xsl:variable name="mode">
                 <xsl:choose>
-                    <xsl:when test="not(@mode)">MODE=<input class="mode" type="text" name="rawtextinput" size="10" value="vertical"></input></xsl:when>
-                    <xsl:otherwise>MODE=<input class="mode" type="text" name="rawtextinput" size="10" value="{@mode}"></input></xsl:otherwise>
+                    <xsl:when test="not(@mode)">MODE=<input class="mode" type="text" name="rawtextinput" size="10" value="vertical"><xsl:text></xsl:text></input></xsl:when>
+                    <xsl:otherwise>MODE=<input class="mode" type="text" name="rawtextinput" size="10" value="{@mode}"/></xsl:otherwise>
                 </xsl:choose>
             </xsl:variable>
     
-            <table class="header"><tbody><tr><td class="header">MATCH=<input class="match" type="text" name="rawtextinput" size="10" value="{@match}"></input></td><td class="header"><xsl:copy-of select="$mode"/></td><td class="header"><a href="#" class="minmax ui-icon ui-icon-plusthick" title="Click me to expand">[+]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
+            <table class="header"><tbody><tr><td class="header">MATCH=<input class="match" type="text" name="rawtextinput" size="10" value="{@match}"/></td><td class="header"><xsl:copy-of select="$mode"/></td><td class="header"><a href="#" class="minmax ui-icon ui-icon-plusthick" title="Click me to expand">[+]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td></tr></tbody></table>
 
                 <table class="table" border="1">
                 <tbody>
@@ -253,7 +253,7 @@ Recent changes:
                 </tr>
                 </tbody>
                 </table>
-        </div><br/>
+        </div>
     </xsl:template>
 
     <!-- ********** GSF:SWITCH ********** -->
@@ -311,17 +311,17 @@ Recent changes:
                 ICON<select>
                     <xsl:choose>
                         <xsl:when test="@type='document'">
-                            <option value = "document" selected = "document">Document</option>
+                            <option value = "document" selected = "selected">Document</option>
                             <option value = "classifier">Classifier</option>
                             <option value = "source">Source</option>
                         </xsl:when>
                         <xsl:when test="@type='classifier'">
-                            <option value = "classifier" selected = "classifier">Classifier</option>
+                            <option value = "classifier" selected = "selected">Classifier</option>
                             <option value = "document">Document</option>
                             <option value = "source">Source</option>
                         </xsl:when>
                         <xsl:when test="@type='source'">
-                            <option value = "source" selected = "source">Source</option>
+                            <option value = "source" selected = "selected">Source</option>
                             <option value ="document">Document</option>
                             <option value ="classifier">Classifier</option>
                         </xsl:when>

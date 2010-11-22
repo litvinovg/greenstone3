@@ -17,6 +17,9 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import org.apache.log4j.*;
 
 public class SystemAction extends Action {
@@ -74,12 +77,20 @@ public class SystemAction extends Action {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            InputSource is = new InputSource( new StringReader( format_string ) );
+            String input = "<html><head><title></title></head><body>" + format_string + "</body></html>";
+            InputSource is = new InputSource( new StringReader( input ) );
             Document d = builder.parse( is );
             page_response.appendChild(d);
         }
         catch( Exception ex ) {
             logger.error("There was an exception "+ex);
+            
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw, true);
+            ex.printStackTrace(pw);
+            pw.flush();
+            sw.flush();
+            logger.error(sw.toString());
         }
 
         //Element child = this.doc.createElement("div"); //format_string);

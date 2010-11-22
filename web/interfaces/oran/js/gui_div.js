@@ -6,15 +6,17 @@ var initialised_iframe = "false";
 function createFormatStatement()
 {
 
-    var formatStatement = document.getElementById('formatStatement').innerHTML;
-    //console.log(formatStatement);
+    var formatDiv = document.getElementById('formatStatement');
+    var formatStatement = innerXHTML(formatDiv);
+    console.log(formatStatement);
+
 
     //var myurl = 'http://localhost:8080/greenstone3/format?a=s&sa=s&t='+formatStatement;
 
     //jQuery.post( url, [ data ], [ success(data, textStatus, XMLHttpRequest) ], [ dataType ] )
 
     $.post("http://localhost:8080/greenstone3/format?a=s&sa=s", {data: formatStatement}, function(data) {
-        $('.result').innerHTML = data; //html(data);
+        //$('.result').innerHTML = data; //html(data);
         console.log("Success, we have received data");
         console.log(data);
         }, 'html');

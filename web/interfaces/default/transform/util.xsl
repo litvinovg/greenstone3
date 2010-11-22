@@ -10,8 +10,6 @@
   <xsl:param name="interface_name"/>
   <xsl:param name="library_name"/>
 
-  <xsl:include href="xml-to-string.xsl"/>
-  
   <!-- every pages ................................................. -->
   
   <xsl:variable name="a"><xsl:value-of select="/page/pageRequest/paramList/param[@name='a']/@value"/></xsl:variable>
