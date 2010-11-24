@@ -8,7 +8,7 @@ function createFormatStatement()
 
     var formatDiv = document.getElementById('formatStatement');
     var formatStatement = innerXHTML(formatDiv);
-    console.log(formatStatement);
+    //console.log(formatStatement);
 
 
     //var myurl = 'http://localhost:8080/greenstone3/format?a=s&sa=s&t='+formatStatement;

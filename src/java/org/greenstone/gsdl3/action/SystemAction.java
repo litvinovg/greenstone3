@@ -17,6 +17,12 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import java.io.*;
+import org.xml.sax.*;
+import javax.xml.parsers.SAXParserFactory; 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -25,6 +31,8 @@ import org.apache.log4j.*;
 public class SystemAction extends Action {
     
       static Logger logger = Logger.getLogger(org.greenstone.gsdl3.action.SystemAction.class.getName());
+
+    String tempVal = "";
 
     /** process a request */
     public Node process (Node message_node) {
@@ -67,20 +75,33 @@ public class SystemAction extends Action {
          logger.error("Initiate save");
          String format_string = (String)params.get("data");
          logger.error("data="+format_string);
+
+         //SamParser sam = new SamParser();
+         //String format_statement = sam.parse(input);
+         //logger.error("format string="+format_statement);
+    
+        Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+
          Iterator it = params.keySet().iterator();
          while(it.hasNext())
          {
             logger.error("Param: "+it.next());
          }	
-        Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 
+        //Node text = this.doc.createTextNode(format_string);
+        //page_response.appendChild(text);
+    
+        
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            String input = "<html><head><title></title></head><body>" + format_string + "</body></html>";
+            //String input = "<html><head><title></title></head><body>" + format_string + "</body></html>";
+            String input = format_string;
             InputSource is = new InputSource( new StringReader( input ) );
             Document d = builder.parse( is );
-            page_response.appendChild(d);
+            Element e = d.getDocumentElement();
+            
+            page_response.appendChild(this.doc.importNode(e, true));
         }
         catch( Exception ex ) {
             logger.error("There was an exception "+ex);
@@ -92,7 +113,8 @@ public class SystemAction extends Action {
             sw.flush();
             logger.error(sw.toString());
         }
-
+        
+    
         //Element child = this.doc.createElement("div"); //format_string);
         //Node text = this.doc.createTextNode(format_string); //"<h1>Hi there and greetings!</h1>");
         //child.innerHTML = "<h1>Hi there and greetings!</h1>";
@@ -129,5 +151,65 @@ public class SystemAction extends Action {
 	return result;
 	
     }
+
+    /*
+    public void parse (String message) {
+        //get a factory
+        SAXParserFactory spf = SAXParserFactory.newInstance();
+        try {
+
+            //get a new instance of parser
+            SAXParser sp = spf.newSAXParser();
+            InputSource is = new InputSource( new StringReader( message ) );
+            //parse the file and also register this class for call backs
+            sp.parse(is, new SamParser());
+
+        }catch(SAXException se) {
+            se.printStackTrace();
+        }catch(ParserConfigurationException pce) {
+            pce.printStackTrace();
+        }catch (IOException ie) {
+            ie.printStackTrace();
+        }
+    }
+    */
+
+    //Event Handlers
+/*    public void startElement(String uri, String localName, String qName,
+        Attributes attributes) throws SAXException {
+        //reset
+        logger.error("Start Element: "+qName);
+        //if(qName.equalsIgnoreCase("Template")) {
+            //create a new instance of employee
+            //tempEmp = new Employee();
+            //tempEmp.setType(attributes.getValue("type"));
+            
+        //}
+    }
+
+
+    public void characters(char[] ch, int start, int length) throws SAXException {
+        tempVal = new String(ch,start,length);
+    }
+
+    public void endElement(String uri, String localName,
+        String qName) throws SAXException {
+
+        logger.error("Characters: "+tempVal);
+        logger.error("End Element: "+qName);
+        /*
+        if(qName.equalsIgnoreCase("Employee")) {
+            //add it to the list
+            myEmpls.add(tempEmp);
+
+        }else if (qName.equalsIgnoreCase("Name")) {
+            tempEmp.setName(tempVal);
+        }else if (qName.equalsIgnoreCase("Id")) {
+            tempEmp.setId(Integer.parseInt(tempVal));
+        }else if (qName.equalsIgnoreCase("Age")) {
+            tempEmp.setAge(Integer.parseInt(tempVal));
+        } */
+
+    //}
 
 }

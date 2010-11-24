@@ -127,7 +127,7 @@ Recent changes:
 
         <xsl:choose>
             <xsl:when test="$current = $meta">
-                <xsl:text disable-output-escaping="yes">&lt;option value="</xsl:text><xsl:value-of select="$meta"/><xsl:text disable-output-escaping="yes">" selected&gt;</xsl:text><xsl:value-of select="$meta"/><xsl:text disable-output-escaping="yes">&lt;/option&gt;</xsl:text>
+                <xsl:text disable-output-escaping="yes">&lt;option value="</xsl:text><xsl:value-of select="$meta"/><xsl:text disable-output-escaping="yes">" selected="selected"&gt;</xsl:text><xsl:value-of select="$meta"/><xsl:text disable-output-escaping="yes">&lt;/option&gt;</xsl:text>
                 <!-- <option value ="{$meta}" selected="selected"><xsl:value-of select="$meta"/></option> -->
             </xsl:when>
             <xsl:otherwise>
