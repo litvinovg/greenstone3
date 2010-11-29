@@ -355,7 +355,7 @@ Recent changes:
         
         <div class="block leaf gsf_text" title="gsf:text">
                 <xsl:variable name="rawtext"><xsl:value-of select="."/></xsl:variable>
-                <table class="header"><tbody><tr><td class="header"><input type="text" name="rawtextinput" size="10" value="{$rawtext}"></input></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
+                <table class="header"><tbody><tr><td class="header"><input class="text" type="text" name="rawtextinput" size="10" value="{$rawtext}"></input></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
         </div>
     </xsl:template>
 
@@ -389,6 +389,10 @@ Recent changes:
         <xsl:param name="metadataSets"/>
 
         <!-- <xsl:text>&lt;br/&gt;</xsl:text> <br/> -->
+        <div class="block leaf gsf_text" title="gsf:text">
+                <xsl:variable name="rawtext"><xsl:text disable-output-escaping='no'>&lt;br/&gt;</xsl:text></xsl:variable>
+                <table class="header"><tbody><tr><td class="header"><input class="text" type="text" name="rawtextinput" size="10" value="{$rawtext}"></input></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
+        </div>
     
         <xsl:apply-templates mode="xml-to-gui">
             <xsl:with-param name="depth" select="$depth"/>
@@ -396,6 +400,28 @@ Recent changes:
         </xsl:apply-templates>
     </xsl:template>
 
+    <!-- ********** Italics ********** -->
+    <xsl:template match="i" mode="xml-to-gui">
+        <xsl:param name="depth"/>
+        <xsl:param name="metadataSets"/>
+
+        <!-- <xsl:text>&lt;br/&gt;</xsl:text> <br/> -->
+        <div class="block leaf gsf_text" title="gsf:text">
+                <xsl:variable name="rawtext"><xsl:text disable-output-escaping='no'>&lt;i&gt;</xsl:text></xsl:variable>
+                <table class="header"><tbody><tr><td class="header"><input class="text" type="text" name="rawtextinput" size="10" value="{$rawtext}"></input></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
+        </div>
+    
+        <xsl:apply-templates mode="xml-to-gui">
+            <xsl:with-param name="depth" select="$depth"/>
+            <xsl:with-param name="metadataSets" select="$metadataSets"/>
+        </xsl:apply-templates>
+
+        <div class="block leaf gsf_text" title="gsf:text">
+                <xsl:variable name="rawtext"><xsl:text disable-output-escaping='no'>&lt;/i&gt;</xsl:text></xsl:variable>
+                <table class="header"><tbody><tr><td class="header"><input class="text" type="text" name="rawtextinput" size="10" value="{$rawtext}"></input></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
+        </div>
+
+    </xsl:template>
 
     <!-- ********** MATCH ALL ********** -->
     <xsl:template match="*" mode="xml-to-gui">
