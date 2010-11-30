@@ -20,6 +20,9 @@
     </action>
     <action name='pr' class='ProcessAction' xslt='process.xsl'/>
     <action name='s' class='SystemAction' xslt='system.xsl'/>
+
+    <action name='f' class='FormatAction' xslt='formatString.xsl'/>
+
     <action name='g' class='GeneralAction'>
       <subaction name="authen" xslt='pages/authen.xsl'/>
       <subaction name="berry" xslt='pages/berry.xsl'/>

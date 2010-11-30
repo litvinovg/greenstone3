@@ -390,8 +390,8 @@ Recent changes:
 
         <!-- <xsl:text>&lt;br/&gt;</xsl:text> <br/> -->
         <div class="block leaf gsf_text" title="gsf:text">
-                <xsl:variable name="rawtext"><xsl:text disable-output-escaping='no'>&lt;br/&gt;</xsl:text></xsl:variable>
-                <table class="header"><tbody><tr><td class="header"><input class="text" type="text" name="rawtextinput" size="10" value="{$rawtext}"></input></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
+                <!-- <xsl:variable name="rawtext"><xsl:text disable-output-escaping='no'>br/</xsl:text></xsl:variable> -->
+                <table class="header"><tbody><tr><td class="header">&lt;<input class="text" type="text" name="rawtextinput" size="10" value="br/"></input>&gt;</td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
         </div>
     
         <xsl:apply-templates mode="xml-to-gui">
@@ -407,8 +407,8 @@ Recent changes:
 
         <!-- <xsl:text>&lt;br/&gt;</xsl:text> <br/> -->
         <div class="block leaf gsf_text" title="gsf:text">
-                <xsl:variable name="rawtext"><xsl:text disable-output-escaping='no'>&lt;i&gt;</xsl:text></xsl:variable>
-                <table class="header"><tbody><tr><td class="header"><input class="text" type="text" name="rawtextinput" size="10" value="{$rawtext}"></input></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
+                <!-- <xsl:variable name="rawtext"><xsl:text disable-output-escaping='no'>i</xsl:text></xsl:variable> -->
+                <table class="header"><tbody><tr><td class="header">&lt;<input class="text" type="text" name="rawtextinput" size="10" value="i"></input>&gt;</td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
         </div>
     
         <xsl:apply-templates mode="xml-to-gui">
@@ -417,8 +417,8 @@ Recent changes:
         </xsl:apply-templates>
 
         <div class="block leaf gsf_text" title="gsf:text">
-                <xsl:variable name="rawtext"><xsl:text disable-output-escaping='no'>&lt;/i&gt;</xsl:text></xsl:variable>
-                <table class="header"><tbody><tr><td class="header"><input class="text" type="text" name="rawtextinput" size="10" value="{$rawtext}"></input></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
+                <xsl:variable name="rawtext"><xsl:text disable-output-escaping='no'>/i</xsl:text></xsl:variable>
+                <table class="header"><tbody><tr><td class="header">&lt;<input class="text" type="text" name="rawtextinput" size="10" value="{$rawtext}"></input>&gt;</td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
         </div>
 
     </xsl:template>

@@ -15,7 +15,9 @@ function createFormatStatement()
 
     //jQuery.post( url, [ data ], [ success(data, textStatus, XMLHttpRequest) ], [ dataType ] )
 
-    $.post("http://localhost:8080/greenstone3/format?a=s&sa=s", {data: formatStatement}, function(data) {
+    // How do I find out my collection name?
+
+    $.post("http://localhost:8080/greenstone3/format?a=f", {data: formatStatement}, function(data) {
         //$('.result').innerHTML = data; //html(data);
         console.log("Success, we have received data");
         console.log(data);

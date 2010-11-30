@@ -74,6 +74,7 @@ public class GSXML {
   public static final String FORMAT_ELEM = "format"; // config files use format - should we use this instead of stylesheet??
   public static final String TERM_ELEM = "term";
   public static final String SYSTEM_ELEM = "system";
+  public static final String FORMAT_STRING_ELEM = "formatString";
   
   //config file elems
   public static final String COLLECTION_CONFIG_ELEM = "collectionConfig";
@@ -197,6 +198,8 @@ public class GSXML {
   public static final String REQUEST_TYPE_FORMAT = "format";
   // modify the requests
   public static final String REQUEST_TYPE_MESSAGING = "messaging";
+  // save the format string
+  public static final String REQUEST_TYPE_FORMAT_STRING = "formatString";
   
   // service types
   public static final String SERVICE_TYPE_QUERY = "query";

@@ -28,9 +28,9 @@ import java.io.StringWriter;
 
 import org.apache.log4j.*;
 
-public class SystemAction extends Action {
+public class FormatAction extends Action {
     
-      static Logger logger = Logger.getLogger(org.greenstone.gsdl3.action.SystemAction.class.getName());
+      static Logger logger = Logger.getLogger(org.greenstone.gsdl3.action.FormatAction.class.getName());
 
     String tempVal = "";
 
@@ -51,7 +51,7 @@ public class SystemAction extends Action {
 
 	Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
 	
-	String coll = (String)params.get(GSParams.SYSTEM_CLUSTER);
+	String coll = (String)params.get(GSParams.COLLECTION); //SYSTEM_CLUSTER);
 
 	String to = "";
 	if (coll!=null && !coll.equals("")) {
@@ -59,40 +59,50 @@ public class SystemAction extends Action {
 	}
 
 	Element mr_request_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-	Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_SYSTEM, to, lang, uid);
+	Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT_STRING, to, lang, uid);
 	mr_request_message.appendChild(mr_request);
 	
-	Element system = this.doc.createElement(GSXML.SYSTEM_ELEM);
-	mr_request.appendChild(system);
-	
-	// will need to change the following if can do more than one system request at once
-	if (subaction.equals("c")) { // configure
-	    system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_CONFIGURE);
-	    String info = (String)params.get(GSParams.SYSTEM_SUBSET);
-	    system.setAttribute(GSXML.SYSTEM_SUBSET_ATT, info);
+	Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
+	mr_request.appendChild(format);
+
+    String format_string = (String)params.get("data");
+    
+    Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+
+    Iterator it = params.keySet().iterator();
+    while(it.hasNext())
+    {
+        logger.error("Param: "+it.next());
+    }      
+
+    try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            //String input = "<html><head><title></title></head><body>" + format_string + "</body></html>";
+            String input = format_string;
+            InputSource is = new InputSource( new StringReader( input ) );
+            Document d = builder.parse( is );
+            Element e = d.getDocumentElement();
+            
+            page_response.appendChild(this.doc.importNode(e, true));
+    } catch( Exception ex ) {
+            logger.error("There was an exception "+ex);
+            
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw, true);
+            ex.printStackTrace(pw);
+            pw.flush();
+            sw.flush();
+            logger.error(sw.toString());
     }
-	else {
-	    String name = (String)params.get(GSParams.SYSTEM_MODULE_NAME);
-	    String type = (String)params.get(GSParams.SYSTEM_MODULE_TYPE);
 
-	    system.setAttribute(GSXML.SYSTEM_MODULE_NAME_ATT, name);
-	    system.setAttribute(GSXML.SYSTEM_MODULE_TYPE_ATT, type);
-	    
-	    if (subaction.equals("d")) { // delete
-		system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_DEACTIVATE);
 
-	    } else if (subaction.equals("a")) { // add
-		system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_ACTIVATE);
-	    } else {
-	    // create the default response
-	    // for now just have an error
-	    logger.error("bad subaction type");
-	    Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
-	    result.appendChild(page_response);
-	
-	    return result;
-	    }
-	}
+    // Call XSLT to transform document to xml format string
+    this.transformer = new XMLTransformer();
+
+    // not sure what to do here - some code from Transforming Receptionist
+
+    // create a mesage to send to the collection object via the message router
 
 	Node response_message = this.mr.process(mr_request_message);
 	
