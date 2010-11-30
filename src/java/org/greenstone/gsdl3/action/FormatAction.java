@@ -30,7 +30,8 @@ import org.apache.log4j.*;
 
 public class FormatAction extends Action {
     
-      static Logger logger = Logger.getLogger(org.greenstone.gsdl3.action.FormatAction.class.getName());
+    static Logger logger = Logger.getLogger(org.greenstone.gsdl3.action.FormatAction.class.getName());
+    XMLTransformer transformer = null;
 
     String tempVal = "";
 
