@@ -658,6 +658,7 @@ public class TransformingReceptionist extends Receptionist{
     if (stylesheet==null) {
       logger.info(" cant find stylesheet for "+name);
     }
+    logger.error("stylesheet:"+stylesheet);
     return stylesheet;
   }
 

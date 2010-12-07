@@ -508,7 +508,22 @@ that is passed to teh service  - eg used for coll config files for Collection
 	    }
 	    return response;
 	}
-	
+
+    if (type.equals(GSXML.REQUEST_TYPE_FORMAT_STRING)) {
+        logger.error("Received format string request");
+        String service = request.getAttribute("service");
+        logger.error("Service is " + service);
+        String classifier = null;
+        if(service.equals("ClassifierBrowse"))
+        {
+            classifier = request.getAttribute("classifier");
+            logger.error("Classifier is " + classifier);
+        }
+        Element format_element = (Element) GSXML.getChildByTagName(request, GSXML.FORMAT_STRING_ELEM);
+        String format_string = GSXML.getNodeText(format_element);
+        logger.error("Format string: " + format_string);
+        logger.error("Config file location = " + GSFile.collectionConfigFile(this.site_home, this.cluster_name));
+	}
 	if (type.equals(GSXML.REQUEST_TYPE_SYSTEM)) {
 	    response = processSystemRequest(request);
 	} else { // unknown type

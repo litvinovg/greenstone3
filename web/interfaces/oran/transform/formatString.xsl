@@ -1,8 +1,13 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-  xmlns:java="http://xml.apache.org/xslt/java"
-  extension-element-prefixes="java">
+  xmlns:xslt="http://www.w3.org/1999/XSL/Transform"
+  xmlns:gslib="http://www.greenstone.org/XSL/Library"
+  xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
+  xmlns:util="http://org.greenstone.gsdl3.util.XSLTUtil"
+  exclude-result-prefixes="util gslib gsf xslt">
+
+  <!-- extension-element-prefixes="java"> -->
 
   <xsl:strip-space elements="*"/>
   
@@ -240,26 +245,27 @@
 
   <!-- Main page generation -->
 
-  <xsl:template match="page">
-    <html>
+  <xsl:template match="/">
+    <!-- <html>
       <head>
 	<title>
 	  <xsl:call-template name="pageTitle"/><xsl:text> </xsl:text>
 	</title>
       </head>
       <body>
-        <h2> This should be the format string (unmodified and html version) </h2>
+        <h2> This should be the format string (unmodified and html version) </h2> -->
         <!-- <xsl:value-of select="/page/pageResponse" disable-output-escaping="yes"/> -->
         <xsl:call-template name="xml">
-            <xsl:with-param name="fmt" select="/page/pageResponse"/>
+            <xsl:with-param name="fmt" select="."/>
         </xsl:call-template><xsl:text> </xsl:text>
         <!-- <xsl:apply-templates select="/page/pageResponse" mode="xml"/> -->
-      </body>
-    </html>
+      <!-- </body>
+    </html> -->
   </xsl:template>
   
+  <!--
   <xsl:template name="pageTitle">
     <xsl:value-of select="java:org.greenstone.gsdl3.util.XSLTUtil.getInterfaceText($interface_name, /page/@lang, 'gsdl')"/>
-  </xsl:template>
+  </xsl:template> -->
   
 </xsl:stylesheet>

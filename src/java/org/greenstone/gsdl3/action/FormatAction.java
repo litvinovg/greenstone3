@@ -2,6 +2,7 @@ package org.greenstone.gsdl3.action;
 
 import org.greenstone.gsdl3.core.ModuleInterface;
 import org.greenstone.gsdl3.util.*;
+import org.greenstone.util.GlobalProperties;
 
 // XML classes
 import org.w3c.dom.Node; 
@@ -53,6 +54,14 @@ public class FormatAction extends Action {
 	Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
 	
 	String coll = (String)params.get(GSParams.COLLECTION); //SYSTEM_CLUSTER);
+    String service = (String)params.get(GSParams.SERVICE);
+    String classifier = (String)params.get("cl");
+
+
+    logger.error("Collection="+coll);
+    logger.error("Service="+service);
+    logger.error("Classifier="+classifier);
+
 
 	String to = "";
 	if (coll!=null && !coll.equals("")) {
@@ -61,20 +70,25 @@ public class FormatAction extends Action {
 
 	Element mr_request_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 	Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT_STRING, to, lang, uid);
+
+    request.setAttribute("service", service);
+    if(classifier != null)
+        request.setAttribute("classifier", classifier);
+
 	mr_request_message.appendChild(mr_request);
 	
-	Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
-	mr_request.appendChild(format);
+	//Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
+	//mr_request.appendChild(format);
 
     String format_string = (String)params.get("data");
     
     Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 
     Iterator it = params.keySet().iterator();
-    while(it.hasNext())
-    {
-        logger.error("Param: "+it.next());
-    }      
+    //while(it.hasNext())
+    //{
+    //    logger.error("Param: "+it.next());
+    //}      
 
     try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -82,10 +96,48 @@ public class FormatAction extends Action {
             //String input = "<html><head><title></title></head><body>" + format_string + "</body></html>";
             String input = format_string;
             InputSource is = new InputSource( new StringReader( input ) );
-            Document d = builder.parse( is );
-            Element e = d.getDocumentElement();
-            
-            page_response.appendChild(this.doc.importNode(e, true));
+            Document d = (Document) builder.parse( is );
+            //Element e = d.getDocumentElement();
+            //Node d2 = this.doc.importNode(e,true); 
+
+            //Document format_doc = this.converter.newDOM();
+            //doc.appendChild(d2);
+
+            //File interface_config_file = new File(GSFile.interfaceConfigFile(GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), (String)this.config_params.get(GSConstants.INTERFACE_NAME))));
+            //if (!interface_config_file.exists()) {
+            //  logger.error(" interface config file: "+interface_config_file.getPath()+" not found!");
+            //}
+            //Document config_doc = this.converter.getDOM(interface_config_file, "utf-8");
+            //if (config_doc == null) {
+            //  logger.error(" could not parse interface config file: "+interface_config_file.getPath());
+            //}
+        
+            //Element config_elem = config_doc.getDocumentElement();
+            //String base_interface = config_elem.getAttribute("baseInterface");
+
+
+            // Call XSLT to transform document to xml format string
+            XMLTransformer transformer = new XMLTransformer();
+            //String stylesheet = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String)this.config_params.get(GSConstants.SITE_NAME), coll, (String)this.config_params.get(GSConstants.INTERFACE_NAME), "oran", "FormatAction");
+            //logger.error(stylesheet);
+            Document style_doc = this.converter.getDOM(new File("/home/sam/greenstone3/web/interfaces/oran/transform/formatString.xsl"), "UTF-8");
+
+            if(style_doc == null)
+                logger.error("style_doc is null");
+
+            // not sure what to do here - some code from Transforming Receptionist
+            String transformed = transformer.transformToString(style_doc, d);
+            //Node transformed = transformer.transform(style_doc, d);
+           
+            Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
+            GSXML.setNodeText(format, transformed);
+            //format.appendChild(this.doc.createTextNode(transformed));
+            //format.setNodeValue(transformed);
+            mr_request.appendChild(format); 
+            logger.error("Transformed: "+transformed);
+
+
+            //page_response.appendChild(this.doc.importNode(e, true));
     } catch( Exception ex ) {
             logger.error("There was an exception "+ex);
             
@@ -99,9 +151,10 @@ public class FormatAction extends Action {
 
 
     // Call XSLT to transform document to xml format string
-    this.transformer = new XMLTransformer();
+    //XMLTransformer transformer = new XMLTransformer();
 
     // not sure what to do here - some code from Transforming Receptionist
+    //transformer.transformToString(Document stylesheet, Document source);
 
     // create a mesage to send to the collection object via the message router
 

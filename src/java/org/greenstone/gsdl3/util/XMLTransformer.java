@@ -97,7 +97,7 @@ public class XMLTransformer {
 	    this.t_factory = org.apache.xalan.processor.TransformerFactoryImpl.newInstance();
 	    //this.t_factory = TransformerFactory.newInstance();
 	} catch (Exception e) {
-	    logger.error("exception "+e.getMessage());
+	    logger.error("exception creating t_factory "+e.getMessage());
 	}
     }
 

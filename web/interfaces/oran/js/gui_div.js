@@ -10,14 +10,44 @@ function createFormatStatement()
     var formatStatement = innerXHTML(formatDiv);
     //console.log(formatStatement);
 
+    // find collection name
+
+    var myurl = document.URL;
+    console.log(myurl);
+    var first = myurl.indexOf("&c")+3;
+    var last = myurl.indexOf("&", first);
+    
+    var collection_name = myurl.substring(first,last); ///&c=(.*)&/.exec(myurl);
+    console.log(collection_name);
+
+    first = myurl.indexOf("&s")+3;
+    last = myurl.indexOf("&", first);
+
+    var service_name = myurl.substring(first,last);
+    console.log(service_name);
+
+    var classifier_name = null;
+
+    if(service_name == "ClassifierBrowse")
+    {
+        first = myurl.indexOf("&cl")+4;
+        last = myurl.indexOf("&", first);
+
+        classifier_name = myurl.substring(first,last);
+        console.log(classifier_name);
+    }
 
     //var myurl = 'http://localhost:8080/greenstone3/format?a=s&sa=s&t='+formatStatement;
 
     //jQuery.post( url, [ data ], [ success(data, textStatus, XMLHttpRequest) ], [ dataType ] )
 
     // How do I find out my collection name?
+    var post_url = "http://localhost:8080/greenstone3/format?a=f&c=" + collection_name +"&s=" + service_name;
 
-    $.post("http://localhost:8080/greenstone3/format?a=f", {data: formatStatement}, function(data) {
+    if(classifier_name != null)
+        post_url = post_url + "&cl=" + classifier_name;
+
+    $.post(post_url, {data: formatStatement}, function(data) {
         //$('.result').innerHTML = data; //html(data);
         console.log("Success, we have received data");
         console.log(data);

@@ -233,9 +233,9 @@ public class Receptionist implements ModuleInterface {
 	Node resulting_page = postProcessPage(page);
 
 	logger.debug("receptionist returned response");
-	logger.error("receptionist returned response");
+	//logger.error("receptionist returned response");
 	logger.debug(this.converter.getString(resulting_page));
-	logger.error(this.converter.getString(resulting_page));
+	//logger.error(this.converter.getString(resulting_page));
 //    logger.info("receptionist returned response");
 //    logger.info(this.converter.getString(resulting_page));
 
