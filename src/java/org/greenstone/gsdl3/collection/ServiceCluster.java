@@ -31,6 +31,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element; 
 import org.w3c.dom.NodeList; 
 
+import java.io.*;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -523,7 +524,66 @@ that is passed to teh service  - eg used for coll config files for Collection
         String format_string = GSXML.getNodeText(format_element);
         logger.error("Format string: " + format_string);
         logger.error("Config file location = " + GSFile.collectionConfigFile(this.site_home, this.cluster_name));
-	}
+
+        // check for version file
+
+        String directory = new File(GSFile.collectionConfigFile(this.site_home, this.cluster_name)).getParent() + "/";
+        logger.error("Directory is " + directory);
+
+        String version_filename = "";
+
+        if(service.equals("ClassifierBrowse"))
+            version_filename = directory + "browse_"+classifier+"_format_statement_version.txt";
+        else
+            version_filename = directory + "query_format_statement_version.txt";
+
+        File version_file = new File(version_filename);
+        logger.error("Version filename is " + version_filename);
+        String version_number = "1";
+
+        try{
+
+            if(version_file.exists())
+            {
+                // Read version
+                 BufferedReader reader = new BufferedReader(new FileReader(version_filename));
+                 version_number = reader.readLine();
+                 int aInt = Integer.parseInt(version_number) + 1;
+                 version_number = Integer.toString(aInt);
+                 reader.close();
+            }
+            else{
+                // Create
+                version_file.createNewFile(); 
+                // write 1 to file
+                BufferedWriter writer = new BufferedWriter(new FileWriter(version_filename));
+                writer.write(version_number);
+                writer.close();
+            }
+
+            // Write version file
+            String format_statement_filename = "";
+
+            if(service.equals("ClassifierBrowse"))
+                format_statement_filename = directory + "browse_"+classifier+"_format_statement_v" + version_number + ".txt"; 
+            else
+                format_statement_filename = directory + "query_format_statement_v" + version_number + ".txt";
+
+            logger.error("Format statement filename is " + format_statement_filename);
+
+            BufferedWriter writer = new BufferedWriter(new FileWriter(format_statement_filename));
+            writer.write(format_string);
+            writer.close();
+
+            // Update version number
+
+        } catch (IOException e) {
+            logger.error("IO Exception "+e);
+            //System.exit(1);
+        }
+
+
+    }
 	if (type.equals(GSXML.REQUEST_TYPE_SYSTEM)) {
 	    response = processSystemRequest(request);
 	} else { // unknown type
