@@ -1914,8 +1914,26 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="flax-resources"/></exec> 
     <exec executable="svn"><arg value="checkout"/><arg value="${flax.checkout.path}/lib"/> 
       <arg value="flax-lib"/></exec> 
-    <move file="${web.home}/WEB-INF/web.xml" tofile="${web.home}/WEB-INF/web.xml.greenstone3backup"/>
     <antcall target="flax-copy-files" />
+  </target>
+  
+  <target name="flax-copy-files" description="copy some flax files into the appropriate greenstone3 directories">
+    <echo>copying flax files ...</echo>
+    <copy file="${web.home}/WEB-INF/classes/flax/web.xml" todir="${web.home}/WEB-INF" overwrite="true" />
+    <!-- A configuration file containing web service binding information for the axis engine -->
+    <copy file="${web.home}/WEB-INF/classes/flax/server-config.wsdd" todir="${web.home}/WEB-INF" overwrite="true" />
+    <!-- A static web service wsdl file which is queried by soap client. The reason this file is used (instead of the dynamically generated version) is in case any redirects are used in the Apache configuration (e.g., flax.nzdl.org:80 redirects to harakeke:8080) -->
+    <copy file="${basedir}/flax-resources/FlaxWebService.wsdl" tofile="${web.home}/FlaxWebService.wsdl" filtering="true" overwrite="true">
+    	<filterset>
+            <filter token="flaxpublicserver" value="${tomcat.server}"/>
+            <filter token="flaxpublicport" value="${tomcat.port}"/>
+    	</filterset>	
+    </copy>
+    <copy todir="${web.home}/WEB-INF/lib">
+    	<fileset dir="${basedir}/flax-lib">
+            <include="*.jar"/>
+    	</fileset>	
+    </copy>
   </target>
 
   <target name="update-flax" description="update flax from repository">
@@ -1935,22 +1953,6 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <exec executable="svn"><arg value="update"/>
       <arg value="flax-lib"/></exec> 
     <antcall target="flax-copy-files" />
-  </target>
-  
-  <target name="flax-copy-files" description="copy some flax files into the appropriate greenstone3 directories">
-    <echo>copying flax files ...</echo>
-    <copy file="${web.home}/WEB-INF/classes/flax/web.xml" todir="${web.home}/WEB-INF" overwrite="true" />
-    <!-- A configuration file containing web service binding information for the axis engine -->
-    <copy file="${web.home}/WEB-INF/classes/flax/server-config.wsdd" todir="${web.home}/WEB-INF" overwrite="true" />
-    <!-- A static web service wsdl file which is queried by soap client. The reason this file is used (instead of the dynamically generated version) is in case any redirects are used in the Apache configuration (e.g., flax.nzdl.org:80 redirects to harakeke:8080) -->
-    <copy file="${basedir}/flax-resources/FlaxWebService.wsdl" tofile="${web.home}/FlaxWebService.wsdl" filtering="true" overwrite="true">
-    	<filterset>
-            <filter token="flaxpublicserver" value="${tomcat.server}"/>
-            <filter token="flaxpublicport" value="${tomcat.port}"/>
-    	</filterset>	
-    </copy>
-    <copy file="${basedir}/flax-lib/opennlp-tools-1.3.0.jar" todir="${web.home}/WEB-INF/lib" overwrite="true" />    
-    <copy file="${basedir}/flax-lib/cos.jar" todir="${web.home}/WEB-INF/lib" overwrite="true" />    
   </target>
 
 
