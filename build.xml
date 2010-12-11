@@ -1931,7 +1931,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </copy>
     <copy todir="${web.home}/WEB-INF/lib">
     	<fileset dir="${basedir}/flax-lib">
-            <include="*.jar"/>
+            <include name="*.jar"/>
     	</fileset>	
     </copy>
   </target>
