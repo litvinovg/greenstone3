@@ -29,6 +29,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element; 
 import org.w3c.dom.NodeList; 
 
+import java.io.*;
 import java.io.File;
 import java.util.HashMap;
 
@@ -297,6 +298,205 @@ public class Collection
 	logger.error("Collection: cant process system request, configure "+subset);
 	return false;
     } 
+
+ /** handles requests made to the ServiceCluster itself 
+     *
+     * @param req - the request Element- <request>
+     * @return the result Element - should be <response>
+     */
+    protected Element processMessage(Element request) {
+
+    Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+    response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
+    String type = request.getAttribute(GSXML.TYPE_ATT);
+    String lang = request.getAttribute(GSXML.LANG_ATT);
+    response.setAttribute(GSXML.TYPE_ATT, type);
+
+    if (type.equals(GSXML.REQUEST_TYPE_FORMAT_STRING)) {
+        logger.error("Received format string request");
+
+        String subaction = request.getAttribute("subaction");
+        logger.error("Subaction is " + subaction);
+
+        String service = request.getAttribute("service");
+        logger.error("Service is " + service);
+
+        String classifier = null;
+        if(service.equals("ClassifierBrowse"))
+        {
+            classifier = request.getAttribute("classifier");
+            logger.error("Classifier is " + classifier);
+        }
+
+        Element format_element = (Element) GSXML.getChildByTagName(request, GSXML.FORMAT_STRING_ELEM);
+        //String format_string = GSXML.getNodeText(format_element);
+        Element format_statement = (Element) format_element.getFirstChild();
+
+        //logger.error("Format string: " + format_string);
+        logger.error("Config file location = " + GSFile.collectionConfigFile(this.site_home, this.cluster_name));
+
+        // check for version file
+
+        String directory = new File(GSFile.collectionConfigFile(this.site_home, this.cluster_name)).getParent() + File.separator;
+        logger.error("Directory is " + directory);
+
+        String version_filename = "";
+        if(service.equals("ClassifierBrowse"))
+            version_filename = directory + "browse_"+classifier+"_format_statement_version.txt";
+        else
+            version_filename = directory + "query_format_statement_version.txt";
+
+        File version_file = new File(version_filename);
+        logger.error("Version filename is " + version_filename);
+
+
+        if(subaction.equals("update"))
+        {
+            String version_number = "1";
+            BufferedWriter writer;
+
+            try{
+
+                if(version_file.exists())
+                {
+                    // Read version
+                    BufferedReader reader = new BufferedReader(new FileReader(version_filename));
+                    version_number = reader.readLine();
+                    int aInt = Integer.parseInt(version_number) + 1;
+                    version_number = Integer.toString(aInt);
+                    reader.close();
+                }
+                else{
+                    // Create
+                    version_file.createNewFile();
+                    writer = new BufferedWriter(new FileWriter(version_filename));
+                    writer.write(version_number);
+                    writer.close();
+                }
+
+                // Write version file
+                String format_statement_filename = "";
+
+                if(service.equals("ClassifierBrowse"))
+                    format_statement_filename = directory + "browse_"+classifier+"_format_statement_v" + version_number + ".txt";
+                else
+                    format_statement_filename = directory + "query_format_statement_v" + version_number + ".txt";
+
+                logger.error("Format statement filename is " + format_statement_filename);
+
+                // Write format statement
+                String format_string = GSXML.xmlNodeToString(format_statement);
+                writer = new BufferedWriter(new FileWriter(format_statement_filename));
+                writer.write(format_string);
+                writer.close();
+
+                // Update version number
+                writer = new BufferedWriter(new FileWriter(version_filename));
+                writer.write(version_number);
+                writer.close();
+
+            } catch (IOException e) {
+                logger.error("IO Exception "+e);
+            }
+        }
+
+        if(subaction.equals("save"))
+        {
+            logger.error("SAVE format statement");
+
+            // open collectionConfig.xml and read in to w3 Document
+            String collection_config = directory + "collectionConfig.xml";
+            Document config = this.converter.getDOM(new File(collection_config), "UTF-8");
+           
+            //String tag_name = "";
+            int k;
+            int index;
+            Element elem;
+            Node current_node = GSXML.getChildByTagName(config, "CollectionConfig");
+            NodeList current_node_list;
+
+            if(service.equals("ClassifierBrowse"))
+            {
+                //tag_name = "browse";
+                // if CLX then need to look in <classifier> X then <format>
+                // default is <browse><format>
+
+                current_node = GSXML.getChildByTagName(current_node, "browse");
+
+                // find CLX
+                if(classifier != null)
+                {
+                    current_node_list = GSXML.getChildrenByTagName(current_node, "classifier");
+                    index = Integer.parseInt(classifier.substring(2)) - 1;
+                    // index should be given by X-1
+                    current_node = current_node_list.item(index);
+                    current_node = GSXML.getChildByTagName(current_node, "format");
+                }
+                else{
+                    current_node = GSXML.getChildByTagName(current_node, "format");
+                }
+            }
+            else
+            {
+                // look in <format> with no attributes
+            
+                current_node_list = GSXML.getChildrenByTagName(current_node, "search");
+                for(k=0; k<current_node_list.getLength(); k++) 
+                {
+                    current_node = current_node_list.item(k);
+                    // if current_node has no attributes then break
+                    elem = (Element) current_node;
+                    if(elem.hasAttribute("name")==false)
+                        break;
+                }
+            }
+
+            // Current_node should be a format tag
+            elem = (Element) current_node;
+
+            logger.error("Current_node = " + elem.getNodeName());
+
+            // seems we want to remove current child/ren and replace with format_statement's child/ren?
+
+            // remove existing
+            current_node_list = elem.getChildNodes();
+            for(k=0; k<current_node_list.getLength(); k++)
+            {
+                current_node = elem.removeChild(current_node_list.item(k));
+            }
+
+            // append new
+            current_node_list = format_statement.getChildNodes();
+            for(k=0; k<current_node_list.getLength(); k++)
+            {
+                current_node = elem.appendChild(current_node_list.item(k));
+            }
+
+            //String text = GSXML.getNodeText(elem);
+            //logger.error(text);
+            //text = text.replaceAll("_httpsite_", http_site);
+            //text = text.replaceAll("_httpcollection_", http_collection);
+            //GSXML.setNodeText(d, text);
+
+            // Now convert config document to string for writing to file
+            String new_config = GSXML.xmlNodeToString(config);
+
+            // Write to file (not original! for now)
+            try{
+                BufferedWriter writer = new BufferedWriter(new FileWriter(collection_config+".new"));
+                writer.write(new_config);
+                writer.close();
+            } catch (IOException e) {
+                logger.error("IO Exception "+e);
+            }
+        }
+    }
+    else { // unknown type
+        super.processMessage(request);
+
+    }
+    return response;
+    }
 
 }
 

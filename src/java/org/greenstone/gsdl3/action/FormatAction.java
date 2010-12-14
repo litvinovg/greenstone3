@@ -54,11 +54,13 @@ public class FormatAction extends Action {
 	Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
 	
 	String coll = (String)params.get(GSParams.COLLECTION); //SYSTEM_CLUSTER);
+    //String subaction = (String)params.get(GSParams.SUBACTION);
     String service = (String)params.get(GSParams.SERVICE);
     String classifier = (String)params.get("cl");
 
 
     logger.error("Collection="+coll);
+    logger.error("Subaction="+subaction);
     logger.error("Service="+service);
     logger.error("Classifier="+classifier);
 
@@ -71,9 +73,10 @@ public class FormatAction extends Action {
 	Element mr_request_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 	Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT_STRING, to, lang, uid);
 
-    request.setAttribute("service", service);
-    if(classifier != null)
-        request.setAttribute("classifier", classifier);
+    mr_request.setAttribute("service", service);
+    mr_request.setAttribute("subaction", subaction);
+    //if(classifier != null)
+    mr_request.setAttribute("classifier", classifier);
 
 	mr_request_message.appendChild(mr_request);
 	
@@ -97,41 +100,39 @@ public class FormatAction extends Action {
             String input = format_string;
             InputSource is = new InputSource( new StringReader( input ) );
             Document d = (Document) builder.parse( is );
-            //Element e = d.getDocumentElement();
-            //Node d2 = this.doc.importNode(e,true); 
+            //Node n1 = d.getFirstChild();            
+            //Document d2 = (Document) this.doc.importNode(e, true);
 
-            //Document format_doc = this.converter.newDOM();
-            //doc.appendChild(d2);
-
-            //File interface_config_file = new File(GSFile.interfaceConfigFile(GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), (String)this.config_params.get(GSConstants.INTERFACE_NAME))));
-            //if (!interface_config_file.exists()) {
-            //  logger.error(" interface config file: "+interface_config_file.getPath()+" not found!");
-            //}
-            //Document config_doc = this.converter.getDOM(interface_config_file, "utf-8");
-            //if (config_doc == null) {
-            //  logger.error(" could not parse interface config file: "+interface_config_file.getPath());
-            //}
-        
-            //Element config_elem = config_doc.getDocumentElement();
-            //String base_interface = config_elem.getAttribute("baseInterface");
-
+            //Element format_statement = this.doc.importNode(d, true);
 
             // Call XSLT to transform document to xml format string
             XMLTransformer transformer = new XMLTransformer();
-            //String stylesheet = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String)this.config_params.get(GSConstants.SITE_NAME), coll, (String)this.config_params.get(GSConstants.INTERFACE_NAME), "oran", "FormatAction");
-            //logger.error(stylesheet);
+            // HOW DO I DO THIS PROPERLY?
             Document style_doc = this.converter.getDOM(new File("/home/sam/greenstone3/web/interfaces/oran/transform/formatString.xsl"), "UTF-8");
 
             if(style_doc == null)
                 logger.error("style_doc is null");
 
             // not sure what to do here - some code from Transforming Receptionist
-            String transformed = transformer.transformToString(style_doc, d);
-            //Node transformed = transformer.transform(style_doc, d);
-           
+            //String transformed = transformer.transformToString(style_doc, d);
+            logger.error("About to transform");
+            Node transformed = (Node) transformer.transform(style_doc, d);  // Failing org.w3c.dom.DOMException: HIERARCHY_REQUEST_ERR: An attempt was made to insert a node where it is not permitted. ; SystemID: file:///home/sam/greenstone3/packages/tomcat/bin/dummy.xsl
+
+            logger.error("Transform successful?");
+         
+            if(transformed==null)  // not null
+                logger.error("TRANSFORMED IS NULL");
+
+            logger.error("begin import"); 
+            Node imported = this.doc.importNode(transformed, true); // There was an exception org.w3c.dom.DOMException: NOT_SUPPORTED_ERR: The implementation does not support the requested type of object or operation.
+            logger.error("finished import"); 
+
+            String format_string2 = GSXML.xmlNodeToString(imported); // null pointer exception occuring here
+            logger.error("format string="+format_string2);
+ 
             Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
-            GSXML.setNodeText(format, transformed);
-            //format.appendChild(this.doc.createTextNode(transformed));
+            //GSXML.setNodeText(format, transformed);
+            format.appendChild(transformed);
             //format.setNodeValue(transformed);
             mr_request.appendChild(format); 
             logger.error("Transformed: "+transformed);

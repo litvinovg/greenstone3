@@ -3,46 +3,79 @@ console.log("Loading gui_div.js\n");
 
 var initialised_iframe = "false";
 
-function createFormatStatement()
-{
+//function createFormatStatement()
+//{
 
-    var formatDiv = document.getElementById('formatStatement');
-    var formatStatement = innerXHTML(formatDiv);
+    //var formatDiv = document.getElementById('formatStatement');
+    //var formatStatement = innerXHTML(formatDiv);
     //console.log(formatStatement);
 
     // find collection name
 
-    var myurl = document.URL;
-    console.log(myurl);
-    var first = myurl.indexOf("&c")+3;
-    var last = myurl.indexOf("&", first);
+    //var myurl = document.URL;
+    //console.log(myurl);
+    //var first = myurl.indexOf("&c")+3;
+    //var last = myurl.indexOf("&", first);
     
-    var collection_name = myurl.substring(first,last); ///&c=(.*)&/.exec(myurl);
-    console.log(collection_name);
+    //var collection_name = getSubstring(myurl, "&c", "&"); //myurl.substring(first,last); ///&c=(.*)&/.exec(myurl);
+    //console.log(collection_name);
 
-    first = myurl.indexOf("&s")+3;
-    last = myurl.indexOf("&", first);
+    //first = myurl.indexOf("&s")+3;
+    //last = myurl.indexOf("&", first);
 
-    var service_name = myurl.substring(first,last);
-    console.log(service_name);
+    //var service_name = myurl.substring(first,last);
+    //console.log(service_name);
 
-    var classifier_name = null;
+    //var classifier_name = null;
 
-    if(service_name == "ClassifierBrowse")
-    {
-        first = myurl.indexOf("&cl")+4;
-        last = myurl.indexOf("&", first);
+    //if(service_name == "ClassifierBrowse")
+    //{
+    //    first = myurl.indexOf("&cl")+4;
+    //    last = myurl.indexOf("&", first);
 
-        classifier_name = myurl.substring(first,last);
-        console.log(classifier_name);
-    }
+    //    classifier_name = myurl.substring(first,last);
+    //    console.log(classifier_name);
+    //}
 
     //var myurl = 'http://localhost:8080/greenstone3/format?a=s&sa=s&t='+formatStatement;
 
     //jQuery.post( url, [ data ], [ success(data, textStatus, XMLHttpRequest) ], [ dataType ] )
 
     // How do I find out my collection name?
-    var post_url = "http://localhost:8080/greenstone3/format?a=f&c=" + collection_name +"&s=" + service_name;
+
+function getSubstring(str, first, last)
+{
+    var first_index = str.indexOf(first)+first.length+1;
+    var last_index = str.indexOf(last, first_index);
+
+    var substring = str.substring(first_index, last_index);
+
+    console.log(substring);
+
+    return substring;
+}
+    
+function getFormatStatement()
+{
+    var formatDiv = document.getElementById('formatStatement');
+    var formatStatement = innerXHTML(formatDiv);
+    return formatStatement;
+}
+
+function updateFormatStatement()
+{
+    var formatStatement = getFormatStatement();
+
+    var myurl = document.URL;
+
+    var collection_name = getSubstring(myurl, "&c", "&");
+    var service_name = getSubstring(myurl, "&s", "&");
+    var classifier_name = null;
+
+    if(service_name == "ClassifierBrowse")
+        classifier_name = getSubstring(myurl, "&cl", "&");
+
+    var post_url = "http://localhost:8080/greenstone3/format?a=f&sa=update&c=" + collection_name +"&s=" + service_name;
 
     if(classifier_name != null)
         post_url = post_url + "&cl=" + classifier_name;
@@ -52,6 +85,32 @@ function createFormatStatement()
         console.log("Success, we have received data");
         console.log(data);
         }, 'html');
+}
+
+function saveFormatStatement()
+{
+    var formatStatement = getFormatStatement();
+
+    var myurl = document.URL;
+
+    var collection_name = getSubstring(myurl, "&c", "&");
+    var service_name = getSubstring(myurl, "&s", "&");
+    var classifier_name = null;
+
+    if(service_name == "ClassifierBrowse")
+        classifier_name = getSubstring(myurl, "&cl", "&");
+
+    var post_url = "http://localhost:8080/greenstone3/format?a=f&sa=save&c=" + collection_name +"&s=" + service_name;
+
+    if(classifier_name != null)
+        post_url = post_url + "&cl=" + classifier_name;
+
+    $.post(post_url, {data: formatStatement}, function(data) {
+        //$('.result').innerHTML = data; //html(data);
+        console.log("Success, we have received data");
+        console.log(data);
+        }, 'html');
+}
 
 /*
     $.ajax({
@@ -103,7 +162,7 @@ function createFormatStatement()
         }
         */
     //}
-}
+//}
 
 function traverse(node, formatstring)
   {

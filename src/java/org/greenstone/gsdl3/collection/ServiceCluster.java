@@ -33,6 +33,7 @@ import org.w3c.dom.NodeList;
 
 import java.io.*;
 import java.io.File;
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -509,7 +510,7 @@ that is passed to teh service  - eg used for coll config files for Collection
 	    }
 	    return response;
 	}
-
+    /*
     if (type.equals(GSXML.REQUEST_TYPE_FORMAT_STRING)) {
         logger.error("Received format string request");
         String service = request.getAttribute("service");
@@ -527,7 +528,7 @@ that is passed to teh service  - eg used for coll config files for Collection
 
         // check for version file
 
-        String directory = new File(GSFile.collectionConfigFile(this.site_home, this.cluster_name)).getParent() + "/";
+        String directory = new File(GSFile.collectionConfigFile(this.site_home, this.cluster_name)).getParent() + File.pathSeparator;
         logger.error("Directory is " + directory);
 
         String version_filename = "";
@@ -539,7 +540,10 @@ that is passed to teh service  - eg used for coll config files for Collection
 
         File version_file = new File(version_filename);
         logger.error("Version filename is " + version_filename);
+
         String version_number = "1";
+        BufferedWriter writer; // = new BufferedWriter(new FileWriter(version_filename));
+        //RandomAccessFile version_file_random_access;
 
         try{
 
@@ -547,18 +551,25 @@ that is passed to teh service  - eg used for coll config files for Collection
             {
                 // Read version
                  BufferedReader reader = new BufferedReader(new FileReader(version_filename));
+                 //version_file_random_access = new RandomAccessFile(version_file, "r");
+                 //logger.error("
+                 //version_number = version_file_random_access.readInt();
                  version_number = reader.readLine();
                  int aInt = Integer.parseInt(version_number) + 1;
                  version_number = Integer.toString(aInt);
                  reader.close();
+                 //version_file_random_access.close();
             }
             else{
                 // Create
                 version_file.createNewFile(); 
                 // write 1 to file
-                BufferedWriter writer = new BufferedWriter(new FileWriter(version_filename));
+                writer = new BufferedWriter(new FileWriter(version_filename));
+                //version_file_random_access = new RandomAccessFile(version_file, "w");
+                //version_file_random_access.writeInt(version_number);
                 writer.write(version_number);
                 writer.close();
+                //version_file_random_access.close();
             }
 
             // Write version file
@@ -571,11 +582,22 @@ that is passed to teh service  - eg used for coll config files for Collection
 
             logger.error("Format statement filename is " + format_statement_filename);
 
-            BufferedWriter writer = new BufferedWriter(new FileWriter(format_statement_filename));
+            writer = new BufferedWriter(new FileWriter(format_statement_filename));
             writer.write(format_string);
             writer.close();
 
             // Update version number
+            //version_file_random_access = new RandomAccessFile(version_file, "w");
+            //version_file_random_access.writeInt(version_number);
+            //version_file_random_access.close();
+
+            writer = new BufferedWriter(new FileWriter(version_filename));
+            //version_file_random_access = new RandomAccessFile(version_file, "w");
+            //version_file_random_access.writeInt(version_number);
+            writer.write(version_number);
+            writer.close();
+
+
 
         } catch (IOException e) {
             logger.error("IO Exception "+e);
@@ -583,7 +605,7 @@ that is passed to teh service  - eg used for coll config files for Collection
         }
 
 
-    }
+    }*/
 	if (type.equals(GSXML.REQUEST_TYPE_SYSTEM)) {
 	    response = processSystemRequest(request);
 	} else { // unknown type

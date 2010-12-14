@@ -176,7 +176,8 @@
 
     <td width="75%">
 
-    <button id="updateFormatStatement" type="button" onclick="createFormatStatement()">Update Format Statement</button>
+    <button id="updateFormatStatement" type="button" onclick="updateFormatStatement()">Update Format Statement</button>
+    <button id="saveFormatStatement" type="button" onclick="saveFormatStatement()">Save Format Statement</button>
 
     <div id="formatStatement">
         <div id="formatRoot">

@@ -920,13 +920,16 @@ public class GSXML {
     sb.append('<');
     sb.append(e.getNodeName());
     NamedNodeMap attrs = e.getAttributes();
-    for (int i = 0; i < attrs.getLength(); i++) {
-      Node attr = attrs.item(i);
-      sb.append(' ');
-      sb.append(attr.getNodeName());
-      sb.append("=\"");
-      sb.append(attr.getNodeValue());
-      sb.append('"');
+    if(attrs != null)
+    {
+        for (int i = 0; i < attrs.getLength(); i++) {
+            Node attr = attrs.item(i);
+            sb.append(' ');
+            sb.append(attr.getNodeName());
+            sb.append("=\"");
+            sb.append(attr.getNodeValue());
+            sb.append('"');
+        }
     }
     
     NodeList children = e.getChildNodes();

@@ -176,6 +176,7 @@ public class XMLTransformer {
 		try {
 			// Use the TransformerFactory to process the stylesheet Source and generate a Transformer.
 			Transformer transformer = this.t_factory.newTransformer(new DOMSource(stylesheet));
+            logger.error("XMLTransformer transformer is " + transformer);
 			transformer.setErrorListener(new TransformErrorListener());
 			if (parameters != null) {
 				Set params = parameters.entrySet();
