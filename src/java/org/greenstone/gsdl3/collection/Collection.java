@@ -492,7 +492,7 @@ public class Collection
         }
     }
     else { // unknown type
-        super.processMessage(request);
+        return super.processMessage(request);
 
     }
     return response;
