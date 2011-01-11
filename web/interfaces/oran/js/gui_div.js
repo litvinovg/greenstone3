@@ -3,6 +3,12 @@ console.log("Loading gui_div.js\n");
 
 var initialised_iframe = "false";
 
+function onTextChange(item, text)
+{
+    item.setAttribute("value",text);
+}
+
+
 //function createFormatStatement()
 //{
 

@@ -33,6 +33,14 @@ import java.io.*;
 import java.io.File;
 import java.util.HashMap;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.xml.sax.*;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+
 import org.apache.log4j.*;
 
 /**
@@ -329,8 +337,8 @@ public class Collection
         }
 
         Element format_element = (Element) GSXML.getChildByTagName(request, GSXML.FORMAT_STRING_ELEM);
-        //String format_string = GSXML.getNodeText(format_element);
-        Element format_statement = (Element) format_element.getFirstChild();
+        String format_string = GSXML.getNodeText(format_element);
+        //Element format_statement = (Element) format_element.getFirstChild();
 
         //logger.error("Format string: " + format_string);
         logger.error("Config file location = " + GSFile.collectionConfigFile(this.site_home, this.cluster_name));
@@ -385,7 +393,7 @@ public class Collection
                 logger.error("Format statement filename is " + format_statement_filename);
 
                 // Write format statement
-                String format_string = GSXML.xmlNodeToString(format_statement);
+                //String format_string = GSXML.xmlNodeToString(format_statement);
                 writer = new BufferedWriter(new FileWriter(format_statement_filename));
                 writer.write(format_string);
                 writer.close();
@@ -404,91 +412,114 @@ public class Collection
         {
             logger.error("SAVE format statement");
 
-            // open collectionConfig.xml and read in to w3 Document
-            String collection_config = directory + "collectionConfig.xml";
-            Document config = this.converter.getDOM(new File(collection_config), "UTF-8");
-           
-            //String tag_name = "";
-            int k;
-            int index;
-            Element elem;
-            Node current_node = GSXML.getChildByTagName(config, "CollectionConfig");
-            NodeList current_node_list;
-
-            if(service.equals("ClassifierBrowse"))
-            {
-                //tag_name = "browse";
-                // if CLX then need to look in <classifier> X then <format>
-                // default is <browse><format>
-
-                current_node = GSXML.getChildByTagName(current_node, "browse");
-
-                // find CLX
-                if(classifier != null)
-                {
-                    current_node_list = GSXML.getChildrenByTagName(current_node, "classifier");
-                    index = Integer.parseInt(classifier.substring(2)) - 1;
-                    // index should be given by X-1
-                    current_node = current_node_list.item(index);
-                    current_node = GSXML.getChildByTagName(current_node, "format");
-                }
-                else{
-                    current_node = GSXML.getChildByTagName(current_node, "format");
-                }
-            }
-            else
-            {
-                // look in <format> with no attributes
-            
-                current_node_list = GSXML.getChildrenByTagName(current_node, "search");
-                for(k=0; k<current_node_list.getLength(); k++) 
-                {
-                    current_node = current_node_list.item(k);
-                    // if current_node has no attributes then break
-                    elem = (Element) current_node;
-                    if(elem.hasAttribute("name")==false)
-                        break;
-                }
-            }
-
-            // Current_node should be a format tag
-            elem = (Element) current_node;
-
-            logger.error("Current_node = " + elem.getNodeName());
-
-            // seems we want to remove current child/ren and replace with format_statement's child/ren?
-
-            // remove existing
-            current_node_list = elem.getChildNodes();
-            for(k=0; k<current_node_list.getLength(); k++)
-            {
-                current_node = elem.removeChild(current_node_list.item(k));
-            }
-
-            // append new
-            current_node_list = format_statement.getChildNodes();
-            for(k=0; k<current_node_list.getLength(); k++)
-            {
-                current_node = elem.appendChild(current_node_list.item(k));
-            }
-
-            //String text = GSXML.getNodeText(elem);
-            //logger.error(text);
-            //text = text.replaceAll("_httpsite_", http_site);
-            //text = text.replaceAll("_httpcollection_", http_collection);
-            //GSXML.setNodeText(d, text);
-
-            // Now convert config document to string for writing to file
-            String new_config = GSXML.xmlNodeToString(config);
-
-            // Write to file (not original! for now)
             try{
+
+                // Convert format string to a document
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                //String input = "<html><head><title></title></head><body>" + format_string + "</body></html>";
+                String input = format_string.substring(0,format_string.length()-1)+"</xml>";
+                logger.error(input);
+                InputSource is = new InputSource( new StringReader( input ) );
+                logger.error("About to parse format string");
+                Document format_statement = (Document) builder.parse( is );
+                logger.error("Done parsing format string");
+
+                // open collectionConfig.xml and read in to w3 Document
+                String collection_config = directory + "collectionConfig.xml";
+                Document config = this.converter.getDOM(new File(collection_config), "UTF-8");
+           
+                //String tag_name = "";
+                int k;
+                int index;
+                Element elem;
+                Node current_node = GSXML.getChildByTagName(config, "CollectionConfig");
+                NodeList current_node_list;
+    
+                if(service.equals("ClassifierBrowse"))
+                {
+                    //tag_name = "browse";
+                    // if CLX then need to look in <classifier> X then <format>
+                    // default is <browse><format>
+
+                    current_node = GSXML.getChildByTagName(current_node, "browse");
+
+                    // find CLX
+                    if(classifier != null)
+                    {
+                        current_node_list = GSXML.getChildrenByTagName(current_node, "classifier");
+                        index = Integer.parseInt(classifier.substring(2)) - 1;
+                        // index should be given by X-1
+                        current_node = current_node_list.item(index);
+                        current_node = GSXML.getChildByTagName(current_node, "format");
+                    }
+                    else{
+                        current_node = GSXML.getChildByTagName(current_node, "format");
+                    }
+                }
+                else
+                {
+                    // look in <format> with no attributes
+            
+                    current_node_list = GSXML.getChildrenByTagName(current_node, "search");
+                    for(k=0; k<current_node_list.getLength(); k++) 
+                    {
+                        current_node = current_node_list.item(k);
+                        // if current_node has no attributes then break
+                        elem = (Element) current_node;
+                        if(elem.hasAttribute("name")==false)
+                            break;
+                    }
+                }
+
+                // Current_node should be a format tag
+                elem = (Element) current_node;
+    
+                logger.error("Current_node = " + elem.getNodeName());
+
+                // seems we want to remove current child/ren and replace with format_statement's child/ren?
+
+                // remove existing
+                current_node_list = elem.getChildNodes();
+                for(k=0; k<current_node_list.getLength(); k++)
+                {
+                    current_node = elem.removeChild(current_node_list.item(k));
+                }
+
+                // append new but we have a string!
+                GSXML.setNodeText(elem, format_string);
+
+                //current_node_list = format_statement.getChildNodes();
+                //for(k=0; k<current_node_list.getLength(); k++)
+                //{
+                //    current_node = elem.appendChild(current_node_list.item(k));
+                //}
+
+                //String text = GSXML.getNodeText(elem);
+                //logger.error(text);
+                //text = text.replaceAll("_httpsite_", http_site);
+                //text = text.replaceAll("_httpcollection_", http_collection);
+                //GSXML.setNodeText(d, text);
+
+                // Now convert config document to string for writing to file
+                String new_config = GSXML.xmlNodeToString(config);
+    
+                // Write to file (not original! for now)
                 BufferedWriter writer = new BufferedWriter(new FileWriter(collection_config+".new"));
                 writer.write(new_config);
                 writer.close();
-            } catch (IOException e) {
-                logger.error("IO Exception "+e);
+
+             } catch( Exception ex ) {
+                logger.error("There was an exception "+ex);
+
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw, true);
+                ex.printStackTrace(pw);
+                pw.flush();
+                sw.flush();
+                logger.error(sw.toString());
             }
+
         }
     }
     else { // unknown type

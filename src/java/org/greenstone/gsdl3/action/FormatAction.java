@@ -84,6 +84,8 @@ public class FormatAction extends Action {
 	//mr_request.appendChild(format);
 
     String format_string = (String)params.get("data");
+    //logger.error("Original format string");
+    //logger.error(format_string);
     
     Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 
@@ -114,25 +116,25 @@ public class FormatAction extends Action {
                 logger.error("style_doc is null");
 
             // not sure what to do here - some code from Transforming Receptionist
-            //String transformed = transformer.transformToString(style_doc, d);
+            String transformed = transformer.transformToString(style_doc, d);
             logger.error("About to transform");
-            Node transformed = (Node) transformer.transform(style_doc, d);  // Failing org.w3c.dom.DOMException: HIERARCHY_REQUEST_ERR: An attempt was made to insert a node where it is not permitted. ; SystemID: file:///home/sam/greenstone3/packages/tomcat/bin/dummy.xsl
+            //Node transformed = (Node) transformer.transform(style_doc, d);  // Failing org.w3c.dom.DOMException: HIERARCHY_REQUEST_ERR: An attempt was made to insert a node where it is not permitted. ; SystemID: file:///home/sam/greenstone3/packages/tomcat/bin/dummy.xsl
 
             logger.error("Transform successful?");
          
             if(transformed==null)  // not null
                 logger.error("TRANSFORMED IS NULL");
 
-            logger.error("begin import"); 
-            Node imported = this.doc.importNode(transformed, true); // There was an exception org.w3c.dom.DOMException: NOT_SUPPORTED_ERR: The implementation does not support the requested type of object or operation.
-            logger.error("finished import"); 
+            //logger.error("begin import"); 
+            //Node imported = this.doc.importNode(transformed, true); // There was an exception org.w3c.dom.DOMException: NOT_SUPPORTED_ERR: The implementation does not support the requested type of object or operation.
+            //logger.error("finished import"); 
 
-            String format_string2 = GSXML.xmlNodeToString(imported); // null pointer exception occuring here
-            logger.error("format string="+format_string2);
+            //String format_string2 = GSXML.xmlNodeToString(imported); // null pointer exception occuring here
+            //logger.error("format string="+format_string2);
  
             Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
-            //GSXML.setNodeText(format, transformed);
-            format.appendChild(transformed);
+            GSXML.setNodeText(format, transformed);
+            //format.appendChild(transformed);
             //format.setNodeValue(transformed);
             mr_request.appendChild(format); 
             logger.error("Transformed: "+transformed);
