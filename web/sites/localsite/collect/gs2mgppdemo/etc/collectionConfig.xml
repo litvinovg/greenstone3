@@ -39,7 +39,9 @@
             <option name="casefold"/>
             <option name="stem"/>
         </indexOption>
-        <format name="searchType">plain,form</format>
+        <searchType name="plain"/>
+        <searchType name="simpleform"/>
+        <searchType name="advancedform"/>
         <format><gsf:template match="documentNode"><td valign="top"><gsf:link type="document"><gsf:icon type="document"/></gsf:link></td><td><gsf:switch><gsf:metadata name="Title" select="ancestors" separator=": "/><gsf:when test="exists"><gsf:metadata name="Title" select="ancestors" separator=": "/>:</gsf:when></gsf:switch><gsf:link type="document"><gsf:metadata name="Title"/></gsf:link></td></gsf:template></format>
     </search>
     <import>
