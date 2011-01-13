@@ -70,7 +70,7 @@ If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "r
     <description>Greenstone video extension (Need more details)</description>
     <sequenceList>
       <step id="download" action="download" label="Download Extension">
-        <mainSource method="svn">http://svn.greenstone.org/gs2-extensions/video/trunk/src</mainSource>
+        <mainSource method="svn">http://svn.greenstone.org/gs2-extensions/video-and-audio/trunk/src</mainSource>
       </step>
 
       <step id="install" action="button" label="Compile" dependsOn="download">

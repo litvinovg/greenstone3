@@ -49,7 +49,7 @@ public class DownloadStep extends Step
 
 	ExtensionInformation info = _parent.getParent();
 	
-	_mainSource = new Source("svn", info.getBaseURL() + info.getFileStem() + "/trunk/", "", this);
+	_mainSource = new Source("svn", info.getBaseURL() + info.getFileStem() + "/trunk/src", "", this);
 
 	_button.addActionListener(new DownloadButtonListener());
     }
