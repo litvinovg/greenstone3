@@ -244,13 +244,13 @@
       </xsl:if>
 
 <!-- *************************************************************************************** -->
-<H2>Preview</H2>
+<!--<H2>Preview</H2>
 
                     <div id="my_categories"><xsl:text> </xsl:text></div>
 
                     <iframe name="preview" id="iframe" width="98%" height="300">Your browser does not support iframes</iframe> 
 
-                    <xsl:variable name="preview"> 
+                    <xsl:variable name="preview"> -->
                     <!-- <button type="button" onclick="loadXMLDoc()">Change Content</button> -->
 					<div id="gs_content">
 						<!--
@@ -260,7 +260,7 @@
 						<xsl:apply-templates select="/page"/>
 
 					</div>
-                    </xsl:variable>
+   <!--                 </xsl:variable>
 
                     <script type="text/javascript">
                         preview_html = <xsl:text disable-output-escaping="yes">'</xsl:text><xsl:copy-of select="$preview"/><xsl:text disable-output-escaping="yes">';</xsl:text>
@@ -268,7 +268,7 @@
 
                     <div id="result">
                     Here
-                    </div>
+                    </div>-->
 
 					<div id="gs_footer">
 						<xsl:call-template name="poweredByGS3TextBar"/>
