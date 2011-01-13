@@ -17,28 +17,32 @@ If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "r
     </description>
     <sequenceList>
       <step id="installOptions" action="properties" label="Install options" dependsOn="AUTOMATIC_DOWNLOAD">
-	<optionList id="Mat" label="Mat options">
-	  <option id="User_Name" label="User name"/>
-	  <option id="Password" label="Password"/>
-	  <option id="Tomcat_Port" label="Tomcat port"/>
-	  <option id="JVM_Version" label="Java Virtual Machine version"/>
-	</optionList>
+        <optionList id="Mat" label="Mat options">
+          <option id="User_Name" label="User name"/>
+          <option id="Password" label="Password"/>
+          <option id="Tomcat_Port" label="Tomcat port"/>
+          <option id="JVM_Version" label="Java Virtual Machine version"/>
+        </optionList>
       </step>
+      
       <step id="install" action="button" label="Install" dependsOn="installOptions">
-	<command>
-	  <os name="default">ant compile</os>
+        <command>
+          <os name="default">ant compile</os>
         </command>
       </step>
+
       <step id="controlPanel" action="panel" label="Control Panel" dependsOn="install">
-	<class>org.greenstone.admin.guiext.mat.ControlPanel</class>
+        <class>org.greenstone.admin.guiext.mat.ControlPanel</class>
       </step>
+
       <step id="uninstall" action="button" label="Uninstall" dependsOn="install" rollbackTo="install">
-	<command>
-	  <os name="default">ant clean</os>
-	</command>
+        <command>
+          <os name="default">ant clean</os>
+        </command>
       </step>
     </sequenceList>
   </extension>
+
   <extension>
     <name>EKit HTML Editor</name>
     <group>Java / Web</group>
@@ -46,17 +50,19 @@ If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "r
     <description>An HTML editor for GLI</description>
     <sequenceList>
       <step id="run" action="button" label="Run EKit" dependsOn="AUTOMATIC_DOWNLOAD">
-	<command>
-	  <os name="default">java -jar ekit.jar</os>
-	</command>
+        <command>
+          <os name="default">java -jar ekit.jar</os>
+        </command>
       </step>
+      
       <step id="assoc" action="button" label="Setup EKit for GLI" dependsOn="AUTOMATIC_DOWNLOAD">
-	<command>
-	  <os name="default">java -jar GLIAssociate.jar</os>
-	</command>
+        <command>
+          <os name="default">java -jar GLIAssociate.jar</os>
+        </command>
       </step>
     </sequenceList>
   </extension>
+
   <extension>
     <name>Video Plugin</name>
     <group>Java / Web</group>
@@ -64,18 +70,20 @@ If you cannot launch Metadata Analysis Tool, please remove the gs2mgdemo from "r
     <description>Greenstone video extension (Need more details)</description>
     <sequenceList>
       <step id="download" action="download" label="Download Extension">
-	<mainSource method="svn">http://svn.greenstone.org/gs2-extensions/video/trunk</mainSource>
+        <mainSource method="svn">http://svn.greenstone.org/gs2-extensions/video/trunk/src</mainSource>
       </step>
+
       <step id="install" action="button" label="Compile" dependsOn="download">
-	<command>
-	  <os name="default">./CASCADE-MAKE.sh</os>
-	  <os name="Windows">CASCADE-MAKE</os>
-	</command>
+        <command>
+          <os name="default">./CASCADE-MAKE.sh</os>
+          <os name="Windows">CASCADE-MAKE</os>
+        </command>
       </step>
+
       <step id="uninstall" action="button" label="Uninstall" dependsOn="install" rollbackTo="install">
-	<command>
-	  <os name="default"/>
-	</command>
+        <command>
+          <os name="default"/>
+        </command>
       </step>
     </sequenceList>
   </extension>
