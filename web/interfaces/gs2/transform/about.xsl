@@ -60,9 +60,11 @@
     </xsl:call-template>
     <div class="document">
       <xsl:if test="not(/page/pageRequest/paramList/param[@name='qt']) or /page/pageRequest/paramList/param[@name='qt']/@value = 0">
-      <xsl:apply-templates select="serviceList/service[@name='TextQuery']">
-	<xsl:with-param name="collName" select="$collName"/></xsl:apply-templates>
-      <xsl:call-template name="dividerBar"/>
+	<xsl:if test="serviceList/service[@name='TextQuery']">
+	  <xsl:apply-templates select="serviceList/service[@name='TextQuery']">
+	    <xsl:with-param name="collName" select="$collName"/></xsl:apply-templates>
+	  <xsl:call-template name="dividerBar"/>
+	</xsl:if>
       </xsl:if>
     </div>
     <div>
