@@ -222,88 +222,108 @@
 
   <!-- If building a release then we want to adjust environment variables so that the support library can be see during compilation -->
   <if><bool><isset property="use.support.lib"/></bool>
-    <if><bool><isset property="env.CFLAGS"/></bool>
-      <property name="cflags.arg" value="CFLAGS=&quot;-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CFLAGS}&quot;"/>
-      <else>
-        <property name="cflags.arg" value="CFLAGS=&quot;-I${basedir}/ext/gnome-lib/${os.bin.dir}/include&quot;"/>
-      </else>
-    </if>
-    <else>
-      <if><bool><isset property="env.CFLAGS"/></bool>
-        <property name="cflags.arg" value="CFLAGS=&quot;${env.CFLAGS}&quot;"/>
-        <else>
-          <property name="cflags.arg" value=" "/>
-        </else>
-      </if>
-    </else>
-  </if>
 
-  <if><bool><isset property="use.support.lib"/></bool>
-    <if><bool><isset property="env.CPPFLAGS"/></bool>
-      <property name="cppflags.arg" value="CPPFLAGS=&quot;-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CPPFLAGS}&quot;"/>
-      <else>
-        <property name="cppflags.arg" value="CPPFLAGS=&quot;-I${basedir}/ext/gnome-lib/${os.bin.dir}/include&quot;"/>
-      </else>
-    </if>
-    <else>
-      <if><bool><isset property="env.CPPFLAGS"/></bool>
-        <property name="cppflags.arg" value="CPPFLAGS=&quot;${env.CPPFLAGS}&quot;"/>
-        <else>
-          <property name="cppflags.arg" value=" "/>
-        </else>
-      </if>
-    </else>
-  </if>
+	<property name="gnome-lib-dir" value="${basedir}/ext/gnome-lib-minimal/${os.bin.dir}"/>
 
-  <if><bool><isset property="use.support.lib"/></bool>
-    <if><bool><isset property="env.CXXFLAGS"/></bool>
-      <property name="cxxflags.arg" value="CXXFLAGS=&quot;-I${basedir}/ext/gnome-lib/${os.bin.dir}/include ${env.CXXFLAGS}&quot;"/>
-      <else>
-        <property name="cxxflags.arg" value="CXXFLAGS=&quot;-I${basedir}/ext/gnome-lib/${os.bin.dir}/include&quot;"/>
-      </else>
-    </if>
-    <else>
-      <if><bool><isset property="env.CXXFLAGS"/></bool>
-        <property name="cxxflags.arg" value="CXXFLAGS=&quot;${env.CXXFLAGS}&quot;"/>
-        <else>
-          <property name="cxxflags.arg" value=" "/>
-        </else>
-      </if>
-    </else>
-  </if>
+	<if><bool><isset property="env.CFLAGS"/></bool>
+		<property name="cflags.arg" value="CFLAGS=&quot;-I${gnome-lib-dir}/include ${env.CFLAGS}&quot;"/>
+	<else>
+		<property name="cflags.arg" value="CFLAGS=&quot;-I${gnome-lib-dir}/include&quot;"/>
+	</else>
+	</if>
 
-  <if><bool><isset property="use.support.lib"/></bool>
-    <if><bool><isset property="env.LDFLAGS"/></bool>
-      <property name="ldflags.arg" value="LDFLAGS=&quot;-L${basedir}/ext/gnome-lib/${os.bin.dir}/lib ${env.LDFLAGS}&quot;"/>
-      <else>
-        <property name="ldflags.arg" value="LDFLAGS=&quot;-L${basedir}/ext/gnome-lib/${os.bin.dir}/lib&quot;"/>
-      </else>
-    </if>
-    <else>
-      <if><bool><isset property="env.LDFLAGS"/></bool>
-        <property name="ldflags.arg" value="LDFLAGS=&quot;${env.LDFLAGS}&quot;"/>
-        <else>
-          <property name="ldflags.arg" value=" "/>
-        </else>
-      </if>
-    </else>
-  </if>
+	<if><bool><isset property="env.CPPFLAGS"/></bool>
+		<property name="cppflags.arg" value="CPPFLAGS=&quot;-I${gnome-lib-dir}/include ${env.CPPFLAGS}&quot;"/>
+	<else>
+		<property name="cppflags.arg" value="CPPFLAGS=&quot;-I${gnome-lib-dir}/include&quot;"/>
+	</else>
+	</if>
 
-  <if><bool><isset property="use.support.lib"/></bool>
-    <if><bool><isset property="env.PATH"/></bool>
-      <property name="path.arg" value="PATH=&quot;${basedir}/ext/gnome-lib/${os.bin.dir}/bin:${env.PATH}&quot;"/>
-      <else>
-        <property name="path.arg" value="PATH=&quot;${basedir}/ext/gnome-lib/${os.bin.dir}/bin&quot;"/>
-      </else>
-    </if>
-    <else>    
-      <if><bool><isset property="env.PATH"/></bool>
-        <property name="path.arg" value="PATH=&quot;${env.PATH}&quot;"/>
-        <else>
-          <property name="path.arg" value=" "/>
-        </else>
-      </if>
-    </else>
+	<if><bool><isset property="env.CXXFLAGS"/></bool>
+		<property name="cxxflags.arg" value="CXXFLAGS=&quot;-I${gnome-lib-dir}/include ${env.CXXFLAGS}&quot;"/>
+	<else>
+        	<property name="cxxflags.arg" value="CXXFLAGS=&quot;-I${gnome-lib-dir}/include&quot;"/>
+	</else>
+	</if>
+
+	<if><bool><isset property="env.LDFLAGS"/></bool>
+		<property name="ldflags.arg" value="LDFLAGS=&quot;-L${gnome-lib-dir}/lib ${env.LDFLAGS}&quot;"/>
+	<else>
+        	<property name="ldflags.arg" value="LDFLAGS=&quot;-L${gnome-lib-dir}/lib&quot;"/>
+	</else>
+	</if>
+
+	<if><bool><isset property="env.PATH"/></bool>
+		<property name="path.arg" value="PATH=&quot;${gnome-lib-dir}/bin:${env.PATH}&quot;"/>
+	<else>
+        	<property name="path.arg" value="PATH=&quot;${gnome-lib-dir}/bin&quot;"/>
+	</else>
+	</if>
+
+	<if><bool><isset property="env.PKG_CONFIG_PATH"/></bool>
+		<property name="pcpath.arg" value="PKG_CONFIG_PATH=&quot;${gnome-lib-dir}/lib/pkgconfig:${env.PKG_CONFIG_PATH}&quot;"/>
+	<else>
+        	<property name="pcpath.arg" value="PKG_CONFIG_PATH=&quot;${gnome-lib-dir}/lib/pkgconfig&quot;"/>
+	</else>
+	</if>
+
+	<if><bool><isset property="env.LD_LIBRARY_PATH"/></bool>
+		<property name="ldlpath.arg" value="LD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib:${env.LD_LIBRARY_PATH}&quot;"/>
+	<else>
+        	<property name="ldlpath.arg" value="LD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib&quot;"/>
+	</else>
+	</if>
+
+	<else>
+		<if><bool><isset property="env.CFLAGS"/></bool>
+			<property name="cflags.arg" value="CFLAGS=&quot;${env.CFLAGS}&quot;"/>
+        	<else>
+			<property name="cflags.arg" value=" "/>
+		</else>
+		</if>
+
+		<if><bool><isset property="env.CPPFLAGS"/></bool>
+        		<property name="cppflags.arg" value="CPPFLAGS=&quot;${env.CPPFLAGS}&quot;"/>
+        	<else>
+			<property name="cppflags.arg" value=" "/>
+		</else>
+		</if>
+
+		<if><bool><isset property="env.CXXFLAGS"/></bool>
+			<property name="cxxflags.arg" value="CXXFLAGS=&quot;${env.CXXFLAGS}&quot;"/>
+		<else>
+			<property name="cxxflags.arg" value=" "/>
+		</else>
+		</if>
+
+		<if><bool><isset property="env.LDFLAGS"/></bool>
+			<property name="ldflags.arg" value="LDFLAGS=&quot;${env.LDFLAGS}&quot;"/>
+		<else>
+			<property name="ldflags.arg" value=" "/>
+		</else>
+		</if>
+
+		<if><bool><isset property="env.PATH"/></bool>
+			<property name="path.arg" value="PATH=&quot;${env.PATH}&quot;"/>
+		<else>
+			<property name="path.arg" value=" "/>
+		</else>
+		</if>
+
+		<if><bool><isset property="env.PKG_CONFIG_PATH"/></bool>
+			<property name="pcpath.arg" value="PKG_CONFIG_PATH=&quot;${env.PKG_CONFIG_PATH}&quot;"/>
+		<else>
+			<property name="pcpath.arg" value=" "/>
+		</else>
+		</if>
+
+		<if><bool><isset property="env.LD_LIBRARY_PATH"/></bool>
+			<property name="ldlpath.arg" value="LD_LIBRARY_PATH=&quot;${env.LD_LIBRARY_PATH}&quot;"/>
+		<else>
+			<property name="ldlpath.arg" value=" "/>
+		</else>
+		</if>
+	</else>
   </if>
 
   <condition property="gs2.opt.args" value= " " else="--disable-mg --disable-mgpp --disable-accentfold --disable-gdbm --disable-sqlite">
@@ -1508,6 +1528,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg line="${cppflags.arg}"/>
       <arg line="${cxxflags.arg}"/>
       <arg line="${path.arg}"/>
+      <arg line="${pcpath.arg}"/>
+      <arg line="${ldlpath.arg}"/>
     </exec>
   </target>
 
@@ -1831,6 +1853,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg line="${cppflags.arg}"/>
       <arg line="${cxxflags.arg}"/>
       <arg line="${path.arg}"/>
+      <arg line="${pcpath.arg}"/>
+      <arg line="${ldlpath.arg}"/>
     </exec>
   </target>
 
