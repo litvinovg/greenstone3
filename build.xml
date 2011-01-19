@@ -222,7 +222,6 @@
 
   <!-- If building a release then we want to adjust environment variables so that the support library can be see during compilation -->
   <if><bool><isset property="use.support.lib"/></bool>
-
 	<property name="gnome-lib-dir" value="${basedir}/ext/gnome-lib-minimal/${os.bin.dir}"/>
 
 	<if><bool><isset property="env.CFLAGS"/></bool>
@@ -267,10 +266,20 @@
 	</else>
 	</if>
 
-	<if><bool><isset property="env.LD_LIBRARY_PATH"/></bool>
-		<property name="ldlpath.arg" value="LD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib:${env.LD_LIBRARY_PATH}&quot;"/>
+	<if><bool><equals arg1="${os.bin.dir}" arg2="darwin"/></bool>
+		<if><bool><isset property="env.DYLD_LIBRARY_PATH"/></bool>
+			<property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib:${env.DYLD_LIBRARY_PATH}&quot;"/>
+		<else>
+			<property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib&quot;"/>
+		</else>
+		</if>
 	<else>
-        	<property name="ldlpath.arg" value="LD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib&quot;"/>
+		<if><bool><isset property="env.LD_LIBRARY_PATH"/></bool>
+			<property name="ldlpath.arg" value="LD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib:${env.LD_LIBRARY_PATH}&quot;"/>
+		<else>
+			<property name="ldlpath.arg" value="LD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib&quot;"/>
+		</else>
+		</if>
 	</else>
 	</if>
 
@@ -317,14 +326,26 @@
 		</else>
 		</if>
 
-		<if><bool><isset property="env.LD_LIBRARY_PATH"/></bool>
-			<property name="ldlpath.arg" value="LD_LIBRARY_PATH=&quot;${env.LD_LIBRARY_PATH}&quot;"/>
+		<if><bool><equals arg1="${os.bin.dir}" arg2="darwin"/></bool>
+			<if><bool><isset property="env.DYLD_LIBRARY_PATH"/></bool>
+				<property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${env.DYLD_LIBRARY_PATH}&quot;"/>
+			<else>
+				<property name="ldlpath.arg" value=" "/>
+			</else>
+			</if>
 		<else>
-			<property name="ldlpath.arg" value=" "/>
-		</else>
+			<if><bool><isset property="env.LD_LIBRARY_PATH"/></bool>
+				<property name="ldlpath.arg" value="LD_LIBRARY_PATH=&quot;${env.LD_LIBRARY_PATH}&quot;"/>
+			<else>
+				<property name="ldlpath.arg" value=" "/>
+			</else>
+			</if>
+		</else>	 
 		</if>
 	</else>
   </if>
+  <property name="allargs" value="${cflags.arg} ${cxxflags.arg} ${cppflags.arg} ${ldflags.arg} ${path.arg} ${ldlpath.arg} ${pcpath.arg}"/>
+  <echo>ALL ARGS = ${allargs}</echo>
 
   <condition property="gs2.opt.args" value= " " else="--disable-mg --disable-mgpp --disable-accentfold --disable-gdbm --disable-sqlite">
     <istrue value="${with.jni}"/>
@@ -1523,13 +1544,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="--bindir=${gs2build.home}/bin/${os.bin.dir}"/> <!-- what value to use?? -->
       <arg line="${gs2.opt.args}"/>
       <arg line="${static.arg}"/>
-      <arg line="${ldflags.arg}"/>
-      <arg line="${cflags.arg}"/>        
-      <arg line="${cppflags.arg}"/>
-      <arg line="${cxxflags.arg}"/>
-      <arg line="${path.arg}"/>
-      <arg line="${pcpath.arg}"/>
-      <arg line="${ldlpath.arg}"/>
+      <arg line="${allargs}"/>
     </exec>
   </target>
 
@@ -1843,18 +1858,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
  
   <target name="configure-build-src" depends="init" if="collection.building.enabled"
     description="Configure the build-src component">
+    <echo>ALL ARGS - BUILD-SRC = ${allargs}</echo>
     <exec executable="${build.src.home}/configure" os="${os.unix}"
       dir="${build.src.home}" failonerror="true">
       <arg value="--prefix=${gs2build.home}"/>
-      <arg line="${gs2.opt.args}"/>
-      <arg line="${static.arg}"/>
-      <arg line="${ldflags.arg}"/>
-      <arg line="${cflags.arg}"/>        
-      <arg line="${cppflags.arg}"/>
-      <arg line="${cxxflags.arg}"/>
-      <arg line="${path.arg}"/>
-      <arg line="${pcpath.arg}"/>
-      <arg line="${ldlpath.arg}"/>
+      <arg line="${gs2.opt.args} ${static.arg} ${allargs}"/>
     </exec>
   </target>
 
@@ -1862,6 +1870,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <target name="compile-build-src" depends="init" if="collection.building.enabled">
     
     <exec executable="make" dir="${build.src.home}" os="${os.unix}" failonerror="true">
+    	<arg line="${ldlpath.arg}"/>
     </exec>
 	
     <exec executable="make" dir="${build.src.home}" os="${os.unix}" failonerror="true">
