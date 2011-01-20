@@ -1857,7 +1857,6 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
  
   <target name="configure-build-src" depends="init" if="collection.building.enabled"
     description="Configure the build-src component">
-    <echo>ALL ARGS - BUILD-SRC = ${allargs}</echo>
     <exec executable="${build.src.home}/configure" os="${os.unix}"
       dir="${build.src.home}" failonerror="true">
       <arg value="--prefix=${gs2build.home}"/>
