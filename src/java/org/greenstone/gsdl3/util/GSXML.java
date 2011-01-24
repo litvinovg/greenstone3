@@ -413,28 +413,31 @@ public class GSXML {
     
   }
   
-  /** copies the metadata out of teh metadataList of 'from' into
+  /** copies the metadata out of the metadataList of 'from' into
    * the metadataList of 'to' */
   public static boolean mergeMetadataLists(Node to, Node from) {
-    Node to_meta = getChildByTagName(to, METADATA_ELEM+LIST_MODIFIER);
     Node from_meta = getChildByTagName(from, METADATA_ELEM+LIST_MODIFIER);
-    
     if  (from_meta == null) { // nothing to copy
       return true;
     }
+    return mergeMetadataFromList(to, from_meta);
+  }
+  
+
+  /** copies the metadata out of the meta_list metadataList  into
+   * the metadataList of 'to' */
+  public static boolean mergeMetadataFromList(Node to, Node meta_list) {
+    if (meta_list == null) return false;
+    Node to_meta = getChildByTagName(to, METADATA_ELEM+LIST_MODIFIER);
     Document to_owner = to.getOwnerDocument();
-    Node new_from = to_owner.importNode(from_meta, true);
-    
-    if (to_meta == null) { // just copy the whole list
-      to.appendChild(new_from);
+    if (to_meta == null) {
+      to.appendChild(to_owner.importNode(meta_list, true));
       return true;
     }
-    
-    // copy individual elements
-    Node child = new_from.getFirstChild();
-    while ( child != null) {
-      to_meta.appendChild(child);
-      child = child.getNextSibling();
+    // copy individual metadata elements
+    NodeList meta_items = ((Element)meta_list).getElementsByTagName(METADATA_ELEM);
+    for (int i=0; i<meta_items.getLength(); i++) {
+      to_meta.appendChild(to_owner.importNode(meta_items.item(i),true));
     }
     return true;
   }
