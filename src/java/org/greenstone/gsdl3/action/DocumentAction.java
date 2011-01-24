@@ -329,7 +329,7 @@ public class DocumentAction extends Action {
 	Element doc_param = this.doc.createElement(GSXML.PARAM_ELEM);
 	doc_meta_param_list.appendChild(doc_param);
 	doc_param.setAttribute(GSXML.NAME_ATT, "metadata");
-	doc_param.setAttribute(GSXML.VALUE_ATT, "archivedir");
+	doc_param.setAttribute(GSXML.VALUE_ATT, "assocfilepath");
 
 	// create the doc node list for the metadata request
 	Element doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
@@ -355,14 +355,13 @@ public class DocumentAction extends Action {
 	// Merge the metadata with the structure information
 	NodeList dm_response_docs = dm_response_doc_list.getChildNodes();
 	for (int i = 0; i < doc_nodes.getLength(); i++) {
-	    GSXML.mergeMetadataLists(doc_nodes.item(i), dm_response_docs.item(i));
+	  GSXML.mergeMetadataLists(doc_nodes.item(i), dm_response_docs.item(i));
 	}
-	// get teh top level doc metadata out
+	// get the top level doc metadata out
 	Element doc_meta_response = (Element)dm_response_message.getElementsByTagName(GSXML.RESPONSE_ELEM).item(1);
-	Element doc_meta_list = (Element)GSXML.getNodeByPath(doc_meta_response, "documentNodeList/documentNode/metadataList");
-	if (doc_meta_list != null) {
-	    the_document.appendChild(this.doc.importNode(doc_meta_list, true));
-	}
+	Element top_doc_node = (Element)GSXML.getNodeByPath(doc_meta_response, "documentNodeList/documentNode");
+	GSXML.mergeMetadataLists(the_document, top_doc_node);
+	
 	// Build a request to obtain some document content
 	Element dc_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 	to = GSPath.appendLink(collection, "DocumentContentRetrieve");  // Hard-wired?
@@ -469,15 +468,19 @@ public class DocumentAction extends Action {
 	    dummy_node.appendChild(this.doc.importNode(dc_response_doc_content, true));
 	    // hack for simple type
 	    if (document_type.equals("simple")) {
-		// we dont want the internal docNode, just want the content and metadata in the document
+	        // we dont want the internal docNode, just want the content and metadata in the document
 		// rethink this!!
 		the_document.removeChild(dummy_node);
 
 		NodeList dummy_children = dummy_node.getChildNodes();
 		//for (int i=0; i<dummy_children.getLength(); i++) {
 		for (int i=dummy_children.getLength()-1; i>=0; i--) {
+		  // special case as we don't want more than one metadata list
+		  if (dummy_children.item(i).getNodeName().equals(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER)) {
+		    GSXML.mergeMetadataFromList(the_document, dummy_children.item(i));
+		  } else {
 		    the_document.appendChild(dummy_children.item(i));
-		    
+		  }
 		}
 	    }
 	} else {
