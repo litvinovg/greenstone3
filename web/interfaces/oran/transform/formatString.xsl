@@ -255,9 +255,11 @@
       <body>
         <h2> This should be the format string (unmodified and html version) </h2> -->
         <!-- <xsl:value-of select="/page/pageResponse" disable-output-escaping="yes"/> -->
+        <format xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">
         <xsl:call-template name="xml">
             <xsl:with-param name="fmt" select="."/>
         </xsl:call-template><xsl:text> </xsl:text>
+        </format>
         <!-- <xsl:apply-templates select="/page/pageResponse" mode="xml"/> -->
       <!-- </body>
     </html> -->

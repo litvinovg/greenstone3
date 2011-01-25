@@ -337,8 +337,8 @@ public class Collection
         }
 
         Element format_element = (Element) GSXML.getChildByTagName(request, GSXML.FORMAT_STRING_ELEM);
-        String format_string = GSXML.getNodeText(format_element);
-        //Element format_statement = (Element) format_element.getFirstChild();
+        //String format_string = GSXML.getNodeText(format_element);
+        Element format_statement = (Element) format_element.getFirstChild();
 
         //logger.error("Format string: " + format_string);
         logger.error("Config file location = " + GSFile.collectionConfigFile(this.site_home, this.cluster_name));
@@ -393,7 +393,7 @@ public class Collection
                 logger.error("Format statement filename is " + format_statement_filename);
 
                 // Write format statement
-                //String format_string = GSXML.xmlNodeToString(format_statement);
+                String format_string = this.converter.getString(format_statement); //GSXML.xmlNodeToString(format_statement);
                 writer = new BufferedWriter(new FileWriter(format_statement_filename));
                 writer.write(format_string);
                 writer.close();
@@ -415,15 +415,15 @@ public class Collection
             try{
 
                 // Convert format string to a document
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder builder = factory.newDocumentBuilder();
+                //DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                //DocumentBuilder builder = factory.newDocumentBuilder();
                 //String input = "<html><head><title></title></head><body>" + format_string + "</body></html>";
-                String input = format_string.substring(0,format_string.length()-1)+"</xml>";
-                logger.error(input);
-                InputSource is = new InputSource( new StringReader( input ) );
-                logger.error("About to parse format string");
-                Document format_statement = (Document) builder.parse( is );
-                logger.error("Done parsing format string");
+                //String input = format_string.substring(0,format_string.length()-1)+"</xml>";
+                //logger.error(input);
+                //InputSource is = new InputSource( new StringReader( input ) );
+                //logger.error("About to parse format string");
+                //Document format_statement = (Document) builder.parse( is );
+                //logger.error("Done parsing format string");
 
                 // open collectionConfig.xml and read in to w3 Document
                 String collection_config = directory + "collectionConfig.xml";
@@ -487,13 +487,18 @@ public class Collection
                 }
 
                 // append new but we have a string!
-                GSXML.setNodeText(elem, format_string);
+                //GSXML.setNodeText(elem, "THIS IS A TEST");
+                //GSXML.setNodeText(elem, format_string);
 
-                //current_node_list = format_statement.getChildNodes();
-                //for(k=0; k<current_node_list.getLength(); k++)
-                //{
-                //    current_node = elem.appendChild(current_node_list.item(k));
-                //}
+                current_node_list = format_statement.getChildNodes();
+                for(k=0; k<current_node_list.getLength(); k++)
+                {
+                    //if(transformed.getNodeType() == Node.DOCUMENT_NODE)
+                //transformed = ((Document)transformed).getDocumentElement();
+                    logger.error("Node type: "+current_node_list.item(k).getNodeType());
+                    if(current_node_list.item(k).getNodeType() != Node.PROCESSING_INSTRUCTION_NODE)
+                        current_node = elem.appendChild(this.doc.importNode(current_node_list.item(k),true));
+                }
 
                 //String text = GSXML.getNodeText(elem);
                 //logger.error(text);
@@ -502,7 +507,7 @@ public class Collection
                 //GSXML.setNodeText(d, text);
 
                 // Now convert config document to string for writing to file
-                String new_config = GSXML.xmlNodeToString(config);
+                String new_config = this.converter.getString(config);
     
                 // Write to file (not original! for now)
                 BufferedWriter writer = new BufferedWriter(new FileWriter(collection_config+".new"));

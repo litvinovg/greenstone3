@@ -96,12 +96,13 @@ public class FormatAction extends Action {
     //}      
 
     try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
+            //DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            //DocumentBuilder builder = factory.newDocumentBuilder();
             //String input = "<html><head><title></title></head><body>" + format_string + "</body></html>";
-            String input = format_string;
-            InputSource is = new InputSource( new StringReader( input ) );
-            Document d = (Document) builder.parse( is );
+            //String input = format_string;
+            //InputSource is = new InputSource( new StringReader( input ) );
+            //Document d = (Document) builder.parse( is );
+            Document d = this.converter.getDOM(format_string); //(Document) builder.parse( is );
             //Node n1 = d.getFirstChild();            
             //Document d2 = (Document) this.doc.importNode(e, true);
 
@@ -110,20 +111,26 @@ public class FormatAction extends Action {
             // Call XSLT to transform document to xml format string
             XMLTransformer transformer = new XMLTransformer();
             // HOW DO I DO THIS PROPERLY?
-            Document style_doc = this.converter.getDOM(new File("/home/sam/greenstone3/web/interfaces/oran/transform/formatString.xsl"), "UTF-8");
+            //String style = stylesheetFile(String gsdl3_home, String site_name, String collection, String interface_name, ArrayList base_interfaces, String filename);
+            //Document style_doc = this.converter.getDOM(new File(style), "UTF-8"); //"/home/sam/greenstone3/web/interfaces/oran/transform/formatString.xsl"), "UTF-8");  /*************************/
+            Document style_doc = this.converter.getDOM(new File("/home/sam/greenstone3/web/interfaces/oran/transform/formatString.xsl"), "UTF-8");  /*************************/
 
             if(style_doc == null)
                 logger.error("style_doc is null");
 
             // not sure what to do here - some code from Transforming Receptionist
-            String transformed = transformer.transformToString(style_doc, d);
+            //String transformed = transformer.transformToString(style_doc, d);
             logger.error("About to transform");
-            //Node transformed = (Node) transformer.transform(style_doc, d);  // Failing org.w3c.dom.DOMException: HIERARCHY_REQUEST_ERR: An attempt was made to insert a node where it is not permitted. ; SystemID: file:///home/sam/greenstone3/packages/tomcat/bin/dummy.xsl
+            Node transformed = (Node) transformer.transform(style_doc, d);  // Failing org.w3c.dom.DOMException: HIERARCHY_REQUEST_ERR: An attempt was made to insert a node where it is not permitted. ; SystemID: file:///home/sam/greenstone3/packages/tomcat/bin/dummy.xsl
 
             logger.error("Transform successful?");
          
             if(transformed==null)  // not null
                 logger.error("TRANSFORMED IS NULL");
+
+            if(transformed.getNodeType() == Node.DOCUMENT_NODE)
+                transformed = ((Document)transformed).getDocumentElement(); 
+            logger.error("Node type: "+transformed.getNodeType());
 
             //logger.error("begin import"); 
             //Node imported = this.doc.importNode(transformed, true); // There was an exception org.w3c.dom.DOMException: NOT_SUPPORTED_ERR: The implementation does not support the requested type of object or operation.
@@ -133,8 +140,8 @@ public class FormatAction extends Action {
             //logger.error("format string="+format_string2);
  
             Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
-            GSXML.setNodeText(format, transformed);
-            //format.appendChild(transformed);
+            //GSXML.setNodeText(format, transformed);
+            format.appendChild(this.doc.importNode(transformed,true));
             //format.setNodeValue(transformed);
             mr_request.appendChild(format); 
             logger.error("Transformed: "+transformed);
