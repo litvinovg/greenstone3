@@ -1954,11 +1954,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <!-- A configuration file containing web service binding information for the axis engine -->
     <copy file="${web.home}/WEB-INF/classes/flax/server-config.wsdd" todir="${web.home}/WEB-INF" overwrite="true" />
     <!-- A static web service wsdl file which is queried by soap client. The reason this file is used (instead of the dynamically generated version) is in case any redirects are used in the Apache configuration (e.g., flax.nzdl.org:80 redirects to harakeke:8080) -->
-    <copy file="${basedir}/flax-resources/FlaxWebService.wsdl" tofile="${web.home}/FlaxWebService.wsdl" filtering="true" overwrite="true">
+    <copy file="${basedir}/flax-resources/FlaxWebService.wsdl" tofile="${web.home}/FlaxWebService.wsdl" filtering="true" overwrite="true"><!-- Do not do the replacement here, as it disrupts the replacement when using the release-kits. Do this manually when installing flax from svn.
     	<filterset>
             <filter token="flaxpublicserver" value="${tomcat.server}"/>
             <filter token="flaxpublicport" value="${tomcat.port}"/>
-    	</filterset>	
+    	</filterset>-->
     </copy>
     <copy todir="${web.home}/WEB-INF/lib">
     	<fileset dir="${basedir}/flax-lib">
