@@ -272,7 +272,7 @@ Other Notes:
 
 See greenstone3/docs/manual/manual.pdf for more details about the software and installation etc.
 
-Output is logged to web/logs. usage.log is a usage log, while greenstone.log is the error/message log. To change the level of logging, edit the web/WEB-INF/classes/log4j.properties file, and change the log4j.disable property. Valid values are TRACE, DEBUG, INFO, WARN, ERROR and FATAL.
+Output is logged to web/logs. usage.log is a usage log, while greenstone.log is the error/message log. To change the level of logging, edit the web/WEB-INF/classes/log4j.properties file, and change the log4j.disable and log4j.rootCategory properties. Valid values are TRACE, DEBUG, INFO, WARN, ERROR and FATAL.
 
 To prevent Tomcat showing directory listings, edit Tomcat's conf/web.xml file and set the value of the "listings" servlet parameter to false.
 
