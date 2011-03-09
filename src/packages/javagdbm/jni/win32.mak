@@ -27,7 +27,7 @@
 JAVAGDBMHOME = ..
  
 GSDLHOME= $(GSDL3HOME)\gs2build
-GDBMHOME = $(GSDLHOME)\packages\windows\gdbm\gdbm
+GDBMHOME = $(GSDLHOME)\common-src\packages\gdbm\gdbm-1.8.3
 
 AR = lib
 CC = cl
@@ -55,7 +55,7 @@ SOURCES = \
     gdbmjava.c
 
 OBJECTS = \
-    gdbmjava$o   "$(GDBMHOME)\gdbm.lib"
+    gdbmjava$o   "$(GDBMHOME)\gdbm.lib" 
  
 all : compile link
 
