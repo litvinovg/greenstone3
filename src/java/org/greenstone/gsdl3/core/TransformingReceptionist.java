@@ -6,9 +6,12 @@ import org.greenstone.gsdl3.action.*;
 // XML classes
 import org.w3c.dom.Node; 
 import org.w3c.dom.NodeList; 
+import org.w3c.dom.Comment;
+import org.w3c.dom.Text;
 import org.w3c.dom.Document; 
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
+import org.w3c.dom.NamedNodeMap;
 
 // other java classes
 import java.io.File;
@@ -25,6 +28,8 @@ import javax.xml.transform.stream.*;
 import org.apache.log4j.*;
 import org.apache.xerces.dom.*;
 import org.apache.xerces.parsers.DOMParser;
+
+import org.apache.commons.lang3.StringUtils;
 
 /** A receptionist that uses xslt to transform the page_data before returning it. . Receives requests consisting
  * of an xml representation of cgi args, and returns the page of data - in 
@@ -80,7 +85,7 @@ public class TransformingReceptionist extends Receptionist{
   /** configures the receptionist - overwrite this to set up the xslt map*/
   public boolean configure() {
 	
-    if (this.config_params==null) {
+   if (this.config_params==null) {
       logger.error(" config variables must be set before calling configure");
       return false;
     }
@@ -278,28 +283,132 @@ public class TransformingReceptionist extends Receptionist{
    * we need to get any format element out of the page and add it to the xslt
    * before transforming */
   protected Node transformPage(Element page) {
+  	
+	 boolean allowsClientXSLT = (Boolean)config_params.get(GSConstants.ALLOW_CLIENT_SIDE_XSLT);
+	 //System.out.println("Client side transforms allowed? " + allowsClientXSLT);
+	 
+	 // Force it back to traditional
+	 if(!allowsClientXSLT)
+		config_params.put(GSConstants.INTERFACE_NAME, "traditional");
+	
+  	 Element request = (Element)GSXML.getChildByTagName(page, GSXML.PAGE_REQUEST_ELEM);
+	 String output = request.getAttribute(GSXML.OUTPUT_ATT);  	
+	 
+	 String currentInterface = (String)config_params.get(GSConstants.INTERFACE_NAME);
+	 //System.out.println("Current output mode is: " + output + ", current interface name is: " + currentInterface);
+	 
+	 if(allowsClientXSLT) {
+		 if((currentInterface.equals("default") && output.equals("html")) || output.equals("server"))
+		   // Switch the interface
+		   config_params.put(GSConstants.INTERFACE_NAME, "traditional");
+		 else if(currentInterface.equals("traditional") && !output.equals("html"))
+		   // The reverse needs to happen too
+		   config_params.put(GSConstants.INTERFACE_NAME, "default");
+	}
+  	
+    // DocType defaults in case the skin doesn't have an "xsl:output" element
+    String qualifiedName = "html";
+    String publicID = "-//W3C//DTD HTML 4.01 Transitional//EN";
+    String systemID = "http://www.w3.org/TR/html4/loose.dtd";
+		
+    // We need to create an empty document with a predefined DocType,
+    // that will then be used for the transformation by the DOMResult
+    Document docWithDoctype = converter.newDOM(qualifiedName, publicID, systemID);		
+		
+	if(output.equals("xsltclient")) {
+	// If you're just getting the client-side transform page, why bother with the rest of this?
+	Element html = docWithDoctype.createElement("html");
+	 Element img = docWithDoctype.createElement("img");
+	 img.setAttribute("src", "interfaces/default/images/loading.gif"); // Make it dynamic
+	 img.setAttribute("alt", "Please wait...");
+	 Text title_text = docWithDoctype.createTextNode("Please wait..."); // Make this language dependent
+	 Element head = docWithDoctype.createElement("head");
+	 Element title = docWithDoctype.createElement("title");
+	 title.appendChild(title_text);
+	 Element body = docWithDoctype.createElement("body");
+	 Element script = docWithDoctype.createElement("script");
+	 Element jquery = docWithDoctype.createElement("script");
+	 jquery.setAttribute("src", "jquery.js");
+	 jquery.setAttribute("type", "text/javascript");
+	 Comment jquery_comment = docWithDoctype.createComment("jQuery");
+	 Comment script_comment = docWithDoctype.createComment("Filler for browser");
+	 script.setAttribute("src", "test.js");
+	 script.setAttribute("type", "text/javascript");
+	 Element pagevar = docWithDoctype.createElement("script");
+	 Element style = docWithDoctype.createElement("style");
+	 style.setAttribute("type", "text/css");
+	 Text style_text = docWithDoctype.createTextNode("body { text-align: center; padding: 50px; font: 14pt Arial, sans-serif; font-weight: bold; }");
+	 pagevar.setAttribute("type", "text/javascript");
+	 Text page_var_text = docWithDoctype.createTextNode("var placeholder = true;");
+	 
+	 html.appendChild(head);
+	 head.appendChild(title);
+	 head.appendChild(style);
+	 style.appendChild(style_text);
+	 html.appendChild(body);
+	 head.appendChild(pagevar);
+	 head.appendChild(jquery);
+	 head.appendChild(script);
+	 pagevar.appendChild(page_var_text);
+	 jquery.appendChild(jquery_comment);
+	 script.appendChild(script_comment);
+	 body.appendChild(img);
+	 docWithDoctype.appendChild(html);
+	 
+	 return (Node)docWithDoctype;
+	 }
 
+    // Passing in the pretty string here means it needs to be generated even when not debugging; so use custom function to return blank when debug is off
     logger.debug("page before transforming:");
-    logger.debug(this.converter.getPrettyString(page));
+    logger.debug(this.converter.getPrettyStringLogger(page, logger));
 
-    Element request = (Element)GSXML.getChildByTagName(page, GSXML.PAGE_REQUEST_ELEM);
     String action = request.getAttribute(GSXML.ACTION_ATT);
     String subaction = request.getAttribute(GSXML.SUBACTION_ATT);
-		
-    String output = request.getAttribute(GSXML.OUTPUT_ATT);
+
     // we should choose how to transform the data based on output, eg diff
     // choice for html, and wml??
     // for now, if output=xml, we don't transform the page, we just return 
     // the page xml
-    if (output.equals("xml")) {
-      return page;
+    Document theXML = null;
+    
+    if (output.equals("xml") || output.equals("clientside")) {
+      // Append some bits and pieces first...
+      theXML = converter.newDOM();
+      // Import into new document first!
+      Node newPage = theXML.importNode(page, true);
+      theXML.appendChild(newPage);
+      Element root = theXML.createElement("xsltparams");
+      newPage.appendChild(root);
+      
+      Element libname = theXML.createElement("param");
+      libname.setAttribute("name", "library_name");
+      Text libnametext = theXML.createTextNode((String)config_params.get(GSConstants.LIBRARY_NAME));
+      libname.appendChild(libnametext);
+      
+      Element intname = theXML.createElement("param");
+      intname.setAttribute("name", "interface_name");
+      Text intnametext = theXML.createTextNode((String)config_params.get(GSConstants.INTERFACE_NAME));
+      intname.appendChild(intnametext);
+	  
+	  Element filepath = theXML.createElement("param");
+	  filepath.setAttribute("name", "filepath");
+	  Text filepathtext = theXML.createTextNode(GlobalProperties.getGSDL3Home());
+	  filepath.appendChild(filepathtext);
+      
+      root.appendChild(libname);
+      root.appendChild(intname);   
+	  root.appendChild(filepath);
+      
+      if(output.equals("xml"))
+      return theXML.getDocumentElement();
     }
 		
 
     Element cgi_param_list = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
     String collection = "";
     if (cgi_param_list != null) {
-      HashMap params = GSXML.extractParams(cgi_param_list, false);
+      // Don't waste time getting all the parameters
+      HashMap params = GSXML.extractParams(cgi_param_list, false, GSParams.COLLECTION);
       collection = (String)params.get(GSParams.COLLECTION);
       if (collection == null) collection = "";
     }
@@ -313,8 +422,7 @@ public class TransformingReceptionist extends Receptionist{
     Document style_doc = this.converter.getDOM(new File(xslt_file), "UTF-8");
     String errorPage = this.converter.getParseErrorMessage();
     if(errorPage != null) {
-      return XMLTransformer.constructErrorXHTMLPage(
-						    "Cannot parse the xslt file: " + xslt_file + "\n" + errorPage);
+      return XMLTransformer.constructErrorXHTMLPage("Cannot parse the xslt file: " + xslt_file + "\n" + errorPage);
     }
     if (style_doc == null) {
       logger.error(" cant parse the xslt file needed, so returning the original page!");
@@ -334,14 +442,15 @@ public class TransformingReceptionist extends Receptionist{
     }
     if (format_elem != null) {
       //page_response.removeChild(format_elem);
-      logger.debug("format elem="+this.converter.getPrettyString(format_elem));
+      logger.debug("format elem="+this.converter.getPrettyStringLogger(format_elem, logger));
       // need to transform the format info
       String configStylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String)this.config_params.get(GSConstants.SITE_NAME), collection, (String)this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces,   "config_format.xsl");
       Document configStylesheet_doc = this.converter.getDOM(new File(configStylesheet_file));
+
       if (configStylesheet_doc != null) {
 	Document format_doc = this.converter.newDOM();
 	format_doc.appendChild(format_doc.importNode(format_elem, true));
-	Node result = this.transformer.transform(configStylesheet_doc, format_doc);
+	Node result = this.transformer.transform(configStylesheet_doc, format_doc); // Needs addressing <-
 				
 	// Since we started creating documents with DocTypes, we can end up with 
 	// Document objects here. But we will be working with an Element instead, 
@@ -352,7 +461,7 @@ public class TransformingReceptionist extends Receptionist{
 	} else {
 	  new_format = (Element)result;
 	}
-	logger.debug("new format elem="+this.converter.getPrettyString(new_format));
+	logger.debug("new format elem="+this.converter.getPrettyStringLogger(new_format, logger));
 	if (output.equals("newformat")) {
 	  return new_format;
 	}
@@ -369,14 +478,14 @@ public class TransformingReceptionist extends Receptionist{
 	//GSXSLT.mergeStylesheets(oldStyle_doc, format_elem);
       }
       logger.debug("the converted stylesheet is:");
-      logger.debug(this.converter.getPrettyString(style_doc.getDocumentElement()));
+      logger.debug(this.converter.getPrettyStringLogger(style_doc.getDocumentElement(), logger));
     }
 		
     //for debug purposes only
     Document oldStyle_doc = style_doc;
 
 
-    Document preprocessingXsl  ;
+    Document preprocessingXsl;
     try {
       preprocessingXsl = getPreprocessDoc();
       String errMsg = ((XMLConverter.ParseErrorHandler)parser.getErrorHandler()).getErrorMessage();
@@ -536,17 +645,27 @@ public class TransformingReceptionist extends Receptionist{
     if (output.equals("skinandlib")) {
       return converter.getDOM(getStringFromDocument(skinAndLibraryXsl));
     }
-    if (output.equals("skinandlibdoc")) {
-      return converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
+    if (output.equals("skinandlibdoc") || output.equals("clientside")) { 	
+    	
+    	Node skinAndLib = converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
+    	
+    	if(output.equals("skinandlibdoc")) {
+      return skinAndLib;
+       } else {
+       	// Send XML and skinandlibdoc down the line together
+       	Document finalDoc = converter.newDOM();
+       	Node finalDocSkin = finalDoc.importNode(skinAndLibraryDoc.getDocumentElement(), true);
+       	Node finalDocXML = finalDoc.importNode(theXML.getDocumentElement(), true);
+       	Element root = finalDoc.createElement("skinlibPlusXML");
+       	root.appendChild(finalDocSkin);
+       	root.appendChild(finalDocXML);
+       	finalDoc.appendChild(root);
+       	return (Node)finalDoc.getDocumentElement();
+       }
     }
     if (output.equals("oldskindoc")) {
       return converter.getDOM(getStringFromDocument(oldStyle_doc));
     }
-
-    // DocType defaults in case the skin doesn't have an "xsl:output" element
-    String qualifiedName = "html";
-    String publicID = "-//W3C//DTD HTML 4.01 Transitional//EN";
-    String systemID = "http://www.w3.org/TR/html4/loose.dtd";
 
     // Try to get the system and public ID from the current skin xsl document
     // otherwise keep the default values.
@@ -570,24 +689,21 @@ public class TransformingReceptionist extends Receptionist{
       }
     }
 		
-    // We need to create an empty document with a predefined DocType,
-    // that will then be used for the transformation by the DOMResult
-    Document docWithDoctype = converter.newDOM(qualifiedName, publicID, systemID);
-		
     //System.out.println(converter.getPrettyString(docWithDoctype));
     //System.out.println("Doctype vals: " + qualifiedName + " " + publicID + " " + systemID) ;
 		
+	 docWithDoctype = converter.newDOM(qualifiedName, publicID, systemID);			
 		
     //System.out.println("Generate final HTML from current skin") ;
     //Transformation of the XML message from the receptionist to HTML with doctype
-    return this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype);
-		
-		
+
+    return this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype); // The default
+	
     // The line below will do the transformation like we use to do before having Skin++ implemented,
     // it will not contain any GS-Lib statements expanded, and the result will not contain any doctype.
 
     //return (Element)this.transformer.transform(style_doc, doc, config_params);  
-
+	//return null; // For now - change later
   }
 	
 	
@@ -605,7 +721,7 @@ public class TransformingReceptionist extends Receptionist{
 	transformer.transform(domSource, result);
 	content = writer.toString();
 	System.out.println("Change the & to &Amp; for proper debug dispay") ;
-	content = content.replaceAll("&", "&amp;");
+	content = StringUtils.replace(content, "&", "&amp;");
 	writer.flush();
       }
     catch(TransformerException ex)
