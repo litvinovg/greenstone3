@@ -44,6 +44,8 @@ import java.util.Properties;
 
 import org.apache.log4j.*;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * The hub of a Greenstone system.
  *
@@ -270,7 +272,7 @@ public class MessageRouter implements  ModuleInterface {
         // The message needs to go to another module. The same message can 
         // be passed to multiple modules  - they will be in a comma 
         // separated list in the 'to' attribute
-        String [] modules = path.split(",");
+        String [] modules = StringUtils.split(path, ",");
         
         for (int j=0; j<modules.length; j++) {
           // why can't we do this outside the loop??
