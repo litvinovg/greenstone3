@@ -1,0 +1,186 @@
+<interfaceConfig>
+  <actionList>
+    <action name='p' class='PageAction'>
+      <subaction name='home' xslt='home.xsl'/>
+      <subaction name='about' xslt='about.xsl'/>
+      <subaction name='help' xslt='help.xsl'/>
+      <subaction name='pref' xslt='pref.xsl'/>
+      <subaction name='gli4gs3' xslt='gli4gs3.xsl'/>
+      <subaction name='nav' xslt='nav.xsl'/><!-- used for the collection header frame -->
+      <subaction name="html" xslt="html.xsl"/> <!-- use to put an external page into a frame with a collection header-->
+    </action>
+    <action name='q' class='QueryAction' xslt='query.xsl'/>
+    <action name='b' class='GS2BrowseAction' xslt='classifier.xsl'/>
+    <action name='a' class='AppletAction' xslt='applet.xsl'/>
+    <action name='d' class='DocumentAction' xslt='document.xsl'/>
+    <action name='xd' class='XMLDocumentAction'>
+      <subaction name='toc' xslt='document-toc.xsl'/>
+      <subaction name='text' xslt='document-content.xsl'/>
+    </action>
+    <action name='pr' class='ProcessAction' xslt='process.xsl'/>
+    <action name='s' class='SystemAction' xslt='system.xsl'/>
+    <action name='g' class='GeneralAction'>
+      <subaction name="authen" xslt='authen.xsl'/>
+      <subaction name="berry" xslt='berry.xsl'/>
+    </action>
+  </actionList>
+  <languageList>
+    <language name="en">
+      <displayItem name='name'>English</displayItem>
+    </language>
+    <language name="fr">
+      <displayItem name='name'>Français</displayItem>
+    </language>
+    <language name='es'>
+      <displayItem name='name'>Español</displayItem>
+    </language>
+    <language name="jp">
+      <displayItem name='name'>にほんご</displayItem>
+    </language>
+    <language name="vi">
+      <displayItem name='name'>Vietnamese</displayItem>
+    </language>
+    <language name='ar'>
+      <displayItem name='name'>Arabic</displayItem>
+    </language>
+  	<language name='bg'>
+      <displayItem name='name'>Bulgarian</displayItem>
+    </language>
+  	<language name='bn'>
+      <displayItem name='name'>বাংলা (Bengali)</displayItem>
+    </language>
+  	<language name='ca'>
+      <displayItem name='name'>Català (Catalan)</displayItem>
+    </language>
+  	<language name='cs'>
+      <displayItem name='name'>Česky (Czech)</displayItem>
+    </language>
+  	<language name='de'>
+      <displayItem name='name'>Deutsch (German)</displayItem>
+    </language>
+  	<language name='el'>
+      <displayItem name='name'>Ελληνικά (Greek)</displayItem>
+    </language>
+    <language name='fa'>
+      <displayItem name='name'>Farsi</displayItem>
+    </language>
+    <language name='fi'>
+      <displayItem name='name'>Finnish</displayItem>
+    </language>
+    <language name='gd'>
+      <displayItem name='name'>Gaelic (Scottish)</displayItem>
+    </language>
+    <language name='gl'>
+      <displayItem name='name'>Galician</displayItem>
+    </language>
+    <language name='he'>
+      <displayItem name='name'>Hebrew</displayItem>
+    </language>
+    <language name='hi'>
+      <displayItem name='name'>Hindi</displayItem>
+    </language>
+    <language name='hu'>
+      <displayItem name='name'>Hungarian</displayItem>
+    </language>
+    <language name='hy'>
+      <displayItem name='name'>Armenian</displayItem>
+    </language>
+    <language name='id'>
+      <displayItem name='name'>Bahasa Indonesia (Indonesian)</displayItem>
+    </language>
+    <language name='it'>
+      <displayItem name='name'>Italiano</displayItem>
+    </language>    
+    <language name='ka'>
+      <displayItem name='name'>Georgian</displayItem>
+    </language>
+    <language name='kk'>
+      <displayItem name='name'>Қазақ (Kazakh)</displayItem>
+    </language>
+    <language name='kn'>
+      <displayItem name='name'>Kannada</displayItem>
+    </language>
+    <language name='ky'>
+      <displayItem name='name'>Кыргызча (Kirghiz)</displayItem>
+    </language>    
+    <language name='lv'>
+      <displayItem name='name'>Latvian</displayItem>
+    </language>
+	<language name='mi'>
+      <displayItem name='name'>Māori</displayItem>
+    </language>
+	<language name='ml'>
+      <displayItem name='name'>Malayalam</displayItem>
+    </language>
+	<language name='mn'>
+      <displayItem name='name'>Монгол (Mongolian)</displayItem>
+    </language>
+	<language name='mr'>
+      <displayItem name='name'>Marathi</displayItem>
+    </language>
+	<language name='nl'>
+      <displayItem name='name'>Nederlands (Dutch)</displayItem>
+    </language>
+	<language name='pl'>
+      <displayItem name='name'>polski (Polish)</displayItem>
+    </language>
+	<language name='pt-br'>
+      <displayItem name='name'>português-BR (Brasil)</displayItem>
+    </language>
+	<language name='pt-pt'>
+      <displayItem name='name'>português-PT (Portugal)</displayItem>
+    </language>
+	<language name='ps'>
+      <displayItem name='name'>Pushto</displayItem>
+    </language>
+	<language name='prs'>
+      <displayItem name='name'>Dari</displayItem>
+    </language>
+	<language name='ro'>
+      <displayItem name='name'>Romanian</displayItem>
+    </language>
+	<language name='ru'>
+      <displayItem name='name'>русский (Russian)</displayItem>
+    </language>
+	<language name='si'>
+      <displayItem name='name'>Sinhalese</displayItem>
+    </language>
+	<language name='sk'>
+      <displayItem name='name'>Slovenčina (Slovak)</displayItem>
+    </language>
+	<language name='sr'>
+      <displayItem name='name'>Serbian</displayItem>
+    </language>
+	<language name='ta'>
+      <displayItem name='name'>Tamil</displayItem>
+    </language>	
+	<language name='te'>
+      <displayItem name='name'>Telugu</displayItem>
+    </language>
+	<language name='th'>
+      <displayItem name='name'>Thai</displayItem>
+    </language>
+	<language name='tr'>
+      <displayItem name='name'>Turkish</displayItem>
+    </language>
+	<language name='uk'>
+      <displayItem name='name'>Ukrainian</displayItem>
+    </language>
+	<language name='ur'>
+      <displayItem name='name'>Urdu</displayItem>
+    </language>
+	<language name='vi'>
+      <displayItem name='name'>Tiếng Việt</displayItem>
+    </language>
+	<language name='zh'>
+      <displayItem name='name'>简体中文 (Simplified Chinese)</displayItem>
+    </language>
+	<language name='zh-tr'>
+      <displayItem name='name'>繁體中文 (Traditional Chinese)</displayItem>
+    </language>
+  </languageList>
+  <optionList>
+    <option name="highlightQueryTerms" value="true"/>
+    <option name="berryBaskets" value="true"/>
+  </optionList>
+</interfaceConfig>
