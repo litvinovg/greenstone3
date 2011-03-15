@@ -23,11 +23,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.net.URLDecoder;
 
+// Apache Commons
+import org.apache.commons.lang3.*;
+
+import java.util.Stack;
+
 public class GS2MacroResolver 
     extends MacroResolver
 {
 
     protected SimpleCollectionDatabase coll_db = null;
+
+    private static Pattern p_back_slash = Pattern.compile("\\\"");// create a pattern "\\\"", but it matches both " and \"
     
     // need to make it not add macros if they are already present
     public GS2MacroResolver(SimpleCollectionDatabase db) {
@@ -57,15 +64,16 @@ public class GS2MacroResolver
 	    this.lang = lang;
 	} 
 
-	ArrayList macros;
+	Stack macros;//ArrayList macros;
 	if (scope.equals(SCOPE_TEXT)) {
 	    macros = text_macros;
 	} else {
 	    macros = metadata_macros;
 	}
-	for (int i=0; i<macros.size(); i++) {
+	//for (int i=0; i<macros.size(); i++) {
+	while(!macros.empty()) {
 	    String new_text = null;
-	    Macro m = (Macro)macros.get(i);
+	    Macro m = (Macro)macros.pop();//.get(i);
 	    switch (m.type) {
 	    case TYPE_DICT:
 		if (m.text==null || new_lang) {
@@ -75,24 +83,28 @@ public class GS2MacroResolver
 		// we assume that dictionary entries will contain no macros
 		// otherwise we can't cache the answer because it might be 
 		// document specific
-		text = text.replaceAll(m.macro, m.text);
+		text = StringUtils.replace(text, m.macro, m.text);
 		break;
 	    case TYPE_TEXT:
 		// make sure we resolve any macros in the text
 		// the (?s) treats the string as a single line, cos . 
 		// doesn't necessarily match line breaks
 		//if (text.matches("(?s).*"+m.macro+".*")) {
-		Pattern p_text = Pattern.compile(".*" + m.macro + ".*",Pattern.DOTALL);
-		Matcher match_text = p_text.matcher(text);
-		if (match_text.matches()) {
+		
+		/*Pattern p_text = Pattern.compile(".*" + m.macro + ".*",Pattern.DOTALL);
+		Matcher match_text = p_text.matcher(text);*/
+
+		// sm252
+		// String.contains is far faster than regex!
+		if (text.contains(m.macro)) { //match_text.matches()) { //text.matches("(?s).*"+m.macro+".*")) {
 		    if (m.resolve) {
 			new_text = this.resolve(m.text, lang, scope, doc_oid);
 		    } else {
 			new_text = m.text;
 		    }
-		    text = text.replaceAll(m.macro, new_text);
+		    text = StringUtils.replace(text, m.macro, new_text);
 		    if (m.macro.endsWith("\\\\")){ // to get rid of "\" from the string likes: "src="http://www.greenstone.org:80/.../mw.gif\">"
-			Pattern p_back_slash = Pattern.compile("\\\"");// create a pattern "\\\"", but it matches both " and \"
+			
 			Matcher m_slash = p_back_slash.matcher(text);
 			String clean_str = "";
 			int s=0;
@@ -110,9 +122,10 @@ public class GS2MacroResolver
 		}
 		break;
 	    case TYPE_META:
-		Pattern p = Pattern.compile(".*" + m.macro + ".*",Pattern.DOTALL);
-		Matcher match = p.matcher(text);
-		if (match.matches()) {
+		//Pattern p = Pattern.compile(".*" + m.macro + ".*",Pattern.DOTALL);
+		//Matcher match = p.matcher(text);
+		// sm252
+		if (text.contains(m.macro)) { //(match.matches()) { //text.matches("(?s).*"+m.macro+".*")) {
 		    if (node_info == null) {
 			node_info = coll_db.getInfo(doc_oid);
 			if (node_info == null) {
@@ -132,7 +145,7 @@ public class GS2MacroResolver
 			if (m.resolve) {
 			    new_text = this.resolve(new_text, lang, scope, doc_oid);
 			}
-			text = text.replaceAll(m.macro, new_text);
+			text =  StringUtils.replace(text, m.macro, new_text);
 		    }
 		    
 		}

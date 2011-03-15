@@ -27,6 +27,8 @@ import java.text.SimpleDateFormat;
 import org.apache.log4j.*;
 import org.w3c.dom.Node; 
 
+import org.apache.commons.lang3.StringUtils;
+
 /** a class to contain various static methods that are used by the xslt
  * stylesheets
  */
@@ -87,7 +89,7 @@ public class XSLTUtil {
     }
 
     public static String getNumberedItem(String list, int number) {
-	String [] items = list.split(",", -1);	
+	String [] items = StringUtils.split(list, ",", -1);	
 	if (items.length > number) {
 	    return items[number];
 	}
@@ -111,7 +113,7 @@ public class XSLTUtil {
     public static String getInterfaceText(String interface_name, String lang, String key, String args_str) {
 	String [] args = null;
 	if (args_str!=null && !args_str.equals("")) {
-	    args = args_str.split(";");
+	    args = StringUtils.split(args_str, ";");
 	}
 	Dictionary dict = new Dictionary("interface_"+interface_name, lang);
 	String result = dict.get(key, args);

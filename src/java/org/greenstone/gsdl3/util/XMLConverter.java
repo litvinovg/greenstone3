@@ -40,8 +40,15 @@ import java.io.StringReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.util.regex.*;
 
 import org.apache.log4j.*;
+
+// Apache Commons
+import org.apache.commons.lang3.*;
+
+import java.util.*;
+import java.lang.reflect.*;
 
 /** XMLConverter - utility class for greenstone
  *
@@ -58,7 +65,6 @@ public class XMLConverter {
     protected DOMParser parser = null;
 
     private static boolean outputEscaping = true;
-
 
      /** the no-args constructor */
     public XMLConverter() {
@@ -215,6 +221,17 @@ public class XMLConverter {
 	return xmlRepresentation.toString();
     }
 
+    /* For the purposes of logger.debug statements, where this is called and hence outputted,
+	returns an empty string if debugging is not enabled */
+    public static String getPrettyStringLogger(Node xmlNode, Logger log) {
+
+	if(log.isDebugEnabled())
+		return getPrettyString(xmlNode);
+	
+	return "";
+
+    }
+
     private static void getString(Node xmlNode, StringBuffer xmlRepresentation, 
 			     int depth, boolean pretty)
     {
@@ -241,7 +258,8 @@ public class XMLConverter {
 		String pid  = dt.getPublicId();
 		String sid  = dt.getSystemId();
 		
-		String doctype_str = "<!DOCTYPE " + dt.getName() + " PUBLIC \"" + pid + "\" \"" + sid + "\">\n";
+		// Use previously assigned name, not dt.getName() again
+		String doctype_str = "<!DOCTYPE " + name + " PUBLIC \"" + pid + "\" \"" + sid + "\">\n";
 		
 		xmlRepresentation.append(doctype_str);
 	    }
@@ -320,16 +338,19 @@ public class XMLConverter {
 	    String text = xmlNode.getNodeValue();
 
 	    // Perform output escaping, if required
+	    // Apache Commons replace method is far superior to String.replaceAll - very fast!
 	    if (outputEscaping) {
-		text = text.replaceAll("&", "&amp;");  // Must be done first!!
-		text = text.replaceAll("<", "&lt;");
-		text = text.replaceAll(">", "&gt;");
-		text = text.replaceAll("\"", "&quot;");
-		text = text.replaceAll("\'", "&apos;");
+
+		text = StringUtils.replace(text, "&", "&amp;");
+		text = StringUtils.replace(text, "<", "&lt;");
+		text = StringUtils.replace(text, ">", "&gt;");
+		text = StringUtils.replace(text, "'", "&apos;");
+		text = StringUtils.replace(text, "\"", "&quot;");
 	    }
 
 	    // Remove any control-C characters
-	    text = text.replaceAll("" + (char) 3, "");
+	    text = StringUtils.replace(text, "" + (char)3, "");
+
 	    xmlRepresentation.append(text);
 	}
 

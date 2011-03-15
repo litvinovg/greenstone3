@@ -20,6 +20,8 @@ package org.greenstone.gsdl3.util;
 
 import org.apache.log4j.*;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class SimpleCollectionDatabase implements OID.OIDTranslatable {
   
   static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.SimpleCollectionDatabase.class.getName());
@@ -103,7 +105,7 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable {
     
     DBInfo info = new DBInfo();
     
-    String [] lines = key_info.split("\n");
+    String [] lines = StringUtils.split(key_info, "\n");
     String key;
     String value;
     for (int i=0; i<lines.length; i++) {
@@ -192,8 +194,8 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable {
       // something is wrong
       return top;
     }
-    contains = contains.replaceAll("\"", doc_id);
-    String [] children = contains.split(";");
+    contains = StringUtils.replace(contains, "\"", doc_id);
+    String [] children = StringUtils.split(contains, ";");
     if (suff.equals("fc")) {
       return children[0];
     } else if (suff.equals("lc")) {

@@ -263,10 +263,14 @@ public class GSXML {
     return ids;
   }
   
+  public static HashMap extractParams(Element xml, boolean deep) {
+	return extractParams(xml, deep, null);
+  }
+
   /** takes a paramList element, and gets a HashMap of name-value pairs
    * if deep=true, extracts embedded params, otherwise just top level
    * params*/
-  public static HashMap extractParams(Element xml, boolean deep) {
+  public static HashMap extractParams(Element xml, boolean deep, String toFind) {
     
     if (!xml.getNodeName().equals(PARAM_ELEM+LIST_MODIFIER)) {
       logger.error("paramList element should have been passed to extractParams, instead it was "+xml.getNodeName());
@@ -285,6 +289,15 @@ public class GSXML {
         Element param = (Element)params.item(i);
         String name=param.getAttribute(NAME_ATT);
         String value=getValue(param); //att or content
+
+	// For only one parameter
+	if(toFind != null && name.equals(toFind)) {
+		param_map.put(name, value);
+		return param_map;
+	}		
+	else if(toFind != null)
+		continue;
+
         int pos = name.indexOf('.');
         if (pos == -1) { // a base param
           param_map.put(name, value);
