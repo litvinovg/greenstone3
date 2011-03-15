@@ -18,6 +18,8 @@ import java.io.File;
 import java.util.Hashtable;
 import org.apache.log4j.*;
 
+// Apache Commons
+import org.apache.commons.lang3.*;
 
 /** a servlet to serve the greenstone library - we are using servlets instead
  * of cgi
@@ -42,6 +44,9 @@ public class LibraryServlet extends HttpServlet {
   /** the default language - is specified by setting a servlet param,
    * otherwise DEFAULT_LANG is used*/
   protected String default_lang= null;
+  
+  /** Whether or not client-side XSLT support should be exposed */
+  protected boolean supports_client_xslt = false;
 
   /** The default default - used if a default lang is not specified
    * in the servlet params */
@@ -86,8 +91,13 @@ public class LibraryServlet extends HttpServlet {
     String library_name = config.getInitParameter(GSConstants.LIBRARY_NAME);
     String gsdl3_home = config.getInitParameter(GSConstants.GSDL3_HOME);
     String interface_name = config.getInitParameter(GSConstants.INTERFACE_NAME);
+	
+	String allowXslt = (String)config.getInitParameter(GSConstants.ALLOW_CLIENT_SIDE_XSLT);
+	supports_client_xslt = allowXslt != null && allowXslt.equals("true");
+	
     this.default_lang = config.getInitParameter(GSConstants.DEFAULT_LANG);
     String sess_expire = config.getInitParameter(GSXML.SESSION_EXPIRATION);
+	
     if (sess_expire != null && !sess_expire.equals("")) {
       this.session_expiration = Integer.parseInt(sess_expire);
     }
@@ -124,7 +134,9 @@ public class LibraryServlet extends HttpServlet {
     HashMap config_params = new HashMap();
     
     config_params.put(GSConstants.LIBRARY_NAME, library_name);
-    config_params.put(GSConstants.INTERFACE_NAME, interface_name);
+    config_params.put(GSConstants.INTERFACE_NAME, interface_name);	
+	config_params.put(GSConstants.ALLOW_CLIENT_SIDE_XSLT, supports_client_xslt);
+	
     if (site_name != null) {
       config_params.put(GSConstants.SITE_NAME, site_name);
     }
@@ -280,25 +292,29 @@ public class LibraryServlet extends HttpServlet {
 
     String query_string = request.getQueryString();
     if (query_string!=null){
-      String[] query_arr = query_string.split("&");
+      String[] query_arr = StringUtils.split(query_string, "&");
       boolean redirect = false;
       String href = null;
       String rl = null;
+      String[] nameval = new String[2]; // Reuse it for memory efficiency purposes	
+
       for (int i=0;i<query_arr.length;i++){
+
         if (query_arr[i].startsWith("el=")){
           if (query_arr[i].substring(query_arr[i].indexOf("=")+1,query_arr[i].length()).equals("direct")){
             redirect = true;
           }
         }else if(query_arr[i].startsWith("href=")){
           href = query_arr[i].substring(query_arr[i].indexOf("=")+1,query_arr[i].length());
-          href = href.replaceAll("%2f", "/");
-          href = href.replaceAll("%7e", "~");
-          href = href.replaceAll("%3f", "?");
-          href = href.replaceAll("%3A", "\\:");
+          href = StringUtils.replace(href, "%2f", "/");
+          href = StringUtils.replace(href, "%7e", "~");
+          href = StringUtils.replace(href, "%3f", "?");
+          href = StringUtils.replace(href, "%3A", "\\:");
         }else if(query_arr[i].startsWith("rl=")){
           rl = query_arr[i].substring(query_arr[i].indexOf("=")+1,query_arr[i].length());
         }
       }
+
       //if query_string contains "el=", the web page will be redirected to the external URl, otherwise a greenstone page with an external URL will be displayed
       //"rl=0" this is an external link
       //"rl=1" this is an internal link
@@ -307,8 +323,8 @@ public class LibraryServlet extends HttpServlet {
         response.sendRedirect(href);
       }
     }
+	
     // Nested Diagnostic Configurator to identify the client for
-    
     HttpSession session = request.getSession (true);
     session.setMaxInactiveInterval(session_expiration);
     String uid = (String)session.getAttribute (GSXML.USER_ID_ATT);
@@ -337,11 +353,34 @@ public class LibraryServlet extends HttpServlet {
     if (output==null || output.equals ("")) {
       output = "html"; // uses html by default
     }
-    
+	
+	// If server output, force a switch to traditional interface
+	//output = (output.equals("server")) ? "html" : output;
+	
+	// Force change the output mode if client-side XSLT is supported - server vs. client
+	// BUT only if the library allows client-side transforms	
+	if(supports_client_xslt) {
+		// MUST be done before the xml_message is built
+		Cookie[] cookies = request.getCookies();
+		Cookie xsltCookie = null;
+		
+		// The client has cookies enabled and a value set - use it!
+		if(cookies != null) {
+			for(Cookie c : cookies) {
+				if(c.getName().equals("supportsXSLT")) {
+					xsltCookie = c;
+					break;
+				}
+			}
+			output = (xsltCookie != null && xsltCookie.getValue().equals("true") && output.equals("html")) ? "xsltclient" : output;
+		}
+	}
+	
     // the request to the receptionist
     Element xml_message = this.doc.createElement (GSXML.MESSAGE_ELEM);
     Element xml_request = GSXML.createBasicRequest (this.doc, GSXML.REQUEST_TYPE_PAGE, "", lang, uid);
     xml_request.setAttribute (GSXML.OUTPUT_ATT, output);
+    
     xml_message.appendChild (xml_request);
     
     String action = request.getParameter (GSParams.ACTION);
@@ -463,7 +502,7 @@ public class LibraryServlet extends HttpServlet {
           && !name.equals (GSParams.SUBACTION) 
           && !name.equals (GSParams.LANGUAGE) 
           && !name.equals (GSParams.OUTPUT)) {// we have already dealt with these
-
+		  
           String value="";
           String [] values = request.getParameterValues (name);
           value = values[0];
@@ -508,14 +547,14 @@ public class LibraryServlet extends HttpServlet {
           String value =  GSXML.xmlSafe ((String)session.getAttribute (name));
 
           // ugly hack to undo : escaping
-          value = value.replaceAll ("%3A", "\\:");
+          value = StringUtils.replace(value, "%3A", "\\:");
           param.setAttribute (GSXML.VALUE_ATT,value);
           xml_param_list.appendChild (param);
         }
       }
     }
       
-    if (!output.equals ("html")) {
+    if (!output.equals("html") && !output.equals("server") && !output.equals("xsltclient")) {
       response.setContentType ("text/xml"); // for now use text
     }
     
@@ -583,14 +622,17 @@ public class LibraryServlet extends HttpServlet {
 
 		// get all the <a> elements
 		NodeList hrefs = data.getElementsByTagName("a");
-		for (int i=0; hrefs!=null && i<hrefs.getLength(); i++) {
+		// Instead of calculating each iteration...
+		int hrefscount = hrefs.getLength();
+
+		for (int i=0; hrefs!=null && i < hrefscount; i++) {
 		  Element a = (Element)hrefs.item(i);
 		  // ugly hack to get rid of : in the args - interferes with session handling
 		  String href = a.getAttribute("href");
 		  if (!href.equals("")) {
 		    if (href.indexOf("?")!=-1) {
-		      String[] parts = href.split("\\?", -1);
-		      parts[1]=parts[1].replaceAll(":", "%3A");
+		      String[] parts = StringUtils.split(href, "\\?", -1);
+		      parts[1] = StringUtils.replace(parts[1], ":", "%3A");
 		      href = parts[0]+"?"+parts[1];
 		    }
 		    a.setAttribute("href", response.encodeURL(href));
@@ -599,7 +641,8 @@ public class LibraryServlet extends HttpServlet {
 		
 		// now find any submit bits - get all the <form> elements
 		NodeList forms = data.getElementsByTagName("form");
-		for (int i=0; forms!=null && i<forms.getLength(); i++) {
+		int formscount = forms.getLength();
+		for (int i=0; forms!=null && i < formscount; i++) {
 		  Element form = (Element)forms.item(i);
 		  form.setAttribute("action", response.encodeURL(form.getAttribute("action")));
 		}
