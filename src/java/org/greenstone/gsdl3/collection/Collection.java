@@ -43,6 +43,9 @@ import javax.xml.parsers.SAXParser;
 
 import org.apache.log4j.*;
 
+// Apache Commons
+import org.apache.commons.lang3.*;
+
 /**
  * Represents a collection in Greenstone. A collection is an extension of
  * a ServiceCluster - it has local data that the services use.
@@ -274,8 +277,8 @@ public class Collection
 	    for(int k=0; k<displaynodes.getLength(); k++) {
 		Element d = (Element) displaynodes.item(k);
 		String text = GSXML.getNodeText(d);
-		text = text.replaceAll("_httpsite_", http_site);
-		text = text.replaceAll("_httpcollection_", http_collection);
+		text = StringUtils.replace(text, "_httpsite_", http_site);
+		text = StringUtils.replace(text, "_httpcollection_", http_collection);
 		GSXML.setNodeText(d, text);
 	    }
 	}
