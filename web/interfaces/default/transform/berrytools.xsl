@@ -2,9 +2,8 @@
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:java="http://xml.apache.org/xslt/java"
-  xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
-  extension-element-prefixes="java util"
-  exclude-result-prefixes="java util">
+  extension-element-prefixes="java"
+  exclude-result-prefixes="java">
 
   <xsl:param name="berryBaskets"/>
   
@@ -78,7 +77,7 @@
 
      var checkout = function(){
        var request_type = "GET";
-       var url = "?a=pr&amp;rt=r&amp;ro=1&amp;s=ItemNum&amp;o=XML&amp;c="; 
+       var url = "?a=pr&amp;amp;rt=r&amp;amp;ro=1&amp;amp;s=ItemNum&amp;amp;o=XML&amp;amp;c="; 
  
          var responseSuccess = function(o){
 	     var response = o.responseXML;
@@ -96,14 +95,14 @@
                     var parent = item.parentNode;
                     parent.removeChild(item);
                    
-                   if (parent !=null &amp;&amp; parent.id == "documentberries"){
+                   if (parent !=null &amp;amp;&amp;amp; parent.id == "documentberries"){
                          var root = YAHOO.util.Dom.get(itemID+":root");
                          var section = YAHOO.util.Dom.get(itemID+":section");
-                         if(root!=null &amp;&amp; root.id.indexOf(itemID) !=-1){
+                         if(root!=null &amp;amp;&amp;amp; root.id.indexOf(itemID) !=-1){
                              parent.removeChild(root);
                           }
      
-	                  if(section!=null &amp;&amp; section.id.indexOf(itemID) !=-1){
+	                  if(section!=null &amp;amp;&amp;amp; section.id.indexOf(itemID) !=-1){
                              parent.removeChild(section);
         	          }
                       
@@ -129,21 +128,21 @@
                    var parent = berry.parentNode;
                    
                    
-                   if (parent !=null &amp;&amp; parent.id == "documentberries"){
+                   if (parent !=null &amp;amp;&amp;amp; parent.id == "documentberries"){
                          var root = YAHOO.util.Dom.get(berry.id+":root");
                          var section = YAHOO.util.Dom.get(berry.id+":section");
-                         if(root!=null &amp;&amp; root.id.indexOf(berry.id) !=-1){
+                         if(root!=null &amp;amp;&amp;amp; root.id.indexOf(berry.id) !=-1){
                              root.style.visibility ="visible" ;
                           }
      
-	                  if(section!=null &amp;&amp; section.id.indexOf(berry.id) !=-1){
+	                  if(section!=null &amp;amp;&amp;amp; section.id.indexOf(berry.id) !=-1){
                              section.style.visibility ="visible" ;
         	          }
                       
                           
                      }  
 
-               if (berry.className  &amp;&amp;  berry.className  == 'pick')
+               if (berry.className  &amp;amp;&amp;amp;  berry.className  == 'pick')
                   { 
                     berry.style.visibility = "visible";
                     new ygDDPlayer(berry.id,'basket',berryList); 
@@ -167,7 +166,7 @@
 
     function updateBerryImages(){
      
-      for (var i =0;i &lt; berryList.length &amp;&amp; i &lt;12 ; i++ ){
+      for (var i =0;i &lt; berryList.length &amp;amp;&amp;amp; i &lt;12 ; i++ ){
                var berries = YAHOO.util.Dom.get('berries');
                var img = document.createElement('img');
                img.src = 'interfaces/default/images/berry3.png';
@@ -182,12 +181,12 @@
     function basketUpdate(e) {
 		var target = e.target;
                
-		if ((target.id.toLowerCase() == 'berrybasket' || target.id.toLowerCase() == 'berries')  &amp;&amp; !show){
+		if ((target.id.toLowerCase() == 'berrybasket' || target.id.toLowerCase() == 'berries')  &amp;amp;&amp;amp; !show){
 	       	    showBasket();
                     show = true;
                 }
                 else{
-                    if (target.id.toLowerCase() == 'hideview' &amp;&amp; show){
+                    if (target.id.toLowerCase() == 'hideview' &amp;amp;&amp;amp; show){
                        hideBasket();
                        show = false;
                     }
@@ -263,7 +262,7 @@
         hideView.appendChild(document.createTextNode("Hide"));
         fullView.appendChild(document.createTextNode("Full View"));
         hideView.setAttribute("id","hideview");
-        fullView.setAttribute("href","?a=g&amp;sa=berry&amp;c=&amp;s=DisplayList&amp;rt=r");
+        fullView.setAttribute("href","?a=g&amp;amp;sa=berry&amp;amp;c=&amp;amp;s=DisplayList&amp;amp;rt=r");
         fullView.setAttribute("class","fullview");
 
         }
@@ -292,7 +291,7 @@
 
 
      function addBerry(el){
-      var  addurl = "?a=pr&amp;rt=r&amp;ro=1&amp;s=AddItem&amp;c=&amp;s1.id=2&amp;o=XML&amp;s1.item=" + el.id;	   
+      var  addurl = "?a=pr&amp;amp;rt=r&amp;amp;ro=1&amp;amp;s=AddItem&amp;amp;c=&amp;amp;s1.id=2&amp;amp;o=XML&amp;amp;s1.item=" + el.id;	   
       var addSuccess = function(o){ 
  		 var result = o.responseXML;
                  var items = result.getElementsByTagName('item');
@@ -306,19 +305,19 @@
                     parent.removeChild(el);
                
                      var itemID = item.getAttribute('collection')+":"+item.getAttribute('name'); 
-                    if (parent !=null  &amp;&amp; parent.id == "documentberries"){
+                    if (parent !=null  &amp;amp;&amp;amp; parent.id == "documentberries"){
                          var root = YAHOO.util.Dom.get(itemID+":root");
                          var section = YAHOO.util.Dom.get(itemID+":section");
-                         if(root!=null  &amp;&amp; root.id.indexOf(itemID) !=-1){
+                         if(root!=null  &amp;amp;&amp;amp; root.id.indexOf(itemID) !=-1){
                              parent.removeChild(root);
                           }
      
-	                  if(section!=null  &amp;&amp; section.id.indexOf(itemID) !=-1){
+	                  if(section!=null  &amp;amp;&amp;amp; section.id.indexOf(itemID) !=-1){
                              parent.removeChild(section);
         	          }                                                
                      }
 
-                    if (!YAHOO.util.Dom.get('hideview') &amp;&amp;  berryList.length &lt; 13){
+                    if (!YAHOO.util.Dom.get('hideview') &amp;amp;&amp;amp;  berryList.length &lt; 13){
                       while (berries.hasChildNodes()) {
        	                   berries.removeChild(berries.firstChild);
 	                }

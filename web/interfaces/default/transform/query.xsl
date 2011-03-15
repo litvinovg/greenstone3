@@ -2,9 +2,8 @@
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:java="http://xml.apache.org/xslt/java"
-  xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
-  extension-element-prefixes="java util"
-  exclude-result-prefixes="java util">
+  extension-element-prefixes="java"
+  exclude-result-prefixes="java">
   
   <!-- style includes global params interface_name, library_name -->
   <xsl:include href="style.xsl"/>
@@ -20,17 +19,19 @@
       <head>
 	<title>
 	  <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
-	  <xsl:call-template name="pageTitle"/><xsl:text> </xsl:text>
+	  <xsl:text> </xsl:text>
 	</title>
 	<xsl:call-template name="globalStyle"/>
 	<xsl:call-template name="pageStyle"/>
       </head>
       <body>
+    
 	<xsl:attribute name="dir"><xsl:call-template name="direction"/></xsl:attribute>
 	<div id="page-wrapper">
 	  <xsl:call-template name="response" />
 	  <xsl:call-template name="greenstoneFooter"/>
 	</div>
+	<xsl:call-template name="pageTitle"/>
       </body>
     </html>
   </xsl:template>
@@ -38,7 +39,7 @@
   <xsl:variable name="berrybasketswitch"><xsl:value-of select="/page/pageRequest/paramList/param[@name='berrybasket']/@value"/></xsl:variable> 
 
   <xsl:template name="pageTitle">
-    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/>
+    <span class="getTextFor null document.title.gsdl"></span>
   </xsl:template>
 
   <!-- page specific style goes here -->
@@ -80,7 +81,7 @@
   <!-- layout the response -->
   <xsl:template name="query-response">
     <xsl:param name="collName"/>
-    <xsl:call-template name="dividerBar"><xsl:with-param name='text'><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.results')"/></xsl:with-param></xsl:call-template>
+    <xsl:call-template name="dividerBar"><xsl:with-param name='text'>query.results</xsl:with-param></xsl:call-template>
     
     <!-- If query term information is available, display it -->
     <xsl:call-template name="termInfo"/>

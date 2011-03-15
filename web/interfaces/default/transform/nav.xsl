@@ -2,9 +2,8 @@
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:java="http://xml.apache.org/xslt/java"
-  xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
-  extension-element-prefixes="java util"
-  exclude-result-prefixes="java util">
+  extension-element-prefixes="java"
+  exclude-result-prefixes="java">
   
   <!-- style includes global params interface_name, library_name -->
   <xsl:include href="style.xsl"/>

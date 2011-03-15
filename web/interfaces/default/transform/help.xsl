@@ -2,9 +2,8 @@
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:java="http://xml.apache.org/xslt/java"
-  xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
-  extension-element-prefixes="java util"
-  exclude-result-prefixes="java util">
+  extension-element-prefixes="java"
+  exclude-result-prefixes="java">
   
   <!-- style includes global params interface_name, library_name -->
   <xsl:include href="style.xsl"/>
@@ -17,7 +16,7 @@
       <head>
 	<title>
 	  <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
-	  <xsl:call-template name="pageTitle"/><xsl:text> </xsl:text>
+	  <xsl:text> </xsl:text>
 	</title>
 	<xsl:call-template name="globalStyle"/>
 	<xsl:call-template name="pageStyle"/>
@@ -28,12 +27,27 @@
 	  <xsl:call-template name="response" />
 	  <xsl:call-template name="greenstoneFooter"/>
 	</div>
+		<xsl:call-template name="pageTitle"/>
       </body>
     </html>
   </xsl:template>
   
   <xsl:template name="pageTitle">
-    <xsl:choose><xsl:when test="/page/pageResponse/*/displayItem[@name='name']"><xsl:value-of select="/page/pageResponse/*/displayItem[@name='name']"/></xsl:when><xsl:otherwise><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/></xsl:otherwise></xsl:choose>: <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_t')"/>
+    <xsl:choose>
+    	<xsl:when test="/page/pageResponse/*/displayItem[@name='name']">
+    		<span>
+    			<xsl:attribute name="class">
+					<xsl:text>getTextFor null document.title.text:'</xsl:text>
+    				<xsl:value-of select="/page/pageResponse/*/displayItem[@name='name']"/>
+					<xsl:text>'</xsl:text>
+    			</xsl:attribute>
+    		</span>
+    	</xsl:when>
+    	<xsl:otherwise>
+    		<span class="getTextFor null document.title.gsdl">&amp;amp;nbsp;</span>
+    	</xsl:otherwise>
+    </xsl:choose>
+    <span class="getTextFor null document.title.text:'&#160;:&#160;'[a],document.title.help_t[a]">&amp;amp;nbsp;</span>
   </xsl:template>
 
   <!-- page specific style goes here -->

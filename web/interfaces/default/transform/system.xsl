@@ -13,7 +13,7 @@
       <head>
 	<title>
 	  <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
-	  <xsl:call-template name="pageTitle"/><xsl:text> </xsl:text>
+	  <xsl:text> </xsl:text>
 	</title>
 	<xsl:call-template name="globalStyle"/>
 	<xsl:call-template name="pageStyle"/>
@@ -23,13 +23,14 @@
 	<div id="page-wrapper">
 	  <xsl:call-template name="response" />
 	  <xsl:call-template name="greenstoneFooter"/>
+	  <xsl:call-template name="pageTitle"/>
 	</div>
       </body>
     </html>
   </xsl:template>
   
   <xsl:template name="pageTitle">
-    <xsl:value-of select="java:org.greenstone.gsdl3.util.XSLTUtil.getInterfaceText($interface_name, /page/@lang, 'gsdl')"/>
+    <span class="getTextFor null document.title.gsdl">&amp;nbsp;</span>
   </xsl:template>
   
   <!-- page specific style goes here -->

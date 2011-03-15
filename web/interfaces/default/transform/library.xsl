@@ -3,8 +3,7 @@
 <xsl:stylesheet version="1.0" 
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
   xmlns:gslib="http://www.greenstone.org/XSL/Library"
-  exclude-result-prefixes="util xalan gslib gsf xslt gs3">
-  
+  exclude-result-prefixes="gslib">
   
   <xsl:output
     method="html" 

@@ -2,9 +2,8 @@
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:java="http://xml.apache.org/xslt/java"
-  xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
-  extension-element-prefixes="java util"
-  exclude-result-prefixes="java util">
+  extension-element-prefixes="java"
+  exclude-result-prefixes="java">
 
   <!-- style includes global params interface_name, library_name -->
   <xsl:include href="style.xsl"/>
@@ -82,7 +81,7 @@
     <xsl:param name="clusterName"/>
     <center/>
     <applet code="org.greenstone.gsdl3.build.StatusDisplay.class" codebase='lib' archive='gsdl3.jar, xercesImpl.jar, xml-apis.jar' width='600' height='150'>The status display applet.
-      <param name='library'><xsl:attribute name="value"><xsl:value-of select='$library_name'/>?a=pr&amp;rt=s&amp;c=<xsl:value-of select='$clusterName'/>&amp;s=<xsl:value-of select='/page/pageResponse/service/@name'/>&amp;o=xml&amp;ro=1&amp;l=<xsl:value-of select='/page/@lang'/>&amp;pid=<xsl:value-of select="@pid"/><xsl:apply-templates select="/page/pageResponse/service/paramList" mode="cgi"/></xsl:attribute></param>
+      <param name='library'><xsl:attribute name="value"><xsl:value-of select='$library_name'/>?a=pr&amp;amp;rt=s&amp;amp;c=<xsl:value-of select='$clusterName'/>&amp;amp;s=<xsl:value-of select='/page/pageResponse/service/@name'/>&amp;amp;o=xml&amp;amp;ro=1&amp;amp;l=<xsl:value-of select='/page/@lang'/>&amp;amp;pid=<xsl:value-of select="@pid"/><xsl:apply-templates select="/page/pageResponse/service/paramList" mode="cgi"/></xsl:attribute></param>
       <param name='initial_text'><xsl:attribute name="value"><xsl:value-of select="."/></xsl:attribute></param>
       <param name='initial_code'><xsl:attribute name="value"><xsl:value-of  select="@code"/></xsl:attribute></param></applet>
     <xsl:call-template name="dividerBar"/>

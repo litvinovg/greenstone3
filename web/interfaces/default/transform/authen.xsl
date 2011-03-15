@@ -2,9 +2,8 @@
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:java="http://xml.apache.org/xslt/java"
-  xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
-  extension-element-prefixes="java util"
-  exclude-result-prefixes="java util">
+  extension-element-prefixes="java"
+  exclude-result-prefixes="java">
 
   <!-- style includes global params interface_name, library_name -->
   <xsl:include href="style.xsl"/>
@@ -13,14 +12,14 @@
   <xsl:output method="html"/> 
 
   <xsl:template name="pageTitle">
-    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.authentication')"/>
+    <!-- differred for page title --> <span class="getTextFor null document.title.authen.authentication"></span>
   </xsl:template>
 
   <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
   <xsl:template name="pageHead">
     <head>
       <title>
-	<xsl:call-template name="pageTitle"/><xsl:text> </xsl:text>
+		<xsl:text> </xsl:text>
       </title>
       <xsl:call-template name="globalStyle"/>
       <xsl:call-template name="pageStyle"/>
@@ -34,6 +33,8 @@
       <xsl:call-template name="pageHead" />
       <xsl:call-template name="addGroup" />
       <body>
+   
+   	<xsl:call-template name="pageTitle"/>
 	<xsl:attribute name="dir"><xsl:call-template name="direction"/></xsl:attribute>
 	<div id="page-wrapper">
  	  <xsl:variable name="authen_service" select="/page/pageRequest/paramList/param[@name='s']/@value"/>
@@ -52,10 +53,10 @@
 	  <div align="left" >
 	    <table align="left" border="0" width="100%">
 	      <tr align="left">
-		<td><h2><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.authentication')"/></h2></td>
+		<td><h2 class="getTextFor authen.authentication"></h2></td>
 		<td><xsl:if test="$un_s!=''">
 		    <xsl:if test="$asn!='' and $asn!='0'">
-		      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.username')"/>  :  <xsl:value-of select="$un_s"/>
+		      <span class="getTextFor authen.username"></span>  :  <xsl:value-of select="$un_s"/>
 		    </xsl:if>
 		  </xsl:if></td>
 	      </tr>
@@ -65,16 +66,16 @@
 	  <div id="navbar">
 	    <ul id="navbarlist">
 	      <!--greenstone home-->
-	      <li><a href="{$library_name}"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.greenstone_home')"/></a></li>
+	      <li><a href="{$library_name}"><span class="getTextFor authen.greenstone_home"></span></a></li>
 	      
 	      <!--list users-->
 	      <li>
 		<xsl:choose>
 		  <xsl:when test="$asn!='' and $asn!='0' and $un_s!=''">
-		    <a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s=Authentication&amp;s1.aup=ListUsers&amp;s1.asn={$asn}&amp;s1.uan=1&amp;s1.un={$un_s}&amp;s1.pw="><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.list_users')"/></a>
+		    <a href="{$library_name}?a=g&amp;amp;rt=r&amp;amp;sa=authen&amp;amp;s=Authentication&amp;amp;s1.aup=ListUsers&amp;amp;s1.asn={$asn}&amp;amp;s1.uan=1&amp;amp;s1.un={$un_s}&amp;amp;s1.pw="><span class="getTextFor authen.list_users"></span></a>
 		  </xsl:when>
 		  <xsl:otherwise>
-		    <a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s=Authentication&amp;s1.asn=&amp;s1.aup=Login"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.list_users')"/></a>
+		    <a href="{$library_name}?a=g&amp;amp;rt=r&amp;amp;sa=authen&amp;amp;s=Authentication&amp;amp;s1.asn=&amp;amp;s1.aup=Login"><span class="getTextFor authen.list_users"></span></a>
 		  </xsl:otherwise>
 		</xsl:choose></li>
 	      
@@ -82,10 +83,10 @@
 	      <li>
 		<xsl:choose>
 		  <xsl:when test="$asn!='' and $asn!='0' and $un_s!=''">
-		    <a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s=Authentication&amp;s1.aup=AddUser&amp;s1.asn={$asn}&amp;s1.uan=1&amp;s1.un={$un_s}&amp;s1.pw=&amp;s1.umun=&amp;s1.umpw=&amp;s1.umgp=&amp;s1.umas=&amp;s1.umc="><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.add_a_new_user')"/></a> 
+		    <a href="{$library_name}?a=g&amp;amp;rt=r&amp;amp;sa=authen&amp;amp;s=Authentication&amp;amp;s1.aup=AddUser&amp;amp;s1.asn={$asn}&amp;amp;s1.uan=1&amp;amp;s1.un={$un_s}&amp;amp;s1.pw=&amp;amp;s1.umun=&amp;amp;s1.umpw=&amp;amp;s1.umgp=&amp;amp;s1.umas=&amp;amp;s1.umc="><span class="getTextFor authen.add_a_new_user"></span></a> 
 		  </xsl:when>
 		  <xsl:otherwise>
-		    <a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s=Authentication&amp;s1.asn=&amp;s1.aup=Login"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.add_a_new_user')"/></a>
+		    <a href="{$library_name}?a=g&amp;amp;rt=r&amp;amp;sa=authen&amp;amp;s=Authentication&amp;amp;s1.asn=&amp;amp;s1.aup=Login"><span class="getTextFor authen.add_a_new_user"></span></a>
 		  </xsl:otherwise>
 		</xsl:choose>
 	      </li>
@@ -94,10 +95,10 @@
 	      <li>
 		<xsl:choose>
 		  <xsl:when test="$asn!='' and $asn!='0' and $un_s!=''">
-		    <a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s=Authentication&amp;s1.aup=ModifyPassword&amp;s1.asn={$asn}&amp;s1.uan=1&amp;s1.un={$un_s}&amp;s1.pw=&amp;s1.umpw1=&amp;s1.umpw2=&amp;s1.umpw="><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.change_password')"/></a>
+		    <a href="{$library_name}?a=g&amp;amp;rt=r&amp;amp;sa=authen&amp;amp;s=Authentication&amp;amp;s1.aup=ModifyPassword&amp;amp;s1.asn={$asn}&amp;amp;s1.uan=1&amp;amp;s1.un={$un_s}&amp;amp;s1.pw=&amp;amp;s1.umpw1=&amp;amp;s1.umpw2=&amp;amp;s1.umpw="><span class="getTextFor authen.change_password"></span></a>
 		  </xsl:when>
 		  <xsl:otherwise>
-		    <a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s=Authentication&amp;s1.asn=&amp;s1.aup=Login"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.change_password')"/></a>
+		    <a href="{$library_name}?a=g&amp;amp;rt=r&amp;amp;sa=authen&amp;amp;s=Authentication&amp;amp;s1.asn=&amp;amp;s1.aup=Login"><span class="getTextFor authen.change_password"></span></a>
 		  </xsl:otherwise>
 		</xsl:choose>
 	      </li>
@@ -105,10 +106,10 @@
 	      <li>
 		<xsl:choose>
 		  <xsl:when test="$un_s!='' and $asn!='' and $asn!='0'">
-		    <a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s=Authentication&amp;s1.asn=&amp;s1.aup=Login&amp;s1.un=&amp;s1.pw="><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.logout')"/></a>
+		    <a href="{$library_name}?a=g&amp;amp;rt=r&amp;amp;sa=authen&amp;amp;s=Authentication&amp;amp;s1.asn=&amp;amp;s1.aup=Login&amp;amp;s1.un=&amp;amp;s1.pw="><span class="getTextFor authen.logout"></span></a>
 		  </xsl:when>
 		  <xsl:otherwise>
-		    <a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s=Authentication&amp;s1.asn=&amp;s1.aup=Login"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.login')"/></a>
+		    <a href="{$library_name}?a=g&amp;amp;rt=r&amp;amp;sa=authen&amp;amp;s=Authentication&amp;amp;s1.asn=&amp;amp;s1.aup=Login"><span class="getTextFor authen.login"></span></a>
 		  </xsl:otherwise>
 		</xsl:choose>
 	      </li>
@@ -123,20 +124,20 @@
 		  <xsl:if test="$pro_action='Login'">
 		    <xsl:choose>
 		      <xsl:when test="$asn!='' and $asn!='0'">
-			<p align="left"> <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.login_successfully')"/></p>
+			<p align="left"> <span class="getTextFor authen.login_successfully"></span></p>
 		      </xsl:when>
 		      <xsl:otherwise>
 
 			<p align="left">
-			  <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.login_descibe_line_3')"/><br/></p>
+			  <span class="getTextFor authen.login_describe_line_3"></span><br/></p>
 			<xsl:if test="$err='un-pw-err'">
-			  <p align="left"><font color='red'><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.wrong_password_warning')"/></font></p>
+			  <p align="left"><font color='red'><span class="getTextFor authen.wrong_password_warning"></span></font></p>
 			</xsl:if>
 			<xsl:if test="$err='no-permission' and $info='Login'">
-			  <p align="left"><font color='red'><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.no_permission')"/></font></p>
+			  <p align="left"><font color='red'><span class="getTextFor authen.no_permission"></span></font></p>
 			</xsl:if>
 			<xsl:if test="$err='as-false'">
-			  <p align="left"><font color='red'><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.account_status_false')"/></font></p>
+			  <p align="left"><font color='red'><span class="getTextFor authen.account_status_false"></span></font></p>
 			</xsl:if>
 			<xsl:call-template name="login">
 			  <xsl:with-param name="sub_action" select="$sub_action"/>
@@ -158,9 +159,9 @@
 
 		    <xsl:if test="$info='Login'">
 		      <p align="left">
-			<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.login_descibe_line_2')"/><br/></p>
+			<span class="getTextFor authen.login_describe_line_2"></span><br/></p>
 		      <xsl:if test="$err='no-permission' and $info='Login'">
-			<p align="left"><font color='red'><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.no_permission')"/></font></p>
+			<p align="left"><font color='red'><span class="getTextFor authen.no_permission"></span></font></p>
 		      </xsl:if>
 		    </xsl:if>
 		  </xsl:if>
@@ -173,10 +174,10 @@
 
 		    <xsl:if test="$asn!='1'">
 		      <p align="left">
-			<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.login_descibe_line_2')"/><br/>
+			<span class="getTextFor authen.login_describe_line_2"></span><br/>
 		      </p>
 		      <xsl:if test="$err='no-permission'">
-			<p align="left"><font color='red'><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.no_permission')"/></font></p>
+			<p align="left"><font color='red'><span class="getTextFor authen.no_permission"></span></font></p>
 		      </xsl:if>
 		    </xsl:if>
 		    
@@ -186,15 +187,16 @@
 		    </xsl:if>
 		    
 		    <xsl:if test="$info='adduser_interface'">
-		      <h2 align="left"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.add_a_new_user_title')"/></h2>
+		      <h2 align="left"><span class="getTextFor authen.add_a_new_user_title"></span></h2>
 		      <xsl:if test="$err='pw-err'">
-			<p align="left"><font color="red"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.password_err')"/></font></p>
+			<p align="left"><font color="red"><span class="getTextFor authen.password_err"></span></font></p>
 		      </xsl:if>	
 		      <xsl:if test="$err='un-err'">
-			<p align="left"><font color="red"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.unsername_err')"/></font></p>
+		      <!-- not sure if this is meant to be unsername_err; if it is, disregard -->
+			<p align="left"><font color="red"><span class="getTextFor authen.unsername_err"></span></font></p>
 		      </xsl:if>	
 		      <xsl:if test="$err='un-exist'">
-			<p align="left"><font color='red'><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.user_has_existed')"/></font></p>
+			<p align="left"><font color='red'><span class="getTextFor authen.user_has_existed"></span></font></p>
 		      </xsl:if>
 		      <xsl:call-template name="edituser" >
 			<xsl:with-param name="sub_action" select="$sub_action"/>
@@ -221,28 +223,28 @@
 		    </xsl:if>
 
 		    <xsl:if test="$err=''">
-		      <h2 align="left"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.change_password_title')"/></h2>
-		      <p align="left"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.change_password_successed_content')"/></p>
+		      <h2 align="left"><span class="getTextFor authen.change_password_title"></span></h2>
+		      <p align="left"><span class="getTextFor authen.change_password_successed_content"></span></p>
 		    </xsl:if>
 		    
 		    <xsl:if test="$asn!='0' and $info='modify_interface'">
-		      <h2 align="left"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.change_password_title')"/></h2>
-		      <p align="left"><font color="grey"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.change_password_describe_line_1')"/></font></p>
+		      <h2 align="left"><span class="getTextFor authen.change_password_title"></span></h2>
+		      <p align="left"><font color="grey"><span class="getTextFor authen.change_password_describe_line_1"></span></font></p>
 
 		      <xsl:if test="$err='umpw1-err'">
-			<p align="left"><font color="red"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.new_password_invalid')"/></font></p>
+			<p align="left"><font color="red"><span class="getTextFor authen.new_password_invalid"></span></font></p>
 		      </xsl:if>
 		      <xsl:if test="$err='umpw2-err'">
-			<p align="left"><font color="red"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.retyped_password_invalid')"/></font></p>
+			<p align="left"><font color="red"><span class="getTextFor authen.retyped_password_invalid"></span>></font></p>
 		      </xsl:if>
 		      <xsl:if test="$err='pw-umpw-nm-err' or $err='umpw-null-err'">
-			<p align="left"><font color="red"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.old_password_warning')"/></font></p>
+			<p align="left"><font color="red"><span class="getTextFor authen.old_password_warning"></span></font></p>
 		      </xsl:if>  
 		      <xsl:if test="$err='umpw1-umpw2-nm-err'">
-			<p align="left"><font color="red"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.two_password_not_match')"/></font></p>
+			<p align="left"><font color="red"><span class="getTextFor authen.two_password_not_match"></span></font></p>
 		      </xsl:if> 
 		      <xsl:if test="$err='umpw1-umpw2-null-err'">
-			<p align="left"><font color="red"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.password_empty_warning')"/></font></p>
+			<p align="left"><font color="red"><span class="getTextFor authen.password_empty_warning"></span></font></p>
 		      </xsl:if> 
 		      
 		      <xsl:call-template name="modifypassword">
@@ -285,18 +287,18 @@
 		    </xsl:if>
 
 		    <xsl:if test="$info='edituser-interface'"> 
-		      <h2 align="left"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.edit_user_information')"/></h2>
+		      <h2 align="left"><span class="getTextFor authen.edit_user_information"></span></h2>
 		      <xsl:if test="$err='umpw-err'"> 
-			<p align="left"><font color="red"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.password_err')"/></font></p>
+			<p align="left"><font color="red"><span class="getTextFor authen.password_err"></span></font></p>
 		      </xsl:if>
 		      <xsl:if test="$err='umun-err'"> 
-			<p align="left"><font color="red"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.unsername_err')"/></font></p>
+			<p align="left"><font color="red"><span class="getTextFor authen.username_err"></span></font></p>
 		      </xsl:if>
 		      <xsl:if test="$err='ini-umpw-err'"> 
-			<p align="left"><font color="red"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.password_initial')"/></font></p>
+			<p align="left"><font color="red"><span class="getTextFor authen.password_initial"></span></font></p>
 		      </xsl:if>
 		      <xsl:if test="$err='un-exist'">
-			<p align="left"><font color='red'><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.user_has_existed')"/></font></p>
+			<p align="left"><font color='red'><span class="getTextFor authen.user_has_existed"></span></font></p>
 		      </xsl:if>
 		      <xsl:call-template name="edituser" >
 			<xsl:with-param name="sub_action" select="$sub_action"/>
@@ -357,10 +359,10 @@
 
 	<table align="center">
 	  <tr>
-	    <td><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.username')"/></td><td><input type="string" name="s1.un" size="10" value=""/></td><td></td>
+	    <td><span class="getTextFor authen.username"></span></td><td><input type="string" name="s1.un" size="10" value=""/></td><td></td>
 	  </tr>
 	  <tr>
-	    <td><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.password')"/></td><td><input type="password" name="s1.pw" size="10" value=""/></td><td>
+	    <td><span class="getTextFor authen.password"></span></td><td><input type="password" name="s1.pw" size="10" value=""/></td><td>
 	      <input type="submit" value="submit"></input></td>
 	  </tr>
 	</table>
@@ -370,14 +372,14 @@
 
   <!--template name="listusers"-->
   <xsl:template name="listusers" >
-    <h2 align="left"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.list_of_current_users_title')"/></h2>
+    <h2 align="left"><span class="getTextFor authen.list_of_current_users_title"></span></h2>
 
     <table id='mainTable' align="left" border="0" cellspacing="1" cellpadding="3" width="100%" >
       <tr>
-	<th bgcolor="#d0d0d0"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.username')"/></th>
-	<th bgcolor="#d0d0d0"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.account_status')"/></th>
-	<th bgcolor="#d0d0d0"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.groups')"/></th>
-	<th bgcolor="#d0d0d0"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.comment')"/></th>
+	<th bgcolor="#d0d0d0" class="getTextFor authen.username"></th>
+	<th bgcolor="#d0d0d0" class="getTextFor authen.account_status"></th>
+	<th bgcolor="#d0d0d0" class="getTextFor authen.groups"></th>
+	<th bgcolor="#d0d0d0" class="getTextFor authen.comment"></th>
 	<th bgcolor="#d0d0d0"></th>
       </tr>
       <xsl:for-each select="/page/pageResponse/authenticationNode/service/userNodeList/userNode">
@@ -452,12 +454,12 @@
 	<input type='hidden' name='s1.uan' value='1'/>
 	<input type='hidden' name='s1.aup' value='{$pro_action}'/>
 	
-	<table align="center"><tr><td align="right">
-	      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.old_password')"/></td><td><input type="password" name="s1.umpw" size="10" value=""/></td></tr>
-	  <tr><td align="right">
-	      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.new_password')"/></td><td><input type="password" name="s1.umpw1" size="10" value=""/></td></tr>
-	  <tr><td align="right">
-	      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.retype_new_password')"/></td><td><input type="password" name="s1.umpw2" size="10" value=""/></td></tr>
+	<table align="center"><tr><td align="right" class="getTextFor authen.old_password">
+	      </td><td><input type="password" name="s1.umpw" size="10" value=""/></td></tr>
+	  <tr><td align="right" class="getTextFor authen.new_password">
+	      </td><td><input type="password" name="s1.umpw1" size="10" value=""/></td></tr>
+	  <tr><td align="right" class="getTextFor authen.retype_new_password">
+	      </td><td><input type="password" name="s1.umpw2" size="10" value=""/></td></tr>
 	  <tr><td></td><td>
 	      <input type="submit" value="submit"></input></td>
 	  </tr>
@@ -484,7 +486,7 @@
 	<input type='hidden' name='s1.asn' value='{$asn}'/>
 	<input type='hidden' name='s1.uan' value='1'/>
 	<input type='hidden' name='s1.umun' value='{$umun_s}'/>
-	<p><font color='red'><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.do_you_really_want_to_permanently_remove_user')"/> <xsl:value-of select="$umun_s"/>" ?</font></p>
+	<p><font color='red' class="getTextFor authen.do_you_really_want_to_permanently_remove_user"> <xsl:value-of select="$umun_s"/>" ?</font></p>
 	<input type="submit" value="yes"><xsl:attribute name="name">s1.cm</xsl:attribute></input>
 	<input type="submit" value="no"><xsl:attribute name="name">s1.cm</xsl:attribute></input>
       </form>
@@ -517,28 +519,28 @@
 	<input type='hidden' name='s1.un' value='{$un_s}'/>
 	<input type='hidden' name='s1.pw' value='{$pw_s}'/>
 	
-	<table align="left" ><tr><td>
-	      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.username')"/></td><td><input type="text" name="s1.umun" size="15" value="{$umun_s}"/></td><td><font color="gray"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.username_describe')"/></font></td></tr>
-	  <tr><td>
-	      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.password')"/></td><td><input type="password" name="s1.umpw" size="15" value="{$umpw_s}"/></td><td><font color="gray"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.password_describe')"/></font></td></tr>
-	  <tr><td>
-	      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.account_status')"/></td><td>	
+	<table align="left" ><tr><td class="getTextFor authen.username">
+	      </td><td><input type="text" name="s1.umun" size="15" value="{$umun_s}"/></td><td><font color="gray" class="getTextFor authen.username_describe"></font></td></tr>
+	  <tr><td class="getTextFor authen.password">
+	      </td><td><input type="password" name="s1.umpw" size="15" value="{$umpw_s}"/></td><td><font color="gray" class="getTextFor authen.password_describe"></font></td></tr>
+	  <tr><td class="getTextFor authen.account_status">
+	      </td><td>	
 	      <select name="s1.umas">
 		<xsl:if test="$umas_s=''">
-		  <option value="true" selected="selected"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.enabled')"/></option>
-		  <option value="false"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.disabled')"/></option>
+		  <option value="true" selected="selected" class="getTextFor authen.enabled"></option>
+		  <option value="false" class="getTextFor authen.disabled"></option>
 		</xsl:if> 
 		<xsl:if test="$umas_s='true'">
-		  <option value="true" selected="selected"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.enabled')"/></option>
-		  <option value="false"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.disabled')"/></option>
+		  <option value="true" selected="selected" class="getTextFor authen.enabled"></option>
+		  <option value="false" class="getTextFor authen.disabled"></option>
 		</xsl:if> 
 		<xsl:if test="$umas_s='false'">
-		  <option value="true"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.enabled')"/></option>
-		  <option value="false" selected="selected"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.disabled')"/></option>
+		  <option value="true" class="getTextFor authen.enabled"></option>
+		  <option value="false" selected="selected" class="getTextFor authen.disabled"></option>
 		</xsl:if> 
 	      </select></td><td></td></tr>
-	  <tr><td>
-	      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.groups')"/></td><td><input type="text" id="group" name="s1.umgp" size="70" value="{$umgp_s}"/></td><td><font color="gray"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.groups_describe')"/></font></td></tr>
+	  <tr><td class="getTextFor authen.groups">
+	      </td><td><input type="text" id="group" name="s1.umgp" size="70" value="{$umgp_s}"/></td><td><font color="gray" class="getTextFor authen.groups_describe"></font></td></tr>
 	  <tr>
 	    <td></td>
 	    <td  align="right"> <select id="groups" size="0">
@@ -596,8 +598,8 @@
 	    </td>
 	    <td><input type="button" name="addGroupButton" value="add" onClick="addGroup('collects')"/></td>
 	  </tr>
-	  <tr><td>
-	      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.comment')"/></td><td colspan="2"><div><textarea cols="40" rows="5" name="s1.umc"><xsl:value-of select="$umc_s"/>
+	  <tr><td class="getTextFor authen.comment">
+	      </td><td colspan="2"><div><textarea cols="40" rows="5" name="s1.umc"><xsl:value-of select="$umc_s"/>
 
 		</textarea></div></td></tr> 
 	  <tr>

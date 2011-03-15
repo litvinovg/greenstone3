@@ -3,13 +3,17 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
   xmlns:gslib="http://www.greenstone.org/XSL/Library"
   xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
-  xmlns:util="http://org.greenstone.gsdl3.util.XSLTUtil"
-  exclude-result-prefixes="util gslib gsf">
+  exclude-result-prefixes="gslib gsf">
   
   <!-- some global parameters - these are set by whoever is invoking the transformation -->
   <xsl:param name="interface_name"/>
   <xsl:param name="library_name"/>
 
+  <!-- Get rid of XSLT parameters from view -->
+  <xsl:template match="xsltparams/param">
+    <xsl:text></xsl:text>
+  </xsl:template>
+  
   <!-- every pages ................................................. -->
   
   <xsl:variable name="a"><xsl:value-of select="/page/pageRequest/paramList/param[@name='a']/@value"/></xsl:variable>
@@ -59,17 +63,21 @@
 	  obj.style.display = "";
 	  hide_link = document.getElementById("hide");
 	  removeAllChildren(hide_link);
-	  hide_link.appendChild(document.createTextNode("</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'hide_error')"/><xsl:text disable-output-escaping="yes">"));
+	  var theText = getText('hide_error', null);
+	  var hide_text = document.createTextNode(theText);
+	  hide_link.appendChild(hide_text));
 	  } else {
 	  obj.style.display = "none";
 	  hide_link = document.getElementById("hide");
 	  removeAllChildren(hide_link);
-	  hide_link.appendChild(document.createTextNode("</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'show_error')"/><xsl:text disable-output-escaping="yes">"));
+	  var theText = getText('show_error', null);
+	  var show_text = document.createTextNode(theText);
+	  hide_link.appendChild(show_text);
 	  } 
 	  }
 	</xsl:text>
       </script>
-      <p align='right'><a id="hide" href="javascript:toggleHideError(error);"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'show_error')"/></a></p>
+      <p align='right'><a id="hide" href="javascript:toggleHideError(error);"></a></p>
       <div id="error" style="display: none;">
 	<xsl:apply-templates select="descendant::error"/>
       </div>
@@ -83,7 +91,7 @@
   
   
   <xsl:template name="poweredByGS3TextBar">
-    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gs3power')"/> 
+    <span class="getTextFor gs3power">&amp;nbsp;</span>
   </xsl:template>
   
   
@@ -91,12 +99,12 @@
 
   <xsl:template name="siteHomePageTitle">
     <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
-    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/><xsl:text> </xsl:text>
+    <span class="getTextFor gsdl">&amp;nbsp;</span><xsl:text> </xsl:text>
   </xsl:template>
 
 
   <xsl:template name="selectACollectionTextBar">
-    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.select_a_collection')"/>
+  	<span class="getTextFor home.select_a_collection">&amp;nbsp;</span>
   </xsl:template>
   
   
@@ -111,7 +119,7 @@
       <input type="hidden" name="s" value="{@name}"/>
       <input type="hidden" name="s1.collection" value="all"/>
       <input type="text" name="s1.query" size="20"/>
-      <input type="submit"><xsl:attribute name="value"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.quick_search')"/></xsl:attribute></input>
+      <input type="submit" class="getTextFor null this.value.home.quick_search" />
     </form>
   </xsl:template>
   
@@ -161,13 +169,8 @@
   
   
   <xsl:template name="libraryInterfaceLink">
-    <li><a href="{$library_name}?a=p&amp;sa=gli4gs3"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.librarian_interface')"/></a></li>
+    <li><a href="{$library_name}?a=p&amp;sa=gli4gs3"><span class="getTextFor home.librarian_interface">&amp;nbsp;</span></a></li>
   </xsl:template> 
-  
-  
-  <xsl:template name="greenstoneLogoAlternateText">
-    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/>
-  </xsl:template>
 
   <!-- about page - collection home ......................... -->
   <xsl:variable name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
@@ -175,7 +178,6 @@
   <xsl:param name="pageType"/>
   <xsl:variable name="this-element" select="/page/pageResponse/collection|/page/pageResponse/serviceCluster"/>
   <xsl:variable name="this-service" select="/page/pageResponse/service/@name"/>
-
 
   <xsl:template name="aboutCollectionPageTitle">
     <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
@@ -187,15 +189,12 @@
     <a href="{$library_name}?a=p&amp;sa=about&amp;c={$collName}">
       <xsl:choose>
 	<xsl:when test="$this-element/displayItem[@name='icon']">
-	  <img border="0">
+	  <img border="0" class="getTextFor null this.title.aboutpage">
 	    <xsl:attribute name="src">
 	      <xsl:value-of select="$this-element/metadataList/metadata[@name='httpPath']"/>/images/<xsl:value-of select="$this-element/displayItem[@name='icon']"/>
 	    </xsl:attribute>	
 	    <xsl:attribute name="alt">
 	      <xsl:value-of select="$this-element/displayItem[@name='name']"/>
-	    </xsl:attribute>
-	    <xsl:attribute name="title">
-	      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'aboutpage')"/>
 	    </xsl:attribute>
 	  </img>
 	</xsl:when>
@@ -208,20 +207,17 @@
 
 
   <xsl:template name="homeButtonTop">
-    <a href="{$library_name}?a=p&amp;sa=home"><xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_tip')"/></xsl:attribute>
-      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_b')"/></a>
+    <a href="{$library_name}?a=p&amp;sa=home" class="getTextFor home_b this.title.home_tip">&amp;nbsp;</a>
   </xsl:template>
 
 
   <xsl:template name="helpButtonTop">
     <xsl:choose>
       <xsl:when test="$pageType='help'">
-	<li><a><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></a></li>
+	<li><a class="getTextFor help_b"></a></li>
       </xsl:when>
       <xsl:otherwise>
-	<li><a href="{$library_name}?a=p&amp;sa=help&amp;c={$collName}"><xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_tip')"/></xsl:attribute>
-	    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/>
-	  </a></li>
+	<li><a href="{$library_name}?a=p&amp;sa=help&amp;c={$collName}" class="getTextFor help_b this.title.help_tip">&amp;nbsp;</a></li>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
@@ -230,12 +226,10 @@
   <xsl:template name="preferencesButtonTop">
     <xsl:choose>
       <xsl:when test="$pageType='pref'">
-	<li><a><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/></a></li>
+	<li><a class="getTextFor pref_b">&amp;nbsp;</a></li>
       </xsl:when>
       <xsl:otherwise>
-	<li><a href="{$library_name}?a=p&amp;sa=pref&amp;c={$collName}"><xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_tip')"/></xsl:attribute>
-	    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/>
-	  </a></li>
+	<li><a href="{$library_name}?a=p&amp;sa=pref&amp;c={$collName}" class="getTextFor pref_b this.title.pref_tip">&amp;nbsp;</a></li>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
@@ -278,13 +272,13 @@
 
   <xsl:template match="serviceList">
     <xsl:param name="collName"/>
-    <h3><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'about.services')"/></h3>
+    <h3 class="getTextFor about.services">&amp;nbsp;</h3>
     <xsl:choose>
       <xsl:when test="service">
-	<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'about.servicehelp')"/>
+		<span class="getTextFor about.servicehelp">&amp;nbsp;</span>
       </xsl:when>
       <xsl:otherwise>
-	<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'about.noservices')"/>
+		<span class="getTextFor about.noservices">&amp;nbsp;</span>
       </xsl:otherwise>
     </xsl:choose>
     

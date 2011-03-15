@@ -2,9 +2,8 @@
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:java="http://xml.apache.org/xslt/java"
-  xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
-  extension-element-prefixes="java util"
-  exclude-result-prefixes="java util">
+  extension-element-prefixes="java"
+  exclude-result-prefixes="java">
 
   <!--<xsl:include href="style.xsl"/>-->
   <xsl:include href="service-params.xsl"/>
@@ -114,7 +113,7 @@
             
            
 
-            if (target.id.toLowerCase() == 'urlcheck' &amp;&amp; urlonly){
+            if (target.id.toLowerCase() == 'urlcheck' &amp;amp;&amp;amp; urlonly){
                var urlcheck = YAHOO.util.Dom.get('urlcheck');
                urlcheck.src = 'interfaces/default/images/check3.gif';              
                var parea  =YAHOO.util.Dom.get('pretextarea');       
@@ -124,7 +123,7 @@
                
             }
 
-            if (target.id.toLowerCase() == 'urlcheck' &amp;&amp; !urlonly ){ 
+            if (target.id.toLowerCase() == 'urlcheck' &amp;amp;&amp;amp; !urlonly ){ 
                 var urlcheck = YAHOO.util.Dom.get('urlcheck');
                 urlcheck.src = 'interfaces/default/images/check4.gif';                       
                 var parea  =YAHOO.util.Dom.get('pretextarea');
@@ -210,14 +209,14 @@
                var li = document.createElement('li'); 
                var a = document.createElement('a'); 
                var text ="";
-               a.href ="?a=d&amp;c="+doc['collection']+"&amp;d="+doc['name'];
+               a.href ="?a=d&amp;amp;c="+doc['collection']+"&amp;amp;d="+doc['name'];
                a.appendChild(document.createTextNode(doc['title'])); 
                 if (doc['root_title'] != ""){
                      li.appendChild(document.createTextNode(doc['root_title']+": ")); 
                    }               
                li.appendChild(a);
                var metadata = "";
-               for (var metaItem in doc &amp;&amp; metaItem != 'title'){
+               for (var metaItem in doc &amp;amp;&amp;amp; metaItem != 'title'){
                     metadata = "\n"+metaItem+": "+ doc[metaItem]+"\n";
                }
                text +=metadata+"\n";
@@ -248,7 +247,7 @@
              var content =  YAHOO.util.Dom.get('content'); 
              var textview =  YAHOO.util.Dom.get('textview');
 
-              if (previousView != null &amp;&amp; textview !=null){
+              if (previousView != null &amp;amp;&amp;amp; textview !=null){
                  previousView.style.backgroundImage =  'url("interfaces/default/images/bg_on.png")'; 
               } 
 
@@ -325,7 +324,7 @@
              var content =  YAHOO.util.Dom.get('content'); 
              var email =  YAHOO.util.Dom.get('email');
 
-              if (previousView != null &amp;&amp; email !=null ){
+              if (previousView != null &amp;amp;&amp;amp; email !=null ){
                  previousView.style.backgroundImage =  'url("interfaces/default/images/bg_on.png")'; 
               } 
               
@@ -436,7 +435,7 @@
            
           for (var i in docList){
               var doc = docList[i];
-              urls +=root_url+"?a=d&amp;c="+doc["collection"]+"&amp;d="+doc["name"]+"\n\n";  
+              urls +=root_url+"?a=d&amp;amp;c="+doc["collection"]+"&amp;amp;d="+doc["name"]+"\n\n";  
                      
           }
 
@@ -452,7 +451,7 @@
 
               for (var i in docList){
                    var doc = docList[i];
-                   var url =root_url+"?a=d&amp;c="+doc['collection']+"&amp;d="+doc['name']+"\n";  
+                   var url =root_url+"?a=d&amp;amp;c="+doc['collection']+"&amp;amp;d="+doc['name']+"\n";  
                     for (var metaItem in doc){
                         var metadata = metaItem+": "+ doc[metaItem]+"\n";
                       }
@@ -465,7 +464,7 @@
            }                                                    	    		 
 	                     
           function sendMail(){
-              var  url = "?a=pr&amp;rt=r&amp;ro=1&amp;s=SendMail&amp;c=";
+              var  url = "?a=pr&amp;amp;rt=r&amp;amp;ro=1&amp;amp;s=SendMail&amp;amp;c=";
                      var request_type = "POST";
                      var postdata = ""; 
  	             var i;	     
@@ -475,14 +474,14 @@
                          
                           var input = YAHOO.util.Dom.get(i);  
                           var value = input.value;  
-			  postdata +="&amp;s1."+i+"="+value;	
+			  postdata +="&amp;amp;s1."+i+"="+value;	
 			}                                   
 
 
                        var content = YAHOO.util.Dom.get('pretextarea').value;
                        
-                       content = content.replace(/&amp;/g,'-------');  
-                       postdata +="&amp;s1.content="+content;
+                       content = content.replace(/&amp;amp;/g,'-------');  
+                       postdata +="&amp;amp;s1.content="+content;
                                                                 
                       
                         var callback = {
@@ -529,12 +528,12 @@
 	
 	function mailBoxUpdate(e) {
 		var target = e.target;
-		if (target.id.toLowerCase() == 'sendasemail' &amp;&amp; !show){
+		if (target.id.toLowerCase() == 'sendasemail' &amp;amp;&amp;amp; !show){
 	       	    showMailBox();
                     show = true;
                 }
                 else{
-                    if (target.id.toLowerCase() == 'sendasemail' &amp;&amp; show){
+                    if (target.id.toLowerCase() == 'sendasemail' &amp;amp;&amp;amp; show){
                        hideMailBox();
                        show = false;
                     }
@@ -550,7 +549,7 @@
 
        function showMailBox(){
            var mailbox = YAHOO.util.Dom.get('mailbox');  
-           if (table != null &amp;&amp; !show){
+           if (table != null &amp;amp;&amp;amp; !show){
                mailbox.appendChild(table);
               return;
            }
@@ -668,7 +667,7 @@
          }
       
          function sendMail(){
-              var  url = "?a=pr&amp;rt=r&amp;ro=1&amp;s=SendMail&amp;c=";
+              var  url = "?a=pr&amp;amp;rt=r&amp;amp;ro=1&amp;amp;s=SendMail&amp;amp;c=";
                      var request_type = "POST";
                      var postdata = ""; 
  	             var i;	     
@@ -678,20 +677,20 @@
                          
                           var input = YAHOO.util.Dom.get(i);  
                           var value = input.value;  
-			  postdata +="&amp;s1."+i+"="+value;	
+			  postdata +="&amp;amp;s1."+i+"="+value;	
 			}                                   
 
 
                        for (i in mailserver){
                           var input = YAHOO.util.Dom.get(i);  
                           var value = input.value; 
-                           postdata +="&amp;s1."+i+"="+value;
+                           postdata +="&amp;amp;s1."+i+"="+value;
                         }
 
                        var content = YAHOO.util.Dom.get('pretextarea').value;
                        
-                       content = content.replace(/&amp;/g,'-------');  
-                       postdata +="&amp;s1.content="+content;
+                       content = content.replace(/&amp;amp;/g,'-------');  
+                       postdata +="&amp;amp;s1.content="+content;
                                                                 
                       
                         var callback = {
@@ -720,9 +719,9 @@
     <div class='banner'>
       <div class='pageinfo'>
 	<p class='bannerlinks'>
-	  <a class='navlink' href='{$library_name}?a=p&amp;sa=home' title='Library home page' >HOME</a>
-	  <a class='navlink' href='{$library_name}?a=p&amp;sa=help&amp;c='  title='Help pages' >HELP</a>
-	  <a class='navlink' href='{$library_name}?a=p&amp;sa=pref&amp;c=' title='Change your interface preferences'>PREFERENCES</a>
+	  <a class='navlink' href='{$library_name}?a=p&amp;amp;sa=home' title='Library home page' >HOME</a>
+	  <a class='navlink' href='{$library_name}?a=p&amp;amp;sa=help&amp;amp;c='  title='Help pages' >HELP</a>
+	  <a class='navlink' href='{$library_name}?a=p&amp;amp;sa=pref&amp;amp;c=' title='Change your interface preferences'>PREFERENCES</a>
 	</p>      
       </div>
       <div class='basketimage'><p class='bannertitle'>Berry Basket</p></div>        

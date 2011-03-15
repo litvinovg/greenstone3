@@ -2,9 +2,8 @@
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:java="http://xml.apache.org/xslt/java"
-  xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
-  extension-element-prefixes="java util"
-  exclude-result-prefixes="java util">
+  extension-element-prefixes="java"
+  exclude-result-prefixes="java">
   
   <!-- style includes global params interface_name, library_name -->
   <xsl:include href="style.xsl"/>
@@ -28,12 +27,17 @@
 	  <xsl:call-template name="response" />
 	  <xsl:call-template name="greenstoneFooter"/>
 	</div>
+		<xsl:call-template name="pageTitleDeferred" />
       </body>
     </html>
   </xsl:template>
   
   <xsl:template name="pageTitle">
-    <xsl:choose><xsl:when test="/page/pageResponse/*/displayItem[@name='name']"><xsl:value-of select="/page/pageResponse/*/displayItem[@name='name']"/></xsl:when><xsl:otherwise><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/></xsl:otherwise></xsl:choose>: <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_t')"/>
+    <xsl:choose><xsl:when test="/page/pageResponse/*/displayItem[@name='name']"><xsl:value-of select="/page/pageResponse/*/displayItem[@name='name']"/></xsl:when><xsl:otherwise></xsl:otherwise></xsl:choose>
+  </xsl:template>
+  
+  <xsl:template name="pageTitleDeferred">
+  	    <xsl:choose><xsl:when test="/page/pageResponse/*/displayItem[@name='name']"></xsl:when><xsl:otherwise><span class="getTextFor null document.title.gsdl,document.title.text:' : '[a],document.title.pref_t[a]"></span>:</xsl:otherwise></xsl:choose>
   </xsl:template>
 
   <!-- page specific style goes here -->
@@ -58,7 +62,7 @@
 	<input type='hidden' name='a' value='p'/>
 	<input type='hidden' name='sa' value='pref'/>
 	<input type='hidden' name='c' value="{$collName}"/>
-	<div class="formheading"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.prespref')"/></div>
+	<div class="formheading"><span class="getTextFor pref.prespref"></span></div>
 	<ul id="presprefs"><xsl:call-template name="pres-prefs"/></ul>
 	<ul id="berrybasketprefs" ><xsl:call-template name="berrybasket-prefs"/></ul>
 	
@@ -66,16 +70,17 @@
 	  <ul id="bookprefs"><xsl:call-template name="book-prefs"/></ul>
 	</xsl:if>
 	
-	<div class="formheading"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.searchpref')"/></div>
+	<div class="formheading"><span class="getTextFor pref.searchpref"></span></div>
 	<ul id="searchprefs"><xsl:call-template name="search-prefs"/></ul>
-	<input type='submit'><xsl:attribute name="value"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.set_prefs')"/></xsl:attribute></input>
+	<input type='submit' class="getTextFor null this.value.pref.set_prefs" id="test"></input>
       </form>
     </div>
   </xsl:template>
   
   <xsl:template name="pres-prefs">
-    <li><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.interfacelang')"/> <xsl:call-template name="lang-list"/></li>
-    <li><span class="rightspace"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.encoding')"/></span>x</li>
+  	<li><span class="getTextFor pref.interfacelang"></span></li>
+    <li><xsl:call-template name="lang-list"/></li>
+    <li><span class="rightspace"><span class="getTextFor pref.encoding"></span></span>x</li>
   </xsl:template>
   
   <xsl:template name="lang-list">
@@ -89,12 +94,12 @@
   
   <xsl:template name="search-prefs">
     <xsl:variable name="hits"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='hitsPerPage']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='hitsPerPage']/@value"/></xsl:when><xsl:otherwise>20</xsl:otherwise></xsl:choose></xsl:variable> 
-    <li><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.hitsperpage')"/> 
+    <li><span class="getTextFor pref.hitsperpage">&amp;amp;nbsp;</span> 
       <select name="hitsPerPage">
 	<option value="20"><xsl:if test="$hits=20"><xsl:attribute name="selected"></xsl:attribute></xsl:if>20</option> 
 	<option value="50"><xsl:if test="$hits=50"><xsl:attribute name="selected"></xsl:attribute></xsl:if>50</option>
 	<option value="100"><xsl:if test="$hits=100"><xsl:attribute name="selected"></xsl:attribute></xsl:if>100</option>
-	<option value="-1"><xsl:if test="$hits=-1"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.all')"/></option>
+	<option value="-1" class="getTextFor pref.all"><xsl:if test="$hits=-1"><xsl:attribute name="selected"></xsl:attribute></xsl:if></option>
       </select>
     </li>
   </xsl:template>
@@ -102,9 +107,9 @@
   <xsl:template name="berrybasket-prefs">
     <xsl:variable name="berrybasket"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='berrybasket']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='berrybasket']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
     
-    <li><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket')"/> <select name="berrybasket">
-        <option value="on"><xsl:if test="$berrybasket='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.on')"/></option> 
-	<option value="off"><xsl:if test="$berrybasket='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.off')"/></option>
+    <li><span class="getTextFor pref.berrybasket">&amp;amp;nbsp;</span> <select name="berrybasket">
+        <option value="on" class="getTextFor pref.berrybasket.on"><xsl:if test="$berrybasket='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if></option> 
+	<option value="off" class="getTextFor pref.berrybasket.off"><xsl:if test="$berrybasket='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if></option>
       </select>
     </li>
   </xsl:template>
@@ -112,9 +117,9 @@
   <xsl:template name="book-prefs">
     <xsl:variable name="book"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='book']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='book']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
     
-    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.book')"/> <select name="book">
-      <option value="on"><xsl:if test="$book='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.on')"/></option> 
-      <option value="off"><xsl:if test="$book='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.off')"/></option>
+    <span class="getTextFor pref.book">&amp;amp;nbsp;</span> <select name="book">
+      <option value="on" class="getTextFor pref.berrybasket.on"><xsl:if test="$book='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if></option> 
+      <option value="off" class="getTextFor pref.berrybasket.off"><xsl:if test="$book='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if></option>
     </select>
     
   </xsl:template>

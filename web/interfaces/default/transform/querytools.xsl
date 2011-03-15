@@ -2,9 +2,8 @@
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:java="http://xml.apache.org/xslt/java"
-  xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
-  extension-element-prefixes="java util"
-  exclude-result-prefixes="java util">
+  extension-element-prefixes="java"
+  exclude-result-prefixes="java">
 
   <!-- have changed this so it uses service hitsPerPage and startPage if the service description has a param called hitsPerPage,  otherwise uses interface ones -->
   <xsl:template name="resultNavigation">
@@ -60,13 +59,13 @@
 	
 	<div>   
 	  <div>
-	    <xsl:if test="$here &gt; 1"><a href="{$library_name}?a=q&amp;sa={$sa}&amp;c={$collName}&amp;s={$service}&amp;rt=rd&amp;{$page-param}={$prev}"><img src="interfaces/default/images/less.gif" width='30' height='16' border='0' align='top'/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.matches')"/><xsl:text> </xsl:text><xsl:value-of select="number(($prev - 1)*$hpp + 1)"/> - <xsl:value-of select="number(($prev * $hpp))"/></a></xsl:if>
+	    <xsl:if test="$here &gt; 1"><a href="{$library_name}?a=q&amp;sa={$sa}&amp;c={$collName}&amp;s={$service}&amp;rt=rd&amp;{$page-param}={$prev}"><img src="interfaces/default/images/less.gif" width='30' height='16' border='0' align='top'/><span class="getTextFor query.matches"></span><xsl:text> </xsl:text><xsl:value-of select="number(($prev - 1)*$hpp + 1)"/> - <xsl:value-of select="number(($prev * $hpp))"/></a></xsl:if>
 	    
 	    
 	    <xsl:if test="(($here * $hpp) + 1)  &lt; $td">
 	      <xsl:variable name='m' select="number($next * $hpp)"/>
 	      <xsl:variable name='mm'><xsl:choose><xsl:when test="$m &lt; $td"><xsl:value-of select='$m'/></xsl:when><xsl:otherwise><xsl:value-of select='$td'/></xsl:otherwise></xsl:choose></xsl:variable>
-	      <a href="{$library_name}?a=q&amp;sa={$sa}&amp;c={$collName}&amp;s={$service}&amp;rt=rd&amp;{$page-param}={$next}"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.matches')"/><xsl:text> </xsl:text><xsl:value-of select="number(($next - 1)*$hpp + 1)"/> - <xsl:value-of select="$mm"/><img src="interfaces/default/images/more.gif" width='30' height='16' border='0' align='top'/></a></xsl:if></div>
+	      <a href="{$library_name}?a=q&amp;sa={$sa}&amp;c={$collName}&amp;s={$service}&amp;rt=rd&amp;{$page-param}={$next}"><span class="getTextFor query.matches"></span><xsl:text> </xsl:text><xsl:value-of select="number(($next - 1)*$hpp + 1)"/> - <xsl:value-of select="$mm"/><img src="interfaces/default/images/more.gif" width='30' height='16' border='0' align='top'/></a></xsl:if></div>
 	</div>
       </xsl:if>
     </div>
@@ -79,17 +78,17 @@
       <xsl:variable name="numDocsReturned" select="metadataList/metadata[@name='numDocsReturned']"/>
       <xsl:choose>
 	<xsl:when test="$numDocsMatched='0' or $numDocsReturned='0'">
-	  <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.nodocsmatch')"/>
+		<span class="getTextFor query.nodocsmatch"></span>
 	</xsl:when>
 	<xsl:when test="$numDocsMatched='1' or $numDocsReturned='1'">
-	  <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.onedocsmatch')"/>
+		<span class="getTextFor query.onedocsmatch"></span>
 	</xsl:when>
 	<xsl:when test="$numDocsMatched">
-	  <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.manydocsmatch', $numDocsMatched)"/>
-	  <xsl:if test="$numDocsReturned"> (<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.docsreturned', $numDocsReturned)"/>)</xsl:if>
+	  <span><xsl:attribute name="class"><xsl:value-of select="concat('getTextFor null this.innerText.query.manydocsmatch|', $numDocsMatched)"/></xsl:attribute></span>
+	  <xsl:if test="$numDocsReturned"> (<span><xsl:attribute name="class"><xsl:value-of select="concat('getTextFor null this.innerText.query.docsreturned|', $numDocsReturned)" /></xsl:attribute></span>)</xsl:if>
 	</xsl:when>
 	<xsl:when test="$numDocsReturned">
-	  <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.atleastdocsmatch', $numDocsReturned)"/>
+	  <span><xsl:attribute name="class"><xsl:value-of select="concat('getTextFor null this.innerText.query.atleastdocsmatch|', $numDocsReturned)" /></xsl:attribute></span>
 	</xsl:when>
       </xsl:choose>
     </div>
@@ -135,15 +134,15 @@
     <xsl:param name="collName"/>
     <xsl:param name="serviceName"/>
     <a><xsl:attribute name="href"><xsl:value-of select='$library_name'/>?a=d&amp;c=<xsl:value-of select='$collName'/>&amp;d=<xsl:value-of select='@nodeID'/><xsl:if test="@nodeType='leaf'">&amp;sib=1</xsl:if>&amp;dt=<xsl:value-of select='@docType'/>&amp;p.a=q&amp;&amp;p.sa=<xsl:value-of select="/page/pageRequest/@subaction"/>&amp;p.s=<xsl:value-of select="$serviceName"/></xsl:attribute>
-      <xsl:apply-templates select="." mode="displayNodeIcon"/>
+      <xsl:apply-templates select="." mode="displayNodeIcon"/><xsl:text>sample</xsl:text>
     </a>
-    <span><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name='Title']"/></span>
+    <span><xsl:text>Testing</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name='Title']"/></span>
   </xsl:template>
 
   <xsl:template name="termInfo">
     <div class="terminfo">
       <xsl:if test="count(termList/term) > 0">
-	<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.wordcount')"/>
+      <span class="getTextFor query.wordcount">&amp;nbsp;</span>
 	<xsl:for-each select="termList/term">
 	  <xsl:if test="position() > 1">, </xsl:if>
 	  <xsl:value-of select="@name"/>: <xsl:value-of select="@freq"/> 
