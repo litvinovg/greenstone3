@@ -7,9 +7,7 @@
 <!-- this is based on a sample web.xml file provided by 
 http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 -->
-<web-app>
-
-
+<web-app>
   <!-- General description of your web application -->
   
   <display-name>GSDL3</display-name>
@@ -76,6 +74,13 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
     <servlet-class>TestServlet</servlet-class>
   </servlet>
   
+  <!-- For client side text fetching -->
+  <servlet>
+    <servlet-name>grabtext</servlet-name>
+    <description>Grabs text for client-side display with minimal overhead.</description>
+    <servlet-class>org.greenstone.gsdl3.ClientSideServlet</servlet-class>
+  </servlet>
+  
   
    <servlet>
     <servlet-name>dev</servlet-name>
@@ -103,31 +108,31 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
     </init-param>
   </servlet>
 
-  <servlet>^M
-    <servlet-name>Format</servlet-name>^M
-    <description>A new skin engine still in development based on the standard gsdl3 library program</description>^M
-    <servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>^M
-    <init-param>^M
-      <param-name>library_name</param-name>^M
-      <param-value>format</param-value>^M
-    </init-param>^M
-    <init-param>^M
-      <param-name>site_name</param-name>^M
-      <param-value>localsite</param-value>^M
-    </init-param>^M
-    <init-param>^M
-      <param-name>interface_name</param-name>^M
-      <param-value>oran</param-value>^M
-    </init-param>^M
-    <init-param>^M
-      <param-name>receptionist_class</param-name>^M
-      <param-value>FormatReceptionist</param-value>^M
-    </init-param>^M
-    <init-param>^M
-      <param-name>default_lang</param-name>^M
-      <param-value>en</param-value>^M
-    </init-param>^M
-  </servlet>^M
+  <servlet>
+    <servlet-name>Format</servlet-name>
+    <description>A new skin engine still in development based on the standard gsdl3 library program</description>
+    <servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
+    <init-param>
+      <param-name>library_name</param-name>
+      <param-value>format</param-value>
+    </init-param>
+    <init-param>
+      <param-name>site_name</param-name>
+      <param-value>localsite</param-value>
+    </init-param>
+    <init-param>
+      <param-name>interface_name</param-name>
+      <param-value>oran</param-value>
+    </init-param>
+    <init-param>
+      <param-name>receptionist_class</param-name>
+      <param-value>FormatReceptionist</param-value>
+    </init-param>
+    <init-param>
+      <param-name>default_lang</param-name>
+      <param-value>en</param-value>
+    </init-param>
+  </servlet>
 
   
   <servlet>
@@ -232,6 +237,10 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
       <param-name>default_lang</param-name>
       <param-value>en</param-value>
     </init-param>
+	<init-param>
+	 <param-name>allow_client_side_xslt</param-name>
+	 <param-value>true</param-value>
+	</init-param>
   </servlet>
 
   <!-- axis servlets -->
@@ -344,10 +353,10 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
     <url-pattern>/dev</url-pattern>
   </servlet-mapping>
 
-  <servlet-mapping>^M
-    <servlet-name>Format</servlet-name>^M
-    <url-pattern>/format</url-pattern>^M
-  </servlet-mapping>^M
+  <servlet-mapping>
+    <servlet-name>Format</servlet-name>
+    <url-pattern>/format</url-pattern>
+  </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>gs2-library</servlet-name>
@@ -364,6 +373,10 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
     <url-pattern>/gs3library</url-pattern>
   </servlet-mapping>
 
+	<servlet-mapping>
+		<servlet-name>grabtext</servlet-name>
+		<url-pattern>/grabtext</url-pattern>
+	</servlet-mapping>
   
   <!-- axis mappings -->
   <servlet-mapping>
@@ -418,7 +431,7 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
     <extension>xsd</extension>
     <mime-type>text/xml</mime-type>
   </mime-mapping>
-  
+
 </web-app>
 
 
