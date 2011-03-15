@@ -1,0 +1,14 @@
+This version of Greenstone 3 has been optimised as part of the Summer Research Scholarship I undertook. This version, however, also contains support for client-side XSLT.
+
+The main modifications include:
+* The use of Apache Commons StringUtils class for text replacement and splitting;
+* The use of StringUtils.contains over the *.text.* regular expression;
+* Plus: client-side XSLT support.
+
+Note that the XML Texts collection had to be modified in certain areas due to it using four XSL overrides in its transform directory. This may or may not be necessary depending on the XSL overrides in place for other collections. For an example of this, see the about-clientside.xsl file in the gberg collection.
+
+Steven McTainsh
+February 2011
+
+
+
