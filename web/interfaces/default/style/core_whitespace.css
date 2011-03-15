@@ -1,0 +1,376 @@
+
+body {
+  padding:0;
+  margin:0;
+  font-family: sans-serif, arial, helvetica;   
+  background: #fff url('../images/chalk.gif') scroll repeat-y left top;
+  color: #000000 
+}
+
+/* this contains everything - all the other divs */
+#page-wrapper {
+  margin: .5em 3em 0 5em;
+}
+
+a:link
+{
+color: #339966;
+}
+
+a:visited
+{
+color: #066;
+}
+
+a:hover, a:active
+{
+color: #99CC33;
+}
+
+div#banner ul, ul#resultlist, ul#tocnodes, ul#docbuttons, ul.tocnode, ul#bannerlist, ul#navbarlist, ul#collectionlist, ul#servicelist, ul#classifierlist, ul#classifiernodelist, ul#queryitemlist{
+  list-style-type:none;
+  margin:0;
+  padding:0;
+}
+
+div#banner ul li, ul#bannerlist li, ul#navbarlist li {
+  display: inline;
+  margin:0;
+  padding:0;	
+}
+
+
+ul li>select, ul li>input {
+  padding: 0;
+  margin-left:5px;
+}
+
+
+div#banner {
+  margin: 0;
+  padding:0;
+  overflow: hidden;
+}
+
+div#banner p {
+  margin:0;
+  padding: 0;
+  float:left;
+  font-size: 16px;
+  text-align: left;
+  overflow:hidden	
+}
+
+div#banner p a {
+  background-image: url('../images/banner_bg.png');
+  background-repeat: repeat-y;
+}
+
+
+div#banner ul{
+  margin:0;
+  padding:0; 
+  float:right; 
+  font-size: 12px;  
+}
+
+div#banner a{
+  text-decoration: none;
+  color:#000000;
+}
+
+
+ul#bannerlist li a {
+  padding: 0 10px 0 10px; 
+  text-decoration: none;
+}
+
+ul#bannerlist li a:link, ul#bannerlist li a:visited
+{
+ background-color: #DEE79C;
+ background-image: url('../images/bg_off.png');
+ text-decoration: none
+}
+
+ul#bannerlist li a:hover{
+ background-color: #FFFF66;
+ background-image: url('../images/bg_on.png') ;
+ text-decoration: none
+}
+
+
+div#navbar{
+  clear:both;
+}
+
+ul#navbarlist{
+  margin:0;
+  padding:0; 
+  list-style-type: none; 
+  text-align:center;
+  width: 100%;
+  font-size: 80%;
+  background-image: url('../images/bg_green.png');	  
+  background-color: #99CC99
+ }
+
+ul#navbarlist li a {
+  padding: 0 20px 0 20px; 
+  margin: 0;
+  color: #000000; 
+  text-decoration: none;
+}
+
+ul#navbarlist li a:link, ul#navbarlist li a:visited{
+   background-image: url('../images/bg_off.png') ;
+ }
+
+ul#navbarlist li a:hover{
+  background-image: url('../images/bg_on.png') ;
+}
+
+
+ul#collectionlist li, ul#servicelist li{
+  display:block;
+  padding:0;
+  margin: .2em 0 0 0;
+  overflow:hidden;
+}
+
+
+ul#collectionlist img{
+  margin:0;
+  padding:0;
+  width: 150px;
+  height: 45px;
+  border: 1px solid black;
+  background-image: url('../images/collectimg_bg.png');
+  background-repeat: repeat-y;
+  overflow:hidden
+}
+
+ul#collectionlist li a.noimage{
+  display: block;
+  margin:0;
+  width: 145px;
+  height: 40px;
+  border: 1px solid black;
+  background-image: url('../images/collectimg_bg.png');
+  background-repeat: repeat-y;
+  overflow:hidden; padding-left:5px; padding-right:0; padding-top:5px; padding-bottom:0
+
+}
+
+ul#collectionlist li a{
+  font-size: 16px;
+  color: #000000;
+  text-decoration: none;  
+  font-weight: bold;
+}
+
+ul#servicelist li a{
+  margin:0 .5em 0 0;
+}
+
+ul#queryitemlist li{
+  display:block;
+  margin: .2em 0 .2em 0;
+}
+
+ul#classifierlist li{
+  list-style: none;
+  margin: 0 0 5px 0;
+  padding: 0;
+  display: block;
+  color:#000;
+}
+
+ul#classifierlist li#activeclassifier{
+  font-weight:bold;
+  padding: 0 0 0 5px;
+  margin:0 0 5px 0;
+}
+
+ ul#classifierlist li a:link, ul#classifierlist li a:visited  
+{
+   display:block;
+   margin:0;
+   background-image: url('../images/bg_off.png');
+   text-decoration: none; 
+   color:#000;
+   width:100%; padding-left:5px; padding-right:0; padding-top:2px; padding-bottom:2px
+ } 
+
+ul#classifierlist li a:hover, ul#classifierlist li a:active
+{
+  display:block;
+  margin:0;
+  background-image: url('../images/bg_on.png');
+  text-decoration: none; padding-left:5px; padding-right:0; padding-top:2px; padding-bottom:2px
+  
+}
+
+ul#classifierlist{
+   float:left;
+   font-size: 14px;
+   text-align: left;
+   width: 15%;
+   margin:0;
+   padding:0;
+}
+
+div#classifiers{
+  float:left;
+  width: 75%;
+  margin:0;
+  padding:0 0 0 10px;
+ }
+
+ul#classifiernodelist li{
+  list-style: none;
+  margin: 0;
+  padding: 5px 0 0 0;
+  display: block;
+ }
+
+ul.childrenlist{
+  margin: 0 0 0 0;
+  padding: 0 0 0 20px;
+  display: block;
+  width: 100%;
+}
+
+div#content{
+ clear: both;
+ overflow: hidden;
+ margin: .2em 0 0 0;
+}
+
+/* bg image set in style macro */
+div.divbar { 
+  clear: both; 
+  background-image: url('../images/bg_green.png'); 
+  width: 100%; 
+  text-align: center;
+  font-size:80%
+}
+
+
+/** query form style**/
+div#queryform{
+
+}
+
+/** search result style */
+div#terminfo{
+
+}
+
+div#matchdocs{
+
+}
+
+div.resultnavigation{
+ margin: 0;
+ padding:0;
+}
+
+ul#resultlist li{
+  display:block;
+}
+
+
+div.documenttext { clear: both; } /* come after any floating divs */
+
+div#documentheading{
+  font-size: 16pt;
+  font-weight: bold;
+}
+
+div#documentinfo { 
+  float:left;
+  padding:0;
+  margin:0;
+  width:24%;
+} 
+
+div#toc{
+  float:left;
+  text-align:left;
+  width:60%;
+  padding:0;
+  margin:0; 
+}
+
+ul#docbuttons li {
+   display: block;
+  font-size: 11px;
+  font-weight: bold;
+  background: #f7e7c5;
+  margin: 1px;
+  border: 1px solid #eeddbb;
+  text-align: center;
+  vertical-align: middle;
+  height: 30px; /* IE6 and NS4 treat width/height as min-width/min-height */
+  width: 110px;
+}
+
+
+ul#tocnodes li{
+ margin: 0;
+ padding: 5px 0 0 0;
+ display:block;
+}
+
+ul.tocnode {
+  margin:0;
+  padding:5px 0 0 20px;
+}
+
+ul.tocnode  a{
+ margin: 0;
+ padding:0 5px 0 0;
+ }
+
+span.bold{
+  font-weight: bold;	   
+}
+
+div.documentarrows{
+  clear: both; 
+  margin: 0 0 0 0;
+  padding: 1em 0 0 0;   
+}
+
+img.lessarrow{
+  float:left;
+  border: none;  
+}
+
+img.morearrow{
+  float:right;
+  border:none; 
+}
+
+div.formheading{
+  font-size: 16pt;
+  font-weight: bold;
+  margin: .5em 0 0;
+  padding:0;
+}
+
+ul#presprefs li, ul#berrybasketprefs li, ul#searchprefs li{
+  display: block;
+} 
+
+
+div.phrasebrowse{
+  text-align:center;
+  padding:0;
+  margin: .5em 0 .5em 0;   
+}
+
+div.QuickSearch {
+  float: right;
+}
+
