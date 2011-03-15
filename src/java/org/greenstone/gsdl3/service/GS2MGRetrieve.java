@@ -33,6 +33,9 @@ import java.io.File;
 
 import org.apache.log4j.*;
 
+// Apache Commons
+import org.apache.commons.lang3.*;
+
 public class GS2MGRetrieve
 extends AbstractGS2DocumentRetrieve {
     static Logger logger = Logger.getLogger (org.greenstone.gsdl3.service.GS2MGRetrieve.class.getName ());
@@ -133,7 +136,7 @@ extends AbstractGS2DocumentRetrieve {
         
         if (doc_content!=null) {
             // remove any ctrl-c or ctrl-b
-            doc_content = doc_content.replaceAll ("\u0002|\u0003", "");
+            doc_content = StringUtils.replace(doc_content, "\u0002|\u0003", "");
             // replace _httpimg_ with the correct address
             doc_content = resolveTextMacros (doc_content, doc_id, lang);
             //GSXML.addDocText(this.doc, doc, doc_content);

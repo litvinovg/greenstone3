@@ -43,6 +43,9 @@ import java.util.ArrayList;
 
 import org.apache.log4j.*;
 
+// Apache Commons
+import org.apache.commons.lang3.*;
+
 /** Implements the generic retrieval and classifier services for GS2 
  * collections.
  *
@@ -149,7 +152,7 @@ public abstract class AbstractGS2DocumentRetrieve
 	ArrayList children = new ArrayList();
 	StringTokenizer st = new StringTokenizer(contains, ";");
 	while (st.hasMoreTokens()) {
-	    String child_id = st.nextToken().replaceAll("\"", node_id);
+	    String child_id = StringUtils.replace(st.nextToken(), "\"", node_id);
 	    children.add(child_id);
 	}
 	return children;
@@ -234,7 +237,7 @@ public abstract class AbstractGS2DocumentRetrieve
 	    }
 	    
 	    String contains = info.getInfo("contains");
-	    contains = contains.replaceAll("\"", parent_id);
+	    contains = StringUtils.replace(contains, "\"", parent_id);
 	    String [] children = contains.split(";");
 	    for (int i=0;i<children.length;i++) {
 		String child_id = children[i];
@@ -474,7 +477,7 @@ public abstract class AbstractGS2DocumentRetrieve
 		    value ="-1";
 		} else {
 		    String contains = info.getInfo("contains");
-		    contains = contains.replaceAll("\"", parent_id);
+		    contains = StringUtils.replace(contains, "\"", parent_id);
 		    String [] children = contains.split(";");
 		    for (int i=0;i<children.length;i++) {
 			String child_id = children[i];
