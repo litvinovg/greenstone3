@@ -60,6 +60,9 @@ with.jni=true
 # Same issue as 'with.jni' for how this gets used in ant 1.7.1 and before
 #compile.static=true
 
+## Uncomment this line to enable compilation with the gnome-lib extension
+## The gnome-lib extension should be in the [gsdl3home]/ext directory
+#use.support.lib=true
 
 ## windows c++ compilation
 # The following property does not help in build.xml. 
