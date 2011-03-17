@@ -64,11 +64,11 @@ public class GS2MacroResolver
 	    this.lang = lang;
 	} 
 
-	Stack macros;//ArrayList macros;
+	Stack macros = new Stack();//ArrayList macros;
 	if (scope.equals(SCOPE_TEXT)) {
-	    macros = text_macros;
+	    macros.addAll(text_macros);
 	} else {
-	    macros = metadata_macros;
+	    macros.addAll(metadata_macros);
 	}
 	//for (int i=0; i<macros.size(); i++) {
 	while(!macros.empty()) {
