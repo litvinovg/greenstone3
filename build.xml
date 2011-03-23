@@ -1694,7 +1694,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 
   <target name="prepare-gli" depends="init" if="collection.building.enabled" unless="gli.present">
     <!-- checkout -->
-    <if><bool><not><istrue value="${nosvn.mode}"/></not></bool>
+    <if><bool><and><not><istrue value="${nosvn.mode}"/></not><isset property="gli.and.gems"/></and></bool>
 
     <exec executable="svn">
       <arg value="checkout"/>
@@ -1728,20 +1728,22 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
  
   <target name="compile-gli" depends="init" if="collection.building.enabled">
-    <!-- gli -->
-    <property name="gli.home" value="${basedir}/gli"/>
+    <if><bool><isset property="gli.and.gems"/></bool>
+      <!-- gli -->
+      <property name="gli.home" value="${basedir}/gli"/>
 
-    <!-- linux -->
-    <exec executable="makegli.sh" os="${os.unix}" dir="${gli.home}" resolveExecutable="true" failonerror="true"/>
-    <!--remote gli-->
-    <exec executable="makejar.sh" os="${os.unix}" dir="${gli.home}"
-      resolveExecutable="true" failonerror="true"/>
-    <!-- windows -->
-    <exec executable="makegli.bat" os="${os.windows}" dir="${gli.home}" resolveExecutable="true" failonerror="true"/>
-    <!--remote gli-->
-    <exec executable="makejar.bat" os="${os.windows}" dir="${gli.home}"
-      resolveExecutable="true" failonerror="true"/> 
-    <copy file="${gli.home}/GLIServer.jar" todir="${gs2build.home}/bin/java" />
+      <!-- linux -->
+      <exec executable="makegli.sh" os="${os.unix}" dir="${gli.home}" resolveExecutable="true" failonerror="true"/>
+      <!--remote gli-->
+      <exec executable="makejar.sh" os="${os.unix}" dir="${gli.home}"
+	    resolveExecutable="true" failonerror="true"/>
+      <!-- windows -->
+      <exec executable="makegli.bat" os="${os.windows}" dir="${gli.home}" resolveExecutable="true" failonerror="true"/>
+      <!--remote gli-->
+      <exec executable="makejar.bat" os="${os.windows}" dir="${gli.home}"
+	    resolveExecutable="true" failonerror="true"/> 
+      <copy file="${gli.home}/GLIServer.jar" todir="${gs2build.home}/bin/java" />
+    </if>
   </target>
 
   <target name="gli" description="Run the Greenstone Librarian Interface" depends="init" if="collection.building.enabled">
