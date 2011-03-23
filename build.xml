@@ -1252,15 +1252,36 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <target name="compile-core" depends="init" 
     description="Compile only the Greenstone core">
     <mkdir dir="${build.home}"/>
-    <javac srcdir="${src.home}"
-      destdir="${build.home}"
-      debug="${compile.debug}"
-      deprecation="${compile.deprecation}"
-      optimize="${compile.optimize}">
-      <classpath>
-        <path refid="compile.classpath"/>
-      </classpath>
-    </javac>
+    <if><bool><isset property="with.jni"/></bool>
+	<javac srcdir="${src.home}"
+	       destdir="${build.home}"
+	       debug="${compile.debug}"
+	       deprecation="${compile.deprecation}"
+	       optimize="${compile.optimize}">
+	  <classpath>
+            <path refid="compile.classpath"/>
+	  </classpath>
+	</javac>
+	<else>
+	  <property name="gsprefix" value=""/>	  
+	  <javac srcdir="${src.home}"
+	       destdir="${build.home}"
+	       debug="${compile.debug}"
+	       deprecation="${compile.deprecation}"
+	       optimize="${compile.optimize}">
+	    <classpath>
+              <path refid="compile.classpath"/>
+	    </classpath>
+	    <exclude name="org/greenstone/gsdl3/service/GS2MGPPRetrieve.java"/>
+	    <exclude name="org/greenstone/gsdl3/service/GS2MGPPSearch.java"/>
+	    <exclude name="org/greenstone/gsdl3/service/GS2MGSearch.java"/>
+	    <exclude name="org/greenstone/gsdl3/service/GS2MGRetrieve.java"/>
+	    <exclude name="org/greenstone/gsdl3/service/GoogleNgramMGPPSearch.java"/>
+	    <exclude name="org/greenstone/gsdl3/service/PhindPhraseBrowse.java"/>
+	    <exclude name="org/greenstone/gsdl3/util/GDBMWrapper.java"/>
+	  </javac>
+	</else>
+    </if>
     <jar destfile="${build.home}/gsdl3.jar">
       <fileset dir="${build.home}">
         <include name="org/greenstone/gsdl3/**"/>
