@@ -57,7 +57,7 @@ compile.optimize=true
 with.jni=true
 
 ## Controls whether or not we want GLI and GEMS to be checked out and compiled
-gems.and.gli=true
+with.gli.and.gems=true
 
 ## Control if compilation of gs2 is static or not. Used, for example, for distributions
 # Same issue as 'with.jni' for how this gets used in ant 1.7.1 and before

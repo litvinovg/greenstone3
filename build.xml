@@ -1694,7 +1694,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 
   <target name="prepare-gli" depends="init" if="collection.building.enabled" unless="gli.present">
     <!-- checkout -->
-    <if><bool><and><not><istrue value="${nosvn.mode}"/></not><isset property="gli.and.gems"/></and></bool>
+    <if><bool><and><not><istrue value="${nosvn.mode}"/></not><isset property="with.gli.and.gems"/></and></bool>
 
     <exec executable="svn">
       <arg value="checkout"/>
@@ -1728,7 +1728,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
  
   <target name="compile-gli" depends="init" if="collection.building.enabled">
-    <if><bool><isset property="gli.and.gems"/></bool>
+    <if><bool><isset property="with.gli.and.gems"/></bool>
       <!-- gli -->
       <property name="gli.home" value="${basedir}/gli"/>
 
