@@ -25,6 +25,28 @@
 		<include name="gs2build/win32cfg.h"/>
 	</patternset>
 
+	<!-- source component without gli- files that get compiled and could be safely removed from a binary distribution -->
+	<patternset id="greenstone3.source.no.gli.component">
+		<include name="src"/>
+		<include name="src/**/*"/>
+		<include name="gs2build/common-src"/>
+		<include name="gs2build/common-src/**/*"/>
+		<include name="gs2build/build-src"/>
+		<include name="gs2build/build-src/**/*"/>
+		<include name="gs2build/runtime-src"/>
+		<include name="gs2build/runtime-src/**/*"/>
+		<include name="gs2build/aclocal.m4"/>
+		<include name="gs2build/config.guess"/>
+		<include name="gs2build/config.h.in"/>
+		<include name="gs2build/config.sub"/>
+		<include name="gs2build/configure"/>
+		<include name="gs2build/configure.in"/>
+		<include name="gs2build/install-sh"/>
+		<include name="gs2build/Makefile.in"/>
+		<include name="gs2build/win32.mak"/>
+		<include name="gs2build/win32cfg.h"/>
+	</patternset>
+
 	<!-- imagemagick -->
 	<patternset id="greenstone3.imagemagick.component">
 		<include name="gs2build/bin/**/imagemagick"/>

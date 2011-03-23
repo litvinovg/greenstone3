@@ -2023,11 +2023,21 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 
 <!-- ========== Some distribution targets ======================== -->
   <target name="remove-source">
+    <if><bool><isset property="with.gli.and.gems"/></bool>
     <delete includeEmptyDirs="true">
       <fileset dir="." defaultexcludes="false">
         <patternset refid="greenstone3.source.component"/>
      </fileset>
     </delete>
+    
+    <else>
+    <delete includeEmptyDirs="true">
+      <fileset dir="." defaultexcludes="false">
+        <patternset refid="greenstone3.source.no.gli.component"/>
+     </fileset>
+    </delete>
+    </else>
+    </if>
   </target>
 
   <target name="dist-tidy"
@@ -2050,7 +2060,9 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <!-- linux, mac -->
     <if><bool><istrue value="${current.os.isunix}"/></bool>
       <delete><fileset dir="." includes="*.bat"/></delete>
-      <delete><fileset dir="gli" includes="*.bat"/></delete>
+      <if><bool><isset property="with.gli.and.gems"/></bool>
+	<delete><fileset dir="gli" includes="*.bat"/></delete>
+      </if>
       <delete><fileset dir="gs2build" includes="*.bat"/></delete>
       <delete><fileset dir="bin/script" includes="*.bat"/></delete>
       <delete file="${basedir}/gs2build/win32cfg.h"/>
@@ -2061,7 +2073,9 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <!-- windows -->
     <else><if><bool><istrue value="${current.os.iswindows}"/></bool>
       <delete><fileset dir="." includes="*.sh,*.bash,*.csh"/></delete>
-      <delete><fileset dir="gli" includes="*.sh,*.bash,*.csh"/></delete>
+      <if><bool><isset property="with.gli.and.gems"/></bool>
+	<delete><fileset dir="gli" includes="*.sh,*.bash,*.csh"/></delete>
+      </if>
       <delete><fileset dir="gs2build" includes="*.sh,*.bash,*.csh"/></delete>
       <delete><fileset dir="bin/script" includes="*.sh,*.bash,*.csh"/></delete>
     </if></else></if>
