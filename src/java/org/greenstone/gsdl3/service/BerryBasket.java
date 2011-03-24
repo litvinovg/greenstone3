@@ -448,7 +448,6 @@ public class BerryBasket
 
 
     protected Element processDisplayList(Element request) {
-	// Create a new (empty) result message
      	Hashtable docsMap =  updateDocMap(request);
 
 	// Create a new (empty) result message
@@ -456,16 +455,16 @@ public class BerryBasket
 	
         Iterator keys = docsMap.keySet().iterator();
 	
-         while(keys.hasNext()){     
-	     String collection = (String)keys.next(); 
-             Hashtable items = (Hashtable)docsMap.get(collection);
-	     Iterator itemItr = items.values().iterator();
-
-             Element collectionNode = this.doc.createElement("collection");
-             collectionNode.setAttribute("name",collection);
-	     result.appendChild(collectionNode);
-
-	     while(itemItr.hasNext()){  
+	while(keys.hasNext()){     
+	    String collection = (String)keys.next(); 
+	    Hashtable items = (Hashtable)docsMap.get(collection);
+	    Iterator itemItr = items.values().iterator();
+	    
+	    Element collectionNode = this.doc.createElement("berryList");
+	    collectionNode.setAttribute("name",collection);
+	    result.appendChild(collectionNode);
+	    
+	    while(itemItr.hasNext()){  
                 Item item = (Item)itemItr.next();
 	        Element itemElement = this.doc.createElement("item");
 		
@@ -475,12 +474,12 @@ public class BerryBasket
 		itemElement.setAttribute("title",item.title);
 		itemElement.setAttribute("date",item.date);
                	itemElement.setAttribute("root_title",item.rootTitle);                
- 	     }	     
-	 }
+	    }	     
+	}
        
 	return result;
 
-   }
+    }
 
 
 	public Element processSendMail(Element request){
