@@ -52,7 +52,6 @@ public class DefaultReceptionist extends TransformingReceptionist {
 		
 		if (coll_name.equals("")) {
 			coll_name = GSXML.getNamedElement(param_list, GSXML.PARAM_ELEM, GSXML.NAME_ATT, "p.c").getAttribute(GSXML.VALUE_ATT);
-			logger.debug("*%*%*%* new collname = " + coll_name);
 		}
 		
 		boolean get_service_description = false;
@@ -66,8 +65,6 @@ public class DefaultReceptionist extends TransformingReceptionist {
 			coll_description = (Element)GSXML.getChildByTagName(page_response, GSXML.CLUSTER_ELEM);
 		}
 		if (coll_description == null) { 
-		
-			logger.debug("*%*%*%* No collection element, getting one");
 		
 			// we dont have one yet - get it
 			Element coll_about_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
@@ -95,9 +92,6 @@ public class DefaultReceptionist extends TransformingReceptionist {
 		}
 
 		// have got a coll description
-		
-		logger.debug("*%*%*%* Getting display information about the services");
-		
 		// now get the dispay info for the services
 		Element service_list = (Element)GSXML.getChildByTagName(coll_description, GSXML.SERVICE_ELEM+GSXML.LIST_MODIFIER);
 		if (service_list == null) {
@@ -128,9 +122,6 @@ public class DefaultReceptionist extends TransformingReceptionist {
 				return;
 			}
 		}
-		
-		
-		logger.debug("*%*%*%* Off to get the service descriptions");
 
 		// if get here, we need to get the service descriptions
 		
