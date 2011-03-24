@@ -20,7 +20,7 @@
 	<xsl:template match="/page/pageResponse">
 
 		<!-- show the classifiers if more than one (title, subject, etc.) -->
-		<xsl:if test="service/classifierList/classifier[2]">
+		<!--<xsl:if test="service/classifierList/classifier[2]">
 			<div id="classifierList" class="navList">
 				<ul>
 					<xsl:for-each select="service/classifierList/classifier">
@@ -29,14 +29,16 @@
 				</ul>
 				<div class="clear"><xsl:text> </xsl:text></div>
 			</div>
-		</xsl:if>
+		</xsl:if>-->
 
 		<!-- this right sidebar -->
-		<div id="rightSidebar">
-			<!-- show the berry basket if it's turned on -->
-			<gslib:berryBasket/>
-			<xsl:text> </xsl:text>
-		</div>
+		<xsl:if test="$berryBasketOn">
+			<div id="rightSidebar">
+				<!-- show the berry basket if it's turned on -->
+				<gslib:berryBasket/>
+				<xsl:text> </xsl:text>
+			</div>
+		</xsl:if>
 	
 		<!--
 			show the clasifier results - 

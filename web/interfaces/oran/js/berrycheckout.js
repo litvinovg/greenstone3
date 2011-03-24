@@ -14,8 +14,8 @@ options[1] = 'textview';
 options[2] = 'email';
 
 function navigate(e){
-
-	var target = e.target;
+	
+	var target = this;
 
 	if ( target.id.toLowerCase() == '' ) {
 		target = target.parentNode;
@@ -45,6 +45,9 @@ function navigate(e){
 		urlcheck.src = 'interfaces/default/images/check3.gif';
 		var parea =YAHOO.util.Dom.get('pretextarea');
 		urlonly = false;
+		
+		this.value='URL only view';
+		
 		populateUrlsAndMetadata(parea);
 		return;
 	}
@@ -55,6 +58,9 @@ function navigate(e){
 		var parea =YAHOO.util.Dom.get('pretextarea');
 		populateUrls(parea);
 		urlonly = true;
+		
+		this.value='URL and Metadata view';
+		
 		return;
 	}
 
@@ -90,6 +96,16 @@ function navigate(e){
 	}
 }
 
+function pageLoad(){
+	for(var j = 0; j < options.length; j++)
+	{
+		var ele = document.getElementById(options[j]);
+		YAHOO.util.Event.addListener(ele, 'click', navigate);
+	}
+	
+	showFullView();
+}
+
 function showFullView(){
 
 	var content =  YAHOO.util.Dom.get('berryBasketContent');
@@ -100,7 +116,6 @@ function showFullView(){
 		content.appendChild(document.createTextNode("Your berry basket is empty."));
 		return;
 	}
-
 
 	var trashbin = document.createElement('div');
 	trashbin.id ='trashbin';
@@ -276,16 +291,28 @@ function showEmail(){
 	input.setAttribute("type", "button");
 	input.setAttribute("value", "send");
 	content.appendChild(input);
-
+	
+	YAHOO.util.Event.addListener(input, 'click', navigate);
 }
-
 
 function buildPreview(parent){
 
 	var div = document.createElement('div');
 	var cb = document.createElement('input');
-	cb.type = 'checkbox';
+	cb.setAttribute('class', 'sendbutton');
+	cb.type = 'button';
+	cb.id = 'urlcheck';
+	if (urlonly)
+	{
+		cb.value='URL and Metadata view';
+	}
+	else
+	{
+		cb.value='URL only view';
+	}
 
+	YAHOO.util.Event.addListener(cb, 'click', navigate);
+	
 	var img = document.createElement('img');
 	img.src = 'interfaces/default/images/check3.gif';
 	img.id = 'urlcheck';
@@ -295,7 +322,7 @@ function buildPreview(parent){
 	var urls = document.createElement('span');
 	urls.id = 'urls';
 	urls.className = 'berrycheck';
-	urls.appendChild(document.createTextNode('URL only'));
+	//urls.appendChild(document.createTextNode('URL only'));
 	div.appendChild(urls);
 
 	// var urlsmetadata = document.createElement('span');
@@ -311,9 +338,14 @@ function buildPreview(parent){
 
 	parent.appendChild(parea);
 
-	populateUrlsAndMetadata(parea);
-
-
+	if(urlonly)
+	{
+		populateUrls(parea);
+	}
+	else
+	{
+		populateUrlsAndMetadata(parea);
+	}
 }
 
 function populateUrls(parea){
@@ -405,7 +437,6 @@ function berryCheckoutHighlight( id ) {
 
 }
 
-YAHOO.util.Event.addListener(window,'click', navigate);
-YAHOO.util.Event.addListener(window,'load', showFullView);
+YAHOO.util.Event.addListener(window,'load', pageLoad);
 
 

@@ -9,12 +9,12 @@
 
 	<!-- use the 'main' layout -->
 	<xsl:include href="layouts/main.xsl"/>
-
+	
 	<!-- set page title -->
 	<xsl:template name="pageTitle"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket')"/></xsl:template>
 
 	<!-- set page breadcrumbs -->
-	<xsl:template name="breadcrumbs"><gslib:siteLink/><gslib:rightArrow/></xsl:template>
+	<xsl:template name="breadcrumbs"><gslib:siteLink/><gslib:rightArrow/> <gslib:collectionNameLinked/><gslib:rightArrow/></xsl:template>
 
 	<!-- the page content -->
 	<xsl:template match="/page">
@@ -23,18 +23,18 @@
 		<script type="text/javascript">
 			var doc;
 			var docList = new Array();
-			<xsl:for-each select="/page/pageResponse/collection/item">
-				<xsl:text disable-output-escaping="yes">
-			doc = new Array();</xsl:text>
+			<xsl:for-each select="/page/pageResponse/berryList/item">
+				<xsl:text disable-output-escaping="yes">doc = new Array();</xsl:text>
 				<xsl:for-each select="@*">
-					<xsl:text disable-output-escaping="yes">
-			doc["</xsl:text><xsl:value-of select="name()" /><xsl:text disable-output-escaping="yes">"]='</xsl:text><xsl:value-of select="." /><xsl:text disable-output-escaping="yes">';</xsl:text>
+					<xsl:text disable-output-escaping="yes">doc["</xsl:text>
+					<xsl:value-of select="name()" />
+					<xsl:text disable-output-escaping="yes">"]='</xsl:text>
+					<xsl:value-of select="." />
+					<xsl:text disable-output-escaping="yes">';</xsl:text>
 				</xsl:for-each>
-				<xsl:text disable-output-escaping="yes">
-			docList[</xsl:text>
+				<xsl:text disable-output-escaping="yes">docList[</xsl:text>
 				<xsl:value-of select="position()-1"/>
-				<xsl:text>] = doc;
-</xsl:text>
+				<xsl:text>] = doc;</xsl:text>
 			</xsl:for-each>
 		</script>
 

@@ -18,7 +18,19 @@
 	<xsl:template name="pageTitle"><gslib:documentTitle/></xsl:template>
 
 	<!-- set page breadcrumbs -->
-	<xsl:template name="breadcrumbs"><gslib:siteLink/><gslib:rightArrow/></xsl:template>
+	<xsl:template name="breadcrumbs">
+		<gslib:siteLink/><gslib:rightArrow/> 
+		<gslib:collectionNameLinked/><gslib:rightArrow/> 
+		<a>
+			<xsl:attribute name="href">
+				<xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="$collName"/>&amp;d=<xsl:value-of select="/page/pageResponse/document/documentNode[1]/@nodeID"/>&amp;dt=<xsl:value-of select="/page/pageResponse/document/documentNode/@docType"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>
+			</xsl:attribute>
+			<xsl:variable name="documentTitleVar">
+				<gslib:documentTitle/>
+			</xsl:variable>
+			Document
+		</a>
+	</xsl:template>
 
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse/document">
@@ -44,8 +56,7 @@
 		</div>
 
 		<!-- display the document -->
-                <xsl:choose>
-
+		<xsl:choose>
 			<xsl:when test="@external != ''">
 				<xsl:call-template name="externalPage">
 					<xsl:with-param name="external" select="@external"/>
@@ -131,14 +142,20 @@
 		</li>
 
 	</xsl:template>
-  <xsl:template name="externalPage">
-    <xsl:param name="external"/>
-    <xsl:variable name="go_forward_link"><a><xsl:attribute name="href"><xsl:value-of select="$external"/></xsl:attribute><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'external.go_forward')"/></a></xsl:variable>
-    <h2><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'external.title')"/></h2>
-    <p><xsl:value-of select="util:getInterfaceTextWithDOM($interface_name, /page/@lang, 'external.text', $go_forward_link)" disable-output-escaping="yes"/>
-    </p>
-  </xsl:template>
-
+	
+	<xsl:template name="externalPage">
+		<xsl:param name="external"/>
+		<xsl:variable name="go_forward_link">
+			<a>
+				<xsl:attribute name="href">
+					<xsl:value-of select="$external"/>
+				</xsl:attribute>
+				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'external.go_forward')"/>
+			</a>
+		</xsl:variable>
+		<h2><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'external.title')"/></h2>
+		<p><xsl:value-of select="util:getInterfaceTextWithDOM($interface_name, /page/@lang, 'external.text', $go_forward_link)" disable-output-escaping="yes"/></p>
+	</xsl:template>
 
 	<xsl:template match="/page"><xsl:apply-templates select="/page/pageResponse/document"/></xsl:template> <!-- this to be deleted eventually -->
 

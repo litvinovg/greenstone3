@@ -18,12 +18,102 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page">
+	
+		<!-- 
+		Add some javascript to the page that notices when a preference is changed 
+		so that, if the user tries to navigate away from the page without clicking
+		the "Set preferences" button, it asks them if they want their preferences
+		saved or not 
+		-->
+		<script type="text/javascript"><xsl:text disable-output-escaping="yes">
+			var modified = false;
+					
+			function assembleURLFromForm(formElem)
+			{
+				var url = "dev";
+				var selectNodes = formElem.getElementsByTagName("select");
+				var inputNodes = formElem.getElementsByTagName("input");
+
+				for (var i = 0; i &lt; selectNodes.length; i++)
+				{
+					var current = selectNodes[i];
+					url += (url == "dev") ? "?" : "&amp;";
+					url += current.name + "=";
+					url += current.options[current.selectedIndex].text;
+				}
+				
+				for (var i = 0; i &lt; inputNodes.length; i++)
+				{
+					var current = inputNodes[i];
+					if (current.type == "hidden" || current.type == "text")
+					{
+						url += (url == "dev") ? "?" : "&amp;";
+						url += current.name + "=";
+						url += current.value;
+					}
+				}
+				return url;
+			}
+					
+			function checkModified(e)
+			{
+				if (modified)
+				{
+					var ok = confirm("Would you like to save your preferences?");
+					
+					if (ok)
+					{
+						var formElem = document.getElementById("prefform");
+						formElem.submit();
+						var xmlhttp;
+						if (window.XMLHttpRequest)
+						{
+							xmlhttp=new XMLHttpRequest();
+						}
+						else
+						{
+							xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+						}
+						//assembleURLFromForm(formElem);
+						xmlhttp.open("GET",assembleURLFromForm(formElem),false);
+						xmlhttp.send();
+					}
+				}
+			}
+			
+			function changed()
+			{
+				modified = true;
+			}
+			
+			function pageLoad()
+			{
+				var formElem = document.getElementById("prefform");
+			
+				var selectNodes = formElem.getElementsByTagName("select");
+				var inputNodes = formElem.getElementsByTagName("input");
+
+				YAHOO.util.Event.addListener(selectNodes, 'change', changed);
+				
+				for(var i = 0; i &lt; inputNodes.length; i++)
+				{
+					current = inputNodes[i];
+					if(current.getAttribute("type") == null)
+					{
+						YAHOO.util.Event.on(current, 'keyup', changed);
+					}
+				}
+			}
+			
+			YAHOO.util.Event.addListener(window, 'load', pageLoad);
+			YAHOO.util.Event.addListener(window, 'beforeunload', checkModified);
+		</xsl:text></script>
 
 		<xsl:variable name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
 		<xsl:variable name="tidyoption"><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='tidyoption']"/></xsl:variable>
 
 		<div id="queryform">
-			<form name="PrefForm" method="get" action="{$library_name}">
+			<form name="PrefForm" method="get" action="{$library_name}" id="prefform">
 
 				<input type='hidden' name='a' value='p'/>
 				<input type='hidden' name='sa' value='pref'/>
@@ -88,18 +178,65 @@
 				<!-- search preferences -->
 				<h3><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.searchpref')"/></h3>
 				<div id="searchprefs">
-					<xsl:variable name="hits"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='hitsPerPage']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='hitsPerPage']/@value"/></xsl:when><xsl:otherwise>20</xsl:otherwise></xsl:choose></xsl:variable> 
+					<xsl:variable name="hits">
+						<xsl:choose>
+							<xsl:when test="/page/pageRequest/paramList/param[@name='hitsPerPage']">
+								<xsl:value-of select="/page/pageRequest/paramList/param[@name='hitsPerPage']/@value"/>
+							</xsl:when>
+							<xsl:otherwise>
+								20
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:variable> 
 					<div class="paramLabel">
 						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.hitsperpage')"/>
 					</div>
 					<div class="paramValue">
 						<select name="hitsPerPage">
-							<option value="20"><xsl:if test="$hits=20"><xsl:attribute name="selected"></xsl:attribute></xsl:if>20</option> 
-							<option value="50"><xsl:if test="$hits=50"><xsl:attribute name="selected"></xsl:attribute></xsl:if>50</option>
-							<option value="100"><xsl:if test="$hits=100"><xsl:attribute name="selected"></xsl:attribute></xsl:if>100</option>
-							<option value="-1"><xsl:if test="$hits=-1"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.all')"/></option>
+							<option value="20">
+								<xsl:if test="$hits=20">
+									<xsl:attribute name="selected" />
+								</xsl:if>
+								20
+							</option> 
+							<option value="50">
+								<xsl:if test="$hits=50">
+									<xsl:attribute name="selected" />
+								</xsl:if>
+								50
+							</option>
+							<option value="100">
+								<xsl:if test="$hits=100">
+									<xsl:attribute name="selected" />
+								</xsl:if>
+								100
+							</option>
+							<option value="-1">
+								<xsl:if test="$hits=-1">
+									<xsl:attribute name="selected" />
+								</xsl:if>
+								<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.all')"/>
+							</option>
 						</select>
 					</div>
+					
+					<br class="clear"/>
+					
+					<xsl:variable name="mdocs">
+						<xsl:choose>
+							<xsl:when test="/page/pageRequest/paramList/param[@name='maxDocs']">
+								<xsl:value-of select="/page/pageRequest/paramList/param[@name='maxDocs']/@value"/>
+							</xsl:when>
+							<xsl:otherwise>100</xsl:otherwise>
+						</xsl:choose>
+					</xsl:variable> 
+					<div class="paramLabel">
+						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.maxDocs')"/>
+					</div>
+					<div class="paramValue">
+						<input name="maxDocs" size="3" value="{$mdocs}" />
+					</div>
+					
 					<br class="clear"/>
 				</div>
 

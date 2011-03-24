@@ -58,7 +58,7 @@ var checkout = function(){
 		// set berries images visible
 		// they are set to be invisible to prevent flickering when first loaded (see berry.css)
 
-		var berries = $('img');
+		var berries = document.getElementsByTagName('img');
 		var berrybasket = new YAHOO.util.DDTarget('berrybasket','basket');
 
 		for (var j=0; j < berries.length; j++){
@@ -86,6 +86,7 @@ var checkout = function(){
 	}
 
 	var responseFailure = function(o){
+		alert("CHECKOUT FAILED");
 //alert( arguments.callee );
 	}
 
@@ -164,13 +165,9 @@ function showBasket() {
 	var berryBasket = YAHOO.util.Dom.get('berrybasket');
 	var basketHandle = YAHOO.util.Dom.get('baskethandle');
 	var berries = YAHOO.util.Dom.get('berries');
-	var div = document.createElement('div');
-	var list = document.createElement('ol');
 	var width = 500;
 	var height = 40;
 	var i=0;
-
-	list.id = 'doclist';
 
 	//remove berryImages in the berry basket
 	while (berries.hasChildNodes()) {
@@ -179,14 +176,22 @@ function showBasket() {
 	while (basketHandle.hasChildNodes()) {
 		basketHandle.removeChild(basketHandle.firstChild);
 	}
+	
+	var div = document.createElement('div');
+	berries.appendChild(div);
+	var list = document.createElement('ol');
+	div.appendChild(list);
+	
+	list.id = 'doclist';
 
 	//put the berries in
-	for (i in berryList){
+	for (i; i < berryList.length; i++){
 		var berryItem = berryList[i];
 		var berryElement = document.createElement('li');
+		list.appendChild(berryElement);
 		var title = berryItem.getAttribute('title');
 		var root_title = berryItem.getAttribute('root_title');
-		var id = berryItem.getAttribute('collection')+":"+berryItem.getAttribute('name');
+		//var id = berryItem.getAttribute('collection')+":"+berryItem.getAttribute('name');
 
 		if (root_title != ""){
 			root_title +=":";
@@ -196,32 +201,44 @@ function showBasket() {
 		if (title.length > 50){
 			title = title.substring(0,20)+" ... "+title.substr(title.length-35,35);
 		}
-
-		berryElement.appendChild(document.createTextNode(title));
+		
 		berryElement.setAttribute("class","berryitem");
-		list.appendChild(berryElement);
-		height +=18;
+		berryElement.setAttribute("title",title);
+		berryElement.innerHTML = title;
+		height +=40;
 	}
 
 	oldHeight = berryBasket.style.height;
 	oldWidth = berryBasket.style.width;
 	oldBg = berryBasket.style.background;
-	berryBasket.style.height = height;
-	berryBasket.style.width = width;
+	//berryBasket.style.height = height;
+	//berryBasket.style.width = width;
 	berryBasket.style.background ='url("interfaces/default/images/kete2.png") 0 0 repeat';
 	berryBasket.style.cursor = "default";
 	berryBasket.className = "show";
-	div.appendChild(list);
-	berries.appendChild(div);
-	berries.style.height = height - 40;
+	//berries.style.height = height - 40;
 
 	//put the full view link in
 	var fullView = document.createElement('a');
 	berries.appendChild(fullView);
+	
+	//Find the collection in the cgi parameters
+	var url = window.location.href;
+	var colstart = url.indexOf("&c=");
+	var collectionName = "";
+	if (colstart != -1)
+	{
+		var colend = url.indexOf("&", (colstart + 1));
+		if (colend == -1)
+		{
+			colend = url.length - 1;
+		}
+		collectionName = url.substring(colstart + 3, colend);
+	}
+	
 	fullView.appendChild(document.createTextNode('Full View »'));
-	fullView.setAttribute("href","?a=g&sa=berry&c=&s=DisplayList&rt=r");
+	fullView.setAttribute("href","?a=g&sa=berry&c=&s=DisplayList&rt=r&p.c=" + collectionName);
 	fullView.setAttribute("id","berryFullViewLink");
-
 
 	//toggle expand/collapse links
 	var expandLink = YAHOO.util.Dom.get('berryBasketExpandLink');

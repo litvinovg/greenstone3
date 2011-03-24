@@ -35,9 +35,12 @@
 							<xsl:variable name="ns">s1.</xsl:variable>
 							<xsl:for-each select="paramList/param">
 								<xsl:choose>
+									<xsl:when test="@name='case' or @name='stem' or @name='accent'">
+									</xsl:when>
 									<xsl:when test="@type='multi'">
 										<xsl:apply-templates select="."><xsl:with-param name="ns" select="$ns"/></xsl:apply-templates>
 									</xsl:when>
+									<xsl:when test="@name = 'sortBy' or @name = 'maxDocs'"></xsl:when>
 									<xsl:otherwise>
 										<xsl:variable name="pvalue"><xsl:apply-templates select="." mode="calculate-default"><xsl:with-param name="ns" select="$ns"/></xsl:apply-templates></xsl:variable>
 										<div class="paramLabel"><xsl:value-of select="displayItem[@name='name']"/></div>
@@ -114,7 +117,7 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<!-- invisible params - used by other stuff. in the query form, we set to teh default -->
+	<!-- invisible params - used by other stuff. in the query form, we set to the default -->
 	<xsl:template match="param[@type='invisible']">
 		<xsl:param name="ns">s1.</xsl:param>
 		<input type='hidden' name='{$ns}{@name}' value='{@default}'/>
