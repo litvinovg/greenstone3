@@ -378,7 +378,9 @@ function getNodeContent(node) {
 	url = url.replace('&amp;', '&');
 	$.get(url, function(data) {
 	
-	   $.get('http://localhost:8080/greenstone3/interfaces/default/transform/document_text.xsl', function(text) {
+	   gsurl = $($(data).find("metadata[name=siteURL]")[0]).text();
+	
+	   $.get(gsurl + '/interfaces/default/transform/document_text.xsl', function(text) {
 	   
 	   var output = '';
 	   var result = '';
