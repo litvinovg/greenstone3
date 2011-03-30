@@ -1650,8 +1650,15 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="/f"/>
       <arg value="win32.mak"/>
       <arg value="install"/>
+	  <arg value="GSDLHOME=${gs2build.home}"/>
       <arg value="ENABLE_JNI=${gs2.windows.enablejni}"/>
-      <arg value="USE_SQLITE=0"/> <!-- why is this not on by default? -->
+      <arg value="ENABLE_MG=${gs2.windows.enablemg}"/>
+      <arg value="ENABLE_MGPP=${gs2.windows.enablemgpp}"/>
+      <arg value="USE_GDBM=${gs2.windows.usegdbm}"/>
+      <arg value="USE_SQLITE=${gs2.windows.usesqlite}"/>
+	  <!--
+      <arg value="ENABLE_JNI=${gs2.windows.enablejni}"/>
+      <arg value="USE_SQLITE=0"/>--> <!-- why is this not on by default? -->
     </exec>
 
     <!-- install gs2build indexers for windows -->
