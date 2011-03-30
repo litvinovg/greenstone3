@@ -286,16 +286,15 @@ public class TransformingReceptionist extends Receptionist{
   	
 	 boolean allowsClientXSLT = (Boolean)config_params.get(GSConstants.ALLOW_CLIENT_SIDE_XSLT);
 	 //System.out.println("Client side transforms allowed? " + allowsClientXSLT);
-
-	 String currentInterface = (String)config_params.get(GSConstants.INTERFACE_NAME);
 	 
 	 // Force it back to traditional
-	 if(!allowsClientXSLT && currentInterface.equals("default"))
+	 if(!allowsClientXSLT)
 		config_params.put(GSConstants.INTERFACE_NAME, "traditional");
 	
   	 Element request = (Element)GSXML.getChildByTagName(page, GSXML.PAGE_REQUEST_ELEM);
 	 String output = request.getAttribute(GSXML.OUTPUT_ATT);  	
 	 
+	 String currentInterface = (String)config_params.get(GSConstants.INTERFACE_NAME);
 	 //System.out.println("Current output mode is: " + output + ", current interface name is: " + currentInterface);
 	 
 	 if(allowsClientXSLT) {
@@ -413,13 +412,13 @@ public class TransformingReceptionist extends Receptionist{
       collection = (String)params.get(GSParams.COLLECTION);
       if (collection == null) collection = "";
     }
-
+		
     String xslt_file = getXSLTFileName(action, subaction, collection);
     if (xslt_file==null) {
       // returning file not found error page to indicate which file is missing
       return fileNotFoundErrorPage(xslt_file);
     }
-
+		
     Document style_doc = this.converter.getDOM(new File(xslt_file), "UTF-8");
     String errorPage = this.converter.getParseErrorMessage();
     if(errorPage != null) {
