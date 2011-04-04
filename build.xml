@@ -75,6 +75,21 @@
   <!-- get properties from the environment -->
   <property environment="env"/>
 
+  <!-- uses perl.path if set in build.properties, otherwise try for
+       environment variable PERLPATH, and failing that assumes 'perl' 
+       is on environment PATH -->
+  <if><bool><isset property="env.PERLPATH"/></bool>
+      <property name="perl.path" value="${env.PERLPATH}"/>
+  </if>
+
+  <!-- full.perl.path is for pretty-printing only, e.g. used in target "start" -->
+  <if><bool><isset property="perl.path"/></bool>
+      <property name="full.perl.path" value="${perl.path}${file.separator}perl"/>
+    <else>
+      <property name="full.perl.path" value="perl (will use the enviroment variable PATH to find this executable)"/>
+    </else>
+  </if>
+
   <!-- get the filesets defining components and executables -->
   <import file="resources/xml/components.xml"/>
   <import file="resources/xml/executables.xml"/>
@@ -557,6 +572,9 @@
     <echo>${app.name} (${app.version}) server running using Apache Tomcat and Java</echo> 
     <echo>Tomcat: ${catalina.home}</echo> 
     <echo>Java  : ${java.home}</echo>
+    <if><bool><available file="${build.src.home}"/></bool>
+      <echo>Perl  : ${full.perl.path}</echo>
+    </if>
     <echo>URL   : http://${tomcat.server}:${tomcat.port}${app.path}/</echo>
     <!-- assuming that index.html is not needed here -->   
   </target>
@@ -574,10 +592,15 @@
   <target name="usage" description="Print a help message">
     <echo message="  Execute 'ant -projecthelp' for a list of targets."/>
     <echo message="  Execute 'ant -help' for Ant help."/>
-    <echo>To install Greenstone3, run '${install-command}'. 
-      There are properties defined in build.properties. The install process will ask you if these properties are set correctly. To avoid this prompt, use the '-Dproperties.accepted=yes' option.
-      To log the output, use the '-logfile build.log' option.
-      The README.txt file has more information about the ant targets and install process.
+    <echo>
+  To install Greenstone3, run '${install-command}'. 
+    There are properties defined in build.properties. The install 
+      process will ask you if these properties are set correctly. 
+      To avoid this prompt, use the '-Dproperties.accepted=yes' 
+      option.
+    To log the output, use the '-logfile build.log' option.
+  The README.txt file has more information about the ant targets
+    and install process.
     </echo>
   </target>
   
@@ -960,6 +983,7 @@
     <exec executable="${catalina.home}/bin/startup.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
       <!--<env key="GSDLOS" value="linux"/> do we need this?? -->
       <env key="GSDL3HOME" value="${basedir}"/>
+      <env key="PERLPATH" value="${perl.path}"/>
       <env key="PATH" path="${tomcat.path}"/>
       <env key="CATALINA_OPTS" value="${catalina.opts}"/>
       <env key="CATALINA_HOME" value="${catalina.home}"/>
@@ -971,6 +995,7 @@
     <exec executable="${catalina.home}/bin/startup.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="true">
       <env key="GSDLOS" value="windows"/>
       <env key="GSDL3HOME" value="${basedir}"/>
+      <env key="PERLPATH" value="${perl.path}"/>
       <env key="Path" path="${tomcat.path}"/>
       <env key="PATH" path="${tomcat.path}"/>
       <env key="CATALINA_OPTS" value="${catalina.opts}"/>
@@ -1435,9 +1460,10 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </exec>
 
     <!-- windows: just the java stuff. Calling without the "compile" argument first will run winMake.bat with "all" which will then perform both the compile AND link targets in jni/win32.mak (thereby also generating gdbmjava.dll). Then we run the same command with the "install" argument to copy the gdbmjava.dll into the correct location. -->
-    <echo>Windows: compile javagdbm (java only)</echo>
+    <echo>Windows: compile javagdbm</echo>
     <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true" />
     <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true">
+<!--      <env key="GSDLHOME" path="${gs2build.home}"/> -->
       <arg value="install"/>
     </exec>
 

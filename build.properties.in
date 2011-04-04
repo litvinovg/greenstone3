@@ -18,6 +18,9 @@ tomcat.installed.path=
 ## Collection building options
 # uncomment if you don't want to have collection building enabled
 #disable.collection.building=true
+#
+# uncomment (and edit) if you want to control where perl is found
+#perl.path=/usr/bin
 
 ## Greenstone 3 server program options
 # does running the server automatically start up Tomcat and a browser
