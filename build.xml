@@ -1434,15 +1434,15 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="install"/>
     </exec>
 
-    <!-- windows: just the java stuff. -->
+    <!-- windows: just the java stuff. Calling without the "compile" argument first will run winMake.bat with "all" which will then perform both the compile AND link targets in jni/win32.mak (thereby also generating gdbmjava.dll). Then we run the same command with the "install" argument to copy the gdbmjava.dll into the correct location. -->
     <echo>Windows: compile javagdbm (java only)</echo>
+    <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true" />
     <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true">
-      <arg value="compile"/>
-      <arg value="javaonly"/>
+      <arg value="install"/>
     </exec>
 
     <!-- install the jar file -->
-    <echo>Install the javagdbm jar file</echo>
+    <echo>Install the javagdbm jar file ${javagdbm.home}/javagdbm.jar ${lib.jni}</echo>
     <copy file="${javagdbm.home}/javagdbm.jar" todir="${lib.jni}"/>
   </target>
 
