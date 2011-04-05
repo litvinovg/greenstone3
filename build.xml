@@ -542,7 +542,7 @@
     description="Do a `svn update` for all sources. Doesn't recompile the code. You need to be online to run this."/>
   
   <target name="configure" depends="init,configure-tomcat,configure-web"
-    description="Configure the installation (not the C++ code). Includes setting up config files. Should be re-run if you change the build.properties file."/>
+    description="Configure the installation (not the C++ code). Includes setting up config files. Should be re-run if you change the build.properties file, including if you change the port number."/>
 
   <target name="clean" depends="init,clean-packages,clean-core,clean-common-src,clean-collection-building,clean-classpath-jars"
     description="Remove all old compiled code. Includes runtime and collection-building if necessary"/>
