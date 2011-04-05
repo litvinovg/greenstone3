@@ -22,7 +22,8 @@
   <taskdef name="rsr" classname="org.greenstone.anttasks.RegexSearchReplace" classpathref="project.classpath"/>
   <!--<taskdef name="svn" classname="org.tigris.subversion.svnant.SvnTask" classpathref="project.classpath"/>-->
   <taskdef name="if" classname="ise.antelope.tasks.IfTask" classpathref="project.classpath"/>
-  <taskdef name="try" classname="ise.antelope.tasks.TryTask" classpathref="project.classpath"/>
+  <taskdef name="stringutil" classname="ise.antelope.tasks.StringUtilTask" classpathref="project.classpath"/>
+
  
   <!-- ===================== Property Definitions =========================== -->
   
@@ -74,44 +75,6 @@
 
   <!-- get properties from the environment -->
   <property environment="env"/>
-
-  <!-- uses perl.path if set in build.properties, otherwise try for
-       environment variable PERLPATH, and failing that assumes 'perl' 
-       is on environment PATH -->
-
-  <if><bool><isset property="env.PERLPATH"/></bool>
-      <property name="perl.path" value="${env.PERLPATH}"/>
-  <else>
-     <echo>
-  Using PATH enviroment variable to locate Perl.
-    <exec executable="which"  spawn="false" outputproperty="full.perl.path">
-      <arg value="perl" />
-    </exec>
-    <echo>
-      <if><equals  arg1="${full.perl.path}" arg2="/usr/bin/perl" />
-    Non-standard location of Perl found: ${full.perl.path}
-    Set the environment variable PERLPATH or the perl.path property in
-      build.properties to explicitly control the version of Perl used.
-    </echo>
-  </else>
-  </if>
-
-<!--
-  <if><bool><isset property="perl.on.path"/></bool>
-    <propertyregex property="perl.path"
-          input="perl.on.path"
-          regexp=".*([^\/]*)"
-          select="\1" />
-  </if>
--->
-
-  <!-- full.perl.path is for pretty-printing only, e.g. used in target "start" -->
-  <if><bool><isset property="perl.path"/></bool>
-      <property name="full.perl.path" value="${perl.path}${file.separator}perl"/>
-    <else>
-      <property name="full.perl.path" value="perl (will use the enviroment variable PATH to find this executable)"/>
-    </else>
-  </if>
 
   <!-- get the filesets defining components and executables -->
   <import file="resources/xml/components.xml"/>
@@ -590,7 +553,57 @@
   <target name="update" depends="init,svnupdate,clean,install"
     description="Update (thru Subversion) all the source (including common-src or collection-building, and runtime), then clean, and re-install. To do this without any SVN updates, run it like 'ant -Dnosvn.mode=yes update'"/>
 
-  <target name="start" depends="init,start-tomcat"
+
+  <target name="perl-for-building" depends="init">
+    <!-- uses perl.path if set in build.properties, otherwise try for
+         environment variable PERLPATH, and failing that assumes 'perl' 
+         is on environment PATH -->
+    <if><bool><available file="${build.src.home}"/></bool>
+
+      <if><bool><not><isset property="perl.path"/></not></bool>
+
+        <if>
+          <bool>
+            <and>
+              <isset property="env.PERLPATH"/>
+              <not><equals arg1="${env.PERLPATH}" arg2=""/></not>
+            </and>
+          </bool>
+          <property name="perl.path" value="${env.PERLPATH}"/>
+          <else>
+            <echo>
+  Using PATH enviroment variable to locate Perl.
+            </echo>
+            <exec executable="which" os="${os.unix}" spawn="false" outputproperty="full.perl.path">
+              <arg value="perl" />
+            </exec>
+
+            <stringutil string="${full.perl.path}" property="perl.path">
+              <replace regex="\/[^\/]*$" replacement="" />
+            </stringutil>
+
+            <if><bool><not><equals arg1="${full.perl.path}" arg2="/usr/bin/perl"/></not></bool>
+              <echo>
+    Non-standard location of Perl found: ${full.perl.path}
+    Set the environment variable PERLPATH or the perl.path property in
+      build.properties to explicitly control the version of Perl used.
+              </echo>
+            </if>
+          </else>
+        </if>
+      </if>
+
+      <!-- full.perl.path is for pretty-printing only, e.g. used in target "start" -->
+      <if><bool><isset property="perl.path"/></bool>
+        <property name="full.perl.path" value="${perl.path}${file.separator}perl"/>
+        <else>
+          <property name="full.perl.path" value="perl (will use the enviroment variable PATH to find this executable)"/>
+        </else>
+      </if>
+    </if>
+  </target>
+
+  <target name="start" depends="init,configure-web,start-tomcat"
     description="Startup the Tomcat server." >
     <echo>${app.name} (${app.version}) server running using Apache Tomcat and Java</echo> 
     <echo>Tomcat: ${catalina.home}</echo> 
@@ -844,7 +857,7 @@
     <echo>collection gberg installed</echo>
   </target>
 
-  <target name="configure-web" depends="init"
+  <target name="configure-web" depends="init,perl-for-building"
     description="Configure only the web app config files">
     <!-- we want a unix path in the global.properties file -->
     <pathconvert targetos="unix" property="src.gsdl3.home.unix">
@@ -854,6 +867,7 @@
     <filter token="gsdl3version" value="${app.version}"/>
     <filter token="tomcat.server" value="${tomcat.server}"/>
     <filter token="tomcat.port" value="${tomcat.port}"/>
+    <filter token="perlpath" value="${perl.path}"/>
     <copy file="${basedir}/resources/java/global.properties.in" tofile="${web.classes}/global.properties" filtering="true" overwrite="true"/>
     <copy file="${basedir}/resources/java/log4j.properties.in" tofile="${web.classes}/log4j.properties" filtering="true" overwrite="true"/>
     <chmod file="${web.classes}/global.properties" perm="600"/>
@@ -998,6 +1012,8 @@
     <!-- need to edit the config file, or do we get the user to do this???-->
   </target>
  
+  
+
 <!-- Another way: http://ptrthomas.wordpress.com/2006/03/25/how-to-start-and-stop-tomcat-from-ant/ -->
   <target name="start-tomcat" description="Startup only Tomcat" depends="init" if="tomcat.islocal">
     <property name="tomcat.classpath" refid="local.tomcat.classpath"/>
@@ -1006,7 +1022,6 @@
     <exec executable="${catalina.home}/bin/startup.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
       <!--<env key="GSDLOS" value="linux"/> do we need this?? -->
       <env key="GSDL3HOME" value="${basedir}"/>
-      <env key="PERLPATH" value="${perl.path}"/>
       <env key="PATH" path="${tomcat.path}"/>
       <env key="CATALINA_OPTS" value="${catalina.opts}"/>
       <env key="CATALINA_HOME" value="${catalina.home}"/>
@@ -1018,7 +1033,6 @@
     <exec executable="${catalina.home}/bin/startup.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="true">
       <env key="GSDLOS" value="windows"/>
       <env key="GSDL3HOME" value="${basedir}"/>
-      <env key="PERLPATH" value="${perl.path}"/>
       <env key="Path" path="${tomcat.path}"/>
       <env key="PATH" path="${tomcat.path}"/>
       <env key="CATALINA_OPTS" value="${catalina.opts}"/>
