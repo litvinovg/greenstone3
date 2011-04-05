@@ -78,9 +78,32 @@
   <!-- uses perl.path if set in build.properties, otherwise try for
        environment variable PERLPATH, and failing that assumes 'perl' 
        is on environment PATH -->
+
   <if><bool><isset property="env.PERLPATH"/></bool>
       <property name="perl.path" value="${env.PERLPATH}"/>
+  <else>
+     <echo>
+  Using PATH enviroment variable to locate Perl.
+    <exec executable="which"  spawn="false" outputproperty="full.perl.path">
+      <arg value="perl" />
+    </exec>
+    <echo>
+      <if><equals  arg1="${full.perl.path}" arg2="/usr/bin/perl" />
+    Non-stanard location of Perl found: ${full.perl.path}
+    Set the environment variable PERLPATH or the perl.path property in
+      build.properties to explicitly control the version of Perl used.
+    </echo>
+  </else>
   </if>
+
+<!--
+  <if><bool><isset property="perl.on.path"/></bool>
+    <propertyregex property="perl.path"
+          input="perl.on.path"
+          regexp=".*([^\/]*)"
+          select="\1" />
+  </if>
+-->
 
   <!-- full.perl.path is for pretty-printing only, e.g. used in target "start" -->
   <if><bool><isset property="perl.path"/></bool>
@@ -1459,11 +1482,16 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="install"/>
     </exec>
 
-    <!-- windows: just the java stuff. Calling without the "compile" argument first will run winMake.bat with "all" which will then perform both the compile AND link targets in jni/win32.mak (thereby also generating gdbmjava.dll). Then we run the same command with the "install" argument to copy the gdbmjava.dll into the correct location. -->
+    <!-- windows: Calling without the "compile" argument first will run winMake.bat with 
+         "all" which will then perform both the compile AND link targets in jni/win32.mak 
+         (thereby also generating gdbmjava.dll). Then we run the same command with 
+         the "install" argument to copy the gdbmjava.dll into the correct location. -->
     <echo>Windows: compile javagdbm</echo>
-    <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true" />
     <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true">
-<!--      <env key="GSDLHOME" path="${gs2build.home}"/> -->
+      <env key="GSDLHOME" path="${gs2build.home}"/>
+    </exec>
+    <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true">
+      <env key="GSDLHOME" path="${gs2build.home}"/>
       <arg value="install"/>
     </exec>
 
