@@ -89,7 +89,7 @@
     </exec>
     <echo>
       <if><equals  arg1="${full.perl.path}" arg2="/usr/bin/perl" />
-    Non-stanard location of Perl found: ${full.perl.path}
+    Non-standard location of Perl found: ${full.perl.path}
     Set the environment variable PERLPATH or the perl.path property in
       build.properties to explicitly control the version of Perl used.
     </echo>
