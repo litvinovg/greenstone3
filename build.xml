@@ -558,7 +558,8 @@
     <!-- uses perl.path if set in build.properties, otherwise try for
          environment variable PERLPATH, and failing that assumes 'perl' 
          is on environment PATH -->
-    <if><bool><available file="${build.src.home}"/></bool>
+    <!-- if, outside build.properties, we only set perl.path if we have gs2build/build-src (collection building), then we won't set perl.path in a (flax) binary, since it doesn't have build-src -->
+    <!--<if><bool><available file="${build.src.home}"/></bool>-->
 
       <if><bool><not><isset property="perl.path"/></not></bool>
 
@@ -600,7 +601,7 @@
           <property name="full.perl.path" value="perl (will use the enviroment variable PATH to find this executable)"/>
         </else>
       </if>
-    </if>
+    <!-- </if>-->
   </target>
 
   <target name="start" depends="init,configure-web,start-tomcat"
