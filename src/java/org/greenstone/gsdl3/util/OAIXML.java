@@ -503,7 +503,7 @@ public class OAIXML {
       if(oai_version.equals(OAI_VERSION2)) {
         oai.setAttribute("xmlns", "http://www.openarchives.org/OAI/2.0/");
         oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/2.0 \n http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd");
+        oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/2.0/ \n http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd");
       } else {
         oai.setAttribute("xmlns", "http://www.openarchives.com/OAI/1.1/OAI_" + verb);
         oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
