@@ -26,7 +26,7 @@
 
 JAVAGDBMHOME = ..
  
-GSDLHOME= $(GSDL3HOME)\gs2build
+GSDLHOME= $(GSDL3SRCHOME)\gs2build
 GDBMHOME = $(GSDLHOME)\common-src\packages\gdbm\gdbm-1.8.3
 
 AR = lib
@@ -66,7 +66,7 @@ link:
         $(CC) -MD -LD $(OBJECTS) -Fegdbmjava.dll
 
 install: 
-        copy gdbmjava.dll "$(GSDL3HOME)\lib\jni"
+        copy gdbmjava.dll "$(GSDL3SRCHOME)\lib\jni"
 
 clean:
 	del *$o 
