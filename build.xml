@@ -573,22 +573,35 @@
           <property name="perl.path" value="${env.PERLPATH}"/>
           <else>
             <echo>
-  Using PATH enviroment variable to locate Perl.
+  Using PATH environment variable to locate Perl.
             </echo>
             <exec executable="which" os="${os.unix}" spawn="false" outputproperty="full.perl.path">
               <arg value="perl" />
             </exec>
 
+	    <exec executable="where" os="${os.windows}" spawn="false" outputproperty="full.perl.path">
+              <arg value="perl" />
+            </exec>
+
+            <if><bool><istrue value="${current.os.iswindows}"/></bool>
+              <stringutil string="${full.perl.path}" property="full.perl.path">
+                <replace regex="[\n].*$" replacement="" />
+              </stringutil>
+	    </if>
+
             <stringutil string="${full.perl.path}" property="perl.path">
-              <replace regex="\/[^\/]*$" replacement="" />
+                <replace regex="\/[^\/]*$" replacement="" />
             </stringutil>
 
-            <if><bool><not><equals arg1="${full.perl.path}" arg2="/usr/bin/perl"/></not></bool>
-              <echo>
+            <if><bool><istrue value="${current.os.isunix}"/></bool>
+
+              <if><bool><not><equals arg1="${full.perl.path}" arg2="/usr/bin/perl"/></not></bool>
+                <echo>
     Non-standard location of Perl found: ${full.perl.path}
     Set the environment variable PERLPATH or the perl.path property in
       build.properties to explicitly control the version of Perl used.
-              </echo>
+                </echo>
+              </if>
             </if>
           </else>
         </if>
