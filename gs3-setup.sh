@@ -268,16 +268,18 @@ if test -e gs2build/setup.bash ; then
   cd gs2build ; source setup.bash ; cd ..
 fi
 
-if test -e ext ; then
-  for gsdl_ext in ext/* ; do
-    if [ -d $gsdl_ext ] ; then 
-      cd $gsdl_ext > /dev/null
-      if test -e setup.bash ; then 
-        source ./setup.bash 
-      fi 
-      cd ../..  
+if test "x$gsopt_noexts" != "x1" ; then
+    if test -e ext ; then
+	for gsdl_ext in ext/* ; do
+	    if [ -d $gsdl_ext ] ; then 
+		cd $gsdl_ext > /dev/null
+		if test -e setup.bash ; then 
+		    source ./setup.bash 
+		fi 
+		cd ../..  
+	    fi
+	done
     fi
-  done
 fi
 
 if test -e local ; then
