@@ -703,6 +703,9 @@ public class OAIReceptionist implements ModuleInterface {
       return msg;
     }
     Element res_in_result = (Element)GSXML.getChildByTagName(result, OAIXML.RESPONSE);
+    if(res_in_result == null) { // return the results of all other collections accumulated so far
+	return msg;
+    }
     Element verb_elem = (Element)GSXML.getChildByTagName(res_in_result, verb);
     if(msg == null) {
       return result;

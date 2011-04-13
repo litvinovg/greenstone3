@@ -264,6 +264,9 @@ public class Collection
       } else {
 	has_oai = true;
       }
+    } else { // no list of services (no ServiceRackList), so no oai_service_rack either
+	// explicitly set has_oai to false here, since it's initialised to true by default
+	has_oai = false;
     }
     return true;
   }
