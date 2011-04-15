@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CollectionConfig xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <metadataList>
+        <metadata lang="en" name="creator"/>
+        <metadata lang="en" name="maintainer"/>
+        <metadata lang="en" name="public">true</metadata>
+    </metadataList>
+    <displayItemList>
+        <displayItem assigned="true" lang="en" name="description">This is a demonstration collection for the Greenstone3 digital library software. It contains a small subset (11 books) of the Humanitarian and Development Libraries. It is the Greenstone 3 equivalent of the Greenstone 2 demo collection, built with Lucene for indexing and JDBM as the database for metadata.</displayItem>
+        <displayItem assigned="true" lang="en" name="name">Lucene/JDBM demo</displayItem>
+    </displayItemList>
+    <search type="lucene">
+        <level name="section">
+            <displayItem lang="en" name="name">chapter</displayItem>
+        </level>
+        <level name="document">
+            <displayItem lang="en" name="name">book</displayItem>
+        </level>
+        <defaultLevel name="section"/>
+        <index name="allfields">
+            <displayItem lang="en" name="name">all fields</displayItem>
+        </index>
+        <index name="text">
+            <displayItem lang="en" name="name">text</displayItem>
+        </index>
+        <index name="dls.Title,Title">
+            <displayItem lang="en" name="name">titles</displayItem>
+        </index>
+        <index name="dls.Subject">
+            <displayItem lang="en" name="name">subjects</displayItem>
+        </index>
+        <index name="dls.Organization">
+            <displayItem lang="en" name="name">organisations</displayItem>
+        </index>
+        <indexOption>
+            <option name="accentfold"/>
+            <option name="casefold"/>
+            <option name="stem"/>
+        </indexOption>
+        <searchType name="plain"/>
+        <searchType name="simpleform"/>
+        <searchType name="advancedform"/>
+        <format><gsf:template match="documentNode"><td valign="top"><gsf:link type="document"><gsf:icon type="document"/></gsf:link></td><td><gsf:switch><gsf:metadata name="Title" select="ancestors" separator=": "/><gsf:when test="exists"><gsf:metadata name="Title" select="ancestors" separator=": "/>:</gsf:when></gsf:switch><gsf:link type="document"><gsf:metadata name="Title"/></gsf:link></td></gsf:template></format>
+    </search>
+    <infodb type="jdbm"/>
+    <import>
+        <pluginList>
+            <plugin name="GreenstoneXMLPlugin"/>
+            <plugin name="HTMLPlugin">
+                <option name="-description_tags"/>
+            </plugin>
+            <plugin name="MetadataXMLPlugin"/>
+            <plugin name="ArchivesInfPlugin"/>
+            <plugin name="DirectoryPlugin"/>
+        </pluginList>
+    </import>
+    <browse>
+        <classifier name="List">
+            <option name="-metadata" value="dls.Title"/>
+            <option name="-partition_type_within_level" value="constant_size"/>
+        </classifier>
+        <classifier name="Hierarchy">
+            <option name="-metadata" value="dls.Subject"/>
+            <option name="-sort" value="dls.Title"/>
+        </classifier>
+        <classifier name="List">
+            <option name="-metadata" value="dls.Organization"/>
+            <option name="-sort_leaf_nodes_using" value="dls.Title"/>
+            <option name="-partition_type_within_level" value="constant_size"/>
+            <option name="-bookshelf_type" value="always"/>
+            <option name="-buttonname" value="Organization"/>
+        </classifier>
+        <classifier name="List">
+            <option name="-metadata" value="dls.Keyword"/>
+            <option name="-buttonname" value="Howto"/>
+            <option name="-partition_type_within_level" value="constant_size"/>
+            <format><gsf:template match="documentNode"><td><gsf:link type="document"><gsf:metadata name="dls.Keyword"/></gsf:link></td></gsf:template><gsf:template match="classifierNode"><td><gsf:link type="classifier"><gsf:metadata name="Title"/></gsf:link></td></gsf:template></format>
+        </classifier>
+        <format><gsf:template match="documentNode"><td valign="top"><gsf:link type="document"><gsf:icon type="document"/></gsf:link></td><td valign="top"><gsf:metadata name="srclink"/><gsf:choose-metadata><gsf:metadata name="thumbicon"/><gsf:metadata name="srcicon"/></gsf:choose-metadata><gsf:metadata name="/srclink"/></td><td valign="top"><gsf:choose-metadata><gsf:metadata name="dc.Title"/><gsf:metadata name="exp.Title"/><gsf:metadata name="Title"/><gsf:default>Untitled</gsf:default></gsf:choose-metadata><gsf:switch><gsf:metadata name="Source"/><gsf:when test="exists"><br/><i>(<gsf:metadata name="Source"/>)</i></gsf:when></gsf:switch></td></gsf:template><gsf:template match="classifierNode"><td valign="top"><gsf:link type="classifier"><gsf:icon type="classifier"/></gsf:link></td><td><gsf:metadata name="Title"/></td></gsf:template><gsf:template match="classifierNode" mode="horizontal"><gsf:link type="horizontal"><gsf:metadata name="Title"/></gsf:link></gsf:template></format>
+    </browse>
+    <display>
+        <format><gsf:option name="TOC" value="true"/></format>
+    </display>
+    <replaceListRef id="gs2-standard"/>
+</CollectionConfig>

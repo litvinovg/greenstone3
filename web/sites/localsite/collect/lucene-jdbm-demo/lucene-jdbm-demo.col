@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE GathererCollection [
+  <!ELEMENT GathererCollection (Argument*, GathererConfig, BuildConfig)>
+  <!ELEMENT GathererConfig    (Arguments*)>
+  <!ELEMENT BuildConfig       (Build, Import)>
+  <!ELEMENT Build             (Arguments*)>
+  <!ELEMENT Import            (Arguments*)>
+  <!ELEMENT Argument          (#PCDATA)>
+  <!ATTLIST Argument
+            name              CDATA #REQUIRED
+				enabled           CDATA "true">
+]>
+<GathererCollection>
+    <Argument name="built">false</Argument>
+    <Argument name="imported">false</Argument>
+    <GathererConfig/>
+    <BuildConfig>
+        <Build>
+            <Argument enabled="false" name="sections_index_document_metadata">never</Argument>
+            <Argument enabled="false" name="faillog"/>
+            <Argument enabled="false" name="index"/>
+            <Argument enabled="false" name="language"/>
+            <Argument enabled="false" name="maxnumeric">4</Argument>
+            <Argument enabled="false" name="mode">all</Argument>
+            <Argument enabled="false" name="verbosity">0</Argument>
+        </Build>
+        <Import>
+            <Argument enabled="false" name="maxdocs">1</Argument>
+            <Argument enabled="false" name="OIDtype">hash</Argument>
+            <Argument enabled="false" name="OIDmetadata"/>
+            <Argument enabled="false" name="sortmeta"/>
+            <Argument enabled="false" name="groupsize">1</Argument>
+            <Argument enabled="false" name="saveas">GreenstoneXML</Argument>
+            <Argument enabled="false" name="faillog"/>
+            <Argument enabled="false" name="removeprefix"/>
+            <Argument enabled="false" name="removesuffix"/>
+            <Argument enabled="false" name="verbosity">0</Argument>
+        </Import>
+    </BuildConfig>
+</GathererCollection>
