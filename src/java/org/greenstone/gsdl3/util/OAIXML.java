@@ -160,6 +160,13 @@ public class OAIXML {
     
     //stores the date format "yyyy-MM-ddTHH:mm:ssZ"
     public static String granularity = "";
+
+    // http://www.openarchives.org/OAI/openarchivesprotocol.html#DatestampsRequests 
+    // specifies that all repositories must support YYYY-MM-DD (yyyy-MM-dd in Java)
+    // this would be in addition to the other (optional) granularity of above that 
+    // a repository may additionally choose to support.
+    public static final String default_granularity = "yyyy-MM-dd";
+
     //this value is overriden in getOAIConfigXML()
     public static long token_expiration = 7200;
     
@@ -311,6 +318,7 @@ public class OAIXML {
       Element granu_elem = (Element)GSXML.getChildByTagName(oai_config_elem, GRANULARITY);
       //initialize the granu_str which might be used by other methods (eg, getDate())
       granularity = GSXML.getNodeText(granu_elem).trim();
+
       //change "yyyy-MM-ddTHH:mm:ssZ" to "yyyy-MM-dd'T'HH:mm:ss'Z'"
       granularity = granularity.replaceAll("T", "'T'");
       granularity = granularity.replaceAll("Z", "'Z'");
@@ -461,8 +469,20 @@ public class OAIXML {
         sdf = new SimpleDateFormat(granularity);
         date = sdf.parse(pattern);
       } catch(Exception e) {
-        logger.error("invalid date format: " + pattern);
-        return null;
+	  if(!default_granularity.equals(granularity)) { // try validating against default granularity
+	      try {
+		  date = null;
+		  sdf = null;
+		  sdf = new SimpleDateFormat(default_granularity);
+		  date = sdf.parse(pattern);
+	      } catch(Exception ex) {
+		  logger.error("invalid date format: " + pattern);
+		  return null;
+	      }
+	  } else {
+	      logger.error("invalid date format: " + pattern);
+	      return null;
+	  }
       }
       return date;
     }
@@ -480,8 +500,20 @@ public class OAIXML {
         sdf = new SimpleDateFormat(granularity);
         date = sdf.parse(pattern);
       } catch(Exception e) {
-        logger.error("invalid date format: " + pattern);
-        return -1;
+	  if(!default_granularity.equals(granularity)) { // try validating against default granularity
+	      try {
+		  date = null;
+		  sdf = null;
+		  sdf = new SimpleDateFormat(default_granularity);
+		  date = sdf.parse(pattern);
+	      } catch(Exception ex) {
+		  logger.error("invalid date format: " + pattern);
+		  return -1;
+	      }
+	  } else {
+	      logger.error("invalid date format: " + pattern);
+	      return -1;
+	  }        
       }
       return date.getTime();
     }    

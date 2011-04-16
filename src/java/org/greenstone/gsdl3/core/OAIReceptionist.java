@@ -338,23 +338,40 @@ public class OAIReceptionist implements ModuleInterface {
     String token = "";
     
     HashMap param_map = OAIXML.getParamMap(params);    
-    if (!isValidParam(param_map, valid_strs) ||
-        !param_map.containsKey(OAIXML.METADATA_PREFIX)) {
-      logger.error("contains invalid params or no metadataPrefix");
-      return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+    if (!isValidParam(param_map, valid_strs)) {
+	logger.error("One of the params is invalid");
+	return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
     } 
+    // param keys are valid, but if there are any date params, check they're of the right format
+    String from = (String)param_map.get(OAIXML.FROM);
+    if(from != null) {	
+	Date from_date = OAIXML.getDate(from);
+	if(from_date == null) {
+	    logger.error("invalid date: " + from);
+	    return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+	}
+    }
+    String until = (String)param_map.get(OAIXML.UNTIL);
+    if(until != null) {	
+	Date until_date = OAIXML.getDate(until);
+	if(until_date == null) {
+	    logger.error("invalid date: " + until);
+	    return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+	} 
+    }    
+    if(from != null && until != null) { // check they are of the same date-time format (granularity)
+	if(from.length() != until.length()) {
+	    logger.error("The request has different granularities (date-time formats) for the From and Until date parameters.");
+	    return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+	}
+    }
+
     //ask the message router for a list of oai collections
     NodeList oai_coll = getOAICollectionList();
     int oai_coll_size = oai_coll.getLength();
     if (oai_coll_size == 0) {
       logger.info("returned oai collection list is empty");
       return getMessage(OAIXML.createErrorElement(OAIXML.NO_RECORDS_MATCH, ""));
-    }
-    //Now that we got a prefix, check and see if it's supported by this repository
-    String prefix_value = (String)param_map.get(OAIXML.METADATA_PREFIX);
-    if (containsMetadataPrefix(prefix_value) == false) {
-      logger.error("requested prefix is not found in OAIConfig.xml");
-      return getMessage(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
     }
     
     //Now we check if the optional argument 'set' has been specified in the params; if so,
@@ -389,6 +406,20 @@ public class OAIReceptionist implements ModuleInterface {
       }
     }
     
+    // Custom test that expects a metadataPrefix comes here at end so that the official params can
+    // be tested first for errors and their error responses sent off. Required for OAI validation
+    if (!param_map.containsKey(OAIXML.METADATA_PREFIX)) {
+      logger.error("contains invalid params or no metadataPrefix");
+      return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+    }    
+    
+    //Now that we got a prefix, check and see if it's supported by this repository
+    String prefix_value = (String)param_map.get(OAIXML.METADATA_PREFIX);
+    if (containsMetadataPrefix(prefix_value) == false) {
+      logger.error("requested prefix is not found in OAIConfig.xml");
+      return getMessage(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
+    }
+
     //Now that all validation has been done, I hope, we can send request to the message router
     Element result = null;
     String verb = req.getAttribute(OAIXML.TO); 
@@ -518,16 +549,34 @@ public class OAIReceptionist implements ModuleInterface {
     }
     
     HashMap param_map = OAIXML.getParamMap(params);    
-    if (!isValidParam(param_map, valid_strs) ||
-        !param_map.containsKey(OAIXML.METADATA_PREFIX)) {
-      // it must have a metadataPrefix
-      /** Here I disagree with the OAI specification: even if a resumptionToken is 
-       *  included in the request, the metadataPrefix is a must argument. Otherwise
-       *  how would we know what metadataPrefix the harvester requested in his last request?
-       */
-      logger.error("no metadataPrefix");
-      return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
-    } 
+    if (!isValidParam(param_map, valid_strs)) {
+	logger.error("One of the params is invalid");
+	return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+    }
+    // param keys are valid, but if there are any date params, check they're of the right format
+    String from = (String)param_map.get(OAIXML.FROM);
+    if(from != null) {	
+	Date from_date = OAIXML.getDate(from);
+	if(from_date == null) {
+	    logger.error("invalid date: " + from);
+	    return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+	}
+    }
+    String until = (String)param_map.get(OAIXML.UNTIL);
+    Date until_date = null;
+    if(until != null) {	
+	until_date = OAIXML.getDate(until);
+	if(until_date == null) {
+	    logger.error("invalid date: " + until);
+	    return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+	} 
+    }
+    if(from != null && until != null) { // check they are of the same date-time format (granularity)
+	if(from.length() != until.length()) {
+	    logger.error("The request has different granularities (date-time formats) for the From and Until date parameters.");
+	    return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+	}
+    }
     
     //ask the message router for a list of oai collections
     NodeList oai_coll = getOAICollectionList();
@@ -535,13 +584,6 @@ public class OAIReceptionist implements ModuleInterface {
     if (oai_coll_size == 0) {
       logger.info("returned oai collection list is empty");
       return getMessage(OAIXML.createErrorElement(OAIXML.NO_RECORDS_MATCH, ""));
-    }
-    
-    //Now that we got a prefix, check and see if it's supported by this repository
-    String prefix_value = (String)param_map.get(OAIXML.METADATA_PREFIX);
-    if (containsMetadataPrefix(prefix_value) == false) {
-      logger.error("requested prefix is not found in OAIConfig.xml");
-      return getMessage(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
     }
     
     //Now we check if the optional argument 'set' has been specified in the params; if so,
@@ -584,6 +626,27 @@ public class OAIReceptionist implements ModuleInterface {
         return getMessage(OAIXML.createErrorElement(OAIXML.BAD_RESUMPTION_TOKEN, ""));
       }
     }
+
+    // Moved the additional custom test that mandates the metadataPrefix here, since official
+    // errors should be caught first, so that their error responses can be sent off first
+    // such that GS2's oaiserver will validate properly.
+    if (!param_map.containsKey(OAIXML.METADATA_PREFIX)) {
+      // it must have a metadataPrefix
+      /** Here I disagree with the OAI specification: even if a resumptionToken is 
+       *  included in the request, the metadataPrefix is a must argument. Otherwise
+       *  how would we know what metadataPrefix the harvester requested in his last request?
+       */
+      logger.error("no metadataPrefix");
+      return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+    }
+        
+    //Now that we got a prefix, check and see if it's supported by this repository
+    String prefix_value = (String)param_map.get(OAIXML.METADATA_PREFIX);
+    if (containsMetadataPrefix(prefix_value) == false) {
+      logger.error("requested prefix is not found in OAIConfig.xml");
+      return getMessage(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
+    }
+
     //Now that all validation has been done, I hope, we can send request to the message router
     Element result = null;
     String verb = req.getAttribute(OAIXML.TO); 
@@ -789,6 +852,10 @@ public class OAIReceptionist implements ModuleInterface {
         // send request to message router
         // get the names
         strs = splitNames(identifier);
+	if(strs == null || strs.length < 3) {
+	    logger.error("identifier is not in the form site:coll:id" + identifier);
+	    return getMessage(OAIXML.createErrorElement(OAIXML.ID_DOES_NOT_EXIST, ""));
+	}
         String name_of_site = strs[0];
         String coll_name = strs[1];
         String oid = strs[2];
@@ -850,21 +917,11 @@ public class OAIReceptionist implements ModuleInterface {
     }
 
     //do the earliestDatestamp
-    long lastmodified = System.currentTimeMillis();
     //send request to mr to search through the earliest datestamp amongst all oai collections in the repository.
     //ask the message router for a list of oai collections
     NodeList oai_coll = getOAICollectionList();
-    int oai_coll_size = oai_coll.getLength();
-    if (oai_coll_size == 0) {
-      logger.info("returned oai collection list is empty. Set repository earliestDatestamp to be 1970-01-01.");
-      lastmodified = 0;
-    }
-    //the collection build time is determined by the last modified time of the buildConfig.xml file
-    for(int i=0; i<oai_coll_size; i++) {
-      long coll_build_time = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.LASTMODIFIED));
-      lastmodified = (lastmodified > coll_build_time)? coll_build_time : lastmodified;
-    }
-    String earliestDatestamp_str = OAIXML.getTime(lastmodified);
+    long earliestDatestamp = getEarliestDateStamp(oai_coll);
+    String earliestDatestamp_str = OAIXML.getTime(earliestDatestamp);
     Element earliestDatestamp_elem = OAIXML.createElement(OAIXML.EARLIEST_DATESTAMP);
     GSXML.setNodeText(earliestDatestamp_elem, earliestDatestamp_str);
     identify.appendChild(earliestDatestamp_elem);
@@ -888,6 +945,9 @@ public class OAIReceptionist implements ModuleInterface {
     logger.info(identifier);
     String [] strs = new String[3];
     int first_colon = identifier.indexOf(":");
+    if(first_colon == -1) {
+	return null;
+    }
     strs[0] = identifier.substring(0, first_colon);
 
     String sr = identifier.substring(first_colon + 1);
@@ -970,4 +1030,22 @@ public class OAIReceptionist implements ModuleInterface {
     Node result_node = mr.process(msg);
     return converter.nodeToElement(result_node);
   }
+
+    // See OAIConfig.xml
+    // dynamically works out what the earliestDateStamp is, since it varies by collection
+    protected long getEarliestDateStamp(NodeList oai_coll) {
+	//do the earliestDatestamp
+	long lastmodified = System.currentTimeMillis();	
+	int oai_coll_size = oai_coll.getLength();
+	if (oai_coll_size == 0) {
+	    logger.info("returned oai collection list is empty. Setting repository earliestDatestamp to be 1970-01-01.");
+	    lastmodified = 0;
+	}
+	//the collection build time is determined by the last modified time of the buildConfig.xml file
+	for(int i=0; i<oai_coll_size; i++) {
+	    long coll_build_time = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.LASTMODIFIED));
+	    lastmodified = (lastmodified > coll_build_time)? coll_build_time : lastmodified;
+	}
+	return lastmodified;
+    }
 }

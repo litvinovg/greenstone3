@@ -28,6 +28,9 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.io.File;
 
 import org.apache.log4j.*;
@@ -76,6 +79,10 @@ public class OAIServer extends HttpServlet {
   // do we output the stylesheet processing instruction?
   protected boolean use_oai_stylesheet = true;
   protected String oai_stylesheet = "interfaces/oai/oai2.xsl";
+
+    // there is no getQueryString() method in the HttpServletRequest returned from doPost, 
+    // since that is actually of type apache RequestFacade, and doesn't define such a method
+    protected String queryString = null;
 
   static Logger logger = Logger.getLogger(org.greenstone.gsdl3.OAIServer.class.getName());
   
@@ -222,11 +229,13 @@ public class OAIServer extends HttpServlet {
   private void logUsageInfo(HttpServletRequest request){
     String usageInfo = "";
     
+    String query = (queryString == null) ? request.getQueryString() : queryString;
+
     //logged info = general-info + session-info
     usageInfo =
       request.getContextPath()+" "+ //session id
       request.getServletPath()+" "+ //serlvet
-      "["+request.getQueryString()+"]" +" "+ //the query string
+      "["+query+"]" +" "+ //the query string
       "["+usageInfo.trim()+"]" +" "+ // params stored in a session
       request.getRemoteAddr()+" "+   //remote address
       request.getHeader("user-agent")+" "; //the remote brower info
@@ -255,6 +264,7 @@ public class OAIServer extends HttpServlet {
     }
     return query.substring(verb_start_index, verb_end_index);
   }
+
   public void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
     logUsageInfo(request);
@@ -275,7 +285,8 @@ public class OAIServer extends HttpServlet {
     //we don't get the baseURL from the http request because what we get might be different from the one known publicly due to local network redirection.
     //For example, puka.cs.waikato.ac.nz vs www.greenstone.org
     //String base_url = request.getRequestURL().toString();
-    String query = request.getQueryString();
+    // if called by doPost (if this was originally a POST request), var queryString would have been set
+    String query = (queryString == null) ? request.getQueryString() : queryString;
     String[] pairs = (query==null)? null : query.split("&");//split into key/value pairs
     String verb = getVerb(query);
     Element xml_response = OAIXML.createBasicResponse(verb, pairs);
@@ -376,9 +387,36 @@ public class OAIServer extends HttpServlet {
       }
     } 
   }
+
+  // For OAI version 2.0, validation tests indicated that POST needs to be supported. Some
+  // modification was required in order to ensure that the request is passed intact to doGet()
   public void doPost(HttpServletRequest request,
     HttpServletResponse response)
     throws ServletException, IOException {
+
+      // the post method returns a wrapper of type RequestFacade by apache and there
+      // is no getQueryString() method defined for it. Therefore, need to work this out
+      // manually before calling doGet(request, response) so that doGet can work as before.
+      
+      queryString = "";
+      Iterator parameter_entries = request.getParameterMap().entrySet().iterator();
+      while(parameter_entries.hasNext()) {	  
+	  Map.Entry param_entry = (Map.Entry)parameter_entries.next();
+	  String[] paramVals = (String[]) param_entry.getValue();
+	  if(paramVals != null) {
+	      if(paramVals.length > 0) {
+		  logger.error("POST request received: " + param_entry.getKey() + " - " + paramVals[0]);
+		  queryString = queryString + "&" + param_entry.getKey() + "=" + paramVals[0];
+	      }
+	  }	  
+      }
+      if(queryString.length() > 0) {
+	  queryString = queryString.substring(1);
+	  //queryString = java.net.URLEncoder.encode(queryString,"UTF-8");
+      }
+      if(queryString.equals("")) {
+	  queryString = null;
+      }
     doGet(request,response);    
   }
 }
