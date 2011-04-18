@@ -255,8 +255,8 @@ public class OAIPMH extends ServiceRack {
     String lastmodified = "";
     if(keys.contains(OAIXML.LASTMODIFIED)) {
       lastmodified = info.getInfo(OAIXML.LASTMODIFIED);
+      lastmodified = OAIXML.getTime(Long.parseLong(lastmodified)*1000); // java wants dates in milliseconds
     }
-    lastmodified = OAIXML.getTime(Long.parseLong(lastmodified));
 
     Element get_record = OAIXML.createElement(OAIXML.GET_RECORD);
     Element record = OAIXML.createElement(OAIXML.RECORD);
@@ -334,8 +334,8 @@ public class OAIPMH extends ServiceRack {
       String lastmodified = "";
       if(keys.contains(OAIXML.LASTMODIFIED)) {
         lastmodified = info.getInfo(OAIXML.LASTMODIFIED);
+	lastmodified = OAIXML.getTime(Long.parseLong(lastmodified)*1000); // java wants dates in milliseconds
       }
-      lastmodified = OAIXML.getTime(Long.parseLong(lastmodified));
       
       Date this_date = OAIXML.getDate(lastmodified);        
       if (from_date != null) {
@@ -420,8 +420,8 @@ public class OAIPMH extends ServiceRack {
       String lastmodified = "";
       if(keys.contains(OAIXML.LASTMODIFIED)) {
         lastmodified = info.getInfo(OAIXML.LASTMODIFIED);
+	lastmodified = OAIXML.getTime(Long.parseLong(lastmodified)*1000); // java wants dates in milliseconds
       }
-      lastmodified = OAIXML.getTime(Long.parseLong(lastmodified));
       
       Date this_date = OAIXML.getDate(lastmodified);        
       if (from_date != null) {

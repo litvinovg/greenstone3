@@ -287,6 +287,8 @@ public class OAIServer extends HttpServlet {
     //String base_url = request.getRequestURL().toString();
     // if called by doPost (if this was originally a POST request), var queryString would have been set
     String query = (queryString == null) ? request.getQueryString() : queryString;
+    queryString = null; // reset member variable, else no doGet will work as long as the server remains running
+
     String[] pairs = (query==null)? null : query.split("&");//split into key/value pairs
     String verb = getVerb(query);
     Element xml_response = OAIXML.createBasicResponse(verb, pairs);
@@ -412,7 +414,7 @@ public class OAIServer extends HttpServlet {
       }
       if(queryString.length() > 0) {
 	  queryString = queryString.substring(1);
-	  //queryString = java.net.URLEncoder.encode(queryString,"UTF-8");
+	  //queryString = OAIXML.oaiEncode(queryString);
       }
       if(queryString.equals("")) {
 	  queryString = null;

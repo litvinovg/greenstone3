@@ -238,7 +238,7 @@ public class OAIXML {
       for (int i=0; i<tokens.getLength(); i++) {
         Element token_elem = (Element)tokens.item(i);
         String expire_str = token_elem.getAttribute(EXPIRATION_DATE);
-        long datestamp = getTime(expire_str);
+        long datestamp = getTime(expire_str); // expire_str is in milliseconds
         if(datestamp < System.currentTimeMillis()) {
           resumption_token_elem.removeChild(token_elem);
           token_elem = null;
@@ -359,7 +359,7 @@ public class OAIXML {
 
     
     public static long getTokenExpiration() {
-      return token_expiration*1000;
+	return token_expiration*1000; // in milliseconds
     }
 
     /** TODO: returns a basic response for appropriate oai version
@@ -519,8 +519,8 @@ public class OAIXML {
     }    
     /** get the string representation of a time from a long value(long type)
      */
-    public static String getTime(long seconds) {
-      Date date = new Date(seconds);
+    public static String getTime(long milliseconds) {
+      Date date = new Date(milliseconds);
       SimpleDateFormat sdf = new SimpleDateFormat(granularity);
       return sdf.format(date);
     }    
