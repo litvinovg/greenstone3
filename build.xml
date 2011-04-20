@@ -630,7 +630,13 @@
     <if><bool><available file="${build.src.home}"/></bool>
       <echo>Perl  : ${full.perl.path}</echo>
     </if>
-    <echo>URL   : http://${tomcat.server}:${tomcat.port}${app.path}/</echo>
+    <if><bool><isset property="install.flax"/></bool>
+        <property name="url" value="http://${tomcat.server}:${tomcat.port}${app.path}/flax"/>
+    <else>
+        <property name="url" value="http://${tomcat.server}:${tomcat.port}${app.path}/"/>
+    </else>
+    </if>
+    <echo>URL   : ${url}</echo>
     <!-- assuming that index.html is not needed here -->   
   </target>
 
@@ -2080,6 +2086,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
   <target name="configure-flax-wsdl" description="Configure flax webservice with tomcat server/port">
     <rsr file="${web.home}/FlaxWebService.wsdl" pattern="@flaxpublicserver@:@flaxpublicport@" replacement="${tomcat.server}:${tomcat.port}"/>
+    <echo>FLAX server for Moodle module is configured to: http://${tomcat.server}:${tomcat.port}.</echo>
   </target>
 
   <target name="update-flax" description="update flax from repository">
