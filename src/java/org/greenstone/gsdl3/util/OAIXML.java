@@ -111,6 +111,7 @@ public class OAIXML {
     public static final String NO_RECORDS_MATCH = "noRecordsMatch";
     public static final String OAI = "OAI";
     public static final String OAI_DASH_PMH = "OAI-PMH";
+    public static final String OAI_LASTMODIFIED = "oailastmodified";
     public static final String OAIPMH = "OAIPMH";
     public static final String OAI_RESUMPTION_TOKENS = "OAIResumptionTokens";
     public static final String OAI_SERVICE = "oaiService";

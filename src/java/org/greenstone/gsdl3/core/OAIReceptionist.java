@@ -295,7 +295,7 @@ public class OAIReceptionist implements ModuleInterface {
       /** read the resumptionTokenExpiration element in OAIConfig.xml and get the specified time value
        *  Use the time value plus the current system time to get the expiration date string.
        */
-      String expiration_date = OAIXML.getTime(System.currentTimeMillis() + OAIXML.getTokenExpiration());
+	String expiration_date = OAIXML.getTime(System.currentTimeMillis() + OAIXML.getTokenExpiration()); // in milliseconds
       token.setAttribute(OAIXML.EXPIRATION_DATE, expiration_date);
     }
     
@@ -1033,19 +1033,22 @@ public class OAIReceptionist implements ModuleInterface {
 
     // See OAIConfig.xml
     // dynamically works out what the earliestDateStamp is, since it varies by collection
+    // returns this time in *milliseconds*.
     protected long getEarliestDateStamp(NodeList oai_coll) {
 	//do the earliestDatestamp
-	long lastmodified = System.currentTimeMillis();	
+	long earliestDatestamp = System.currentTimeMillis();	
 	int oai_coll_size = oai_coll.getLength();
 	if (oai_coll_size == 0) {
 	    logger.info("returned oai collection list is empty. Setting repository earliestDatestamp to be 1970-01-01.");
-	    lastmodified = 0;
+	    earliestDatestamp = 0;
 	}
-	//the collection build time is determined by the last modified time of the buildConfig.xml file
+	// the earliestDatestamp is now stored as a metadata element in the collection's buildConfig.xml file
+	// we get the earliestDatestamp among the collections
 	for(int i=0; i<oai_coll_size; i++) {
-	    long coll_build_time = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.LASTMODIFIED));
-	    lastmodified = (lastmodified > coll_build_time)? coll_build_time : lastmodified;
+	    long coll_earliestDatestamp = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.EARLIEST_DATESTAMP));
+	    earliestDatestamp = (earliestDatestamp > coll_earliestDatestamp)? coll_earliestDatestamp : earliestDatestamp;
 	}
-	return lastmodified;
+
+	return earliestDatestamp*1000; // converting from seconds to milliseconds
     }
 }

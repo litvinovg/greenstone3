@@ -252,16 +252,16 @@ public class OAIPMH extends ServiceRack {
     }
 
     ArrayList keys = new ArrayList(info.getKeys());
-    String lastmodified = "";
-    if(keys.contains(OAIXML.LASTMODIFIED)) {
-      lastmodified = info.getInfo(OAIXML.LASTMODIFIED);
-      lastmodified = OAIXML.getTime(Long.parseLong(lastmodified)*1000); // java wants dates in milliseconds
+    String oailastmodified = "";
+    if(keys.contains(OAIXML.OAI_LASTMODIFIED)) {
+      oailastmodified = info.getInfo(OAIXML.OAI_LASTMODIFIED);
+      oailastmodified = OAIXML.getTime(Long.parseLong(oailastmodified)*1000); // java wants dates in milliseconds
     }
 
     Element get_record = OAIXML.createElement(OAIXML.GET_RECORD);
     Element record = OAIXML.createElement(OAIXML.RECORD);
     //compose the header element
-    record.appendChild(createHeaderElement(oid, lastmodified));      
+    record.appendChild(createHeaderElement(oid, oailastmodified));      
     //compose the metadata element
     record.appendChild(createMetadataElement(prefix, info, metadata_format));
     get_record.appendChild(record);
@@ -331,13 +331,13 @@ public class OAIPMH extends ServiceRack {
         continue;
       }
       ArrayList keys = new ArrayList(info.getKeys());
-      String lastmodified = "";
-      if(keys.contains(OAIXML.LASTMODIFIED)) {
-        lastmodified = info.getInfo(OAIXML.LASTMODIFIED);
-	lastmodified = OAIXML.getTime(Long.parseLong(lastmodified)*1000); // java wants dates in milliseconds
+      String oailastmodified = "";
+      if(keys.contains(OAIXML.OAI_LASTMODIFIED)) {
+        oailastmodified = info.getInfo(OAIXML.OAI_LASTMODIFIED);
+	oailastmodified = OAIXML.getTime(Long.parseLong(oailastmodified)*1000); // java wants dates in milliseconds
       }
       
-      Date this_date = OAIXML.getDate(lastmodified);        
+      Date this_date = OAIXML.getDate(oailastmodified);        
       if (from_date != null) {
         if(this_date.before(from_date)) {
           continue;
@@ -349,7 +349,7 @@ public class OAIPMH extends ServiceRack {
         }
       }      
       //compose the header element and append it
-      list_identifiers.appendChild(createHeaderElement(oid, lastmodified));      
+      list_identifiers.appendChild(createHeaderElement(oid, oailastmodified));      
     }//end of for(int i=0; i<oid_list.size(); i++) of doing thru each record
     
     return OAIXML.getResponse(list_identifiers);        
@@ -417,13 +417,13 @@ public class OAIPMH extends ServiceRack {
         continue;
       }
       ArrayList keys = new ArrayList(info.getKeys());
-      String lastmodified = "";
-      if(keys.contains(OAIXML.LASTMODIFIED)) {
-        lastmodified = info.getInfo(OAIXML.LASTMODIFIED);
-	lastmodified = OAIXML.getTime(Long.parseLong(lastmodified)*1000); // java wants dates in milliseconds
+      String oailastmodified = "";
+      if(keys.contains(OAIXML.OAI_LASTMODIFIED)) {
+        oailastmodified = info.getInfo(OAIXML.OAI_LASTMODIFIED);
+	oailastmodified = OAIXML.getTime(Long.parseLong(oailastmodified)*1000); // java wants dates in milliseconds
       }
       
-      Date this_date = OAIXML.getDate(lastmodified);        
+      Date this_date = OAIXML.getDate(oailastmodified);        
       if (from_date != null) {
         if(this_date.before(from_date)) {
           continue;
@@ -438,7 +438,7 @@ public class OAIPMH extends ServiceRack {
       Element record = OAIXML.createElement(OAIXML.RECORD);
       list_records.appendChild(record);
       //compose the header element
-      record.appendChild(createHeaderElement(oid, lastmodified));      
+      record.appendChild(createHeaderElement(oid, oailastmodified));      
       //compose the metadata element
       record.appendChild(createMetadataElement(prefix, info, metadata_format));
       
@@ -500,7 +500,7 @@ public class OAIPMH extends ServiceRack {
   }
   /** create a header element used when processing requests like ListRecords/GetRecord/ListIdentifiers
    */
-  private Element createHeaderElement(String oid, String lastmodified) {    
+  private Element createHeaderElement(String oid, String oailastmodified) {    
         Element header = OAIXML.createElement(OAIXML.HEADER);
         Element identifier = OAIXML.createElement(OAIXML.IDENTIFIER);
         GSXML.setNodeText(identifier, site_name + ":" + coll_name + ":" + oid);
@@ -509,7 +509,7 @@ public class OAIPMH extends ServiceRack {
         GSXML.setNodeText(set_spec, site_name + ":" + coll_name);
         header.appendChild(set_spec);
         Element datestamp = OAIXML.createElement(OAIXML.DATESTAMP);
-        GSXML.setNodeText(datestamp, lastmodified);
+        GSXML.setNodeText(datestamp, oailastmodified);
         header.appendChild(datestamp);
         return header;
   }
@@ -655,6 +655,9 @@ public class OAIPMH extends ServiceRack {
 <childtype>VList
 <contains>".1;".2;".3;".4;".5;".6;".7;".8;".9
 <docnum>349
+<oailastmodified>1303283795
+<lastmodifieddate>20110412
+<oailastmodifieddate>20110420
 ----------------------------------------------------------------------
      */
   public String[] getMetadata(DBInfo info, String names) {

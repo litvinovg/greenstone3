@@ -620,8 +620,10 @@ public class MessageRouter implements  ModuleInterface {
           Element ane = this.doc.createElement(GSXML.COLLECTION_ELEM);
           //The collection name is returned as site_name:coll_name, which is in fact the set specification
           ane.setAttribute(GSXML.NAME_ATT, site_name + ":" + col_name);
-          ane.setAttribute(OAIXML.LASTMODIFIED, "" + c.getLastmodified());
-          
+          ane.setAttribute(OAIXML.LASTMODIFIED, "" + c.getLastmodified()); 
+	       // lastmodified not of use anymore for OAI, perhaps useful as general information
+	  ane.setAttribute(OAIXML.EARLIEST_DATESTAMP, "" + c.getEarliestDatestamp()); // for OAI
+
           this.oai_collection_list.appendChild(ane);
           //logger.info(GSXML.xmlNodeToString(oai_collection_list));
         }      

@@ -67,7 +67,10 @@ public class Collection
     protected boolean has_oai = true;
     /** time when this collection was built */
     protected long lastmodified = 0;
-    
+    /** earliestDatestamp of this collection. Necessary for OAI */
+    protected long earliestDatestamp = 0;
+
+
     /** An element containing the serviceRackList element of buildConfig.xml, used to determine whether it contains
      *  the OAIPMH serviceRack 
      */
@@ -132,10 +135,16 @@ public class Collection
     public boolean isPublic() {
 	return is_public;
     }
-    //used by the OAIReceptionist to find out the earliest datestamp amongst all oai collections in the repository
+    // Not used anymore by the OAIReceptionist to find out the earliest datestamp 
+    // amongst all oai collections in the repository. May be useful generally.
     public long getLastmodified() {
       return lastmodified;
     }
+    //used by the OAIReceptionist to find out the earliest datestamp amongst all oai collections in the repository
+    public long getEarliestDatestamp() {
+	return earliestDatestamp;
+    }
+
     /** whether the service_map in ServiceCluster.java contains the service 'OAIPMH'
      *  11/06/2007 xiao
      */
@@ -178,7 +187,7 @@ public class Collection
 	if (build_config_doc != null) {
 	    build_config_elem = build_config_doc.getDocumentElement();
 	}
-  
+
 	lastmodified = build_config_file.lastModified();
   
 	return build_config_elem;
@@ -263,6 +272,28 @@ public class Collection
 	
       } else {
 	has_oai = true;
+	
+	// extract earliestDatestamp from the buildconfig.xml for OAI
+	Element metadata_list = (Element)GSXML.getChildByTagName(build_config_xml, GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+
+	if(metadata_list != null) {
+	    NodeList children = metadata_list.getElementsByTagName(GSXML.METADATA_ELEM); 
+	           // can't do getChildNodes(), because whitespace, such as newlines, creates Text nodes
+	    for (int i = 0; i < children.getLength(); i++) {
+		Element metadata = (Element)children.item(i);
+		if(metadata.getAttribute(GSXML.NAME_ATT).equals(OAIXML.EARLIEST_DATESTAMP)) {
+		    String earliestDatestampStr = GSXML.getValue(metadata);
+		    if(!earliestDatestampStr.equals("")) {
+			earliestDatestamp = Long.parseLong(earliestDatestampStr);
+		    }
+		    break; // found a metadata element with name=earliestDatestamp in buildconfig
+		}
+	    }
+	}
+	
+	// If at the end of this, there is no value for earliestDatestamp, print out a warning
+	logger.warn("No earliestDatestamp in buildConfig.xml for collection: " + this.cluster_name + ". Defaulting to 0.");
+
       }
     } else { // no list of services (no ServiceRackList), so no oai_service_rack either
 	// explicitly set has_oai to false here, since it's initialised to true by default
