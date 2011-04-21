@@ -579,20 +579,25 @@
               <arg value="perl" />
             </exec>
 
-	    <exec executable="where" os="${os.windows}" spawn="false" outputproperty="full.perl.path">
+			<!-- DOS semi-equivalent of Linux which is "where" which returns lines of matches.
+			Use ant string functions to grab just the first line returned by the DOS where command. 
+			Sadly, "where" is not supported by winXP. Using GNUwin32 port of Linux "which" instead.-->
+			<!--<exec executable="where" os="${os.windows}" spawn="false" outputproperty="full.perl.path">
               <arg value="perl" />
             </exec>
-
+			
             <if><bool><istrue value="${current.os.iswindows}"/></bool>
               <stringutil string="${full.perl.path}" property="full.perl.path">
                 <replace regex="[\n].*$" replacement="" />
               </stringutil>
-	    </if>
+			</if>-->
+			<exec executable="${gs2build.home}/bin/windows/which" os="${os.windows}" spawn="false" outputproperty="full.perl.path">
+              <arg value="perl" />
+            </exec>
 
             <stringutil string="${full.perl.path}" property="perl.path">
                 <replace regex="\/[^\/]*$" replacement="" />
             </stringutil>
-
             <if><bool><istrue value="${current.os.isunix}"/></bool>
 
               <if><bool><not><equals arg1="${full.perl.path}" arg2="/usr/bin/perl"/></not></bool>
