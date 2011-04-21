@@ -900,11 +900,7 @@ public class OAIReceptionist implements ModuleInterface {
     copyElement(identify, OAIXML.BASE_URL);
     //do the protocol version
     copyElement(identify, OAIXML.PROTOCOL_VERSION);
-    //do the deletedRecord
-    copyElement(identify, OAIXML.DELETED_RECORD);
-    //do the granularity
-    copyElement(identify, OAIXML.GRANULARITY);
-    
+        
     //There can be more than one admin email according to the OAI specification
     NodeList admin_emails = GSXML.getChildrenByTagName(oai_config, OAIXML.ADMIN_EMAIL);
     int num_admin = 0;
@@ -925,6 +921,11 @@ public class OAIReceptionist implements ModuleInterface {
     Element earliestDatestamp_elem = OAIXML.createElement(OAIXML.EARLIEST_DATESTAMP);
     GSXML.setNodeText(earliestDatestamp_elem, earliestDatestamp_str);
     identify.appendChild(earliestDatestamp_elem);
+
+    //do the deletedRecord
+    copyElement(identify, OAIXML.DELETED_RECORD);
+    //do the granularity
+    copyElement(identify, OAIXML.GRANULARITY);
         
     return getMessage(identify);
   }
