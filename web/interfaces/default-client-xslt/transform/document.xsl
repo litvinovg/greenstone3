@@ -144,7 +144,7 @@
 	      var flash_plug_html = ""
 	      flash_plug_html += '&lt;OBJECT align="middle" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" \n';
 	      flash_plug_html += '  codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" \n';
-	      flash_plug_html += '  height="100%" id="Book" swLiveConnect="true" \n';
+	      flash_plug_html += '  height="800" id="Book" swLiveConnect="true" \n';
 	      flash_plug_html += '  width="100%"&gt;\n';
 	      flash_plug_html += '    &lt;PARAM name="allowScriptAccess" value="always" /&gt;\n';
 	      flash_plug_html += '    &lt;PARAM name="movie" value="Book.swf';
@@ -155,7 +155,7 @@
 	      flash_plug_html += '    &lt;PARAM name="bgcolor" value="#FFFFFF" /&gt;\n';
 	      flash_plug_html += '    &lt;EMBED align="middle" \n';
 	      flash_plug_html += '      allowScriptAccess="always" swLiveConnect="true" \n';
-	      flash_plug_html += '      bgcolor="#FFFFFF" height="100%" name="Book" \n';
+	      flash_plug_html += '      bgcolor="#FFFFFF" height="800" name="Book" \n';
 	      flash_plug_html += '      pluginspage="http://www.macromedia.com/go/getflashplayer" \n';
 	      flash_plug_html += '      quality="high" \n';
 	      flash_plug_html += '      src="Book.swf';
@@ -173,7 +173,6 @@
 	  <xsl:call-template name="documentHeading">
 	    <xsl:with-param name="collName" select="$collName"/>
 	  </xsl:call-template>
-	  
 	  <xsl:call-template name="documentArrows">
 	    <xsl:with-param name="collName" select="$collName"/>
 	  </xsl:call-template>         
@@ -249,7 +248,7 @@
     <xsl:choose>
       <xsl:when test="$bookswitch = 'on'">
 	<script type="text/javascript">
-	  <xsl:text disable-output-escaping="yes">var img_cover = '</xsl:text><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']"/>/index/assoc/<xsl:value-of select="metadataList/metadata[@name='archivedir']"/>/cover.jpg<xsl:text disable-output-escaping="yes">';</xsl:text>
+	  <xsl:text disable-output-escaping="yes">var img_cover = '</xsl:text><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']"/>/index/assoc/<xsl:value-of select="metadataList/metadata[@name='assocfilepath']"/>/cover.jpg<xsl:text disable-output-escaping="yes">';</xsl:text>
 	</script>
       </xsl:when>
       <xsl:otherwise>
@@ -439,34 +438,33 @@
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="documentNode" mode="xmlpeeling">
-    <!-- get title -->
-    <xsl:choose>
-      <xsl:when test="nodeContent">
-	<xsl:text disable-output-escaping="yes">
-	  &lt;Section&gt;
-	  &lt;Description&gt;
-	  &lt;Metadata name="Title"&gt;
-	</xsl:text>
-	<xsl:value-of select="normalize-space(metadataList/metadata[@name='Title'])"/>
-	<xsl:text disable-output-escaping="yes">
-	  &lt;/Metadata&gt;
-	  &lt;/Description&gt;
-	</xsl:text>
-	<xsl:value-of select="normalize-space(nodeContent)" disable-output-escaping="yes"/>
-	<xsl:text disable-output-escaping="yes">&lt;/Sec&gt;</xsl:text>
-      </xsl:when>
-    </xsl:choose>
+  	<xsl:template match="documentNode" mode="xmlpeeling">
+		<!-- get title -->
+		<xsl:if test="nodeContent">
+			<xsl:text disable-output-escaping="yes">
+				&lt;Section&gt;
+				&lt;Description&gt;
+				&lt;Metadata name="Title"&gt;
+			</xsl:text>
+			<xsl:value-of select="normalize-space(metadataList/metadata[@name='Title'])"/>
+			<xsl:text disable-output-escaping="yes">
+				&lt;/Metadata&gt;
+				&lt;/Description&gt;
+			</xsl:text>
+			<xsl:value-of select="normalize-space(nodeContent)" disable-output-escaping="yes"/>
+		</xsl:if>
 
-    <!-- recurse to the children -->
-    <xsl:if test="documentNode">
-      <xsl:apply-templates select="documentNode" mode="xmlpeeling" />
-    </xsl:if>
-
-    <!-- end the section -->
-    <xsl:text disable-output-escaping="yes">
-      &lt;/Section&gt;
-    </xsl:text>
+		<!-- recurse to the children -->
+		<xsl:if test="documentNode">
+			<xsl:apply-templates select="documentNode" mode="xmlpeeling" />
+		</xsl:if>
+	
+		<!-- end the section -->
+		<xsl:if test="nodeContent">
+			<xsl:text disable-output-escaping="yes">
+				&lt;/Section&gt;
+			</xsl:text>
+		</xsl:if>
   </xsl:template>
   
   <!-- match any file nodes -->
