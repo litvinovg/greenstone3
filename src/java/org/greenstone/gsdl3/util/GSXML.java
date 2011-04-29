@@ -686,6 +686,11 @@ public class GSXML {
   
   public static void addParametersToList(Document owner, Element param_list,
     HashMap params) {
+	if (params == null)
+	{
+		return;
+	}
+	
     Set items = params.entrySet();
     Iterator i = items.iterator();
     while(i.hasNext()) {

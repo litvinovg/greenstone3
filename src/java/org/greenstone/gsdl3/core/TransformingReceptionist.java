@@ -204,10 +204,15 @@ public class TransformingReceptionist extends Receptionist{
 	}
 	else if(excerptTag != null)
 	{
+		/*
         // define a list
         
 		Node selectedElement = modifyNodesByTagRecursive(transformed_page, excerptTag);
+		*/
+		
+		Node selectedElement = getNodeByTagRecursive(transformed_page, excerptTag);
 		return selectedElement;
+		
 	}
 	return transformed_page;
   }
@@ -284,26 +289,32 @@ public class TransformingReceptionist extends Receptionist{
    * before transforming */
   protected Node transformPage(Element page) {
   	
-	 boolean allowsClientXSLT = (Boolean)config_params.get(GSConstants.ALLOW_CLIENT_SIDE_XSLT);
-	 //System.out.println("Client side transforms allowed? " + allowsClientXSLT);
-	 
-	 // Force it back to traditional
-	 if(!allowsClientXSLT)
-		config_params.put(GSConstants.INTERFACE_NAME, "traditional");
-	
-  	 Element request = (Element)GSXML.getChildByTagName(page, GSXML.PAGE_REQUEST_ELEM);
-	 String output = request.getAttribute(GSXML.OUTPUT_ATT);  	
-	 
-	 String currentInterface = (String)config_params.get(GSConstants.INTERFACE_NAME);
-	 //System.out.println("Current output mode is: " + output + ", current interface name is: " + currentInterface);
-	 
-	 if(allowsClientXSLT) {
-		 if((currentInterface.equals("default") && output.equals("html")) || output.equals("server"))
-		   // Switch the interface
-		   config_params.put(GSConstants.INTERFACE_NAME, "traditional");
-		 else if(currentInterface.equals("traditional") && !output.equals("html"))
-		   // The reverse needs to happen too
-		   config_params.put(GSConstants.INTERFACE_NAME, "default");
+	boolean allowsClientXSLT = (Boolean)config_params.get(GSConstants.ALLOW_CLIENT_SIDE_XSLT);
+	//System.out.println("Client side transforms allowed? " + allowsClientXSLT);
+
+	String currentInterface = (String)config_params.get(GSConstants.INTERFACE_NAME);
+
+	Element request = (Element)GSXML.getChildByTagName(page, GSXML.PAGE_REQUEST_ELEM);
+	String output = request.getAttribute(GSXML.OUTPUT_ATT);
+
+	//System.out.println("Current output mode is: " + output + ", current interface name is: " + currentInterface);
+
+	if(allowsClientXSLT) {
+		if(!currentInterface.endsWith(GSConstants.CLIENT_SIDE_XSLT_INTERFACE_SUFFIX) && output.equals("html"))
+		{
+			System.out.println("output is html and we are not currently using a client side version, switching");
+			// Switch the interface
+			config_params.put(GSConstants.INTERFACE_NAME, currentInterface.concat(GSConstants.CLIENT_SIDE_XSLT_INTERFACE_SUFFIX));
+		}
+		else if((currentInterface.endsWith(GSConstants.CLIENT_SIDE_XSLT_INTERFACE_SUFFIX) && !output.equals("html")) || output.equals("server"))
+		{
+			// The reverse needs to happen too
+			config_params.put(GSConstants.INTERFACE_NAME, currentInterface.substring(0, currentInterface.length() - GSConstants.CLIENT_SIDE_XSLT_INTERFACE_SUFFIX.length()));
+		}
+	}
+	else if (currentInterface.endsWith(GSConstants.CLIENT_SIDE_XSLT_INTERFACE_SUFFIX))
+	{
+		config_params.put(GSConstants.INTERFACE_NAME, currentInterface.substring(0, currentInterface.length() - GSConstants.CLIENT_SIDE_XSLT_INTERFACE_SUFFIX.length()));
 	}
   	
     // DocType defaults in case the skin doesn't have an "xsl:output" element
@@ -772,9 +783,9 @@ public class TransformingReceptionist extends Receptionist{
     // now find the absolute path
     String stylesheet = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String)this.config_params.get(GSConstants.SITE_NAME), collection, (String)this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, name);
     if (stylesheet==null) {
-      logger.info(" cant find stylesheet for "+name);
+      logger.info(" Can't find stylesheet for "+name);
     }
-    logger.error("stylesheet:"+stylesheet);
+    logger.debug("Stylesheet: "+stylesheet);
     return stylesheet;
   }
 

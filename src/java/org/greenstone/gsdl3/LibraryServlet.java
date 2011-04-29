@@ -632,8 +632,17 @@ public class LibraryServlet extends HttpServlet {
 		  if (!href.equals("")) {
 		    if (href.indexOf("?")!=-1) {
 		      String[] parts = StringUtils.split(href, "\\?", -1);
-		      parts[1] = StringUtils.replace(parts[1], ":", "%3A");
-		      href = parts[0]+"?"+parts[1];
+			  if (parts.length == 1)
+			  {
+				parts[0] = StringUtils.replace(parts[0], ":", "%3A");
+				href = "?"+parts[0];
+			  }
+			  else
+			  {
+				parts[1] = StringUtils.replace(parts[1], ":", "%3A");
+				href = parts[0]+"?"+parts[1];
+			  }
+		      
 		    }
 		    a.setAttribute("href", response.encodeURL(href));
 		  }

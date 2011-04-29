@@ -222,10 +222,10 @@ public class Collection
         Element plugin_list = (Element)GSXML.getChildByTagName(import_list, GSXML.PLUGIN_ELEM+GSXML.LIST_MODIFIER);
         addPlugins(plugin_list);
         if (plugin_list != null){
-          Element plugin_elem = (Element)GSXML.getNamedElement(plugin_list, GSXML.PLUGIN_ELEM, GSXML.NAME_ATT, "HTMLPlug");
+          Element plugin_elem = (Element)GSXML.getNamedElement(plugin_list, GSXML.PLUGIN_ELEM, GSXML.NAME_ATT, "HTMLPlugin");
           if (plugin_elem != null) {
             //get the option
-            Element option_elem = (Element)GSXML.getNamedElement(plugin_elem, GSXML.PARAM_OPTION_ELEM, GSXML.NAME_ATT, "-tidy_html");
+            Element option_elem = (Element)GSXML.getNamedElement(plugin_elem, GSXML.PARAM_OPTION_ELEM, GSXML.NAME_ATT, "-use_realistic_book");
             if (option_elem != null) {
               useBook = true;
             }

@@ -49,6 +49,7 @@ public class GSParams {
 
     public static final String EXPAND_DOCUMENT = "ed";
     public static final String EXPAND_CONTENTS = "ec";
+	public static final String REALISTIC_BOOK = "book";
 
   // used for filtering out a piece of the final page
   public static final String EXCERPT_ID = "excerptid";
@@ -79,6 +80,8 @@ public class GSParams {
 	addParameter(DOCUMENT_TYPE, true);
 	addParameter(EXPAND_DOCUMENT, false);
 	addParameter(EXPAND_CONTENTS, false);
+	addParameter(REALISTIC_BOOK, false);	
+	
  	//addParameter();
 	// ugly hack so we don't save the extlink param
 	addParameter("s0.ext", false);

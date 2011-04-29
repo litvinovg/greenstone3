@@ -276,5 +276,37 @@ public class XSLTUtil {
 	    return formatted_str;
 	}
     
+	public static String hashToSectionId(String hashString)
+	{
+		if(hashString == null || hashString.length() == 0 || !hashString.startsWith("HASH")) {return "";}
+		
+		int firstDotIndex = hashString.indexOf(".");
+		if(firstDotIndex == -1)
+		{	
+			return "";
+		}
+		
+		String sectionString = hashString.substring(firstDotIndex + 1);
+		
+		return sectionString;
+	}
+	
+	public static String hashToDepthClass(String hashString)
+	{
+		if(hashString == null || hashString.length() == 0 || !hashString.startsWith("HASH")) {return "";}
+		
+		String sectionString = hashToSectionId(hashString);
+		
+		int count = sectionString.split("\\.").length;
+		
+		if (sectionString.equals(""))
+		{
+			return "sectionHeaderDepthTitle";
+		}
+		else 
+		{
+			return "sectionHeaderDepth" + count;
+		}
+	}
 }
 

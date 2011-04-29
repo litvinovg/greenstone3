@@ -51,7 +51,11 @@ public class DefaultReceptionist extends TransformingReceptionist {
 		String uid = page_request.getAttribute(GSXML.USER_ID_ATT);
 		
 		if (coll_name.equals("")) {
-			coll_name = GSXML.getNamedElement(param_list, GSXML.PARAM_ELEM, GSXML.NAME_ATT, "p.c").getAttribute(GSXML.VALUE_ATT);
+			Element pc_param = GSXML.getNamedElement(param_list, GSXML.PARAM_ELEM, GSXML.NAME_ATT, "p.c");
+			if(pc_param != null)
+			{
+				coll_name = pc_param.getAttribute(GSXML.VALUE_ATT);
+			}
 		}
 		
 		boolean get_service_description = false;
