@@ -2078,6 +2078,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </copy>
   </target>
   <target name="configure-flax-wsdl" description="Configure flax webservice with tomcat server/port">
+    <copy file="${basedir}/flax-resources/FlaxWebService.wsdl" tofile="${web.home}/FlaxWebService.wsdl" overwrite="true"/>
     <rsr file="${web.home}/FlaxWebService.wsdl" pattern="@flaxpublicserver@:@flaxpublicport@" replacement="${tomcat.server}:${tomcat.port}"/>
     <echo>FLAX server for Moodle module is configured to: http://${tomcat.server}:${tomcat.port}.</echo>
   </target>
