@@ -66,14 +66,46 @@
 			</xsl:when>
 
 			<xsl:otherwise>
+				<p class="termList">
+					<xsl:choose>
+						<xsl:when test="count(/page/pageResponse/termList/term) &lt; 3">
+							<xsl:for-each select="/page/pageResponse/termList/term">
+								<span style="font-style:italic;"><xsl:value-of select="@name"/></span> occurs <xsl:value-of select="@freq"/> times in <xsl:value-of select="@numDocsMatch"/> document(s) <br />
+							</xsl:for-each>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:for-each select="/page/pageResponse/termList/term">
+								<span style="font-style:italic;"><xsl:value-of select="@name"/></span> (<xsl:value-of select="@freq"/>);
+							</xsl:for-each>
+						</xsl:otherwise>
+					</xsl:choose>
+				</p>
 				
 				<ul id="results">
 					<xsl:for-each select="pageResponse/documentNodeList/documentNode">
 						<li class="document">
 							<a>
-								<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/></xsl:attribute>
-								<xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
+								<xsl:choose>
+									<xsl:when test="/page/pageResponse/collection/@name">
+										<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=q&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;hl=on&amp;ed=1#<xsl:value-of select="@nodeID"/></xsl:attribute>
+									</xsl:when>
+									<xsl:when test="@collection">
+										<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="@collection"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=q&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;hl=on&amp;ed=1#<xsl:value-of select="@nodeID"/></xsl:attribute>
+									</xsl:when>
+								</xsl:choose>
+								
+								<xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/> 
 							</a>
+							
+							<!-- If this is results from a cross collection search then add a link to the collection that it is from -->
+							<xsl:if test="@collection">
+								(<a style="background-image:none; padding:3px;">
+									<xsl:attribute name="href">
+										<xsl:value-of select="$library_name"/>?a=p&amp;sa=about&amp;c=<xsl:value-of select="@collection"/>
+									</xsl:attribute>
+									<xsl:value-of select="@collection"/>
+								</a>)
+							</xsl:if>
 							<xsl:call-template name="documentBerryForClassifierOrSearchPage"/>
 						</li>
 					</xsl:for-each>

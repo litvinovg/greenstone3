@@ -535,10 +535,10 @@ used on the document page
       <div id="documentberries">
         <img class="pick" id="{/page/pageResponse/collection/@name}:{$rootNode}" src="interfaces/{$interface_name}/images/berry.png" alt="in basket" width="15" height="15" border="0"/>
         <span id="{/page/pageResponse/collection/@name}:{$rootNode}:root" class="documentberry">the whole document</span>
-        <xsl:if test="$selectedNode != $rootNode">
+        <!--<xsl:if test="$selectedNode != $rootNode">
           <img class="pick" id="{/page/pageResponse/collection/@name}:{$selectedNode}" src="interfaces/{$interface_name}/images/berry.png" alt="in basket" width="15" height="15" border="0"/>
           <span id="{/page/pageResponse/collection/@name}:{$selectedNode}:section" class="documentberry">the current section</span>
-        </xsl:if>
+        </xsl:if>-->
       </div>
     </xsl:if>
   </xsl:template>
@@ -548,7 +548,7 @@ used on the document page
   </xsl:template>
   <xsl:template name="coverImage">
     <img>
-      <xsl:attribute name="src"><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']"/>/index/assoc/<xsl:value-of select="metadataList/metadata[@name='archivedir']"/>/cover.jpg</xsl:attribute>
+      <xsl:attribute name="src"><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']"/>/index/assoc/<xsl:value-of select="metadataList/metadata[@name='assocfilepath']"/>/cover.jpg</xsl:attribute>
     </img>
   </xsl:template>
   <xsl:template name="previousNextButtons">

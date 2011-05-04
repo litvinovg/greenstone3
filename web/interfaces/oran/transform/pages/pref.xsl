@@ -27,6 +27,7 @@
 		-->
 		<script type="text/javascript"><xsl:text disable-output-escaping="yes">
 			var modified = false;
+			var bypass = false;
 					
 			function assembleURLFromForm(formElem)
 			{
@@ -57,7 +58,7 @@
 					
 			function checkModified(e)
 			{
-				if (modified)
+				if (modified &amp;&amp; !bypass)
 				{
 					var ok = confirm("Would you like to save your preferences?");
 					
@@ -74,7 +75,7 @@
 						{
 							xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
 						}
-						//assembleURLFromForm(formElem);
+
 						xmlhttp.open("GET",assembleURLFromForm(formElem),false);
 						xmlhttp.send();
 					}
@@ -84,6 +85,7 @@
 			function changed()
 			{
 				modified = true;
+				bypass = false;
 			}
 			
 			function pageLoad()
@@ -242,7 +244,7 @@
 
 				<br/>
 
-				<input type='submit'><xsl:attribute name="value"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.set_prefs')"/></xsl:attribute></input>
+				<input type='submit' onclick="bypass=true;"><xsl:attribute name="value"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.set_prefs')"/></xsl:attribute></input>
 
 			</form>
 		</div>

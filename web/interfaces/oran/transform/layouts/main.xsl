@@ -41,9 +41,9 @@
 			</head>
 			
 			<body><xsl:call-template name="textDirectionAttribute"/><xsl:call-template name="actionClass"/>
-
+				
 				<xsl:call-template name="displayErrorsIfAny"/>
-
+				<a name="top"><xsl:text> </xsl:text></a>
 				<div id="container">
 
 					<div id="gs_banner">

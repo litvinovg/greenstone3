@@ -10,11 +10,112 @@ body {
 	background-color: #eae4d9;
 }
 
+h3 {
+	margin-top:2px;
+	margin-bottom:2px;
+}
+
+p {
+	margin-top:0px;
+	margin-bottom:0.75em;
+}
+
+.sectionHeader {
+	margin-top:0px;
+	margin-bottom:0px;
+}
+
+.headerTD {
+	vertical-align: middle;
+}
+
+/* Styles for the different depths */
+.sectionHeaderDepthTitle{
+	font-size:1.8em;
+	line-height:1em;
+	font-weight:bold;
+}
+
+.sectionHeaderDepth1{
+	font-size:1.6em;
+	line-height:1em;
+	font-weight:bold;
+}
+
+.sectionHeaderDepth2{
+	font-size:1.4em;
+	line-height:1em;
+	font-weight:bold;
+	font-style:italic;
+}
+
+.sectionHeaderDepth3{
+	font-size:1.2em;
+	line-height:1em;
+	font-style:italic;
+}
+
+.sectionHeaderDepth4{
+	font-size:1em;
+	line-height:1em;
+	font-weight:italic;
+}
+
+.sectionNumberSpan{
+	/*Uncomment this line to disable automatic section numbering*/
+	/*display:none;*/
+}
+
+.sectionContainer{
+	padding-top:1em;
+	padding-bottom:1em;
+	padding-left:1.5em;
+}
+
+.icon{
+	background-repeat: no-repeat;
+	height:16px;
+	width:16px;
+	cursor:pointer;
+}
+
+.toggleImageExpand {
+	background-image: url('../images/expand.png');
+	background-position: 2px 2px;
+}
+
+.toggleImageCollapse {
+	background-image: url('../images/collapse.png');
+	background-position: 2px 2px;
+}
+
+.toggleImagePage {
+	background-image: url('../images/page.png');
+	background-position: 2px 2px;
+}
+
+.toggleImageChapter {
+	background-image: url('../images/chapter.png');
+}
+
+.realisticBookIcon {
+	background-repeat: no-repeat;
+	background-image: url('../images/rbook.png');
+	height: 32px;
+	width: 32px;
+}
+
+.backToTop {
+	font-size:0.7em;
+	padding-left: 2em;
+	text-align:center;
+}
+
 #container {	position: relative;
 	margin: 0 auto 20px auto;
 	max-width: 1000px;
 	padding: 0;
-	line-height: 160%;
+	line-height: 120%;
 	background-color: #fff;
 	border: 1px solid #c8c3b9;
 }
@@ -29,18 +130,51 @@ body {
 
 #gs_content {
 	padding: 1em;
+	padding-right: 2em;
 	min-height: 300px;
 	/* background-color: #ff0; */
 }
 
+.termList {
+	font-size:12px;
+	line-height:14px;
+}
+
+.noTermHighlight{
+
+}
+
+.termHighlight{
+	background:yellow;
+}
+
+.viewOptions {
+	width: 100%;
+	text-align:center;
+	background:#008800;
+}
+
+.viewOptions td {
+	padding-top:4px;
+	padding-bottom:4px;
+}
+
+.viewOptions a:link, .viewOptions a:hover, .viewOptions a:active, .viewOptions a:visited {
+	color:white;
+	text-decoration:none;
+}
+
 #rightSidebar {
 	border: 1px solid #cdc;
-	padding: 10px;
 	width: 25%;
 	min-width: 180px;
 	float: right;
 	margin: 0 0 10px 20px;
 	/* background-color: #f0f; */
+}
+
+#contentsArea {
+	padding:10px;
 }
 
 #quickSearch {
@@ -53,8 +187,6 @@ body {
 
 .collectionLink {
 	display: block;
-	width: 140px;
-	height: 100px;
 	float: left;
 	border: 1px solid #888;
 	margin: 0 20px 20px 0;
@@ -112,7 +244,7 @@ body.dAction #gs_banner h2 {
 #quicksearcharea {
 	width:60%;
 	text-align:right;
-	padding: 5px;
+	padding: 0.4em;
 	color:white;
 	background-color:#007200;
 }
@@ -128,11 +260,6 @@ body.dAction #gs_banner h2 {
 	color:white; 
 	text-transform:lowercase;
 	padding-left:10px; 
-}
-
-#expandqueryboxbutton {
-	color:white;
-	text-decoration:none;
 }
 
 #breadcrumbs {
@@ -162,7 +289,7 @@ body.dAction #gs_banner h2 {
 	text-transform: capitalize;
 }
 
-#nav a {
+#nav a{
 
 	display: block;
 	float:left;
@@ -261,6 +388,7 @@ body.dAction #gs_banner h2 {
 
 /* style the search and classifier results */
 #results {
+	line-height: 160%;
 	margin: 0;
 	padding: 0;
 	/* border: 1px solid #f00; */
@@ -675,7 +803,7 @@ div.QuickSearch {
 #tableOfContents {
 	margin: 0;
 	padding: 0;
-	font-size: 80%;
+	font-size: 70%;
 }
 
 #tableOfContents li {
@@ -705,7 +833,15 @@ div.QuickSearch {
 }
 
 #tableOfContents ul {
-	padding: 0 0 0 20px;
+	padding: 0 0 0 0;
+}
+
+#tableOfContents ul ul{
+	padding: 0 0 0 0;
+}
+
+#tableOfContents ul ul ul{
+	padding: 0 0 0 16px;
 }
 
 /* -------- SEARCH ------- */
@@ -719,6 +855,7 @@ div.QuickSearch {
 
 
 table{
-	border-collapse:collapse;border-spacing:0;
+	border-collapse:collapse;
+	border-spacing:0;
 }
 
