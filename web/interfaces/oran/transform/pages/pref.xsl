@@ -185,6 +185,9 @@
 							<xsl:when test="/page/pageRequest/paramList/param[@name='hitsPerPage']">
 								<xsl:value-of select="/page/pageRequest/paramList/param[@name='hitsPerPage']/@value"/>
 							</xsl:when>
+							<xsl:when test="/page/pageRequest/paramList/param[@name='s1.hitsPerPage']">
+								<xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.hitsPerPage']/@value"/>
+							</xsl:when>
 							<xsl:otherwise>
 								20
 							</xsl:otherwise>
@@ -194,7 +197,7 @@
 						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.hitsperpage')"/>
 					</div>
 					<div class="paramValue">
-						<select name="hitsPerPage">
+						<select name="s1.hitsPerPage">
 							<option value="20">
 								<xsl:if test="$hits=20">
 									<xsl:attribute name="selected" />
@@ -229,6 +232,9 @@
 							<xsl:when test="/page/pageRequest/paramList/param[@name='maxDocs']">
 								<xsl:value-of select="/page/pageRequest/paramList/param[@name='maxDocs']/@value"/>
 							</xsl:when>
+							<xsl:when test="/page/pageRequest/paramList/param[@name='s1.maxDocs']">
+								<xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.maxDocs']/@value"/>
+							</xsl:when>
 							<xsl:otherwise>100</xsl:otherwise>
 						</xsl:choose>
 					</xsl:variable> 
@@ -236,7 +242,7 @@
 						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.maxDocs')"/>
 					</div>
 					<div class="paramValue">
-						<input name="maxDocs" size="3" value="{$mdocs}" />
+						<input name="s1.maxDocs" size="3" value="{$mdocs}" />
 					</div>
 					
 					<br class="clear"/>

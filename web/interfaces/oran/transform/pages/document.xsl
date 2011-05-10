@@ -38,7 +38,7 @@
 			<xsl:variable name="documentTitleVar">
 				<gslib:documentTitle/>
 			</xsl:variable>
-			Document
+			<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.document')"/>
 		</a>
 	</xsl:template>
 	
@@ -62,6 +62,7 @@
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse/document">
 		<xsl:if test="$bookswitch = 'off'">
+			<div id="bookdiv" style="visibility:hidden; height:0px;"><xsl:text> </xsl:text></div>
 			<!-- Add the Javascript that adds and removes highlighting ( *** in document-scripts.xsl *** ) -->
 			<xsl:call-template name="highlightingScript"/>
 			
@@ -110,7 +111,7 @@
 			<xsl:otherwise>
 				<div id="gs-document-text" class="documenttext"> 
 					<xsl:apply-templates select="documentNode" mode="document"/>
-				</div>
+				</div>	
 			</xsl:otherwise>
 		</xsl:choose>
 
@@ -136,14 +137,11 @@
 		<table><tr>
 			<!-- Expand/collapse button -->
 			<td class="headerTD">
-				<div id="dtoggle{@nodeID}" onclick="toggleSection('{@nodeID}');">			
-					<xsl:attribute name="class">
-					<xsl:choose>
-						<xsl:when test="nodeContent and not(documentNode)">icon leafNode toggleImageCollapse</xsl:when>
-						<xsl:otherwise>icon toggleImageCollapse</xsl:otherwise>
-					</xsl:choose>
+				<img id="dtoggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
+					<xsl:attribute name="src">
+						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
 					</xsl:attribute>
-				</div>
+				</img>
 			</td>
 			
 			<!-- Automatic section number -->
@@ -165,7 +163,7 @@
 			<xsl:if test="util:hashToDepthClass(@nodeID) != 'sectionHeaderDepthTitle'">
 				<td class="backToTop headerTD">
 					<a href="#top">
-						<xsl:text disable-output-escaping="yes">&#9650;back to top</xsl:text>
+						<xsl:text disable-output-escaping="yes">&#9650;</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.back_to_top')"/>
 					</a>
 				</td>
 			</xsl:if>
@@ -210,10 +208,14 @@
 					<td>
 						<xsl:choose>
 							<xsl:when test="not(nodeContent and not(documentNode))">
-								<div id="ttoggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon toggleImageCollapse"/>
+								<img id="ttoggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">
+									<xsl:attribute name="src">
+										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
+									</xsl:attribute>
+								</img>
 							</xsl:when>
 							<xsl:otherwise>
-								<div class="icon"/>
+								<xsl:attribute name="class">emptyIcon</xsl:attribute>
 							</xsl:otherwise>
 						</xsl:choose>
 					</td>
@@ -221,24 +223,26 @@
 				
 				<!-- The chapter/page icon -->
 				<td>
-					<div>
-						<xsl:attribute name="class">
+					<img>
+						<xsl:if test="nodeContent and not(documentNode)">
+							<xsl:attribute name="class">leafNode</xsl:attribute>
+						</xsl:if>
+						
+						<xsl:attribute name="src">
 							<xsl:choose>
 								<xsl:when test="nodeContent and not(documentNode)">
-									icon leafNode toggleImagePage
+									<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'page_image')"/> 
 								</xsl:when>
 								<xsl:otherwise>
-									icon toggleImageChapter
+									<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'chapter_image')"/>
 								</xsl:otherwise>
 							</xsl:choose>
 						</xsl:attribute>
-					</div>
+					</img>
 				</td>
 				
 				<!-- The section name, links to the section in the document -->
 				<td>				
-					<!-- display this item from the table of contents -->
-					<xsl:if test="$isCurrent"><xsl:attribute name="class">current</xsl:attribute></xsl:if>
 					<a>
 						<xsl:attribute name="href">#<xsl:value-of select="@nodeID"/></xsl:attribute>
 						<xsl:if test="util:hashToSectionId(@nodeID)">
@@ -301,35 +305,36 @@
 	<xsl:template match="/page"><xsl:apply-templates select="/page/pageResponse/document"/></xsl:template> <!-- this to be deleted eventually -->
 	
 	<xsl:template name="viewOptions">
+		<xsl:call-template name="realisticBooksScript"/>
 		<table class="viewOptions"><tr>
-			<!-- Highlight on/off button -->
-			<xsl:if test="/page/pageRequest/paramList/param[@name = 'p.a']/@value = 'q'">
-				<td>
-					<a id="highlightOption">
-						<xsl:choose>
-							<xsl:when test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'on'">
-								<xsl:attribute name="href">
-									<xsl:text>javascript:removeHighlight();</xsl:text>
-								</xsl:attribute>
-								<xsl:text>No Highlighting</xsl:text>
-							</xsl:when>
-							<xsl:otherwise>
-								<xsl:attribute name="href">
-									<xsl:text>javascript:addHighlight();</xsl:text>
-								</xsl:attribute>
-								<xsl:text>Highlighting</xsl:text>
-							</xsl:otherwise>
-						</xsl:choose>
-					</a>
-				</td>
-			</xsl:if>
-			
 			<!-- Realistic books link -->
 			<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
 				<td>
-					<a title="Realistic book view" href="{$library_name}?a=d&amp;c={$collName}&amp;d={/page/pageResponse/document/documentNode[1]/@nodeID}&amp;dt={/page/pageResponse/document/documentNode/@docType}&amp;p.a=b&amp;p.s={/page/pageResponse/service/@name}&amp;book=on&amp;ed=1">
-						<img src="interfaces/oran/images/rbook.png"/>
-					</a>
+					<!-- old url = {$library_name}?a=d&amp;c={$collName}&amp;d={/page/pageResponse/document/documentNode[1]/@nodeID}&amp;dt={/page/pageResponse/document/documentNode/@docType}&amp;p.a=b&amp;p.s={/page/pageResponse/service/@name}&amp;book=on&amp;ed=1 -->
+					<div title="Realistic book view" id="rbOptionDiv"><input id="rbOption" type="checkbox" onclick="bookInit();" class="optionCheckBox"/></div>
+				</td>
+			</xsl:if>
+			
+			<!-- Highlight on/off button -->
+			<xsl:if test="/page/pageRequest/paramList/param[@name = 'p.a']/@value = 'q'">
+				<td>
+					<div id="highlightOptionDiv" title="Search term highlighting">
+						<input id="highlightOption" type="checkbox" class="optionCheckBox">
+							<xsl:choose>
+								<xsl:when test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'on'">
+									<xsl:attribute name="onclick">
+										<xsl:text>removeHighlight();</xsl:text>
+									</xsl:attribute>
+									<xsl:attribute name="checked">true</xsl:attribute>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:attribute name="onclick">
+										<xsl:text>addHighlight();</xsl:text>
+									</xsl:attribute>
+								</xsl:otherwise>
+							</xsl:choose>
+						</input>
+					</div>
 				</td>
 			</xsl:if>
 		</tr></table>	

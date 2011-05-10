@@ -31,6 +31,30 @@
 							<xsl:if test="not(paramList/param[@name='startPage'])">
 								<input type="hidden" name="startPage" value="1"/>
 							</xsl:if>
+							<xsl:choose>
+								<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.maxDocs']">
+									<input type="hidden" name="s1.maxDocs">
+										<xsl:attribute name="value">
+											<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.maxDocs']/@value"/>
+										</xsl:attribute>
+									</input>
+								</xsl:when>
+								<xsl:otherwise>
+									<input type="hidden" name="s1.maxDocs" value="100"/>
+								</xsl:otherwise>
+							</xsl:choose>
+							<xsl:choose>
+								<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.hitsPerPage']">
+									<input type="hidden" name="s1.hitsPerPage">
+										<xsl:attribute name="value">
+											<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.hitsPerPage']/@value"/>
+										</xsl:attribute>
+									</input>
+								</xsl:when>
+								<xsl:otherwise>
+									<input type="hidden" name="s1.hitsPerPage" value="20"/>
+								</xsl:otherwise>
+							</xsl:choose>
 
 							<xsl:variable name="ns">s1.</xsl:variable>
 							<xsl:for-each select="paramList/param">
@@ -62,20 +86,42 @@
 						</div>
 					</form>
 				</xsl:for-each>
-
 			</xsl:when>
 
 			<xsl:otherwise>
+				<!-- The list of search terms with their frequency and document count -->
 				<p class="termList">
 					<xsl:choose>
+						<!-- If there is only one or two search terms then show the expanded information -->
 						<xsl:when test="count(/page/pageResponse/termList/term) &lt; 3">
 							<xsl:for-each select="/page/pageResponse/termList/term">
-								<span style="font-style:italic;"><xsl:value-of select="@name"/></span> occurs <xsl:value-of select="@freq"/> times in <xsl:value-of select="@numDocsMatch"/> document(s) <br />
+								<span style="font-style:italic;"><xsl:value-of select="@name"/></span>
+								<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.occurs')"/><xsl:text> </xsl:text>
+								<xsl:value-of select="@freq"/>
+								<xsl:choose>
+									<xsl:when test="@freq = 1">
+										<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.time')"/>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.time_plural')"/>
+									</xsl:otherwise>
+								</xsl:choose>
+								<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.in')"/><xsl:text> </xsl:text>
+								<xsl:value-of select="@numDocsMatch"/>
+								<xsl:choose>
+									<xsl:when test="@numDocsMatch = 1">
+										<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document')"/>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document_plural')"/>
+									</xsl:otherwise>
+								</xsl:choose>
+								<br />
 							</xsl:for-each>
 						</xsl:when>
 						<xsl:otherwise>
 							<xsl:for-each select="/page/pageResponse/termList/term">
-								<span style="font-style:italic;"><xsl:value-of select="@name"/></span> (<xsl:value-of select="@freq"/>);
+								<span style="font-style:italic;"><xsl:value-of select="@name"/></span> (<xsl:value-of select="@freq"/>)
 							</xsl:for-each>
 						</xsl:otherwise>
 					</xsl:choose>
@@ -109,14 +155,122 @@
 							<xsl:call-template name="documentBerryForClassifierOrSearchPage"/>
 						</li>
 					</xsl:for-each>
+					<br/>
+					
+					<!-- Previous/Next buttons-->
+					<xsl:call-template name="prevNextButtons"/>
 				</ul>
 			</xsl:otherwise>
-
+			
 		</xsl:choose>
 
 	</xsl:template>
+	
+	<xsl:template name="prevNextButtons">	
+		<!-- Current page -->
+		<xsl:variable name="currentPage">
+			<xsl:choose>
+				<xsl:when test="/page/pageRequest/paramList/param[@name='startPage']/@value">
+					<xsl:value-of select="/page/pageRequest/paramList/param[@name='startPage']/@value" />
+				</xsl:when>
+				<xsl:when test="/page/pageRequest/paramList/param[@name='s1.startPage']/@value">
+					<xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.startPage']/@value" />
+				</xsl:when>
+				<xsl:otherwise>1</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+	
+		<!-- Find the total number of documents returned -->
+		<xsl:variable name="docMax">
+			<xsl:choose>
+				<xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']">
+					<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']"/>
+				</xsl:when>
+				<xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'numDocsMatched']">
+					<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'numDocsMatched']"/>
+				</xsl:when>
+				<xsl:otherwise><xsl:value-of select="count(/page/pageResponse/documentNodeList/documentNode)"/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		
+		<!-- Find the number of documents displayed per page -->
+		<xsl:variable name="docsPerPage">
+			<xsl:choose>
+				<xsl:when test="/page/pageRequest/paramList/param[@name='hitsPerPage']">
+					<xsl:value-of select="/page/pageRequest/paramList/param[@name='hitsPerPage']/@value" />
+				</xsl:when>
+				<xsl:when test="/page/pageRequest/paramList/param[@name='s1.hitsPerPage']">
+					<xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.hitsPerPage']/@value" />
+				</xsl:when>
+				<xsl:otherwise>20</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		
+			<table id="searchResultNavTable"><tr>
+				<!-- Previous button -->
+				<td id="prevArrowTD">
+					<xsl:if test="$currentPage != 1">
+						<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/@subaction}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;startPage={$currentPage - 1}">
+							<img src="interfaces/oran/images/previous.png"/>
+						</a>
+					</xsl:if>
+				</td>
+				<td id="prevTD">
+					<xsl:if test="$currentPage != 1">
+						<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/@subaction}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;startPage={$currentPage - 1}">Previous</a>
+					</xsl:if>
+				</td>
+				
+				<!-- Search result status bar (in english it reads "Displaying X to Y of Z documents") -->
+				<xsl:if test="$docMax &gt; 0">
+					<td id="searchResultsStatusBar">
+						<!-- "Displaying" -->
+						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.displaying')"/><xsl:text> </xsl:text>
+						<!-- "X" -->
+						<xsl:value-of select="($currentPage - 1) * $docsPerPage + 1"/>
+						<!-- "to" -->
+						<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.to')"/><xsl:text> </xsl:text>
+						<!-- "Y" -->
+						<xsl:choose>
+							<xsl:when test="($currentPage * $docsPerPage + 1) &gt; $docMax">
+								<xsl:value-of select="$docMax"/>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:value-of select="$currentPage * $docsPerPage"/>
+							</xsl:otherwise>
+						</xsl:choose>
+						<!-- "of" -->
+						<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.of')"/><xsl:text> </xsl:text>
+						<!-- "Z" -->
+						<xsl:value-of select="$docMax"/>
+						<!-- "document[s]"-->
+						<xsl:choose>
+							<xsl:when test="$docMax = 1">
+								<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document')"/>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document_plural')"/>
+							</xsl:otherwise>
+						</xsl:choose>
+					</td>
+				</xsl:if>
+				
+				<!-- Next button -->
+				<td id="nextTD">
+					<xsl:if test="($currentPage * $docsPerPage + 1) &lt; $docMax">
+						<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/paramList/param[@name = 'sa']/@value}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;startPage={$currentPage + 1}">Next</a>
+					</xsl:if>
+				</td>
+				<td id="nextArrowTD">
+					<xsl:if test="($currentPage * $docsPerPage + 1) &lt; $docMax">
+						<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/paramList/param[@name = 'sa']/@value}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;startPage={$currentPage + 1}">
+							<img src="interfaces/oran/images/next.png"/>
+						</a>
+					</xsl:if>
+				</td>
+			</tr></table>
+	</xsl:template>
 
- 
 	<!-- puts all the params into a=p&p=h type form - need to change this if use 
 	multi params  -->
 	<xsl:template match="paramList" mode="cgi">

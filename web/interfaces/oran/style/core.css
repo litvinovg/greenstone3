@@ -72,42 +72,74 @@ p {
 	padding-left:1.5em;
 }
 
+.classifierContainer {
+	padding-left:1.5em;
+}
+
 .icon{
-	background-repeat: no-repeat;
+	cursor:pointer;
+	padding:2px;
+}
+
+.emptyIcon {
 	height:16px;
 	width:16px;
-	cursor:pointer;
 }
 
-.toggleImageExpand {
-	background-image: url('../images/expand.png');
-	background-position: 2px 2px;
-}
-
-.toggleImageCollapse {
-	background-image: url('../images/collapse.png');
-	background-position: 2px 2px;
-}
-
-.toggleImagePage {
-	background-image: url('../images/page.png');
-	background-position: 2px 2px;
-}
-
-.toggleImageChapter {
-	background-image: url('../images/chapter.png');
-}
-
-.realisticBookIcon {
+#rbOptionDiv {
 	background-repeat: no-repeat;
 	background-image: url('../images/rbook.png');
 	height: 32px;
 	width: 32px;
 }
 
+#highlightOptionDiv {
+	background-repeat: no-repeat;
+	background-image: url('../images/hl.png');
+	height: 32px;
+	width: 32px;
+}
+
+.optionCheckBox {
+	margin-left:35px; 
+	margin-top:10px;
+}
+
+#bookdiv {
+	
+}
+
 .backToTop {
 	font-size:0.7em;
 	padding-left: 2em;
+	text-align:center;
+}
+
+#prevArrowTD {
+	text-align:right; 
+	width:10%;
+}
+
+#nextArrowTD {
+	text-align:left; 
+	width:10%;
+}
+
+#prevTD {
+	text-align:left; 
+	width:20%;
+}
+
+#nextTD {
+	text-align:right; 
+	width:20%;
+}
+
+#searchResultNavTable {
+	width:100%;
+}
+
+#searchResultsStatusBar {
 	text-align:center;
 }
 
@@ -150,13 +182,11 @@ p {
 
 .viewOptions {
 	width: 100%;
-	text-align:center;
 	background:#008800;
 }
 
 .viewOptions td {
-	padding-top:4px;
-	padding-bottom:4px;
+	padding: 5px;
 }
 
 .viewOptions a:link, .viewOptions a:hover, .viewOptions a:active, .viewOptions a:visited {
@@ -203,13 +233,14 @@ collectionLinkImage {
 #gs_footer {
 	position: relative;
 	display: block;
-	height: 30px;
 	background: transparent url('../images/gsdlhead.gif') scroll no-repeat left top;
 	margin: 0 auto;
 	text-align: center;
 	vertical-align: middle;
 	font-size: 70%;
 	color: #fff;
+	padding-top:5px;
+	padding-bottom:5px;
 }
 
 
@@ -250,13 +281,12 @@ body.dAction #gs_banner h2 {
 }
 
 #quicksearcharea table{
-	font-size:10px; 
+	font-size:70%; 
 	margin:0; 
 	float: right;
 }
 
 #quicksearcharea a{
-	font-size: 11px;
 	color:white; 
 	text-transform:lowercase;
 	padding-left:10px; 
@@ -414,8 +444,8 @@ body.dAction #gs_banner h2 {
 
 #results .document a { background-image: url('../images/book.png'); }
 #results .document a:visited { background-image: url('../images/book-visited.png'); color: #999; }
-
 #results .shelf>a { background-image: url('../images/bookshelf.png'); }
+c
 
 /* corners of the banner */
 /*
@@ -451,224 +481,6 @@ body.dAction #gs_banner h2 {
 
 a:link, a:hover, a:active, a:visited { color: #050; }
 
-/*
-
-ul li>select, ul li>input {
-  padding: 0;
-  margin-left:5px;
-}
-
-
-
-div#banner ul, ul#resultlist, ul#tocnodes, ul#docbuttons, ul.tocnode, ul#bannerlist, ul#navbarlist, ul#collectionlist, ul#servicelist, ul#classifierlist, ul#classifiernodelist, ul#queryitemlist{
-  list-style-type:none;
-  margin:0;
-  padding:0;
-}
-
-div#banner ul li, ul#bannerlist li, ul#navbarlist li {
-  display: inline;
-  margin:0;
-  padding:0;	
-}
-
-
-
-div#banner p {
-  margin:0;
-  padding: 0;
-  float:left;
-  font-size: 16px;
-  text-align: left;
-  overflow:hidden	
-}
-
-div#banner p a {
-  background-image: url('../images/banner_bg.png');
-  background-repeat: repeat-y;
-}
-
-
-div#banner ul{
-  margin:0;
-  padding:0; 
-  float:right; 
-  font-size: 12px;  
-}
-
-div#banner a{
-  text-decoration: none;
-  color:#000000;
-}
-
-
-
-ul#bannerlist li a {
-  padding: 0 10px 0 10px; 
-  text-decoration: none;
-}
-
-ul#bannerlist li a:link, ul#bannerlist li a:visited
-{
- background-color: #DEE79C;
- background-image: url('../images/bg_off.png');
- text-decoration: none
-}
-
-ul#bannerlist li a:hover{
- background-color: #FFFF66;
- background-image: url('../images/bg_on.png') ;
- text-decoration: none
-}
-
-
-div#navbar{
-  clear:both;
-}
-
-ul#navbarlist{
-  margin:0;
-  padding:0; 
-  list-style-type: none; 
-  text-align:center;
-  width: 100%;
-  font-size: 80%;
-  background-image: url('../images/bg_green.png');	  
-  background-color: #99CC99
- }
-
-ul#navbarlist li a {
-  padding: 0 20px 0 20px; 
-  margin: 0;
-  color: #000000; 
-  text-decoration: none;
-}
-
-ul#navbarlist li a:link, ul#navbarlist li a:visited{
-   background-image: url('../images/bg_off.png') ;
- }
-
-ul#navbarlist li a:hover{
-  background-image: url('../images/bg_on.png') ;
-}
-
-
-ul#collectionlist li, ul#servicelist li{
-  display:block;
-  padding:0;
-  margin: .2em 0 0 0;
-  overflow:hidden;
-}
-
-
-ul#collectionlist img{
-  margin:0;
-  padding:0;
-  width: 150px;
-  height: 45px;
-  border: 1px solid black;
-  background-image: url('../images/collectimg_bg.png');
-  background-repeat: repeat-y;
-  overflow:hidden
-}
-
-ul#collectionlist li a.noimage{
-  display: block;
-  margin:0;
-  width: 145px;
-  height: 40px;
-  border: 1px solid black;
-  background-image: url('../images/collectimg_bg.png');
-  background-repeat: repeat-y;
-  overflow:hidden; padding-left:5px; padding-right:0; padding-top:5px; padding-bottom:0
-
-}
-
-ul#collectionlist li a{
-  font-size: 16px;
-  color: #000000;
-  text-decoration: none;  
-  font-weight: bold;
-}
-
-ul#servicelist li a{
-  margin:0 .5em 0 0;
-}
-
-ul#queryitemlist li{
-  display:block;
-  margin: .2em 0 .2em 0;
-}
-
-ul#classifierlist li{
-  list-style: none;
-  margin: 0 0 5px 0;
-  padding: 0;
-  display: block;
-  color:#000;
-}
-
-ul#classifierlist li#activeclassifier{
-  font-weight:bold;
-  padding: 0 0 0 5px;
-  margin:0 0 5px 0;
-}
-
- ul#classifierlist li a:link, ul#classifierlist li a:visited  
-{
-   display:block;
-   margin:0;
-   background-image: url('../images/bg_off.png');
-   text-decoration: none; 
-   color:#000;
-   width:100%; padding-left:5px; padding-right:0; padding-top:2px; padding-bottom:2px
- } 
-
-ul#classifierlist li a:hover, ul#classifierlist li a:active
-{
-  display:block;
-  margin:0;
-  background-image: url('../images/bg_on.png');
-  text-decoration: none; padding-left:5px; padding-right:0; padding-top:2px; padding-bottom:2px
-  
-}
-
-ul#classifierlist{
-   float:left;
-   font-size: 14px;
-   text-align: left;
-   width: 15%;
-   margin:0;
-   padding:0;
-}
-
-div#classifiers{
-  float:left;
-  width: 75%;
-  margin:0;
-  padding:0 0 0 10px;
- }
-
-ul#classifiernodelist li{
-  list-style: none;
-  margin: 0;
-  padding: 5px 0 0 0;
-  display: block;
- }
-
-ul.childrenlist{
-  margin: 0 0 0 0;
-  padding: 0 0 0 20px;
-  display: block;
-  width: 100%;
-}
-
-div#content{
- clear: both;
- overflow: hidden;
- margin: .2em 0 0 0;
-}
-
 /* bg image set in style macro */
 div.divbar { 
   clear: both; 
@@ -701,8 +513,6 @@ div.resultnavigation{
 ul#resultlist li{
   display:block;
 }
-
-
 
 div#documentheading{
   font-size: 16pt;

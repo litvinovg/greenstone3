@@ -18,19 +18,7 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse">
-
-		<!-- show the classifiers if more than one (title, subject, etc.) -->
-		<!--<xsl:if test="service/classifierList/classifier[2]">
-			<div id="classifierList" class="navList">
-				<ul>
-					<xsl:for-each select="service/classifierList/classifier">
-						<li><gslib:classifierLink/></li>
-					</xsl:for-each>
-				</ul>
-				<div class="clear"><xsl:text> </xsl:text></div>
-			</div>
-		</xsl:if>-->
-
+		<xsl:call-template name="classifierLoadScript"/>
 		<!-- this right sidebar -->
 		<xsl:if test="$berryBasketOn">
 			<div id="rightSidebar">
@@ -77,22 +65,133 @@
 	-->
 	<xsl:template match="classifierNode" priority="3">
 
-		<li class="shelf">
+		<table id="title{@nodeID}"><tr>
+			<!-- Expand/collapse button -->
+			<td class="headerTD">
+				<img id="toggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
+					<xsl:attribute name="src">
+						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
+					</xsl:attribute>
+				</img>
+			</td>
+			<!-- Bookshelf icon -->
+			<td>
+				<img>
+					<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'bookshelf_image')"/></xsl:attribute>
+				</img>
+			</td>
+			<!-- Link title -->
+			<td>
+				<a href="javascript:toggleSection('{@nodeID}');">
+					<xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
+				</a>
+			</td>
+		</tr></table>
+		
+		<!-- Show any documents or sub-groups in this group -->
+		<xsl:if test="documentNode|classifierNode">
+			<div id="div{@nodeID}" class="classifierContainer" style="display:block;">
+				<xsl:apply-templates select="documentNode|classifierNode"/>
+			</div>
+		</xsl:if>
+	</xsl:template>
+	
+	<xsl:template name="classifierLoadScript">
+		<script type="text/javascript">
+			<xsl:text disable-output-escaping="yes">
+				var collapseImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/><xsl:text disable-output-escaping="yes">";
+				var expandImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/><xsl:text disable-output-escaping="yes">";
+				var loadingImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'loading_image')"/><xsl:text disable-output-escaping="yes">";
+				var inProgress = new Array();
+			
+				function isExpanded(sectionID)
+				{
+					var divElem = document.getElementById("div" + sectionID);
+					if(divElem.style.display == "block")
+					{
+						return true;
+					}
+					return false;
+				}
+			
+				function toggleSection(sectionID)
+				{
+					var section = document.getElementById("div" + sectionID);
+					var sectionToggle = document.getElementById("toggle" + sectionID);
+					
+					if(section)
+					{
+						if(isExpanded(sectionID))
+						{
+							section.style.display = "none";
+							sectionToggle.setAttribute("src", expandImageURL);
+						}
+						else
+						{
+							section.style.display = "block";
+							sectionToggle.setAttribute("src", collapseImageURL);
+						}
+					}
+					else
+					{
+						httpRequest(sectionID);
+					}
+				}
+				
+				function httpRequest(sectionID)
+				{
+					if(!inProgress[sectionID])
+					{
+						inProgress[sectionID] = true;
+						var httpRequest;
+						if (window.XMLHttpRequest) {
+							httpRequest = new XMLHttpRequest();
+						}
+						else if (window.ActiveXObject) {
+							httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
+						}
+						
+						var sectionToggle = document.getElementById("toggle" + sectionID);
+						sectionToggle.setAttribute("src", loadingImageURL);
 
-			<a>
-				<xsl:attribute name="href">
-					<xsl:value-of select="$library_name"/>?a=b&amp;rt=r&amp;s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;cl=<xsl:value-of select='@nodeID'/><xsl:if test="classifierNode|documentNode">.pr</xsl:if></xsl:attribute>
-				<xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
-			</a>
+						var url = document.URL;
+						url = url.replace(/(&amp;|\?)cl=([a-z\.0-9]+)/gi, "$1cl=" + sectionID + "&amp;excerptid=div" + sectionID);
 
-			<!-- show any documents or sub-groups in this group -->
-			<xsl:if test="documentNode|classifierNode">
-				<ul>
-					<xsl:apply-templates select="documentNode|classifierNode"/>
-				</ul>
-			</xsl:if>
-		</li>
+						httpRequest.open('GET', url, true);
+						httpRequest.onreadystatechange = function() 
+						{
+							if (httpRequest.readyState == 4) 
+							{
+								if (httpRequest.status == 200) 
+								{
+									var newDiv = document.createElement("div");			
+									var sibling = document.getElementById("title" + sectionID);
+									var parent = sibling.parentNode;
+									
+									if(sibling.nextSibling)
+									{
+										parent.insertBefore(newDiv, sibling.nextSibling);
+									}
+									else
+									{
+										parent.appendChild(newDiv);
+									}
 
+									newDiv.innerHTML = httpRequest.responseText;
+									sectionToggle.setAttribute("src", collapseImageURL);
+								}
+								else
+								{
+									sectionToggle.setAttribute("src", expandImageURL);
+								}
+								inProgress[sectionID] = false;
+							}
+						}
+						httpRequest.send();
+					}
+				}
+			</xsl:text>
+		</script>
 	</xsl:template>
 
 </xsl:stylesheet>

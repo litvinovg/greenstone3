@@ -10,6 +10,11 @@
 	<xsl:template name="expansionScript">
 		<script type="text/javascript">
 			<xsl:text disable-output-escaping="yes">
+				var collapseImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/><xsl:text disable-output-escaping="yes">";
+				var expandImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/><xsl:text disable-output-escaping="yes">";
+				var chapterImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'chapter_image')"/><xsl:text disable-output-escaping="yes">";
+				var pageImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'page_image')"/><xsl:text disable-output-escaping="yes">";
+				
 				function toggleSection(sectionID)
 				{
 					var docElem = document.getElementById("doc" + sectionID);
@@ -20,14 +25,12 @@
 					
 					if(docElem.style.display == "none")
 					{
-						var imageClass = (docToggleElem.getAttribute("class").indexOf("leafNode") != -1) ? "icon toggleImageCollapse leafNode" : "icon toggleImageCollapse";
-						
 						docElem.style.display = "block";
-						docToggleElem.setAttribute("class", imageClass);
+						docToggleElem.setAttribute("src", collapseImageURL);
 						
 						if(tocToggleElem)
 						{
-							tocToggleElem.setAttribute("class", imageClass);
+							tocToggleElem.setAttribute("src", collapseImageURL);
 						}
 						
 						if(tocElem)
@@ -40,13 +43,11 @@
 						docElem.style.display = "none";
 						
 						//Use the page image if this is a leaf node and the chapter image if it not
-						//var imageClass = (docToggleElem.getAttribute("class").indexOf("leafNode") != -1) ? "icon toggleImagePage leafNode" : "icon toggleImageChapter";
-						var imageClass = (docToggleElem.getAttribute("class").indexOf("leafNode") != -1) ? "icon toggleImageExpand leafNode" : "icon toggleImageExpand";
-						docToggleElem.setAttribute("class", imageClass);
+						docToggleElem.setAttribute("src", expandImageURL);
 						
 						if(tocToggleElem)
 						{
-							tocToggleElem.setAttribute("class", imageClass);
+							tocToggleElem.setAttribute("src", expandImageURL);
 						}
 						
 						if(tocElem)
@@ -131,8 +132,7 @@
 					}
 					
 					var option = document.getElementById("highlightOption");
-					option.innerHTML = "No Highlighting";
-					option.setAttribute("href", "javascript:removeHighlight();");
+					option.setAttribute("onclick", "removeHighlight();");
 				}
 				
 				function removeHighlight()
@@ -148,17 +148,48 @@
 					}
 					
 					var option = document.getElementById("highlightOption");
-					option.innerHTML = "Highlighting";
-					option.setAttribute("href", "javascript:addHighlight();");
+					option.setAttribute("onclick", "addHighlight();");
 				}
 			</xsl:text>
 		</script>
 	</xsl:template>
 	
 	<xsl:template name="realisticBooksScript">
-		<div id="bookdiv"/>
 		<script type="text/javascript">
 			<xsl:text disable-output-escaping="yes">
+				function bookInit()
+				{
+					loadBook(); 
+					hideText(); 
+					showBook(); 
+					swapLinkJavascript(false);
+				}
+				
+				function hideText()
+				{
+					var textDiv = document.getElementById("gs-document-text");
+					textDiv.style.display = "none";
+				}
+				
+				function showText()
+				{
+					var textDiv = document.getElementById("gs-document-text");
+					textDiv.style.display = "block";
+				}
+				
+				function hideBook()
+				{
+					var bookDiv = document.getElementById("bookdiv");
+					bookDiv.style.visibility = "hidden";
+					bookDiv.style.height = "0px";
+				}
+				
+				function showBook()
+				{
+					var bookDiv = document.getElementById("bookdiv");
+					bookDiv.style.visibility = "visible";
+					bookDiv.style.height = "600px";
+				}
 				
 				//Helper function to create param elements
 				function createParam(name, value)
@@ -169,50 +200,67 @@
 					return param;
 				}
 				
-				//Work out the URL to the cover image and the document
-				var img_cover = '</xsl:text><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']"/>/index/assoc/<xsl:value-of select="metadataList/metadata[@name='assocfilepath']"/>/cover.jpg<xsl:text disable-output-escaping="yes">';
-				var doc_url = document.URL; 
-				doc_url = doc_url.replace(/(&amp;|\?)book=[a-z]+/gi,'');
-				doc_url += '&amp;book=flashxml';	
-				
-				//The outer OBJECT element
-				var objectElem = document.createElement("OBJECT");
-				objectElem.setAttribute("align", "middle");
-				objectElem.setAttribute("classid", "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000");
-				objectElem.setAttribute("codebase", "http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0");
-				objectElem.setAttribute("height", "600px");
-				objectElem.setAttribute("width", "100%");
-				
-				//Parameter list
-				var params = new Array();
-				params[0] = createParam("allowScriptAccess", "always");
-				params[1] = createParam("movie", "Book.swf?src_image=" + escape(img_cover) + "&amp;doc_url=" + escape(doc_url));
-				params[2] = createParam("quality", "high");
-				params[3] = createParam("bgcolor", "#FFFFFF");
-				
-				//The embed element that goes into the object element
-				var embedElem = document.createElement("EMBED");
-				embedElem.setAttribute("allowScriptAccess", "always");
-				embedElem.setAttribute("swLiveConnect", "true");
-				embedElem.setAttribute("bgcolor", "#FFFFFF");
-				embedElem.setAttribute("height", "600px");
-				embedElem.setAttribute("name", "Book");
-				embedElem.setAttribute("pluginspage", "http://www.macromedia.com/go/getflashplayer");
-				embedElem.setAttribute("quality", "high");
-				embedElem.setAttribute("src", "Book.swf?src_image=" + escape(img_cover) + "&amp;doc_url=" + escape(doc_url));
-				embedElem.setAttribute("type", "application/x-shockwave-flash");
-				embedElem.setAttribute("width", "100%");
-				
-				//Append the param and embed elements to the object element
-				for(var i = 0; i &lt; params.length; i++)
+				function swapLinkJavascript(rbOn)
 				{
-					objectElem.appendChild(params[i]);
+					var option = document.getElementById("rbOption");
+					if(rbOn)
+					{
+						option.setAttribute("onclick", "hideText(); showBook(); swapLinkJavascript(false);");
+					}
+					else
+					{
+						option.setAttribute("onclick", "hideBook(); showText(); swapLinkJavascript(true);");
+					}
 				}
-				objectElem.appendChild(embedElem);
 				
-				//Append the object element to the page
-				var flashDiv = document.getElementById("bookdiv");
-				flashDiv.appendChild(objectElem);
+				function loadBook()
+				{
+					//Work out the URL to the cover image and the document
+					var img_cover = '</xsl:text><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']"/>/index/assoc/<xsl:value-of select="metadataList/metadata[@name='assocfilepath']"/>/cover.jpg<xsl:text disable-output-escaping="yes">';
+					var doc_url = document.URL; 
+					doc_url = doc_url.replace(/(&amp;|\?)book=[a-z]+/gi,'');
+					doc_url += '&amp;book=flashxml';	
+					
+					//The outer OBJECT element
+					var objectElem = document.createElement("OBJECT");
+					objectElem.setAttribute("align", "middle");
+					objectElem.setAttribute("classid", "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000");
+					objectElem.setAttribute("codebase", "http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0");
+					objectElem.setAttribute("height", "600px");
+					objectElem.setAttribute("width", "70%");
+					objectElem.setAttribute("id", "bookObject");
+					
+					//Parameter list
+					var params = new Array();
+					params[0] = createParam("allowScriptAccess", "always");
+					params[1] = createParam("movie", "RealisticBook.swf?src_image=" + escape(img_cover) + "&amp;doc_url=" + escape(doc_url));
+					params[2] = createParam("quality", "high");
+					params[3] = createParam("bgcolor", "#FFFFFF");
+					
+					//The embed element that goes into the object element
+					var embedElem = document.createElement("EMBED");
+					embedElem.setAttribute("allowScriptAccess", "always");
+					embedElem.setAttribute("swLiveConnect", "true");
+					embedElem.setAttribute("bgcolor", "#FFFFFF");
+					embedElem.setAttribute("height", "600px");
+					embedElem.setAttribute("name", "Book");
+					embedElem.setAttribute("pluginspage", "http://www.macromedia.com/go/getflashplayer");
+					embedElem.setAttribute("quality", "high");
+					embedElem.setAttribute("src", "RealisticBook.swf?src_image=" + escape(img_cover) + "&amp;doc_url=" + escape(doc_url));
+					embedElem.setAttribute("type", "application/x-shockwave-flash");
+					embedElem.setAttribute("width", "70%");
+					
+					//Append the param and embed elements to the object element
+					for(var i = 0; i &lt; params.length; i++)
+					{
+						objectElem.appendChild(params[i]);
+					}
+					objectElem.appendChild(embedElem);
+					
+					//Append the object element to the page
+					var flashDiv = document.getElementById("bookdiv");
+					flashDiv.appendChild(objectElem);
+				}
 			</xsl:text>
 		</script>
 	</xsl:template>

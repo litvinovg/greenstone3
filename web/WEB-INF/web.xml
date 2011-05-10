@@ -231,7 +231,7 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
     </init-param>
     <init-param>
       <param-name>interface_name</param-name>
-      <param-value>default</param-value>
+      <param-value>default-client-xslt</param-value>
     </init-param>
     <init-param>
       <param-name>default_lang</param-name>
