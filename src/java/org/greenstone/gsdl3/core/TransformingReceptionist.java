@@ -272,7 +272,7 @@ public class TransformingReceptionist extends Receptionist{
             //logger.error("Modify node value = "+result.getNodeValue()); //NamedItem("href"););
             logger.error("BEFORE Modify node attribute = "+result.getAttributes().getNamedItem("href").getNodeValue());
             String url = result.getAttributes().getNamedItem("href").getNodeValue();
-            url = url + "&excerptid=results";
+            //url = url + "&excerptid=results";
             result.getAttributes().getNamedItem("href").setNodeValue(url);
             logger.error("AFTER Modify node attribute = "+result.getAttributes().getNamedItem("href").getNodeValue());
             
