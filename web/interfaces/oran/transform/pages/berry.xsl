@@ -19,10 +19,15 @@
 	<!-- the page content -->
 	<xsl:template match="/page">
 		<xsl:variable name="clusterName"><xsl:value-of select="/page/pageRequest/paramList/param[@name='c']/@value"/></xsl:variable>
-		<script type="text/javascript" src="interfaces/oran/js/berrycheckout.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript" src="interfaces/oran/js/berrybasket/berrycheckout.js"><xsl:text> </xsl:text></script>
 		<script type="text/javascript">
-			var doc;
-			var docList = new Array();
+			<xsl:text disable-output-escaping="yes">
+				var doc;
+				var docList = new Array();
+				
+				//Slight hack so we can do things in the dev skin specifically
+				window.interfaceName = "dev";
+			</xsl:text>
 			<xsl:for-each select="/page/pageResponse/berryList/item">
 				<xsl:text disable-output-escaping="yes">doc = new Array();</xsl:text>
 				<xsl:for-each select="@*">
@@ -38,14 +43,14 @@
 			</xsl:for-each>
 		</script>
 
-		<div class="navList" id="berryCheckoutOptions">
-			<ul>
-				<li id="fullview" class="current"><span>Full View</span></li>
-				<li id="textview"><span>Text View</span></li>
-				<li id="email"><span>Email</span></li>
-			</ul>
+		<table class="navList" id="berryCheckoutOptions">
+			<tr>
+				<td id="fullview" class="current"><span>Full View</span></td>
+				<td id="textview"><span>Text View</span></td>
+				<td id="email"><span>Email</span></td>
+			</tr>
 			<div class="clear"><xsl:text> </xsl:text></div>
-		</div>
+		</table>
 		<div id="berryBasketContent"><span><xsl:text> </xsl:text></span></div>
 
 	</xsl:template>

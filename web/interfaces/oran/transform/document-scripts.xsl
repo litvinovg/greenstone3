@@ -168,13 +168,13 @@
 				function hideText()
 				{
 					var textDiv = document.getElementById("gs-document-text");
-					textDiv.style.display = "none";
+					textDiv.style.visibility = "hidden";
 				}
 				
 				function showText()
 				{
 					var textDiv = document.getElementById("gs-document-text");
-					textDiv.style.display = "block";
+					textDiv.style.visibility = "visible";
 				}
 				
 				function hideBook()
@@ -182,6 +182,14 @@
 					var bookDiv = document.getElementById("bookdiv");
 					bookDiv.style.visibility = "hidden";
 					bookDiv.style.height = "0px";
+					
+					var bookObject = document.getElementById("bookObject");
+					bookObject.style.visibility = "hidden";
+					bookObject.style.height = "0px";
+					
+					var bookEmbed = document.getElementById("bookEmbed");
+					bookEmbed.style.visibility = "hidden";
+					bookEmbed.style.height = "0px";
 				}
 				
 				function showBook()
@@ -189,15 +197,14 @@
 					var bookDiv = document.getElementById("bookdiv");
 					bookDiv.style.visibility = "visible";
 					bookDiv.style.height = "600px";
-				}
-				
-				//Helper function to create param elements
-				function createParam(name, value)
-				{
-					var param = document.createElement("PARAM");
-					param.setAttribute("name", name);
-					param.setAttribute("value", value);
-					return param;
+					
+					var bookObject = document.getElementById("bookObject");
+					bookObject.style.visibility = "visible";
+					bookObject.style.height = "600px";
+					
+					var bookEmbed = document.getElementById("bookEmbed");
+					bookEmbed.style.visibility = "visible";
+					bookEmbed.style.height = "600px";
 				}
 				
 				function swapLinkJavascript(rbOn)
@@ -213,53 +220,53 @@
 					}
 				}
 				
+				//Helper function to create param elements
+				function createParam(name, value)
+				{
+					var param = document.createElement("PARAM");
+					param.setAttribute("name", name);
+					param.setAttribute("value", value);
+					return param;
+				}
+				
 				function loadBook()
 				{
-					//Work out the URL to the cover image and the document
-					var img_cover = '</xsl:text><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']"/>/index/assoc/<xsl:value-of select="metadataList/metadata[@name='assocfilepath']"/>/cover.jpg<xsl:text disable-output-escaping="yes">';
 					var doc_url = document.URL; 
 					doc_url = doc_url.replace(/(&amp;|\?)book=[a-z]+/gi,'');
-					doc_url += '&amp;book=flashxml';	
+					doc_url += '&amp;book=flashxml';
 					
-					//The outer OBJECT element
-					var objectElem = document.createElement("OBJECT");
-					objectElem.setAttribute("align", "middle");
-					objectElem.setAttribute("classid", "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000");
-					objectElem.setAttribute("codebase", "http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0");
-					objectElem.setAttribute("height", "600px");
-					objectElem.setAttribute("width", "70%");
-					objectElem.setAttribute("id", "bookObject");
-					
-					//Parameter list
-					var params = new Array();
-					params[0] = createParam("allowScriptAccess", "always");
-					params[1] = createParam("movie", "RealisticBook.swf?src_image=" + escape(img_cover) + "&amp;doc_url=" + escape(doc_url));
-					params[2] = createParam("quality", "high");
-					params[3] = createParam("bgcolor", "#FFFFFF");
-					
-					//The embed element that goes into the object element
-					var embedElem = document.createElement("EMBED");
-					embedElem.setAttribute("allowScriptAccess", "always");
-					embedElem.setAttribute("swLiveConnect", "true");
-					embedElem.setAttribute("bgcolor", "#FFFFFF");
-					embedElem.setAttribute("height", "600px");
-					embedElem.setAttribute("name", "Book");
-					embedElem.setAttribute("pluginspage", "http://www.macromedia.com/go/getflashplayer");
-					embedElem.setAttribute("quality", "high");
-					embedElem.setAttribute("src", "RealisticBook.swf?src_image=" + escape(img_cover) + "&amp;doc_url=" + escape(doc_url));
-					embedElem.setAttribute("type", "application/x-shockwave-flash");
-					embedElem.setAttribute("width", "70%");
-					
-					//Append the param and embed elements to the object element
-					for(var i = 0; i &lt; params.length; i++)
-					{
-						objectElem.appendChild(params[i]);
-					}
-					objectElem.appendChild(embedElem);
-					
-					//Append the object element to the page
-					var flashDiv = document.getElementById("bookdiv");
-					flashDiv.appendChild(objectElem);
+					var img_cover = '</xsl:text><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']"/>/index/assoc/<xsl:value-of select="metadataList/metadata[@name='assocfilepath']"/>/cover.jpg<xsl:text disable-output-escaping="yes">';
+
+					var flash_plug_html = ""
+					flash_plug_html += '&lt;OBJECT align="middle" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" \n';
+					flash_plug_html += '  height="600px" id="bookObject" swLiveConnect="true" \n';
+					flash_plug_html += '  codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" \n';
+					flash_plug_html += '  width="70%"&gt;\n';
+					flash_plug_html += '    &lt;PARAM name="allowScriptAccess" value="always" /&gt;\n';
+					flash_plug_html += '    &lt;PARAM name="movie" value="Book.swf';
+					flash_plug_html += '?src_image=' + escape(img_cover);
+					flash_plug_html += '&amp;doc_url=' + escape(doc_url)
+					flash_plug_html += '" /&gt;\n';
+					flash_plug_html += '    &lt;PARAM name="quality" value="high" /&gt;\n';
+					flash_plug_html += '    &lt;PARAM name="bgcolor" value="#FFFFFF" /&gt;\n';
+					flash_plug_html += '    &lt;EMBED align="middle" \n';
+					flash_plug_html += '      allowScriptAccess="always" swLiveConnect="true" \n';
+					flash_plug_html += '      bgcolor="#FFFFFF" height="600px" name="Book" \n';
+					flash_plug_html += '      pluginspage="http://www.macromedia.com/go/getflashplayer" \n';
+					flash_plug_html += '      quality="high" id="bookEmbed"\n';
+					flash_plug_html += '      src="Book.swf';
+					flash_plug_html += '?src_image=' + escape(img_cover);
+					flash_plug_html += '&amp;doc_url=' + escape(doc_url);
+					flash_plug_html += '"\n'; 
+					flash_plug_html += '      type="application/x-shockwave-flash" width="70%" /&gt;\n';
+					flash_plug_html += '&lt;/OBJECT&gt;\n';
+					var flash_div = document.getElementById("bookdiv");
+					flash_div.innerHTML = flash_plug_html;
+				}
+				
+				if(document.URL.indexOf("book=on") != -1)
+				{
+					loadBook();
 				}
 			</xsl:text>
 		</script>

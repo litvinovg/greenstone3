@@ -102,6 +102,7 @@
 				var collapseImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/><xsl:text disable-output-escaping="yes">";
 				var expandImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/><xsl:text disable-output-escaping="yes">";
 				var loadingImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'loading_image')"/><xsl:text disable-output-escaping="yes">";
+				var berryBaskets = "</xsl:text><xsl:value-of select="/page/pageRequest/paramList/param[@name='berrybasket']/@value"/><xsl:text disable-output-escaping="yes">";
 				var inProgress = new Array();
 			
 				function isExpanded(sectionID)
@@ -155,7 +156,12 @@
 						sectionToggle.setAttribute("src", loadingImageURL);
 
 						var url = document.URL;
-						url = url.replace(/(&amp;|\?)cl=([a-z\.0-9]+)/gi, "$1cl=" + sectionID + "&amp;excerptid=div" + sectionID);
+						url = url.replace(/(&amp;|\?)cl=[a-z\.0-9]+/gi, "$1cl=" + sectionID + "&amp;excerptid=div" + sectionID);
+			
+						if(berryBaskets == "on")
+						{
+							url = url + "&amp;berrybasket=on";
+						}
 
 						httpRequest.open('GET', url, true);
 						httpRequest.onreadystatechange = function() 
@@ -176,9 +182,14 @@
 									{
 										parent.appendChild(newDiv);
 									}
-
+									
 									newDiv.innerHTML = httpRequest.responseText;
 									sectionToggle.setAttribute("src", collapseImageURL);
+									
+									if(berryBaskets == "on")
+									{
+										checkout();
+									}
 								}
 								else
 								{

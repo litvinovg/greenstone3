@@ -8,20 +8,26 @@
   <xsl:template name="siteName">
     <xsl:value-of select="/page/pageResponse/metadataList/metadata[@name='siteName']"/>
   </xsl:template>
+  
   <xsl:template name="siteLink">
     <a href="./{$library_name}">
       <xsl:call-template name="siteName"/>
       <xsl:text> </xsl:text>
     </a>
   </xsl:template>
+  
   <xsl:variable name="a">
     <xsl:value-of select="/page/pageRequest/paramList/param[@name='a']/@value"/>
   </xsl:variable>
+  
   <xsl:variable name="collections" select="/page/pageResponse/collectionList/collection"/>
+  
   <xsl:variable name="berrybasketswitch">
     <xsl:value-of select="/page/pageRequest/paramList/param[@name='berrybasket']/@value"/>
   </xsl:variable>
+  
   <xsl:variable name="berryBasketOn" select="/page/pageRequest/paramList/param[@name='berrybasket' and @value='on']"/>
+  
   <!-- template to get the name of the current collection -->
   <xsl:template name="collectionName">
     <xsl:choose>
@@ -31,6 +37,7 @@
       <xsl:otherwise>All Collections</xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
   <xsl:template name="collectionNameShort">
     <xsl:value-of select="/page/pageResponse/collection/@name"/>
   </xsl:template>
@@ -42,10 +49,12 @@
       </a>
     </xsl:if>
   </xsl:template>
+  
   <!-- text to get the name of the current service ("Browse","Search" etc) -->
   <xsl:template name="serviceName">
     <xsl:value-of select="/page/pageResponse/service/displayItem[@name='name']"/>
   </xsl:template>
+  
   <xsl:template name="textDirectionAttribute">
     <xsl:attribute name="dir">
       <xsl:choose>
@@ -54,6 +63,7 @@
       </xsl:choose>
     </xsl:attribute>
   </xsl:template>
+  
   <xsl:template name="actionClass">
     <xsl:attribute name="class"><xsl:value-of select="/page/pageRequest/@action"/>Action <xsl:if test="/page/pageRequest/@subaction"><xsl:value-of select="/page/pageRequest/@subaction"/>Subaction</xsl:if></xsl:attribute>
   </xsl:template>
@@ -82,6 +92,7 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
   <xsl:template match="error">
     Error: <xsl:value-of select="."/>
   </xsl:template>
@@ -124,27 +135,34 @@
       </div>
     </xsl:if>
   </xsl:template>
+  
   <xsl:template name="noTextBar">
     <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
   </xsl:template>
+  
   <xsl:template name="poweredByGS3TextBar">
     <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gs3power')"/>
   </xsl:template>
+  
   <xsl:template name="rightArrow">
     <xsl:text disable-output-escaping="yes"> &amp;raquo; </xsl:text>
   </xsl:template>
+  
   <!-- site home ....................................................................... -->
   <xsl:template name="siteHomePageTitle">
     <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
     <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/>
     <xsl:text> </xsl:text>
   </xsl:template>
+  
   <xsl:template name="selectACollectionTextBar">
     <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.select_a_collection')"/>
   </xsl:template>
+  
   <xsl:template name="crossCollectionQuickSearchForm">
     <xsl:apply-templates select="serviceList/service[@name='TextQuery']"/>
   </xsl:template>
+  
   <xsl:template match="service[@name='TextQuery']">
     <form name="QuickSearch" method="get" action="{$library_name}">
       <input type="hidden" name="a" value="q"/>
@@ -159,6 +177,7 @@
       </input>
     </form>
   </xsl:template>
+  
   <xsl:template name="collectionLinkWithImage">
     <xsl:choose>
       <xsl:when test="displayItem[@name='icon']">
@@ -184,9 +203,11 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
   <xsl:template name="serviceClusterList">
     <xsl:apply-templates select="serviceClusterList"/>
   </xsl:template>
+  
   <xsl:template match="serviceClusterList">
     <xsl:for-each select="serviceCluster">
       <a href="{$library_name}?a=p&amp;sa=about&amp;c={@name}">
@@ -195,6 +216,7 @@
       </a>
     </xsl:for-each>
   </xsl:template>
+  
   <xsl:template name="serviceLink">
     <div class="paramLabel">
       <a href="{$library_name}?a=q&amp;rt=d&amp;s={@name}">
@@ -206,6 +228,7 @@
     </div>
     <br class="clear"/>
   </xsl:template>
+  
   <xsl:template name="authenticationLink">
     <xsl:for-each select="serviceList/service[@type='authen']">
       <li>
@@ -216,6 +239,7 @@
       </li>
     </xsl:for-each>
   </xsl:template>
+  
   <xsl:template name="libraryInterfaceLink">
     <li>
       <a href="{$library_name}?a=p&amp;sa=gli4gs3">
@@ -223,20 +247,24 @@
       </a>
     </li>
   </xsl:template>
+  
   <xsl:template name="greenstoneLogoAlternateText">
     <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/>
   </xsl:template>
+  
   <!-- about page - collection home ....................................................................... -->
   <xsl:variable name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
   <xsl:param name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
   <xsl:param name="pageType"/>
   <xsl:variable name="this-element" select="/page/pageResponse/collection|/page/pageResponse/serviceCluster"/>
   <xsl:variable name="this-service" select="/page/pageResponse/service/@name"/>
+  
   <xsl:template name="aboutCollectionPageTitle">
     <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
     <xsl:value-of select="/page/pageResponse/collection/displayItem[@name='name']"/>
     <xsl:text> </xsl:text>
   </xsl:template>
+  
   <xsl:template name="collectionHomeLinkWithLogoIfAvailable">
     <a href="{$library_name}?a=p&amp;sa=about&amp;c={$collName}">
       <xsl:choose>
@@ -257,6 +285,7 @@
       </xsl:choose>
     </a>
   </xsl:template>
+  
   <xsl:template name="homeButtonTop">
     <a href="{$library_name}?a=p&amp;sa=home">
       <xsl:attribute name="title">
@@ -265,6 +294,7 @@
       <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_b')"/>
     </a>
   </xsl:template>
+  
   <xsl:template name="helpButtonTop">
     <xsl:choose>
       <xsl:when test="$pageType='help'">
@@ -286,6 +316,7 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
   <xsl:template name="preferencesButtonTop">
     <xsl:choose>
       <xsl:when test="$pageType='pref'">
@@ -307,6 +338,7 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
   <xsl:template name="servicesNavigationBar">
     <xsl:for-each select="$this-element/serviceList/service">
       <xsl:variable name="action">
@@ -342,6 +374,7 @@
       </xsl:choose>
     </xsl:for-each>
   </xsl:template>
+  
   <xsl:template name="collectionDescriptionTextAndServicesLinks">
     <xsl:apply-templates select="pageResponse/collection|serviceCluster"/>
   </xsl:template>
@@ -351,6 +384,7 @@
       <xsl:with-param name="collName" select="$collName"/>
     </xsl:apply-templates>
   </xsl:template>
+  
   <xsl:template match="serviceList">	
 	<xsl:param name="collName"/>
 	<xsl:if test="service[not(@type = 'query' or @type = 'browse' or @type = 'retrieve')]">
@@ -396,6 +430,7 @@
 		</xsl:if>
 	</xsl:if>
   </xsl:template>
+  
   <!-- classifier page ............................................................................ -->
   <xsl:template name="collapsedNavigationTab">
     <xsl:param name="type"/>
@@ -415,6 +450,7 @@
       </a>
     </li>
   </xsl:template>
+  
   <xsl:template name="navigationTab">
     <xsl:variable name="isCurrent" select="@name=/page/pageResponse/service/@name"/>
     <xsl:variable name="action">
@@ -450,6 +486,7 @@
       </li>
     </xsl:if>
   </xsl:template>
+  
   <xsl:template name="classifierLink">
     <xsl:if test="@name=/page/pageResponse/classifier/@name">
       <xsl:attribute name="class">current</xsl:attribute>
@@ -458,6 +495,7 @@
       <xsl:value-of select="displayItem[@name='description']"/>
     </a>
   </xsl:template>
+  
   <!-- query page ............................................................................ -->
   <xsl:template name="indexName">
     <xsl:value-of select="/page/pageResponse/service/displayItem[@name='name']"/>
@@ -470,6 +508,7 @@
       <xsl:otherwise>Cross-Collection</xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+  
   <!--
 BERRY BASKET TEMPLATES
 These get used on many different pages to add the
@@ -497,18 +536,21 @@ berry basket function to the site
       </div>
     </xsl:if>
   </xsl:template>
+  
   <!-- include the required javascript and css for berry baskets -->
   <xsl:template name="berryBasketHeadTags">
-    <script type="text/javascript" src="interfaces/{$interface_name}/js/YAHOO.js"><xsl:text> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/{$interface_name}/js/event.js"><xsl:text> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/{$interface_name}/js/connection.js"><xsl:text> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/{$interface_name}/js/dom.js"><xsl:text> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/{$interface_name}/js/dragdrop.js"><xsl:text> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/{$interface_name}/js/ygDDPlayer.js"><xsl:text> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/{$interface_name}/js/ygDDOnTop.js"><xsl:text> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/{$interface_name}/js/berrybasket.js"><xsl:text> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/{$interface_name}/js/yui/yahoo-min.js"><xsl:text> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/{$interface_name}/js/yui/event-min.js"><xsl:text> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/{$interface_name}/js/yui/connection-min.js"><xsl:text> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/{$interface_name}/js/yui/dom-min.js"><xsl:text> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/{$interface_name}/js/yui/dragdrop-min.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/yui/cookie-min.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/berrybasket/ygDDPlayer.js"><xsl:text> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/{$interface_name}/js/berrybasket/ygDDOnTop.js"><xsl:text> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/{$interface_name}/js/berrybasket/berrybasket.js"><xsl:text> </xsl:text></script>
     <link rel="stylesheet" href="interfaces/{$interface_name}/style/berry.css" type="text/css"/>
   </xsl:template>
+  
   <!--
 create a little berry which can be drag&dropped onto the berry basket
 used on classifier and search result pages
@@ -520,6 +562,7 @@ used on classifier and search result pages
       </img>
     </xsl:if>
   </xsl:template>
+  
   <!--
 create little berrys which can be drag&dropped onto the berry basket
 used on the document page
@@ -542,6 +585,7 @@ used on the document page
       </div>
     </xsl:if>
   </xsl:template>
+  
   <!-- document page -->
   <xsl:template name="documentTitle">
     <xsl:value-of select="/page/pageResponse/document/documentNode/metadataList/metadata[@name='Title']"/>
@@ -551,6 +595,7 @@ used on the document page
       <xsl:attribute name="src"><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']"/>/index/assoc/<xsl:value-of select="metadataList/metadata[@name='assocfilepath']"/>/cover.jpg</xsl:attribute>
     </img>
   </xsl:template>
+  
   <xsl:template name="previousNextButtons">
     <!-- prev -->
     <a>
@@ -563,4 +608,5 @@ used on the document page
       <img class="morearrow" src="interfaces/{$interface_name}/images/next.png"/>
     </a>
   </xsl:template>
+  
 </xsl:stylesheet>

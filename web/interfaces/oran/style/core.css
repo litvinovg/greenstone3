@@ -62,8 +62,8 @@ p {
 }
 
 .sectionNumberSpan{
-	/*Uncomment this line to disable automatic section numbering*/
-	/*display:none;*/
+	/*Comment out this line to enable automatic section numbering*/
+	display:none;
 }
 
 .sectionContainer{
@@ -84,29 +84,6 @@ p {
 .emptyIcon {
 	height:16px;
 	width:16px;
-}
-
-#rbOptionDiv {
-	background-repeat: no-repeat;
-	background-image: url('../images/rbook.png');
-	height: 32px;
-	width: 32px;
-}
-
-#highlightOptionDiv {
-	background-repeat: no-repeat;
-	background-image: url('../images/hl.png');
-	height: 32px;
-	width: 32px;
-}
-
-.optionCheckBox {
-	margin-left:35px; 
-	margin-top:10px;
-}
-
-#bookdiv {
-	
 }
 
 .backToTop {
@@ -392,9 +369,11 @@ body.dAction #gs_banner h2 {
 	list-style: none;
 }
 
-.navList li {
-	float: left;
-	margin: 0 0 0 20px;
+.navList td {
+	/*float: left;*/
+	padding-left: 3em;
+	padding-right: 3em;
+	text-align:center;
 	cursor: pointer;
 	color: #fff;
 }
@@ -405,7 +384,7 @@ body.dAction #gs_banner h2 {
 	color: #fff;
 }
 
-.navList li.current {
+.navList td.current {
 	background-color: #efea6e;
 	color: #444;
 	cursor: default;
@@ -445,7 +424,6 @@ body.dAction #gs_banner h2 {
 #results .document a { background-image: url('../images/book.png'); }
 #results .document a:visited { background-image: url('../images/book-visited.png'); color: #999; }
 #results .shelf>a { background-image: url('../images/bookshelf.png'); }
-c
 
 /* corners of the banner */
 /*

@@ -17,17 +17,18 @@ dd.setHandleElId('baskethandle');
 var checkout = function(){
 
 	if ( document.getElementById('berrybasket') == null ) return;
-//alert( arguments.callee );
+	
 	var request_type = "GET";
-	var url = "?a=pr&rt=r&ro=1&s=ItemNum&o=XML&c=";
+	var url = "?a=pr&rt=r&ro=1&s=ItemNum&o=XML&hhf=Cache-Control%3Dno-cache&c=";
 
 	var responseSuccess = function(o){
-//alert( arguments.callee );
+		
 		var response = o.responseXML;
 		var size = response.getElementsByTagName('size').item(0).getAttribute('value');
 
 		var items = response.getElementsByTagName('item');
 
+		berryList = new Array();
 		for (var i=0;i < items.length ; i++ ){
 
 			// remove berries images from if the berry basket has already contains this item
@@ -87,7 +88,6 @@ var checkout = function(){
 
 	var responseFailure = function(o){
 		alert("CHECKOUT FAILED");
-//alert( arguments.callee );
 	}
 
 	var callback = {
@@ -95,13 +95,21 @@ var checkout = function(){
 		failure: responseFailure
 	}
 
+	//var date = new Date();
+	//url += "&rand=" + date.getTime();
 	YAHOO.util.Connect.asyncRequest(request_type , url , callback);
 }
 
 function updateBerryImages(){
-//alert( arguments.callee );
+
 	var berries = YAHOO.util.Dom.get('berries');
 	if ( berries == null ) return;
+	
+	while(berries.hasChildNodes())
+	{
+		berries.removeChild(berries.firstChild);
+	}
+	
 	for (var i =0;i < berryList.length && i<12 ; i++ ){
 		var img = document.createElement('img');
 		img.src = 'interfaces/oran/images/berry.png';
@@ -211,12 +219,10 @@ function showBasket() {
 	oldHeight = berryBasket.style.height;
 	oldWidth = berryBasket.style.width;
 	oldBg = berryBasket.style.background;
-	//berryBasket.style.height = height;
-	//berryBasket.style.width = width;
+
 	berryBasket.style.background ='url("interfaces/default/images/kete2.png") 0 0 repeat';
 	berryBasket.style.cursor = "default";
 	berryBasket.className = "show";
-	//berries.style.height = height - 40;
 
 	//put the full view link in
 	var fullView = document.createElement('a');
@@ -285,11 +291,10 @@ function hideBasket() {
 
 
 function addBerry(el){
-//alert( arguments.callee );
-	var addurl = "?a=pr&rt=r&ro=1&s=AddItem&c=&s1.id=2&o=XML&s1.item=" + el.id;
+	alert("ADDING");
+	var addurl = "?a=pr&rt=r&ro=1&s=AddItem&c=&s1.id=2&o=XML&hhf=Cache-Control%3Dno-cache&s1.item=" + el.id;
 
 	var addSuccess = function(o){
-alert( arguments.callee );
 		var result = o.responseXML;
 		var items = result.getElementsByTagName('item');
 
@@ -375,14 +380,13 @@ alert( arguments.callee );
 	}
 
 	var addFailure = function(o){
-//alert( arguments.callee );
 	}
 
 	var addcallback = {
 		success:addSuccess,
 		failure:addFailure
 	}
-
+	
 	YAHOO.util.Connect.asyncRequest(request_type , addurl , addcallback);
 }
 

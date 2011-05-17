@@ -62,7 +62,13 @@
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse/document">
 		<xsl:if test="$bookswitch = 'off'">
-			<div id="bookdiv" style="visibility:hidden; height:0px;"><xsl:text> </xsl:text></div>
+			<div id="bookdiv" style="visibility:hidden; height:0px; display:inline;"><xsl:text> </xsl:text></div>
+		
+			<!-- Adds the realistic books javascript if necessary ( *** in document-scripts.xsl *** ) -->
+			<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
+				<xsl:call-template name="realisticBooksScript"/>
+			</xsl:if>
+			
 			<!-- Add the Javascript that adds and removes highlighting ( *** in document-scripts.xsl *** ) -->
 			<xsl:call-template name="highlightingScript"/>
 			
@@ -106,6 +112,7 @@
 			</xsl:when>
 			<xsl:when test="$bookswitch = 'on'">
 				<!-- *** in document-scripts.xsl *** -->
+				<div id="bookdiv" style="display:inline;"><xsl:text> </xsl:text></div>
 				<xsl:call-template name="realisticBooksScript"/>
 			</xsl:when>
 			<xsl:otherwise>
@@ -305,36 +312,39 @@
 	<xsl:template match="/page"><xsl:apply-templates select="/page/pageResponse/document"/></xsl:template> <!-- this to be deleted eventually -->
 	
 	<xsl:template name="viewOptions">
-		<xsl:call-template name="realisticBooksScript"/>
 		<table class="viewOptions"><tr>
 			<!-- Realistic books link -->
 			<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
 				<td>
 					<!-- old url = {$library_name}?a=d&amp;c={$collName}&amp;d={/page/pageResponse/document/documentNode[1]/@nodeID}&amp;dt={/page/pageResponse/document/documentNode/@docType}&amp;p.a=b&amp;p.s={/page/pageResponse/service/@name}&amp;book=on&amp;ed=1 -->
-					<div title="Realistic book view" id="rbOptionDiv"><input id="rbOption" type="checkbox" onclick="bookInit();" class="optionCheckBox"/></div>
+					<img>
+						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'realistic_books_image')"/></xsl:attribute>
+					</img>
+					<input id="rbOption" type="checkbox" onclick="bookInit();" class="optionCheckBox"/>
 				</td>
 			</xsl:if>
 			
 			<!-- Highlight on/off button -->
 			<xsl:if test="/page/pageRequest/paramList/param[@name = 'p.a']/@value = 'q'">
 				<td>
-					<div id="highlightOptionDiv" title="Search term highlighting">
-						<input id="highlightOption" type="checkbox" class="optionCheckBox">
-							<xsl:choose>
-								<xsl:when test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'on'">
-									<xsl:attribute name="onclick">
-										<xsl:text>removeHighlight();</xsl:text>
-									</xsl:attribute>
-									<xsl:attribute name="checked">true</xsl:attribute>
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:attribute name="onclick">
-										<xsl:text>addHighlight();</xsl:text>
-									</xsl:attribute>
-								</xsl:otherwise>
-							</xsl:choose>
-						</input>
-					</div>
+					<img>
+						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'highlight_image')"/></xsl:attribute>
+					</img>
+					<input id="highlightOption" type="checkbox" class="optionCheckBox">
+						<xsl:choose>
+							<xsl:when test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'on'">
+								<xsl:attribute name="onclick">
+									<xsl:text>removeHighlight();</xsl:text>
+								</xsl:attribute>
+								<xsl:attribute name="checked">true</xsl:attribute>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:attribute name="onclick">
+									<xsl:text>addHighlight();</xsl:text>
+								</xsl:attribute>
+							</xsl:otherwise>
+						</xsl:choose>
+					</input>
 				</td>
 			</xsl:if>
 		</tr></table>	

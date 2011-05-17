@@ -139,8 +139,22 @@ function showFullView(){
 		var doc = docList[i];
 		var li = document.createElement('li');
 		var a = document.createElement('a');
+		var img = document.createElement('img');
 		var text ="";
+		
+		img.setAttribute("src", "interfaces/oran/images/berry.png");
+		img.setAttribute("id", doc['collection']+":"+ doc['name']);
+		img.setAttribute("height", "15px");
+		img.setAttribute("width", "15px");
+		li.appendChild(img);
+		
 		a.href ="?a=d&c="+doc['collection']+"&d="+doc['name'];
+		
+		if(window.interfaceName && window.interfaceName == "dev")
+		{
+			a.href +="&dt=hierarchy&ed=1";
+		}
+		
 		a.appendChild(document.createTextNode(doc['title'])); 
 		if (doc['root_title'] != ""){
 			li.appendChild(document.createTextNode(doc['root_title']+": ")); 
@@ -153,10 +167,9 @@ function showFullView(){
 		}
 		text +=metadata+"\n";
 		li.appendChild(document.createTextNode(text));
-		li.id = doc['collection']+":"+ doc['name'];
 		li.className = 'berrydoc';
 		ol.appendChild(li);
-		new ygDDPlayer(li.id,'trash',docList);
+		new ygDDPlayer(img.id,'trash',docList);
 	}
 
 	/**
