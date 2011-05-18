@@ -26,24 +26,45 @@
   </xsl:template>
   
   <!-- a special handling of the param list - we override the one in service-params -->
-  <xsl:template match="paramList" priority='2'>    	
-    <span class="textselect">
-      Search for
-	  <xsl:apply-templates select="param[@name='index']"><xsl:with-param name="default"><xsl:apply-templates select="param[@name='index']" mode="calculate-default"/></xsl:with-param></xsl:apply-templates>
-      <xsl:if test="param[@name='indexSubcollection']">
-	    of <xsl:apply-templates select="param[@name='indexSubcollection']"><xsl:with-param name="default"><xsl:apply-templates select="param[@name='indexSubcollection']" mode="calculate-default"/></xsl:with-param></xsl:apply-templates>
-      </xsl:if>
-      <xsl:if test="param[@name='indexLanguage']">
-        in <xsl:apply-templates select="param[@name='indexLanguage']"><xsl:with-param name="default"><xsl:apply-templates select="param[@name='indexLanguage']" mode="calculate-default"/></xsl:with-param></xsl:apply-templates>
-      </xsl:if>
+  <xsl:template match="paramList" priority='2'>  
+	<xsl:choose>
+		<xsl:when test="/page/pageResponse/collection/@type = 'lucene'">
+			<span class="textselect">
+				Search in
+				<xsl:apply-templates select="param[@name='index']"><xsl:with-param name="default"><xsl:apply-templates select="param[@name='index']" mode="calculate-default"/></xsl:with-param></xsl:apply-templates>
+				<xsl:if test="param[@name='indexSubcollection']">
+					of <xsl:apply-templates select="param[@name='indexSubcollection']"><xsl:with-param name="default"><xsl:apply-templates select="param[@name='indexSubcollection']" mode="calculate-default"/></xsl:with-param></xsl:apply-templates>
+				</xsl:if>
+				<xsl:if test="param[@name='indexLanguage']">
+					in <xsl:apply-templates select="param[@name='indexLanguage']"><xsl:with-param name="default"><xsl:apply-templates select="param[@name='indexLanguage']" mode="calculate-default"/></xsl:with-param></xsl:apply-templates>
+				</xsl:if>
+				<xsl:if test="param[@name='sortBy']">
+					, sorting results by <xsl:apply-templates select="param[@name='sortBy']"><xsl:with-param name="default"><xsl:apply-templates select="param[@name='sortBy']" mode="calculate-default"/></xsl:with-param></xsl:apply-templates>
+				</xsl:if>
 
-      <xsl:if test="param[@name='level' and not(@type='invisible')]">
-        at <xsl:apply-templates select="param[@name='level']"><xsl:with-param name="default"><xsl:apply-templates select="param[@name='level']" mode="calculate-default"/></xsl:with-param></xsl:apply-templates> level
-      </xsl:if>
+				<xsl:call-template name='query_mode'/>
+			</span>
+		</xsl:when>
+		<xsl:otherwise>
+			<span class="textselect">
+			  Search for
+			  <xsl:apply-templates select="param[@name='index']"><xsl:with-param name="default"><xsl:apply-templates select="param[@name='index']" mode="calculate-default"/></xsl:with-param></xsl:apply-templates>
+			  <xsl:if test="param[@name='indexSubcollection']">
+				of <xsl:apply-templates select="param[@name='indexSubcollection']"><xsl:with-param name="default"><xsl:apply-templates select="param[@name='indexSubcollection']" mode="calculate-default"/></xsl:with-param></xsl:apply-templates>
+			  </xsl:if>
+			  <xsl:if test="param[@name='indexLanguage']">
+				in <xsl:apply-templates select="param[@name='indexLanguage']"><xsl:with-param name="default"><xsl:apply-templates select="param[@name='indexLanguage']" mode="calculate-default"/></xsl:with-param></xsl:apply-templates>
+			  </xsl:if>
 
-      <xsl:call-template name='query_mode'/>
+			  <xsl:if test="param[@name='level' and not(@type='invisible')]">
+				at <xsl:apply-templates select="param[@name='level']"><xsl:with-param name="default"><xsl:apply-templates select="param[@name='level']" mode="calculate-default"/></xsl:with-param></xsl:apply-templates> level
+			  </xsl:if>
 
-    </span>	
+			  <xsl:call-template name='query_mode'/>
+
+			</span>	
+		</xsl:otherwise>
+	</xsl:choose>
     <span class="querybox"> 
       <xsl:call-template name="query-and-submit"/>
     </span>
