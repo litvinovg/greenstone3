@@ -35,10 +35,6 @@
 
     <replace macro="[archivedir]" scope="all" metadata="assocfilepath" resolve="false"/>
     <replace macro="[assocfilepath]" scope="all" metadata="assocfilepath" resolve="false"/>
-    <replace macro="[Image]" scope="metadata" metadata="Image" resolve="false"/>
-    <replace macro="[Thumb]" scope="metadata" metadata="Thumb" resolve="false"/>
-    <replace macro="[ThumbWidth]" scope="metadata" metadata="ThumbWidth" resolve="false"/>
-    <replace macro="[ThumbHeight]" scope="metadata" metadata="ThumbHeight" resolve="false"/>
     <replace macro="[srcurl]" scope="metadata" metadata="srcurl" resolve="false"/>
     <replace macro="[SourceFile]" scope="metadata" metadata="SourceFile" resolve="false"/>
     <!-- _httpsite_ and _clustername_ are macros that are defined in the java code -->
