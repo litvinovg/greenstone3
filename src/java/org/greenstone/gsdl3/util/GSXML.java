@@ -73,6 +73,7 @@ public class GSXML {
   public static final String STYLESHEET_ELEM = "format";//"stylesheet"; // any additional stylesheet stuff is carried in the message inside this elem
   public static final String FORMAT_ELEM = "format"; // config files use format - should we use this instead of stylesheet??
   public static final String TERM_ELEM = "term";
+  public static final String STOPWORD_ELEM = "stopword";
   public static final String SYSTEM_ELEM = "system";
   public static final String FORMAT_STRING_ELEM = "formatString";
   
