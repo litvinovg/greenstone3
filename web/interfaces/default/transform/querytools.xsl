@@ -85,7 +85,7 @@
 	</xsl:when>
 	<xsl:when test="$numDocsMatched">
 	  <span><xsl:attribute name="class"><xsl:value-of select="concat('getTextFor null this.innerText.query.manydocsmatch|', $numDocsMatched)"/></xsl:attribute></span>
-	  <xsl:if test="$numDocsReturned"> (<span><xsl:attribute name="class"><xsl:value-of select="concat('getTextFor null this.innerText.query.docsreturned|', $numDocsReturned)" /></xsl:attribute></span>)</xsl:if>
+	  <xsl:if test="$numDocsReturned"> <!--(<span><xsl:attribute name="class"><xsl:value-of select="concat('getTextFor null this.innerText.query.docsreturned|', $numDocsReturned)" /></xsl:attribute></span>)--></xsl:if>
 	</xsl:when>
 	<xsl:when test="$numDocsReturned">
 	  <span><xsl:attribute name="class"><xsl:value-of select="concat('getTextFor null this.innerText.query.atleastdocsmatch|', $numDocsReturned)" /></xsl:attribute></span>
@@ -139,17 +139,25 @@
     <span><xsl:text>Testing</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name='Title']"/></span>
   </xsl:template>
 
-  <xsl:template name="termInfo">
-    <div class="terminfo">
-      <xsl:if test="count(termList/term) > 0">
-      <span class="getTextFor query.wordcount">&amp;nbsp;</span>
-	<xsl:for-each select="termList/term">
-	  <xsl:if test="position() > 1">, </xsl:if>
-	  <xsl:value-of select="@name"/>: <xsl:value-of select="@freq"/> 
-	</xsl:for-each>
-      </xsl:if>
-    </div>
-  </xsl:template>
+	<xsl:template name="termInfo">
+		<div class="terminfo">
+			<xsl:if test="count(termList/stopword) > 0">
+				<span class="getTextFor query.wordcount"></span>
+				<xsl:text>The following terms are too common and have been excluded from the search: </xsl:text>
+				<xsl:for-each select="termList/stopword">
+					<xsl:value-of select="@name"/><xsl:text> </xsl:text>
+				</xsl:for-each>
+				<br />
+			</xsl:if>
+			<xsl:if test="count(termList/term) > 0">
+				<span class="getTextFor query.wordcount"></span>
+				<xsl:for-each select="termList/term">
+					<xsl:if test="position() > 1">, </xsl:if>
+					<xsl:value-of select="@name"/>: <xsl:value-of select="@freq"/> 
+				</xsl:for-each>
+			</xsl:if>
+		</div>
+	</xsl:template>
 
 </xsl:stylesheet>
 

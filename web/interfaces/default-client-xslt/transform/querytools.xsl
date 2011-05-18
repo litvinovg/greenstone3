@@ -140,17 +140,25 @@
     <span><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name='Title']"/></span>
   </xsl:template>
 
-  <xsl:template name="termInfo">
-    <div class="terminfo">
-      <xsl:if test="count(termList/term) > 0">
-	<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.wordcount')"/>
-	<xsl:for-each select="termList/term">
-	  <xsl:if test="position() > 1">, </xsl:if>
-	  <xsl:value-of select="@name"/>: <xsl:value-of select="@freq"/> 
-	</xsl:for-each>
-      </xsl:if>
-    </div>
-  </xsl:template>
+	<xsl:template name="termInfo">
+		<div class="terminfo">
+			<xsl:if test="count(termList/stopword) > 0">
+				<span class="getTextFor query.wordcount"></span>
+				<xsl:text>The following terms are too common and have been excluded from the search: </xsl:text>
+				<xsl:for-each select="termList/stopword">
+					<xsl:value-of select="@name"/><xsl:text> </xsl:text>
+				</xsl:for-each>
+				<br />
+			</xsl:if>
+			<xsl:if test="count(termList/term) > 0">
+				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.wordcount')"/>
+				<xsl:for-each select="termList/term">
+					<xsl:if test="position() > 1">, </xsl:if>
+					<xsl:value-of select="@name"/>: <xsl:value-of select="@freq"/> 
+				</xsl:for-each>
+			</xsl:if>
+		</div>
+	</xsl:template>
 
 </xsl:stylesheet>
 
