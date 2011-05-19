@@ -576,8 +576,6 @@ public class LibraryServlet extends HttpServlet {
 				String name = (String)nameValueMap.get("name");
 				String value = (String)nameValueMap.get("value");
 				
-				System.err.println("SETTING HEADER " + name + " = " + value);
-				
 				if(name != null && value != null)
 				{
 					response.setHeader(name, value);

@@ -291,7 +291,6 @@ function hideBasket() {
 
 
 function addBerry(el){
-	alert("ADDING");
 	var addurl = "?a=pr&rt=r&ro=1&s=AddItem&c=&s1.id=2&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=" + el.id;
 
 	var addSuccess = function(o){
