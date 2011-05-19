@@ -1,113 +1,89 @@
-
-
+/*
 function loadAsync(sUri, SOAPMessage) {
-   var xmlHttp = XmlHttp.create();
-   var async = true;
-   xmlHttp.open("POST", sUri, async);
-   xmlHttp.onreadystatechange = function () {
-      if (xmlHttp.readyState == 4){
-		var result = xmlHttp.responseText;
+	var xmlHttp = XmlHttp.create();
+	xmlHttp.open("POST", sUri, true);
+	xmlHttp.onreadystatechange = function () {
+		if (xmlHttp.readyState == 4){
 			getTitle2(xmlHttp.responseXML, xmlHttp.responseText);
-    }     
-   }
-   xmlHttp.setRequestHeader("SOAPAction", " ");
-   xmlHttp.setRequestHeader("Content-Type", "Content-Type: text/xml; charset=utf-8");
- 
-   xmlHttp.send(SOAPMessage);
-}
+		}     
+	}
+	xmlHttp.setRequestHeader("SOAPAction", " ");
+	xmlHttp.setRequestHeader("Content-Type", "Content-Type: text/xml; charset=utf-8");
 
+	xmlHttp.send(SOAPMessage);
+}
+*/
 
 function messageToSOAP(message) {
-    soapBody = '<soapenv:Body>' + message + '</soapenv:Body>'
-    soap = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' + soapBody + '</soapenv:Envelope>'
-    x= '<?xml version="1.0" encoding="UTF-8"?>' + soap;
-    return x;
+	return ['<?xml version="1.0" encoding="UTF-8"?>', 
+		'<soapenv:Envelope ',
+		'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"',
+		'xmlns:xsd="http://www.w3.org/2001/XMLSchema"',
+		'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">',
+			'<soapenv:Body>', 
+				message, 
+			'</soapenv:Body>',
+		'</soapenv:Envelope>'].join("");
 }
-
-
-
 
 function getText(element) { //get the text from possibly multiple text nodes
-if (element.hasChildNodes()) {
-	tempString = '';
-    for (j=0; j < element.childNodes.length; j++) {
-    				if (element.childNodes[j].nodeType == Node.TEXT_NODE ) { // =2
-    					tempString += element.childNodes[j].nodeValue;
-    				} 
-					else {
-						tempString += 'non text node: ';
-					}
-    } 
-	return tempString;
+	if (element.hasChildNodes()) {
+		var tempString = [];
+		for (var j = 0; j < element.childNodes.length; j++) {
+			if (element.childNodes[j].nodeType == Node.TEXT_NODE ) { // =2
+				tempString.push(element.childNodes[j].nodeValue);
+			} 
+			else {
+				tempString.push('non text node: ');
+			}
+		} 
+		return tempString.join("");
+	}
+	else {
+		return 'getText: element has no ChildNodes from which to extract Text';
+	}
 }
-else {
-	return 'getText: element has no ChildNodes from which to extract Text';
-}
-}
-
 
 function newOpenTag(name) {
-	return '<' + name + '>';
+	return ['<', name, '>'].join("");
 }
 
 function newCloseTag(name) {
-	return '</' + name + '>';
+	return ['</', name, '>'].join("");
 }
 
 function newEmptyTag(name) {
-	return '<' + name + '/>';
+	return ['<', name, '/>'].join("");
 }
 
 function newElement(name, content) {
-    e = '<' + name + '>' + content;
-    e += '</' + name + '>';
-    return e;
+	return ['<', name, '>', content, '</', name, '>'].join("");
 }
-
 
 function newElementAtt1(name, content, attName, attValue) {
-    e = '<' + name + ' ' + attName + '="' + attValue +'">' + content;
-    e += '</' + name + '>';
-    return e;
+	return ['<', name, ' ', attName, '="', attValue, '">', content, '</', name, '>'].join("");
 }
-
-
-
 
 function newElementAtt(name, content, nameArray, valueArray) {
-    e = '<' + name + ' ' ;
-    for (i=0; i < nameArray.length; i++) {
-        e += newAttribute(nameArray[i], valueArray[i])
-    }
-    e += '>' + content;
-    e += '</' + name + '>';
-    return e;
+	var e = ['<', name, ' '];
+	for (i=0; i < nameArray.length; i++) {
+		e.push(newAttribute(nameArray[i], valueArray[i]));
+	}
+	e.push(['>', content, '</', name, '>']);
+	return e.join("");
 }
-
 
 function newAttribute(name, value) {
-				 return ' ' + name + '="' + value + '"';
+	return [' ', name, '="', value, '"'].join("");
 }
 
-/*
-var a = [];
-var b = [];
-a[0] = 'title';
-b[0] = 'test';
-a[1] = 'title2';
-b[1] = 'test2';
-
-alert( newElement('message', 'some content', a=[], b=[]));
-
-*/
-
 function countElementChildren(node) {
-  	count= 0;
-	childList = node.childNodes;
+	var count = 0;
+	var childList = node.childNodes;
 	for(var i=0; i < (childList.length); i++) {
-		childNode = childList.item(i);
+		var childNode = childList.item(i);
 		if ((childNode.nodeType == 1))	{ // only count elements
-				count++;
+			count++;
 		}
 	}
 	return count;
@@ -119,11 +95,10 @@ function removeAllChildren(node) {
 	}
 }
 
-
 function isElement(node) {
-    if (node.nodeType == 1) {
-    		return true; }
-    else {
-    		return false;
-    }
+	if (node.nodeType == 1) {
+		return true; }
+	else {
+		return false;
+	}
 }
