@@ -166,7 +166,6 @@
 						<xsl:call-template name="documentHeading">
 							<xsl:with-param name="collName" select="$collName"/>
 						</xsl:call-template>
-						NOT CLIENT!!!
 						<xsl:call-template name="documentArrows">
 							<xsl:with-param name="collName" select="$collName"/>
 						</xsl:call-template>         
