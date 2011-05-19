@@ -19,7 +19,7 @@ var checkout = function(){
 	if ( document.getElementById('berrybasket') == null ) return;
 	
 	var request_type = "GET";
-	var url = "?a=pr&rt=r&ro=1&s=ItemNum&o=XML&hhf=Cache-Control%3Dno-cache&c=";
+	var url = "?a=pr&rt=r&ro=1&s=ItemNum&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&c=";
 
 	var responseSuccess = function(o){
 		
@@ -292,7 +292,7 @@ function hideBasket() {
 
 function addBerry(el){
 	alert("ADDING");
-	var addurl = "?a=pr&rt=r&ro=1&s=AddItem&c=&s1.id=2&o=XML&hhf=Cache-Control%3Dno-cache&s1.item=" + el.id;
+	var addurl = "?a=pr&rt=r&ro=1&s=AddItem&c=&s1.id=2&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=" + el.id;
 
 	var addSuccess = function(o){
 		var result = o.responseXML;

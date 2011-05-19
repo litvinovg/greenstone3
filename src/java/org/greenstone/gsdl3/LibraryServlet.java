@@ -14,9 +14,15 @@ import javax.servlet.http.*;
 import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.Hashtable;
 import org.apache.log4j.*;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 // Apache Commons
 import org.apache.commons.lang3.*;
@@ -559,20 +565,24 @@ public class LibraryServlet extends HttpServlet {
 		}
 		
 		//Add custom HTTP headers if requested
-		String httpHeaders = StringEscapeUtils.unescapeHtml4(request.getParameter(GSParams.HTTPHEADERFIELDS));
-		if (httpHeaders!=null && !httpHeaders.equals ("")) {
-			String[] headerParams = StringUtils.split(httpHeaders, "&");
+		Gson gson = new Gson();
+		Type type = new TypeToken<List<Map<String,String>>>() {}.getType();
+		List<Map<String,String>> httpHeaders = gson.fromJson(request.getParameter(GSParams.HTTPHEADERFIELDS), type);
+		if (httpHeaders != null && httpHeaders.size() > 0) {
 			
-			for(int j = 0; j < headerParams.length; j++)
+			for(int j = 0; j < httpHeaders.size(); j++)
 			{
-				int index = StringUtils.indexOf(headerParams[j], "=");
+				Map nameValueMap = (Map)httpHeaders.get(j);
+				String name = (String)nameValueMap.get("name");
+				String value = (String)nameValueMap.get("value");
 				
-				if(index != -1)
+				System.err.println("SETTING HEADER " + name + " = " + value);
+				
+				if(name != null && value != null)
 				{
-					response.setHeader(StringUtils.substring(headerParams[j], 0, index), StringUtils.substring(headerParams[j], index+1));
+					response.setHeader(name, value);
 				}
 			}
-			
 		}
 		
 		//GSXML.printXMLNode(xml_message);
@@ -688,5 +698,4 @@ public class LibraryServlet extends HttpServlet {
 		doGet(request,response);
 		
 	}
-
 }

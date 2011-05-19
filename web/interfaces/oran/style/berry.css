@@ -1,11 +1,8 @@
 #berrybasket {
 	min-height: 22px;
 	padding: 5px;
-	/*margin: 0 0 1em 0;*/
-	/* background: #E0F0E0 url("../images/berrybasket.png") scroll no-repeat 0 0; */
 	background: transparent url("../images/kete2.png") scroll repeat 0 0;
 	z-index:10;
-	/*cursor: pointer;*/
 	font-size: 80%;
 	min-height: 2em;
 }

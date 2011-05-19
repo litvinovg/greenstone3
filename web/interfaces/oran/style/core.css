@@ -328,7 +328,6 @@ body.dAction #gs_banner h2 {
 #bannerLinks li {
 	float: right;
 	margin: 0;
-	background: transparent url('../images/tab-right.gif') no-repeat scroll 100% -50px;
 	padding: 0 2px 0 0;
 }
 
