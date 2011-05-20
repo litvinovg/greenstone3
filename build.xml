@@ -1519,11 +1519,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
          (thereby also generating gdbmjava.dll). Then we run the same command with 
          the "install" argument to copy the gdbmjava.dll into the correct location. -->
     <echo>Windows: compile javagdbm</echo>
-    <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true">
-      <env key="GSDLHOME" path="${gs2build.home}"/>
+    <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true">	  
+      <env key="GSDL3SRCHOME" path="${basedir}"/>
     </exec>
     <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true">
-      <env key="GSDLHOME" path="${gs2build.home}"/>
+      <env key="GSDL3SRCHOME" path="${basedir}"/>
       <arg value="install"/>
     </exec>
 
