@@ -53,11 +53,11 @@
 	    <table align="left" border="0" width="100%">
 	      <tr align="left">
 		<td><h2><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.authentication')"/></h2></td>
-		<td><xsl:if test="$un_s!=''">
+		<!--<td><xsl:if test="$un_s!=''">
 		    <xsl:if test="$asn!='' and $asn!='0'">
 		      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.username')"/>  :  <xsl:value-of select="$un_s"/>
 		    </xsl:if>
-		  </xsl:if></td>
+		  </xsl:if></td>-->
 	      </tr>
 	    </table>
 	  </div>
