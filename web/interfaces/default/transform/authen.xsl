@@ -381,22 +381,29 @@
 	<th bgcolor="#d0d0d0"></th>
       </tr>
       <xsl:for-each select="/page/pageResponse/authenticationNode/service/userNodeList/userNode">
+	<script type="text/javascript">
+	<xsl:text disable-output-escaping="yes">
+	var username="</xsl:text><xsl:value-of select="@umun"/><xsl:text disable-output-escaping="yes">";
+	</xsl:text>
+	</script>
 	<tr>
 	  <td bgcolor="#eeeeee"><xsl:value-of select="@umun"/></td>
-	  <td id="status" bgcolor="#eeeeee">
+	  <!--<td id="status" bgcolor="#eeeeee">-->
+	  <td bgcolor="#eeeeee"><xsl:attribute name="id">status<xsl:value-of select="@umun"/></xsl:attribute>
 	    <script type="text/javascript">
 	      <xsl:text disable-output-escaping="yes">
 		var status="</xsl:text><xsl:value-of select="@umas"/><xsl:text disable-output-escaping="yes">";
 		if (status=="true"){
-		  document.getElementById("status").innerHTML="enabled";
+		  document.getElementById("status"+username).innerHTML="enabled";
 		}
 		if (status=="false"){
-		  document.getElementById("status").innerHTML="disabled";
+		  document.getElementById("status"+username).innerHTML="disabled";
 		}
 	      </xsl:text>		 
 	    </script>
 	  </td>
-	  <td id="group" bgcolor="#eeeeee">
+	  <!--<td id="group" bgcolor="#eeeeee">-->
+	  <td bgcolor="#eeeeee"><xsl:attribute name="id">group<xsl:value-of select="@umun"/></xsl:attribute>
 	    <script type="text/javascript">
 	      <xsl:text disable-output-escaping="yes">
 		var groups="</xsl:text><xsl:value-of select="@umgp"/><xsl:text disable-output-escaping="yes">";
@@ -405,7 +412,7 @@
 		for (j=0; j &lt; split_groups.length ; j++){
 		  new_groups+=split_groups[j]+" &lt;br /&gt; ";
 		}
-		document.getElementById('group').innerHTML=new_groups;
+		document.getElementById('group'+username).innerHTML=new_groups;
 	      </xsl:text>		 
 	    </script>
 	  </td>
