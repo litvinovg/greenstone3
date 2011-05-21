@@ -95,7 +95,7 @@
 
   <property name="axis.zip.version" value="axis-bin-1_4.zip"/>
   <property name="axis.dir.version" value="axis-1_4"/>
-  <property name="sqlite.targz.version" value="sqlite-amalgamation-3.5.9.tar.gz"/>
+  <property name="sqlite.targz.version" value="sqlite-autoconf-3070602.tar.gz"/>
 
   <property name="build.home" value="${basedir}/build"/>
   <property name="src.home" value="${basedir}/src/java"/>
