@@ -387,9 +387,8 @@
 	</xsl:text>
 	</script>
 	<tr>
-	  <td bgcolor="#eeeeee"><xsl:value-of select="@umun"/></td>
-	  <!--<td id="status" bgcolor="#eeeeee">-->
-	  <td bgcolor="#eeeeee"><xsl:attribute name="id">status<xsl:value-of select="@umun"/></xsl:attribute>
+	  <td bgcolor="#eeeeee"><xsl:value-of select="@umun"/></td>	  
+	  <td id="status{@umun}" bgcolor="#eeeeee">	  
 	    <script type="text/javascript">
 	      <xsl:text disable-output-escaping="yes">
 		var status="</xsl:text><xsl:value-of select="@umas"/><xsl:text disable-output-escaping="yes">";
@@ -402,8 +401,7 @@
 	      </xsl:text>		 
 	    </script>
 	  </td>
-	  <!--<td id="group" bgcolor="#eeeeee">-->
-	  <td bgcolor="#eeeeee"><xsl:attribute name="id">group<xsl:value-of select="@umun"/></xsl:attribute>
+	  <td id="group{@umun}" bgcolor="#eeeeee">
 	    <script type="text/javascript">
 	      <xsl:text disable-output-escaping="yes">
 		var groups="</xsl:text><xsl:value-of select="@umgp"/><xsl:text disable-output-escaping="yes">";
