@@ -13,7 +13,8 @@ body {
   font-family: sans-serif, arial, helvetica;   
   background-image: url('../images/chalk.gif');
   background-color: #fff; 
-  color: #000000 
+  background-repeat:repeat-y;  
+  color: #000000;
 }
 
 /* this contains everything - all the other divs */
