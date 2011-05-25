@@ -76,11 +76,11 @@ abstract public class Action {
         return true;
     }
 
-    protected void extractMetadataNames(Element format, HashSet meta_names) {
+	protected void extractMetadataNames(Element format, HashSet meta_names) {
     //NodeList nodes = format.getElementsByTagNameNS("metadata", "http://www.greenstone.org/configformat");
-    NodeList nodes = format.getElementsByTagName("gsf:metadata");
-        for (int i=0; i<nodes.getLength(); i++) {
-            Element elem = (Element)nodes.item(i);
+    NodeList metadata_nodes = format.getElementsByTagName("gsf:metadata");
+        for (int i=0; i<metadata_nodes.getLength(); i++) {
+            Element elem = (Element)metadata_nodes.item(i);
             StringBuffer metadata = new StringBuffer();
             String all = elem.getAttribute("multiple");
             String name = elem.getAttribute("name");
@@ -104,6 +104,20 @@ abstract public class Action {
             metadata.append(name);
             meta_names.add(metadata.toString());
         }
+
+		// The XSL tranform for
+		//   gsf:link type="source" 
+		// makes use of 'assocfilepath' so need to make sure it's asked for
+
+		NodeList link_nodes = format.getElementsByTagName("gsf:link");
+			for (int i=0; i<link_nodes.getLength(); i++) {
+				Element elem = (Element)link_nodes.item(i);
+				String type = elem.getAttribute("type");
+			if (type.equals("source")) {
+			meta_names.add("assocfilepath");
+			}
+		}
+
     }
 
     protected Element createMetadataParamList(HashSet metadata_names) {
