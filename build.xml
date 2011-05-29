@@ -2099,7 +2099,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="flax-resources"/></exec> 
     <exec executable="svn"><arg value="update"/>
       <arg value="flax-lib"/></exec> 
-    <antcall target="flax-copy-files" />
+    <!--<antcall target="flax-copy-files" />-->
+	<antcall target="compile-core" />
   </target>
 
 
