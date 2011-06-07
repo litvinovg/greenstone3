@@ -278,7 +278,7 @@ public class XSLTUtil {
     
 	public static String hashToSectionId(String hashString)
 	{
-		if(hashString == null || hashString.length() == 0 || !hashString.startsWith("HASH")) {return "";}
+		if(hashString == null || hashString.length() == 0) {return "";}
 		
 		int firstDotIndex = hashString.indexOf(".");
 		if(firstDotIndex == -1)
@@ -293,7 +293,7 @@ public class XSLTUtil {
 	
 	public static String hashToDepthClass(String hashString)
 	{
-		if(hashString == null || hashString.length() == 0 || !hashString.startsWith("HASH")) {return "";}
+		if(hashString == null || hashString.length() == 0) {return "";}
 		
 		String sectionString = hashToSectionId(hashString);
 		
