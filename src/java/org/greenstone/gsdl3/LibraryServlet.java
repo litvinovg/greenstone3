@@ -565,20 +565,24 @@ public class LibraryServlet extends HttpServlet {
 		}
 		
 		//Add custom HTTP headers if requested
-		Gson gson = new Gson();
-		Type type = new TypeToken<List<Map<String,String>>>() {}.getType();
-		List<Map<String,String>> httpHeaders = gson.fromJson(request.getParameter(GSParams.HTTPHEADERFIELDS), type);
-		if (httpHeaders != null && httpHeaders.size() > 0) {
-			
-			for(int j = 0; j < httpHeaders.size(); j++)
-			{
-				Map nameValueMap = (Map)httpHeaders.get(j);
-				String name = (String)nameValueMap.get("name");
-				String value = (String)nameValueMap.get("value");
+		String httpHeadersParam = request.getParameter(GSParams.HTTPHEADERFIELDS);
+		if (httpHeadersParam != null && httpHeadersParam.length() > 0)
+		{
+			Gson gson = new Gson();
+			Type type = new TypeToken<List<Map<String,String>>>() {}.getType();
+			List<Map<String,String>> httpHeaders = gson.fromJson(httpHeadersParam, type);
+			if (httpHeaders != null && httpHeaders.size() > 0) {
 				
-				if(name != null && value != null)
+				for(int j = 0; j < httpHeaders.size(); j++)
 				{
-					response.setHeader(name, value);
+					Map nameValueMap = (Map)httpHeaders.get(j);
+					String name = (String)nameValueMap.get("name");
+					String value = (String)nameValueMap.get("value");
+					
+					if(name != null && value != null)
+					{
+						response.setHeader(name, value);
+					}
 				}
 			}
 		}
