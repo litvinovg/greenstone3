@@ -420,7 +420,7 @@ body.dAction #gs_banner h2 {
 }
 
 
-#results .document a { background-image: url('../images/book.png'); }
+/*#results .document a { background-image: url('../images/book.png'); }*/
 #results .document a:visited { background-image: url('../images/book-visited.png'); color: #999; }
 #results .shelf>a { background-image: url('../images/bookshelf.png'); }
 

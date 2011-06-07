@@ -316,7 +316,6 @@
 			<!-- Realistic books link -->
 			<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
 				<td>
-					<!-- old url = {$library_name}?a=d&amp;c={$collName}&amp;d={/page/pageResponse/document/documentNode[1]/@nodeID}&amp;dt={/page/pageResponse/document/documentNode/@docType}&amp;p.a=b&amp;p.s={/page/pageResponse/service/@name}&amp;book=on&amp;ed=1 -->
 					<img>
 						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'realistic_books_image')"/></xsl:attribute>
 					</img>
@@ -325,7 +324,7 @@
 			</xsl:if>
 			
 			<!-- Highlight on/off button -->
-			<xsl:if test="/page/pageRequest/paramList/param[@name = 'p.a']/@value = 'q'">
+			<xsl:if test="/page/pageRequest/paramList/param[@name = 'p.a']/@value = 'q' and count(//annotation) > 0">
 				<td>
 					<img>
 						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'highlight_image')"/></xsl:attribute>

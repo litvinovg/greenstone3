@@ -33,37 +33,47 @@
 			you can change the appearance of the results by editing
 			the two templates at the bottom of this file
 		-->
-		<ul id="results">
-			<xsl:apply-templates select="classifier/*"/>
-		</ul>
+		<table id="results">
+			<xsl:for-each select="classifier/*">
+				<tr>
+					<xsl:apply-templates select="."/>
+				</tr>
+			</xsl:for-each>
+		</table>
 		<div class="clear"><xsl:text> </xsl:text></div>
-
 	</xsl:template>
 
 
 	<!--
 	TEMPLATE FOR DOCUMENTS
 	-->
-	<xsl:template match="documentNode" priority="3">
-
-		<!-- show the document details -->
-		<li class="document">
-
+	<xsl:template match="documentNode">
+		<!-- The book icon -->
+		<td>
+			<img>			
+				<xsl:attribute name="src">
+					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'book_image')"/>
+				</xsl:attribute>
+			</img>
+		</td>
+		<!-- The document link -->
+		<td>
 			<a>
 				<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;ed=1</xsl:attribute>
 				<xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
 			</a>
+		</td>
+		<!-- The berry (optional) -->
+		<td>
 			<xsl:call-template name="documentBerryForClassifierOrSearchPage"/>
-
-		</li>
-
+		</td>
 	</xsl:template>
 
 
 	<!--
 	TEMPLATE FOR GROUPS OF DOCUMENTS
 	-->
-	<xsl:template match="classifierNode" priority="3">
+	<xsl:template match="classifierNode">
 
 		<table id="title{@nodeID}"><tr>
 			<!-- Expand/collapse button -->
@@ -90,8 +100,14 @@
 		
 		<!-- Show any documents or sub-groups in this group -->
 		<xsl:if test="documentNode|classifierNode">
-			<div id="div{@nodeID}" class="classifierContainer" style="display:block;">
-				<xsl:apply-templates select="documentNode|classifierNode"/>
+			<div id="div{@nodeID}" class="classifierContainer">
+				<table>
+					<xsl:for-each select="documentNode|classifierNode">
+						<tr>
+							<xsl:apply-templates select="."/>
+						</tr>
+					</xsl:for-each>
+				</table>
 			</div>
 		</xsl:if>
 	</xsl:template>
@@ -108,7 +124,7 @@
 				function isExpanded(sectionID)
 				{
 					var divElem = document.getElementById("div" + sectionID);
-					if(divElem.style.display == "block")
+					if(!divElem.style.display || divElem.style.display == "block")
 					{
 						return true;
 					}

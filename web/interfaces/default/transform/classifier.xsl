@@ -72,15 +72,15 @@
 
     <!-- <xsl:variable name="tok" select="fn:tokenize($fmt,'/s+')"/> -->
 
-      <div id="format">
+     <!--<div id="format">
         <p>
 	  <b>Format string here</b>
 	  <i>
-	      <xsl:value-of select="$fmt"/>
+	      <xsl:value-of select="$fmt"/>-->
 	      <!-- <xsl:value-of select="$tok"/> -->
-	  </i>
+	  <!--</i>
         </p>
-      </div>
+      </div>-->
     <!-- </xsl:if> -->
 
   
