@@ -25,6 +25,9 @@
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
 		<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
 		<link rel="shortcut icon" href="favicon.ico"/> 
+        <script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/ui/jquery-ui.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/oran/js/jquery.selectboxes.js"><xsl:text> </xsl:text></script>
 	</xsl:template>
 		
 	<!-- ***** HEADER LAYOUT TEMPLATE ***** -->
@@ -113,9 +116,9 @@
 
 				<!-- home -->
 				<li>
-					<a href="{$library_name}?a=p&amp;amp;sa=about&amp;amp;c={$collNameChecked}">
+					<a href="{$library_name}?a=p&amp;amp;sa=home">
 						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_tip')"/></xsl:attribute>
-						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'about_b')"/>
+						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_b')"/>
 					</a>
 				</li>
 			</ul>
@@ -131,31 +134,31 @@
 				<xsl:attribute name="style">
 					<xsl:choose>
 						<xsl:when test="string-length($pageTitleVar) &lt; 20">
-							font-size: 1.5em; line-height: 1.5em;
+							font-size: 24px; line-height: 26px;
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 30">
-							font-size: 1.4em; line-height: 1.4em;
+							font-size: 22px; line-height: 24px;
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 40">
-							font-size: 1.3em; line-height: 1.3em;
+							font-size: 20px; line-height: 22px;
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 50">
-							font-size: 1.2em; line-height: 1.2em;
+							font-size: 18px; line-height: 20px;
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 60">
-							font-size: 1.1em; line-height: 1.2em;
+							font-size: 16px; line-height: 18px;
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 70">
-							font-size: 1em; line-height: 1.1em;
+							font-size: 15px; line-height: 17px;
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 80">
-							font-size: 0.9em; line-height: 1em;
+							font-size: 14px; line-height: 16px;
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 90">
-							font-size: 0.8em; line-height: 0.9em;
+							font-size: 13px; line-height: 15px;
 						</xsl:when>
 						<xsl:otherwise>
-							font-size: 0.7em; line-height: 0.9em;
+							font-size: 12px; line-height: 14px;
 						</xsl:otherwise>
 					</xsl:choose>
 				</xsl:attribute>
@@ -178,31 +181,6 @@
 					<input type="hidden" name="s" value="TextQuery"/>
 					<input type="hidden" name="c" value="{$collNameChecked}"/>
 					<input type="hidden" name="startPage" value="1"/>
-					<xsl:choose>
-						<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.maxDocs']">
-							<input type="hidden" name="s1.maxDocs">
-								<xsl:attribute name="value">
-									<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.maxDocs']/@value"/>
-								</xsl:attribute>
-							</input>
-						</xsl:when>
-						<xsl:otherwise>
-							<input type="hidden" name="s1.maxDocs" value="100"/>
-						</xsl:otherwise>
-					</xsl:choose>
-					<xsl:choose>
-						<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.hitsPerPage']">
-							<input type="hidden" name="s1.hitsPerPage">
-								<xsl:attribute name="value">
-									<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.hitsPerPage']/@value"/>
-								</xsl:attribute>
-							</input>
-						</xsl:when>
-						<xsl:otherwise>
-							<input type="hidden" name="s1.hitsPerPage" value="20"/>
-						</xsl:otherwise>
-					</xsl:choose>
-					
 					<!-- The query text box -->
 					<span class="querybox">
 						<xsl:variable name="qs">

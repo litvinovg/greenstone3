@@ -71,7 +71,7 @@ Recent changes:
 
         <xsl:choose>
             <xsl:when test="$exists='TRUE'">
-                <select>
+                <select name="meta_select" onChange="onSelectChange(this)">
                     <xsl:apply-templates select="$metadataSets" mode="meta-to-combo">
                         <xsl:with-param name="current" select="$current_mod"/>
                     </xsl:apply-templates>
@@ -192,7 +192,7 @@ Recent changes:
 
         <div class="gsf_link css_gsf_link block" title="gsf:link">
         <xsl:variable name="link">
-                LINK<select>
+                LINK<select name="link_select" onChange="onSelectChange(this)">
                     <xsl:choose>
                         <xsl:when test="@type='document'">
         	                <option value = "document" selected = "selected">Document</option>
@@ -308,7 +308,7 @@ Recent changes:
 
         <div class="gsf_icon css_gsf_icon block leaf" title="gsf:icon">
             <xsl:variable name="icon">
-                ICON<select>
+                ICON<select name="icon_select" onChange="onSelectChange(this, this.value)">
                     <xsl:choose>
                         <xsl:when test="@type='document'">
                             <option value = "document" selected = "selected">Document</option>
@@ -353,10 +353,24 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
         
-        <div class="block leaf gsf_text" title="gsf:text">
-                <xsl:variable name="rawtext"><xsl:value-of select="."/></xsl:variable>
-                <table class="header"><tbody><tr><td class="header"><input class="text" type="text" name="rawtextinput" size="10" value="{$rawtext}" onChange="onTextChange(this, this.value)"></input></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
-        </div>
+        <xsl:variable name="rawtext"><xsl:value-of select="."/></xsl:variable>
+
+        <xsl:if test="normalize-space($rawtext) != '' ">
+            <div class="block leaf gsf_text" title="gsf:text">
+                <table class="header">
+                    <tbody>
+                        <tr>
+                            <td class="header">
+                                <input class="text" type="text" name="rawtextinput" size="10" value="{$rawtext}" onChange="onTextChange(this, this.value)"></input>
+                            </td>
+                            <td class="header">
+                                <a href="[myhref]" class="ui-icon ui-icon-closethick"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </xsl:if>
     </xsl:template>
 
 

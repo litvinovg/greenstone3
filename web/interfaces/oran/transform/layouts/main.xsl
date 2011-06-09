@@ -15,10 +15,10 @@
 	exclude-result-prefixes="util java util">
 
 	<xsl:include href="header.xsl"/>
-	<!--<xsl:include href="formatmanager.xsl"/>-->
+	<xsl:include href="formatmanager.xsl"/>
 	
-	<xsl:include href="xml-to-gui.xsl"/>
-	<xsl:include href="xml-to-gui-templates.xsl"/>
+	<!--<xsl:include href="xml-to-gui.xsl"/>-->
+	<!--<xsl:include href="xml-to-gui-templates.xsl"/>-->
 
 	<!-- put the URL or path of your site here site -->
 	<!-- eg 'http://www.example.com/mysite' or '/mysite'  -->
@@ -52,9 +52,11 @@
 						<xsl:call-template name="create-banner"/>
 
 					</div>
-					
-					<!--<xsl:call-template name="formatmanagerpre"/>-->
 
+                    <xsl:if test="/page/pageRequest/paramList/param[(@name='formatedit') and (@value='1')]">
+    					<xsl:call-template name="formatmanagerpre"/>
+                    </xsl:if>
+    
 					<div id="gs_content">
 						<!--
 							show the content of the page.
