@@ -113,7 +113,7 @@ public class FormatAction extends Action {
             // HOW DO I DO THIS PROPERLY?
             //String style = stylesheetFile(String gsdl3_home, String site_name, String collection, String interface_name, ArrayList base_interfaces, String filename);
             //Document style_doc = this.converter.getDOM(new File(style), "UTF-8"); //"/home/sam/greenstone3/web/interfaces/oran/transform/formatString.xsl"), "UTF-8");  /*************************/
-            Document style_doc = this.converter.getDOM(new File("/home/sam/greenstone3/web/interfaces/oran/transform/formatString.xsl"), "UTF-8");  /*************************/
+            Document style_doc = this.converter.getDOM(new File("/research/sjb48/greenstone3/web/interfaces/oran/transform/formatString.xsl"), "UTF-8");  /*************************/
 
             if(style_doc == null)
                 logger.error("style_doc is null");
