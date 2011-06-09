@@ -1,11 +1,26 @@
 
 console.log("Loading gui_div.js\n");
 
-var initialised_iframe = "false";
+// var initialised_iframe = "false";
 
 function onTextChange(item, text)
 {
+    console.log("I have set "+item+".value to "+text);
     item.setAttribute("value",text);
+}
+
+function onSelectChange(item)
+{
+    console.log("I have set "+item.value+".selected to selected");
+    for (var i=0; i<item.options.length; i++)
+    {
+        if(item.selectedIndex == i)
+            item.options[i].setAttribute("selected", "selected");
+        else
+            item.options[i].removeAttribute("selected");
+    }
+    //item.options[item.selectedIndex].selected = "selected";
+    //item.setAttribute("selected","selected");
 }
 
 
@@ -81,7 +96,7 @@ function updateFormatStatement()
     if(service_name == "ClassifierBrowse")
         classifier_name = getSubstring(myurl, "&cl", "&");
 
-    var post_url = "http://localhost:8080/greenstone3/format?a=f&sa=update&c=" + collection_name +"&s=" + service_name;
+    var post_url = "http://localhost:8989/greenstone3/format?a=f&sa=update&c=" + collection_name +"&s=" + service_name;
 
     if(classifier_name != null)
         post_url = post_url + "&cl=" + classifier_name;
@@ -106,7 +121,7 @@ function saveFormatStatement()
     if(service_name == "ClassifierBrowse")
         classifier_name = getSubstring(myurl, "&cl", "&");
 
-    var post_url = "http://localhost:8080/greenstone3/format?a=f&sa=save&c=" + collection_name +"&s=" + service_name;
+    var post_url = "http://localhost:8989/greenstone3/format?a=f&sa=save&c=" + collection_name +"&s=" + service_name;
 
     if(classifier_name != null)
         post_url = post_url + "&cl=" + classifier_name;
@@ -328,6 +343,7 @@ $(document).ready(function(){
 
     var CURRENT_SELECT_VALUE = "";
 
+    /*
     var iframe = document.getElementById('iframe');
     var iframe_document = iframe.document;
    
@@ -384,6 +400,7 @@ $(document).ready(function(){
         iframe_document.close(); 
         initialised_iframe = "true";
     }
+    */
 
     /*    
     $(iframe_document.documentElement.innerHTML).find('a').each(function() {
