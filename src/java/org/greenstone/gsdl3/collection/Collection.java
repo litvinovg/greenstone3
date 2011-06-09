@@ -32,6 +32,7 @@ import org.w3c.dom.NodeList;
 import java.io.*;
 import java.io.File;
 import java.util.HashMap;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -470,33 +471,55 @@ public class Collection
                 int k;
                 int index;
                 Element elem;
+                // Try importing entire tree to this.doc so we can add and remove children at ease
+                //Node current_node = this.doc.importNode(GSXML.getChildByTagName(config, "CollectionConfig"),true);
                 Node current_node = GSXML.getChildByTagName(config, "CollectionConfig");
                 NodeList current_node_list;
-    
+   
+                logger.error("Service is "+service);
+
                 if(service.equals("ClassifierBrowse"))
                 {
                     //tag_name = "browse";
                     // if CLX then need to look in <classifier> X then <format>
                     // default is <browse><format>
 
+                    logger.error("Looking for browse");
                     current_node = GSXML.getChildByTagName(current_node, "browse");
 
                     // find CLX
                     if(classifier != null)
                     {
+                        logger.error("Classifier is not null");
+                        logger.error("Classifier is "+classifier);
                         current_node_list = GSXML.getChildrenByTagName(current_node, "classifier");
                         index = Integer.parseInt(classifier.substring(2)) - 1;
+                        logger.error("classifier index is "+index);
                         // index should be given by X-1
                         current_node = current_node_list.item(index);
-                        current_node = GSXML.getChildByTagName(current_node, "format");
+                        // what if classifier does not have a format tag?
+                        if(GSXML.getChildByTagName(current_node, "format") == null)
+                        {
+                            logger.error("ERROR: classifier does not have a format child");
+                            // well then create a format tag
+                            Element format_tag = config.createElement("format");
+                            current_node = (Node) current_node.appendChild(format_tag);
+                            //current_node = (Node) format_tag;
+                        }
+                        
+                        else{
+                            current_node = GSXML.getChildByTagName(current_node, "format");
+                        }
                     }
                     else{
+                        logger.error("Classifier is null");
                         current_node = GSXML.getChildByTagName(current_node, "format");
                     }
                 }
                 else
                 {
                     // look in <format> with no attributes
+                    logger.error("I presume this is search");
             
                     current_node_list = GSXML.getChildrenByTagName(current_node, "search");
                     for(k=0; k<current_node_list.getLength(); k++) 
@@ -531,10 +554,10 @@ public class Collection
                 for(k=0; k<current_node_list.getLength(); k++)
                 {
                     //if(transformed.getNodeType() == Node.DOCUMENT_NODE)
-                //transformed = ((Document)transformed).getDocumentElement();
-                    logger.error("Node type: "+current_node_list.item(k).getNodeType());
+                    //transformed = ((Document)transformed).getDocumentElement();
+                    //logger.error("Node type: "+current_node_list.item(k).getNodeType());
                     if(current_node_list.item(k).getNodeType() != Node.PROCESSING_INSTRUCTION_NODE)
-                        current_node = elem.appendChild(this.doc.importNode(current_node_list.item(k),true));
+                        elem.appendChild(config.importNode(current_node_list.item(k),true));
                 }
 
                 //String text = GSXML.getNodeText(elem);
@@ -545,6 +568,10 @@ public class Collection
 
                 // Now convert config document to string for writing to file
                 String new_config = this.converter.getString(config);
+
+                new_config = StringUtils.replace(new_config, "&lt;", "<");
+                new_config = StringUtils.replace(new_config, "&gt;", ">");
+                new_config = StringUtils.replace(new_config, "&quot;", "\"");
     
                 // Write to file (not original! for now)
                 BufferedWriter writer = new BufferedWriter(new FileWriter(collection_config+".new"));
