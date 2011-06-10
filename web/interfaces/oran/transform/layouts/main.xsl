@@ -47,15 +47,13 @@
 				<div id="container">
 
 					<div id="gs_banner">
-
 						<!-- ***** in header.xsl ***** -->
 						<xsl:call-template name="create-banner"/>
-
 					</div>
-
-                    <xsl:if test="/page/pageRequest/paramList/param[(@name='formatedit') and (@value='1')]">
-    					<xsl:call-template name="formatmanagerpre"/>
-                    </xsl:if>
+					
+					<xsl:if test="/page/pageRequest/paramList/param[(@name='formatedit') and (@value='1')]">
+						<xsl:call-template name="formatmanagerpre"/>
+					</xsl:if>
     
 					<div id="gs_content">
 						<!--
@@ -76,9 +74,7 @@
 					<div class="corner" id="cornerTopRight"><xsl:text> </xsl:text></div>
 					<div class="corner" id="cornerBottomLeft"><xsl:text> </xsl:text></div>
 					<div class="corner" id="cornerBottomRight"><xsl:text> </xsl:text></div>
-
 				</div>
-
 			</body>
 		</html>
 	</xsl:template>

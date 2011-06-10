@@ -230,13 +230,15 @@
   </xsl:template>
   
   <xsl:template name="authenticationLink">
-    <xsl:for-each select="serviceList/service[@type='authen']">
-      <li>
-        <a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s={@name}&amp;s1.aup=Login&amp;s1.un=&amp;s1.asn=">
-          <xsl:value-of select="displayItem[@name='name']"/>
-        </a>
-        <xsl:value-of select="displayItem[@name='description']"/>
-      </li>
+    <xsl:for-each select="//serviceList/service[@type='authen']">
+		<div class="paramLabel">
+			<a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s={@name}&amp;s1.aup=Login&amp;s1.un=&amp;s1.asn=">
+				<xsl:value-of select="displayItem[@name='name']"/>
+			</a>
+		</div>
+		<div class="paramValue">
+			<xsl:value-of select="displayItem[@name='description']"/>
+		</div>
     </xsl:for-each>
   </xsl:template>
   

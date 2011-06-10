@@ -20,14 +20,14 @@
 		</xsl:choose>
 	</xsl:variable>
 	
-	<!-- Creates a header for -->
+	<!-- Creates a header for the html page -->
 	<xsl:template name="create-html-header">
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
 		<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
 		<link rel="shortcut icon" href="favicon.ico"/> 
-        <script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.js"><xsl:text> </xsl:text></script>
+        <!--<script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.js"><xsl:text> </xsl:text></script>
         <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/ui/jquery-ui.js"><xsl:text> </xsl:text></script>
-        <script type="text/javascript" src="interfaces/oran/js/jquery.selectboxes.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/oran/js/jquery.selectboxes.js"><xsl:text> </xsl:text></script>-->
 	</xsl:template>
 		
 	<!-- ***** HEADER LAYOUT TEMPLATE ***** -->
@@ -134,31 +134,31 @@
 				<xsl:attribute name="style">
 					<xsl:choose>
 						<xsl:when test="string-length($pageTitleVar) &lt; 20">
-							font-size: 24px; line-height: 26px;
+							<xsl:text>font-size: 1.5em; line-height: 1.5em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 30">
-							font-size: 22px; line-height: 24px;
+							<xsl:text>font-size: 1.4em; line-height: 1.4em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 40">
-							font-size: 20px; line-height: 22px;
+							<xsl:text>font-size: 1.3em; line-height: 1.3em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 50">
-							font-size: 18px; line-height: 20px;
+							<xsl:text>font-size: 1.2em; line-height: 1.2em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 60">
-							font-size: 16px; line-height: 18px;
+							<xsl:text>font-size: 1.1em; line-height: 1.2em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 70">
-							font-size: 15px; line-height: 17px;
+							<xsl:text>font-size: 1em; line-height: 1.1em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 80">
-							font-size: 14px; line-height: 16px;
+							<xsl:text>font-size: 0.9em; line-height: 1em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 90">
-							font-size: 13px; line-height: 15px;
+							<xsl:text>font-size: 0.8em; line-height: 0.9em;</xsl:text>
 						</xsl:when>
 						<xsl:otherwise>
-							font-size: 12px; line-height: 14px;
+							<xsl:text>font-size: 0.7em; line-height: 0.9em;</xsl:text>
 						</xsl:otherwise>
 					</xsl:choose>
 				</xsl:attribute>

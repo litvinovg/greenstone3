@@ -208,10 +208,7 @@ collectionLinkImage {
 }
 
 #gs_footer {
-	position: relative;
-	display: block;
 	background: transparent url('../images/gsdlhead.gif') scroll no-repeat left top;
-	margin: 0 auto;
 	text-align: center;
 	vertical-align: middle;
 	font-size: 70%;
@@ -312,6 +309,11 @@ body.dAction #gs_banner h2 {
 #nav li:hover, #nav li.current { background-position: 100% 0; }
 #nav li:hover a, #nav li.current a { background-position: 0 0; cursor:default; }
 
+#authennavbarlist {
+	display: inline;
+	list-style-type: none;
+	padding-right: 20px;
+}
 
 /* css to make the page links work (home, help, preference) */
 #bannerLinks {
