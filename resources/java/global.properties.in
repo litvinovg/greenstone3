@@ -29,3 +29,5 @@ proxy.password=
 #mail.smtp.password=isppassword
 #mail.from=ispusername@myisp.com
 
+# flax auxiliary external server url for collocation retrieval
+flax.aux.server=flax.nzdl.org/greenstone3/flax
