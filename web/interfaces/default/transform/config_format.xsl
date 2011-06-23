@@ -43,6 +43,14 @@
 	  <xsl:apply-templates/>
 	</a>
       </xsl:when>
+	<xsl:when test="@type='sourcelinkfile'">
+	<a><xslt:attribute name='href'><xslt:value-of 
+	   disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']" />/index/assoc/<xslt:value-of 
+	   disable-output-escaping="yes" select="metadataList/metadata[@name='assocfilepath']" />/<xslt:value-of 
+	   disable-output-escaping="yes" select="metadataList/metadata[@name='srclinkFile']" /></xslt:attribute>
+	  <xsl:apply-templates/>
+	</a>
+      </xsl:when>
 	  
       <xsl:otherwise> <!-- a document link -->
 	<xslt:variable name="bookswitch"><xslt:value-of select="/page/pageRequest/paramList/param[@name='book']/@value"/></xslt:variable>

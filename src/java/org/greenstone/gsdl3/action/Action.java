@@ -113,7 +113,7 @@ abstract public class Action {
 			for (int i=0; i<link_nodes.getLength(); i++) {
 				Element elem = (Element)link_nodes.item(i);
 				String type = elem.getAttribute("type");
-			if (type.equals("source")) {
+			if (type.equals("source") || type.equals("sourcelinkfile")) {
 			meta_names.add("assocfilepath");
 			}
 		}
