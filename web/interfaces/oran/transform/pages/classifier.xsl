@@ -47,7 +47,17 @@
 	<!--
 	TEMPLATE FOR DOCUMENTS
 	-->
-	<xsl:template match="documentNode">
+
+    <!--<xsl:template match="documentNode" priority="3">-->
+        <!-- show the document details -->
+        <!--<li class="document">
+            <a>
+                <xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;ed=1</xsl:attribute><xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
+            </a>
+        </li>
+    </xsl:template>-->
+
+	<xsl:template match="documentNode" priority="3">
 		<!-- The book icon -->
 		<td>
 			<img>			
@@ -67,7 +77,7 @@
 		<td>
 			<xsl:call-template name="documentBerryForClassifierOrSearchPage"/>
 		</td>
-	</xsl:template>
+	</xsl:template>-->
 
 
 	<!--

@@ -18,7 +18,11 @@
 
         <!-- Sam2's div code -->
 
+        <script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/ui/jquery-ui.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/oran/js/jquery.selectboxes.js"><xsl:text> </xsl:text></script>
         <script type="text/javascript" src="interfaces/oran/js/innerxhtml.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/oran/js/jquery.xml.js"><xsl:text> </xsl:text></script>
         <script type="text/javascript" src="interfaces/oran/js/gui_div.js"><xsl:text> </xsl:text></script>
        
         <xsl:call-template name="xml-to-gui-templates">
@@ -52,6 +56,8 @@
             .droppable { background-color: #99dd99;}
             .droppable_hl { border: dashed 1px #ccc; background-color:#FFFFCC; }
 
+            #XSLTcode {width: 99%; }
+
             .elementToolBox {position: fixed; top: 25%; right: 0px; background: none repeat scroll 0% 0% white; width: 250px; }
 
             <!-- .gsf_metadata { border: solid 2px #0000BB; background-color: #440077; } -->
@@ -61,26 +67,80 @@
 
         <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/themes/base/jquery-ui.css"/> 
 
+
+
         <table width="100%" border="1"> 
 
-        <td width="75%">
+            <td width="100%">
+                <xsl:choose>
+                    <xsl:when test="/page/pageRequest/@action = 'd'">
+                        <!-- TOC on or off -->
+                        <xsl:choose>
+                            <xsl:when test="/page/pageResponse/format[@type='display']/gsf:option[(@name='TOC') and (@value='true')]">
+                                <input type="checkbox" name="TOC" checked="checked" onclick="displayTOC(this)">Display Table of Contents (set to true)</input>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <input type="checkbox" name="TOC" onclick="displayTOC(this)">Display Table of Contents (set to false)</input>
+                            </xsl:otherwise>
+                        </xsl:choose> <br/>
 
-        <button id="updateFormatStatement" type="button" onclick="updateFormatStatement()">Update Format Statement</button>
-        <button id="saveFormatStatement" type="button" onclick="saveFormatStatement()">Save Format Statement</button>
+                        <!-- book cover image on or off -->
+                        <xsl:choose>
+                            <xsl:when test="/page/pageResponse/format[@type='display']/gsf:option[(@name='coverImage') and (@value='true')]">
+                                <input type="checkbox" name="bookCover" checked="checked" onclick="displayBookCover(this)">Display Book Cover Image (set to true)</input>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <input type="checkbox" name="bookCover" onclick="displayBookCover(this)">Display Book Cover Image (set to false)</input>
+                            </xsl:otherwise>
+                        </xsl:choose> <br/>
 
-        <div id="formatStatement">
-            <div id="formatRoot">
-        
-        <xsl:call-template name="xml-to-gui">
-            <xsl:with-param name="node-set" select="//format"/> <!-- [@type='browse']"/>  -->
-            <xsl:with-param name="metadataSets" select="//metadataSetList"/> 
-        </xsl:call-template> 
-            </div>
-        </div>
-        </td>    
+                        <textarea id="XSLTcode" rows="5">
+                        The XSLT code for the relevant part of the page will be displayed here.
+                        </textarea>
+                        <!-- What are we doing?  It might be possible to tweak saveFormatStatement() if we are only dealing with format stuff but are we? -->
+                        <br/>
+                        <table>
+                            <td>
+                                <button id="saveDocumentChanges" type="button" onclick="saveDocumentChanges()">Save Changes</button>
+                            </td>
+                            <td>
+                                <form>
+                                    <input name="documentChanges" type="radio" id="applyToDocument" value="document" checked="true"/>Apply to this document only
+                                    <input name="documentChanges" type="radio" id="applyToCollection" value="collection" />Apply to collection
+                                </form>
+                            </td>
+                        </table>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <table>
+                            <td>
+                                <button id="updateFormatStatement" type="button" onclick="updateFormatStatement()">Update Format Statement</button>
+                            </td>
+                            <td>
+                                <button id="saveFormatStatement" type="button" onclick="saveFormatStatement()">Save Format Statement</button>
+                            </td>
+                            <td>
+                                <form>
+                                    <input name="classifiers" type="radio" id="applyToThis" value="this" checked="true"/>This Classifier
+                                    <input name="classifiers" type="radio" id="applyToAll" value="all" />All Classifiers
+                                </form> 
+                            </td>
+                        </table>
 
+                        <div id="formatStatement">
+                            <div id="formatRoot">
+                                <xsl:call-template name="xml-to-gui">
+                                    <xsl:with-param name="node-set" select="//format"/> <!-- [@type='browse']"/>  -->
+                                    <xsl:with-param name="metadataSets" select="//metadataSetList"/> 
+                                </xsl:call-template> 
+                            </div>
+                        </div>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </td>    
+        </table>
 
-        <td class="elementToolBox">
+        <div class="elementToolBox">
             <h2> Elements to add </h2>
             <!-- <div class="header element_type_gsf_template css_gsf_template" title="gsf:template">TEMPLATE</div> -->
                 <div class="draggable_gsf_template css_gsf_template block" title="gsf:template">
@@ -211,8 +271,7 @@
                 <div class="draggable_tr css_tr" title="gsf:row">NEW TABLE ROW</div>
                 <div class="draggable_td css_td" title="gsf:column">NEW TABLE COLUMN</div>
 
-            </td>
-        </table>
+         </div>
 
         <!--
         <div id="format">

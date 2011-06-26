@@ -89,12 +89,19 @@
 						<gslib:berryBasket/>
 
 						<!-- the book's cover image -->
-						<div id="coverImage"><gslib:coverImage/></div>
+                        <!-- COULD BE WORTH SETTING THE STYLE TO DISPLAY:BLOCK OR DISPLAY:NONE BASED ON WHETHER FLAG IS TRUE OR FALSE -->
+                        <!-- OTHERWISE, IF FLAG IS FALSE AND WE WANT TO TURN BOOK COVER ON, NEED TO REQUEST THE NEW PAGE WITH FLAG SET -->
+                        <xsl:if test="/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true'">
+    						<div id="coverImage"><gslib:coverImage/></div>
+                        </xsl:if>
 
-						<!-- the contents -->
-						<div id="tableOfContents">
-							<xsl:apply-templates select="documentNode" mode="TOC"/>
-						</div>
+						<!-- the contents (if enabled) -->
+                        <!-- VALUE=<xsl:value-of select="/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value"/> -->
+                        <xsl:if test="/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
+						    <div id="tableOfContents">
+							    <xsl:apply-templates select="documentNode" mode="TOC"/>
+						    </div>
+                        </xsl:if>
 					</div>
 				</td></tr>
 			</table>
@@ -141,7 +148,7 @@
 	<xsl:template match="documentNode" mode="document">
 		<a name="{@nodeID}"><xsl:text> </xsl:text></a>
 		<!-- Section header -->
-		<table><tr>
+		<table class="sectionHeader"><tr>
 			<!-- Expand/collapse button -->
 			<td class="headerTD">
 				<img id="dtoggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
@@ -162,7 +169,8 @@
 							<xsl:text> </xsl:text>
 						</span>
 					</xsl:if>
-					<xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Title']"/> 
+                    <!-- Display the title for the section regardless of whether automatic section numbering is turned on -->
+					<span class="sectionTitle"><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Title']"/></span>
 				</p>
 			</td>
 			

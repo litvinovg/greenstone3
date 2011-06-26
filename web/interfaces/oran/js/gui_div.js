@@ -1,7 +1,83 @@
 
 console.log("Loading gui_div.js\n");
 
-// var initialised_iframe = "false";
+/* DOCUMENT SPECIFIC FUNCTIONS */
+
+function displayTOC(checkbox)
+{
+    if (checkbox.checked == true)
+    {
+        console.log("Show the TOC!");
+        displaySideBar(true);
+        $("#tableOfContents").css("display", "block");
+    }
+    else
+    {
+        console.log("Hide the TOC!");
+        $("#tableOfContents").css("display", "none");
+        if ($("#coverImage").css("display") == "none")
+            displaySideBar(false);
+    }
+
+    return;
+}
+
+function displayBookCover(checkbox)
+{
+    if (checkbox.checked == true)
+    {
+        console.log("Show the book cover!");
+        displaySideBar(true);
+        $("#coverImage").css("display", "block");
+    }
+    else
+    {
+        console.log("Hide the book cover!");
+        $("#coverImage").css("display", "none");
+        if ($("#tableOfContents").css("display") == "none")
+            displaySideBar(false);
+    }
+
+    return;
+}
+
+function displaySideBar(toggle)
+{
+    if (toggle == true)
+    {
+        console.log("Show the sidebar!");
+        $("#rightSidebar").css("display", "block");
+    }
+    else
+    {
+        console.log("Hide the sidebar!");
+        $("#rightSidebar").css("display", "none");
+    }
+
+    return;
+}
+
+
+function checkDocumentRadio()
+{
+    var selection = $('input[name="documentChanges"]'); //document.quiz.colour;
+
+    for (i=0; i<selection.length; i++)
+
+        if (selection[i].checked == true)
+            return selection[i].value;
+
+    return "this";
+}
+
+function saveDocumentChanges()
+{
+    console.log("Saving changes to "+checkDocumentRadio());
+}
+
+
+
+/* FUNCTIONS FOR FORMAT EDITING */                                                                    
 
 function onTextChange(item, text)
 {
@@ -22,7 +98,6 @@ function onSelectChange(item)
     //item.options[item.selectedIndex].selected = "selected";
     //item.setAttribute("selected","selected");
 }
-
 
 //function createFormatStatement()
 //{
@@ -83,14 +158,33 @@ function getFormatStatement()
     return formatStatement;
 }
 
+function checkClassifierRadio()
+{
+    var selection = $('input[name="classifiers"]'); //document.quiz.colour;
+
+    for (i=0; i<selection.length; i++)
+
+          if (selection[i].checked == true)
+              return selection[i].value;
+
+    return "this";
+
+}
+
 function updateFormatStatement()
 {
     var formatStatement = getFormatStatement();
 
+    var thisOrAll = checkClassifierRadio();
+    console.log(thisOrAll);
     var myurl = document.URL;
 
     var collection_name = getSubstring(myurl, "&c", "&");
-    var service_name = getSubstring(myurl, "&s", "&");
+    var service_name = getSubstring(myurl, "&s", "&");  
+
+    if(thisOrAll == "all")
+        service_name = "AllClassifierBrowse";
+
     var classifier_name = null;
 
     if(service_name == "ClassifierBrowse")
@@ -103,20 +197,26 @@ function updateFormatStatement()
 
     $.post(post_url, {data: formatStatement}, function(data) {
         //$('.result').innerHTML = data; //html(data);
-        console.log("Success, we have received data");
-        console.log(data);
+    
+        // An error is returned because there is no valid XSLT for a format update action, there probably shouldn't be one so we ignore what the post returns.    
+        console.log("Successfully updated");
+        //console.log(data);
         }, 'html');
 }
 
 function saveFormatStatement()
 {
     var formatStatement = getFormatStatement();
+    var thisOrAll = checkClassifierRadio();
 
     var myurl = document.URL;
 
     var collection_name = getSubstring(myurl, "&c", "&");
     var service_name = getSubstring(myurl, "&s", "&");
     var classifier_name = null;
+
+    if(thisOrAll == "all")
+        service_name = "AllClassifierBrowse";
 
     if(service_name == "ClassifierBrowse")
         classifier_name = getSubstring(myurl, "&cl", "&");
@@ -128,9 +228,44 @@ function saveFormatStatement()
 
     $.post(post_url, {data: formatStatement}, function(data) {
         //$('.result').innerHTML = data; //html(data);
-        console.log("Success, we have received data");
-        console.log(data);
+        
+        // An error is returned because there is no valid XSLT for a format update action, there probably shouldn't be one so we ignore what the post returns.    
+        console.log("Successfully saved");
+        //console.log(data);
         }, 'html');
+}
+
+function getXSLT(classname)
+{
+    var myurl = document.URL;
+
+    var collection_name = getSubstring(myurl, "&c", "&");
+    var document_id = getSubstring(myurl, "&d", "&");
+    var document_type = getSubstring(myurl, "&dt", "&");
+    var prev_action = getSubstring(myurl, "&p.a", "&");
+    var prev_service = getSubstring(myurl, "&p.s", "&");
+    //var classifier_name = null;
+
+    //if(service_name == "ClassifierBrowse")
+    //    classifier_name = getSubstring(myurl, "&cl", "&");
+
+
+    //var post_url = "http://localhost:8989/greenstone3/format?a=f&sa=getXSLT&c=" + collection_name +"&s=" + service_name+"&d=" + document_id + "&o=skinandlib";
+    var post_url = "http://localhost:8989/greenstone3/format?a=d&c=" + collection_name + "&d=" + document_id + "&dt=" + document_type + "&p.a=" + prev_action + "&p.s=" + prev_service + "&o=skinandlib";
+
+    //if(classifier_name != null)
+    //    post_url = post_url + "&cl=" + classifier_name;
+
+    $.post(post_url, {data: classname}, function(data) {
+            //$('.result').innerHTML = data; //html(data);
+            console.log("Success, we have received data");
+            //console.log(data);
+            classname = "." + classname;
+            console.log(classname); //data.getElementsByTagName("div"));
+            var content = $( data ).find(classname);
+            console.log(content.xml());
+            $("#XSLTcode").val(content.xml());
+            }, 'xml');
 }
 
 /*
@@ -342,6 +477,20 @@ $(document).ready(function(){
     console.log("Document ready function\n");
 
     var CURRENT_SELECT_VALUE = "";
+
+    /* DOCUMENT SPECIFIC FUNCTIONS */
+
+    $('.sectionHeader').click(function () {
+        console.log('section Header click *');
+        getXSLT("sectionHeader");
+        return false; //don't event bubble
+    });
+
+    $('.sectionContainer').click(function () {
+        console.log('section Container click *');
+        getXSLT("sectionContainer");
+        return false; // don't event bubble
+    });
 
     /*
     var iframe = document.getElementById('iframe');
@@ -566,10 +715,14 @@ function bind_tables()
     console.log('function bind_tables()');
     //$('.tr').resize_tables($(this)); //equalHeights();
 
+    $('#sectionHeader').click(function () {
+         console.log('section Header click *');
+         return true;
+    });
     
-    $('td').click(function () {
-         console.log('td click *');
-         return false;
+    $('#sectionContainer').click(function () {
+         console.log('section Container click *');
+         return true;
     });
 
     $(".td-div").resizable({
