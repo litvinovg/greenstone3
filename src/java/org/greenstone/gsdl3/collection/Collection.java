@@ -358,6 +358,8 @@ public class Collection
     String lang = request.getAttribute(GSXML.LANG_ATT);
     response.setAttribute(GSXML.TYPE_ATT, type);
 
+    logger.error("Collection received a message, attempting to process");
+
     if (type.equals(GSXML.REQUEST_TYPE_FORMAT_STRING)) {
         logger.error("Received format string request");
 
@@ -500,7 +502,7 @@ public class Collection
                         // what if classifier does not have a format tag?
                         if(GSXML.getChildByTagName(current_node, "format") == null)
                         {
-                            logger.error("ERROR: classifier does not have a format child");
+                            logger.error("ERROR: valid classifier but does not have a format child");
                             // well then create a format tag
                             Element format_tag = config.createElement("format");
                             current_node = (Node) current_node.appendChild(format_tag);
@@ -510,11 +512,37 @@ public class Collection
                         else{
                             current_node = GSXML.getChildByTagName(current_node, "format");
                         }
+
                     }
                     else{
                         logger.error("Classifier is null");
-                        current_node = GSXML.getChildByTagName(current_node, "format");
+                        // To support all classifiers, set classifier to null?  There is the chance here that the format tag does not exist
+                        if(GSXML.getChildByTagName(current_node, "format") == null)
+                        {
+                            logger.error("ERROR: classifier does not have a format child");
+                            // well then create a format tag
+                            Element format_tag = config.createElement("format");
+                            current_node = (Node) current_node.appendChild(format_tag);
+                            //current_node = (Node) format_tag;
+                        }
+                        else
+                            current_node = GSXML.getChildByTagName(current_node, "format");
                     }
+                }
+                else if(service.equals("AllClassifierBrowse"))
+                {
+                    logger.error("Looking for browse");
+                    current_node = GSXML.getChildByTagName(current_node, "browse");
+                    if(GSXML.getChildByTagName(current_node, "format") == null)
+                    {
+                        logger.error("ERROR AllClassifierBrowse: all classifiers do not have a format child");
+                        // well then create a format tag
+                        Element format_tag = config.createElement("format");
+                        current_node = (Node) current_node.appendChild(format_tag);
+                        //current_node = (Node) format_tag;
+                    }
+                    else
+                        current_node = GSXML.getChildByTagName(current_node, "format");
                 }
                 else
                 {
@@ -535,16 +563,19 @@ public class Collection
                 // Current_node should be a format tag
                 elem = (Element) current_node;
     
-                logger.error("Current_node = " + elem.getNodeName());
+                logger.error("*Current_node = " + elem.getNodeName());
 
                 // seems we want to remove current child/ren and replace with format_statement's child/ren?
 
                 // remove existing
                 current_node_list = elem.getChildNodes();
+                logger.error("About to remove old children");
                 for(k=0; k<current_node_list.getLength(); k++)
                 {
                     current_node = elem.removeChild(current_node_list.item(k));
                 }
+
+                logger.error("old nodes removed");
 
                 // append new but we have a string!
                 //GSXML.setNodeText(elem, "THIS IS A TEST");
@@ -559,6 +590,7 @@ public class Collection
                     if(current_node_list.item(k).getNodeType() != Node.PROCESSING_INSTRUCTION_NODE)
                         elem.appendChild(config.importNode(current_node_list.item(k),true));
                 }
+                logger.error("new nodes added");
 
                 //String text = GSXML.getNodeText(elem);
                 //logger.error(text);
@@ -567,6 +599,7 @@ public class Collection
                 //GSXML.setNodeText(d, text);
 
                 // Now convert config document to string for writing to file
+                logger.error("Convert config to string");
                 String new_config = this.converter.getString(config);
 
                 new_config = StringUtils.replace(new_config, "&lt;", "<");
@@ -577,6 +610,7 @@ public class Collection
                 BufferedWriter writer = new BufferedWriter(new FileWriter(collection_config+".new"));
                 writer.write(new_config);
                 writer.close();
+                logger.error("All is happy with collection");
 
              } catch( Exception ex ) {
                 logger.error("There was an exception "+ex);

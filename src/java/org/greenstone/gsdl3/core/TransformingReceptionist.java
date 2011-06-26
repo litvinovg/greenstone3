@@ -425,6 +425,8 @@ public class TransformingReceptionist extends Receptionist{
     }
 		
     String xslt_file = getXSLTFileName(action, subaction, collection);
+    logger.error("I am looking for the XSLT file for action "+action+", subaction "+subaction+" and collection "+collection);
+    logger.error("The XSLT file I have found is "+xslt_file);
     if (xslt_file==null) {
       // returning file not found error page to indicate which file is missing
       return fileNotFoundErrorPage(xslt_file);
@@ -770,6 +772,7 @@ public class TransformingReceptionist extends Receptionist{
 
   protected String getXSLTFileName(String action, String subaction,
 				   String collection) {
+    logger.error("getXSLTFileName: I am looking for the XSLT file for action "+action+", subaction "+subaction+" and collection "+collection);
 
     String name = null;
     if (!subaction.equals("")) {

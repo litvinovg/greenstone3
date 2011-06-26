@@ -39,63 +39,63 @@ public class FormatAction extends Action {
     /** process a request */
     public Node process (Node message_node) {
 	
-	Element message = this.converter.nodeToElement(message_node);
+	    Element message = this.converter.nodeToElement(message_node);
 
-	// assume only one request
-	Element request = (Element)GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
+    	// assume only one request
+	    Element request = (Element)GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 	
-	String subaction = request.getAttribute(GSXML.SUBACTION_ATT);
-	String lang = request.getAttribute(GSXML.LANG_ATT);
-	String uid = request.getAttribute(GSXML.USER_ID_ATT);
-	// get the param list
-	Element cgi_param_list = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
-	HashMap params = GSXML.extractParams(cgi_param_list, false);
+    	String subaction = request.getAttribute(GSXML.SUBACTION_ATT);
+	    String lang = request.getAttribute(GSXML.LANG_ATT);
+    	String uid = request.getAttribute(GSXML.USER_ID_ATT);
+	    // get the param list
+    	Element cgi_param_list = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+	    HashMap params = GSXML.extractParams(cgi_param_list, false);
 
-	Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
+    	Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
 	
-	String coll = (String)params.get(GSParams.COLLECTION); //SYSTEM_CLUSTER);
-    //String subaction = (String)params.get(GSParams.SUBACTION);
-    String service = (String)params.get(GSParams.SERVICE);
-    String classifier = (String)params.get("cl");
+	    String coll = (String)params.get(GSParams.COLLECTION); //SYSTEM_CLUSTER);
+        //String subaction = (String)params.get(GSParams.SUBACTION);
+        String service = (String)params.get(GSParams.SERVICE);
+        String classifier = (String)params.get("cl");
 
 
-    logger.error("Collection="+coll);
-    logger.error("Subaction="+subaction);
-    logger.error("Service="+service);
-    logger.error("Classifier="+classifier);
+        logger.error("Collection="+coll);
+        logger.error("Subaction="+subaction);
+        logger.error("Service="+service);
+        logger.error("Classifier="+classifier);
 
 
-	String to = "";
-	if (coll!=null && !coll.equals("")) {
-	    to = coll;
-	}
+        String to = "";
+        if (coll!=null && !coll.equals("")) {
+            to = coll;
+        }
 
-	Element mr_request_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-	Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT_STRING, to, lang, uid);
+        Element mr_request_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+        Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT_STRING, to, lang, uid);
 
-    mr_request.setAttribute("service", service);
-    mr_request.setAttribute("subaction", subaction);
-    //if(classifier != null)
-    mr_request.setAttribute("classifier", classifier);
+        mr_request.setAttribute("service", service);
+        mr_request.setAttribute("subaction", subaction);
+        //if(classifier != null)
+        mr_request.setAttribute("classifier", classifier);
 
-	mr_request_message.appendChild(mr_request);
+        mr_request_message.appendChild(mr_request);
 	
-	//Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
-	//mr_request.appendChild(format);
+        //Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
+        //mr_request.appendChild(format);
 
-    String format_string = (String)params.get("data");
-    //logger.error("Original format string");
-    //logger.error(format_string);
+        String format_string = (String)params.get("data");
+        //logger.error("Original format string");
+        //logger.error(format_string);
     
-    Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+        Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 
-    Iterator it = params.keySet().iterator();
-    //while(it.hasNext())
-    //{
-    //    logger.error("Param: "+it.next());
-    //}      
+        Iterator it = params.keySet().iterator();
+        //while(it.hasNext())
+        //{
+        //    logger.error("Param: "+it.next());
+        //}      
 
-    try {
+        try {
             //DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             //DocumentBuilder builder = factory.newDocumentBuilder();
             //String input = "<html><head><title></title></head><body>" + format_string + "</body></html>";
@@ -121,7 +121,8 @@ public class FormatAction extends Action {
             // not sure what to do here - some code from Transforming Receptionist
             //String transformed = transformer.transformToString(style_doc, d);
             logger.error("About to transform");
-            Node transformed = (Node) transformer.transform(style_doc, d);  // Failing org.w3c.dom.DOMException: HIERARCHY_REQUEST_ERR: An attempt was made to insert a node where it is not permitted. ; SystemID: file:///home/sam/greenstone3/packages/tomcat/bin/dummy.xsl
+            Node transformed = (Node) transformer.transform(style_doc, d);  
+            // Failing org.w3c.dom.DOMException: HIERARCHY_REQUEST_ERR: An attempt was made to insert a node where it is not permitted. ; SystemID: file:///home/sam/greenstone3/packages/tomcat/bin/dummy.xsl
 
             logger.error("Transform successful?");
          
@@ -148,7 +149,7 @@ public class FormatAction extends Action {
 
 
             //page_response.appendChild(this.doc.importNode(e, true));
-    } catch( Exception ex ) {
+        } catch( Exception ex ) {
             logger.error("There was an exception "+ex);
             
             StringWriter sw = new StringWriter();
@@ -157,21 +158,21 @@ public class FormatAction extends Action {
             pw.flush();
             sw.flush();
             logger.error(sw.toString());
-    }
+        }
 
 
-    // Call XSLT to transform document to xml format string
-    //XMLTransformer transformer = new XMLTransformer();
+        // Call XSLT to transform document to xml format string
+        //XMLTransformer transformer = new XMLTransformer();
 
-    // not sure what to do here - some code from Transforming Receptionist
-    //transformer.transformToString(Document stylesheet, Document source);
+        // not sure what to do here - some code from Transforming Receptionist
+        //transformer.transformToString(Document stylesheet, Document source);
 
-    // create a mesage to send to the collection object via the message router
+        // create a mesage to send to the collection object via the message router
 
-	Node response_message = this.mr.process(mr_request_message);
+        Node response_message = this.mr.process(mr_request_message);
 	
-	result.appendChild(GSXML.duplicateWithNewName(this.doc, (Element)GSXML.getChildByTagName(response_message, GSXML.RESPONSE_ELEM), GSXML.RESPONSE_ELEM, true));
-	return result;
+        result.appendChild(GSXML.duplicateWithNewName(this.doc, (Element)GSXML.getChildByTagName(response_message, GSXML.RESPONSE_ELEM), GSXML.RESPONSE_ELEM, true));
+        return result;
 	
     }
 
