@@ -8,7 +8,7 @@ public class Server2Property extends BaseProperty
     {
 	// Initialising customised final variables 
 	// Version number, WEB_PORT
-	super("2", "portnumber", "autoenter", "start_browser");
+	super("2", "portnumber", "autoenter", "start_browser", "keepport");
     }
 
 }

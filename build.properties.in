@@ -25,6 +25,8 @@ tomcat.installed.path=
 ## Greenstone 3 server program options
 # does running the server automatically start up Tomcat and a browser
 server.auto.start=false
+# if set to true, won't try other ports if the specified port is not available
+server.keep.port=false
 # default servlet to start with
 server.default.servlet=/library
 

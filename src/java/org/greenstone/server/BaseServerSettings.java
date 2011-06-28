@@ -20,6 +20,7 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
     static final Color bg_color = Color.white;
 
     protected JCheckBox autoEnter;
+    protected JCheckBox keepPortToggle;
 
     protected JSpinner portNumber_spinner = null;
     protected JTextField program_path_field = null;
@@ -30,6 +31,7 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 
     protected int portNum = DEFPORT;
     protected boolean autoStart = false;
+    protected boolean keepPort = false;
     protected String browserPath = "";
     protected boolean useDefaultBrowser = true;
 
@@ -66,6 +68,14 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 	    this.autoStart = false;
 	}
 
+	String keep_port_str = server.config_properties.getProperty(BaseServer.Property.KEEPPORT).trim();
+	if (keep_port_str.equals("true") || keep_port_str.equals("1")) {
+	    this.keepPort = true;
+	} else {
+	    this.keepPort = false;
+	}
+
+
 	setTitle(server.dictionary.get("ServerSettings.Title"));
 	setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
@@ -75,6 +85,7 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 	portNumber_spinner.setEditor(new JSpinner.NumberEditor(portNumber_spinner, "#####"));
 
 	autoEnter = new JCheckBox(server.dictionary.get("ServerSettings.Auto_Start"));
+	keepPortToggle = new JCheckBox(server.dictionary.get("ServerSettings.Keep_Port"));
 	
 	if (autoStart) {
 	    autoEnter.setSelected(true);
@@ -82,6 +93,13 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 	    autoEnter.setSelected(false);
 	}
 	autoEnter.setBackground(bg_color);
+
+	if(keepPort) {
+	    keepPortToggle.setSelected(true);
+	} else {
+	    keepPortToggle.setSelected(false);
+	}
+	keepPortToggle.setBackground(bg_color);
 
 
 	JButton save_button = new JButton(BaseServer.dictionary.get("ServerSettings.OK"));
@@ -106,8 +124,9 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 	port_panel.add(portNumber_spinner);
 	port_panel.setBackground(bg_color);
 
-	JPanel top_panel = new JPanel(new GridLayout(2,1));
+	JPanel top_panel = new JPanel(new GridLayout(3,1));
 	top_panel.add(port_panel);
+	top_panel.add(keepPortToggle);
 	top_panel.add(autoEnter);
 
 	JPanel comb_panel = createServletPanel();
@@ -226,6 +245,10 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 	    if (autoStart != autoEnter.isSelected()) {
             	has_changed = true;
 	    }
+	    if (keepPort != keepPortToggle.isSelected()) {
+            	has_changed = true;
+	    }
+
 
 	    // call subclass' onSave method, which may indicate (further) changes,
 	    // and which may or may not require a restart

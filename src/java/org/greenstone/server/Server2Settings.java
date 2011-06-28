@@ -108,6 +108,11 @@ public class Server2Settings extends BaseServerSettings
 	    String newAutoEnter = auto_enter ? "1" : "0";
 	    newFileLines = scriptReadWrite.queryReplace(newFileLines, BaseServer.Property.AUTOSTART, newAutoEnter);
 	}
+	boolean keep_port = keepPortToggle.isSelected();
+	if(keepPort != keep_port) {
+	    String newKeepPort = keep_port ? "1" : "0";
+	    newFileLines = scriptReadWrite.queryReplace(newFileLines, BaseServer.Property.KEEPPORT, newKeepPort);
+	}
 
 	// external access - onSave() would have updated this value
 	newFileLines = scriptReadWrite.queryReplace(newFileLines, "externalaccess", Integer.toString(externalaccess));

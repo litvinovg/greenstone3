@@ -26,6 +26,7 @@ import org.greenstone.util.RunAnt;
 import org.greenstone.server.BaseServer;
 import org.greenstone.server.BaseProperty;
 
+
 public class Server2 extends BaseServer 
 {
     private static final int WAITING_TIME = 10; // time to wait and check for whether the server is running
@@ -286,7 +287,7 @@ public class Server2 extends BaseServer
 	    recordError("Exception trying to load properties from gsdlsite_cfg. Using default library prefix.", e);
 	    suffix = httpprefix + suffix;
 	}
-	
+
 	libraryURL = "http://" + host + ":" + port + suffix;
     }
 
@@ -296,34 +297,44 @@ public class Server2 extends BaseServer
 	// make sure the port is okay, otherwise find another port
 	// first choice is port 80, second choice starts at 8282
 	String port = config_properties.getProperty("portnumber", "80");
+	String keepport = config_properties.getProperty("keepport", "0"); // default is to not try to keep the same port
+
 	int portDefault = 8282;
 	try {
 	    int portNum = Integer.parseInt(port);
 	    boolean verbose = true;
 	    if(!PortFinder.isPortAvailable(portNum, verbose)) { // first time, print any Port Unavailable messages
-		
-		PortFinder portFinder = new PortFinder(portDefault, 101);
-		// Search for a free port silently from now on--don't want more
-		// messages saying that a port could not be found...
-		portNum = portFinder.findPortInRange(!verbose);
-		
-		if (portNum == -1) {
-		    // If we've still not found a free port, do we try the default port again?
-		    System.err.println("No free port found. Going to try on " + portDefault + " anyway.");
-		    port = Integer.toString(portDefault);
+		if(keepport.equals("1")) {
+		    String errorMsg = "Unable to run the Greenstone server on port " + port + ". It may already be in use.";
+		    System.err.println("\n******************");
+		    logger_.error(errorMsg);
+		    System.err.println("If you wish to try another port, go to File > Settings of the Greenstone Server interface and either change the port number or untick the \"Do Not Modify Port\" option there. Then press the \"Enter Library\" button.");
+		    System.err.println("******************\n");
 		} else {
-		    port = Integer.toString(portNum);
+
+		    PortFinder portFinder = new PortFinder(portDefault, 101);
+		    // Search for a free port silently from now on--don't want more
+		    // messages saying that a port could not be found...
+		    portNum = portFinder.findPortInRange(!verbose);
+		    
+		    if (portNum == -1) {
+			// If we've still not found a free port, do we try the default port again?
+			System.err.println("No free port found. Going to try on " + portDefault + " anyway.");
+			port = Integer.toString(portDefault);
+		    } else {
+			port = Integer.toString(portNum);
+		    }
+		    config_properties.setProperty("portnumber", port); // store the correct port
+		    
+		    // write this updated port to the config file, since the configure target uses the file to run
+		    ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
+		    ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
+		    scriptReadWrite.replaceOrAddLine(fileLines, "portnumber", port, false); // write the correct port
+		    scriptReadWrite.writeOutFile(config_properties_file, fileLines);
+		    
+		    configure_required_ = true;
+		    System.err.println("Running server on port " + port + ".");
 		}
-		config_properties.setProperty("portnumber", port); // store the correct port
-
-		// write this updated port to the config file, since the configure target uses the file to run
-		ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
-		ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
-		scriptReadWrite.replaceOrAddLine(fileLines, "portnumber", port, false); // write the correct port
-		scriptReadWrite.writeOutFile(config_properties_file, fileLines);
-
-		configure_required_ = true;
-		System.err.println("Running server on port " + port + ".");
 	    }    
 	} catch (Exception e) {
 	    recordError("Exception in Server2.reload(): " + e.getMessage());

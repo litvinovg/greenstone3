@@ -92,6 +92,9 @@ public class Server3Settings extends BaseServerSettings
 	String newAutoEnter = (new Boolean(autoEnter.isSelected())).toString();
 	newFileLines = scriptReadWrite.queryReplace(newFileLines, BaseServer.Property.AUTOSTART, newAutoEnter);
 
+	String newKeepPort = (new Boolean(keepPortToggle.isSelected())).toString();
+	newFileLines = scriptReadWrite.queryReplace(newFileLines, BaseServer.Property.KEEPPORT, newKeepPort);
+
 	String newServletDef = (String) servlet_combobox.getSelectedItem();
 	newFileLines = scriptReadWrite.queryReplace(newFileLines,BaseServer.Property.DEFAULT_SERVLET, (String) url_mappings.get(newServletDef));	
     }

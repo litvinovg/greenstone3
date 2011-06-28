@@ -5,6 +5,7 @@ public class BaseProperty {
     public final String GSDL_HOME;
     public final String GSDL_VERSION;
     public final String AUTOSTART;
+    public final String KEEPPORT;
     public final String START_BROWSER;
 
     public final String DEFAULT_SERVLET = "server.default.servlet";
@@ -20,7 +21,7 @@ public class BaseProperty {
     public final String SERVER_CONTROL;
     public final String SERVER_SETTINGS;
     
-    protected BaseProperty(String version, String web_port, String autostart, String startbrowser) 
+    protected BaseProperty(String version, String web_port, String autostart, String startbrowser, String keepport) 
     {
 	// property names
 	WEB_PORT = web_port;
@@ -30,6 +31,7 @@ public class BaseProperty {
 	SERVER_SETTINGS = "Server"+version+"Settings";
 	AUTOSTART = autostart;
 	START_BROWSER = startbrowser;
+	KEEPPORT = keepport;
     }
 
 }
