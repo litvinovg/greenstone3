@@ -2062,6 +2062,12 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <exec executable="svn"><arg value="checkout"/><arg value="${flax.checkout.path}/lib"/> 
       <arg value="flax-lib"/></exec> 
     <antcall target="flax-copy-files" />
+    <!-- Disable jni and gli -->
+    <condition property="file.name.to.edit" value="${basedir}/build.properties" else="${basedir}/build.properties.in">
+      <available file="${basedir}/build.properties"/>
+    </condition>
+    <concat destfile="${file.name.to.edit}" append="true" fixlastline="yes">with.jni=false</concat>  	    
+    <concat destfile="${file.name.to.edit}" append="true" fixlastline="yes">with.gli.and.gems=false</concat>
   </target>
   
   <target name="flax-copy-files" description="copy some flax files into the appropriate greenstone3 directories">
@@ -2099,7 +2105,6 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="flax-resources"/></exec> 
     <exec executable="svn"><arg value="update"/>
       <arg value="flax-lib"/></exec> 
-    <!--<antcall target="flax-copy-files" />-->
 	<antcall target="compile-core" />
   </target>
 
