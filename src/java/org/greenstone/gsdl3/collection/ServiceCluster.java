@@ -387,8 +387,6 @@ that is passed to teh service  - eg used for coll config files for Collection
      */
     public Node process(Node message_node) {
 
-    logger.error("ServiceCluster is processing a message");
-
 	Element message = this.converter.nodeToElement(message_node);
 
 	NodeList requests = message.getElementsByTagName(GSXML.REQUEST_ELEM);
@@ -418,7 +416,6 @@ that is passed to teh service  - eg used for coll config files for Collection
 		
 	    } else { // the request is for one of my services
 		String service = GSPath.getFirstLink(to);
-		logger.error(service+" specified!");
 		
 		if (!this.service_map.containsKey(service)) {
 		    logger.error("non-existant service, "+service+", specified!");
@@ -469,7 +466,6 @@ that is passed to teh service  - eg used for coll config files for Collection
      */
     protected Element processMessage(Element request) {
 
-    logger.error("ServiceCluster is processing an element request");
 	Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 	response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
 	String type = request.getAttribute(GSXML.TYPE_ATT);
