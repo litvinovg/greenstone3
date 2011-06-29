@@ -990,14 +990,18 @@ public class GSXML {
     System.out.print('<');
     System.out.print(e.getNodeName());
     NamedNodeMap attrs = e.getAttributes();
-    for (int i = 0; i < attrs.getLength(); i++) {
-      Node attr = attrs.item(i);
-      System.out.print(' ');
-      System.out.print(attr.getNodeName());
-      System.out.print("=\"");
-      System.out.print(attr.getNodeValue());
-      System.out.print('"');
-    }
+	
+	if (attrs != null)
+	{
+		for (int i = 0; i < attrs.getLength(); i++) {
+			Node attr = attrs.item(i);
+			System.out.print(' ');
+			System.out.print(attr.getNodeName());
+			System.out.print("=\"");
+			System.out.print(attr.getNodeValue());
+			System.out.print('"');
+		}
+	}
     
     NodeList children = e.getChildNodes();
     
