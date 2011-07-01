@@ -118,5 +118,31 @@
       alt='{$alt}' title='{$title}'/>
   </xsl:template>
 
+  <!-- builds up links to available document types equivalent to the default source
+       document with as anchor the equivalent documents' doctype icons. -->
+  <xsl:template name="equivDocLinks">
+    <xsl:param name="count"/>
+
+      <xsl:variable name="docicon" select="metadataList/metadata[contains(@name, 'equivDocIcon')]"/>	
+      <xsl:variable name="docStartlink" select="metadataList/metadata[contains(@name, 'all_*,*_equivDocLink')]"/>	
+      <xsl:variable name="docEndlink" select="metadataList/metadata[contains(@name, '/equivDocLink')]"/>
+
+      <xsl:variable name="equivDocIcon" select="java:org.greenstone.gsdl3.util.XSLTUtil.getNumberedItem($docicon, $count)" />
+      <xsl:variable name="equivStartlink" select="java:org.greenstone.gsdl3.util.XSLTUtil.getNumberedItem($docStartlink, $count)" />
+      <xsl:variable name="equivEndlink" select="java:org.greenstone.gsdl3.util.XSLTUtil.getNumberedItem($docEndlink, $count)" />
+
+      <xsl:if test="$equivDocIcon != ''">
+        <xsl:value-of disable-output-escaping="yes" select="$equivStartlink"/>
+        <xsl:value-of disable-output-escaping="yes" select="$equivDocIcon"/>
+        <xsl:value-of disable-output-escaping="yes" select="$equivEndlink"/>
+
+        <!-- recursively call this template to get multiple entries -->
+        <xsl:call-template name="equivDocLinks">
+          <xsl:with-param name="count"><xsl:value-of select="$count + 1"/></xsl:with-param>
+        </xsl:call-template>
+      </xsl:if>
+
+  </xsl:template>
+
 </xsl:stylesheet>
 

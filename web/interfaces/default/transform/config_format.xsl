@@ -76,7 +76,40 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
+  <!-- calls a template in icons.xsl in order to avoid xsl vs xslt issue -->
+  <xsl:template match="gsf:equivlinkgs3">
+    <xslt:call-template name="equivDocLinks">
+      <xslt:with-param name="count" select="0"/>
+    </xslt:call-template>
+  </xsl:template>
+
+  <!-- Another way: build all the equivalent document links for the current document in one go. No looping necessary: handled in function call. -->
+  <!--<xsl:template match="gsf:equivlinkgs3">
+	<xslt:variable name="docicon" select="metadataList/metadata[contains(@name, 'equivDocIcon')]"/>	
+	<xslt:variable name="docStartlink" select="metadataList/metadata[contains(@name, 'all_*,*_equivDocLink')]"/>	
+	<xslt:variable name="docEndlink" select="metadataList/metadata[contains(@name, '/equivDocLink')]"/>
+
+	<xslt:variable name="equivDocLinks" select="java:org.greenstone.gsdl3.util.XSLTUtil.getEquivDocLinks(',',$docicon, $docStartlink, $docEndlink, ' ')" />
+	<xslt:value-of disable-output-escaping="yes" select="$equivDocLinks"/>
+  </xsl:template>-->
+
+<!--
+In the collection's format statement, could have the following javascript+XSLT in place of
+the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl and icons.xsl).
+<xsl:text disable-output-escaping="yes">&lt;script&gt;var equivDocIcon= [ &quot;
+</xsl:text>
+<gsf:metadata name="equivDocIcon" separator="&quot;, &quot;" multiple="true"/>
+<xsl:text disable-output-escaping="yes">&quot;];var equivDocStartLink= [ &quot;
+</xsl:text>
+<gsf:metadata name="equivDocLink" separator="&quot;,&quot;" multiple="true"/>
+<xsl:text disable-output-escaping="yes">&quot;];var equivDocEndLink= [ &quot;
+</xsl:text>
+<gsf:metadata name="/equivDocLink" separator="&quot;,&quot;" multiple="true"/>
+<xsl:text disable-output-escaping="yes">&quot;];for (var i=0; i&lt;equivDocIcon.length; i++) { document.write(equivDocStartLink[i]+ equivDocIcon[i] + equivDocEndLink[i]); }&lt;/script&gt;
+</xsl:text>
+-->
+
   <xsl:template match="gsf:metadata[@format]">
     <xslt:value-of disable-output-escaping="yes"><xsl:attribute name="select">java:org.greenstone.gsdl3.util.XSLTUtil.<xsl:value-of select="@format"/>(metadataList/metadata[@name='<xsl:apply-templates select="." mode="get-metadata-name"/>'], /page/@lang )</xsl:attribute></xslt:value-of>
   </xsl:template>

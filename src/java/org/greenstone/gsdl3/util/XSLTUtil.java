@@ -96,6 +96,32 @@ public class XSLTUtil {
 	return ""; // index out of bounds
     }
 
+    /** Generates links to equivalent documents for a document with a default document icon/type. 
+     * Links are generated from the parameters: a list of document icons which are each in turn embedded 
+     * in the matching starting link tag in the list of docStartLinks (these starting links link to the 
+     * equivalent documents in another format). Each link's start tag is closed with the corresponding 
+     * closing tag in the docEndLinks list. Parameter token is the list separator. Parameter divider is 
+     * the string that should separate each final link generated from the next.
+     * Returns a string that represents a sequence of links to equivalent documents, where the anchor is
+     * a document icon. */
+    public static String getEquivDocLinks(String token, String docIconsString, String docStartLinksString, 
+					  String docEndLinksString, String divider)
+    {
+	String [] docIcons = StringUtils.split(docIconsString, token, -1);
+	String [] startLinks = StringUtils.split(docStartLinksString, token, -1);
+	String [] endLinks = StringUtils.split(docEndLinksString, token, -1);
+
+	StringBuffer buffer = new StringBuffer();
+	for(int i = 0; i < docIcons.length; i++) {
+	    if(i > 0) {
+		buffer.append(divider);
+	    }
+	    buffer.append(startLinks[i]+docIcons[i]+endLinks[i]);
+	}
+	
+	return buffer.toString();
+    }
+
     
     public static String tidyWhitespace(String original) {
 	

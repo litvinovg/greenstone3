@@ -104,20 +104,46 @@ abstract public class Action {
             metadata.append(name);
             meta_names.add(metadata.toString());
         }
+	
+	// The XSL tranform for
+	//   gsf:link type="source" 
+	// makes use of 'assocfilepath' so need to make sure it's asked for
+	
+	NodeList link_nodes = format.getElementsByTagName("gsf:link");
+	for (int i=0; i<link_nodes.getLength(); i++) {
+	    Element elem = (Element)link_nodes.item(i);
+	    String type = elem.getAttribute("type");
+	    if (type.equals("source")) {
+		meta_names.add("assocfilepath");
+	    } else if (type.equals("sourcelinkfile")) {
+		meta_names.add("assocfilepath");
+		//meta_names.add("srclinkFile");
+	    }
+	}
 
-		// The XSL tranform for
-		//   gsf:link type="source" 
-		// makes use of 'assocfilepath' so need to make sure it's asked for
 
-		NodeList link_nodes = format.getElementsByTagName("gsf:link");
-			for (int i=0; i<link_nodes.getLength(); i++) {
-				Element elem = (Element)link_nodes.item(i);
-				String type = elem.getAttribute("type");
-			if (type.equals("source") || type.equals("sourcelinkfile")) {
-			meta_names.add("assocfilepath");
-			}
-		}
+	// get all the metadata necessary for when the user has used "gsf:equivlink"
+	// so that we can build up the equivlink from the metadata components it needs
+	link_nodes = format.getElementsByTagName("gsf:equivlinkgs3"); 
+	if(link_nodes != null) {	  
 
+	    String[] equivlink_metanames = {"equivDocIcon", "equivDocLink", "/equivDocLink"};
+
+	    for(int i = 0; i < equivlink_metanames.length; i++) {
+		StringBuffer metadata = new StringBuffer();
+		metadata.append("all"); // this means the attr multiple = true;
+		metadata.append(GSConstants.META_RELATION_SEP);
+		
+		metadata.append(GSConstants.META_SEPARATOR_SEP);
+		metadata.append(','); // attr separator = ","
+		metadata.append(GSConstants.META_SEPARATOR_SEP);
+		metadata.append(GSConstants.META_RELATION_SEP);
+		
+		// the name of the metadata we're retrieving
+		metadata.append(equivlink_metanames[i]);
+		meta_names.add(metadata.toString());
+	    }
+	}
     }
 
     protected Element createMetadataParamList(HashSet metadata_names) {
