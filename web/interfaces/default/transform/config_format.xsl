@@ -47,7 +47,7 @@
 	<a><xslt:attribute name='href'><xslt:value-of 
 	   disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']" />/index/assoc/<xslt:value-of 
 	   disable-output-escaping="yes" select="metadataList/metadata[@name='assocfilepath']" />/<xslt:value-of 
-	   disable-output-escaping="yes" select="metadataList/metadata[@name='srclinkFile']" /></xslt:attribute>
+	   disable-output-escaping="yes" select="metadataList/metadata[@name='srclink_file']" /></xslt:attribute>
 	  <xsl:apply-templates/>
 	</a>
       </xsl:when>
