@@ -127,7 +127,6 @@ extends ServiceCluster {
 		{
 			db_type = "gdbm"; //The default
 		}
-		System.err.println("DB_TYPE = "  + db_type);
 		
 		// process the metadata and display items
 		findAndLoadInfo(coll_config_xml, build_config_xml);
