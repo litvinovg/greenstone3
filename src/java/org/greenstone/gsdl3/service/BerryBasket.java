@@ -286,8 +286,6 @@ public class BerryBasket
 	
 	// Get the parameters of the request
 	Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
-        
-        //GSXML.printXMLNode(param_list);
 
 	if (param_list == null) {
 	    logger.error("BerryBasket Error: DeleteItem request had no paramList.");
@@ -335,8 +333,6 @@ public class BerryBasket
 	
 	// Get the parameters of the request
 	Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
-        
-        //GSXML.printXMLNode(param_list);
 
 	if (param_list == null) {
 	    logger.error("BerryBasket Error: DeleteItem request had no paramList.");
@@ -374,7 +370,6 @@ public class BerryBasket
 
 
     protected Element processItemNum(Element request){
-        // GSXML.printXMLNode(request);
 	Hashtable docsMap = updateDocMap(request);
 
 	// Create a new (empty) result message
@@ -488,8 +483,6 @@ public class BerryBasket
 		
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
-		
-		GSXML.printXMLNode(param_list);
 		
 		if (param_list == null) {
 			logger.error("BerryBasket Error: SendMail request had no paramList.");

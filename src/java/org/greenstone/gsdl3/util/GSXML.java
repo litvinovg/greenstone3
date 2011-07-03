@@ -84,6 +84,7 @@ public class GSXML {
   public static final String RECOGNISE_ELEM = "recognise";
   public static final String DOC_TYPE_ELEM = "docType";
   public static final String SEARCH_ELEM = "search";
+  public static final String INFODB_ELEM = "infodb";
   public static final String INDEX_ELEM = "index";
   public static final String INDEX_STEM_ELEM = "indexStem";
   public static final String INDEX_OPTION_ELEM = "indexOption";
@@ -124,6 +125,7 @@ public class GSXML {
   public static final String FROM_ATT = "from";
   public static final String LANG_ATT = "lang";
   public static final String TYPE_ATT = "type";
+  public static final String DB_TYPE_ATT = "dbType";
   public static final String VALUE_ATT = "value";
   public static final String DEFAULT_ATT = "default";
   public static final String INFO_ATT = "info";
@@ -919,8 +921,8 @@ public class GSXML {
     return filtered.toString();
   }
   
-  public static void printXMLNode(Node e) {
-    printXMLNode(e, 0) ;
+  public static void printXMLNode(Node e, boolean printText) {
+    printXMLNode(e, 0, printText) ;
   }
   
   public static String xmlNodeToString(Node e){
@@ -976,14 +978,20 @@ public class GSXML {
     
   }
   
-  public static void printXMLNode(Node e, int depth) { //recursive method call using DOM API...
+  public static void printXMLNode(Node e, int depth, boolean printText) { //recursive method call using DOM API...
     
+	if(e == null){return;}
+	
     for (int i=0 ; i<depth ; i++)
       System.out.print(' ') ;
     
     if (e.getNodeType() == Node.TEXT_NODE){
-      // shouldn't we actually print the text here????
-      System.out.println("text") ;
+      if(printText){
+        System.out.println(e.getNodeValue());
+	  }
+	  else {
+        System.out.println("text");
+	  }
       return ;
     }
     
@@ -1013,7 +1021,7 @@ public class GSXML {
       
       int len = children.getLength();
       for (int i = 0; i < len; i++) {
-        printXMLNode(children.item(i), depth + 1);
+        printXMLNode(children.item(i), depth + 1, printText);
       }
       
       for (int i=0 ; i<depth ; i++)

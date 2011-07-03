@@ -587,7 +587,6 @@ public class LibraryServlet extends HttpServlet {
 			}
 		}
 		
-		//GSXML.printXMLNode(xml_message);
 		Node xml_result = this.recept.process(xml_message);
 		encodeURLs (xml_result, response);
 		out.println (this.converter.getPrettyString (xml_result));

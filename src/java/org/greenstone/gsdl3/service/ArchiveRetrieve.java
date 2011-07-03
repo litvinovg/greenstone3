@@ -1,5 +1,5 @@
 /*
-*    AbstractDocumentRetrieve.java
+*    ArchiveRetrieve.java
 *    a base class for retrieval services
 
 *    Copyright (C) 2005 New Zealand Digital Library, http://www.nzdl.org
@@ -20,6 +20,7 @@
 */
 package org.greenstone.gsdl3.service;
 
+import org.greenstone.gsdl3.util.DBInfo;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
@@ -30,56 +31,78 @@ import org.apache.log4j.*;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Vector;
 
-/** Abstract class for Document Retrieval Services
-*
-* @author <a href="mailto:greenstone@cs.waikato.ac.nz">Katherine Don</a>
-*/
-
-public class ArchiveRetrieve extends ServiceRack {
-
+public class ArchiveRetrieve extends ServiceRack 
+{
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.ArchiveRetrieve.class.getName());
 
-	protected static final String ARCHIVE_FILE_PATH_RETRIEVE_SERVICE = "ArchiveFilePathRetrieve";
+	protected static final String DOCUMENT_FILE_PATH_RETRIEVE_SERVICE = "DocumentFilePathRetrieve";
+	protected static final String ASSOCIATED_IMPORT_FILES_RETRIEVE_SERVICE = "AssociatedImportFilesRetrieve";
+	protected static final String SOURCE_FILE_OID_RETRIEVE = "SourceFileOIDRetrieve";
 	
 	protected SimpleCollectionDatabase coll_db = null;
-	
-	/** constructor */
-	public ArchiveRetrieve()
-	{
-	}
 
 	/** configure this service */
 	public boolean configure(Element info, Element extra_info)
 	{
-		if (!super.configure(info, extra_info)){
+		if (!super.configure(info, extra_info))
+		{
 			return false;
 		}
 
 		logger.info("Configuring ArchiveRetrieve...");
 		this.config_info = info;
 		
-		Element archiveFilePathRetrieveService = this.doc.createElement(GSXML.SERVICE_ELEM);
-		archiveFilePathRetrieveService.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
-		archiveFilePathRetrieveService.setAttribute(GSXML.NAME_ATT, ARCHIVE_FILE_PATH_RETRIEVE_SERVICE);
-		this.short_service_info.appendChild(archiveFilePathRetrieveService);
+		Element documentFilePathRetrieveService = this.doc.createElement(GSXML.SERVICE_ELEM);
+		documentFilePathRetrieveService.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
+		documentFilePathRetrieveService.setAttribute(GSXML.NAME_ATT, DOCUMENT_FILE_PATH_RETRIEVE_SERVICE);
+		this.short_service_info.appendChild(documentFilePathRetrieveService);
+		
+		Element associatedImportFilesRetrieveService = this.doc.createElement(GSXML.SERVICE_ELEM);
+		associatedImportFilesRetrieveService.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
+		associatedImportFilesRetrieveService.setAttribute(GSXML.NAME_ATT, ASSOCIATED_IMPORT_FILES_RETRIEVE_SERVICE);
+		this.short_service_info.appendChild(associatedImportFilesRetrieveService);
+		
+		Element sourceFileDocIDRetrieveService = this.doc.createElement(GSXML.SERVICE_ELEM);
+		sourceFileDocIDRetrieveService.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
+		sourceFileDocIDRetrieveService.setAttribute(GSXML.NAME_ATT, SOURCE_FILE_OID_RETRIEVE);
+		this.short_service_info.appendChild(sourceFileDocIDRetrieveService);
 		
 		return true;
 	}
 	
 	protected Element getServiceDescription(String service_id, String lang, String subset) 
 	{
-		Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
-		service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
-		service_elem.setAttribute(GSXML.NAME_ATT, ARCHIVE_FILE_PATH_RETRIEVE_SERVICE);
-		return service_elem;
+		if (service_id.equals(DOCUMENT_FILE_PATH_RETRIEVE_SERVICE)) 
+		{
+			Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+			service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
+			service_elem.setAttribute(GSXML.NAME_ATT, DOCUMENT_FILE_PATH_RETRIEVE_SERVICE);
+			return service_elem;
+		}
+		else if (service_id.equals(ASSOCIATED_IMPORT_FILES_RETRIEVE_SERVICE)) 
+		{
+			Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+			service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
+			service_elem.setAttribute(GSXML.NAME_ATT, ASSOCIATED_IMPORT_FILES_RETRIEVE_SERVICE);
+			return service_elem;
+		}
+		else if (service_id.equals(SOURCE_FILE_OID_RETRIEVE))
+		{
+			Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+			service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
+			service_elem.setAttribute(GSXML.NAME_ATT, SOURCE_FILE_OID_RETRIEVE);
+			return service_elem;
+		}
+		return null;
 	}
 	
-	protected Element processArchiveFilePathRetrieve(Element request)
+	protected Element processDocumentFilePathRetrieve(Element request)
 	{
 		// Create a new (empty) result message
 		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
-		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_FILE_PATH_RETRIEVE_SERVICE);
+		result.setAttribute(GSXML.FROM_ATT, DOCUMENT_FILE_PATH_RETRIEVE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 		
 		String lang = request.getAttribute(GSXML.LANG_ATT);
@@ -88,15 +111,15 @@ public class ArchiveRetrieve extends ServiceRack {
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 		if (param_list == null) {
-			GSXML.addError(this.doc, result, "DocumentMetadataRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(this.doc, result, "DocumentFilePathRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;  
 		}
 		HashMap params = GSXML.extractParams(param_list, false);
 		
-		String docID = (String) params.get("docID");
+		String oid = (String) params.get("oid");
 		String collection = (String) params.get("c");
 		
-		String assocFilePath = getAssocFilePathFromDocID(docID, collection, lang, uid);
+		String assocFilePath = getAssocFilePathFromDocID(oid, collection, lang, uid);
 		
 		String docFilePath = this.site_home + File.separatorChar + 
 			"collect" + File.separatorChar +
@@ -104,79 +127,188 @@ public class ArchiveRetrieve extends ServiceRack {
 			"archives" + File.separatorChar + 
 			assocFilePath + File.separatorChar + 
 			"doc.xml";
-		
-		Element metaElem = this.doc.createElement(GSXML.METADATA_ELEM);
-		metaElem.setAttribute("name", "docFilePath");
-		metaElem.setAttribute("value", docFilePath);
-		
-		logger.error("DOCFILEPATH = " + docFilePath);
-		
-		result.appendChild(metaElem);
+
+		Element metadataList = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		metadataList.appendChild(createMetadataElement("docfilepath", docFilePath));
+		result.appendChild(metadataList);
 		
 		return result;
 	}
 	
-	protected Element processArchiveAssociatedImportFilesRetrieve(Element request)
+	protected Element processSourceFileOIDRetrieveService(Element request)
 	{
-		// find out what kind of database we have
-		//Element database_type_elem = (Element) GSXML.getChildByTagName(this.config_info, GSXML.DATABASE_TYPE_ELEM);
-		//String database_type = "jdbm";
-		/*if (database_type_elem != null) {
-			database_type = database_type_elem.getAttribute(GSXML.NAME_ATT);
+		//Create a new (empty) result message
+		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		result.setAttribute(GSXML.FROM_ATT, SOURCE_FILE_OID_RETRIEVE);
+		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
+		
+		String lang = request.getAttribute(GSXML.LANG_ATT);
+		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		
+		// Get the parameters of the request
+		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+		if (param_list == null) 
+		{
+			GSXML.addError(this.doc, result, "DocumentFilePathRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			return result;  
 		}
-		if (database_type == null || database_type.equals("")) {
-			database_type = "gdbm"; // the default
+		HashMap params = GSXML.extractParams(param_list, false);
+		
+		String srcFile = (String) params.get("srcfile");
+		String collection = (String) params.get("c");
+		
+		//Find out what kind of database we have
+		String databaseType = getDatabaseTypeFromCollection(collection, lang, uid);
+		if (databaseType == null || databaseType.equals("")) 
+		{
+			databaseType = "gdbm"; // the default
 		}
 		
-		String db_ext = null;
-		if (database_type.equalsIgnoreCase("jdbm")) {
-			db_ext = ".jdb";
-		} else {
-			db_ext = ".gdb"; // assume gdbm
+		String dbExt = null;
+		if (databaseType.equalsIgnoreCase("jdbm")) 
+		{
+			dbExt = ".jdb";
+		} 
+		else 
+		{
+			dbExt = ".gdb"; // assume gdbm
 		}
 		
-		
-				coll_db = new SimpleCollectionDatabase(database_type);
-		if (!coll_db.databaseOK()) {
-			logger.error("Couldn't create the collection database of type "+database_type);
+		coll_db = new SimpleCollectionDatabase(databaseType);
+		if (!coll_db.databaseOK()) 
+		{
+			logger.error("Couldn't create the collection database of type "+databaseType);
 			return null;
 		}
-		*/
-	
-			/*coll_db.openDatabase(
+
+		coll_db.openDatabase
+		(
 			this.site_home + File.separatorChar + 
 			"collect" + File.separatorChar +
 			collection + File.separatorChar + 
 			"archives" + File.separatorChar + 
-			"archiveinf-doc" + db_ext, 
-			SimpleCollectionDatabase.READ);
+			"archiveinf-src" + dbExt, 
+			SimpleCollectionDatabase.READ
+		);
 		
-		logger.error("STUFF " + coll_db.getInfo(docID));
+		DBInfo info = coll_db.getInfo(srcFile);
 		
-		coll_db.getInfo(docID);*/
-		return null;
+		if (info == null)
+		{
+			return result;
+		}
+		
+		String oid = info.getInfo("oid");
+		
+		Element metadataList = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		metadataList.appendChild(createMetadataElement("oid", oid));
+		result.appendChild(metadataList);
+		
+		return result;
 	}
 	
-	public String getAssocFilePathFromDocID(String docID, String collection, String lang, String uid)
+	protected Element processAssociatedImportFilesRetrieve(Element request)
+	{
+		//Create a new (empty) result message
+		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		result.setAttribute(GSXML.FROM_ATT, ASSOCIATED_IMPORT_FILES_RETRIEVE_SERVICE);
+		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
+		
+		String lang = request.getAttribute(GSXML.LANG_ATT);
+		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		
+		// Get the parameters of the request
+		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+		if (param_list == null) 
+		{
+			GSXML.addError(this.doc, result, "AssociatedImportFilesRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			return result;  
+		}
+		HashMap params = GSXML.extractParams(param_list, false);
+		
+		String oid = (String) params.get("oid");
+		String collection = (String) params.get("c");
+		
+		String databaseType = getDatabaseTypeFromCollection(collection, lang, uid);
+		if (databaseType == null || databaseType.equals("")) 
+		{
+			databaseType = "gdbm"; // the default
+		}
+		
+		String dbExt = null;
+		if (databaseType.equalsIgnoreCase("jdbm")) 
+		{
+			dbExt = ".jdb";
+		} 
+		else 
+		{
+			dbExt = ".gdb"; // assume gdbm
+		}
+		
+		coll_db = new SimpleCollectionDatabase(databaseType);
+		if (!coll_db.databaseOK()) 
+		{
+			logger.error("Couldn't create the collection database of type "+databaseType);
+			return null;
+		}
+
+		coll_db.openDatabase
+		(
+			this.site_home + File.separatorChar + 
+			"collect" + File.separatorChar +
+			collection + File.separatorChar + 
+			"archives" + File.separatorChar + 
+			"archiveinf-doc" + dbExt, 
+			SimpleCollectionDatabase.READ
+		);
+		
+		DBInfo info = coll_db.getInfo(oid);
+		
+		if (info == null)
+		{
+			return result;
+		}
+		
+		String srcFile = info.getInfo("src-file");
+		Vector data = info.getMultiInfo("assoc-file");
+		
+		Element metadataList = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		metadataList.appendChild(createMetadataElement("srcfile", srcFile));
+		
+		for (int i = 0; i < data.size(); i++)
+		{
+			metadataList.appendChild(createMetadataElement("assocfile", (String)data.get(i)));
+		}
+		
+		result.appendChild(metadataList);
+		
+		return result;
+	}
+	
+	public Element createMetadataElement(String name, String value)
+	{
+		Element metaElem = this.doc.createElement(GSXML.METADATA_ELEM);
+		metaElem.setAttribute("name", name);
+		metaElem.setAttribute("value", value);
+		return metaElem;
+	}
+	
+	public String getAssocFilePathFromDocID(String oid, String collection, String lang, String uid)
 	{
 		Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 		Element mr_query_request = GSXML.createBasicRequest (this.doc, GSXML.REQUEST_TYPE_PAGE, collection + "/DocumentMetadataRetrieve", lang, uid);
 		mr_query_message.appendChild(mr_query_request);
 		
 		Element paramList = this.doc.createElement(GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
-
-		Element assocParam = this.doc.createElement(GSXML.PARAM_ELEM);
-		assocParam.setAttribute("name", "metadata");
-		assocParam.setAttribute("value", "assocfilepath");
-		paramList.appendChild(assocParam);
+		paramList.appendChild(createMetadataElement("metadata", "assocfilepath"));
 		
 		mr_query_request.appendChild(paramList);
 
-		Element docList = this.doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
-		Element doc = this.doc.createElement(GSXML.DOC_NODE_ELEM);
-		doc.setAttribute(GSXML.NODE_ID_ATT, docID);
-		docList.appendChild(doc);
-		mr_query_request.appendChild(docList);
+		Element docListElem = this.doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
+		Element docElem = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+		docElem.setAttribute(GSXML.NODE_ID_ATT, oid);
+		docListElem.appendChild(docElem);
+		mr_query_request.appendChild(docListElem);
 
 		Element response = (Element) this.router.process(mr_query_message);
 		
@@ -187,5 +319,23 @@ public class ArchiveRetrieve extends ServiceRack {
 		Element metadataElem = (Element) metadataListElem.getFirstChild();
 		
 		return metadataElem.getFirstChild().getNodeValue();
+	}
+	
+	public String getDatabaseTypeFromCollection(String collection, String lang, String uid)
+	{
+		//Find out what kind of database we have
+		Element dbTypeMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element dbTypeRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, collection, lang, uid);
+		dbTypeMessage.appendChild(dbTypeRequest);
+		Element dbTypeResponse = (Element)this.router.process(dbTypeMessage);
+		
+		String path = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.COLLECTION_ELEM);
+		Element collectionElem = (Element) GSXML.getNodeByPath(dbTypeResponse, path);
+		
+		if (collectionElem != null)
+		{
+			return collectionElem.getAttribute(GSXML.DB_TYPE_ATT);
+		}
+		return null;
 	}
 }   
