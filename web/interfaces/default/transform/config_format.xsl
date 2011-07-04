@@ -39,14 +39,6 @@
 	<a><xslt:attribute name='href'><xslt:value-of 
 	   disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']" />/index/assoc/<xslt:value-of 
 	   disable-output-escaping="yes" select="metadataList/metadata[@name='assocfilepath']" />/<xslt:value-of 
-	   disable-output-escaping="yes" select="metadataList/metadata[@name='Source']" /></xslt:attribute>
-	  <xsl:apply-templates/>
-	</a>
-      </xsl:when>
-	<xsl:when test="@type='sourcelinkfile'">
-	<a><xslt:attribute name='href'><xslt:value-of 
-	   disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']" />/index/assoc/<xslt:value-of 
-	   disable-output-escaping="yes" select="metadataList/metadata[@name='assocfilepath']" />/<xslt:value-of 
 	   disable-output-escaping="yes" select="metadataList/metadata[@name='srclinkFile']" /></xslt:attribute>
 	  <xsl:apply-templates/>
 	</a>

@@ -115,8 +115,6 @@ abstract public class Action {
 	    String type = elem.getAttribute("type");
 	    if (type.equals("source")) {
 		meta_names.add("assocfilepath");
-	    } else if (type.equals("sourcelinkfile")) {
-		meta_names.add("assocfilepath");
 		meta_names.add("srclinkFile");
 	    }
 	}
