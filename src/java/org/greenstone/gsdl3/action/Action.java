@@ -117,7 +117,7 @@ abstract public class Action {
 		meta_names.add("assocfilepath");
 	    } else if (type.equals("sourcelinkfile")) {
 		meta_names.add("assocfilepath");
-		meta_names.add("srclink_file");
+		meta_names.add("srclinkFile");
 	    }
 	}
 
