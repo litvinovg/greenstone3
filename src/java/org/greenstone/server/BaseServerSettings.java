@@ -68,7 +68,7 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 	    this.autoStart = false;
 	}
 
-	String keep_port_str = server.config_properties.getProperty(BaseServer.Property.KEEPPORT).trim();
+	String keep_port_str = server.config_properties.getProperty(BaseServer.Property.KEEPPORT, "false").trim();
 	if (keep_port_str.equals("true") || keep_port_str.equals("1")) {
 	    this.keepPort = true;
 	} else {
