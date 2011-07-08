@@ -54,16 +54,8 @@ public class FormatAction extends Action {
     	Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
 	
 	    String coll = (String)params.get(GSParams.COLLECTION); //SYSTEM_CLUSTER);
-        //String subaction = (String)params.get(GSParams.SUBACTION);
         String service = (String)params.get(GSParams.SERVICE);
         String classifier = (String)params.get("cl");
-
-
-        logger.error("Collection="+coll);
-        logger.error("Subaction="+subaction);
-        logger.error("Service="+service);
-        logger.error("Classifier="+classifier);
-
 
         String to = "";
         if (coll!=null && !coll.equals("")) {
@@ -80,94 +72,76 @@ public class FormatAction extends Action {
 
         mr_request_message.appendChild(mr_request);
 	
-        //Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
-        //mr_request.appendChild(format);
-
         String format_string = (String)params.get("data");
-        //logger.error("Original format string");
-        //logger.error(format_string);
     
         Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 
         Iterator it = params.keySet().iterator();
-        //while(it.hasNext())
-        //{
-        //    logger.error("Param: "+it.next());
-        //}      
 
-        try {
-            //DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            //DocumentBuilder builder = factory.newDocumentBuilder();
-            //String input = "<html><head><title></title></head><body>" + format_string + "</body></html>";
-            //String input = format_string;
-            //InputSource is = new InputSource( new StringReader( input ) );
-            //Document d = (Document) builder.parse( is );
-            Document d = this.converter.getDOM(format_string); //(Document) builder.parse( is );
-            //Node n1 = d.getFirstChild();            
-            //Document d2 = (Document) this.doc.importNode(e, true);
-
-            //Element format_statement = this.doc.importNode(d, true);
-
-            // Call XSLT to transform document to xml format string
-            XMLTransformer transformer = new XMLTransformer();
-            // HOW DO I DO THIS PROPERLY?
-            //String style = stylesheetFile(String gsdl3_home, String site_name, String collection, String interface_name, ArrayList base_interfaces, String filename);
-            //Document style_doc = this.converter.getDOM(new File(style), "UTF-8"); //"/home/sam/greenstone3/web/interfaces/oran/transform/formatString.xsl"), "UTF-8");  /*************************/
-            Document style_doc = this.converter.getDOM(new File("/research/sjb48/greenstone3/web/interfaces/oran/transform/formatString.xsl"), "UTF-8");  /*************************/
-
-            if(style_doc == null)
-                logger.error("style_doc is null");
-
-            // not sure what to do here - some code from Transforming Receptionist
-            //String transformed = transformer.transformToString(style_doc, d);
-            logger.error("About to transform");
-            Node transformed = (Node) transformer.transform(style_doc, d);  
-            // Failing org.w3c.dom.DOMException: HIERARCHY_REQUEST_ERR: An attempt was made to insert a node where it is not permitted. ; SystemID: file:///home/sam/greenstone3/packages/tomcat/bin/dummy.xsl
-
-            logger.error("Transform successful?");
-         
-            if(transformed==null)  // not null
-                logger.error("TRANSFORMED IS NULL");
-
-            if(transformed.getNodeType() == Node.DOCUMENT_NODE)
-                transformed = ((Document)transformed).getDocumentElement(); 
-            logger.error("Node type: "+transformed.getNodeType());
-
-            //logger.error("begin import"); 
-            //Node imported = this.doc.importNode(transformed, true); // There was an exception org.w3c.dom.DOMException: NOT_SUPPORTED_ERR: The implementation does not support the requested type of object or operation.
-            //logger.error("finished import"); 
-
-            //String format_string2 = GSXML.xmlNodeToString(imported); // null pointer exception occuring here
-            //logger.error("format string="+format_string2);
- 
+        if(subaction.equals("saveDocument"))
+        {
             Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
-            //GSXML.setNodeText(format, transformed);
-            format.appendChild(this.doc.importNode(transformed,true));
-            //format.setNodeValue(transformed);
-            mr_request.appendChild(format); 
-            logger.error("Transformed: "+transformed);
+            try{
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                InputSource is = new InputSource( new StringReader( format_string ) );
+                Document d = (Document) builder.parse( is );
+                Node n1 = d.getFirstChild();
 
+                Element format_statement = (Element) this.doc.importNode(n1, true);
+                format.appendChild(format_statement);
+                mr_request.appendChild(format);
+            } catch( Exception ex ) {
+                logger.error("There was an exception "+ex);
 
-            //page_response.appendChild(this.doc.importNode(e, true));
-        } catch( Exception ex ) {
-            logger.error("There was an exception "+ex);
-            
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw, true);
-            ex.printStackTrace(pw);
-            pw.flush();
-            sw.flush();
-            logger.error(sw.toString());
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw, true);
+                ex.printStackTrace(pw);
+                pw.flush();
+                sw.flush();
+                logger.error(sw.toString());
+            }
+
         }
 
+        else
+        {
 
-        // Call XSLT to transform document to xml format string
-        //XMLTransformer transformer = new XMLTransformer();
+            try {
+                Document d = this.converter.getDOM(format_string); 
 
-        // not sure what to do here - some code from Transforming Receptionist
-        //transformer.transformToString(Document stylesheet, Document source);
+                // Call XSLT to transform document to xml format string
+                XMLTransformer transformer = new XMLTransformer();
+                String style = GSFile.interfaceStylesheetFile(GlobalProperties.getGSDL3Home(),(String)this.config_params.get(GSConstants.INTERFACE_NAME), "formatString.xsl");
+                //logger.error("Style doc is "+style+", compared to /research/sjb48/greenstone3/web/interfaces/oran/transform/formatString.xsl");
+                Document style_doc = this.converter.getDOM(new File(style), "UTF-8");
+                //Document style_doc = this.converter.getDOM(new File("/research/sjb48/greenstone3/web/interfaces/oran/transform/formatString.xsl"), "UTF-8");  /*************************/
 
-        // create a mesage to send to the collection object via the message router
+                if(style_doc == null)
+                    logger.error("style_doc is null");
+
+                logger.error("About to transform");
+                Node transformed = (Node) transformer.transform(style_doc, d);  
+                
+                if(transformed.getNodeType() == Node.DOCUMENT_NODE)
+                    transformed = ((Document)transformed).getDocumentElement(); 
+
+                Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
+                format.appendChild(this.doc.importNode(transformed,true));
+                mr_request.appendChild(format); 
+                logger.error("Transformed: "+transformed);
+
+            } catch( Exception ex ) {
+                logger.error("There was an exception "+ex);
+
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw, true);
+                ex.printStackTrace(pw);
+                pw.flush();
+                sw.flush();
+                logger.error(sw.toString());
+            }
+        }
 
         Node response_message = this.mr.process(mr_request_message);
 	
