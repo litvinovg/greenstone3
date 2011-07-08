@@ -380,17 +380,14 @@ Recent changes:
         <xsl:param name="metadataSets"/>
         
 
-        <!-- <td class="td block resizable" title="td" valign="{@valign}" style='overflow: hidden;'> -->
         <td class="column" valign="{@valign}" title="td">
             <div class="td-div block" title="td-div">
             <div class="neverempty block" style="height:50px">NEVER EMPTY</div>
 
-            <!-- <xsl:text>&lt;td</xsl:text>valign=<xsl:value-of select="@valign"/><xsl:text>&gt;</xsl:text><a href="#" class="minmax">[-]</a><a href="#" class="remove">[x]</a> -->
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/> 
                 </xsl:apply-templates>
-                <!-- <xsl:text>&lt;/td&gt;</xsl:text><br/><br/> -->
             </div>
         </td>
         <td class="droppable" width="10px" title="Drag a new column on to me"/>
@@ -402,9 +399,7 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <!-- <xsl:text>&lt;br/&gt;</xsl:text> <br/> -->
         <div class="block leaf gsf_text" title="gsf:text">
-                <!-- <xsl:variable name="rawtext"><xsl:text disable-output-escaping='no'>br/</xsl:text></xsl:variable> -->
                 <table class="header"><tbody><tr><td class="header">&lt;<input class="text" type="text" name="rawtextinput" size="10" value="br/"></input>&gt;</td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
         </div>
     
@@ -419,9 +414,7 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
 
-        <!-- <xsl:text>&lt;br/&gt;</xsl:text> <br/> -->
         <div class="block leaf gsf_text" title="gsf:text">
-                <!-- <xsl:variable name="rawtext"><xsl:text disable-output-escaping='no'>i</xsl:text></xsl:variable> -->
                 <table class="header"><tbody><tr><td class="header">&lt;<input class="text" type="text" name="rawtextinput" size="10" value="i"></input>&gt;</td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
         </div>
     

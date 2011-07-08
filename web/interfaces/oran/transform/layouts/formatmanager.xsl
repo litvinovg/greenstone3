@@ -3,6 +3,7 @@
     xmlns:java="http://xml.apache.org/xslt/java"
     xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
     xmlns:gslib="http://www.greenstone.org/skinning"
+    xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
     extension-element-prefixes="java util"
     exclude-result-prefixes="java util">
 
@@ -60,6 +61,8 @@
 
             .elementToolBox {position: fixed; top: 25%; right: 0px; background: none repeat scroll 0% 0% white; width: 250px; }
 
+            .visible {display: block;}
+            .hidden {display: none;}
             <!-- .gsf_metadata { border: solid 2px #0000BB; background-color: #440077; } -->
 
             <!-- .gsf_choose_metadata { border: solid 1px #000000; background-color: #223344; } -->
@@ -76,7 +79,7 @@
                     <xsl:when test="/page/pageRequest/@action = 'd'">
                         <!-- TOC on or off -->
                         <xsl:choose>
-                            <xsl:when test="/page/pageResponse/format[@type='display']/gsf:option[(@name='TOC') and (@value='true')]">
+                            <xsl:when test="/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
                                 <input type="checkbox" name="TOC" checked="checked" onclick="displayTOC(this)">Display Table of Contents (set to true)</input>
                             </xsl:when>
                             <xsl:otherwise>
@@ -86,7 +89,7 @@
 
                         <!-- book cover image on or off -->
                         <xsl:choose>
-                            <xsl:when test="/page/pageResponse/format[@type='display']/gsf:option[(@name='coverImage') and (@value='true')]">
+                            <xsl:when test="/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true'">
                                 <input type="checkbox" name="bookCover" checked="checked" onclick="displayBookCover(this)">Display Book Cover Image (set to true)</input>
                             </xsl:when>
                             <xsl:otherwise>

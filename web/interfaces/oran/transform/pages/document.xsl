@@ -89,19 +89,28 @@
 						<gslib:berryBasket/>
 
 						<!-- the book's cover image -->
-                        <!-- COULD BE WORTH SETTING THE STYLE TO DISPLAY:BLOCK OR DISPLAY:NONE BASED ON WHETHER FLAG IS TRUE OR FALSE -->
-                        <!-- OTHERWISE, IF FLAG IS FALSE AND WE WANT TO TURN BOOK COVER ON, NEED TO REQUEST THE NEW PAGE WITH FLAG SET -->
-                        <xsl:if test="/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true'">
-    						<div id="coverImage"><gslib:coverImage/></div>
-                        </xsl:if>
+                        <xsl:choose>
+                            <xsl:when test="/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true'">
+        						<div id="coverImage" class="visible"><gslib:coverImage/></div>
+                            </xsl:when>
+                            <xsl:otherwise>
+        						<div id="coverImage" class="hidden"><gslib:coverImage/></div>
+                            </xsl:otherwise>    
+                        </xsl:choose>
 
 						<!-- the contents (if enabled) -->
-                        <!-- VALUE=<xsl:value-of select="/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value"/> -->
-                        <xsl:if test="/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
-						    <div id="tableOfContents">
-							    <xsl:apply-templates select="documentNode" mode="TOC"/>
-						    </div>
-                        </xsl:if>
+                        <xsl:choose>
+                            <xsl:when test="/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
+    						    <div id="tableOfContents" class="visible">
+							        <xsl:apply-templates select="documentNode" mode="TOC"/>
+                                </div>
+                            </xsl:when>    
+                            <xsl:otherwise>
+                                <div id="tableOfContents" class="hidden">
+                                    <xsl:apply-templates select="documentNode" mode="TOC"/>
+                                </div>
+                            </xsl:otherwise>    
+                        </xsl:choose>
 					</div>
 				</td></tr>
 			</table>

@@ -17,8 +17,6 @@
 	<xsl:include href="header.xsl"/>
 	<xsl:include href="formatmanager.xsl"/>
 	
-	<!--<xsl:include href="xml-to-gui.xsl"/>-->
-	<!--<xsl:include href="xml-to-gui-templates.xsl"/>-->
 
 	<!-- put the URL or path of your site here site -->
 	<!-- eg 'http://www.example.com/mysite' or '/mysite'  -->
@@ -51,7 +49,7 @@
 						<xsl:call-template name="create-banner"/>
 					</div>
 					
-					<xsl:if test="/page/pageRequest/paramList/param[(@name='formatedit') and (@value='1')]">
+					<xsl:if test="/page/pageRequest/paramList/param[(@name='formatedit') and (@value='on')]">
 						<xsl:call-template name="formatmanagerpre"/>
 					</xsl:if>
     

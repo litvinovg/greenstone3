@@ -57,7 +57,6 @@ function displaySideBar(toggle)
     return;
 }
 
-
 function checkDocumentRadio()
 {
     var selection = $('input[name="documentChanges"]'); //document.quiz.colour;
@@ -73,9 +72,26 @@ function checkDocumentRadio()
 function saveDocumentChanges()
 {
     console.log("Saving changes to "+checkDocumentRadio());
+    console.log("TOC="+$('input[name="TOC"]').attr('checked'));
+    console.log("Cover Image="+$('input[name="bookCover"]').attr('checked'));
+
+    var myurl = document.URL;
+
+    var collection_name = getSubstring(myurl, "&c", "&");
+    var document_id = getSubstring(myurl, "&d", "&");
+    var document_type = getSubstring(myurl, "&dt", "&");
+    var prev_action = getSubstring(myurl, "&p.a", "&");
+    var prev_service = getSubstring(myurl, "&p.s", "&");
+
+    var post_url = "http://localhost:8989/greenstone3/format?a=f&sa=saveDocument&c=" + collection_name + "&d=" + document_id + "&dt=" + document_type + "&p.a=" + prev_action + "&p.s=" + prev_service;
+
+    // XML will be automatically wrapped in <display><format> tags when saved to collection config
+    var xml = '<format><gsf:option name="TOC" value="'+$('input[name="TOC"]').attr('checked')+'"/><gsf:option name="coverImage" value="'+$('input[name="bookCover"]').attr('checked')+'"/></format>';
+
+    $.post(post_url, {data: xml}, function(data) {
+            console.log("Success, we have received data");
+    }, 'xml');
 }
-
-
 
 /* FUNCTIONS FOR FORMAT EDITING */                                                                    
 
@@ -99,50 +115,13 @@ function onSelectChange(item)
     //item.setAttribute("selected","selected");
 }
 
-//function createFormatStatement()
-//{
-
-    //var formatDiv = document.getElementById('formatStatement');
-    //var formatStatement = innerXHTML(formatDiv);
-    //console.log(formatStatement);
-
-    // find collection name
-
-    //var myurl = document.URL;
-    //console.log(myurl);
-    //var first = myurl.indexOf("&c")+3;
-    //var last = myurl.indexOf("&", first);
-    
-    //var collection_name = getSubstring(myurl, "&c", "&"); //myurl.substring(first,last); ///&c=(.*)&/.exec(myurl);
-    //console.log(collection_name);
-
-    //first = myurl.indexOf("&s")+3;
-    //last = myurl.indexOf("&", first);
-
-    //var service_name = myurl.substring(first,last);
-    //console.log(service_name);
-
-    //var classifier_name = null;
-
-    //if(service_name == "ClassifierBrowse")
-    //{
-    //    first = myurl.indexOf("&cl")+4;
-    //    last = myurl.indexOf("&", first);
-
-    //    classifier_name = myurl.substring(first,last);
-    //    console.log(classifier_name);
-    //}
-
-    //var myurl = 'http://localhost:8080/greenstone3/format?a=s&sa=s&t='+formatStatement;
-
-    //jQuery.post( url, [ data ], [ success(data, textStatus, XMLHttpRequest) ], [ dataType ] )
-
-    // How do I find out my collection name?
-
 function getSubstring(str, first, last)
 {
     var first_index = str.indexOf(first)+first.length+1;
     var last_index = str.indexOf(last, first_index);
+
+    if(last_index == -1)
+        last_index = str.length;
 
     var substring = str.substring(first_index, last_index);
 
@@ -227,11 +206,8 @@ function saveFormatStatement()
         post_url = post_url + "&cl=" + classifier_name;
 
     $.post(post_url, {data: formatStatement}, function(data) {
-        //$('.result').innerHTML = data; //html(data);
-        
         // An error is returned because there is no valid XSLT for a format update action, there probably shouldn't be one so we ignore what the post returns.    
         console.log("Successfully saved");
-        //console.log(data);
         }, 'html');
 }
 
@@ -244,85 +220,21 @@ function getXSLT(classname)
     var document_type = getSubstring(myurl, "&dt", "&");
     var prev_action = getSubstring(myurl, "&p.a", "&");
     var prev_service = getSubstring(myurl, "&p.s", "&");
-    //var classifier_name = null;
 
-    //if(service_name == "ClassifierBrowse")
-    //    classifier_name = getSubstring(myurl, "&cl", "&");
-
-
-    //var post_url = "http://localhost:8989/greenstone3/format?a=f&sa=getXSLT&c=" + collection_name +"&s=" + service_name+"&d=" + document_id + "&o=skinandlib";
     var post_url = "http://localhost:8989/greenstone3/format?a=d&c=" + collection_name + "&d=" + document_id + "&dt=" + document_type + "&p.a=" + prev_action + "&p.s=" + prev_service + "&o=skinandlib";
 
-    //if(classifier_name != null)
-    //    post_url = post_url + "&cl=" + classifier_name;
-
     $.post(post_url, {data: classname}, function(data) {
-            //$('.result').innerHTML = data; //html(data);
             console.log("Success, we have received data");
-            //console.log(data);
             classname = "." + classname;
-            console.log(classname); //data.getElementsByTagName("div"));
+            console.log(classname); 
             var content = $( data ).find(classname);
             console.log(content.xml());
             $("#XSLTcode").val(content.xml());
             }, 'xml');
 }
 
-/*
-    $.ajax({
-        type: "POST",
-        url: "http://localhost:8080/greenstone3/format?a=s&sa=s",
-        data: formatStatement,
-        processData: false,
-        success: function(data) {
-            //$('.result').html(data);
-            console.log("Success, we have received data");
-            //console.log(data);
-        }
-     });
-*/
-    /*
-    $.ajax({
-        url: myurl,
-        success: function(data) {
-            //$('.result').html(data);
-            console.log("Success, we have received data");
-            console.log(data);
-        }
-    });
-    */
-    //if(formatStatement.hasChildNodes())
-    //{
-        //var formatstring = traverse(formatStatement, "");
-        //console.log(formatstring);
-
-        // var children = $(formatStatement).children('div');
-        // for(var i=0; i < children.length; i++)
-        //    traverse(children[i], formatstring)
-     
-        /*
-        var children = formatStatement.childNodes; //[]getChildNodes();
-        var current;
-        for(var i = 0; i < formatStatement.childNodes.length; i++)
-        {
-            current = formatStatement.childNodes[i];
-            //console.log(current.nodeName);
-            //console.log(current.nodeType);
-            if(current.nodeName=='DIV')
-            {
-                //console.log(current);
-                //console.log(current.className);
-                var gsf = find_class(current);
-                console.log(gsf);
-            }
-        }
-        */
-    //}
-//}
-
 function traverse(node, formatstring)
   {
-    //console.log("node=("+node.nodeName+","+node.nodeType+")");
 
     if(node.nodeName=='DIV')
     {
@@ -338,30 +250,6 @@ function traverse(node, formatstring)
     return formatstring;
   }
         
-
-/*
-    console.log("node=("+node.nodeName+","+node.nodeType+")");
-
-    if(node.children.length == 0) //hasChildNodes()) 
-    {
-        console.log("No children so return");
-        return "";
-    }
-
-    if(node.nodeName=='DIV')
-    {
-        console.log("Found a div");
-        formatstring = formatstring + find_class(node);
-    }        
-    
-    for(var i = 0; i < node.children.length; i++)
-        return recursiveTraverse(node.children[i], formatstring);
-    
-
-    return formatstring;
-  }
-*/
-
 function find_class(current)
 {
     var classes = current.className.split(' ');
@@ -695,9 +583,6 @@ function bind_all_sortables()
 {
     console.log('function bind_all_sortables()');
     bind_template_sortable();
-    //bind_table_sortable();
-    //bind_tr_sortable();
-    //bind_td_sortable();
     bind_choose_metadata_sortable();
     bind_link_sortable();
     bind_switch_sortable();
@@ -713,7 +598,6 @@ function bind_all_sortables()
 function bind_tables()
 {
     console.log('function bind_tables()');
-    //$('.tr').resize_tables($(this)); //equalHeights();
 
     $('#sectionHeader').click(function () {
          console.log('section Header click *');
@@ -727,30 +611,18 @@ function bind_tables()
 
     $(".td-div").resizable({
                 alsoResize: 'parent',
-                //containment: 'parent',
                 handles: 'w,e',
                 stop: function(event, ui) {
                         console.log('Resize table on stop');
                         resize_tables($(this));
-                        //$(this).parent().parent().equalHeights();
                 }, });
-
-    //$(".droppable").sortable({
-    //        'cursor':'pointer',
-    //        'tolerance': 'pointer',
-    //        'items':'.column, .td-div',
-    //        'placeholder':'placeholder'
-    //});
 
     $(".droppable").droppable({
             accept: '.element_type_td',
             tolerance: 'pointer', 
-            activate: function(event, ui) { $(this).addClass("droppable_hl");}, // console.log("droppable activated")},
-            deactivate: function(event, ui) { $(this).removeClass("droppable_hl"); }, // console.log("droppable deactivated")},
+            activate: function(event, ui) { $(this).addClass("droppable_hl");}, 
+            deactivate: function(event, ui) { $(this).removeClass("droppable_hl"); },
             drop: function(event, ui) {
-                //if ($(this).hasClass("ui-draggable"))
-                //if (ui.helper.hasClass("ui-draggable"))
-                //{
                  var neverempty = document.createElement("div");
                  neverempty.setAttribute("class","neverempty block");
                  neverempty.setAttribute("style","height:50px");
@@ -758,7 +630,7 @@ function bind_tables()
                  var text = document.createTextNode('NEVER EMPTY');
                  neverempty.appendChild(text);
                  var td = document.createElement("td");
-                 var div = document.createElement("div"); // class=\"td block\" title=\"td-div\"");
+                 var div = document.createElement("div"); 
                  div.setAttribute("title","td-div");
                  div.setAttribute("class","td-div block");
                  div.setAttribute("style","margin-left:0px");
@@ -774,15 +646,6 @@ function bind_tables()
                  resize_tables($(this));
                  bind_td_sortable();
                  bind_block_mouseover();
-                 //bind_all_sortables();
-                //}
-                //else
-                //{
-                //    console.log("Attempting to add");
-                    //$(this).appendTo(ui.draggable[0]);
-                //    $(this).prepend(ui.draggable[0]);
-                    //$(ui.draggable[0]).appendTo($(this));
-                //}
             }
         });
 
@@ -806,21 +669,7 @@ function replace_with(item, me)
             me = a.concat("selected",b);
     }
 
-    //console.log('function replace_with(item, me)');
     item.replaceWith(me); //'<div class="element element-txt">This text box has been added!</div>');
-    //item.find('select').attr("value", CURRENT_SELECT_VALUE);
-
-
-    //if(select != null){
-    //    console.log("Attempting to select " + CURRENT_SELECT_VALUE);
-    //    console.log("length = "+select.length);
-    //    for(index = 0; index < select.length; index++) {
-    //          console.log(select[index].value);  
-    //       if(select[index].value == CURRENT_SELECT_VALUE)
-    //          console.log("Found "+CURRENT_SELECT_VALUE+" at index " + index);
-    //          select.selectedIndex = index;
-    //    }
-    // }
 
     resize_tables(item);
 
@@ -829,7 +678,6 @@ function replace_with(item, me)
 
 function resize_tables(item)
 {
-    //console.log('function resize_tables(item)');
     var max_height = 0;
     (item.parents('.table')).each(function(index) {
         $(this).children().children().children().each(function() {
@@ -857,7 +705,6 @@ function bind_template_sortable()
             'placeholder':'placeholder',
             //'nested':'.gsf:metadata'
             stop: function(event, ui) {
-                //if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('css_table')) { replace_with(ui.item, "<table border=\"1\" width=\"100%\" height=\"50px\"><tr><td><div class=\"td block\" title=\"td-div\">XXXXXXXXXXXXXXXXXXXXXXXX</div></td></tr></table>"); }
                 if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_table')) { replace_with(ui.item, "<table class=\"table\" border=\"2\"></table>"); }
                 if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_choose_metadata')) { replace_with(ui.item, gsf_choose_metadata_element); }
                 if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('draggable_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
@@ -883,34 +730,11 @@ function bind_td_sortable()
             'placeholder':'placeholder_td',
             'connectWith':'column'});
 
-    //$('.column').sortable({
-    //    connectWith:['.column'],
-    //    placeholder: 'placeholder',
-    //    items:'td-div'
-    //});
-
-
-    //$('.column').sortable({
-    //        'cursor':'pointer',
-    //        'tolerance': 'pointer',
-    //        'items':'.td-div',
-    //        'placeholder':'placeholder',
-    //        'connectWith':'.column'
-            //'nested':'.gsf:metadata'
-            //receive: function(event, ui) { alert("Attempted to receive"); },
-            //stop: function(event, ui) {
-            //    if (ui.item.hasClass("ui-draggable") && ui.item.hasClass('element_type_gsf_metadata')) { replace_with(ui.item, gsf_metadata_element); }
-
-    //});
-
-    //console.log('function bind_td_sortable()');
     $('.td-div').sortable({
             'cursor':'pointer',
             'tolerance': 'pointer',
             'items':'.gsf_metadata, .gsf_choose_metadata, .gsf_link, .gsf_switch',
             'placeholder':'placeholder',
-            //'connectWith':'.td-div',
-            //'nested':'.gsf:metadata'
             receive: function(event, ui) { alert("Attempted to receive"); },
             stop: function(event, ui) {
                 // gsf metadata
@@ -1088,21 +912,13 @@ var removeContent = (function () {
 
 var toggleContent = function(e)
 {
-    //console.log('var toggleContent = function(e)');
     console.log('parent: ' + $(this).html());
     if ($(this).html() == '[+]'){ //targetContent.css('display') == 'none') {
-        //$(this).parent().parent().parent().parent().parent().children(".block,.table").slideDown(300);
-        //$(this).parents().children(".block,.table").stopPropagation().slideDown(300);
-        //var x = $(this).parent().parent().parent().parent().parent();
-        //var y = $(this).parent().parent().parent().parent().parent().children(".block,.table");
-        //var z = $(this).closest(".block").children(".table, .block");
         $(this).closest(".block").children(".table, .block").slideDown(300);
         $(this).html('[-]');
         $(this).removeClass("ui-icon-plusthick");
         $(this).addClass("ui-icon-minusthick");
     } else {
-        //$(this).parent().parent().parent().parent().parent().children(".block,.table").slideUp(300);
-        //$(this).parents().children(".block,.table").slideUp(300);
         $(this).closest(".block").children(".table, .block").slideUp(300);
         $(this).html('[+]');
         $(this).removeClass("ui-icon-minusthick");
