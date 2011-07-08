@@ -204,6 +204,13 @@ public class GSFile {
 	return gsdl3_home + File.separatorChar + "interfaces" + 
 	    File.separatorChar + interface_name;
     }
+
+    static public String interfaceStylesheetFile(String gsdl3_home,
+                                   String interface_name, String filename) {
+            return gsdl3_home + File.separatorChar + "interfaces" +
+                   File.separatorChar + interface_name + File.separatorChar 
+                   + "transform" + File.separatorChar + filename;
+                }
     
     static public String siteStylesheetFile(String site_home,
 					    String filename) {
