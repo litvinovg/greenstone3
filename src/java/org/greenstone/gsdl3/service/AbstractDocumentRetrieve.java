@@ -240,6 +240,23 @@ public abstract class AbstractDocumentRetrieve
 	for (int i = 0; i < request_nodes.getLength(); i++) {
 	    Element request_node = (Element) request_nodes.item(i);
 	    String node_id = request_node.getAttribute(GSXML.NODE_ID_ATT);
+
+	    // make a custom copy of metadata_names_list for each docID, since mdoffset value varies for each doc
+	    ArrayList customised_metadata_names_list = new ArrayList(metadata_names_list.size());
+	    int mdoffset = 0;
+	    if(request_node.hasAttribute(GSXML.NODE_MDOFFSET_ATT)) {
+		String offset = request_node.getAttribute(GSXML.NODE_MDOFFSET_ATT);
+		mdoffset = Integer.parseInt(offset);
+		
+		for(int x = 0; x < metadata_names_list.size(); x++) {
+		    String metaname = (String)metadata_names_list.get(x);
+		    if(metaname.indexOf("offset" + GSConstants.META_RELATION_SEP) != -1) {
+			// append offset number to the metaname
+			metaname = metaname.replace("offset"+GSConstants.META_RELATION_SEP, "offset"+mdoffset+GSConstants.META_RELATION_SEP);
+		    } 
+		    customised_metadata_names_list.add(x, metaname);		    
+		}
+	    }
 	   
 	    boolean is_external_link = false;
 	    if (!node_id.startsWith("HASH") && !node_id.startsWith("D")){	
@@ -271,7 +288,7 @@ public abstract class AbstractDocumentRetrieve
 	    }
 	    if (!is_external_link){
 		try {
-		    Element metadata_list = getMetadataList(node_id, all_metadata, metadata_names_list);
+		    Element metadata_list = getMetadataList(node_id, all_metadata, customised_metadata_names_list);
 		    request_node.appendChild(metadata_list);
 		} catch (GSException e) {		
 		    GSXML.addError(this.doc, result, e.getMessage(), e.getType());

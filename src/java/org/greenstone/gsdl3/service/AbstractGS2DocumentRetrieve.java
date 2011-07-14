@@ -40,6 +40,8 @@ import java.util.Vector;
 import java.util.Set;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.*;
 
@@ -195,9 +197,19 @@ public abstract class AbstractGS2DocumentRetrieve
 	    }
 	    
 	} else {
+	    // prepare regex to work with mdoffset: looking for <offset\d*_>
+	    Pattern pattern = Pattern.compile("offset[0-9]*" + GSConstants.META_RELATION_SEP);
+
 	    for (int i=0; i<metadata_names.size(); i++) {
                 String meta_name = (String) metadata_names.get(i);
 		String value = getMetadata(node_id, info, meta_name, lang);
+
+		// Remove the occurrence (if any) in this metaname of the mdoffset number in the pattern <offset\d*_>
+		// Leaving string "offset" in at this point: it will be handled in config_format.xsl's gsf:metadata template match
+		Matcher matcher = pattern.matcher(meta_name);
+		meta_name = matcher.replaceFirst("offset" + GSConstants.META_RELATION_SEP); 
+		    //replaceFirst(""); // if removing the occurrence (if any) of entire pattern <offset\d*_> in input		
+
 		GSXML.addMetadata(this.doc, metadata_list, meta_name, value);
 	    }
 	}
@@ -316,7 +328,7 @@ public abstract class AbstractGS2DocumentRetrieve
 
     protected String getMetadata(String node_id, DBInfo info, 
 				 String metadata, String lang) {
-	boolean multiple = false;
+	String multiple = "false"; // multiple can now be "true", "false" or "offset<number>". It's no longer a boolean
 	String relation = "";
 	String separator = ", ";
 	int pos = metadata.indexOf(GSConstants.META_RELATION_SEP);
@@ -345,8 +357,8 @@ public abstract class AbstractGS2DocumentRetrieve
 	String temp = metadata.substring(0, pos);
 	metadata = metadata.substring(pos+1);
 	// check for all on the front
-	if (temp.equals("all")) {
-	    multiple=true;	    
+	if (temp.equals("all") || temp.startsWith("offset")) { // multiple can now be "true", "false" or "offset"
+	    multiple = temp; // multiple=true;
 	    pos = metadata.indexOf(GSConstants.META_RELATION_SEP);
 	    if (pos ==-1) {
 		temp = "";
@@ -398,12 +410,20 @@ public abstract class AbstractGS2DocumentRetrieve
 
 	StringBuffer result = new StringBuffer();
 
-	if (!multiple) {
+	if (multiple.equals("false")) {
 	    result.append(this.macro_resolver.resolve(relation_info.getInfo(metadata), lang, MacroResolver.SCOPE_META, relation_id));
-	} else {
-	    // we have multiple meta
+	} else if(multiple.startsWith("offset")) { // multiple = offset
+	    String offset = multiple.substring("offset".length(), multiple.length());
+	    int offsetVal = offset.equals("") ? 0 : Integer.parseInt(offset);
+	    String value = relation_info.getInfoOffset(metadata, offsetVal); // what if this metadata is not the one we need to get the offset for? MDTYPE!
+	       // at the moment, do we assume the user will specify retrieving the offset only for such metadata as has an offset? 
+	       // At least, getInfoOffset will return the firstelement if the offset exceeds the bounds of the values for this metadata key
+
+	    result.append(this.macro_resolver.resolve(value, lang, MacroResolver.SCOPE_META, relation_id));
+	    
+	} else { // multiple = true, we have multiple meta	    
 	    Vector values = relation_info.getMultiInfo(metadata);
-  	    if (values != null) {
+	    if (values != null) {
 		boolean first = true;
 		for (int i=0; i<values.size(); i++) {
 		    if (first) {
@@ -414,7 +434,7 @@ public abstract class AbstractGS2DocumentRetrieve
 		    result.append(this.macro_resolver.resolve((String)values.elementAt(i), lang, MacroResolver.SCOPE_META, relation_id));
 		}
 	    }
-          logger.info(result); 
+	    logger.info(result);
 	}
 	// if not ancestors, then this is all we do
 	if (!relation.equals("ancestors")) {
@@ -427,7 +447,7 @@ public abstract class AbstractGS2DocumentRetrieve
 	while (!relation_id.equals(current_id)) {
 	    relation_info = this.coll_db.getInfo(relation_id);
 	    if (relation_info == null) return result.toString();
-	    if (!multiple) {
+	    if (multiple.equals("false")) { //if (!multiple)
 		result.insert(0, separator);
 		result.insert(0, this.macro_resolver.resolve(relation_info.getInfo(metadata), lang, MacroResolver.SCOPE_META, relation_id));
 	    } else {

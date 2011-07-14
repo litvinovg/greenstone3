@@ -33,7 +33,7 @@
       <xsl:when test="@type='classifier'">
 	<a><xslt:attribute name='href'><xslt:value-of select='$library_name'/>?a=b&amp;rt=r&amp;s=<xslt:value-of select='$serviceName'/>&amp;c=<xslt:value-of select='$collName'/>&amp;cl=<xslt:value-of select='@nodeID'/><xslt:if test="classifierNode|documentNode">.pr</xslt:if><xslt:if test="parent::node()[@orientation='horizontal']">&amp;sib=1</xslt:if></xslt:attribute>
 	  <xsl:apply-templates/>
-	</a>
+	</a>	
       </xsl:when>
 	  <xsl:when test="@type='source'">
 	<a><xslt:attribute name='href'><xslt:value-of 
@@ -111,7 +111,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
   </xsl:template>
 
   <xsl:template match="gsf:metadata" mode="get-metadata-name">
-    <xsl:if test="@multiple='true'">all_</xsl:if><xsl:if test='@select'><xsl:value-of select='@select'/>_</xsl:if><xsl:if test="@separator">*<xsl:value-of select='@separator'/>*_</xsl:if><xsl:value-of select="@name"/>
+    <xsl:if test="@multiple='true'">all_</xsl:if><xsl:if test="starts-with(@multiple,'offset')"><xsl:value-of select='@multiple'/>_</xsl:if><xsl:if test='@select'><xsl:value-of select='@select'/>_</xsl:if><xsl:if test="@separator">*<xsl:value-of select='@separator'/>*_</xsl:if><xsl:value-of select="@name"/>
   </xsl:template>
   
   <xsl:template match="gsf:metadata-old">

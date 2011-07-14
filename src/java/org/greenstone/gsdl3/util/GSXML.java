@@ -156,6 +156,7 @@ public class GSXML {
   public static final String NODE_TYPE_ROOT = "root";
   public static final String NODE_TYPE_INTERNAL = "internal";
   public static final String NODE_TYPE_LEAF = "leaf";
+  public static final String NODE_MDOFFSET_ATT = "mdoffset";
   
   public static final String DOC_TYPE_SIMPLE = "simple";
   public static final String DOC_TYPE_PAGED = "paged";
@@ -1038,7 +1039,7 @@ public class GSXML {
       Transformer trans = tf.newTransformer();
       StringWriter sw = new StringWriter();
       trans.transform(new DOMSource(e), new StreamResult(sw));
-      System.err.println( sw.toString() );
+      System.err.println( sw.toString() ); // logger.info( sw.toString() );
     } catch( Exception ex ) {
       System.err.println( "couldn't write " + e + " to log" );
 	}

@@ -573,7 +573,7 @@ public abstract class AbstractBrowse
      * has the form
      * <docNode nodeId='xxx' nodeType='leaf' docType='hierarchy'/>
      */
-    protected Element createDocNode(String node_id) {
+    protected Element createDocNode(String node_id, int offset) {
 	Element node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
 	node.setAttribute(GSXML.NODE_ID_ATT, node_id);
 
@@ -586,6 +586,10 @@ public abstract class AbstractBrowse
 	node.setAttribute(GSXML.DOC_TYPE_ATT, doc_type);
 	String node_type = getNodeType(node_id, doc_type);	
 	node.setAttribute(GSXML.NODE_TYPE_ATT, node_type);
+	
+	// mdoffset information stored in DB determines which of multiple values for
+	// a metadata needs to be displayed when a classifier is built on that metadata
+	node.setAttribute(GSXML.NODE_MDOFFSET_ATT, Integer.toString(offset));
 	return node;
     }
 
@@ -620,11 +624,27 @@ public abstract class AbstractBrowse
     {
 	ArrayList child_ids = getChildrenIds(node_id);
 	if (child_ids==null) return;
+	
+	// get a list of all mdoffsets at this point
+	ArrayList child_offsets = getOffsetsForChildrenIds(node_id);
+	// make sure that if it's doesn't match up with child_ids in length, 
+	// it is padded with 0s to make up the length
+	if(child_offsets == null) {
+	    child_offsets = new ArrayList(child_ids.size());
+	} 
+	if(child_offsets.size() < child_ids.size()) {
+	    Integer zero = new Integer(0);
+	    for(int i = child_offsets.size()-1; i < child_ids.size(); i++) {
+		child_offsets.add(zero);
+	    }
+	}
+
 	for (int i=0; i< child_ids.size(); i++) {
 	    String child_id = (String)child_ids.get(i);
+	    int child_offset = ((Integer)child_offsets.get(i)).intValue(); // counts both docnodes and classnodes at the childlevel, is this right?
 	    Element child_elem;
 	    if (isDocumentId(child_id)) {
-		child_elem = createDocNode(child_id);
+		child_elem = createDocNode(child_id, child_offset);
 	    } else {
 		child_elem = createClassifierNode(child_id);
 	    }
@@ -681,6 +701,11 @@ public abstract class AbstractBrowse
 	}
 	return getChildrenIds(parent_id);
 
+    }
+
+    /** Override to get a list of mdoffsets of children. Return null if no children or if no mdoffsets for them */
+    protected ArrayList getOffsetsForChildrenIds(String node_id) { 
+	return null; 
     }
 
     /** if id ends in .fc, .pc etc, then translate it to the correct id */

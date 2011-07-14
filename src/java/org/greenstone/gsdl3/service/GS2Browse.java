@@ -174,6 +174,28 @@ public class GS2Browse
 	return children;
 
     }
+    /** returns a list of the mdoffset values in order for the children, null is 
+      * returned if there are no children or if the mdoffset field is empty */
+    protected ArrayList getOffsetsForChildrenIds(String node_id) { 
+	DBInfo info = this.coll_db.getInfo(node_id);
+	if (info == null) {
+	    return null;
+	}
+	
+	ArrayList childrenOffsets = new ArrayList();
+	
+	String offset = info.getInfo("mdoffset").trim();
+	if(offset.equals("")) {
+	    return null;
+	}
+	StringTokenizer st = new StringTokenizer(offset, ";");
+	while (st.hasMoreTokens()) {
+	    String val = st.nextToken().trim();
+	    childrenOffsets.add(Integer.valueOf(val));
+	}
+	return childrenOffsets;
+    }
+
     /** returns the node id of the parent node, null if no parent */
     protected String getParentId(String node_id){
 	String parent = OID.getParent(node_id);

@@ -52,6 +52,20 @@ public class DBInfo {
 	return (String)items.firstElement();
     }
 
+    /** get the value for the key at offset. If offset out of bounds,
+     * just return the first one. */
+    public String getInfoOffset(String key, int offset) {
+	Vector items = (Vector)info_map_.get(key);
+	if (items==null) {
+	    return "";
+	}
+	if(offset >= 0 && offset < items.size()) {
+	    return (String)items.get(offset);
+	} // else
+	return (String)items.firstElement();
+    }
+
+
     // methods for keys that can have multiple values
     
     /** add a value to a key - for keys that can have multiple values */
