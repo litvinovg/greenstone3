@@ -247,16 +247,16 @@ public abstract class AbstractDocumentRetrieve
 	    if(request_node.hasAttribute(GSXML.NODE_MDOFFSET_ATT)) {
 		String offset = request_node.getAttribute(GSXML.NODE_MDOFFSET_ATT);
 		mdoffset = Integer.parseInt(offset);
-		
-		for(int x = 0; x < metadata_names_list.size(); x++) {
-		    String metaname = (String)metadata_names_list.get(x);
-		    if(metaname.indexOf("offset" + GSConstants.META_RELATION_SEP) != -1) {
-			// append offset number to the metaname
-			metaname = metaname.replace("offset"+GSConstants.META_RELATION_SEP, "offset"+mdoffset+GSConstants.META_RELATION_SEP);
-		    } 
-		    customised_metadata_names_list.add(x, metaname);		    
-		}
+	    }	
+	    for(int x = 0; x < metadata_names_list.size(); x++) {
+		String metaname = (String)metadata_names_list.get(x);
+		if(metaname.indexOf("offset" + GSConstants.META_RELATION_SEP) != -1) {
+		    // append offset number to the metaname
+		    metaname = metaname.replace("offset"+GSConstants.META_RELATION_SEP, "offset"+mdoffset+GSConstants.META_RELATION_SEP);
+		} 
+		customised_metadata_names_list.add(x, metaname);		    
 	    }
+	    
 	   
 	    boolean is_external_link = false;
 	    if (!node_id.startsWith("HASH") && !node_id.startsWith("D")){	
