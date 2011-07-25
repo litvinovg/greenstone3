@@ -268,12 +268,15 @@ if test -e gs2build/setup.bash ; then
   cd gs2build ; source setup.bash ; cd ..
 fi
 
+
 if test "x$gsopt_noexts" != "x1" ; then
     if test -e ext ; then
 	for gsdl_ext in ext/* ; do
 	    if [ -d $gsdl_ext ] ; then 
 		cd $gsdl_ext > /dev/null
-		if test -e setup.bash ; then 
+		if test -e gs3-setup.sh ; then 
+		    source ./gs3-setup.sh 
+		elif test -e setup.bash ; then 
 		    source ./setup.bash 
 		fi 
 		cd ../..  
@@ -288,15 +291,6 @@ if test -e local ; then
     echo "Sourcing local/gs3-setup.sh"
     cd local ; source gs3-setup.sh ; cd ..
   fi
-
-  # Consider moving these into the local/gs3-setup.sh file
-
-  PATH=$GSDL3SRCHOME/local/bin:$PATH
-  export PATH
-  LD_LIBRARY_PATH=$GSDL3SRCHOME/local/lib:$LD_LIBRARY_PATH
-  export LD_LIBRARY_PATH
-  DYLD_LIBRARY_PATH=$GSDL3SRCHOME/local/lib:$DYLD_LIBRARY_PATH
-  export DYLD_LIBRARY_PATH
 fi
 
 
