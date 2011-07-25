@@ -73,7 +73,11 @@ if exist gs2build\setup.bat (
 if exist ext (
     for /D %%e IN ("ext/*") do (
         cd ext\%%e
-        if EXIST setup.bat call setup.bat
+        if EXIST gs3-setup.bat (
+	  call gs3-setup.bat
+	) else (
+          if EXIST setup.bat call setup.bat
+	)
         cd ..\..
     )
 )
