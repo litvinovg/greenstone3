@@ -77,7 +77,7 @@
 		<td>
 			<xsl:call-template name="documentBerryForClassifierOrSearchPage"/>
 		</td>
-	</xsl:template>-->
+	</xsl:template>
 
 
 	<!--
