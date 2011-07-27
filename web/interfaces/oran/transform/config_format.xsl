@@ -54,7 +54,7 @@
 				<a><xslt:attribute name='href'><xslt:value-of 
 				   disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']" />/index/assoc/<xslt:value-of 
 				   disable-output-escaping="yes" select="metadataList/metadata[@name='assocfilepath']" />/<xslt:value-of 
-				   disable-output-escaping="yes" select="metadataList/metadata[@name='Source']" /></xslt:attribute>
+				   disable-output-escaping="yes" select="metadataList/metadata[@name='srclinkFile']" /></xslt:attribute>
 				  <xsl:apply-templates/>
 				</a>
 			</xsl:when>
@@ -118,10 +118,10 @@
 	<xsl:template match="gsf:icon">
 		<xsl:choose>
 			<xsl:when test="@type='classifier'">
-				<img style="width:20px; height:16px; border:0px" src="util:getInterfaceText($interface_name, /page/@lang, 'bookshelf_image')" /> 
+				<img style="width:20px; height:16px; border:0px"><xsl:attribute name="src"><xsl:text>interfaces/oran/images/bookshelf.png</xsl:text></xsl:attribute></img>
 			</xsl:when>
 			<xsl:when test="@type='document'">
-				<img style="width:20px; height:16px; border:0px" src="util:getInterfaceText($interface_name, /page/@lang, 'book_image')" /> 
+				<img style="width:20px; height:16px; border:0px"><xsl:attribute name="src"><xsl:text>interfaces/oran/images/itext.gif</xsl:text></xsl:attribute></img> 
 			</xsl:when>
 		</xsl:choose>
 	</xsl:template>

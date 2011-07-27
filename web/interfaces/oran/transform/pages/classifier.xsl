@@ -9,6 +9,7 @@
 	
 	<!-- use the 'main' layout -->
 	<xsl:include href="layouts/main.xsl"/>
+	<xsl:include href="classifiertools.xsl"/>
 
 	<!-- set page title -->
 	<xsl:template name="pageTitle"><gslib:serviceName/></xsl:template>
@@ -34,11 +35,13 @@
 			the two templates at the bottom of this file
 		-->
 		<table id="results">
-			<xsl:for-each select="classifier/*">
-				<tr>
-					<xsl:apply-templates select="."/>
-				</tr>
-			</xsl:for-each>
+			<xsl:variable name="collName"><xsl:value-of select="/page/pageRequest/paramList/param[@name='c']/@value"/></xsl:variable>
+			<xsl:variable name="serviceName"><xsl:value-of select="service/@name"/></xsl:variable>
+
+			<xsl:apply-templates select="classifier">
+				<xsl:with-param name="collName" select="$collName"/>
+				<xsl:with-param name="serviceName" select="$serviceName"/>
+			</xsl:apply-templates>
 		</table>
 		<div class="clear"><xsl:text> </xsl:text></div>
 	</xsl:template>
@@ -57,7 +60,7 @@
         </li>
     </xsl:template>-->
 
-	<xsl:template match="documentNode" priority="3">
+	<xsl:template match="documentNode"><!-- priority="3"-->
 		<!-- The book icon -->
 		<td>
 			<img>			
@@ -83,7 +86,7 @@
 	<!--
 	TEMPLATE FOR GROUPS OF DOCUMENTS
 	-->
-	<xsl:template match="classifierNode">
+	<xsl:template match="classifierNode"><!-- priority="3"-->
 
 		<table id="title{@nodeID}"><tr>
 			<!-- Expand/collapse button -->
