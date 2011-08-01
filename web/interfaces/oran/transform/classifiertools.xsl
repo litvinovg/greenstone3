@@ -23,12 +23,12 @@
   <xsl:template match="classifier" mode="default"> <!-- the default -->
     <xsl:param name="collName"/>
     <xsl:param name="serviceName"/>
-    <ul id="classifiernodelist">
+    <table id="classifiernodelist">
       <xsl:call-template name="processNodeChildren">
 	<xsl:with-param name='collName' select='$collName'/>
 	<xsl:with-param name='serviceName' select='$serviceName'/>
       </xsl:call-template>
-    </ul>
+    </table>
   </xsl:template>
 
   
@@ -56,7 +56,7 @@
   
   
   <!-- icon + title template-->
-  <xsl:template match="classifierNode">XXXX
+  <xsl:template match="classifierNode">
     <xsl:param name="collName"/>
     <xsl:param name="serviceName"/>
     <a><xsl:attribute name='href'><xsl:value-of select='$library_name'/>?a=b&amp;rt=r&amp;s=<xsl:value-of select='$serviceName'/>&amp;c=<xsl:value-of select='$collName'/>&amp;cl=<xsl:value-of select='@nodeID'/><xsl:if test="classifierNode|documentNode">.pr</xsl:if></xsl:attribute><xsl:call-template name="bookshelfimg"/></a><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name='Title']"/>
@@ -77,38 +77,37 @@
   <xsl:template name="processNodeChildren">
     <xsl:param name="collName"/>
     <xsl:param name="serviceName"/>
-    <xsl:for-each select='classifierNode|documentNode'>
+    <xsl:for-each select='classifierNode|documentNode'><tr>
       <xsl:choose>
 	<xsl:when test="name()='documentNode'">
-	  <li><table><tr>
+	  <td><table><tr>
 		<xsl:call-template name="documentNodeWrapper">
 		  <xsl:with-param name='collName' select='$collName'/>
 		  <xsl:with-param name='serviceName' select='$serviceName'/>
 		</xsl:call-template>
 	      </tr></table>
-	  </li>
+	  </td>
 	</xsl:when>
 	<xsl:otherwise>
-	  <!--<li>--><table><tr>
+	  <td><table><tr>
 		<xsl:apply-templates select='.'>
 		  <xsl:with-param name='collName' select='$collName'/>
 		  <xsl:with-param name='serviceName' select='$serviceName'/>
 		</xsl:apply-templates>
 	      </tr></table>
-	  <!--</li>-->
+	  </td>
 	  <xsl:if test="child::classifierNode or child::documentNode">
 	    <!--recurse into the children-->
-	    <!--<li>--><ul class="childrenlist">
+	    <tr><td><table class="childrenlist">
 		<xsl:apply-templates select='.' mode='process-all-children'>
 		  <xsl:with-param name='collName' select='$collName'/>
 		  <xsl:with-param name='serviceName' select='$serviceName'/>
 		</xsl:apply-templates>
-	      </ul>
-	    <!--</li>-->
+	    </table></td></tr>
 	  </xsl:if>
 	</xsl:otherwise>
       </xsl:choose>
-    </xsl:for-each>
+    </tr></xsl:for-each>
   </xsl:template>
 
 

@@ -650,11 +650,18 @@ table{
 
 /* ------- BROWSE -------*/
 
-ul.childrenlist li {
-list-style-type:none;
+.childrenlist {
+	margin:0 0 0 10px;
+
+}
+.childrenlist td {
+	padding:3px 0px 0px 10px;
 }
 
 /*
+ul.childrenlist li {
+list-style-type:none;
+}
 ul#classifierlist,ul#classifiernodelist {
 	list-style-type:none;
 	margin:0;

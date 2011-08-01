@@ -118,14 +118,14 @@
 	<xsl:template match="gsf:icon">
 		<xsl:choose>
 			<xsl:when test="@type='classifier'">
-				<img style="width:20px; height:16px; border:0px"><xsl:attribute name="src"><xsl:text>interfaces/oran/images/bookshelf.png</xsl:text></xsl:attribute></img>
+				<img style="border:0px"><xsl:attribute name="src"><xsl:text>interfaces/oran/images/bookshelf.png</xsl:text></xsl:attribute></img>
 			</xsl:when>
 			<xsl:when test="@type='document'">
-				<img style="width:20px; height:16px; border:0px"><xsl:attribute name="src"><xsl:text>interfaces/oran/images/itext.gif</xsl:text></xsl:attribute></img> 
+				<img style="border:0px"><xsl:attribute name="src"><xsl:text>interfaces/oran/images/itext.gif</xsl:text></xsl:attribute></img> 
 			</xsl:when>
 		</xsl:choose>
 	</xsl:template>
-  
+
 	<xsl:template match="gsf:metadata[@format]">
 		<xslt:value-of disable-output-escaping="yes">
 			<xsl:attribute name="select">
