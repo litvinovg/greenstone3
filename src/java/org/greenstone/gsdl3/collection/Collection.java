@@ -358,7 +358,7 @@ public class Collection
     String lang = request.getAttribute(GSXML.LANG_ATT);
     response.setAttribute(GSXML.TYPE_ATT, type);
 
-    logger.error("Collection received a message, attempting to process");
+    logger.debug("Collection received a message, attempting to process");
 
     if (type.equals(GSXML.REQUEST_TYPE_FORMAT_STRING)) {
         logger.error("Received format string request");
