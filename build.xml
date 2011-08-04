@@ -2096,6 +2096,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <exec executable="svn"><arg value="update"/>
       <arg value="${web.home}/interfaces/flax"/></exec> 
     <exec executable="svn"><arg value="update"/>
+      <arg value="${web.home}/web/sites/flax"/></exec>
+    <exec executable="svn"><arg value="update"/>
       <arg value="flax-resources"/></exec> 
     <exec executable="svn"><arg value="update"/>
       <arg value="flax-lib"/></exec> 
