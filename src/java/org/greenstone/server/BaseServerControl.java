@@ -37,6 +37,19 @@ public abstract class BaseServerControl extends JFrame {
 
 	setSize(FRAME_SIZE);
 	setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+	// set the icon for the Greenstone Server Interface
+	try {
+	    ImageIcon image = new ImageIcon(getClass().getResource("/images/servericon.png"));
+	    if (image != null) {
+		this.setIconImage(image.getImage());
+	    }	
+	}
+	catch (Exception exception) {
+	    System.err.println("Error: Could not load servericon.png");
+	    logger.error("Error: Could not load servericon.png");
+	}	
+
 	Dimension screen_size = Toolkit.getDefaultToolkit().getScreenSize();
 	setLocation((screen_size.width - FRAME_SIZE.width) / 2,
 		    (screen_size.height - FRAME_SIZE.height) / 2);
