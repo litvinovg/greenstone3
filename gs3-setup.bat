@@ -18,12 +18,12 @@ if exist gs3-setup.bat goto start
 ::      +-- tomcat (!TOMCAT_HOME!)
 ::      +-- ant (!ANT_HOME!)
 
-:: set GSDLSRCHOME to the current directory
+:: set GSDL3SRCHOME to the current directory
 cd | winutil\setvar.exe GSDL3SRCHOME > !TMP!\setgsdl3.bat
 call !TMP!\setgsdl3.bat
 del !TMP!\setgsdl3.bat
 
-:: set GSDLHOME to the 'web' subdirectory
+:: set GSDL3HOME to the 'web' subdirectory
 set GSDL3HOME=!GSDL3SRCHOME!\web
 
 :: change if using external tomcat or ant
@@ -39,10 +39,10 @@ set CLASSPATH=!GSDL3HOME!\WEB-INF\classes;!GSDL3SRCHOME!\resources\java;!GSDL3SR
 set PATH=!PATH!;!GSDL3SRCHOME!\bin;!GSDL3SRCHOME!\bin\script;!GSDL3SRCHOME!\lib\jni;!ANT_HOME!\bin
 
 :: Override Imagemagick and Ghostscript paths to the bundled applications shipped with greenstone if they exists otherwise use default environment variables.
-if exist "!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\bin\gsdll32.dll" set GS_DLL=!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\bin\gsdll32.dll
-if exist "!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\lib\*.*" set GS_LIB=!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\lib
-if exist "!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\bin\*.*" set PATH=!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\bin;!PATH!
-if exist "!GSDL3SRCHOME!\gs2build\bin\windows\imagemagick\*.*" set PATH=!GSDL3SRCHOME!\gs2build\bin\windows\imagemagick;!PATH!
+:: if exist "!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\bin\gsdll32.dll" set GS_DLL=!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\bin\gsdll32.dll
+:: if exist "!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\lib\*.*" set GS_LIB=!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\lib
+:: if exist "!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\bin\*.*" set PATH=!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\bin;!PATH!
+:: if exist "!GSDL3SRCHOME!\gs2build\bin\windows\imagemagick\*.*" set PATH=!GSDL3SRCHOME!\gs2build\bin\windows\imagemagick;!PATH!
 
 :: a little dynamic set cp stuff
 if exist "!TMP!\setcp.bat" del "!TMP!\setcp.bat"
@@ -60,6 +60,7 @@ set GS_CP_SET=yes
 :skipSetCp
 
 :: ---- if gs2build is there, run its setup.bat file ----
+endlocal & set RUNJAVA=%RUNJAVA%& set PATH=%PATH%& set GSDLOS=%GSDLOS%& set GSDLHOME=%GSDLHOME%& set GSDL3HOME=%GSDL3HOME%& set GSDL3SRCHOME=%GSDL3SRCHOME%& set JAVA_HOME=%JAVA_HOME%& set JRE_HOME=%JRE_HOME%& set ANT_HOME=%ANT_HOME%& set CLASSPATH=%CLASSPATH%
 
 if exist gs2build\setup.bat (
   echo.
@@ -90,6 +91,8 @@ if exist local\gs3-setup.bat (
   call gs3-setup.bat 
   cd ..
 )
+
+setlocal enabledelayedexpansion
 
 :: ---- Search for java ----
 set JAVA_MIN_VERSION=1.5.0_00
