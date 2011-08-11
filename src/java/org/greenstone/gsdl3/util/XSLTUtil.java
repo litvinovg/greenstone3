@@ -137,6 +137,9 @@ public class XSLTUtil {
 	return getInterfaceText(interface_name, lang, key, null);
     }
     public static String getInterfaceText(String interface_name, String lang, String key, String args_str) {
+    
+    key = key.replaceAll("__INTERFACE_NAME__", interface_name);
+    	
 	String [] args = null;
 	if (args_str!=null && !args_str.equals("")) {
 	    args = StringUtils.split(args_str, ";");

@@ -271,9 +271,6 @@ public class GS2BrowseAction extends Action {
 		
 		Element d = this.doc.createElement(GSXML.DOC_NODE_ELEM);
 		d.setAttribute(GSXML.NODE_ID_ATT, ((Element)doc_nodes.item(c)).getAttribute(GSXML.NODE_ID_ATT));
-		if(((Element)doc_nodes.item(c)).hasAttribute(GSXML.NODE_MDOFFSET_ATT)) {
-		    d.setAttribute(GSXML.NODE_MDOFFSET_ATT, ((Element)doc_nodes.item(c)).getAttribute(GSXML.NODE_MDOFFSET_ATT));
-		}
 		doc_list.appendChild(d);
 	    }
 

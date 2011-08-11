@@ -21,76 +21,79 @@ package org.greenstone.gsdl3.util;
 import java.util.Vector;
 import java.util.HashMap;
 import java.util.Set;
-/** class to hold info from a gdbm (or equiv) query
- * maps a String key to a list of Strings (values)
- * at the moment, the user must know if something has a single value or not
+
+/**
+ * class to hold info from a gdbm (or equiv) query maps a String key to a list
+ * of Strings (values) at the moment, the user must know if something has a
+ * single value or not
  */
-public class DBInfo {
+public class DBInfo
+{
+	protected HashMap info_map_;
 
-    protected HashMap info_map_;
-
-    public DBInfo() {
-	info_map_ = new HashMap();
-    }
-
-    // methods for keys that can have a single value
-
-    /** set the value for a key - replaces any existing value */
-    public void setInfo(String key, String value) {
-	Vector v = new Vector();
-	v.add(value);
-	info_map_.put(key, v);
-    }
-
-    /** get the value - used for keys that have one value, otherwise just
-     * returns the first one */
-    public String getInfo(String key) {
-	Vector items = (Vector)info_map_.get(key);
-	if (items==null) {
-	    return "";
+	public DBInfo()
+	{
+		info_map_ = new HashMap();
 	}
-	return (String)items.firstElement();
-    }
 
-    /** get the value for the key at offset. If offset out of bounds,
-     * just return the first one. */
-    public String getInfoOffset(String key, int offset) {
-	Vector items = (Vector)info_map_.get(key);
-	if (items==null) {
-	    return "";
+	// methods for keys that can have a single value
+
+	/** set the value for a key - replaces any existing value */
+	public void setInfo(String key, String value)
+	{
+		Vector v = new Vector();
+		v.add(value);
+		info_map_.put(key, v);
 	}
-	if(offset >= 0 && offset < items.size()) {
-	    return (String)items.get(offset);
-	} // else
-	return (String)items.firstElement();
-    }
 
-
-    // methods for keys that can have multiple values
-    
-    /** add a value to a key - for keys that can have multiple values */
-    public void addInfo(String key, String value) {
-	Vector v = (Vector)info_map_.get(key);
-	if (v==null) {
-	    v = new Vector();
+	/**
+	 * get the value - used for keys that have one value, otherwise just returns
+	 * the first one
+	 */
+	public String getInfo(String key)
+	{
+		Vector items = (Vector) info_map_.get(key);
+		if (items == null)
+		{
+			return "";
+		}
+		return (String) items.firstElement();
 	}
-	v.add(value);
-	info_map_.put(key, v);
-    }
-    /** return a vector of all values associated with a key 
-     * @return Vector of Strings
-     */
-    public Vector getMultiInfo(String key) {
-	return (Vector)info_map_.get(key);
-    }
 
-    /** returns a list of all the keys in the info */
-    public Set getKeys() {
-	return info_map_.keySet();
-    }
-    /** returns the Info as a string */
-    public String toString() {
-	return info_map_.toString();
+	// methods for keys that can have multiple values
 
-    }
+	/** add a value to a key - for keys that can have multiple values */
+	public void addInfo(String key, String value)
+	{
+		Vector v = (Vector) info_map_.get(key);
+		if (v == null)
+		{
+			v = new Vector();
+		}
+		v.add(value);
+		info_map_.put(key, v);
+	}
+
+	/**
+	 * return a vector of all values associated with a key
+	 * 
+	 * @return Vector of Strings
+	 */
+	public Vector getMultiInfo(String key)
+	{
+		return (Vector) info_map_.get(key);
+	}
+
+	/** returns a list of all the keys in the info */
+	public Set getKeys()
+	{
+		return info_map_.keySet();
+	}
+
+	/** returns the Info as a string */
+	public String toString()
+	{
+		return info_map_.toString();
+
+	}
 }

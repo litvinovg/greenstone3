@@ -1,0 +1,1726 @@
+package org.greenstone.gsdl3.util;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Vector;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.greenstone.gsdl3.core.MessageRouter;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import com.oopsconsultancy.xmltask.InsertAction.Position;
+
+public class GSDocumentModel
+{
+	//The two archive databases
+	protected static final String ARCHIVEINFSRC = "archiveinf-src";
+	protected static final String ARCHIVEINFDOC = "archiveinf-doc";
+
+	//Set section operations
+	public static final int OPERATION_REPLACE = 1;
+	public static final int OPERATION_INSERT_BEFORE = 2;
+	public static final int OPERATION_INSERT_AFTER = 3;
+	public static final int OPERATION_APPEND = 4;
+
+	//Duplicate and move operations
+	public static final int OPERATION_TYPE_DOC_TO_DOC = 1;
+	public static final int OPERATION_TYPE_DOC_TO_SEC = 2;
+	public static final int OPERATION_TYPE_SEC_TO_DOC = 3;
+	public static final int OPERATION_TYPE_SEC_TO_SEC = 4;
+
+	//Error codes
+	protected static final int NO_ERROR = 0;
+	protected static final int ERROR_OID_NOT_SPECIFIED = -1;
+	protected static final int ERROR_COLLECTION_NOT_SPECIFIED = -2;
+	protected static final int ERROR_SOURCE_DOCUMENT_OR_SECTION_DOES_NOT_EXIST = -3;
+	protected static final int ERROR_DESTINATION_DOCUMENT_OR_SECTION_DOES_NOT_EXIST = -4;
+	protected static final int ERROR_DESTINATION_DOCUMENT_OR_SECTION_ALREADY_EXISTS = -5;
+	protected static final int ERROR_COULD_NOT_DUPLICATE = -6;
+	protected static final int ERROR_COULD_NOT_MOVE = -7;
+	protected static final int ERROR_DOC_XML_COULD_NOT_BE_CREATED = -8;
+	protected static final int ERROR_EXCEPTION_CREATING_DOC_XML_FILE = -9;
+	protected static final int ERROR_METADATA_NAME_NOT_SPECIFIED = -10;
+	protected static final int ERROR_METADATA_VALUE_NOT_SPECIFIED = -11;
+	protected static final int ERROR_COULD_NOT_RETRIEVE_DOC_XML = -12;
+	protected static final int ERROR_COULD_NOT_WRITE_TO_DOC_XML = -13;
+	protected static final int ERROR_COULD_NOT_RETRIEVE_SECTION = -14;
+	protected static final int ERROR_COULD_NOT_OPEN_DATABASE = -15;
+	protected static final int ERROR_DATA_NOT_FOUND_IN_DATABASE = -16;
+	protected static final int ERROR_COULD_NOT_DELETE = -16;
+	protected static final int ERROR_OID_INCORRECT_FORMAT = -17;
+	protected static final int ERROR_INVALID_MERGE = -18;
+	protected static final int ERROR_INVALID_METADATA_POSITION = -19;
+	protected static final int ERROR_INVALID_SPLIT = -20;
+	protected static final int ERROR_DESTINATION_OID_NOT_SPECIFIED = -21;
+	protected static final HashMap<Integer, String> _errorMessageMap;
+
+	static
+	{
+		//Corresponding error messages
+		HashMap<Integer, String> errorMessageMap = new HashMap<Integer, String>();
+		errorMessageMap.put(ERROR_OID_NOT_SPECIFIED, "OID not specified");
+		errorMessageMap.put(ERROR_COLLECTION_NOT_SPECIFIED, "Collection not specified");
+		errorMessageMap.put(ERROR_SOURCE_DOCUMENT_OR_SECTION_DOES_NOT_EXIST, "The specified source document or section does not exist");
+		errorMessageMap.put(ERROR_DESTINATION_DOCUMENT_OR_SECTION_DOES_NOT_EXIST, "The specified destination document or section does not exist");
+		errorMessageMap.put(ERROR_DESTINATION_DOCUMENT_OR_SECTION_ALREADY_EXISTS, "The specified destination document or section already exists");
+		errorMessageMap.put(ERROR_COULD_NOT_DUPLICATE, "There was an error duplicating document or section");
+		errorMessageMap.put(ERROR_COULD_NOT_MOVE, "There was an error moving document or section");
+		errorMessageMap.put(ERROR_DOC_XML_COULD_NOT_BE_CREATED, "The doc.xml file already exists or could not be created");
+		errorMessageMap.put(ERROR_EXCEPTION_CREATING_DOC_XML_FILE, "There was an exception while creating the doc.xml file");
+		errorMessageMap.put(ERROR_METADATA_NAME_NOT_SPECIFIED, "The name of the requested metadata was not specified");
+		errorMessageMap.put(ERROR_METADATA_VALUE_NOT_SPECIFIED, "The new value for this metadata was not specified");
+		errorMessageMap.put(ERROR_COULD_NOT_RETRIEVE_DOC_XML, "Could not retrieve the necessary doc.xml file");
+		errorMessageMap.put(ERROR_COULD_NOT_WRITE_TO_DOC_XML, "There was an error writing to the doc.xml file");
+		errorMessageMap.put(ERROR_COULD_NOT_RETRIEVE_SECTION, "There was an error retrieving the specified section from the doc.xml file");
+		errorMessageMap.put(ERROR_COULD_NOT_OPEN_DATABASE, "There was an error opening the archive database");
+		errorMessageMap.put(ERROR_DATA_NOT_FOUND_IN_DATABASE, "The specified information could not be found in the database");
+		errorMessageMap.put(ERROR_COULD_NOT_DELETE, "There was an error deleting this document");
+		errorMessageMap.put(ERROR_OID_INCORRECT_FORMAT, "The given OID was not in the correct format");
+		errorMessageMap.put(ERROR_INVALID_MERGE, "Merge can only be performed on two sections of the same level or a section and it's parent. Also the destination section cannot have any child sections");
+		errorMessageMap.put(ERROR_INVALID_METADATA_POSITION, "There is no metadata at the given position");
+		errorMessageMap.put(ERROR_INVALID_SPLIT, "A split at the given location is not possible, either the section does not have text or the split point does not exist");
+		errorMessageMap.put(ERROR_DESTINATION_OID_NOT_SPECIFIED, "The destination OID was not specified");
+		_errorMessageMap = errorMessageMap;
+	}
+
+	protected int _errorStatus = NO_ERROR;
+
+	protected String _siteHome;
+	protected Document _mainDoc;
+	protected MessageRouter _router;
+	protected HashMap<String, Document> _docCache = new HashMap<String, Document>();
+
+	public GSDocumentModel(String siteHome, Document mainDocument, MessageRouter router)
+	{
+		_siteHome = siteHome;
+		_mainDoc = mainDocument;
+		_router = router;
+	}
+
+	public void documentCreate(String oid, String collection, String lang, String uid)
+	{
+		_errorStatus = NO_ERROR;
+		//If the collection is not specified then we cannot continue
+		if (collection == null || collection.equals(""))
+		{
+			_errorStatus = ERROR_COLLECTION_NOT_SPECIFIED;
+			return;
+		}
+
+		//If the document does not have an OID specified then generate one
+		if (oid == null || oid.equals(""))
+		{
+			oid = generateOID();
+		}
+		else if (archiveCheckDocumentOrSectionExists(oid, collection, lang, uid))
+		{
+			_errorStatus = ERROR_DESTINATION_DOCUMENT_OR_SECTION_ALREADY_EXISTS;
+			return;
+		}
+
+		//Check if the OID is the OID for a section
+		boolean section = false;
+		if (oid.contains("."))
+		{
+			section = true;
+		}
+
+		if (!section)
+		{
+			File newDir = new File(_siteHome + File.separatorChar + "collect" + File.separatorChar + collection + File.separatorChar + "archives" + File.separatorChar + oid);
+
+			if (!newDir.exists())
+			{
+				newDir.mkdir();
+			}
+
+			HashMap<String, ArrayList<String>> entries = new HashMap<String, ArrayList<String>>();
+			ArrayList<String> values = new ArrayList<String>();
+			values.add(oid + "/doc.xml");
+			entries.put("doc-file", values);
+
+			//Write the new entry to the archive database 
+			archiveWriteEntryToDatabase(oid, collection, entries, lang, uid);
+			if (_errorStatus != NO_ERROR)
+			{
+				return;
+			}
+
+			//Create a basic doc.xml file to go in the new folder
+			documentXMLCreateDocXML(oid, collection, lang, uid);
+		}
+		else
+		{
+			documentXMLCreateSection(oid, collection, lang, uid);
+		}
+	}
+
+	public void documentDelete(String oid, String collection, String lang, String uid)
+	{
+		_errorStatus = NO_ERROR;
+		if (oid == null || oid.equals(""))
+		{
+			_errorStatus = ERROR_OID_NOT_SPECIFIED;
+			return;
+		}
+		else if (collection == null || collection.equals(""))
+		{
+			_errorStatus = ERROR_COLLECTION_NOT_SPECIFIED;
+			return;
+		}
+
+		if (!archiveCheckDocumentOrSectionExists(oid, collection, lang, uid))
+		{
+			_errorStatus = ERROR_SOURCE_DOCUMENT_OR_SECTION_DOES_NOT_EXIST;
+			return;
+		}
+
+		//Check if the OID is the OID for a section
+		boolean section = false;
+		if (oid.contains("."))
+		{
+			section = true;
+		}
+
+		if (!section)
+		{
+			File dirToDelete = new File(_siteHome + File.separatorChar + "collect" + File.separatorChar + collection + File.separatorChar + "archives" + File.separatorChar + oid);
+
+			if (!dirToDelete.exists() || !dirToDelete.isDirectory() || !deleteDirectory(dirToDelete))
+			{
+				_errorStatus = ERROR_COULD_NOT_DELETE;
+				return;
+			}
+
+			//Remove the entry from the archive database 
+			archiveRemoveEntryFromDatabase(oid, collection, lang, uid);
+		}
+		else
+		{
+			documentXMLDeleteSection(oid, collection, lang, uid);
+		}
+	}
+
+	public void documentDuplicate(String oid, String collection, String newOID, String newCollection, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+
+		//If a new collection is not specified then assume the collection of the original document
+		if (newCollection == null || newCollection.equals(""))
+		{
+			newCollection = collection;
+		}
+
+		//Generate an OID for the duplicate if we are not given one
+		if (newOID == null || newOID.equals(""))
+		{
+			_errorStatus = ERROR_DESTINATION_OID_NOT_SPECIFIED;
+			return;
+		}
+		else if (archiveCheckDocumentOrSectionExists(newOID, newCollection, lang, uid))
+		{
+			_errorStatus = ERROR_DESTINATION_DOCUMENT_OR_SECTION_ALREADY_EXISTS;
+			return;
+		}
+
+		//Check what operation we are performing
+		int op = getOperation(oid, newOID);
+
+		boolean requiresDatabaseEntry = false;
+		switch (op)
+		{
+		case OPERATION_TYPE_DOC_TO_DOC:
+		{
+			String archiveDir = archiveGetDocumentFilePath(oid, collection, lang, uid);
+			if (_errorStatus != NO_ERROR)
+			{
+				return;
+			}
+
+			//Remove doc.xml from the file name
+			archiveDir = archiveDir.substring(0, archiveDir.lastIndexOf(File.separator));
+			File dirToDuplicate = new File(archiveDir);
+
+			//This is possibly not the best way to name the new directory
+			File newDir = new File(archiveDir.substring(0, archiveDir.lastIndexOf(File.separator) + File.separator.length()) + newOID);
+
+			if (dirToDuplicate.exists() && dirToDuplicate.isDirectory() && !newDir.exists())
+			{
+				if (!copyDirectory(dirToDuplicate, newDir))
+				{
+					_errorStatus = ERROR_COULD_NOT_DUPLICATE;
+					return;
+				}
+			}
+			requiresDatabaseEntry = true;
+			break;
+		}
+		case OPERATION_TYPE_DOC_TO_SEC:
+		{
+			Document originalDocument = getDocXML(oid, collection, lang, uid);
+			Element originalSection = getTopLevelSectionElement(originalDocument);
+
+			documentXMLCreateSection(newOID, newCollection, lang, uid);
+			if (_errorStatus != NO_ERROR)
+			{
+				return;
+			}
+
+			documentXMLSetSection(newOID, newCollection, originalSection, OPERATION_REPLACE, lang, uid);
+			break;
+		}
+		case OPERATION_TYPE_SEC_TO_DOC:
+		{
+			Document originalDocument = getDocXML(oid, collection, lang, uid);
+			Element originalSection = getSectionBySectionNumber(originalDocument, getSectionFromOID(oid));
+
+			documentCreate(newOID, newCollection, lang, uid);
+			if (_errorStatus != NO_ERROR)
+			{
+				return;
+			}
+
+			documentXMLCreateSection(newOID, newCollection, lang, uid);
+			if (_errorStatus != NO_ERROR)
+			{
+				return;
+			}
+
+			documentXMLSetSection(newOID, newCollection, originalSection, OPERATION_REPLACE, lang, uid);
+
+			requiresDatabaseEntry = true;
+			break;
+		}
+		case OPERATION_TYPE_SEC_TO_SEC:
+		{
+			Document originalDocument = getDocXML(oid, collection, lang, uid);
+			Element originalSection = getSectionBySectionNumber(originalDocument, getSectionFromOID(oid));
+
+			documentXMLCreateSection(newOID, newCollection, lang, uid);
+			if (_errorStatus != NO_ERROR)
+			{
+				return;
+			}
+
+			documentXMLSetSection(newOID, newCollection, originalSection, OPERATION_REPLACE, lang, uid);
+			break;
+		}
+		}
+
+		if (requiresDatabaseEntry)
+		{
+			HashMap<String, ArrayList<String>> entries = new HashMap<String, ArrayList<String>>();
+			ArrayList<String> values = new ArrayList<String>();
+			values.add(newOID + "/doc.xml");
+			entries.put("doc-file", values);
+
+			//Write the new entry to the archive database 
+			archiveWriteEntryToDatabase(newOID, newCollection, entries, lang, uid);
+		}
+	}
+
+	//TODO: Change return type to something else
+	public void documentGetInformation(String oid, String collection, String[] requestedInfo, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+
+		for (int j = 0; j < requestedInfo.length; j++)
+		{
+			String currentRequest = requestedInfo[j];
+			//TODO: Decide what info requests are valid (e.g. number of sections etc.)
+			//-How many child/sibling sections
+			//-Metadata keys
+		}
+	}
+
+	public void documentMove(String oid, String collection, String newOID, String newCollection, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+
+		documentDuplicate(oid, collection, newOID, newCollection, lang, uid);
+		if (_errorStatus != NO_ERROR)
+		{
+			return;
+		}
+
+		documentDelete(oid, collection, lang, uid);
+	}
+
+	public void documentMerge(String oid, String collection, String mergeOID, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+
+		if ((_errorStatus = checkOIDandCollection(mergeOID, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+
+		int op = getOperation(oid, mergeOID);
+		if (op != OPERATION_TYPE_SEC_TO_SEC && op != OPERATION_TYPE_SEC_TO_DOC) //We allow SEC_TO_DOC in the case that someone wants to merge D11.1 with D11 (for example)
+		{
+			_errorStatus = ERROR_INVALID_MERGE;
+			return;
+		}
+
+		String[] sourceLevels = oid.split("\\.");
+		String[] destinationLevels = mergeOID.split("\\.");
+
+		if (destinationLevels.length > sourceLevels.length)
+		{
+			_errorStatus = ERROR_INVALID_MERGE;
+			return;
+		}
+
+		for (int i = 0; i < sourceLevels.length - 1; i++)
+		{
+			if (i >= destinationLevels.length || !sourceLevels[i].equals(destinationLevels[i]))
+			{
+				_errorStatus = ERROR_INVALID_MERGE;
+				return;
+			}
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return;
+		}
+
+		Element sourceSection = getSectionBySectionNumber(docXML, getSectionFromOID(oid));
+		Element destinationSection = getSectionBySectionNumber(docXML, getSectionFromOID(mergeOID));
+
+		//Make sure the destination Section does not have any child Sections.
+		NodeList childSections = GSXML.getChildrenByTagName(destinationSection, GSXML.DOCXML_SECTION_ELEM);
+		if (childSections.getLength() != 0 && sourceLevels.length == destinationLevels.length)
+		{
+			_errorStatus = ERROR_INVALID_MERGE;
+			return;
+		}
+
+		//Get the children of the destination section so we can copy them to the source section before we overwrite the destination
+		NodeList childrenToKeep = destinationSection.getChildNodes();
+		ArrayList<Node> childList = new ArrayList<Node>();
+		for (int i = 0; i < childrenToKeep.getLength(); i++)
+		{
+			//Need to put these in a list to make them easier to loop through as using a NodeList is messy
+			childList.add(childrenToKeep.item(i));
+		}
+
+		//for(int i = 0; i < childrenToKeep.getLength(); i++)
+		for (int i = 0; i < childList.size(); i++)
+		{
+			Node currentChild = childList.get(i);
+			//If the child is not a <Content> node then add it to source section
+			if (!currentChild.getNodeName().equals(GSXML.DOCXML_CONTENT_ELEM))
+			{
+				sourceSection.appendChild(currentChild);
+				continue;
+			}
+
+			//Get the destination Section's Content node's text node, if it's empty then we don't need to worry about appending it
+			Node destinationTextNode = currentChild.getFirstChild();
+			if (destinationTextNode == null || destinationTextNode.getNodeValue() == null || destinationTextNode.getNodeValue().equals(""))
+			{
+				continue;
+			}
+
+			//If the source Section does not have a content then directly append the destination content
+			Element sourceContent = (Element) GSXML.getChildByTagName(sourceSection, GSXML.DOCXML_CONTENT_ELEM);
+			if (sourceContent == null)
+			{
+				sourceSection.appendChild(currentChild);
+				continue;
+			}
+
+			//If the source Section's Content is empty then again we can directly append the destination content
+			Node sourceTextNode = sourceContent.getFirstChild();
+			if (sourceTextNode == null || sourceTextNode.getNodeValue() == null || sourceTextNode.getNodeValue().equals(""))
+			{
+				sourceSection.appendChild(currentChild);
+				continue;
+			}
+
+			//Otherwise, set the new content to be destination + source text in that order.
+			sourceTextNode.setNodeValue(destinationTextNode.getNodeValue() + " " + sourceTextNode.getNodeValue());
+		}
+
+		documentXMLSetSection(mergeOID, collection, sourceSection, OPERATION_REPLACE, lang, uid);
+		if (_errorStatus != NO_ERROR)
+		{
+			return;
+		}
+
+		documentXMLDeleteSection(oid, collection, lang, uid);
+	}
+
+	public void documentSplit(String oid, String collection, int splitPoint, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return;
+		}
+
+		Element sectionToSplit = null;
+		if (!oid.contains("."))
+		{
+			sectionToSplit = getTopLevelSectionElement(docXML);
+		}
+		else
+		{
+			sectionToSplit = getSectionBySectionNumber(docXML, getSectionFromOID(oid));
+		}
+
+		Element content = (Element) GSXML.getChildByTagName(sectionToSplit, GSXML.DOCXML_CONTENT_ELEM);
+		if (content == null)
+		{
+			_errorStatus = ERROR_INVALID_SPLIT;
+			return;
+		}
+
+		Node textNode = content.getFirstChild();
+		if (textNode == null)
+		{
+			_errorStatus = ERROR_INVALID_SPLIT;
+			return;
+		}
+
+		String text = textNode.getNodeValue();
+		if (splitPoint > text.length() - 2 || splitPoint < 1) //-1 would be the index of the last character, so the last valid split point is -2
+		{
+			_errorStatus = ERROR_INVALID_SPLIT;
+			return;
+		}
+
+		String firstPart = text.substring(0, splitPoint);
+		String secondPart = text.substring(splitPoint);
+
+		Element newSection = docXML.createElement(GSXML.DOCXML_SECTION_ELEM);
+		Element newContent = docXML.createElement(GSXML.DOCXML_CONTENT_ELEM);
+		Node newTextNode = docXML.createTextNode(firstPart);
+		newContent.appendChild(newTextNode);
+		newSection.appendChild(newContent);
+
+		documentXMLSetSection(oid, collection, newSection, OPERATION_INSERT_BEFORE, lang, uid);
+		if (_errorStatus != NO_ERROR)
+		{
+			return;
+		}
+		textNode.setNodeValue(secondPart);
+
+		//Write the new change back into the file
+		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		{
+			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
+		}
+	}
+
+	public void documentXMLCreateDocXML(String oid, String collection, String lang, String uid)
+	{
+		_errorStatus = NO_ERROR;
+		try
+		{
+			Document docXML = null;
+
+			String filePath = archiveGetDocumentFilePath(oid, collection, lang, uid);
+			File docFile = new File(filePath);
+			if (!docFile.exists() && !docFile.createNewFile())
+			{
+				_errorStatus = ERROR_DOC_XML_COULD_NOT_BE_CREATED;
+				return;
+			}
+
+			BufferedWriter bw = new BufferedWriter(new FileWriter(docFile));
+			bw.write("<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>\n");
+			bw.write("<!DOCTYPE Archive SYSTEM \"http://greenstone.org/dtd/Archive/1.0/Archive.dtd\">\n");
+			bw.write("<Archive>\n");
+			bw.write("</Archive>\n");
+			bw.close();
+
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			docXML = db.parse(docFile);
+
+			_docCache.put(oid + "__" + collection, docXML);
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+			_errorStatus = ERROR_EXCEPTION_CREATING_DOC_XML_FILE;
+			return;
+		}
+	}
+
+	public ArrayList<Element> documentXMLGetMetadata(String oid, String collection, String metadataName, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return null;
+		}
+		else if (metadataName == null || metadataName.equals(""))
+		{
+			_errorStatus = ERROR_METADATA_NAME_NOT_SPECIFIED;
+			return null;
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return null;
+		}
+
+		return getMetadataElementsFromSection(docXML, oid, metadataName);
+	}
+
+	public void documentXMLSetMetadata(String oid, String collection, String metadataName, String newMetadataValue, int position, int operation, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+		else if (metadataName == null || metadataName.equals(""))
+		{
+			_errorStatus = ERROR_METADATA_NAME_NOT_SPECIFIED;
+			return;
+		}
+		else if (newMetadataValue == null || newMetadataValue.equals(""))
+		{
+			_errorStatus = ERROR_METADATA_VALUE_NOT_SPECIFIED;
+			return;
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return;
+		}
+
+		ArrayList<Element> metadataElems = getMetadataElementsFromSection(docXML, oid, metadataName);
+
+		if (operation != OPERATION_APPEND && metadataElems.get(position) == null)
+		{
+			_errorStatus = ERROR_INVALID_METADATA_POSITION;
+			return;
+		}
+
+		if (operation == OPERATION_REPLACE)
+		{
+			metadataElems.get(position).setNodeValue(newMetadataValue);
+		}
+		else if (operation == OPERATION_INSERT_BEFORE)
+		{
+			Element newMetadata = createElementWithValue(docXML, GSXML.DOCXML_METADATA_ELEM, metadataName, newMetadataValue);
+			Element existingMetadata = metadataElems.get(position);
+
+			existingMetadata.getParentNode().insertBefore(newMetadata, existingMetadata);
+		}
+		else if (operation == OPERATION_INSERT_AFTER)
+		{
+			Element newMetadata = createElementWithValue(docXML, GSXML.DOCXML_METADATA_ELEM, metadataName, newMetadataValue);
+			Element existingMetadata = metadataElems.get(position + 1);
+
+			if (existingMetadata != null)
+			{
+				existingMetadata.getParentNode().insertBefore(newMetadata, existingMetadata);
+			}
+			else
+			{
+				existingMetadata = metadataElems.get(position);
+				existingMetadata.getParentNode().appendChild(newMetadata);
+			}
+		}
+		else
+		{
+			Element section = getSectionBySectionNumber(docXML, getSectionFromOID(oid));
+			Element description = (Element) GSXML.getChildByTagName(section, GSXML.DOCXML_DESCRIPTION_ELEM);
+			if (description == null)
+			{
+				description = docXML.createElement(GSXML.DOCXML_DESCRIPTION_ELEM);
+				section.appendChild(description);
+			}
+			Element newMetadata = createElementWithValue(docXML, GSXML.DOCXML_METADATA_ELEM, metadataName, newMetadataValue);
+			description.appendChild(newMetadata);
+		}
+
+		//Write the new change back into the file
+		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		{
+			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
+		}
+	}
+
+	public void documentXMLDeleteMetadata(String oid, String collection, String metadataName, int position, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+		else if (metadataName == null || metadataName.equals(""))
+		{
+			_errorStatus = ERROR_METADATA_NAME_NOT_SPECIFIED;
+			return;
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return;
+		}
+
+		ArrayList<Element> metadataElems = getMetadataElementsFromSection(docXML, oid, metadataName);
+
+		if (metadataElems.get(position) != null)
+		{
+			metadataElems.get(position).getParentNode().removeChild(metadataElems.get(position));
+		}
+	}
+
+	public void documentXMLDeleteMetadata(String oid, String collection, String metadataName, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+		else if (metadataName == null || metadataName.equals(""))
+		{
+			_errorStatus = ERROR_METADATA_NAME_NOT_SPECIFIED;
+			return;
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return;
+		}
+
+		ArrayList<Element> metadataElems = getMetadataElementsFromSection(docXML, oid, metadataName);
+
+		for (Element elem : metadataElems)
+		{
+			elem.getParentNode().removeChild(elem);
+		}
+	}
+
+	public void documentXMLReplaceMetadata(String oid, String collection, String metadataName, String oldMetadataValue, String newMetadataValue, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+		else if (metadataName == null || metadataName.equals(""))
+		{
+			_errorStatus = ERROR_METADATA_NAME_NOT_SPECIFIED;
+			return;
+		}
+		else if (newMetadataValue == null || newMetadataValue.equals(""))
+		{
+			_errorStatus = ERROR_METADATA_VALUE_NOT_SPECIFIED;
+			return;
+		}
+		else if (oldMetadataValue == null || oldMetadataValue.equals(""))
+		{
+			_errorStatus = ERROR_METADATA_VALUE_NOT_SPECIFIED;
+			return;
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return;
+		}
+
+		ArrayList<Element> metadataElems = getMetadataElementsFromSection(docXML, oid, metadataName);
+
+		for (Element elem : metadataElems)
+		{
+			Node textNode = elem.getFirstChild();
+
+			if (textNode != null && textNode.getNodeValue().equals(oldMetadataValue))
+			{
+				textNode.setNodeValue(newMetadataValue);
+			}
+		}
+
+		//Write the new change back into the file
+		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		{
+			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
+		}
+	}
+
+	public void documentXMLCreateSection(String oid, String collection, String lang, String uid)
+	{
+		_errorStatus = NO_ERROR;
+		if (oid == null || oid.equals(""))
+		{
+			_errorStatus = ERROR_OID_NOT_SPECIFIED;
+			return;
+		}
+		else if (collection == null || collection.equals(""))
+		{
+			_errorStatus = ERROR_COLLECTION_NOT_SPECIFIED;
+			return;
+		}
+
+		if (oid.contains(".") && !archiveCheckDocumentOrSectionExists(oid.substring(0, oid.indexOf(".")), collection, lang, uid))
+		{
+			documentCreate(oid.substring(0, oid.indexOf(".")), collection, lang, uid);
+			if (_errorStatus != NO_ERROR)
+			{
+				return;
+			}
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return;
+		}
+
+		Element topLevel = docXML.getDocumentElement();
+		if (!oid.contains("."))
+		{
+			if (GSXML.getChildByTagName(topLevel, GSXML.DOCXML_SECTION_ELEM) == null)
+			{
+				Element newSection = docXML.createElement(GSXML.DOCXML_SECTION_ELEM);
+				topLevel.appendChild(newSection);
+			}
+		}
+		else
+		{
+			int[] intLevels = null;
+			try
+			{
+				intLevels = oidToSectionNumberArray(oid);
+			}
+			catch (Exception ex)
+			{
+				_errorStatus = ERROR_OID_INCORRECT_FORMAT;
+				return;
+			}
+
+			Element current = (Element) GSXML.getChildByTagName(topLevel, GSXML.DOCXML_SECTION_ELEM);
+			if (current == null)
+			{
+				Element topLevelSection = docXML.createElement(GSXML.DOCXML_SECTION_ELEM);
+				topLevel.appendChild(topLevelSection);
+				current = topLevelSection;
+			}
+
+			for (int currentLevelValue : intLevels)
+			{
+				NodeList sections = GSXML.getChildrenByTagName(current, GSXML.DOCXML_SECTION_ELEM);
+
+				if (sections.item(currentLevelValue - 1) == null)
+				{
+					Element latest = null;
+					for (int j = 0; j < currentLevelValue - sections.getLength(); j++)
+					{
+						Element blankSection = docXML.createElement(GSXML.DOCXML_SECTION_ELEM);
+						current.appendChild(blankSection);
+						latest = blankSection;
+					}
+					current = latest;
+				}
+				else
+				{
+					current = (Element) sections.item(currentLevelValue - 1);
+				}
+			}
+		}
+
+		//Write the new change back into the file
+		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		{
+			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
+		}
+	}
+
+	public void documentXMLDeleteSection(String oid, String collection, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return;
+		}
+
+		Element section = getSectionBySectionNumber(docXML, getSectionFromOID(oid));
+		if (section == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_DELETE;
+			return;
+		}
+
+		section.getParentNode().removeChild(section);
+
+		//Write the new change back into the file
+		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		{
+			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
+		}
+	}
+
+	public Element documentXMLGetSection(String oid, String collection, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return null;
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return null;
+		}
+
+		Element section = null;
+		if (!oid.contains("."))
+		{
+			section = getTopLevelSectionElement(docXML);
+		}
+		else
+		{
+			section = getSectionBySectionNumber(docXML, getSectionFromOID(oid));
+		}
+
+		if (section == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_SECTION;
+			return null;
+		}
+
+		return section;
+	}
+
+	public void documentXMLSetSection(String oid, String collection, Element newSection, int op, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return;
+		}
+
+		Element existingSection = null;
+		if (!oid.contains("."))
+		{
+			existingSection = getTopLevelSectionElement(docXML);
+		}
+		else
+		{
+			existingSection = getSectionBySectionNumber(docXML, getSectionFromOID(oid));
+		}
+
+		if (existingSection == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_SECTION;
+			return;
+		}
+
+		Element importedSection = (Element) docXML.importNode(newSection, true);
+
+		if (op == OPERATION_APPEND)
+		{
+			existingSection.appendChild(importedSection);
+		}
+		else
+		{
+			Node sectionParent = existingSection.getParentNode();
+
+			//Remove the attributes that are only there to help us find the section
+			importedSection.removeAttribute(GSXML.NODE_ID_ATT);
+			importedSection.removeAttribute(GSXML.COLLECTION_ATT);
+
+			if (op == OPERATION_INSERT_BEFORE || op == OPERATION_REPLACE)
+			{
+				sectionParent.insertBefore(importedSection, existingSection);
+			}
+			else if (op == OPERATION_INSERT_AFTER)
+			{
+				Element sibling = (Element) existingSection.getNextSibling();
+				if (sibling == null)
+				{
+					sectionParent.insertBefore(importedSection, sibling);
+				}
+				else
+				{
+					sectionParent.appendChild(importedSection);
+				}
+			}
+
+			if (op == OPERATION_REPLACE)
+			{
+				sectionParent.removeChild(existingSection);
+			}
+		}
+
+		//Write the new change back into the file
+		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		{
+			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
+			return;
+		}
+	}
+
+	public String documentXMLGetText(String oid, String collection, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return null;
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return null;
+		}
+
+		Element section = null;
+		if (!oid.contains("."))
+		{
+			section = getTopLevelSectionElement(docXML);
+		}
+		else
+		{
+			section = getSectionBySectionNumber(docXML, getSectionFromOID(oid));
+		}
+
+		if (section == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_SECTION;
+			return null;
+		}
+
+		Element contentNode = (Element) GSXML.getChildByTagName(section, GSXML.DOCXML_CONTENT_ELEM);
+		if (contentNode == null)
+		{
+			return null;
+		}
+
+		Node textNode = contentNode.getFirstChild();
+		if (textNode == null)
+		{
+			return null;
+		}
+
+		return textNode.getNodeValue();
+	}
+
+	public void documentXMLSetText(String oid, String collection, Element newContent, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return;
+		}
+
+		Element section = null;
+		if (!oid.contains("."))
+		{
+			section = getTopLevelSectionElement(docXML);
+		}
+		else
+		{
+			section = getSectionBySectionNumber(docXML, getSectionFromOID(oid));
+		}
+
+		if (section == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_SECTION;
+			return;
+		}
+
+		Element existingContent = (Element) GSXML.getChildByTagName(section, GSXML.DOCXML_CONTENT_ELEM);
+
+		//Remove the attributes that are only there to help us find the content
+		newContent.removeAttribute(GSXML.NODE_ID_ATT);
+		newContent.removeAttribute(GSXML.COLLECTION_ATT);
+
+		Element importedContent = (Element) docXML.importNode(newContent, true);
+		//If the current section does not have content then just add it, otherwise replace the existing one
+		if (existingContent == null)
+		{
+			section.appendChild(importedContent);
+		}
+		else
+		{
+			Node contentParent = existingContent.getParentNode();
+
+			//Replace the old node in the document tree
+			contentParent.insertBefore(importedContent, existingContent);
+			contentParent.removeChild(existingContent);
+		}
+
+		//Write the new change back into the file
+		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		{
+			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
+			return;
+		}
+	}
+
+	public void documentXMLSetText(String oid, String collection, String newContent, String lang, String uid)
+	{
+		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		{
+			return;
+		}
+
+		Document docXML = getDocXML(oid, collection, lang, uid);
+		if (docXML == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
+			return;
+		}
+
+		Element section = null;
+		if (!oid.contains("."))
+		{
+			section = getTopLevelSectionElement(docXML);
+		}
+		else
+		{
+			section = getSectionBySectionNumber(docXML, getSectionFromOID(oid));
+		}
+
+		if (section == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_RETRIEVE_SECTION;
+			return;
+		}
+
+		Element existingContent = (Element) GSXML.getChildByTagName(section, GSXML.DOCXML_CONTENT_ELEM);
+
+		//If the current section does not have content then just add it, otherwise replace the existing one
+		if (existingContent == null)
+		{
+			Element newContentElem = docXML.createElement(GSXML.DOCXML_CONTENT_ELEM);
+			Node textNode = docXML.createTextNode(newContent);
+			newContentElem.appendChild(textNode);
+		}
+		else
+		{
+			Node textNode = existingContent.getFirstChild();
+			if (textNode != null)
+			{
+				textNode.setNodeValue(newContent);
+			}
+			else
+			{
+				existingContent.appendChild(docXML.createTextNode(newContent));
+			}
+		}
+
+		//Write the new change back into the file
+		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		{
+			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
+			return;
+		}
+	}
+
+	public String archiveGetDocumentFilePath(String oid, String collection, String lang, String uid)
+	{
+		_errorStatus = NO_ERROR;
+
+		if (oid.contains("."))
+		{
+			oid = oid.substring(0, oid.indexOf("."));
+		}
+
+		String assocFilePath = getDocFilePathFromDatabase(oid, collection, lang, uid);
+		if (assocFilePath == null)
+		{
+			_errorStatus = ERROR_DATA_NOT_FOUND_IN_DATABASE;
+			return null;
+		}
+
+		if (File.separator.equals("\\"))
+		{
+			assocFilePath = assocFilePath.replace("/", "\\");
+		}
+
+		String docFilePath = _siteHome + File.separatorChar + "collect" + File.separatorChar + collection + File.separatorChar + "archives" + File.separatorChar + assocFilePath;
+		return docFilePath;
+	}
+
+	public String archiveGetSourceFileOID(String srcFile, String collection, String lang, String uid)
+	{
+		_errorStatus = NO_ERROR;
+		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFSRC, SimpleCollectionDatabase.READ, lang, uid);
+		if (coll_db == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_OPEN_DATABASE;
+			return null;
+		}
+
+		DBInfo info = coll_db.getInfo(srcFile);
+		if (info == null)
+		{
+			_errorStatus = ERROR_DATA_NOT_FOUND_IN_DATABASE;
+			coll_db.closeDatabase();
+			return null;
+		}
+
+		String oid = info.getInfo("oid");
+
+		coll_db.closeDatabase();
+		return oid;
+	}
+
+	public boolean archiveCheckDocumentOrSectionExists(String oid, String collection, String lang, String uid)
+	{
+		_errorStatus = NO_ERROR;
+		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.READ, lang, uid);
+		if (coll_db == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_OPEN_DATABASE;
+			return false;
+		}
+
+		boolean section = false;
+		if (oid.contains("."))
+		{
+			section = true;
+		}
+
+		DBInfo info = null;
+		if (section)
+		{
+			info = coll_db.getInfo(oid.substring(0, oid.indexOf(".")));
+		}
+		else
+		{
+			info = coll_db.getInfo(oid);
+		}
+		boolean exists = (info != null);
+
+		coll_db.closeDatabase();
+		if (section && exists)
+		{
+			Document docXML = getDocXML(oid, collection, lang, uid);
+			if (getSectionBySectionNumber(docXML, getSectionFromOID(oid)) == null)
+			{
+				return false;
+			}
+			return true;
+		}
+
+		return exists;
+	}
+
+	public void archiveWriteEntryToDatabase(String oid, String collection, HashMap<String, ArrayList<String>> infoList, String lang, String uid)
+	{
+		_errorStatus = NO_ERROR;
+		if (oid == null || oid.equals(""))
+		{
+			_errorStatus = ERROR_OID_NOT_SPECIFIED;
+			return;
+		}
+		else if (collection == null || collection.equals(""))
+		{
+			_errorStatus = ERROR_COLLECTION_NOT_SPECIFIED;
+			return;
+		}
+
+		DBInfo info = new DBInfo();
+
+		for (String s : infoList.keySet())
+		{
+			for (String v : infoList.get(s))
+			{
+				info.addInfo(s, v);
+			}
+		}
+
+		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.WRITE, lang, uid);
+		if (coll_db == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_OPEN_DATABASE;
+			return;
+		}
+		coll_db.setInfo(oid, info);
+		coll_db.closeDatabase();
+	}
+
+	public void archiveRemoveEntryFromDatabase(String oid, String collection, String lang, String uid)
+	{
+		_errorStatus = NO_ERROR;
+		if (oid == null || oid.equals(""))
+		{
+			_errorStatus = ERROR_OID_NOT_SPECIFIED;
+			return;
+		}
+		else if (collection == null || collection.equals(""))
+		{
+			_errorStatus = ERROR_COLLECTION_NOT_SPECIFIED;
+			return;
+		}
+
+		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.WRITE, lang, uid);
+		if (coll_db == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_OPEN_DATABASE;
+			return;
+		}
+		coll_db.deleteKey(oid);
+		coll_db.closeDatabase();
+	}
+
+	public ArrayList<String> archiveGetAssociatedImportFiles(String oid, String collection, String lang, String uid)
+	{
+		_errorStatus = NO_ERROR;
+		if (oid == null || oid.equals(""))
+		{
+			_errorStatus = ERROR_OID_NOT_SPECIFIED;
+			return null;
+		}
+		else if (collection == null || collection.equals(""))
+		{
+			_errorStatus = ERROR_COLLECTION_NOT_SPECIFIED;
+			return null;
+		}
+
+		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.READ, lang, uid);
+		if (coll_db == null)
+		{
+			_errorStatus = ERROR_COULD_NOT_OPEN_DATABASE;
+			return null;
+		}
+
+		DBInfo info = coll_db.getInfo(oid);
+		if (info == null)
+		{
+			_errorStatus = ERROR_DATA_NOT_FOUND_IN_DATABASE;
+			coll_db.closeDatabase();
+			return null;
+		}
+
+		String srcFile = info.getInfo("src-file");
+		Vector data = info.getMultiInfo("assoc-file");
+
+		ArrayList<String> assocFiles = new ArrayList<String>();
+		assocFiles.add(srcFile);
+		for (String d : (Vector<String>) data)
+		{
+			assocFiles.add(d);
+		}
+
+		coll_db.closeDatabase();
+		return assocFiles;
+	}
+
+	/********************
+	 * Helper functions *
+	 *******************/
+
+	public boolean checkError(Element elem, String methodName)
+	{
+		if (_errorMessageMap.get(_errorStatus) != null)
+		{
+			GSXML.addError(elem.getOwnerDocument(), elem, methodName + ": " + _errorMessageMap.get(_errorStatus), GSXML.ERROR_TYPE_SYNTAX);
+			return true;
+		}
+
+		return false;
+	}
+
+	public String getSectionFromOID(String oid)
+	{
+		if (!oid.contains("."))
+		{
+			return null;
+		}
+		return oid.substring(oid.indexOf(".") + 1);
+	}
+
+	public Element createElementWithValue(Document doc, String nodeName, String name, String value)
+	{
+		Element metadataElem = doc.createElement(nodeName);
+		metadataElem.setAttribute(GSXML.NAME_ATT, name);
+		Node textNode = doc.createTextNode(value);
+		metadataElem.appendChild(textNode);
+		return metadataElem;
+	}
+
+	public int getOperation(String to, String from)
+	{
+		int op;
+		if (!to.contains(".") && !from.contains("."))
+		{
+			op = OPERATION_TYPE_DOC_TO_DOC;
+		}
+		else if (!to.contains(".") && from.contains("."))
+		{
+			op = OPERATION_TYPE_DOC_TO_SEC;
+		}
+		else if (to.contains(".") && !from.contains("."))
+		{
+			op = OPERATION_TYPE_SEC_TO_DOC;
+		}
+		else
+		{
+			op = OPERATION_TYPE_SEC_TO_SEC;
+		}
+		return op;
+	}
+
+	public int[] oidToSectionNumberArray(String oid) throws Exception
+	{
+		String[] strLevels = oid.split("\\.");
+		int[] intLevels = new int[strLevels.length - 1];
+
+		for (int i = 1; i < strLevels.length; i++) //Start at 1 to avoid the document identifier part of the OID
+		{
+			intLevels[i - 1] = Integer.parseInt(strLevels[i]);
+		}
+
+		return intLevels;
+	}
+
+	public String getDocFilePathFromDatabase(String oid, String collection, String lang, String uid)
+	{
+		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.WRITE, lang, uid);
+		if (coll_db == null)
+		{
+			return null;
+		}
+		DBInfo info = coll_db.getInfo(oid);
+		if (info == null)
+		{
+			return null;
+		}
+
+		String docFile = info.getInfo("doc-file");
+		coll_db.closeDatabase();
+		return docFile;
+	}
+
+	public boolean deleteDirectory(File current)
+	{
+		try
+		{
+			if (current == null || !current.exists())
+			{
+				return false;
+			}
+
+			if (!current.isDirectory())
+			{
+				current.delete();
+				return true;
+			}
+
+			for (File f : current.listFiles())
+			{
+				if (f.isDirectory())
+				{
+					deleteDirectory(f);
+				}
+				else
+				{
+					f.delete();
+				}
+			}
+			current.delete();
+		}
+		catch (Exception ex)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	public int checkOIDandCollection(String oid, String collection, String lang, String uid)
+	{
+		if (oid == null || oid.equals(""))
+		{
+			return ERROR_OID_NOT_SPECIFIED;
+		}
+
+		if (collection == null || collection.equals(""))
+		{
+			return ERROR_COLLECTION_NOT_SPECIFIED;
+		}
+
+		if (!archiveCheckDocumentOrSectionExists(oid, collection, lang, uid))
+		{
+			return ERROR_SOURCE_DOCUMENT_OR_SECTION_DOES_NOT_EXIST;
+		}
+		return NO_ERROR;
+	}
+
+	protected static String generateOID()
+	{
+		return "temp";
+	}
+
+	public boolean copyDirectory(File src, File dest)
+	{
+		if (src.isDirectory())
+		{
+			//If the destination directory does not exist then create it
+			if (!dest.exists())
+			{
+				dest.mkdir();
+			}
+
+			//Get all the files in the directory
+			String files[] = src.list();
+			for (String file : files)
+			{
+				File srcFile = new File(src, file);
+				File destFile = new File(dest, file);
+
+				if (!copyDirectory(srcFile, destFile))
+				{
+					return false;
+				}
+			}
+		}
+		else
+		{
+			try
+			{
+				FileChannel in = new FileInputStream(src).getChannel();
+				FileChannel out = new FileOutputStream(dest).getChannel();
+
+				in.transferTo(0, in.size(), out);
+
+				in.close();
+				out.close();
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public Element getTopLevelSectionElement(Document docXML)
+	{
+		return (Element) GSXML.getChildByTagName(docXML.getDocumentElement(), GSXML.DOCXML_SECTION_ELEM);
+	}
+
+	public boolean writeXMLFile(Document doc, String oid, String collection, String lang, String uid)
+	{
+		try
+		{
+			DOMSource source = new DOMSource(doc);
+
+			String test = archiveGetDocumentFilePath(oid, collection, lang, uid);
+			File xmlFile = new File(test);
+			Result result = new StreamResult(xmlFile);
+
+			Transformer transformer = TransformerFactory.newInstance().newTransformer();
+			transformer.transform(source, result);
+		}
+		catch (Exception ex)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public Document getDocXML(String oid, String collection, String lang, String uid)
+	{
+		if (oid.contains("."))
+		{
+			oid = oid.substring(0, oid.indexOf("."));
+		}
+
+		Document docXML = null;
+		if ((docXML = _docCache.get(oid + "__" + collection)) == null)
+		{
+			String filePath = archiveGetDocumentFilePath(oid, collection, lang, uid);
+			File docFile = new File(filePath);
+
+			if (!docFile.exists())
+			{
+				return null;
+			}
+
+			try
+			{
+				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				docXML = db.parse(docFile);
+
+				_docCache.put(oid + "__" + collection, docXML);
+			}
+			catch (Exception ex)
+			{
+				return null;
+			}
+		}
+		return docXML;
+	}
+
+	public ArrayList<Element> getMetadataElementsFromSection(Document docXML, String oid, String metadataName)
+	{
+		if (oid.contains("."))
+		{
+			Element section = getSectionBySectionNumber(docXML, getSectionFromOID(oid));
+			return getMetadataElementsFromSection(section, metadataName);
+		}
+		else
+		{
+			return getMetadataElementsFromSection(getTopLevelSectionElement(docXML), metadataName);
+		}
+	}
+
+	public ArrayList<Element> getMetadataElementsFromSection(Element section, String metadataName)
+	{
+		Element description = (Element) GSXML.getChildByTagName(section, GSXML.DOCXML_DESCRIPTION_ELEM);
+		if (description == null)
+		{
+			return null;
+		}
+
+		ArrayList<Element> elemList = new ArrayList<Element>();
+		NodeList metadataNodes = GSXML.getChildrenByTagName(description, GSXML.DOCXML_METADATA_ELEM);
+		for (int j = 0; j < metadataNodes.getLength(); j++)
+		{
+			//If this is a metadata element with the requested name then we have found what we are looking for
+			if (((Element) metadataNodes.item(j)).getAttribute(GSXML.NAME_ATT).equals(metadataName))
+			{
+				elemList.add((Element) metadataNodes.item(j));
+			}
+		}
+
+		return elemList;
+	}
+
+	public Element getSectionBySectionNumber(Document docXML, String sectionNum)
+	{
+		return getSectionBySectionNumber(getTopLevelSectionElement(docXML), sectionNum);
+	}
+
+	public Element getSectionBySectionNumber(Element current, String sectionNum)
+	{
+		if (sectionNum == null || sectionNum.equals(""))
+		{
+			return current;
+		}
+
+		try
+		{
+			String[] levels = sectionNum.split("\\.");
+			int currentSectionNum = Integer.parseInt(levels[0]);
+
+			NodeList sections = GSXML.getChildrenByTagName(current, GSXML.DOCXML_SECTION_ELEM);
+
+			if (levels.length > 1)
+			{
+				return getSectionBySectionNumber((Element) sections.item(currentSectionNum - 1), sectionNum.substring(sectionNum.indexOf(".") + 1));
+			}
+			else
+			{
+				return (Element) sections.item(currentSectionNum - 1);
+			}
+		}
+		catch (Exception ex)
+		{
+			return null;
+		}
+	}
+
+	public String getDatabaseTypeFromCollection(String collection, String lang, String uid)
+	{
+		//Find out what kind of database we have
+		Element dbTypeMessage = _mainDoc.createElement(GSXML.MESSAGE_ELEM);
+		Element dbTypeRequest = GSXML.createBasicRequest(_mainDoc, GSXML.REQUEST_TYPE_DESCRIBE, collection, lang, uid);
+		dbTypeMessage.appendChild(dbTypeRequest);
+		Element dbTypeResponse = (Element) _router.process(dbTypeMessage);
+
+		String path = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.COLLECTION_ELEM);
+		Element collectionElem = (Element) GSXML.getNodeByPath(dbTypeResponse, path);
+
+		if (collectionElem != null)
+		{
+			return collectionElem.getAttribute(GSXML.DB_TYPE_ATT);
+		}
+		return "gdbm"; //The default collection database type
+	}
+
+	public SimpleCollectionDatabase openDatabase(String collection, String dbName, int readWrite, String lang, String uid)
+	{
+		//Find out what kind of database we have
+		String databaseType = getDatabaseTypeFromCollection(collection, lang, uid);
+		String dbExt = DBHelper.getDBExtFromDBType(databaseType);
+
+		SimpleCollectionDatabase coll_db = new SimpleCollectionDatabase(databaseType);
+		if (!coll_db.databaseOK())
+		{
+			System.err.println("Couldn't create the collection database of type " + databaseType);
+			return null;
+		}
+
+		coll_db.openDatabase(_siteHome + File.separatorChar + "collect" + File.separatorChar + collection + File.separatorChar + "archives" + File.separatorChar + dbName + dbExt, readWrite);
+
+		return coll_db;
+	}
+}

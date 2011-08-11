@@ -76,7 +76,7 @@ abstract public class Action {
         return true;
     }
 
-    protected void extractMetadataNames(Element format, HashSet meta_names) {
+	protected void extractMetadataNames(Element format, HashSet meta_names) {
     //NodeList nodes = format.getElementsByTagNameNS("metadata", "http://www.greenstone.org/configformat");
     NodeList metadata_nodes = format.getElementsByTagName("gsf:metadata");
         for (int i=0; i<metadata_nodes.getLength(); i++) {
@@ -89,11 +89,7 @@ abstract public class Action {
             if (all.equals("true")) {
                 metadata.append("all");
                 metadata.append(GSConstants.META_RELATION_SEP);
-            } else if (all.equals("offset")) { // multiple is no longer boolean. 
-		// Can be "true", "false" or it can be "offset" (when requested to use mdoffset)
-                metadata.append("offset");
-                metadata.append(GSConstants.META_RELATION_SEP);
-            } // if multiple=false, then get first value for the metadata
+            }
             if (!select.equals("")) {
                 metadata.append(select);
                 metadata.append(GSConstants.META_RELATION_SEP);

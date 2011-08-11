@@ -36,6 +36,12 @@ public interface FlatDatabaseWrapper {
 
   /** returns the value associated with the key */
   public String getValue(String key);
+  
+  /** sets the given key to the given value in the database */
+  public boolean setValue(String key, String value);
+  
+  /** deletes the given key from the database */
+  public boolean deleteKey(String key);
 
   /** returns a string of key-value entries that can be 
    *	printed for debugging purposes*/
