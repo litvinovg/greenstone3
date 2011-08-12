@@ -45,7 +45,7 @@ import org.apache.log4j.*;
  */
 
 public class GS2MGSearch
-extends AbstractGS2Search {
+extends AbstractGS2TextSearch {
     
     protected static MGSearchWrapper mg_src = null;
     
@@ -80,7 +80,7 @@ extends AbstractGS2Search {
         synchronized(this.mg_src){
         // Create a new (empty) result message ('doc' is in ServiceRack.java)
         Element result = this.doc.createElement (GSXML.RESPONSE_ELEM);
-        result.setAttribute (GSXML.FROM_ATT, TEXT_QUERY_SERVICE);
+        result.setAttribute (GSXML.FROM_ATT, QUERY_SERVICE);
         result.setAttribute (GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
         
         // Get the parameters of the request

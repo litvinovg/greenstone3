@@ -68,7 +68,7 @@ public class GoogleNgramMGPPSearch
 	  for (int d = 0; d < docs.size(); d++) {
 	      String num = Long.toString((((MGPPDocInfo) docs.elementAt(d)).num_));
 	      String doc_id = internalNum2OID(num);
-	      DBInfo dbInfo = this.coll_db.getInfo(doc_id);
+	      DBInfo dbInfo = this.gs_doc_db.getInfo(doc_id);
 	      String fre = (String)dbInfo.getInfo("Frequency");
 	      String tense = (String)dbInfo.getInfo("Tense");
 	     

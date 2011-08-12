@@ -269,7 +269,7 @@ public class CrossCollectionSearch
 	    Element coll = (Element)GSXML.getChildByTagName(response, GSXML.COLLECTION_ELEM);
 	    Element service_list = (Element)GSXML.getChildByTagName(coll, GSXML.SERVICE_ELEM+GSXML.LIST_MODIFIER);
 	    if (service_list==null) continue;
-	    Element query_service = GSXML.getNamedElement(service_list, GSXML.SERVICE_ELEM, GSXML.NAME_ATT, TEXT_QUERY_SERVICE); // should be AbstractSearch.TEXT_QUERY_SERVICE
+	    Element query_service = GSXML.getNamedElement(service_list, GSXML.SERVICE_ELEM, GSXML.NAME_ATT, TEXT_QUERY_SERVICE); // should be AbstractTextSearch.TEXT_QUERY_SERVICE
 	    if (query_service == null) continue;
 	    // use the name of the response in case we are talking to a remote collection, not the name of the collection.
 	    String coll_id = response.getAttribute(GSXML.FROM_ATT);

@@ -39,7 +39,7 @@ import org.apache.log4j.*;
 
 
 abstract public class AbstractGS2FieldSearch 
-    extends AbstractGS2Search 
+    extends AbstractGS2TextSearch 
 {
 
     // extra services offered by mgpp collections
@@ -158,10 +158,10 @@ abstract public class AbstractGS2FieldSearch
 	    }
 	  } 
 	  
-	  // AbstractGS2Search has set up the text query service, but we may not want it
+	  // AbstractGS2TextSearch has set up the TextQuery service, but we may not want it
 	  if (!this.plain_search) {
 	    // need to remove the TextQuery service
-	    Element tq_service = GSXML.getNamedElement(short_service_info, GSXML.SERVICE_ELEM, GSXML.NAME_ATT, TEXT_QUERY_SERVICE);
+	    Element tq_service = GSXML.getNamedElement(short_service_info, GSXML.SERVICE_ELEM, GSXML.NAME_ATT, QUERY_SERVICE);
 	    short_service_info.removeChild(tq_service);
 	    
 	  } 
@@ -199,7 +199,7 @@ abstract public class AbstractGS2FieldSearch
 	
 	
 	// the format info is the same for all services
-	Element format_info = (Element)format_info_map.get(TEXT_QUERY_SERVICE);
+	Element format_info = (Element)format_info_map.get(QUERY_SERVICE);
 	
 	// set up the extra services which are available for this collection
 	if (this.simple_form_search) {
@@ -348,7 +348,7 @@ abstract public class AbstractGS2FieldSearch
 	    
 	} else if (name.equals(FIELD_CASE_PARAM) || name.equals(FIELD_STEM_PARAM) || name.equals(FIELD_ACCENT_PARAM)) {
 	    String[] bool_ops = {"0", "1"};
-	    String[] bool_texts = {getTextString("param.boolean.off", lang, "AbstractSearch"),getTextString("param.boolean.on", lang, "AbstractSearch")}; 
+	    String[] bool_texts = {getTextString("param.boolean.off", lang, "AbstractTextSearch"),getTextString("param.boolean.on", lang, "AbstractTextSearch")}; 
 	    param = GSXML.createParameterDescription(this.doc, name, getTextString("param."+name, lang), GSXML.PARAM_TYPE_BOOLEAN, BOOLEAN_PARAM_ON, bool_ops, bool_texts);
 	    
 	} else if (name.equals(FIELD_FIELD_PARAM)) {
@@ -429,13 +429,12 @@ abstract public class AbstractGS2FieldSearch
     /** process a  query */
     protected Element processAnyQuery(Element request, int query_type)
     {
-
 	String service_name=null;
 	String empty_query_test_param=null;
 	// set up the type specific bits
 	switch (query_type) {
 	case TEXT_QUERY:
-	    service_name = TEXT_QUERY_SERVICE; 
+	    service_name = QUERY_SERVICE; 
 	    empty_query_test_param = QUERY_PARAM;
 	    break;
 	case SIMPLE_QUERY:

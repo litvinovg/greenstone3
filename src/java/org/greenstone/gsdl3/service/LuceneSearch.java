@@ -31,7 +31,7 @@ import org.apache.log4j.*;
  */
 
 public class LuceneSearch 
-    extends AbstractSearch {
+    extends AbstractTextSearch {
 
      static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.LuceneSearch.class.getName());
 
@@ -73,7 +73,7 @@ public class LuceneSearch
 
 	// Create a new (empty) result message
 	Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
-	result.setAttribute(GSXML.FROM_ATT, TEXT_QUERY_SERVICE);
+	result.setAttribute(GSXML.FROM_ATT, QUERY_SERVICE);
 	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 	Element doc_node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
 	result.appendChild(doc_node_list);

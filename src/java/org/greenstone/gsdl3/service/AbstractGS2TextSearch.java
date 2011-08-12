@@ -1,6 +1,6 @@
 /*
- *    GS2MGSearch.java
- *    Copyright (C) 2002 New Zealand Digital Library, http://www.nzdl.org
+ *    AbstractGS2TextSearch.java
+ *    Copyright (C) 2011 New Zealand Digital Library, http://www.nzdl.org
  *
  *    This program is free software; you can redistribute it and/or modify
  *   the Free Software Foundation; either version 2 of the License, or
@@ -22,7 +22,7 @@ package org.greenstone.gsdl3.service;
 import org.greenstone.gsdl3.util.OID;
 import org.greenstone.gsdl3.util.DBInfo;
 import org.greenstone.gsdl3.util.GSXML;
-import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
+import org.greenstone.gsdl3.util.SimpleDocumentDatabase;
 import org.greenstone.gsdl3.util.GSFile;
 
 // XML classes
@@ -41,8 +41,8 @@ import java.io.File;
 
 import org.apache.log4j.*;
 
-public abstract class AbstractGS2Search 
-    extends AbstractSearch 
+public abstract class AbstractGS2TextSearch 
+    extends AbstractTextSearch 
 {
 
     protected static final String EQUIV_TERM_ELEM = "equivTerm";
@@ -76,26 +76,25 @@ public abstract class AbstractGS2Search
     // maxnumeric - 
     protected int maxnumeric = 4;
 
-    // collection database
-    protected SimpleCollectionDatabase coll_db = null;
+    SimpleDocumentDatabase gs_doc_db = null;
 
-    static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.AbstractGS2Search.class.getName());
+    static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.AbstractGS2TextSearch.class.getName());
 
 
     /** constructor */
-    public AbstractGS2Search()
+    public AbstractGS2TextSearch()
     {
 	
     }
     public void cleanUp() {
 	super.cleanUp();
-	this.coll_db.closeDatabase();
+	this.gs_doc_db.cleanUp();
     }
 
     /** configure this service */
     public boolean configure(Element info, Element extra_info)
     {
-	if (!super.configure(info, extra_info)){
+	if (!super.configure(info,extra_info)) {
 	    return false;
 	}
 
@@ -108,11 +107,6 @@ public abstract class AbstractGS2Search
 	if (database_type == null || database_type.equals("")) {
 	  database_type = "gdbm"; // the default
 	}
-	coll_db = new SimpleCollectionDatabase(database_type);
-	if (!coll_db.databaseOK()) {
-	  logger.error("Couldn't create the collection database of type "+database_type);
-	  return false;
-	}
 	
 	// the index stem is either the collection name or is specified in the config file
 	Element index_stem_elem = (Element) GSXML.getChildByTagName(info, INDEX_STEM_ELEM);
@@ -124,12 +118,16 @@ public abstract class AbstractGS2Search
 	    this.index_stem = this.cluster_name;
 	}
 
-	// Open database for querying
-	String coll_db_file = GSFile.collectionDatabaseFile(this.site_home, this.cluster_name, this.index_stem, database_type);
-	if (!this.coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.READ)) {
-	    logger.error("Could not open collection database!");
+	// replaces default AbstractSearch version with one tied to database
+	gs_doc_db = new SimpleDocumentDatabase(this.doc, 
+					       database_type,this.site_home,
+					       this.cluster_name,
+					       this.index_stem);
+	if (!gs_doc_db.isValid()) {
+	    logger.error("Failed to open Document Database.");
 	    return false;
 	}
+	this.gs_doc = gs_doc_db; 
 
 	// do we support any of the extended features?
 	does_chunking = true;
@@ -214,7 +212,8 @@ public abstract class AbstractGS2Search
 	return true;
     }
 
-    protected void getIndexData(ArrayList index_ids, ArrayList index_names, String lang) {
+    protected void getIndexData(ArrayList index_ids, ArrayList index_names, String lang) 
+    {
 	// the index info -
 	Element index_list = (Element)GSXML.getChildByTagName(this.config_info, INDEX_ELEM+GSXML.LIST_MODIFIER);
 	NodeList indexes = index_list.getElementsByTagName(INDEX_ELEM);
@@ -238,7 +237,8 @@ public abstract class AbstractGS2Search
 	}	
     }
 
-    protected void getIndexSubcollectionData(ArrayList index_sub_ids, ArrayList index_sub_names, String lang){
+    protected void getIndexSubcollectionData(ArrayList index_sub_ids, ArrayList index_sub_names, String lang)
+    {
 	// the index info -
 	Element index_sub_list = (Element)GSXML.getChildByTagName(this.config_info, INDEX_SUBCOLLECTION_ELEM+GSXML.LIST_MODIFIER);
 	NodeList index_subs = index_sub_list.getElementsByTagName(INDEX_SUBCOLLECTION_ELEM);
@@ -262,7 +262,8 @@ public abstract class AbstractGS2Search
 	}		 
      }
       
-    protected void getIndexLanguageData(ArrayList index_lang_ids, ArrayList index_lang_names, String lang){
+    protected void getIndexLanguageData(ArrayList index_lang_ids, ArrayList index_lang_names, String lang)
+    {
 	// the index info -
 	Element index_lang_list = (Element)GSXML.getChildByTagName(this.config_info, INDEX_LANGUAGE_ELEM+GSXML.LIST_MODIFIER);
 	NodeList index_langs = index_lang_list.getElementsByTagName(INDEX_LANGUAGE_ELEM);
@@ -306,82 +307,16 @@ public abstract class AbstractGS2Search
 	createParameter(MATCH_PARAM, param_list, lang);
     }
 
-
-
-    /** returns the document type of the doc that the specified node 
-	belongs to. should be one of 
-	GSXML.DOC_TYPE_SIMPLE, 
-	GSXML.DOC_TYPE_PAGED, 
-	GSXML.DOC_TYPE_HIERARCHY
-    */
-    protected String getDocType(String node_id){
-	DBInfo info = this.coll_db.getInfo(node_id);
-	if (info == null) {
-	    return GSXML.DOC_TYPE_SIMPLE;
-	}
-	String doc_type = info.getInfo("doctype");
-	if (!doc_type.equals("")&&!doc_type.equals("doc")) {
-	    return doc_type;
-	}
-
-	String top_id = OID.getTop(node_id);
-	boolean is_top = (top_id.equals(node_id) ? true : false);
-	
-	String children = info.getInfo("contains");
-	boolean is_leaf = (children.equals("") ? true : false);
-
-	if (is_top && is_leaf) { // a single section document
-	    return GSXML.DOC_TYPE_SIMPLE;
-	}
-
-	// now we just check the top node
-	if (!is_top) { // we need to look at the top info
-	    info = this.coll_db.getInfo(top_id);
-	}
-	if (info == null) {
-	    return GSXML.DOC_TYPE_HIERARCHY;
-	}
- 
-	String childtype = info.getInfo("childtype");
-	if (childtype.equals("Paged")) {
-	    return GSXML.DOC_TYPE_PAGED;
-	}
-	return GSXML.DOC_TYPE_HIERARCHY;
-
-    }
     
-    /** returns true if the node has child nodes */
-    protected boolean hasChildren(String node_id){
-	DBInfo info = this.coll_db.getInfo(node_id);
-	if (info == null) {
-	    return false;
-	}
-	String contains = info.getInfo("contains");
-	if (contains.equals("")) {
-	    return false;
-	}
-	return true;
-    }
-    
-    /** returns true if the node has a parent */
-    protected boolean hasParent(String node_id){
-	String parent = OID.getParent(node_id);
-	if (parent.equals(node_id)) {
-	    return false;
-	}
-	return true;
-    }
-    
-   /** convert indexer internal id to Greenstone oid */
+    /** convert indexer internal id to Greenstone oid */
     protected String internalNum2OID(long docnum)
     {
-	return this.coll_db.docnum2OID(docnum);
-	
+	return this.gs_doc_db.internalNum2OID(docnum);
     }
+
     protected String internalNum2OID(String docnum)
     {
-	return this.coll_db.docnum2OID(docnum);
-	
+	return this.gs_doc_db.internalNum2OID(docnum);
     }
 
 }

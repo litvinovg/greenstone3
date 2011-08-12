@@ -49,7 +49,7 @@ import org.apache.log4j.*;
  * 
  */
 public class MapSearch 
-    extends AbstractSearch {
+    extends AbstractTextSearch {
 
 
     static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.MapSearch.class.getName());
@@ -162,7 +162,7 @@ public class MapSearch
     {
 	// Create a new (empty) result message
 	Element result = doc.createElement(GSXML.RESPONSE_ELEM);
-	result.setAttribute(GSXML.FROM_ATT, TEXT_QUERY_SERVICE);
+	result.setAttribute(GSXML.FROM_ATT, QUERY_SERVICE);
 	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
 	// Get the parameters of the request
