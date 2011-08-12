@@ -174,7 +174,7 @@
 		<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']">
 			<xsl:variable name="subaction" select="/page/pageRequest/@subaction"/>
 			<td id="quicksearcharea">
-				<form>
+				<form action="{$library_name}">
 					<input type="hidden" name="a" value="q"/>
 					<input type="hidden" name="sa" value="{$subaction}"/>
 					<input type="hidden" name="rt" value="rd"/>
@@ -216,7 +216,7 @@
 								<td>
 									<a>
 										<xsl:attribute name="href">
-											?a=q&amp;rt=d&amp;c=<xsl:value-of select="$collNameChecked"/>&amp;s=<xsl:value-of select="@name"/>
+										    <xsl:value-of select="$library_name"/>?a=q&amp;rt=d&amp;c=<xsl:value-of select="$collNameChecked"/>&amp;s=<xsl:value-of select="@name"/>
 										</xsl:attribute>
 										<xsl:value-of select="displayItem[@name='name']"/>
 									</a>
