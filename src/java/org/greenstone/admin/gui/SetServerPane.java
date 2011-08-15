@@ -55,7 +55,7 @@ import java.net.*;
 import java.sql.*;
 
 import org.greenstone.util.Configuration;
-import org.greenstone.core.ParsingProgress;
+import org.greenstone.admin.gui.ParsingProgress;
 import org.greenstone.admin.GAI;
 
 

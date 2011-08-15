@@ -46,7 +46,7 @@ import javax.swing.event.*;
 import org.greenstone.admin.GAI;
 import org.greenstone.admin.GAIManager;
 import org.greenstone.admin.gui.LogPane;
-import org.greenstone.core.ParsingProgress;
+import org.greenstone.admin.gui.ParsingProgress;
 import org.apache.tools.ant.*;
 import org.apache.tools.ant.helper.ProjectHelperImpl;
 

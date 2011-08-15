@@ -116,7 +116,7 @@ public class LogPane
 	//log_pane.setSize(LOGPANE_SIZE);
 	
 	// Log_list
-	String[] log_files = { "Tomcat log file", "Extension log file", "Log file 3"};
+	String[] log_files = { "Tomcat log file", "Extension log file"};
 	log_list = new JList(log_files);
 	log_list.setBorder(BorderFactory.createLoweredBevelBorder());
 	log_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

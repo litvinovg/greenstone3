@@ -58,7 +58,7 @@ import org.greenstone.admin.GAIManager;
 import org.greenstone.admin.gui.ThreadControl;
 //import org.greenstone.admin.gui.ConfSettingTableModel;
 import org.greenstone.admin.gui.SiteConfSetting;
-import org.greenstone.core.ParsingProgress;
+import org.greenstone.admin.gui.ParsingProgress;
 
 import org.greenstone.util.Configuration;
 import org.greenstone.gsdl3.util.GSFile;

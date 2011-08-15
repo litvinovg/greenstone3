@@ -34,7 +34,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *########################################################################
  */
-package org.greenstone.core;
+package org.greenstone.admin.gui;
 
 import java.awt.*;
 import java.lang.Object;
