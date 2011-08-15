@@ -24,15 +24,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.oopsconsultancy.xmltask.InsertAction.Position;
-
 public class GSDocumentModel
 {
 	//The two archive databases
 	protected static final String ARCHIVEINFSRC = "archiveinf-src";
 	protected static final String ARCHIVEINFDOC = "archiveinf-doc";
 
-	//Set section operations
+	//Set operations
 	public static final int OPERATION_REPLACE = 1;
 	public static final int OPERATION_INSERT_BEFORE = 2;
 	public static final int OPERATION_INSERT_AFTER = 3;
@@ -113,6 +111,14 @@ public class GSDocumentModel
 		_router = router;
 	}
 
+	/**
+	 * Can be used to create a document or create a section of a document
+	 * 
+	 * @param oid
+	 *            is the identifier of the document/section to create.
+	 * @param collection
+	 *            is the collection we want to create the document/section in.
+	 */
 	public void documentCreate(String oid, String collection, String lang, String uid)
 	{
 		_errorStatus = NO_ERROR;
@@ -171,6 +177,14 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Can be used to delete a document or section
+	 * 
+	 * @param oid
+	 *            is the identifier of the document/section to delete.
+	 * @param collection
+	 *            is the collection to delete the document/section from.
+	 */
 	public void documentDelete(String oid, String collection, String lang, String uid)
 	{
 		_errorStatus = NO_ERROR;
@@ -217,6 +231,22 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Can be used to copy a document or section from one place to another.
+	 * 
+	 * @param oid
+	 *            is the identifier of the document/section that is to be
+	 *            copied.
+	 * @param collection
+	 *            is the collection the source document resides in.
+	 * @param newOID
+	 *            is the new identifier for the document/section (it cannot
+	 *            already exist).
+	 * @param newCollection
+	 *            is the collection the new document/section will be copied to.
+	 *            If this is null then the collection parameter will be used
+	 *            instead.
+	 */
 	public void documentDuplicate(String oid, String collection, String newOID, String newCollection, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -338,12 +368,22 @@ public class GSDocumentModel
 		}
 	}
 
-	//TODO: Change return type to something else
-	public void documentGetInformation(String oid, String collection, String[] requestedInfo, String lang, String uid)
+	/**
+	 * Can be used to acquire information about a given document or section.
+	 * 
+	 * @param oid
+	 *            is the identifier of the document or section.
+	 * @param collection
+	 *            is the collection the document or section resides in.
+	 * @param requestedInfo
+	 *            is an array containing the various requests.
+	 * @return This returns an array containing the requested information.
+	 */
+	public String[] documentGetInformation(String oid, String collection, String[] requestedInfo, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
 		{
-			return;
+			return null;
 		}
 
 		for (int j = 0; j < requestedInfo.length; j++)
@@ -353,8 +393,24 @@ public class GSDocumentModel
 			//-How many child/sibling sections
 			//-Metadata keys
 		}
+		//TODO: Implement
+		return null;
 	}
 
+	/**
+	 * Can be used to move a document or section from one place to another.
+	 * 
+	 * @param oid
+	 *            is the identifier of the document/section to move.
+	 * @param collection
+	 *            is the collection the source document resides in.
+	 * @param newOID
+	 *            is the new identifer for the moved document.
+	 * @param newCollection
+	 *            is the collection the new document/section will be moved to.
+	 *            If this is null then the collection parameter will be used
+	 *            instead.
+	 */
 	public void documentMove(String oid, String collection, String newOID, String newCollection, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -371,6 +427,20 @@ public class GSDocumentModel
 		documentDelete(oid, collection, lang, uid);
 	}
 
+	/**
+	 * Can be used to merge two parts of a document together. The sections must
+	 * be in the same document at the same level (e.g. D11.1.2 and D11.1.3) or a
+	 * section and it's parent (e.g. D11.1.2 and D11.1). Also, the destination
+	 * section cannot have any child sections.
+	 * 
+	 * @param oid
+	 *            the identifier of the section that is to be merged.
+	 * @param collection
+	 *            the collection the section resides in.
+	 * @param mergeOID
+	 *            the identifier of the section that the source section will be
+	 *            merged into.
+	 */
 	public void documentMerge(String oid, String collection, String mergeOID, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -482,6 +552,18 @@ public class GSDocumentModel
 		documentXMLDeleteSection(oid, collection, lang, uid);
 	}
 
+	/**
+	 * Can be used to split a section into two sections (e.g. D11.2.1 will
+	 * become D11.2.1 and D11.2.2). Any child section will belong to the second
+	 * section (D11.2.2 in the example).
+	 * 
+	 * @param oid
+	 *            is the identifer of the section to be split.
+	 * @param collection
+	 *            is the collection the section resides in.
+	 * @param splitPoint
+	 *            is the point in the text we want to split at.
+	 */
 	public void documentSplit(String oid, String collection, int splitPoint, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -550,6 +632,14 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Creates a basic doc.xml file with minimal contents.
+	 * 
+	 * @param oid
+	 *            is the identifier of the document to be created.
+	 * @param collection
+	 *            is the collection the new document will reside in.
+	 */
 	public void documentXMLCreateDocXML(String oid, String collection, String lang, String uid)
 	{
 		_errorStatus = NO_ERROR;
@@ -586,6 +676,18 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Gets a metadata value from a document or section.
+	 * 
+	 * @param oid
+	 *            is the identifier of the section or document to get metadata
+	 *            from.
+	 * @param collection
+	 *            is the collection the section or document resides in.
+	 * @param metadataName
+	 *            is the name of metadata to retrieve
+	 * @return an array of metadata elements containing the resquested metadata
+	 */
 	public ArrayList<Element> documentXMLGetMetadata(String oid, String collection, String metadataName, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -608,6 +710,23 @@ public class GSDocumentModel
 		return getMetadataElementsFromSection(docXML, oid, metadataName);
 	}
 
+	/**
+	 * 
+	 * @param oid
+	 *            is the identifier of the document or section that is to have
+	 *            it's metadata set.
+	 * @param collection
+	 *            is the collection the document/section resides in.
+	 * @param metadataName
+	 *            is the name of the metadata value that is to be set.
+	 * @param newMetadataValue
+	 *            is the new value of the metadata.
+	 * @param position
+	 *            specifies the position of the value to set.
+	 * @param operation
+	 *            can be one of OPERATION_REPLACE, OPERATION_INSERT_BEFORE,
+	 *            OPERATION_INSERT_AFTER or OPERATION_APPEND.
+	 */
 	public void documentXMLSetMetadata(String oid, String collection, String metadataName, String newMetadataValue, int position, int operation, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -686,6 +805,20 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Can be used to delete metadata at a specific position in a document or
+	 * section (such as the third author of a document).
+	 * 
+	 * @param oid
+	 *            is the identifier of the document/section to delete metadata
+	 *            from.
+	 * @param collection
+	 *            is the collection the document resides in.
+	 * @param metadataName
+	 *            is the name of the metadata that is to have an item deleted.
+	 * @param position
+	 *            is position of the item that is to be deleted.
+	 */
 	public void documentXMLDeleteMetadata(String oid, String collection, String metadataName, int position, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -713,6 +846,18 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Can be used to delete all the metadata with a specific name from a
+	 * document or section (e.g. all of the authors).
+	 * 
+	 * @param oid
+	 *            is the identifier of the document or section to delete the
+	 *            metadata from.
+	 * @param collection
+	 *            is the collection the document resides in.
+	 * @param metadataName
+	 *            is the name of the metadata to delete.
+	 */
 	public void documentXMLDeleteMetadata(String oid, String collection, String metadataName, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -740,6 +885,24 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Can be used to replace a specific metadata item of a given name, given
+	 * it's value.
+	 * 
+	 * @param oid
+	 *            is the document/section of the metadata that is to be
+	 *            replaced.
+	 * @param collection
+	 *            is the collection the document resides in.
+	 * @param metadataName
+	 *            is the name of the metadata to be replaced.
+	 * @param oldMetadataValue
+	 *            is the old value of the metadata (the value that will be
+	 *            replaced).
+	 * @param newMetadataValue
+	 *            is the new value of the metadata that will replace the old
+	 *            value.
+	 */
 	public void documentXMLReplaceMetadata(String oid, String collection, String metadataName, String oldMetadataValue, String newMetadataValue, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -788,6 +951,14 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Can be used to create a blank section.
+	 * 
+	 * @param oid
+	 *            is the identifier of the section to be created.
+	 * @param collection
+	 *            is the collection the document resides in.
+	 */
 	public void documentXMLCreateSection(String oid, String collection, String lang, String uid)
 	{
 		_errorStatus = NO_ERROR;
@@ -877,6 +1048,14 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Can be used to delete an entire section.
+	 * 
+	 * @param oid
+	 *            is the identifier of the section to be deleted.
+	 * @param collection
+	 *            is the collection the document resides in.
+	 */
 	public void documentXMLDeleteSection(String oid, String collection, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -907,6 +1086,15 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Can be used to get a section from a document.
+	 * 
+	 * @param oid
+	 *            is the identifier of the section to get.
+	 * @param collection
+	 *            is the collection the document resides in.
+	 * @return the requested section.
+	 */
 	public Element documentXMLGetSection(String oid, String collection, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -940,7 +1128,20 @@ public class GSDocumentModel
 		return section;
 	}
 
-	public void documentXMLSetSection(String oid, String collection, Element newSection, int op, String lang, String uid)
+	/**
+	 * Can be used to set an OID to the given section element.
+	 * 
+	 * @param oid
+	 *            is the identifier of the section to be set.
+	 * @param collection
+	 *            is the collection the section will reside in.
+	 * @param newSection
+	 *            is the new section element.
+	 * @param operation
+	 *            can be one of OPERATION_REPLACE, OPERATION_INSERT_BEFORE,
+	 *            OPERATION_INSERT_AFTER or OPERATION_APPEND.
+	 */
+	public void documentXMLSetSection(String oid, String collection, Element newSection, int operation, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
 		{
@@ -972,7 +1173,7 @@ public class GSDocumentModel
 
 		Element importedSection = (Element) docXML.importNode(newSection, true);
 
-		if (op == OPERATION_APPEND)
+		if (operation == OPERATION_APPEND)
 		{
 			existingSection.appendChild(importedSection);
 		}
@@ -984,11 +1185,11 @@ public class GSDocumentModel
 			importedSection.removeAttribute(GSXML.NODE_ID_ATT);
 			importedSection.removeAttribute(GSXML.COLLECTION_ATT);
 
-			if (op == OPERATION_INSERT_BEFORE || op == OPERATION_REPLACE)
+			if (operation == OPERATION_INSERT_BEFORE || operation == OPERATION_REPLACE)
 			{
 				sectionParent.insertBefore(importedSection, existingSection);
 			}
-			else if (op == OPERATION_INSERT_AFTER)
+			else if (operation == OPERATION_INSERT_AFTER)
 			{
 				Element sibling = (Element) existingSection.getNextSibling();
 				if (sibling == null)
@@ -1001,7 +1202,7 @@ public class GSDocumentModel
 				}
 			}
 
-			if (op == OPERATION_REPLACE)
+			if (operation == OPERATION_REPLACE)
 			{
 				sectionParent.removeChild(existingSection);
 			}
@@ -1015,6 +1216,15 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Gets the text of a given section as a string.
+	 * 
+	 * @param oid
+	 *            is the identifier of the section to get the text from.
+	 * @param collection
+	 *            is the collection the document resides in.
+	 * @return the text from the section.
+	 */
 	public String documentXMLGetText(String oid, String collection, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -1060,6 +1270,16 @@ public class GSDocumentModel
 		return textNode.getNodeValue();
 	}
 
+	/**
+	 * Sets the text of a given section using an element.
+	 * 
+	 * @param oid
+	 *            is the identifier of the section to set the text of.
+	 * @param collection
+	 *            is the collection the document resides in.
+	 * @param newContent
+	 *            is the new content element for the section.
+	 */
 	public void documentXMLSetText(String oid, String collection, Element newContent, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -1119,6 +1339,16 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Sets the text of a given section using a string.
+	 * 
+	 * @param oid
+	 *            is the identifier of the section to set the text of.
+	 * @param collection
+	 *            is the collection the document resides in.
+	 * @param newContent
+	 *            is the new text for the section.
+	 */
 	public void documentXMLSetText(String oid, String collection, String newContent, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
@@ -1179,6 +1409,17 @@ public class GSDocumentModel
 		}
 	}
 
+	/**
+	 * Can be used to get the file path of the doc.xml file containing the given
+	 * OID.
+	 * 
+	 * @param oid
+	 *            is the identifier of the document/section to get the doc.xml
+	 *            of.
+	 * @param collection
+	 *            is the collection the document resides in.
+	 * @return the file path to the doc.xml file.
+	 */
 	public String archiveGetDocumentFilePath(String oid, String collection, String lang, String uid)
 	{
 		_errorStatus = NO_ERROR;
@@ -1204,6 +1445,15 @@ public class GSDocumentModel
 		return docFilePath;
 	}
 
+	/**
+	 * Can be used to find the document that a specific source file is used in.
+	 * 
+	 * @param srcFile
+	 *            is the name of the source file.
+	 * @param collection
+	 *            is the collection the source file resides in.
+	 * @return the OID of the document that the source file is used in.
+	 */
 	public String archiveGetSourceFileOID(String srcFile, String collection, String lang, String uid)
 	{
 		_errorStatus = NO_ERROR;
@@ -1228,6 +1478,15 @@ public class GSDocumentModel
 		return oid;
 	}
 
+	/**
+	 * Checks to see if a document or section at a given OID exists.
+	 * 
+	 * @param oid
+	 *            is the identifier of the document/section to check.
+	 * @param collection
+	 *            is the collection to search in.
+	 * @return true if the document/section exists, false otherwise.
+	 */
 	public boolean archiveCheckDocumentOrSectionExists(String oid, String collection, String lang, String uid)
 	{
 		_errorStatus = NO_ERROR;
@@ -1269,6 +1528,16 @@ public class GSDocumentModel
 		return exists;
 	}
 
+	/**
+	 * Can be used to write a series of entries to the document database.
+	 * 
+	 * @param oid
+	 *            is the key that the entries will be written to.
+	 * @param collection
+	 *            is the collection whose database will be written to.
+	 * @param infoList
+	 *            is the list of entries to write.
+	 */
 	public void archiveWriteEntryToDatabase(String oid, String collection, HashMap<String, ArrayList<String>> infoList, String lang, String uid)
 	{
 		_errorStatus = NO_ERROR;
@@ -1303,6 +1572,14 @@ public class GSDocumentModel
 		coll_db.closeDatabase();
 	}
 
+	/**
+	 * Can be used to remove an entry from the document database.
+	 * 
+	 * @param oid
+	 *            is the key of the entry to erase.
+	 * @param collection
+	 *            is the collection whose database will have the entry removed.
+	 */
 	public void archiveRemoveEntryFromDatabase(String oid, String collection, String lang, String uid)
 	{
 		_errorStatus = NO_ERROR;
@@ -1327,6 +1604,12 @@ public class GSDocumentModel
 		coll_db.closeDatabase();
 	}
 
+	/**
+	 * Gets the list of associated files for a given document.
+	 * @param oid is the identifier that will be used to search for associated documents.
+	 * @param collection is the collection whose database will be searched.
+	 * @return the list of associated files.
+	 */
 	public ArrayList<String> archiveGetAssociatedImportFiles(String oid, String collection, String lang, String uid)
 	{
 		_errorStatus = NO_ERROR;
