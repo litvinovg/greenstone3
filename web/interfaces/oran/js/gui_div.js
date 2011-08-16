@@ -363,7 +363,7 @@ function loadXMLDoc()
 $(document).ready(function(){
 
     console.log("Document ready function\n");
-
+	
     var CURRENT_SELECT_VALUE = "";
 
     /* DOCUMENT SPECIFIC FUNCTIONS */
@@ -379,6 +379,47 @@ $(document).ready(function(){
         getXSLT("sectionContainer");
         return false; // don't event bubble
     });
+	
+	var collection = "";
+	
+	var regex = new RegExp("[?&]c=");
+	var matches = regex.exec(document.URL);
+	if(matches != null)
+	{
+		var startIndex = matches.index;
+		var endIndex = document.URL.indexOf("&", startIndex + 1);
+		
+		if(endIndex == -1)
+		{
+			endIndex = document.URL.length;
+		}
+		
+		collection = document.URL.substring(startIndex, endIndex);
+	}
+
+	$.ajax
+	({
+		type: "GET",
+		url: "?a=g&s=CoverageMetadataRetrieve&o=xml&rt=r&c=" + collection,
+		success: function(data) 
+		{
+			var selectorArea = document.getElementById("metadataSelector");
+			var newSelectBox = document.createElement("SELECT");
+			selectorArea.appendChild(newSelectBox);
+			var metadataSets = data.getElementsByTagName("metadataSet");
+			for(var i = 0; i < metadataSets.length; i++)
+			{
+				var metadata = metadataSets[i].getElementsByTagName("metadata");
+				for(var j = 0; j < metadata.length; j++)
+				{
+					var option = document.createElement("OPTION");
+					option.setAttribute("value", metadataSets[i].getAttribute("name") + "." + metadata[j].getAttribute("name"));
+					option.innerHTML = metadataSets[i].getAttribute("name") + "." + metadata[j].getAttribute("name");
+					newSelectBox.appendChild(option);
+				}
+			}
+		}
+	});
 
     /*
     var iframe = document.getElementById('iframe');

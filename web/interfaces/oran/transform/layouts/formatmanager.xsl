@@ -44,6 +44,7 @@
         </xsl:variable>
 
         <style type="text/css">
+		
             .placeholder{margin-left: 10px; border: dashed 1px #ccc; background-color:#FFFFCC; height:20px; }
 
             .placeholder_td{margin-left: 10px; border: dashed 1px #ccc; background-color:#FFFFCC; width:20px; }
@@ -52,6 +53,7 @@
 
             .resizable { width: 150px; height: 150px; padding: 0.5em; } 
             
+			.indent { margin-left: 15px; }
             .block { margin-left: 15px; border-left: dashed 1px black;}
 
             .droppable { background-color: #99dd99;}
@@ -59,8 +61,10 @@
 
             #XSLTcode {width: 99%; }
 
-            .elementToolBox {position: fixed; top: 25%; right: 0px; background: none repeat scroll 0% 0% white; width: 250px; }
-
+            .elementToolBox {position: fixed; top: 25%; right: 0px; background: white; border: 2px solid; padding: 10px 10px 10px 0px;}
+			
+			.elementToolBoxHeader { font-weight:bold; }
+			
             .visible {display: block;}
             .hidden {display: none;}
             <!-- .gsf_metadata { border: solid 2px #0000BB; background-color: #440077; } -->
@@ -144,33 +148,27 @@
         </table>
 
         <div class="elementToolBox">
-            <h2> Elements to add </h2>
+            <p class="indent elementToolBoxHeader">Elements to add</p>
             <!-- <div class="header element_type_gsf_template css_gsf_template" title="gsf:template">TEMPLATE</div> -->
                 <div class="draggable_gsf_template css_gsf_template block" title="gsf:template">
                     <table class="header">
                         <tbody>
                             <tr>
                                 <td class="header">MATCH=<input type="text" name="rawtextinput" size="10"/></td>
-                                <td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
-                                <td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td>
+                                <!--<td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
+                                <td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td>-->
                             </tr>
                         </tbody>
                     </table>
-                    <table border="1">
-                        <tr class="tr">
-                            <td class="droppable" width="10px"></td>
-                        </tr>
-                    </table>
                 </div>
-                <br/>
 
                 <div class="draggable_gsf_choose_metadata css_gsf_choose_metadata block" title="gsf:choose-metadata">
                     <table class="header">
                         <tbody>
                             <tr>
                                 <td class="header">CHOOSE</td>
-                                <td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td>
-                                <td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td>
+                                <!--<td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td>
+                                <td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td>-->
                             </tr>
                         </tbody>
                     </table>
@@ -180,13 +178,13 @@
                     <table class="header">
                         <tbody>
                             <tr>
-                                <td class="header">
-                                    <xsl:call-template name="meta-to-combo">
+                                <td class="header" id="metadataSelector">
+                                    <!--<xsl:call-template name="meta-to-combo">
                                         <xsl:with-param name="metadataSets" select="//metadataSetList"/>
                                         <xsl:with-param name="current" select="ex.Title"/>
-                                    </xsl:call-template>
+                                    </xsl:call-template>-->
                                 </td>
-                                <td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td>
+                                <!--<td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td>-->
                             </tr>
                         </tbody>
                     </table>
@@ -202,8 +200,8 @@
                                     <option value = "source">Source</option>
                                     <option value = "horizontal">Horizontal</option>
                                 </select></td>
-                                <td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
-                                <td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td>
+                                <!--<td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
+                                <td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td>-->
                             </tr>
                         </tbody>
                     </table>
@@ -214,8 +212,8 @@
                         <tbody>
                             <tr>
                                 <td class="header">SWITCH</td>
-                                <td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
-                                <td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td>
+                                <!--<td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
+                                <td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td>-->
                             </tr>
                         </tbody>
                     </table>
@@ -226,8 +224,8 @@
                         <tbody>
                             <tr>
                                 <td class="header">WHEN<xsl:value-of select="@test"/></td>
-                                <td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
-                                <td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td>
+                                <!--<td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
+                                <td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td>-->
                             </tr>
                         </tbody>
                     </table>
@@ -238,8 +236,8 @@
                         <tbody>
                             <tr>
                                 <td class="header">OTHERWISE</td>
-                                <td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
-                                <td><a href="#" class="ui-icon ui-icon-closethick"/></td>
+                                <!--<td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
+                                <td><a href="#" class="ui-icon ui-icon-closethick"/></td>-->
                             </tr>
                         </tbody>
                     </table>
@@ -250,30 +248,52 @@
                         <tbody>
                             <tr>
                                 <td class="header">ICON<select>
-                                    <option value = "document" selected = "document">Document</option>
-                                    <option value = "classifier">Classifier</option>
-                                    <option value = "source">Source</option>
+                                    <option value="document" selected="document">Document</option>
+                                    <option value="classifier">Classifier</option>
+                                    <option value="source">Source</option>
                                 </select></td>
-                                <td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td>
+                                <!--<td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td>-->
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <br/>
-                <div class="draggable_gsf_text css_text" title="text">
+                <div class="draggable_gsf_text css_text block" title="text">
                     <table class="header">
                         <tbody>
                             <tr>
                                 <td class="header"><input type="text" name="rawtextinput" size="10" value=""/></td>
-                                <td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td>
+                                <!--<td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td>-->
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="draggable_table css_table" title="gsf:table">NEW TABLE</div>
-                <div class="draggable_tr css_tr" title="gsf:row">NEW TABLE ROW</div>
-                <div class="draggable_td css_td" title="gsf:column">NEW TABLE COLUMN</div>
-
+                <div class="draggable_table css_table block" title="gsf:table">
+					<table class="header">
+                        <tbody>
+                            <tr>
+                                <td class="header">NEW TABLE</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="draggable_tr css_tr block" title="gsf:table">
+					<table class="header">
+                        <tbody>
+                            <tr>
+                                <td class="header">NEW TABLE ROW</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="draggable_td css_td block" title="gsf:table">
+					<table class="header">
+                        <tbody>
+                            <tr>
+                                <td class="header">NEW TABLE COLUMN</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
          </div>
 
         <!--
