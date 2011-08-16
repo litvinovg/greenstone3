@@ -1,13 +1,9 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-
-<!DOCTYPE web-app 
-    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" 
-    "http://java.sun.com/dtd/web-app_2_3.dtd">
-
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <!-- this is based on a sample web.xml file provided by 
 http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 -->
-<web-app>
+<web-app>
+
   <!-- General description of your web application -->
   
   <display-name>GSDL3</display-name>
@@ -107,33 +103,6 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
       <param-value>en</param-value>
     </init-param>
   </servlet>
-
-  <servlet>
-    <servlet-name>Format</servlet-name>
-    <description>A new skin engine still in development based on the standard gsdl3 library program</description>
-    <servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
-    <init-param>
-      <param-name>library_name</param-name>
-      <param-value>format</param-value>
-    </init-param>
-    <init-param>
-      <param-name>site_name</param-name>
-      <param-value>localsite</param-value>
-    </init-param>
-    <init-param>
-      <param-name>interface_name</param-name>
-      <param-value>oran</param-value>
-    </init-param>
-    <init-param>
-      <param-name>receptionist_class</param-name>
-      <param-value>FormatReceptionist</param-value>
-    </init-param>
-    <init-param>
-      <param-name>default_lang</param-name>
-      <param-value>en</param-value>
-    </init-param>
-  </servlet>
-
   
   <servlet>
     <servlet-name>gs2-library</servlet-name>
@@ -287,6 +256,11 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
            <param-value>localsite</param-value>
          </init-param>
 </servlet>
+<servlet>
+    <servlet-name>mat</servlet-name>
+    <description>Metadata Analysis Tool</description>
+    <servlet-class>org.greenstone.mat.servlet.MatServlet</servlet-class>
+  </servlet>
 
 <!--
 <filter>
@@ -393,6 +367,10 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
     <servlet-name>AxisServlet</servlet-name>
     <url-pattern>/services/*</url-pattern>
   </servlet-mapping>
+<servlet-mapping>
+    <servlet-name>mat</servlet-name>
+    <url-pattern>/mat</url-pattern>
+  </servlet-mapping>
 
   <!-- uncomment this if you want to use the SOAPMonitorService. You will also 
   need to copy the SOAPMonitorApplet*.class files from 
@@ -433,5 +411,3 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
   </mime-mapping>
 
 </web-app>
-
-
