@@ -328,11 +328,6 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>Format</servlet-name>
-    <url-pattern>/format</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
     <servlet-name>gs2-library</servlet-name>
     <url-pattern>/library</url-pattern>
   </servlet-mapping>
