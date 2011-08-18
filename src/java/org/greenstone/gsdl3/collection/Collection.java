@@ -420,32 +420,19 @@ public class Collection extends ServiceCluster
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 		response.setAttribute(GSXML.TYPE_ATT, type);
 
-		logger.error("Collection received a message, attempting to process");
-
 		if (type.equals(GSXML.REQUEST_TYPE_FORMAT_STRING))
 		{
-			logger.error("Received format string request");
-
 			String subaction = request.getAttribute("subaction");
-			logger.error("Subaction is " + subaction);
-
 			String service = request.getAttribute("service");
-			logger.error("Service is " + service);
 
 			String classifier = null;
 			if (service.equals("ClassifierBrowse"))
 			{
 				classifier = request.getAttribute("classifier");
-				logger.error("Classifier is " + classifier);
 			}
-
-			//logger.error("Format string: " + format_string);
-			logger.error("Config file location = " + GSFile.collectionConfigFile(this.site_home, this.cluster_name));
-
+			
 			// check for version file
-
 			String directory = new File(GSFile.collectionConfigFile(this.site_home, this.cluster_name)).getParent() + File.separator;
-			logger.error("Directory is " + directory);
 
 			String version_filename = "";
 			if (service.equals("ClassifierBrowse"))
@@ -454,7 +441,6 @@ public class Collection extends ServiceCluster
 				version_filename = directory + "query_format_statement_version.txt";
 
 			File version_file = new File(version_filename);
-			logger.error("Version filename is " + version_filename);
 
 			if (subaction.equals("update"))
 			{
@@ -494,8 +480,6 @@ public class Collection extends ServiceCluster
 					else
 						format_statement_filename = directory + "query_format_statement_v" + version_number + ".txt";
 
-					logger.error("Format statement filename is " + format_statement_filename);
-
 					// Write format statement
 					String format_string = this.converter.getString(format_statement); //GSXML.xmlNodeToString(format_statement);
 					writer = new BufferedWriter(new FileWriter(format_statement_filename));
@@ -522,9 +506,7 @@ public class Collection extends ServiceCluster
 				// Get display tag
 				Element display_format = (Element) format_element.getFirstChild();
 
-				logger.error("I have received a save document request");
 				String format_string = GSXML.xmlNodeToString(display_format);
-				logger.error("Param=" + format_string);
 				String collection_config = directory + "collectionConfig.xml";
 				Document config = this.converter.getDOM(new File(collection_config), "UTF-8");
 
@@ -533,13 +515,10 @@ public class Collection extends ServiceCluster
 				// Get display child
 				if (GSXML.getChildByTagName(current_node, "display") == null)
 				{
-					logger.error("ERROR: does not have a display child");
 					// well then create a format tag
 					Element display_tag = config.createElement("display");
 					current_node = (Node) current_node.appendChild(display_tag);
-					//current_node = (Node) format_tag;
 				}
-
 				else
 				{
 					current_node = GSXML.getChildByTagName(current_node, "display");
@@ -547,18 +526,13 @@ public class Collection extends ServiceCluster
 
 				if (GSXML.getChildByTagName(current_node, "format") == null)
 				{
-					logger.error("ERROR: does not have a format child");
 					// well then create a format tag
 					Element format_tag = config.createElement("format");
 					current_node.appendChild(format_tag);
-					//current_node = (Node) format_tag;
 				}
 
 				current_node.replaceChild(config.importNode(display_format, true), GSXML.getChildByTagName(current_node, "format"));
 
-				logger.error(GSXML.xmlNodeToString(current_node));
-
-				logger.error("Convert config to string");
 				String new_config = this.converter.getString(config);
 
 				new_config = StringUtils.replace(new_config, "&lt;", "<");
@@ -571,7 +545,6 @@ public class Collection extends ServiceCluster
 					BufferedWriter writer = new BufferedWriter(new FileWriter(collection_config + ".new"));
 					writer.write(new_config);
 					writer.close();
-					logger.error("All is happy with collection saveDocument");
 				}
 				catch (IOException e)
 				{
@@ -581,15 +554,11 @@ public class Collection extends ServiceCluster
 
 			if (subaction.equals("save"))
 			{
-				logger.error("SAVE format statement");
-
 				Element format_element = (Element) GSXML.getChildByTagName(request, GSXML.FORMAT_STRING_ELEM);
-				//String format_string = GSXML.getNodeText(format_element);
 				Element format_statement = (Element) format_element.getFirstChild();
 
 				try
 				{
-
 					// open collectionConfig.xml and read in to w3 Document
 					String collection_config = directory + "collectionConfig.xml";
 					Document config = this.converter.getDOM(new File(collection_config), "UTF-8");
@@ -603,69 +572,54 @@ public class Collection extends ServiceCluster
 					Node current_node = GSXML.getChildByTagName(config, "CollectionConfig");
 					NodeList current_node_list;
 
-					logger.error("Service is " + service);
-
 					if (service.equals("ClassifierBrowse"))
 					{
 						//tag_name = "browse";
 						// if CLX then need to look in <classifier> X then <format>
 						// default is <browse><format>
 
-						logger.error("Looking for browse");
 						current_node = GSXML.getChildByTagName(current_node, "browse");
 
 						// find CLX
 						if (classifier != null)
 						{
-							logger.error("Classifier is not null");
-							logger.error("Classifier is " + classifier);
 							current_node_list = GSXML.getChildrenByTagName(current_node, "classifier");
 							index = Integer.parseInt(classifier.substring(2)) - 1;
-							logger.error("classifier index is " + index);
+
 							// index should be given by X-1
 							current_node = current_node_list.item(index);
 							// what if classifier does not have a format tag?
 							if (GSXML.getChildByTagName(current_node, "format") == null)
 							{
-								logger.error("ERROR: valid classifier but does not have a format child");
 								// well then create a format tag
 								Element format_tag = config.createElement("format");
 								current_node.appendChild(format_tag);
-								//current_node = (Node) format_tag;
 							}
 						}
 						else
 						{
-							logger.error("Classifier is null");
 							// To support all classifiers, set classifier to null?  There is the chance here that the format tag does not exist
 							if (GSXML.getChildByTagName(current_node, "format") == null)
 							{
-								logger.error("ERROR: classifier does not have a format child");
 								// well then create a format tag
 								Element format_tag = config.createElement("format");
 								current_node.appendChild(format_tag);
-								//current_node = (Node) format_tag;
 							}
 						}
 					}
 					else if (service.equals("AllClassifierBrowse"))
 					{
-						logger.error("Looking for browse");
 						current_node = GSXML.getChildByTagName(current_node, "browse");
 						if (GSXML.getChildByTagName(current_node, "format") == null)
 						{
-							logger.error("ERROR AllClassifierBrowse: all classifiers do not have a format child");
 							// well then create a format tag
 							Element format_tag = config.createElement("format");
 							current_node.appendChild(format_tag);
-							//current_node = (Node) format_tag;
 						}
 					}
 					else
 					{
 						// look in <format> with no attributes
-						logger.error("I presume this is search");
-
 						current_node_list = GSXML.getChildrenByTagName(current_node, "search");
 						for (k = 0; k < current_node_list.getLength(); k++)
 						{
@@ -680,7 +634,6 @@ public class Collection extends ServiceCluster
 					current_node.replaceChild(config.importNode(format_statement, true), GSXML.getChildByTagName(current_node, "format"));
 
 					// Now convert config document to string for writing to file
-					logger.error("Convert config to string");
 					String new_config = this.converter.getString(config);
 
 					new_config = StringUtils.replace(new_config, "&lt;", "<");
@@ -691,7 +644,6 @@ public class Collection extends ServiceCluster
 					BufferedWriter writer = new BufferedWriter(new FileWriter(collection_config + ".new"));
 					writer.write(new_config);
 					writer.close();
-					logger.error("All is happy with collection");
 
 				}
 				catch (Exception ex)

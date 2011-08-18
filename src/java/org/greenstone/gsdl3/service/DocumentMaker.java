@@ -54,20 +54,11 @@ public class DocumentMaker extends ServiceRack
 	protected static final String DOCUMENT_SPLIT = "DocumentSplit";
 	protected static final String DOCUMENT_GET_INFORMATION = "DocumentGetInformation";
 
-	//Metadata services
-	protected static final String DOCUMENT_GET_METADATA = "DocumentGetMetadata";
-	protected static final String DOCUMENT_ADD_METADATA = "DocumentAddMetadata";
-	protected static final String DOCUMENT_DELETE_METADATA = "DocumentDeleteMetadata";
-
-	//Document text services
-	protected static final String DOCUMENT_GET_TEXT = "DocumentGetText";
-	protected static final String DOCUMENT_SET_TEXT = "DocumentSetText";
-
 	//Other services
 	protected static final String DOCUMENT_EXECUTE_TRANSACTION = "DocumentExecuteTransaction";
 	/***************************************************/
 
-	String[] services = { DOCUMENT_CREATE, DOCUMENT_DELETE, DOCUMENT_DUPLICATE, DOCUMENT_GET_INFORMATION, DOCUMENT_MOVE, DOCUMENT_MERGE, DOCUMENT_SPLIT, DOCUMENT_GET_METADATA, DOCUMENT_ADD_METADATA, DOCUMENT_DELETE_METADATA, DOCUMENT_GET_TEXT, DOCUMENT_SET_TEXT, DOCUMENT_EXECUTE_TRANSACTION };
+	String[] services = { DOCUMENT_CREATE, DOCUMENT_DELETE, DOCUMENT_DUPLICATE, DOCUMENT_GET_INFORMATION, DOCUMENT_MOVE, DOCUMENT_MERGE, DOCUMENT_SPLIT, DOCUMENT_EXECUTE_TRANSACTION };
 
 	/** configure this service */
 	public boolean configure(Element info, Element extra_info)
@@ -359,5 +350,4 @@ public class DocumentMaker extends ServiceRack
 	{
 		return null;
 	}
-
 }
