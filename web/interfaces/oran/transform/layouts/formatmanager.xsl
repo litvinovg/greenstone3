@@ -22,7 +22,7 @@
         <!-- Sam2's div code -->
 
         <script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.js"><xsl:text> </xsl:text></script>
-        <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/ui/jquery-ui.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8.15/ui/jquery-ui-1.8.15.custom.js"><xsl:text> </xsl:text></script>
         <script type="text/javascript" src="interfaces/oran/js/jquery.selectboxes.js"><xsl:text> </xsl:text></script>
         <script type="text/javascript" src="interfaces/oran/js/innerxhtml.js"><xsl:text> </xsl:text></script>
         <script type="text/javascript" src="interfaces/oran/js/jquery.xml.js"><xsl:text> </xsl:text></script>
