@@ -262,7 +262,7 @@ Recent changes:
         <xsl:param name="metadataSets"/>
 
         <div class="gsf_switch css_gsf_switch block" title="gsf:switch">
-                <table class="header"><tbody><tr><td class="header">SWITCH</td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
+                <table class="header"><tbody><tr><td class="header">SWITCH</td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td class="header"><a href="#" class="ui-icon ui-icon-closethick"/></td></tr></tbody></table>
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>
                     <xsl:with-param name="metadataSets" select="$metadataSets"/>
@@ -379,10 +379,9 @@ Recent changes:
         <xsl:param name="depth"/>
         <xsl:param name="metadataSets"/>
         
-
         <td class="column" valign="{@valign}" title="td">
-            <div class="td-div block" title="td-div">
-            <div class="neverempty block" style="height:50px">NEVER EMPTY</div>
+            <div class="td-div" title="td-div">
+            <div class="neverempty block" style="height:25px">NEVER EMPTY</div>
 
                 <xsl:apply-templates mode="xml-to-gui">
                     <xsl:with-param name="depth" select="$depth"/>

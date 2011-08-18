@@ -25,9 +25,6 @@
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
 		<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
 		<link rel="shortcut icon" href="favicon.ico"/> 
-        <!--<script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.js"><xsl:text> </xsl:text></script>
-        <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8rc1/ui/jquery-ui.js"><xsl:text> </xsl:text></script>
-        <script type="text/javascript" src="interfaces/oran/js/jquery.selectboxes.js"><xsl:text> </xsl:text></script>-->
 	</xsl:template>
 		
 	<!-- ***** HEADER LAYOUT TEMPLATE ***** -->
@@ -130,7 +127,7 @@
 		<xsl:variable name="pageTitleVar"><xsl:call-template name="pageTitle"/></xsl:variable>
 		<td id="titlearea">
 			<h2>
-				<!-- Resize the title based on how long it is -->
+				<!-- Resize the title based on how long it is (There's probably a better way to do this) -->
 				<xsl:attribute name="style">
 					<xsl:choose>
 						<xsl:when test="string-length($pageTitleVar) &lt; 20">

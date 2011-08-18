@@ -9,6 +9,8 @@
 
     <xsl:include href="xml-to-gui.xsl"/>
     <xsl:include href="xml-to-gui-templates.xsl"/>
+	
+	<xsl:output method="html" omit-xml-declaration="yes"/> 
 
     <xsl:template name="formatmanagerpre">
     
@@ -49,7 +51,7 @@
 
             .placeholder_td{margin-left: 10px; border: dashed 1px #ccc; background-color:#FFFFCC; width:20px; }
 
-            .header { background-color: #AFCCAF; border: solid 1px #117711; padding: 5px; padding-left: 10px;}
+            .header { background-color: #AFCCAF; border: solid 1px #117711; padding: 5px; padding-left: 10px; }
 
             .resizable { width: 150px; height: 150px; padding: 0.5em; } 
             
@@ -73,8 +75,6 @@
         </style>
 
         <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/themes/base/jquery-ui.css"/> 
-
-
 
         <table width="100%" border="1"> 
 
@@ -155,8 +155,8 @@
                         <tbody>
                             <tr>
                                 <td class="header">MATCH=<input type="text" name="rawtextinput" size="10"/></td>
-                                <!--<td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
-                                <td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td>-->
+                                <td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
+                                <td class="header"><a href="#" class="ui-icon ui-icon-closethick">[x]</a></td>
                             </tr>
                         </tbody>
                     </table>
@@ -167,8 +167,8 @@
                         <tbody>
                             <tr>
                                 <td class="header">CHOOSE</td>
-                                <!--<td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td>
-                                <td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td>-->
+                                <td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick" title="Click me to expand">[-]</a></td>
+                                <td class="header"><a href="#" class="ui-icon ui-icon-closethick" title="Click me to remove"/></td>
                             </tr>
                         </tbody>
                     </table>
@@ -178,13 +178,14 @@
                     <table class="header">
                         <tbody>
                             <tr>
+								<td class="header" style="font-size: 0.8em;">METADATA</td>
                                 <td class="header" id="metadataSelector">
                                     <!--<xsl:call-template name="meta-to-combo">
                                         <xsl:with-param name="metadataSets" select="//metadataSetList"/>
                                         <xsl:with-param name="current" select="ex.Title"/>
                                     </xsl:call-template>-->
                                 </td>
-                                <!--<td class="header"><a href="#" class="remove ui-icon ui-icon-closethick" title="Click me to remove"/></td>-->
+                                <td class="header"><a href="#" class="ui-icon ui-icon-closethick" title="Click me to remove"/></td>
                             </tr>
                         </tbody>
                     </table>
@@ -194,14 +195,15 @@
                     <table class="header">
                         <tbody>
                             <tr>
-                                <td class="header">LINK<select>
+								<td class="header">LINK</td>
+                                <td class="header"><select>
                                     <option value = "document" selected = "document">Document</option>
                                     <option value = "classifier">Classifier</option>
                                     <option value = "source">Source</option>
                                     <option value = "horizontal">Horizontal</option>
                                 </select></td>
-                                <!--<td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
-                                <td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td>-->
+                                <td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
+                                <td class="header"><a href="#" class="ui-icon ui-icon-closethick">[x]</a></td>
                             </tr>
                         </tbody>
                     </table>
@@ -212,8 +214,8 @@
                         <tbody>
                             <tr>
                                 <td class="header">SWITCH</td>
-                                <!--<td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
-                                <td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td>-->
+                                <td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
+                                <td class="header"><a href="#" class="ui-icon ui-icon-closethick">[x]</a></td>
                             </tr>
                         </tbody>
                     </table>
@@ -223,9 +225,9 @@
                     <table class="header">
                         <tbody>
                             <tr>
-                                <td class="header">WHEN<xsl:value-of select="@test"/></td>
-                                <!--<td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
-                                <td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td>-->
+                                <td class="header">WHEN <xsl:value-of select="@test"/></td>
+                                <td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
+                                <td class="header"><a href="#" class="ui-icon ui-icon-closethick"/></td>
                             </tr>
                         </tbody>
                     </table>
@@ -236,8 +238,8 @@
                         <tbody>
                             <tr>
                                 <td class="header">OTHERWISE</td>
-                                <!--<td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
-                                <td><a href="#" class="ui-icon ui-icon-closethick"/></td>-->
+                                <td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td>
+                                <td class="header"><a href="#" class="ui-icon ui-icon-closethick"/></td>
                             </tr>
                         </tbody>
                     </table>
@@ -247,12 +249,13 @@
                     <table class="header">
                         <tbody>
                             <tr>
-                                <td class="header">ICON<select>
+                                <td class="header">ICON</td>
+								<td class="header"><select>
                                     <option value="document" selected="document">Document</option>
                                     <option value="classifier">Classifier</option>
                                     <option value="source">Source</option>
                                 </select></td>
-                                <!--<td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td>-->
+                                <td class="header"><a href="#" class="ui-icon ui-icon-closethick">[x]</a></td>
                             </tr>
                         </tbody>
                     </table>
@@ -261,8 +264,9 @@
                     <table class="header">
                         <tbody>
                             <tr>
+								<td class="header">TEXT</td>
                                 <td class="header"><input type="text" name="rawtextinput" size="10" value=""/></td>
-                                <!--<td class="header"><a href="[myhref]" class="ui-icon ui-icon-closethick"/></td>-->
+                                <td class="header"><a href="#" class="ui-icon ui-icon-closethick"/></td>
                             </tr>
                         </tbody>
                     </table>

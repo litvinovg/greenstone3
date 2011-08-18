@@ -69,7 +69,7 @@ Recent changes:
 	                        <option value = "classifier">Classifier</option>
                             <option value = "source">Source</option>
                             <option value = "horizontal">Horizontal</option>
-	            </select></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div> 
+	            </select></td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div> 
         </xsl:variable>
 
         <script type="text/javascript">
@@ -80,7 +80,7 @@ Recent changes:
     <!-- ********** GSF:TEMPLATE ********** -->
 
         <xsl:variable name="template">
-        <div class="gsf_template css_gsf_template block" title="gsf:template"><table class="header"><tbody><tr><td class="header">MATCH=<input type="text" name="rawtextinput" size="10"/></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table><table border="1"><tr class="tr"><td class="droppable" width="10px"></td></tr></table></div><br/>
+        <div class="gsf_template css_gsf_template block" title="gsf:template"><table class="header"><tbody><tr><td class="header">MATCH=<input type="text" name="rawtextinput" size="10"/></td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table><table border="1"><tr class="tr"><td class="droppable" width="10px"></td></tr></table></div><br/>
         </xsl:variable>
 
         <script type="text/javascript">
@@ -91,7 +91,7 @@ Recent changes:
     <!-- ********** GSF:SWITCH ********** -->
 
         <xsl:variable name="switch">
-        <div class="gsf_switch css_gsf_switch block" title="gsf:switch"><table class="header"><tbody><tr><td class="header">SWITCH</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
+        <div class="gsf_switch css_gsf_switch block" title="gsf:switch"><table class="header"><tbody><tr><td class="header">SWITCH</td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
         </xsl:variable>
 
         <script type="text/javascript">
@@ -102,7 +102,7 @@ Recent changes:
     <!-- ********** GSF:WHEN ********** -->
 
         <xsl:variable name="when">
-        <div class="gsf_when css_gsf_when block" title="gsf:when"><table class="header"><tbody><tr><td class="header">WHEN<input type="text" name="rawtextinput" size="10"/></td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
+        <div class="gsf_when css_gsf_when block" title="gsf:when"><table class="header"><tbody><tr><td class="header">WHEN<input type="text" name="rawtextinput" size="10"/></td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
         </xsl:variable>
 
         <script type="text/javascript">
@@ -112,7 +112,7 @@ Recent changes:
     <!-- ********** GSF:OTHERWISE ********** -->
 
         <xsl:variable name="otherwise">
-        <div class="gsf_otherwise css_gsf_otherwise block" title="gsf:otherwise"><table class="header"><tbody><tr><td class="header">OTHERWISE</td><td><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
+        <div class="gsf_otherwise css_gsf_otherwise block" title="gsf:otherwise"><table class="header"><tbody><tr><td class="header">OTHERWISE</td><td class="header"><a href="#" class="minmax ui-icon ui-icon-minusthick">[-]</a></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
         </xsl:variable>
 
         <script type="text/javascript">
@@ -122,7 +122,7 @@ Recent changes:
     <!-- ********** GSF:ICON ********** -->
     
         <xsl:variable name="icon">
-        <div class="gsf_icon css_gsf_icon block leaf" title="gsf:icon"><table class="header"><tbody><tr><td class="header">ICON<select><option value = "document" selected = "document">Document</option><option value = "classifier">Classifier</option><option value = "source">Source</option></select></td><td><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
+        <div class="gsf_icon css_gsf_icon block leaf" title="gsf:icon"><table class="header"><tbody><tr><td class="header">ICON<select><option value = "document" selected = "document">Document</option><option value = "classifier">Classifier</option><option value = "source">Source</option></select></td><td class="header"><a href="#" class="remove ui-icon ui-icon-closethick">[x]</a></td></tr></tbody></table></div>
         </xsl:variable>
 
         <script type="text/javascript">
