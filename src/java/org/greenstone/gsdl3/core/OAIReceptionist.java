@@ -286,7 +286,7 @@ public class OAIReceptionist implements ModuleInterface {
     }
     return getMessage(list_sets_elem);
   }  
-  private Element createResumptionTokenElement(int total_size, int cursor, int so_far_sent, boolean set_expiration) {
+    private Element createResumptionTokenElement(int total_size, int cursor, int so_far_sent, boolean set_expiration, String metadata_prefix) {
     Element token = OAIXML.createElement(OAIXML.RESUMPTION_TOKEN);
     token.setAttribute(OAIXML.COMPLETE_LIST_SIZE, "" + total_size);
     token.setAttribute(OAIXML.CURSOR, "" + cursor);
@@ -304,10 +304,19 @@ public class OAIReceptionist implements ModuleInterface {
       //considered opaque by the harvester (in other words, strictly follow what the
       //data provider has to offer
       //Here, we make use of the uniqueness of the system time
-      GSXML.setNodeText(token, OAIXML.GS3OAI + System.currentTimeMillis() + ":" + so_far_sent);
+	String tokenValue = OAIXML.GS3OAI + System.currentTimeMillis() + ":" + so_far_sent;	
+	if(!metadata_prefix.equals("")) {
+	    tokenValue = tokenValue + ":" + metadata_prefix;
+	}
+	GSXML.setNodeText(token, tokenValue);
     }
     return token;
   }
+    
+    private Element createResumptionTokenElement(int total_size, int cursor, int so_far_sent, boolean set_expiration) {
+	return createResumptionTokenElement(total_size, cursor, so_far_sent, set_expiration, ""); // empty metadata_prefix
+    }
+
   /** if the param_map contains strings other than those in valid_strs, return false;
    *  otherwise true.
    */
@@ -621,7 +630,7 @@ public class OAIReceptionist implements ModuleInterface {
       //    store a new token if necessary.
         //}      
       token = (String)param_map.get(OAIXML.RESUMPTION_TOKEN);
-      logger.info("has resumptionToken" + token);
+      logger.info("has resumptionToken: " + token);
       if(OAIXML.containsToken(token) == false) {
         return getMessage(OAIXML.createErrorElement(OAIXML.BAD_RESUMPTION_TOKEN, ""));
       }
@@ -631,21 +640,42 @@ public class OAIReceptionist implements ModuleInterface {
     // errors should be caught first, so that their error responses can be sent off first
     // such that GS2's oaiserver will validate properly.
     if (!param_map.containsKey(OAIXML.METADATA_PREFIX)) {
-      // it must have a metadataPrefix
-      /** Here I disagree with the OAI specification: even if a resumptionToken is 
-       *  included in the request, the metadataPrefix is a must argument. Otherwise
-       *  how would we know what metadataPrefix the harvester requested in his last request?
-       */
-      logger.error("no metadataPrefix");
-      return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+	if(!token.equals("")) { // resumptiontoken
+	    int lastIndex = token.lastIndexOf(":");
+	    if(lastIndex != token.indexOf(":")) { // if a meta_prefix is suffixed to the usual token,
+		// put that in the map and remove it from the end of the stored token
+		String meta_prefix = token.substring(lastIndex+1);
+		param_map.put(OAIXML.METADATA_PREFIX, meta_prefix);
+		token = token.substring(0, lastIndex);
+		param_map.put(OAIXML.RESUMPTION_TOKEN, token);
+
+		// Add to request <param name="metadataPrefix" value="oai_dc"/>
+		// need to add metaprefix as param to request, else a request 
+		// for subsequent records when working with resumption tokens will fail
+		Element paramEl = req.getOwnerDocument().createElement(OAIXML.PARAM);
+		paramEl.setAttribute(OAIXML.NAME, OAIXML.METADATA_PREFIX);
+		paramEl.setAttribute(OAIXML.VALUE, meta_prefix);
+		req.appendChild(paramEl);
+	    }
+	} else { // no metadata_prefix
+
+	    // it must have a metadataPrefix
+	    /** Here I disagree with the OAI specification: even if a resumptionToken is 
+	     *  included in the request, the metadataPrefix is a must argument. Otherwise
+	     *  how would we know what metadataPrefix the harvester requested in his last request?
+	     */
+	    logger.error("no metadataPrefix");
+	    return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+	}
     }
-        
+    
     //Now that we got a prefix, check and see if it's supported by this repository
     String prefix_value = (String)param_map.get(OAIXML.METADATA_PREFIX);
     if (containsMetadataPrefix(prefix_value) == false) {
-      logger.error("requested prefix is not found in OAIConfig.xml");
-      return getMessage(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
+	logger.error("requested prefix is not found in OAIConfig.xml");
+	return getMessage(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
     }
+    
 
     //Now that all validation has been done, I hope, we can send request to the message router
     Element result = null;
@@ -677,7 +707,7 @@ public class OAIReceptionist implements ModuleInterface {
         Node n = mr.process(msg);
 	Element e = converter.nodeToElement(n);
         result = collectAll(result, e, verb, OAIXML.RECORD);
-        
+
         //clear the content of the old request element
         msg.removeChild(req);
         req = null;
@@ -716,7 +746,7 @@ public class OAIReceptionist implements ModuleInterface {
       //append required number of records (may be a complete or incomplete list)
       getRecords(list_records, record_list, 0, resume_after);
       //An incomplete list is sent; append a resumptionToken element
-      Element token_elem = createResumptionTokenElement(num_records, 0, resume_after, true);
+      Element token_elem = createResumptionTokenElement(num_records, 0, resume_after, true, (String)param_map.get(OAIXML.METADATA_PREFIX));
       //store this token
       OAIXML.addToken(token_elem);
        
@@ -737,13 +767,14 @@ public class OAIReceptionist implements ModuleInterface {
         //append required records to list_records (list is complete)
         getRecords(list_records, record_list, cursor, num_records);
         //An incomplete list is sent; append a resumptionToken element
-        token_elem = createResumptionTokenElement(num_records, cursor, -1, false);
-        list_records.appendChild(token_elem);
+	token_elem = createResumptionTokenElement(num_records, cursor, -1, false, (String)param_map.get(OAIXML.METADATA_PREFIX));
+	list_records.appendChild(token_elem);
+
       } else {
         //No, we are not.
         //append required records to list_records (list is incomplete)
         getRecords(list_records, record_list, cursor, cursor + resume_after);
-        token_elem = createResumptionTokenElement(num_records, cursor, cursor + resume_after, true);
+        token_elem = createResumptionTokenElement(num_records, cursor, cursor + resume_after, true, (String)param_map.get(OAIXML.METADATA_PREFIX));
         //store this token
         OAIXML.addToken(token_elem);
         list_records.appendChild(token_elem);
