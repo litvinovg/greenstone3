@@ -425,6 +425,32 @@ $(document).ready(function(){
 		}
 	});
 	
+	$.ui.sortable.prototype._removeCurrentsFromItems = function() {
+		//console.log("IN _removeCurrentsFromItems FUNCTION");
+		//console.log("this = " + this.currentItem[0].getAttribute('class'));
+		var list = this.currentItem.find(":data(sortable-item)");
+
+		var i = 0;
+		while (i<this.items.length) {
+			var found_match = false;
+			for (var j=0; j<list.length; j++) {
+				if(this.items[i])
+				{
+					if(list[j] == this.items[i].item[0]) {
+						//console.log("Item to splice = " + this.items[i].item[0].getAttribute('class'));
+						this.items.splice(i,1);
+						found_match = true;
+						break;
+					}
+				}
+			};
+			if (!found_match)
+				i++;
+			else
+				break;
+		}
+	};
+	
 	$.ui.plugin.add("draggable", "connectToSortable", {
 	start: function(event, ui) {
         //console.log("FUNCTION start draggable connectToSortable");
