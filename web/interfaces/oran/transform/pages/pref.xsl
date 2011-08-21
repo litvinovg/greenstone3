@@ -146,19 +146,21 @@
 					<br class="clear"/>
 
                     <!-- format editing -->
-                    <div id="formateditprefs">
-                        <xsl:variable name="formatedit"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='formatedit']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='formatedit']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
-                        <div class="paramLabel">
-                            <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.formatedit')"/>
-                        </div>
-                        <div class="paramValue">
-                            <select name="formatedit">
-                                <option value="on"><xsl:if test="$formatedit='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.formatedit.on')"/></option>
-                                <option value="off"><xsl:if test="$formatedit='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.formatedit.off')"/></option>
-                            </select>
-                        </div>
-                        <br class="clear"/>
-                    </div>
+					<xsl:if test="/page/pageResponse/collection/serviceList/service[@name='CoverageMetadataRetrieve']">
+						<div id="formateditprefs">
+							<xsl:variable name="formatedit"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='formatedit']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='formatedit']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
+							<div class="paramLabel">
+								<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.formatedit')"/>
+							</div>
+							<div class="paramValue">
+								<select name="formatedit">
+									<option value="on"><xsl:if test="$formatedit='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.formatedit.on')"/></option>
+									<option value="off"><xsl:if test="$formatedit='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.formatedit.off')"/></option>
+								</select>
+							</div>
+							<br class="clear"/>
+						</div>
+					</xsl:if>
 				</div>
 
 				<!-- berry baskets -->
