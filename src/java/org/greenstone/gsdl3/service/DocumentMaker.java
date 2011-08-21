@@ -21,14 +21,7 @@
  */
 package org.greenstone.gsdl3.service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
-import java.util.HashMap;
-
 import org.apache.log4j.*;
-import org.apache.tools.ant.util.FileUtils;
 
 import org.greenstone.gsdl3.util.GSDocumentModel;
 import org.greenstone.gsdl3.util.GSXML;
