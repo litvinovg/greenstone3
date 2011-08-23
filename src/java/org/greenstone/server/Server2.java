@@ -291,27 +291,30 @@ public class Server2 extends BaseServer
 	libraryURL = "http://" + host + ":" + port + suffix;
     }
 
-    public void reloadConfigProperties() {
-	super.reloadConfigProperties();
+    public void reloadConfigProperties(boolean port_has_changed) {
+	super.reloadConfigProperties(port_has_changed);
 
 	// make sure the port is okay, otherwise find another port
 	// first choice is port 80, second choice starts at 8282
 	String port = config_properties.getProperty("portnumber", "80");
-	String keepport = config_properties.getProperty("keepport", "0"); // default is to not try to keep the same port
+	String keepport = config_properties.getProperty("keepport", "0"); // default is to not try to force the same port if in use by other servers
 
 	int portDefault = 8282;
 	try {
-	    int portNum = Integer.parseInt(port);
-	    boolean verbose = true;
-	    if(!PortFinder.isPortAvailable(portNum, verbose)) { // first time, print any Port Unavailable messages
+	  int portNum = Integer.parseInt(port);
+	  boolean verbose = true;
+	  if(port_has_changed) { // this is the test that prevents the server from arbitrarily shifting the port. 
+							// only check at configured port if it's not the current port (the port we
+							// are still running on), because that will always be in use and unavailable.
+		if(!PortFinder.isPortAvailable(portNum, verbose)) { // first time, print any Port Unavailable messages
 		if(keepport.equals("1")) {
 		    String errorMsg = "Unable to run the Greenstone server on port " + port + ". It may already be in use.";
 		    System.err.println("\n******************");
 		    logger_.error(errorMsg);
 		    System.err.println("If you wish to try another port, go to File > Settings of the Greenstone Server interface and either change the port number or untick the \"Do Not Modify Port\" option there. Then press the \"Enter Library\" button.");
 		    System.err.println("******************\n");
-		} else {
-
+		} else { // can modify port, try to find a new port
+		
 		    PortFinder portFinder = new PortFinder(portDefault, 101);
 		    // Search for a free port silently from now on--don't want more
 		    // messages saying that a port could not be found...
@@ -335,7 +338,8 @@ public class Server2 extends BaseServer
 		    configure_required_ = true;
 		    System.err.println("Running server on port " + port + ".");
 		}
-	    }    
+	    }
+	  }	
 	} catch (Exception e) {
 	    recordError("Exception in Server2.reload(): " + e.getMessage());
 	    port = Integer.toString(portDefault);

@@ -63,7 +63,7 @@ public abstract class BaseServer
 	}
 	
 	config_properties = new Properties();
-	reloadConfigProperties();
+	reloadConfigProperties(true); // first time starting the server, work out port_number
 
 	dictionary = new Dictionary("server", lang, this.getClass().getClassLoader());	
     }
@@ -249,7 +249,7 @@ public abstract class BaseServer
 
     }
     
-    public  void reloadConfigProperties() {
+    public  void reloadConfigProperties(boolean port_has_changed) {
 	try {
 	    FileInputStream in = new FileInputStream(config_properties_file);
 

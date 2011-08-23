@@ -233,11 +233,13 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 	public void actionPerformed(ActionEvent ev) {
 	    // save everything to config_properties if things have changed
 	    boolean has_changed = false;
-            boolean require_restart = false;
+		boolean require_restart = false;
+		boolean port_has_changed = false;
 
 	    if (portNum != ((Integer)portNumber_spinner.getValue()).intValue()) {
-		has_changed = true;
-                require_restart = true;
+			port_has_changed = true;
+			has_changed = true;
+			require_restart = true;
                 server.reconfigRequired();
                 portNum = ((Integer)portNumber_spinner.getValue()).intValue();
              	logger.info("port changed, new port is "+portNumber_spinner.getValue());
@@ -294,7 +296,7 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 
 		scriptReadWrite.writeOutFile(BaseServer.config_properties_file, newFileLines);
 
-		server.reloadConfigProperties();
+		server.reloadConfigProperties(port_has_changed);
 		server.reload(); // work out the URL again in case it has changed
 		if (require_restart){
 		    JOptionPane.showMessageDialog(null,server.dictionary.get("ServerSettings.SettingChanged"),"Info", JOptionPane.INFORMATION_MESSAGE);
