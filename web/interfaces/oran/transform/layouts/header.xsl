@@ -7,6 +7,7 @@
 	exclude-result-prefixes="java util">
 		
 	<xsl:include href="../query-common.xsl"/>
+	<xsl:include href="../javascript-global-setup.xsl"/>
 	
 	<!-- If the c parameter is empty then use the p.c parameter for the collection name-->
 	<xsl:variable name="collNameChecked">
@@ -25,6 +26,8 @@
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
 		<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
 		<link rel="shortcut icon" href="favicon.ico"/> 
+		
+		<xsl:call-template name="setup-gs-variable"/>
 	</xsl:template>
 		
 	<!-- ***** HEADER LAYOUT TEMPLATE ***** -->

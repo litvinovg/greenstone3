@@ -6,6 +6,8 @@
 	xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
 	xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
 	extension-element-prefixes="java">
+	<xsl:param name="interface_name"/>
+	<xsl:param name="library_name"/>
   
 	<xsl:output method="xml"/>
 	<xsl:namespace-alias stylesheet-prefix="xslt" result-prefix="xsl"/>
@@ -26,6 +28,16 @@
 			</xsl:if>
 			<xsl:apply-templates/>
 		</xslt:template>
+	</xsl:template>
+	
+	<xsl:template match="gsf:variable">
+		<xslt:variable>
+			<xsl:copy-of select="@*"/>
+			<xsl:apply-templates/>
+		</xslt:variable>
+		<script type="text/javascript">
+			gs.variables.<xsl:value-of select="@name"/><xslt:text disable-output-escaping="yes"> = "</xslt:text><xsl:apply-templates/><xslt:text disable-output-escaping="yes">";</xslt:text>
+		</script>
 	</xsl:template>
   
 	<xsl:template match="gsf:link">
@@ -118,10 +130,10 @@
 	<xsl:template match="gsf:icon">
 		<xsl:choose>
 			<xsl:when test="@type='classifier'">
-				<img style="border:0px"><xsl:attribute name="src"><xsl:text>interfaces/oran/images/bookshelf.png</xsl:text></xsl:attribute></img>
+				<img style="border:0px"><xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'bookshelf_image')"/></xsl:attribute></img>
 			</xsl:when>
 			<xsl:when test="@type='document'">
-				<img style="border:0px"><xsl:attribute name="src"><xsl:text>interfaces/oran/images/itext.gif</xsl:text></xsl:attribute></img> 
+				<img style="border:0px"><xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'page_icon_image')"/></xsl:attribute></img> 
 			</xsl:when>
 		</xsl:choose>
 	</xsl:template>

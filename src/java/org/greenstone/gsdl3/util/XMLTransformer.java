@@ -169,7 +169,11 @@ public class XMLTransformer {
     }
 
     public Node transform(Document stylesheet, Document source) {
-	return transform(stylesheet, source, null, null);
+    	return transform(stylesheet, source, null, null);
+    }
+    
+    public Node transform(Document stylesheet, Document source, HashMap parameters) {
+    	return transform(stylesheet, source, parameters, null);
     }
 
     public Node transform(Document stylesheet, Document source, HashMap parameters, Document docDocType) {
