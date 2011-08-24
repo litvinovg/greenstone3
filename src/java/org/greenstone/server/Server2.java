@@ -30,10 +30,10 @@ import org.greenstone.server.BaseProperty;
 public class Server2 extends BaseServer 
 {
     private static final int WAITING_TIME = 10; // time to wait and check for whether the server is running
-    private static final String URL_PENDING="URL_pending";
-
+    private static final String URL_PENDING="URL_pending";	
+	
     protected String libraryURL;
-
+	
     private class QuitListener extends Thread 
     {
 	int quitPort = -1;
@@ -102,12 +102,21 @@ public class Server2 extends BaseServer
     }
 
 
-    public Server2(String gsdl2_home, String lang, String configfile, int quitPort)
+    public Server2(String gsdl2_home, String lang, String configfile, int quitPort, String property_prefix)
     {
 	super(gsdl2_home, lang, configfile, "etc"+File.separator+"logs-gsi");	
-	               // configfile can be either glisite.cfg or llssite.cfg
+	               // configfile can be either glisite.cfg or llssite.cfg	
 
-	Property = new Server2Property();
+	//logger_.error("gsdlhome: " + gsdl2_home + " | lang: " + lang + " | configfile: " 
+		//+ configfile + " | mode: " + property_prefix + " | quitport: " + quitPort);
+	
+	// property_prefix is the mode we're running in (gli or empty) and contains the prefix
+	// string to look for in config file for auto_enter and start_browser properties	
+	if(!property_prefix.equals("") && !property_prefix.endsWith(".")) { // ensure a '.' is suffixed if non-empty
+		property_prefix += ".";
+	}
+	Property = new Server2Property(property_prefix);
+	
 	
 	String frame_title = dictionary.get("ServerControl.Frame_Title");
 	server_control_ = new Server2Control(this,frame_title);
@@ -421,11 +430,11 @@ public class Server2 extends BaseServer
 
     public static void main (String[] args)
     {
-    	if ((args.length < 1) || (args.length > 4)) {
+    	if ((args.length < 1) || (args.length > 5)) {
 	    System.err.println(
-	       "Usage: java org.greenstone.server.Server2 <gsdl2-home-dir> [lang] [--config=configfile] [--quitport=portNum]");
+	       "Usage: java org.greenstone.server.Server2 <gsdl2-home-dir> [lang] [--mode=\"gli\"] [--config=configfile] [--quitport=portNum]");
 	    System.exit(1);
-	}
+		}
 	
 	String gsdl2_home = args[0];
 	File gsdl2_dir = new File(gsdl2_home);
@@ -434,33 +443,48 @@ public class Server2 extends BaseServer
 	    System.exit(1);
 	}
 	
-	String lang = (args.length>=2) ? args[1] : "en";
+	int index = 1; // move onto any subsequent arguments
 	
+	// defaults for optional arguments
 	// if no config file is given, then it defaults to llssite.cfg (embedded in quotes to preserve spaces in the filepath)
-	File defaultConfigFile = new File(gsdl2_dir, "llssite.cfg");
-	String configfile = (args.length>=3 && args[2].startsWith("--config=")) ? args[2] : defaultConfigFile.getAbsolutePath();
-	gsdl2_dir = null;
-	defaultConfigFile = null;
-
-	int equalSign = configfile.indexOf('=');
-	if(equalSign != -1) {
-	    configfile = configfile.substring(equalSign+1);
-	}
-
-	String quitport = (args.length == 4 && args[3].startsWith("--quitport=")) ? args[3] : "";
-	equalSign = quitport.indexOf('=');
+	File defaultConfigFile = new File(gsdl2_dir, "llssite.cfg");	
+	String configfile = defaultConfigFile.getAbsolutePath();
 	int port = -1;
-	if(equalSign != -1) {
-	    try {
-		quitport = quitport.substring(equalSign+1);
-		port = Integer.parseInt(quitport);
-	    } catch(Exception e) { // parse fails
-		System.err.println("Port must be numeric. Continuing without it.");
-	    }
-	}
-
-	//System.err.println("Running server with config file: " + configfile);
+	String mode = "";
+	String lang = "en";	
 	
-	new Server2(gsdl2_home, lang, configfile, port);
+	// cycle through arguments, parsing and storing them
+	while(args.length > index) {
+			
+		if(args[index].startsWith("--config=")) {
+			configfile = args[index].substring(args[index].indexOf('=')+1); // get value after '=' sign			
+			gsdl2_dir = null;
+			defaultConfigFile = null;
+		}
+		
+		else if(args[index].startsWith("--quitport=")) {
+			String quitport = args[index].substring(args[index].indexOf('=')+1);			
+			try {				
+				port = Integer.parseInt(quitport);
+			} catch(Exception e) { // parse fails
+				System.err.println("Port must be numeric. Continuing without it.");
+			}		
+		}
+		
+		// mode can be: "gli" if launched by GLI or unspecified. If unspecified, then 
+		// the gs2-server was launched independently.
+		else if(args[index].startsWith("--mode=")) {
+			mode = args[index].substring(args[index].indexOf('=')+1);
+		}
+		
+		else if(args[index].length() == 2) { 
+			// there is an optional argument, but without a --FLAGNAME= prefix, so it's a language code			
+			lang = args[index];
+		}
+		
+		index++;
+	}
+	
+	new Server2(gsdl2_home, lang, configfile, port, mode);
     }
 }
