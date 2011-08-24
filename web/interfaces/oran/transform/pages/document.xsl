@@ -64,16 +64,19 @@
 		<xsl:if test="$bookswitch = 'off'">
 			<div id="bookdiv" style="visibility:hidden; height:0px; display:inline;"><xsl:text> </xsl:text></div>
 		
+			<script type="text/javascript" src="interfaces/{$interface_name}/js/document_scripts.js"><xsl:text> </xsl:text></script>
+			
 			<!-- Adds the realistic books javascript if necessary ( *** in document-scripts.xsl *** ) -->
 			<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
-				<xsl:call-template name="realisticBooksScript"/>
+				<script type="text/javascript">
+					<xsl:text disable-output-escaping="yes">
+						if(document.URL.indexOf("book=on") != -1)
+						{
+							loadBook();
+						}
+					</xsl:text>
+				</script>
 			</xsl:if>
-			
-			<!-- Add the Javascript that adds and removes highlighting ( *** in document-scripts.xsl *** ) -->
-			<xsl:call-template name="highlightingScript"/>
-			
-			<!-- Add the Javascript that expands and collapses sections ( *** in document-scripts.xsl *** ) -->
-			<xsl:call-template name="expansionScript"/>
 		
 			<!-- show the little berries for this document -->
 			<xsl:call-template name="documentBerryForDocumentPage"/>
@@ -129,7 +132,14 @@
 			<xsl:when test="$bookswitch = 'on'">
 				<!-- *** in document-scripts.xsl *** -->
 				<div id="bookdiv" style="display:inline;"><xsl:text> </xsl:text></div>
-				<xsl:call-template name="realisticBooksScript"/>
+				<script type="text/javascript">
+					<xsl:text disable-output-escaping="yes">
+						if(document.URL.indexOf("book=on") != -1)
+						{
+							loadBook();
+						}
+					</xsl:text>
+				</script>
 			</xsl:when>
 			<xsl:otherwise>
 				<div id="gs-document-text" class="documenttext"> 
