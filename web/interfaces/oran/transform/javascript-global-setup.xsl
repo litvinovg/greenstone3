@@ -19,14 +19,6 @@
 		<xsl:call-template name="populate-cgi-param-values"/>
 		<xsl:call-template name="populate-image-url-values"/>
 		<xsl:call-template name="populate-metadata-values"/>
-		<script type="text/javascript">
-			alert(gs.cgiParams.c);
-			alert(gs.cgiParams.book);
-			alert(gs.siteMetadata.siteDescription);
-			alert(gs.siteMetadata.fr.siteDescription);
-			alert(gs.collectionMetadata.httpPath);
-			alert(gs.documentMetadata.assocfilepath);
-		</script>
 	</xsl:template>
 	
 	<xsl:template name="populate-cgi-param-values">
