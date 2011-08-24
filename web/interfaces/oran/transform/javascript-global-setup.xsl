@@ -22,14 +22,16 @@
 	</xsl:template>
 	
 	<xsl:template name="populate-cgi-param-values">
-		<xsl:for-each select="/page/pageRequest/paramList/param">
-			<script type="text/javascript">
-				<xsl:text disable-output-escaping="yes">var name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
-				<xsl:text disable-output-escaping="yes">var value = "</xsl:text><xsl:value-of select="@value"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+		<script type="text/javascript">
+			var name;
+			var value;
+			<xsl:for-each select="/page/pageRequest/paramList/param">
+				<xsl:text disable-output-escaping="yes">name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of select="@value"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				<xsl:text disable-output-escaping="yes">name = name.replace(".", "_");</xsl:text>
 				gs.cgiParams[name] = value;
-			</script>
-		</xsl:for-each>
+			</xsl:for-each>
+		</script>
 	</xsl:template>
 	
 	<xsl:template name="populate-metadata-values">
@@ -52,34 +54,31 @@
 						langList[name] = value;
 					}
 				}
+				var name;
+				var value;
+				var lang;
 			</xsl:text>
-		</script>
-		<xsl:for-each select="/page/pageResponse/metadataList/metadata">
-			<script type="text/javascript">
-				<xsl:text disable-output-escaping="yes">var name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
-				<xsl:text disable-output-escaping="yes">var value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="."/><xsl:text disable-output-escaping="yes">";</xsl:text>
-				<xsl:text disable-output-escaping="yes">var lang = "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+			<xsl:for-each select="/page/pageResponse/metadataList/metadata">
+				<xsl:text disable-output-escaping="yes">name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="."/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">lang = "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				addMetadataToList(name, value, gs.siteMetadata, lang);
-			</script>
-		</xsl:for-each>
+			</xsl:for-each>
 		
-		<xsl:for-each select="/page/pageResponse/collection/metadataList/metadata">
-			<script type="text/javascript">
-				<xsl:text disable-output-escaping="yes">var name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
-				<xsl:text disable-output-escaping="yes">var value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="."/><xsl:text disable-output-escaping="yes">";</xsl:text>
-				<xsl:text disable-output-escaping="yes">var lang = "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+			<xsl:for-each select="/page/pageResponse/collection/metadataList/metadata">
+				<xsl:text disable-output-escaping="yes">name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="."/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">lang = "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				addMetadataToList(name, value, gs.collectionMetadata, lang);
-			</script>
-		</xsl:for-each>
+			</xsl:for-each>
 		
-		<xsl:for-each select="/page/pageResponse/document/metadataList/metadata">
-			<script type="text/javascript">
-				<xsl:text disable-output-escaping="yes">var name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
-				<xsl:text disable-output-escaping="yes">var value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="."/><xsl:text disable-output-escaping="yes">";</xsl:text>
-				<xsl:text disable-output-escaping="yes">var lang = "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+			<xsl:for-each select="/page/pageResponse/document/metadataList/metadata">
+				<xsl:text disable-output-escaping="yes">name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="."/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">lang = "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				addMetadataToList(name, value, gs.documentMetadata, lang);
-			</script>
-		</xsl:for-each>
+			</xsl:for-each>
+		</script>
 	</xsl:template>
 	
 	<xsl:template name="populate-image-url-values">
