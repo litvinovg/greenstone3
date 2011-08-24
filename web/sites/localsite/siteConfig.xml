@@ -5,6 +5,9 @@
     <!--<serviceRack name="GATEServices"/>-->
     <!-- uncomment to provide the Authentication service -->
     <!--<serviceRack name='Authentication'/>-->
+    <serviceRack name="ArchiveIO"/>
+    <serviceRack name="DocumentMaker"/>
+    <serviceRack name="DocXMLUtil"/>
     <serviceRack name="BerryBasket"/>
     <serviceRack name="CrossCollectionSearch">
       <format>
