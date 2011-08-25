@@ -13,7 +13,6 @@
 	
 	<!-- style includes global params interface_name, library_name -->
 	<xsl:include href=".old/berrytools.xsl"/>
-	<xsl:include href="document-scripts.xsl"/>
 	
 	<xsl:variable name="bookswitch">
 		<xsl:choose>
