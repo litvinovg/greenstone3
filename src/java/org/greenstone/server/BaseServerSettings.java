@@ -289,21 +289,23 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 		save(scriptReadWrite, newFileLines);
 		
 		String osName = System.getProperty("os.name");
-                if (osName.startsWith("Windows")){
+		if (osName.startsWith("Windows")){
 		    browserPath = browserPath.replaceAll("\\\\","/");
 		}
 		newFileLines = scriptReadWrite.replaceOrAddLine(newFileLines, BaseServer.Property.BROWSER_PATH, browserPath, true);
 
 		scriptReadWrite.writeOutFile(BaseServer.config_properties_file, newFileLines);
 
-		server.reloadConfigProperties(port_has_changed);
-		server.reload(); // work out the URL again in case it has changed
-		if (require_restart){
-		    JOptionPane.showMessageDialog(null,server.dictionary.get("ServerSettings.SettingChanged"),"Info", JOptionPane.INFORMATION_MESSAGE);
-		    if(autoStart) {
-			server.autoStart();
-			server.getServerControl().updateControl();
-		    }
+		if(server.reloadConfigProperties(port_has_changed)) { // successful/valid configuration changes
+															  // if failure, it would have displayed an error message
+			server.reload(); // work out the URL again in case it has changed
+			if (require_restart){
+				JOptionPane.showMessageDialog(null,server.dictionary.get("ServerSettings.SettingChanged"),"Info", JOptionPane.INFORMATION_MESSAGE);
+				if(autoStart) {
+					server.autoStart();
+					server.getServerControl().updateControl();
+				}
+			}
 		}
 	    } 
 

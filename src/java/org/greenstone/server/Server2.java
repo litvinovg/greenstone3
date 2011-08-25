@@ -300,7 +300,7 @@ public class Server2 extends BaseServer
 	libraryURL = "http://" + host + ":" + port + suffix;
     }
 
-    public void reloadConfigProperties(boolean port_has_changed) {
+    public boolean reloadConfigProperties(boolean port_has_changed) {
 	super.reloadConfigProperties(port_has_changed);
 
 	// make sure the port is okay, otherwise find another port
@@ -317,11 +317,15 @@ public class Server2 extends BaseServer
 							// are still running on), because that will always be in use and unavailable.
 		if(!PortFinder.isPortAvailable(portNum, verbose)) { // first time, print any Port Unavailable messages
 		if(keepport.equals("1")) {
-		    String errorMsg = "Unable to run the Greenstone server on port " + port + ". It may already be in use.";
+			server_control_.errorMessage(dictionary.get("ServerSettings.SettingsUnchangedPortOccupied", new String[]{port}));
+		    String errorMsg = "Unable to run the Greenstone server on port " + port + ". It appears to already be in use.";
 		    System.err.println("\n******************");
-		    logger_.error(errorMsg);
+			logger_.error(errorMsg);
 		    System.err.println("If you wish to try another port, go to File > Settings of the Greenstone Server interface and either change the port number or untick the \"Do Not Modify Port\" option there. Then press the \"Enter Library\" button.");
 		    System.err.println("******************\n");
+			
+			return false; // property change is unsuccessful
+			
 		} else { // can modify port, try to find a new port
 		
 		    PortFinder portFinder = new PortFinder(portDefault, 101);
@@ -354,6 +358,7 @@ public class Server2 extends BaseServer
 	    port = Integer.toString(portDefault);
 	}
 	
+	return true;
     }
 
     

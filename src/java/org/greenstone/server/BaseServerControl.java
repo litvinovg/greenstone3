@@ -279,4 +279,8 @@ public abstract class BaseServerControl extends JFrame {
 	  
 	}
     }
+	
+	public void errorMessage(String message) {
+		JOptionPane.showMessageDialog(null,message,"Error", JOptionPane.ERROR_MESSAGE);
+	}
 }

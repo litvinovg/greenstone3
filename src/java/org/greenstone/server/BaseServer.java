@@ -249,7 +249,8 @@ public abstract class BaseServer
 
     }
     
-    public  void reloadConfigProperties(boolean port_has_changed) {
+	// returns true on success
+    public boolean reloadConfigProperties(boolean port_has_changed) {
 	try {
 	    FileInputStream in = new FileInputStream(config_properties_file);
 
@@ -264,6 +265,7 @@ public abstract class BaseServer
 	    logger_.error("Exception trying to reload configuration properties " +config_properties_file + ": " +e);
 	}
 	
+	return true;
     }
 
 }
