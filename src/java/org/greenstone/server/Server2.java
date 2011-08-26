@@ -13,8 +13,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.net.URL;
 //import java.net.URLConnection;
-import java.util.Properties;
 import java.util.ArrayList;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 import org.apache.log4j.*;
 
@@ -448,17 +449,54 @@ public class Server2 extends BaseServer
 	    System.exit(1);
 	}
 	
-	int index = 1; // move onto any subsequent arguments
+	//for(int i = 0; i < args.length; i++) { System.err.println("Arg[" + i + "]: |" + args[i] + "|");	}
 	
-	// defaults for optional arguments
-	// if no config file is given, then it defaults to llssite.cfg (embedded in quotes to preserve spaces in the filepath)
+	// for every subsequent argument, check whether we're dealing with amalgamated
+	// parameters in that argument. If so, split on whitespace and reconstruct arguments
+	for(int i = 1; i < args.length; i++) {
+	
+		// if the *last* occurrence of a flag parameter is not at the start of 
+		// this argument then we're dealing with amalgamated parameters in this 
+		// argument. Need to split on whitespace and reconstitute the args list
+		int lastIndex = args[i].lastIndexOf("--");
+		if(lastIndex > 0) { 
+		
+			StringTokenizer tokenizer = new StringTokenizer(args[i]); // splits on whitespace
+			String[] tokens = new String[tokenizer.countTokens()+i];
+			int j = 0;
+			for(; j < i; j++) { // copy over previous arguments
+				tokens[j] = args[j];
+			}
+			
+			// the remainder comes from the tokens
+			for(; tokenizer.hasMoreTokens(); j++) {
+				tokens[j] = tokenizer.nextToken();
+			}
+			args = null;
+			args = tokens;
+		}
+		
+	}	
+	
+	// Defaults for optional arguments
+	
+	// if no config file is given, then it defaults to llssite.cfg 
+	// (embedded in quotes to preserve spaces in the filepath)
 	File defaultConfigFile = new File(gsdl2_dir, "llssite.cfg");	
 	String configfile = defaultConfigFile.getAbsolutePath();
 	int port = -1;
 	String mode = "";
-	String lang = "en";	
+	String lang = "en";
 	
-	// cycle through arguments, parsing and storing them
+	int index = 1; // move onto any subsequent arguments (past 1st GSDLHOME arg)
+	if (args.length > index && !args[index].startsWith("--")) {
+		lang = args[index]; // 2nd arg is not a flag option, so must be language
+		index++;
+	}	
+	
+	// Cycle through arguments, parsing and storing them
+	// note that the batch file could have split arguments in the config-
+	// filepath over several parameters. Here we join them back up again.
 	while(args.length > index) {
 			
 		if(args[index].startsWith("--config=")) {
@@ -482,14 +520,15 @@ public class Server2 extends BaseServer
 			mode = args[index].substring(args[index].indexOf('=')+1);
 		}
 		
-		else if(args[index].length() == 2) { 
-			// there is an optional argument, but without a --FLAGNAME= prefix, so it's a language code			
-			lang = args[index];
+		else if(!args[index].startsWith("--")) { // assume it's part of the config file name (that this path had spaces in it)
+			configfile = configfile + " " + args[index]; // reinstate space in path
 		}
 		
 		index++;
 	}
-	
+
+	//System.err.println("\n\n*******\n\ngsdlhome: " + gsdl2_home + " | lang: " + lang + " |configfile:"
+	//	+ configfile + "| mode: " + mode + " | quitport: " + port + "\n\n*************\n");
 	new Server2(gsdl2_home, lang, configfile, port, mode);
     }
 }
