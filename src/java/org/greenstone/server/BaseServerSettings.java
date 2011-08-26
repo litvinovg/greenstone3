@@ -61,7 +61,7 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 	    useDefaultBrowser = false;
 	}
 
-	String auto_start_str = server.config_properties.getProperty(BaseServer.Property.AUTOSTART).trim();
+	String auto_start_str = server.config_properties.getProperty(BaseServer.Property.AUTOSTART, "1").trim();
 	if (auto_start_str.equals("true") || auto_start_str.equals("1")) {
 	    this.autoStart = true;
 	} else {
@@ -296,9 +296,9 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 
 		scriptReadWrite.writeOutFile(BaseServer.config_properties_file, newFileLines);
 
-		if(server.reloadConfigProperties(port_has_changed)) { // successful/valid configuration changes
-															  // if failure, it would have displayed an error message
-			server.reload(); // work out the URL again in case it has changed
+		boolean success = server.reloadConfigProperties(port_has_changed); // if failure, it would have displayed an error message
+		server.reload(); // work out the URL again in case it has changed
+		if(success) { // successful/valid configuration changes
 			if (require_restart){
 				JOptionPane.showMessageDialog(null,server.dictionary.get("ServerSettings.SettingChanged"),"Info", JOptionPane.INFORMATION_MESSAGE);
 				if(autoStart) {
