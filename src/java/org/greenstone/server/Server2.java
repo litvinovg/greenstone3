@@ -34,6 +34,7 @@ public class Server2 extends BaseServer
     private static final String URL_PENDING="URL_pending";	
 	
     protected String libraryURL;
+	protected String property_prefix;
 	
     private class QuitListener extends Thread 
     {
@@ -75,12 +76,13 @@ public class Server2 extends BaseServer
 			    // If the GSI is set to NOT autoenter/autostart the server, then write url=URL_PENDING out to the file.
 			    // When the user finally presses the Enter Library button and so has started up the server, the correct
 			    // url will be written out to the configfile.
+				String url = property_prefix+"url";
 			    if(config_properties.getProperty(BaseServer.Property.AUTOSTART, "").equals("0")) {
-				if(config_properties.getProperty("url") == null) {
-				    config_properties.setProperty("url", URL_PENDING);
+				if(config_properties.getProperty(url) == null) {
+				    config_properties.setProperty(url, URL_PENDING);
 				    ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
 				    ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
-				    scriptReadWrite.replaceOrAddLine(fileLines, "url", URL_PENDING, true);
+				    scriptReadWrite.replaceOrAddLine(fileLines, url, URL_PENDING, true);
 				    scriptReadWrite.writeOutFile(config_properties_file, fileLines);
 				}
 			    }
@@ -103,7 +105,7 @@ public class Server2 extends BaseServer
     }
 
 
-    public Server2(String gsdl2_home, String lang, String configfile, int quitPort, String property_prefix)
+    public Server2(String gsdl2_home, String lang, String configfile, int quitPort, String mode)
     {
 	super(gsdl2_home, lang, configfile, "etc"+File.separator+"logs-gsi");	
 	               // configfile can be either glisite.cfg or llssite.cfg	
@@ -112,7 +114,8 @@ public class Server2 extends BaseServer
 		//+ configfile + " | mode: " + property_prefix + " | quitport: " + quitPort);
 	
 	// property_prefix is the mode we're running in (gli or empty) and contains the prefix
-	// string to look for in config file for auto_enter and start_browser properties	
+	// string to look for in config file for auto_enter, start_browser and url properties
+	property_prefix = mode;
 	if(!property_prefix.equals("") && !property_prefix.endsWith(".")) { // ensure a '.' is suffixed if non-empty
 		property_prefix += ".";
 	}
@@ -163,11 +166,12 @@ public class Server2 extends BaseServer
 	// When the user finally presses the Enter Library button and so has started up the server, the correct
 	// url will be written out to the configfile.
 	if(config_properties.getProperty(BaseServer.Property.AUTOSTART, "").equals("0")) {//if(configfile.endsWith("llssite.cfg")) {
-	    if(config_properties.getProperty("url") == null) {
-		config_properties.setProperty("url", URL_PENDING);
+		String url = property_prefix+"url";
+	    if(config_properties.getProperty(url) == null) {
+		config_properties.setProperty(url, URL_PENDING);
 		ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
 		ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
-		scriptReadWrite.replaceOrAddLine(fileLines, "url", URL_PENDING, true);
+		scriptReadWrite.replaceOrAddLine(fileLines, url, URL_PENDING, true);
 		scriptReadWrite.writeOutFile(config_properties_file, fileLines);
 	    }
 	}
@@ -373,7 +377,7 @@ public class Server2 extends BaseServer
 	boolean done = false;
 	for (int i = fileLines.size()-1; i >= 0 && !done; i--) {
 	    String line = ((String) fileLines.get(i)).trim();
-	    if(line.startsWith("url=")) {
+	    if(line.startsWith(property_prefix+"url=")) {
 		fileLines.remove(i);
 		done = true;
 	    }
@@ -428,7 +432,7 @@ public class Server2 extends BaseServer
 
 	ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
 	ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
-	scriptReadWrite.replaceOrAddLine(fileLines, "url", libraryURL, true);
+	scriptReadWrite.replaceOrAddLine(fileLines, property_prefix+"url", libraryURL, true);
 	scriptReadWrite.replaceOrAddLine(fileLines, "portnumber", port, false); // write the correct port
 	scriptReadWrite.writeOutFile(config_properties_file, fileLines);
     }
