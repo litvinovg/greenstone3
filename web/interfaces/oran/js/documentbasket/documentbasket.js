@@ -20,7 +20,7 @@ var dmcheckout = function(){
 	var url = "?a=pr&rt=r&ro=1&s=GetDocuments&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&c=";
 
 	var responseSuccess = function(o){
-		alert(o.responseText);
+		//alert(o.responseText);
 		var response = o.responseXML;
 		var size = response.getElementsByTagName('size').item(0).getAttribute('value');
 
