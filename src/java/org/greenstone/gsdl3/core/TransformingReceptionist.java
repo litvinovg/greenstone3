@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.StringWriter;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Enumeration;
 
@@ -457,22 +458,14 @@ public class TransformingReceptionist extends Receptionist
 				collection = "";
 		}
 
-		String xslt_file = getXSLTFileName(action, subaction, collection);
-		if (xslt_file == null)
-		{
-			// returning file not found error page to indicate which file is missing
-			return fileNotFoundErrorPage(xslt_file);
-		}
-
-		Document style_doc = this.converter.getDOM(new File(xslt_file), "UTF-8");
-		String errorPage = this.converter.getParseErrorMessage();
-		if (errorPage != null)
-		{
-			return XMLTransformer.constructErrorXHTMLPage("Cannot parse the xslt file: " + xslt_file + "\n" + errorPage);
-		}
+		Document style_doc = getXSLTDocument(action, subaction, collection);
 		if (style_doc == null)
 		{
-			logger.error(" cant parse the xslt file needed, so returning the original page!");
+			String errorPage = this.converter.getParseErrorMessage();
+			if (errorPage != null)
+			{
+				return XMLTransformer.constructErrorXHTMLPage("Cannot parse the xslt file\n" + errorPage);
+			}
 			return page;
 		}
 
@@ -823,9 +816,8 @@ public class TransformingReceptionist extends Receptionist
 		return doc;
 	}
 
-	protected String getXSLTFileName(String action, String subaction, String collection)
+	protected Document getXSLTDocument(String action, String subaction, String collection)
 	{
-
 		String name = null;
 		if (!subaction.equals(""))
 		{
@@ -838,13 +830,32 @@ public class TransformingReceptionist extends Receptionist
 			name = (String) this.xslt_map.get(action);
 		}
 		// now find the absolute path
-		String stylesheet = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, name);
-		if (stylesheet == null)
+		ArrayList<File> stylesheets = GSFile.getStylesheetFiles(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, name);
+
+		if (stylesheets.size() == 0)
 		{
 			logger.info(" Can't find stylesheet for " + name);
 		}
-		logger.debug("Stylesheet: " + stylesheet);
-		return stylesheet;
+		logger.debug("Stylesheet: " + name);
+		
+		Document finalDoc = this.converter.getDOM(stylesheets.get(stylesheets.size() -1), "UTF-8");
+		if(finalDoc == null)
+		{
+			return null;
+		}
+		
+		for(int i = stylesheets.size() - 2; i >= 0; i--)
+		{
+			Document currentDoc = this.converter.getDOM(stylesheets.get(i), "UTF-8");
+			if(currentDoc == null)
+			{
+				return null;
+			}
+			
+			GSXSLT.mergeStylesheets(finalDoc, currentDoc.getDocumentElement());
+		}
+		
+		return finalDoc;
 	}
 
 	// returns the library.xsl path of the library file that is applicable for the current interface
