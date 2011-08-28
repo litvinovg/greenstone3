@@ -26,6 +26,7 @@
     <action name='g' class='GeneralAction'>
       <subaction name="authen" xslt='pages/authen.xsl'/>
       <subaction name="berry" xslt='pages/berry.xsl'/>
+	  <subaction name="documentbasket" xslt='pages/documentbasket.xsl'/>
     </action>
   </actionList>
   <languageList>
@@ -186,5 +187,6 @@
   <optionList>
     <option name="highlightQueryTerms" value="true"/>
     <option name="berryBaskets" value="true"/>
+	<option name="documentBasket" value="true"/>
   </optionList>
 </interfaceConfig>

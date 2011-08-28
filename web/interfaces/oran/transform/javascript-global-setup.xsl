@@ -93,6 +93,7 @@
 			<xsl:text disable-output-escaping="yes">gs.imageURLs.book = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'book_image')"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 			<xsl:text disable-output-escaping="yes">gs.imageURLs.loading = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'loading_image')"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 			<xsl:text disable-output-escaping="yes">gs.imageURLs.pageIcon = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'page_icon_image')"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+			<xsl:text disable-output-escaping="yes">gs.imageURLs.trashFull = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'trash_full_image')"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 		</script>
 	</xsl:template>
 </xsl:stylesheet>

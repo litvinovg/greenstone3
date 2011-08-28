@@ -20,14 +20,21 @@
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse">
 		<xsl:call-template name="classifierLoadScript"/>
-		<!-- this right sidebar -->
-		<xsl:if test="$berryBasketOn">
-			<div id="rightSidebar">
-				<!-- show the berry basket if it's turned on -->
-				<gslib:berryBasket/>
-				<xsl:text> </xsl:text>
-			</div>
-		</xsl:if>
+			<!-- this right sidebar -->
+			<xsl:if test="$berryBasketOn or $documentBasketOn">
+				<div id="rightSidebar">
+					<xsl:if test="$berryBasketOn">
+						<!-- show the berry basket if it's turned on -->
+						<gslib:berryBasket/>
+						<xsl:text> </xsl:text>
+					</xsl:if>
+
+					<xsl:if test="$documentBasketOn">
+						<gslib:documentBasket/>
+						<xsl:text> </xsl:text>
+					</xsl:if>
+	            </div>
+			</xsl:if>
 	
 		<!--
 			show the clasifier results - 

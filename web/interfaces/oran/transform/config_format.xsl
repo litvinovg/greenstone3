@@ -103,20 +103,20 @@
 						<a>
 							<xslt:attribute name="href">
 								<xslt:value-of select='$library_name'/>
-								<xsl:text>?a=d&amp;ed=1&amp;book=off&amp;c=</xsl:text>
+								<xsl:text disable-output-escaping="yes">?a=d&amp;ed=1&amp;book=off&amp;c=</xsl:text>
 								<xslt:value-of select='/page/pageResponse/collection/@name'/>
-								<xsl:text>&amp;d=</xsl:text>
+								<xsl:text disable-output-escaping="yes">&amp;d=</xsl:text>
 								<xslt:value-of select='@nodeID'/>
-								<xsl:text>&amp;dt=</xsl:text>
+								<xsl:text disable-output-escaping="yes">&amp;dt=</xsl:text>
 								<xslt:value-of select='@docType'/>
 								<xslt:if test="@nodeType='leaf'">
-									<xsl:text>&amp;sib=1</xsl:text>
+									<xsl:text disable-output-escaping="yes">&amp;sib=1</xsl:text>
 								</xslt:if>
-								<xsl:text>&amp;p.a=</xsl:text>
+								<xsl:text disable-output-escaping="yes">&amp;p.a=</xsl:text>
 								<xslt:value-of select="/page/pageRequest/@action"/>
-								<xsl:text>&amp;p.sa=</xsl:text>
+								<xsl:text disable-output-escaping="yes">&amp;p.sa=</xsl:text>
 								<xsl:value-of select="/page/pageRequest/@subaction"/>
-								<xsl:text>&amp;p.s=</xsl:text>
+								<xsl:text disable-output-escaping="yes">&amp;p.s=</xsl:text>
 								<xslt:value-of select="/page/pageResponse/service/@name"/>
 							</xslt:attribute>
 							<xsl:apply-templates/>
@@ -133,7 +133,7 @@
 				<img style="border:0px"><xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'bookshelf_image')"/></xsl:attribute></img>
 			</xsl:when>
 			<xsl:when test="@type='document'">
-				<img style="border:0px"><xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'page_icon_image')"/></xsl:attribute></img> 
+				<img style="border:0px"><xslt:attribute name="id">documentBasketBook<xslt:value-of select="/page/pageResponse/collection/@name"/>:<xslt:value-of select="@nodeID"/></xslt:attribute><xslt:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'page_icon_image')"/></xslt:attribute></img> 
 			</xsl:when>
 		</xsl:choose>
 	</xsl:template>

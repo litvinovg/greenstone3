@@ -27,6 +27,7 @@
   </xsl:variable>
   
   <xsl:variable name="berryBasketOn" select="/page/pageRequest/paramList/param[@name='berrybasket' and @value='on']"/>
+  <xsl:variable name="documentBasketOn" select="/page/pageRequest/paramList/param[@name='documentbasket' and @value='on']"/>
   
   <!-- template to get the name of the current collection -->
   <xsl:template name="collectionName">
@@ -539,6 +540,29 @@ berry basket function to the site
     </xsl:if>
   </xsl:template>
   
+  <!-- put the drag&drop document basket on the page -->
+  <xsl:template name="documentBasket">
+    <xsl:if test="$documentBasketOn">
+      <div id="documentbasket" class="hide">
+        <span>Document Basket</span>
+		<span id="documentBasketExpandCollapseLinks" style="display: none;">
+          <a id="documentBasketExpandLink" href="javascript:showDocumentBox()">Expand</a>
+          <a id="documentBasketCollapseLink" style="display: none;" href="javascript:hideDocumentBox()">Collapse</a>
+        </span>
+        <div id="documenthandle">
+          <span>
+            <xsl:text> </xsl:text>
+          </span>
+        </div>
+        <div id="documentpages">
+          <span>
+            <xsl:text> </xsl:text>
+          </span>
+        </div>
+      </div>
+    </xsl:if>
+  </xsl:template>
+  
   <!-- include the required javascript and css for berry baskets -->
   <xsl:template name="berryBasketHeadTags">
     <script type="text/javascript" src="interfaces/{$interface_name}/js/yui/yahoo-min.js"><xsl:text> </xsl:text></script>
@@ -551,6 +575,23 @@ berry basket function to the site
     <script type="text/javascript" src="interfaces/{$interface_name}/js/berrybasket/ygDDOnTop.js"><xsl:text> </xsl:text></script>
     <script type="text/javascript" src="interfaces/{$interface_name}/js/berrybasket/berrybasket.js"><xsl:text> </xsl:text></script>
     <link rel="stylesheet" href="interfaces/{$interface_name}/style/berry.css" type="text/css"/>
+	
+	<!-- Combo-handled YUI CSS files: --> 
+	<link rel="stylesheet" type="text/css" href="interfaces/{$interface_name}/style/skin.css"/>
+
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/documentbasket/documentbasket.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/documentbasket/documentBasketDragDrop.js"><xsl:text> </xsl:text></script>
+	<!-- Combo-handled YUI JS files: --> 
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/documentbasket/yahoo-dom-event.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/documentbasket/container_core-min.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/documentbasket/element-min.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/documentbasket/menu-min.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/documentbasket/button-min.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/documentbasket/editor-min.js"><xsl:text> </xsl:text></script> 
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/documentbasket/yuiloader-min.js"><xsl:text> </xsl:text></script>
+	<!--<script type="text/javascript" src="interfaces/{$interface_name}/js/documentbasket/editor-dialog.js"><xsl:text> </xsl:text></script>-->
+	
+    <link rel="stylesheet" href="interfaces/{$interface_name}/style/documentbasket.css" type="text/css"/>
   </xsl:template>
   
   <!--

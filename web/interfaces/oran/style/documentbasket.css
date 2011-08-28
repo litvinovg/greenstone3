@@ -1,0 +1,110 @@
+#documentbasket {
+	min-height: 22px;
+	padding: 5px;
+	background: transparent url("../images/kete2.png") scroll repeat 0 0;
+	z-index:10;
+	font-size: 80%;
+	min-height: 2em;
+}
+
+#documenthandle {
+	cursor: move;
+	padding: 0;
+	margin: 0;
+	height: 30px;
+	width: auto;
+	background-color: #7f7;
+	display: none;
+}
+
+#documentpages {
+	text-align: left;
+	height: auto;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;   
+}
+#trashbin {
+	float:right;
+}
+#documentpages img {
+	margin: 3px 2px;
+}
+
+#documentpagesFullViewLink {
+	display:block;
+	cursor: pointer;
+	text-align: left;
+
+	#doclist {
+
+	margin-bottom:0;
+}
+li.documentitem {
+   padding: 0;
+   margin: 0 ;
+   color: black;
+   font-size: 90%;
+}
+#urlcheck{
+ float: left;
+ padding: 0;
+ margin: 0;
+ 
+}
+
+.pick {
+  visibility:hidden;
+}
+.content{
+ font-family:sans-serif;
+ text-align:left;
+}
+.mailinput {
+  border:1px solid #2E8B57; 
+  width: 20em;
+  height: 1.5em;
+  font-size: 90%
+}
+
+.mailitem{
+   text-align: left;
+ }
+ 
+textarea#pretextarea {
+  font-family:sans-serif;
+  border:1px solid #2E8B57; 
+  width: 100%;
+  height: 25em;
+  font-size: 90%;
+  margin: 0.5em 0 0 0;
+  padding:0;
+}
+
+div#trashbin{
+   float: right;
+   height: 60px;
+   width:  55px;
+   padding: 0;
+   background: url("../images/trash-empty.png") 0 0 no-repeat;
+   margin:0;
+   z-index:10;
+}
+
+div#binhandle{
+ height: 60px;
+ width:  55px;
+ cursor: move;
+}
+
+span.extralink {
+  cursor:pointer;
+  font-size:80%;
+  font-weight:bold;
+  margin:0 2em 0 0;
+  color:black;
+}
+
+span.extralink:hover {
+   color: #2E8B57;
+}
