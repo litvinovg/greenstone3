@@ -41,7 +41,7 @@
 			you can change the appearance of the results by editing
 			the two templates at the bottom of this file
 		-->
-		<table id="results">
+		<div id="results">
 			<xsl:variable name="collName"><xsl:value-of select="/page/pageRequest/paramList/param[@name='c']/@value"/></xsl:variable>
 			<xsl:variable name="serviceName"><xsl:value-of select="service/@name"/></xsl:variable>
 
@@ -49,7 +49,7 @@
 				<xsl:with-param name="collName" select="$collName"/>
 				<xsl:with-param name="serviceName" select="$serviceName"/>
 			</xsl:apply-templates>
-		</table>
+		</div>
 		<div class="clear"><xsl:text> </xsl:text></div>
 	</xsl:template>
 
@@ -95,7 +95,7 @@
 	-->
 	<xsl:template match="classifierNode"><!-- priority="3"-->
 
-		<table id="title{@nodeID}"><tr>
+		<table id="title{@nodeID}"><tbody><tr>
 			<!-- Expand/collapse button -->
 			<td class="headerTD">
 				<img id="toggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
@@ -116,7 +116,7 @@
 					<xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
 				</a>
 			</td>
-		</tr></table>
+		</tr></tbody></table>
 		
 		<!-- Show any documents or sub-groups in this group -->
 		<xsl:if test="documentNode|classifierNode">
