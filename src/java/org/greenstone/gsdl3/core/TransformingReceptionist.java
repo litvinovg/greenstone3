@@ -280,7 +280,7 @@ public class TransformingReceptionist extends Receptionist
 
 	protected Node modifyNodesByTagRecursive(Node parent, String tag)
 	{
-		if (parent.getNodeType() == Node.ELEMENT_NODE && ((Element) parent).getTagName().equals(tag))
+		if (parent == null || (parent.getNodeType() == Node.ELEMENT_NODE && ((Element) parent).getTagName().equals(tag)))
 		{
 			return parent;
 		}
