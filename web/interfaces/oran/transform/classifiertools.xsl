@@ -80,7 +80,7 @@
     <xsl:for-each select='classifierNode|documentNode'><tr>
       <xsl:choose>
 	<xsl:when test="name()='documentNode'">
-	  <td><table><tr>
+	  <td><table id="div{@nodeID}"><tr>
 		<xsl:call-template name="documentNodeWrapper">
 		  <xsl:with-param name='collName' select='$collName'/>
 		  <xsl:with-param name='serviceName' select='$serviceName'/>
@@ -89,7 +89,14 @@
 	  </td>
 	</xsl:when>
 	<xsl:otherwise>
-	  <td><table><tr>
+	  <td><table id="title{@nodeID}"><tr>
+		<td class="headerTD">
+			<img id="toggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
+				<xsl:attribute name="src">
+					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
+				</xsl:attribute>
+			</img>
+		</td>
 		<xsl:apply-templates select='.'>
 		  <xsl:with-param name='collName' select='$collName'/>
 		  <xsl:with-param name='serviceName' select='$serviceName'/>
@@ -98,7 +105,7 @@
 	  </td>
 	  <xsl:if test="child::classifierNode or child::documentNode">
 	    <!--recurse into the children-->
-	    <tr><td><table class="childrenlist">
+	    <tr><td><table class="childrenlist" id="div{@nodeID}">
 		<xsl:apply-templates select='.' mode='process-all-children'>
 		  <xsl:with-param name='collName' select='$collName'/>
 		  <xsl:with-param name='serviceName' select='$serviceName'/>

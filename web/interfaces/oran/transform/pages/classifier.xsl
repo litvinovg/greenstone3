@@ -19,22 +19,23 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse">
-		<xsl:call-template name="classifierLoadScript"/>
-			<!-- this right sidebar -->
-			<xsl:if test="$berryBasketOn or $documentBasketOn">
-				<div id="rightSidebar">
-					<xsl:if test="$berryBasketOn">
-						<!-- show the berry basket if it's turned on -->
-						<gslib:berryBasket/>
-						<xsl:text> </xsl:text>
-					</xsl:if>
+		<script type="text/javascript" src="interfaces/{$interface_name}/js/classifier_scripts.js"><xsl:text> </xsl:text></script>
+		
+		<!-- this right sidebar -->
+		<xsl:if test="$berryBasketOn or $documentBasketOn">
+			<div id="rightSidebar">
+				<xsl:if test="$berryBasketOn">
+					<!-- show the berry basket if it's turned on -->
+					<gslib:berryBasket/>
+					<xsl:text> </xsl:text>
+				</xsl:if>
 
-					<xsl:if test="$documentBasketOn">
-						<gslib:documentBasket/>
-						<xsl:text> </xsl:text>
-					</xsl:if>
-	            </div>
-			</xsl:if>
+				<xsl:if test="$documentBasketOn">
+					<gslib:documentBasket/>
+					<xsl:text> </xsl:text>
+				</xsl:if>
+			</div>
+		</xsl:if>
 	
 		<!--
 			show the clasifier results - 
@@ -50,6 +51,7 @@
 				<xsl:with-param name="serviceName" select="$serviceName"/>
 			</xsl:apply-templates>
 		</div>
+		<script type="text/javascript">openStoredClassifiers();</script>
 		<div class="clear"><xsl:text> </xsl:text></div>
 	</xsl:template>
 
@@ -57,15 +59,6 @@
 	<!--
 	TEMPLATE FOR DOCUMENTS
 	-->
-
-    <!--<xsl:template match="documentNode" priority="3">-->
-        <!-- show the document details -->
-        <!--<li class="document">
-            <a>
-                <xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;ed=1</xsl:attribute><xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
-            </a>
-        </li>
-    </xsl:template>-->
 
 	<xsl:template match="documentNode"><!-- priority="3"-->
 		<!-- The book icon -->
@@ -131,115 +124,5 @@
 			</div>
 		</xsl:if>
 	</xsl:template>
-	
-	<xsl:template name="classifierLoadScript">
-		<script type="text/javascript">
-			<xsl:text disable-output-escaping="yes">
-				var collapseImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/><xsl:text disable-output-escaping="yes">";
-				var expandImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/><xsl:text disable-output-escaping="yes">";
-				var loadingImageURL = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'loading_image')"/><xsl:text disable-output-escaping="yes">";
-				var berryBaskets = "</xsl:text><xsl:value-of select="/page/pageRequest/paramList/param[@name='berrybasket']/@value"/><xsl:text disable-output-escaping="yes">";
-				var inProgress = new Array();
-			
-				function isExpanded(sectionID)
-				{
-					var divElem = document.getElementById("div" + sectionID);
-					if(!divElem.style.display || divElem.style.display == "block")
-					{
-						return true;
-					}
-					return false;
-				}
-			
-				function toggleSection(sectionID)
-				{
-					var section = document.getElementById("div" + sectionID);
-					var sectionToggle = document.getElementById("toggle" + sectionID);
-					
-					if(section)
-					{
-						if(isExpanded(sectionID))
-						{
-							section.style.display = "none";
-							sectionToggle.setAttribute("src", expandImageURL);
-						}
-						else
-						{
-							section.style.display = "block";
-							sectionToggle.setAttribute("src", collapseImageURL);
-						}
-					}
-					else
-					{
-						httpRequest(sectionID);
-					}
-				}
-				
-				function httpRequest(sectionID)
-				{
-					if(!inProgress[sectionID])
-					{
-						inProgress[sectionID] = true;
-						var httpRequest;
-						if (window.XMLHttpRequest) {
-							httpRequest = new XMLHttpRequest();
-						}
-						else if (window.ActiveXObject) {
-							httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
-						}
-						
-						var sectionToggle = document.getElementById("toggle" + sectionID);
-						sectionToggle.setAttribute("src", loadingImageURL);
-
-						var url = document.URL;
-						url = url.replace(/(&amp;|\?)cl=[a-z\.0-9]+/gi, "$1cl=" + sectionID + "&amp;excerptid=div" + sectionID);
-			
-						if(berryBaskets == "on")
-						{
-							url = url + "&amp;berrybasket=on";
-						}
-
-						httpRequest.open('GET', url, true);
-						httpRequest.onreadystatechange = function() 
-						{
-							if (httpRequest.readyState == 4) 
-							{
-								if (httpRequest.status == 200) 
-								{
-									var newDiv = document.createElement("div");			
-									var sibling = document.getElementById("title" + sectionID);
-									var parent = sibling.parentNode;
-									
-									if(sibling.nextSibling)
-									{
-										parent.insertBefore(newDiv, sibling.nextSibling);
-									}
-									else
-									{
-										parent.appendChild(newDiv);
-									}
-									
-									newDiv.innerHTML = httpRequest.responseText;
-									sectionToggle.setAttribute("src", collapseImageURL);
-									
-									if(berryBaskets == "on")
-									{
-										checkout();
-									}
-								}
-								else
-								{
-									sectionToggle.setAttribute("src", expandImageURL);
-								}
-								inProgress[sectionID] = false;
-							}
-						}
-						httpRequest.send();
-					}
-				}
-			</xsl:text>
-		</script>
-	</xsl:template>
-
 </xsl:stylesheet>
 

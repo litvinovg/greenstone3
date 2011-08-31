@@ -10,6 +10,7 @@
 		<script type="text/javascript">
 			gs = new Array();
 			gs.cgiParams = new Array();
+			gs.xsltParams = new Array();
 			gs.siteMetadata = new Array();
 			gs.collectionMetadata = new Array();
 			gs.documentMetadata = new Array();
@@ -17,6 +18,7 @@
 			gs.variables = new Array();
 		</script>
 		<xsl:call-template name="populate-cgi-param-values"/>
+		<xsl:call-template name="populate-xslt-param-values"/>
 		<xsl:call-template name="populate-image-url-values"/>
 		<xsl:call-template name="populate-metadata-values"/>
 	</xsl:template>
@@ -31,6 +33,13 @@
 				<xsl:text disable-output-escaping="yes">name = name.replace(".", "_");</xsl:text>
 				gs.cgiParams[name] = value;
 			</xsl:for-each>
+		</script>
+	</xsl:template>
+	
+	<xsl:template name="populate-xslt-param-values">
+		<script type="text/javascript">
+			<xsl:text disable-output-escaping="yes">gs.xsltParams.library_name = "</xsl:text><xsl:value-of select="$library_name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+			<xsl:text disable-output-escaping="yes">gs.xsltParams.interface_name = "</xsl:text><xsl:value-of select="$interface_name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 		</script>
 	</xsl:template>
 	

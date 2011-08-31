@@ -181,7 +181,7 @@
 				<!-- document maker -->
 				<div id="documentmakerprefs">
 					<xsl:variable name="documentbasket"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='documentbasket']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='documentbasket']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
-					<div class="paramLabel">Document Maker</div>
+					<div class="paramLabel">Document basket</div>
 					<div class="paramValue">
 						<select name="documentbasket">
 							<option value="on"><xsl:if test="$documentbasket='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.on')"/></option> 
