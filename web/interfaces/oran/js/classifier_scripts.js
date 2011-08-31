@@ -129,6 +129,10 @@ function httpRequest(sectionID)
 			url = url + "&berrybasket=on";
 		}
 
+		if(url.indexOf("#") != -1)
+		{
+			url = url.substring(0, url.indexOf("#"));
+		}
 		httpRequest.open('GET', url, true);
 		httpRequest.onreadystatechange = function() 
 		{
