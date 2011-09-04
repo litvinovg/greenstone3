@@ -86,15 +86,15 @@ function openStoredClassifiers()
 				setTimeout(function()
 				{
 					loopFunction(sectionArray, index + 1);
-				}, 50);
+				}, 25);
 				
-				return true
+				return true;
 			}
 			
 			setTimeout(function()
 			{
 				loopFunction(sectionArray, index);
-			}, 50);
+			}, 25);
 			return false;
 		}
 		
