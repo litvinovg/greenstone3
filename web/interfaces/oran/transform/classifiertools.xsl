@@ -3,8 +3,9 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:java="http://xml.apache.org/xslt/java"
   xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
+  xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
   extension-element-prefixes="java util"
-  exclude-result-prefixes="java util">
+  exclude-result-prefixes="java util gsf">
 
   
   <xsl:template match="classifier">
@@ -90,13 +91,15 @@
 	</xsl:when>
 	<xsl:otherwise>
 	  <td><table id="title{@nodeID}"><tr>
-		<td class="headerTD">
+		<xsl:if test="not(/page/pageResponse/format[@type='browse']/gsf:option[@name='turnstyleClassifiers']) or /page/pageResponse/format[@type='browse']/gsf:option[@name='turnstyleClassifiers']/@value='true'">
+		  <td class="headerTD">
 			<img id="toggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
-				<xsl:attribute name="src">
-					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
-				</xsl:attribute>
+			  <xsl:attribute name="src">
+				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
+			  </xsl:attribute>
 			</img>
-		</td>
+		  </td>
+		</xsl:if>
 		<xsl:apply-templates select='.'>
 		  <xsl:with-param name='collName' select='$collName'/>
 		  <xsl:with-param name='serviceName' select='$serviceName'/>
