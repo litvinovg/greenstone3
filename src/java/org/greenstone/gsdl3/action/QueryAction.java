@@ -112,7 +112,7 @@ public class QueryAction extends Action {
 	Element format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, to, lang, uid);
 	mr_query_message.appendChild(format_request);
 
-	logger.debug(GSXML.xmlNodeToString(mr_query_message));
+	logger.debug(GSXML.xmlNodeToString(mr_query_message, false));
 
 	// do the query
        	Element mr_query_response = (Element)this.mr.process(mr_query_message);

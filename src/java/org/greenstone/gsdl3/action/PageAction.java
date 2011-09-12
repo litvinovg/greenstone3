@@ -78,7 +78,7 @@ public class PageAction extends Action {
 		// second, get the metadata for each collection - we only want specific
 		// elements but for now, we'll just get it all
 		Element collection_list = (Element)GSXML.getChildByTagName(info_response, GSXML.COLLECTION_ELEM+GSXML.LIST_MODIFIER);
-		logger.debug(GSXML.xmlNodeToString(collection_list));
+		logger.debug(GSXML.xmlNodeToString(collection_list, false));
 		if (collection_list != null) {
 			NodeList colls = GSXML.getChildrenByTagName(collection_list, GSXML.COLLECTION_ELEM);
 			if (colls.getLength()>0) {

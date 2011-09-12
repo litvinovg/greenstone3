@@ -293,12 +293,11 @@ public class TransformingReceptionist extends Receptionist
 			{
 				//return result;
 				//logger.error("Modify node value = "+result.getNodeValue()); //NamedItem("href"););
-				logger.error("BEFORE Modify node attribute = " + result.getAttributes().getNamedItem("href").getNodeValue());
-				String url = result.getAttributes().getNamedItem("href").getNodeValue();
+				//logger.error("BEFORE Modify node attribute = " + result.getAttributes().getNamedItem("href").getNodeValue());
+				//String url = result.getAttributes().getNamedItem("href").getNodeValue();
 				//url = url + "&excerptid=results";
-				result.getAttributes().getNamedItem("href").setNodeValue(url);
-				logger.error("AFTER Modify node attribute = " + result.getAttributes().getNamedItem("href").getNodeValue());
-
+				//result.getAttributes().getNamedItem("href").setNodeValue(url);
+				//logger.error("AFTER Modify node attribute = " + result.getAttributes().getNamedItem("href").getNodeValue());
 			}
 		}
 		return null;
@@ -318,7 +317,6 @@ public class TransformingReceptionist extends Receptionist
 	 */
 	protected Node transformPage(Element page)
 	{
-
 		boolean allowsClientXSLT = (Boolean) config_params.get(GSConstants.ALLOW_CLIENT_SIDE_XSLT);
 		//System.out.println("Client side transforms allowed? " + allowsClientXSLT);
 
@@ -834,7 +832,8 @@ public class TransformingReceptionist extends Receptionist
 
 		if (stylesheets.size() == 0)
 		{
-			logger.info(" Can't find stylesheet for " + name);
+			logger.error(" Can't find stylesheet for " + name);
+			return null;
 		}
 		logger.debug("Stylesheet: " + name);
 		

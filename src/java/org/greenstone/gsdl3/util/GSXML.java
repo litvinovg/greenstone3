@@ -945,19 +945,26 @@ public class GSXML {
 		printXMLNode(e, 0, printText) ;
 	}
 
-	public static String xmlNodeToString(Node e){
+	public static String xmlNodeToString(Node e, boolean printText){
 		StringBuffer sb = new StringBuffer("");
-		xmlNodeToString(sb,e,0);
+		xmlNodeToString(sb,e,0,printText);
 		return sb.toString();
 	}
 
-	private static void xmlNodeToString(StringBuffer sb, Node e, int depth){
+	private static void xmlNodeToString(StringBuffer sb, Node e, int depth, boolean printText){
 		
 		for (int i=0 ; i<depth ; i++)
 		sb.append(' ') ;
 		
 		if (e.getNodeType() == Node.TEXT_NODE){
-			sb.append("text") ;
+			if(printText)
+			{
+				sb.append(e.getNodeValue());
+			}
+			else
+			{
+				sb.append("text");
+			}
 			return ;
 		}
 		
@@ -986,7 +993,7 @@ public class GSXML {
 			
 			int len = children.getLength();
 			for (int i = 0; i < len; i++) {
-				xmlNodeToString(sb,children.item(i), depth + 1);
+				xmlNodeToString(sb,children.item(i), depth + 1, printText);
 			}
 			
 			for (int i=0 ; i<depth ; i++)

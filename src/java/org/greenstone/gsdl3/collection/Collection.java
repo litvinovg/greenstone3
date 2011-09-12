@@ -506,7 +506,7 @@ public class Collection extends ServiceCluster
 				// Get display tag
 				Element display_format = (Element) format_element.getFirstChild();
 
-				String format_string = GSXML.xmlNodeToString(display_format);
+				String format_string = GSXML.xmlNodeToString(display_format, false);
 				String collection_config = directory + "collectionConfig.xml";
 				Document config = this.converter.getDOM(new File(collection_config), "UTF-8");
 

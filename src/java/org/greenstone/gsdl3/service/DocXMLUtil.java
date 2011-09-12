@@ -47,7 +47,7 @@ import javax.xml.transform.stream.StreamResult;
 
 public class DocXMLUtil extends ServiceRack
 {
-	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.ArchiveIO.class.getName());
+	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.DocXMLUtil.class.getName());
 	GSDocumentModel _GSDM = null;
 
 	/******************************************************************
