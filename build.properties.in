@@ -7,9 +7,9 @@
 # but not remotely
 tomcat.server=localhost
 # The port number that tomcat is/will be run on
-tomcat.port=8080
+tomcat.port=8383
 # Tomcat's shutdown port - this may need to be changed if you are running two or more Tomcats
-tomcat.shutdown.port=8005
+tomcat.shutdown.port=8305
 # If tomcat is already running, enter the path to the base directory here
 tomcat.installed.path=
 # uncomment the following if you have moved the greenstone3 web directory to tomcats webapps dir 
