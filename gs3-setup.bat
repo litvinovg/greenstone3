@@ -36,7 +36,7 @@ set GSDLOS=windows
 :: ---- Set the CLASSPATH and PATH environment variables ----
 if "!GS_CP_SET!" == "yes" goto skipSetCp
 set CLASSPATH=!GSDL3HOME!\WEB-INF\classes;!GSDL3SRCHOME!\resources\java;!GSDL3SRCHOME!\cp.jar;!CLASSPATH!;
-set PATH=!PATH!;!GSDL3SRCHOME!\bin;!GSDL3SRCHOME!\bin\script;!GSDL3SRCHOME!\lib\jni;!ANT_HOME!\bin
+set PATH=!GSDL3SRCHOME!\bin;!GSDL3SRCHOME!\bin\script;!GSDL3SRCHOME!\lib\jni;!ANT_HOME!\bin;!PATH!
 
 :: Override Imagemagick and Ghostscript paths to the bundled applications shipped with greenstone if they exists otherwise use default environment variables.
 :: if exist "!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\bin\gsdll32.dll" set GS_DLL=!GSDL3SRCHOME!\gs2build\bin\windows\ghostscript\bin\gsdll32.dll
