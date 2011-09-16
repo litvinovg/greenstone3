@@ -767,15 +767,15 @@
     <mkdir dir="${web.home}/logs"/>
   </target>
   
-  <!-- if we are using java 1.5+, we need the xalan.jar file in web/WEB-INF/lib,  but if we are using java 1.4, we can't have it there -->
+  <!-- if we are using java 1.5+, we need the xalan.jar file in web/WEB-INF/lib,  but if we are using java 1.4, we can't have it there.
+       The test for whether we need it assumes we won't be trying to compile GS3 against Java versions less than 1.4. -->
   <target name="configure-java-version" depends="init"
     description="Activates or deactivates some jar libraries as needed depending on your java version">
 
     <available property="have.xalan.jar" file="${web.lib}/xalan.jar"/>
     <condition property="need.xalan.jar">
       <or>
-        <equals arg1="1.5" arg2="${ant.java.version}"/>
-        <equals arg1="1.6" arg2="${ant.java.version}"/>
+        <not><equals arg1="1.4" arg2="${ant.java.version}"/></not>
       </or>
     </condition>
 
