@@ -945,6 +945,12 @@ public class GSXML {
 		printXMLNode(e, 0, printText) ;
 	}
 
+	public static String xmlNodeToString(Node e){
+		StringBuffer sb = new StringBuffer("");
+		xmlNodeToString(sb,e,0,true);
+		return sb.toString();
+	}
+
 	public static String xmlNodeToString(Node e, boolean printText){
 		StringBuffer sb = new StringBuffer("");
 		xmlNodeToString(sb,e,0,printText);
