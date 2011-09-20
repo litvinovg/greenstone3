@@ -531,6 +531,7 @@ public class Server2 extends BaseServer
 		index++;
 	}
 
+	configfile = configfile.trim(); // remove any trailing whitespace
 	//System.err.println("\n\n*******\n\ngsdlhome: " + gsdl2_home + " | lang: " + lang + " |configfile:"
 	//	+ configfile + "| mode: " + mode + " | quitport: " + port + "\n\n*************\n");
 	new Server2(gsdl2_home, lang, configfile, port, mode);
