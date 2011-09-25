@@ -105,6 +105,48 @@ function focusSection(sectionID)
 	}
 }
 
+function minimizeSidebar()
+{
+	var coverImage = document.getElementById("coverImage");
+	var toc = document.getElementById("tableOfContents");
+	var maxLink = document.getElementById("sidebarMaximizeButton");
+	var minLink = document.getElementById("sidebarMinimizeButton");
+	
+	if(coverImage)
+	{
+		coverImage.style.display = "none";
+	}
+	
+	if(toc)
+	{
+		toc.style.display = "none";
+	}
+	
+	maxLink.style.display = "block";
+	minLink.style.display = "none";
+}
+
+function maximizeSidebar()
+{
+	var coverImage = document.getElementById("coverImage");
+	var toc = document.getElementById("tableOfContents");
+	var maxLink = document.getElementById("sidebarMaximizeButton");
+	var minLink = document.getElementById("sidebarMinimizeButton");
+	
+	if(coverImage)
+	{
+		coverImage.style.display = "block";
+	}
+	
+	if(toc)
+	{
+		toc.style.display = "block";
+	}
+	
+	maxLink.style.display = "none";
+	minLink.style.display = "block";
+}
+
 /***********************
 * HIGHLIGHTING SCRIPTS *
 ***********************/
