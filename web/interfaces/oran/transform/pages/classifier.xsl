@@ -8,7 +8,7 @@
 	exclude-result-prefixes="java util">
 	
 	<!-- use the 'main' layout -->
-	<xsl:include href="layouts/main.xsl"/>
+	<xsl:import href="layouts/main.xsl"/>
 	<xsl:include href="classifiertools.xsl"/>
 
 	<!-- set page title -->
@@ -54,7 +54,6 @@
 		<script type="text/javascript">openStoredClassifiers();</script>
 		<div class="clear"><xsl:text> </xsl:text></div>
 	</xsl:template>
-
 
 	<!--
 	TEMPLATE FOR DOCUMENTS
