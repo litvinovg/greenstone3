@@ -35,7 +35,7 @@
 			<head>
 				<!-- ***** in header.xsl ***** -->
 				<xsl:call-template name="create-html-header"/>
-				<xsl:call-template name="berryBasketHeadTags"/>
+				<xsl:call-template name="berryBasketHeadTags"/>	
 			</head>
 			
 			<body><xsl:call-template name="textDirectionAttribute"/><xsl:call-template name="actionClass"/>
@@ -65,7 +65,7 @@
 					<!--<xsl:call-template name="formatmanagerpost"/>-->
 
 					<div id="gs_footer">
-						<xsl:call-template name="poweredByGS3TextBar"/>
+						<a href="http://www.greenstone.org"><xsl:call-template name="poweredByGS3TextBar"/></a>
 					</div>
 
 					<div class="corner" id="cornerTopLeft"><xsl:text> </xsl:text></div>
