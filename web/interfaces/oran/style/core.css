@@ -31,26 +31,26 @@ p {
 
 /* Styles for the different depths */
 .sectionHeaderDepthTitle{
-	font-size:1.8em;
+	font-size:1.4em;
 	line-height:1em;
 	font-weight:bold;
 }
 
 .sectionHeaderDepth1{
-	font-size:1.6em;
+	font-size:1.3em;
 	line-height:1em;
 	font-weight:bold;
 }
 
 .sectionHeaderDepth2{
-	font-size:1.4em;
+	font-size:1.2em;
 	line-height:1em;
 	font-weight:bold;
 	font-style:italic;
 }
 
 .sectionHeaderDepth3{
-	font-size:1.2em;
+	font-size:1.1em;
 	line-height:1em;
 	font-style:italic;
 }
@@ -67,7 +67,7 @@ p {
 }
 
 .sectionContainer{
-	padding-top:1em;
+	padding-top:0.5em;
 	padding-bottom:1em;
 	padding-left:1.5em;
 }
@@ -90,6 +90,10 @@ p {
 	font-size:0.7em;
 	padding-left: 2em;
 	text-align:center;
+}
+
+.hidden{
+	display:none;
 }
 
 #prevArrowTD {
@@ -215,6 +219,10 @@ collectionLinkImage {
 	color: #fff;
 	padding-top:5px;
 	padding-bottom:5px;
+}
+
+#gs_footer a {
+	color:#FFF;
 }
 
 
