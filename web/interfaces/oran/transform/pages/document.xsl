@@ -57,6 +57,58 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
+	
+	<!-- Used to make sure that regardless what the collection designer uses for the title and content we can wrap it properly -->
+	<!-- If editing, be aware that the Document Basket looks for specific classes that this template bakes in (key points marked with ***) -->
+	<xsl:template name="wrapDocumentNodes">
+		<xsl:for-each select="documentNode">
+			<a name="{@nodeID}"><xsl:text> </xsl:text></a>
+			<!-- Section header -->
+			<table class="sectionHeader"><tr>
+			
+				<!-- Expand/collapse button -->
+				<td class="headerTD">
+					<img id="dtoggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
+						<xsl:attribute name="src">
+							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
+						</xsl:attribute>
+					</img>
+				</td>
+				
+				<!-- Title -->
+				<td id="header{@nodeID}" class="headerTD sectionTitle"><!-- *** -->
+					<!-- Get the title from the title sectionTitle template -->
+					<xsl:choose>
+						<xsl:when test="not(/page/pageRequest/paramList/param[@name = 'db']) or /page/pageRequest/paramList/param[@name = 'db']/@value = 'false'">
+							<xsl:apply-templates select="." mode="sectionTitleFormat"/>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:apply-templates select="." mode="sectionTitle"/>
+						</xsl:otherwise>
+					</xsl:choose>
+				</td>
+				
+				<!-- "back to top" link -->
+				<xsl:if test="util:hashToDepthClass(@nodeID) != 'sectionHeaderDepthTitle'">
+					<td class="backToTop headerTD">
+						<a href="#top">
+							<xsl:text disable-output-escaping="yes">&#9650;</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.back_to_top')"/>
+						</a>
+					</td>
+				</xsl:if>
+			</tr></table>
+			
+			<div id="doc{@nodeID}" class="sectionContainer" style="display:block;"><!-- *** -->
+				<div id="text{@nodeID}" class="sectionText"><!-- *** -->
+					<!-- Get the section content from the document template -->
+					<xsl:apply-templates select="." mode="document"/>
+				</div>
+				<xsl:if test="documentNode">
+					<xsl:call-template name="wrapDocumentNodes"/>
+				</xsl:if>
+			</div>	
+		</xsl:for-each>
+	</xsl:template>
 
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse/document">
@@ -65,7 +117,6 @@
 		
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/document_scripts.js"><xsl:text> </xsl:text></script>
 			
-			<!-- Adds the realistic books javascript if necessary ( *** in document-scripts.xsl *** ) -->
 			<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
 				<script type="text/javascript">
 					<xsl:text disable-output-escaping="yes">
@@ -80,42 +131,44 @@
 			<!-- show the little berries for this document -->
 			<xsl:call-template name="documentBerryForDocumentPage"/>
 
-			<table id="rightSidebar"> 
-				<tr><td>
-					<xsl:call-template name="viewOptions"/>
-				</td></tr>
-				<tr><td>
-					<!-- the sidebar -->
-					<div id="contentsArea">				
-						<!-- show the berry basket if it's turned on -->
-						<gslib:berryBasket/>
+			<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']) or /page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']/@value='true'">
+				<table id="rightSidebar">
+					<tr><td>
+						<xsl:call-template name="viewOptions"/>
+					</td></tr>
+					<tr><td>
+						<div id="contentsArea">	
 
-						<!-- the book's cover image -->
-                        <xsl:choose>
-                            <xsl:when test="/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true'">
-        						<div id="coverImage" class="visible"><gslib:coverImage/></div>
-                            </xsl:when>
-                            <xsl:otherwise>
-        						<div id="coverImage" class="hidden"><gslib:coverImage/></div>
-                            </xsl:otherwise>    
-                        </xsl:choose>
+							<!-- show the berry basket if it's turned on -->
+							<gslib:berryBasket/>
 
-						<!-- the contents (if enabled) -->
-                        <xsl:choose>
-                            <xsl:when test="/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
-    						    <div id="tableOfContents" class="visible">
-							        <xsl:apply-templates select="documentNode" mode="TOC"/>
-                                </div>
-                            </xsl:when>    
-                            <xsl:otherwise>
-                                <div id="tableOfContents" class="hidden">
-                                    <xsl:apply-templates select="documentNode" mode="TOC"/>
-                                </div>
-                            </xsl:otherwise>    
-                        </xsl:choose>
-					</div>
-				</td></tr>
-			</table>
+							<!-- the book's cover image -->
+							<xsl:choose>
+								<xsl:when test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']) or /page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true'">
+									<div id="coverImage" class="visible"><gslib:coverImage/></div>
+								</xsl:when>
+								<xsl:otherwise>
+									<div id="coverImage" class="hidden"><gslib:coverImage/></div>
+								</xsl:otherwise>    
+							</xsl:choose>
+
+							<!-- the contents (if enabled) -->
+							<xsl:choose>
+								<xsl:when test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
+									<div id="tableOfContents" class="visible">
+										<xsl:apply-templates select="documentNode" mode="TOC"/>
+									</div>
+								</xsl:when>    
+								<xsl:otherwise>
+									<div id="tableOfContents" class="hidden">
+										<xsl:apply-templates select="documentNode" mode="TOC"/>
+									</div>
+								</xsl:otherwise>    
+							</xsl:choose>
+						</div>
+					</td></tr>
+				</table>
+			</xsl:if>
 		</xsl:if>
 		
 		<!-- display the document -->
@@ -142,7 +195,7 @@
 			</xsl:when>
 			<xsl:otherwise>
 				<div id="gs-document-text" class="documenttext"> 
-					<xsl:apply-templates select="documentNode" mode="document"/>
+					<xsl:call-template name="wrapDocumentNodes"/>
 				</div>	
 			</xsl:otherwise>
 		</xsl:choose>
@@ -162,65 +215,41 @@
 		</xsl:choose>
 	</xsl:template>
 	
-	<!-- This template is used to display the document content -->
+	<xsl:template match="documentNode" mode="sectionTitleFormat">
+		<p>
+			<xsl:attribute name="class"><xsl:value-of select="util:hashToDepthClass(@nodeID)"/> sectionHeader</xsl:attribute>
+			
+			<xsl:if test="util:hashToSectionId(@nodeID)">
+				<span class="sectionNumberSpan">
+					<xsl:value-of select="util:hashToSectionId(@nodeID)"/>
+					<xsl:text> </xsl:text>
+				</span>
+			</xsl:if>
+			<!-- Display the title for the section regardless of whether automatic section numbering is turned on -->
+			<span><xsl:apply-templates select="." mode="sectionTitle"/></span>
+		</p>
+	</xsl:template>
+	
+	<!-- The default template for displaying section titles -->
+	<xsl:template match="documentNode" mode="sectionTitle">
+		<xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Title']"/>
+	</xsl:template>
+	
+	<!-- The default template for displaying the document content -->
 	<xsl:template match="documentNode" mode="document">
-		<a name="{@nodeID}"><xsl:text> </xsl:text></a>
-		<!-- Section header -->
-		<table class="sectionHeader"><tr>
-			<!-- Expand/collapse button -->
-			<td class="headerTD">
-				<img id="dtoggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
-					<xsl:attribute name="src">
-						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
-					</xsl:attribute>
-				</img>
-			</td>
-			
-			<!-- Automatic section number -->
-			<td class="headerTD">
-				<p>
-					<xsl:attribute name="class"><xsl:value-of select="util:hashToDepthClass(@nodeID)"/> sectionHeader</xsl:attribute>
-					
-					<xsl:if test="util:hashToSectionId(@nodeID)">
-						<span class="sectionNumberSpan">
-							<xsl:value-of select="util:hashToSectionId(@nodeID)"/>
-							<xsl:text> </xsl:text>
-						</span>
-					</xsl:if>
-                    <!-- Display the title for the section regardless of whether automatic section numbering is turned on -->
-					<span class="sectionTitle"><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Title']"/></span>
-				</p>
-			</td>
-			
-			<!-- "back to top" link -->
-			<xsl:if test="util:hashToDepthClass(@nodeID) != 'sectionHeaderDepthTitle'">
-				<td class="backToTop headerTD">
-					<a href="#top">
-						<xsl:text disable-output-escaping="yes">&#9650;</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.back_to_top')"/>
-					</a>
-				</td>
-			</xsl:if>
-		</tr></table>
-		
 		<!-- Section text -->
-		<div id="doc{@nodeID}" class="sectionContainer" style="display:block;">		
-			<xsl:for-each select="nodeContent">
-				<xsl:for-each select="node()">
-					<xsl:choose>
-						<xsl:when test="not(name())">
-							<xsl:value-of select="." disable-output-escaping="yes"/>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:apply-templates select="."/>
-						</xsl:otherwise>
-					</xsl:choose>
-				</xsl:for-each>
+		<xsl:for-each select="nodeContent">
+			<xsl:for-each select="node()">
+				<xsl:choose>
+					<xsl:when test="not(name())">
+						<xsl:value-of select="." disable-output-escaping="yes"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:apply-templates select="."/>
+					</xsl:otherwise>
+				</xsl:choose>
 			</xsl:for-each>
-			<xsl:if test="documentNode">
-				<xsl:apply-templates select="documentNode" mode="document"/>
-			</xsl:if>
-		</div>	
-
+		</xsl:for-each><xsl:text> </xsl:text>
 	</xsl:template>
 
 	<!-- This template is used to display the table of contents -->
@@ -282,7 +311,7 @@
 							<xsl:value-of select="util:hashToSectionId(@nodeID)"/>
 							<xsl:text> </xsl:text>
 						</xsl:if>
-						<xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Title']"/>
+						<xsl:apply-templates select="." mode="sectionTitle"/>
 					</a>
 				</td>
 			</tr></table>
@@ -372,6 +401,22 @@
 					</input>
 				</td>
 			</xsl:if>
+			<td style="vertical-align:top;">
+				<a id="sidebarMinimizeButton" href="javascript:minimizeSidebar();" style="float: right; font-size:0.6em;">
+					<img class="icon">
+						<xsl:attribute name="src">
+							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
+						</xsl:attribute>
+					</img>
+				</a>
+				<a id="sidebarMaximizeButton" href="javascript:maximizeSidebar();" style="float: right; font-size:0.6em; display:none;">
+					<img class="icon">
+						<xsl:attribute name="src">
+							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
+						</xsl:attribute>
+					</img>
+				</a>
+			</td>
 		</tr></table>	
 	</xsl:template>
 </xsl:stylesheet>
