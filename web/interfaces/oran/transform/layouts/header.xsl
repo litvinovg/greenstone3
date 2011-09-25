@@ -26,8 +26,32 @@
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
 		<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
 		<link rel="shortcut icon" href="favicon.ico"/> 
+		<script type="text/javascript" src="interfaces/{$interface_name}/js/direct-edit.js"><xsl:text> </xsl:text></script>
 		
+		<xsl:call-template name="init-seaweed"/>
 		<xsl:call-template name="setup-gs-variable"/>
+	</xsl:template>
+		
+	<xsl:template name="init-seaweed">
+		<script type="text/javascript">
+			<xsl:text disable-output-escaping="yes">
+				de.onready(function() {
+					try {
+						de.init();
+
+							de.doc.declarePropertySets({
+								metadata: {
+									phMarkup: '[Enter metadata value]',
+									name: "metadata"
+								}
+							});
+					}
+					catch (err) {
+						alert("Seaweed failed to initialise: " + err.message);
+					}
+				});
+			</xsl:text>
+		</script>
 	</xsl:template>
 		
 	<!-- ***** HEADER LAYOUT TEMPLATE ***** -->
