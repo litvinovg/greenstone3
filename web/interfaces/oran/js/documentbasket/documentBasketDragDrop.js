@@ -174,7 +174,7 @@ documentBasketDDPlayer.prototype.onDragDrop = function(e, id) {
 
 	var  addurl = docAddurlPath + el.id;	
 	var addSuccess = function(o){
-		alert("HERE!" + o.responseText);
+		//alert("HERE!" + o.responseText);
 		var result = o.responseXML;
 		var items = result.getElementsByTagName('item');
 		if (items.length > 0){
