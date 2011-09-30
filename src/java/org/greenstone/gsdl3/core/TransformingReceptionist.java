@@ -27,6 +27,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 import org.apache.log4j.*;
+import org.apache.tools.zip.ExtraFieldUtils;
 import org.apache.xerces.dom.*;
 import org.apache.xerces.parsers.DOMParser;
 
@@ -753,7 +754,17 @@ public class TransformingReceptionist extends Receptionist
 
 		//System.out.println("Generate final HTML from current skin") ;
 		//Transformation of the XML message from the receptionist to HTML with doctype
-
+		
+		if(skinAndLibraryDoc.getElementsByTagName("gsf:metadata").getLength() > 0)
+		{
+			secondConfigFormatPass(collection, skinAndLibraryDoc, doc, request.getAttribute("lang"), request.getAttribute("uid"));
+		}
+		
+		if (output.equals("xmlfinal"))
+		{
+			return doc;
+		}
+		
 		return this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype); // The default
 
 		// The line below will do the transformation like we use to do before having Skin++ implemented,
@@ -761,6 +772,56 @@ public class TransformingReceptionist extends Receptionist
 
 		//return (Element)this.transformer.transform(style_doc, doc, config_params);  
 		//return null; // For now - change later
+	}
+	
+	protected void secondConfigFormatPass(String collection, Document skinAndLibraryDoc, Document doc, String lang, String uid)
+	{
+		String to = GSPath.appendLink(collection, "DocumentMetadataRetrieve"); // Hard-wired?
+		Element metaMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element metaRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+		Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element docNodeList = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		
+		NodeList metaNodes = skinAndLibraryDoc.getElementsByTagName("gsf:metadata");
+
+		for(int i = 0; i < metaNodes.getLength(); i++)
+		{
+			Element param = this.doc.createElement(GSXML.PARAM_ELEM);
+			param.setAttribute(GSXML.NAME_ATT, "metadata");
+			param.setAttribute(GSXML.VALUE_ATT, ((Element)metaNodes.item(i)).getAttribute(GSXML.NAME_ATT));
+			paramList.appendChild(param);
+		}
+		metaRequest.appendChild(paramList);
+		
+		NodeList docNodes = doc.getElementsByTagName("documentNode");
+		for(int i = 0; i < docNodes.getLength(); i++)
+		{
+			Element docNode = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+			docNode.setAttribute(GSXML.NODE_ID_ATT, ((Element)docNodes.item(i)).getAttribute(GSXML.NODE_ID_ATT));
+			docNode.setAttribute(GSXML.NODE_TYPE_ATT, ((Element)docNodes.item(i)).getAttribute(GSXML.NODE_TYPE_ATT));
+			docNodeList.appendChild(docNode);
+		}
+		metaRequest.appendChild(docNodeList);
+
+		metaMessage.appendChild(metaRequest);
+		Element response = (Element)mr.process(metaMessage);
+
+		NodeList metaDocNodes = response.getElementsByTagName(GSXML.DOC_NODE_ELEM);
+		for(int i = 0; i < docNodes.getLength(); i++)
+		{
+			GSXML.mergeMetadataLists(docNodes.item(i), metaDocNodes.item(i));
+		}
+		
+		String configStylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, "config_format.xsl");
+		Document configStylesheet_doc = this.converter.getDOM(new File(configStylesheet_file));
+
+		if (configStylesheet_doc != null)
+		{
+			Document format_doc = this.converter.newDOM();
+			format_doc.appendChild(format_doc.importNode(skinAndLibraryDoc.getDocumentElement().cloneNode(true), true));
+			Node result = this.transformer.transform(configStylesheet_doc, format_doc, config_params);
+			GSXSLT.mergeStylesheets(skinAndLibraryDoc, ((Document)result).getDocumentElement());
+		}
 	}
 
 	// method to convert Document to a proper XML string for debug purposes only
