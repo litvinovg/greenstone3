@@ -3,7 +3,7 @@
     <metadataList>
         <metadata lang="en" name="creator"/>
         <metadata lang="en" name="maintainer"/>
-        <metadata lang="en" name="public">true</metadata>
+        <metadata lang="en" name="public">false</metadata>
     </metadataList>
     <displayItemList>
         <displayItem assigned="true" lang="en" name="description">This is a demonstration collection for the Greenstone3 digital library software. It contains a small subset (11 books) of the Humanitarian and Development Libraries. It is the Greenstone 3 equivalent of the Greenstone 2 demo collection, built with MGPP.</displayItem>
@@ -84,26 +84,26 @@
         <format><gsf:option name="TOC" value="true"/></format>
     </display>
     <replaceListRef id="gs2-standard"/>
-	<serviceRackList>
-    <!-- comment out the following serviceRack if you want to disable OAI for this collection -->
-		<serviceRack name="OAIPMH">
-			<ListMetadataFormats>
-			<!--What metadata sets to support is collection specific. To support other metadata schema, add another metadataFormat element here.
+    <serviceRackList>
+        <!-- comment out the following serviceRack if you want to disable OAI for this collection -->
+        <serviceRack name="OAIPMH">
+            <ListMetadataFormats>
+                <!--What metadata sets to support is collection specific. To support other metadata schema, add another metadataFormat element here.
 			The support of unqualified Dublin Core metadata set is mandatory in the oai specification.
 			-->
-				<metadataFormat metadataPrefix="oai_dc">
-					<metadataPrefix>oai_dc</metadataPrefix>
-					<schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
-					<metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
-					<!--   a custom mapping as this collection doesn't have dc metadata -->
-					<mappingList>
-						<mapping>dc:title,dls.Title</mapping>
-						<mapping>dc:subject,dls.Subject</mapping>
-						<mapping>dc:language,dls.Language</mapping>
-						<mapping>dc:publisher,dls.Organization</mapping>
-					</mappingList>
-				</metadataFormat>
-			</ListMetadataFormats>
-		</serviceRack> 
-	</serviceRackList>
+                <metadataFormat metadataPrefix="oai_dc">
+                    <metadataPrefix>oai_dc</metadataPrefix>
+                    <schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
+                    <metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
+                    <!--   a custom mapping as this collection doesn't have dc metadata -->
+                    <mappingList>
+                        <mapping>dc:title,dls.Title</mapping>
+                        <mapping>dc:subject,dls.Subject</mapping>
+                        <mapping>dc:language,dls.Language</mapping>
+                        <mapping>dc:publisher,dls.Organization</mapping>
+                    </mappingList>
+                </metadataFormat>
+            </ListMetadataFormats>
+        </serviceRack>
+    </serviceRackList>
 </CollectionConfig>

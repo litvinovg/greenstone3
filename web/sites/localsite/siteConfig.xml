@@ -8,7 +8,9 @@
     <serviceRack name="ArchiveIO"/>
     <serviceRack name="DocumentMaker"/>
     <serviceRack name="DocXMLUtil"/>
+	<serviceRack name="DocumentBasket"/>
     <serviceRack name="BerryBasket"/>
+	  <serviceRack name="ServiceUtil"/>
     <serviceRack name="CrossCollectionSearch">
       <format>
 	<!-- this format is used for the search results -->

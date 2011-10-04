@@ -4,6 +4,7 @@
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" >
   <metadataList>
     <metadata name="creator">greenstone@cs.waikato.ac.nz</metadata>
+	<metadata name="public">false</metadata>
   </metadataList>
   <displayItemList>
     <displayItem name='name' lang='en'>Sample XML Texts Collection</displayItem>
