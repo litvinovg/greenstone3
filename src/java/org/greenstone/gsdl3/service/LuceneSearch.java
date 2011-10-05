@@ -36,6 +36,13 @@ public class LuceneSearch
      static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.LuceneSearch.class.getName());
 
     protected static final String INDEX_ELEM = "index";
+
+    protected ArrayList index_ids;
+
+    public LuceneSearch()
+    {
+	index_ids = new ArrayList();
+    }
     
     public boolean configure(Element info, Element extra_info) {
 	if (!super.configure(info, extra_info)){
@@ -43,76 +50,133 @@ public class LuceneSearch
 	}
 	
 	default_index = "idx";
-	return true;
-    }
-    
-    protected void getIndexData(ArrayList index_ids, ArrayList index_names, String lang) 
-    {
-	// the index info - read from config file - cache it??
-	Element index_list = (Element)GSXML.getChildByTagName(this.config_info, INDEX_ELEM+GSXML.LIST_MODIFIER);
+
+	// cache index info read from config file
+	Element index_list 
+	    = (Element)GSXML.getChildByTagName(this.config_info, 
+					       INDEX_ELEM+GSXML.LIST_MODIFIER);
 	if (index_list != null) {
 	    NodeList indexes = index_list.getElementsByTagName(INDEX_ELEM);
 	    int len = indexes.getLength();
 	    // now add even if there is only one
 	    for (int i=0; i<len; i++) {
 		Element index = (Element)indexes.item(i);
-		index_ids.add(index.getAttribute(GSXML.NAME_ATT));
+		index_ids.add(index.getAttribute(GSXML.NAME_ATT));		
+	    }
+	} else {
+	    // there is only one index, so we assume the default
+	    index_ids.add(this.default_index);
+	}
+
+	return true;
+    }
+    
+    protected void getIndexData(ArrayList index_ids, ArrayList index_names, String lang) 
+    {
+	// copying exercise for index_ids, 
+	for (int i=0; i<this.index_ids.size(); i++) {
+	    index_ids.add(this.index_ids.get(i));
+	}
+
+	// But need to work out display name from scratch as this uses
+	// the 'lang' parameter
+
+	Element index_list 
+	    = (Element)GSXML.getChildByTagName(this.config_info,
+					       INDEX_ELEM+GSXML.LIST_MODIFIER);
+	if (index_list != null) {
+	    NodeList indexes = index_list.getElementsByTagName(INDEX_ELEM);
+	    int len = indexes.getLength();
+	    // now add even if there is only one
+	    for (int i=0; i<len; i++) {
+		Element index = (Element)indexes.item(i);
 		index_names.add(GSXML.getDisplayText(index, GSXML.DISPLAY_TEXT_NAME, lang, "en"));
 		
 	    }
 	} else {
 	    // there is only one index, so we assume the default
-	    index_ids.add(this.default_index);
 	    index_names.add("default index");
 	}
-
     }
 
-    /** Process a text query - implemented by concrete subclasses */
-    protected Element processTextQuery(Element request) {
+
+    protected void initResultElement(Element result, Element doc_node_list, Element metadata_list)
+    {
 
 	// Create a new (empty) result message
-	Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
 	result.setAttribute(GSXML.FROM_ATT, QUERY_SERVICE);
 	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
-	Element doc_node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
 	result.appendChild(doc_node_list);
-	Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
 	result.appendChild(metadata_list);
+    }
+
+    protected boolean hasParamList(Element request, Element metadata_list)
+    {
 	// Get the parameters of the request
 	Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 	if (param_list == null) {
 	    logger.error("TextQuery request had no paramList.");
 	    GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", "0");
-	    return result;  // Return the empty result
+	    return false; // signal that an empty result should be return
 	}
 
-	// Process the request parameters
-	HashMap params = GSXML.extractParams(param_list, false);
+	return true;
+    }
 
-	// Make sure a query has been specified
+    protected boolean hasQueryString(Element param_list, Element metadata_list)
+    {
+
+	// Process the request parameters to make sure a query has been specified
+	HashMap params = GSXML.extractParams(param_list, false);
 	String query_string = (String) params.get(QUERY_PARAM);
+
 	if (query_string == null || query_string.equals("")) {
 	    logger.error("TextQuery request had no query string.");
 	    GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", "0");
-	    return result;  // Return the empty result
+	    return false;  // signal that an empty result should be return
 	}
+
+	return true;
+    }
+
+
+
+    /** Process a text query - implemented by concrete subclasses */
+    protected Element processTextQuery(Element request) {
+
+	Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	Element doc_node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
+	Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+	initResultElement(result,doc_node_list,metadata_list);
+
+	if (!hasParamList(request,metadata_list)) {
+	    return result;
+	}
+
+	Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+	if (!hasQueryString(param_list,metadata_list)) {
+	    return result;
+	}
+
+	HashMap params = GSXML.extractParams(param_list, false);
+	String query_string = (String) params.get(QUERY_PARAM);
 
 	// Get the index
 	String index = (String) params.get(INDEX_PARAM);
 	if (index == null || index.equals("")) {
 	    index = this.default_index; // assume the default
 	}
-        try {
+	
+	try {
 	    String index_dir = GSFile.collectionIndexDir(this.site_home, this.cluster_name);
 	    index_dir += File.separator+index;
 	    Searcher searcher = new IndexSearcher(index_dir);
 	    Analyzer analyzer = new StandardAnalyzer();
 	    
 	    Term term = new Term("content", query_string);
-        
+	    
 	    Query query = new TermQuery(term);
-
+	    
 	    Hits hits = searcher.search(query);
 	    GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", ""+hits.length());
 	    
@@ -126,9 +190,8 @@ public class LuceneSearch
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-	
-	return result;
-	    
+    
+	return result;	    
     }
 
     
