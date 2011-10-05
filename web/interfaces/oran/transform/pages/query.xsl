@@ -134,8 +134,16 @@
 					</xsl:for-each>
 				</p>
 				
-				<ul id="results">
+				<!-- <ul id="results"> -->
+				<table id="results">
 					<xsl:for-each select="pageResponse/documentNodeList/documentNode">
+
+					  <tr class="document">
+
+					        <xsl:apply-templates select="."/>
+					  </tr>
+<!--
+
 						<li class="document">
 							<a>
 								<xsl:choose>
@@ -147,10 +155,10 @@
 									</xsl:when>
 								</xsl:choose>
 								
-								<xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/> 
+								<xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
 							</a>
-							
-							<!-- If this is results from a cross collection search then add a link to the collection that it is from -->
+							***** -->
+							<!-- If this is results from a cross collection search then add a link to the collection that it is from --><!--
 							<xsl:if test="@collection">
 								(<a style="background-image:none; padding:3px;">
 									<xsl:attribute name="href">
@@ -161,12 +169,16 @@
 							</xsl:if>
 							<xsl:call-template name="documentBerryForClassifierOrSearchPage"/>
 						</li>
+-->
+
 					</xsl:for-each>
 					<br/>
 					
 					<!-- Previous/Next buttons-->
 					<xsl:call-template name="prevNextButtons"/>
-				</ul>
+				</table>
+				<!-- </ul> -->
+
 			</xsl:otherwise>
 			
 		</xsl:choose>
