@@ -203,6 +203,11 @@ public class GSFile
 		return collectionBaseDir(site_home, collection_name) + File.separatorChar + "index" + File.separatorChar + "assoc" + File.separatorChar + assoc_file_path + File.separatorChar + filename;
 	}
 
+	static public String extHome(String gsdl3_home, String ext_name)
+	{
+		return gsdl3_home + File.separatorChar + "ext" + File.separatorChar + ext_name;
+	}
+
 	static public String siteHome(String gsdl3_home, String site_name)
 	{
 		return gsdl3_home + File.separatorChar + "sites" + File.separatorChar + site_name;
@@ -212,6 +217,7 @@ public class GSFile
 	{
 		return gsdl3_home + File.separatorChar + "interfaces" + File.separatorChar + interface_name;
 	}
+
 
 	static public String interfaceStylesheetFile(String gsdl3_home, String interface_name, String filename)
 	{
