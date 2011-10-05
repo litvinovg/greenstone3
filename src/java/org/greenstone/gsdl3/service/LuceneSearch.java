@@ -16,12 +16,17 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*; //Document;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Hits;
 import org.apache.lucene.queryParser.QueryParser;
+//import org.apache.lucene.search.Hits;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.Directory;
 
+import org.greenstone.LuceneWrapper.GS2Analyzer;
 import java.io.File;
 
 import org.apache.log4j.*;
@@ -170,18 +175,23 @@ public class LuceneSearch
 	try {
 	    String index_dir = GSFile.collectionIndexDir(this.site_home, this.cluster_name);
 	    index_dir += File.separator+index;
-	    Searcher searcher = new IndexSearcher(index_dir);
-	    Analyzer analyzer = new StandardAnalyzer();
+	    Directory index_dir_dir = FSDirectory.open(new File(index_dir));
+	    Searcher searcher = new IndexSearcher(index_dir_dir);
+	    Analyzer analyzer = new GS2Analyzer();
 	    
 	    Term term = new Term("content", query_string);
 	    
 	    Query query = new TermQuery(term);
 	    
-	    Hits hits = searcher.search(query);
-	    GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", ""+hits.length());
+	    TopDocs hits = searcher.search(query, Integer.MAX_VALUE);
+
+	    GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", ""+hits.scoreDocs.length);
 	    
-	    for (int i=0; i<hits.length(); i++) {
-		org.apache.lucene.document.Document luc_doc = hits.doc(i);
+    	    IndexReader reader = ((IndexSearcher) searcher).getIndexReader();
+
+	    for (int i=0; i<hits.scoreDocs.length; i++) {
+		int lucene_doc_num = hits.scoreDocs[i].doc;
+		org.apache.lucene.document.Document luc_doc = reader.document(lucene_doc_num);
 		String node_id = luc_doc.get("nodeID");
 		Element node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
 		node.setAttribute(GSXML.NODE_ID_ATT, node_id);
