@@ -26,8 +26,8 @@ public class GSConstants {
     public static final String SITE_NAME = "site_name";
     public static final String LIBRARY_NAME = "library_name";
     public static final String DEFAULT_LANG = "default_lang";
-	public static final String ALLOW_CLIENT_SIDE_XSLT = "allow_client_side_xslt";
-	public static final String CLIENT_SIDE_XSLT_INTERFACE_SUFFIX = "-client-xslt";
+    public static final String ALLOW_CLIENT_SIDE_XSLT = "allow_client_side_xslt";
+    public static final String CLIENT_SIDE_XSLT_INTERFACE_SUFFIX = "-client-xslt";
 
     public static final String META_RELATION_SEP = "_";
     public static final String META_SEPARATOR_SEP = "*";
