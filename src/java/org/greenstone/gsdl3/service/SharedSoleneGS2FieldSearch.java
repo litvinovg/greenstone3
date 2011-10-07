@@ -37,8 +37,8 @@ import java.util.Vector;
 // Logging
 import org.apache.log4j.Logger;
 
-import org.greenstone.LuceneWrapper.SharedSoleneQueryResult;
-import org.greenstone.LuceneWrapper.SharedSoleneQuery;
+import org.greenstone.LuceneWrapper3.SharedSoleneQueryResult;
+import org.greenstone.LuceneWrapper3.SharedSoleneQuery;
 
 // Shared code for Solr and Lucene GS2FieldSearch
 

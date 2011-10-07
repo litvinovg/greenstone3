@@ -26,7 +26,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.Directory;
 
-import org.greenstone.LuceneWrapper.GS2Analyzer;
+import org.greenstone.LuceneWrapper3.GS2Analyzer;
 import java.io.File;
 
 import org.apache.log4j.*;
