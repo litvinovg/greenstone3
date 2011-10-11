@@ -22,7 +22,6 @@ public class ServiceUtil extends ServiceRack
 	
 	public boolean configure(Element info, Element extra_info)
 	{
-		System.out.println("CONFIGURING");
 		if (!super.configure(info, extra_info))
 		{
 			return false;
