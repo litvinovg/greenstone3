@@ -30,6 +30,11 @@
 		
 		<xsl:call-template name="init-seaweed"/>
 		<xsl:call-template name="setup-gs-variable"/>
+		<xsl:call-template name="additionalHeaderContent"/>
+	</xsl:template>
+	
+	<xsl:template name="additionalHeaderContent">
+		<!-- This template should be overridden in the collectionConfig.xml file if you want to add extra header content -->
 	</xsl:template>
 		
 	<xsl:template name="init-seaweed">
@@ -47,7 +52,7 @@
 							});
 					}
 					catch (err) {
-						alert("Seaweed failed to initialise: " + err.message);
+						//alert("Seaweed failed to initialise: " + err.message);
 					}
 				});
 			</xsl:text>
