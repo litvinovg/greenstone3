@@ -212,7 +212,10 @@ collectionLinkImage {
 }
 
 #gs_footer {
+	position: relative;
+	display: block;
 	background: transparent url('../images/gsdlhead.gif') scroll no-repeat left top;
+	margin: 0 auto;
 	text-align: center;
 	vertical-align: middle;
 	font-size: 70%;
@@ -317,11 +320,6 @@ body.dAction #gs_banner h2 {
 #nav li:hover, #nav li.current { background-position: 100% 0; }
 #nav li:hover a, #nav li.current a { background-position: 0 0; cursor:default; }
 
-#authennavbarlist {
-	display: inline;
-	list-style-type: none;
-	padding-right: 20px;
-}
 
 /* css to make the page links work (home, help, preference) */
 #bannerLinks {
@@ -424,13 +422,13 @@ body.dAction #gs_banner h2 {
 }
 
 #results li a {
-	padding: 3px 3px 3px 28px;
+	padding: 3px 3px 3px 3px;
 	background-repeat: no-repeat;
 	background-position: 0 .1em;
 }
 
 
-/*#results .document a { background-image: url('../images/book.png'); }*/
+#results .document a { /*background-image: url('../images/book.png'); */}
 #results .document a:visited { background-image: url('../images/book-visited.png'); color: #999; }
 #results .shelf>a { background-image: url('../images/bookshelf.png'); }
 
