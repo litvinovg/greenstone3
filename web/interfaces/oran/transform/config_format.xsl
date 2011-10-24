@@ -39,6 +39,10 @@
 			gs.variables.<xsl:value-of select="@name"/><xslt:text disable-output-escaping="yes"> = "</xslt:text><xsl:apply-templates/><xslt:text disable-output-escaping="yes">";</xslt:text>
 		</script>
 	</xsl:template>
+	
+	<xsl:template match="gsf:defaultClassifierNode">
+		<xslt:call-template name="defaultClassifierNode"/>
+	</xsl:template>
   
 	<xsl:template match="gsf:link">
 		<xsl:choose>
@@ -150,12 +154,23 @@
 		</xslt:value-of>
 	</xsl:template>
 
+	<!-- if this gsf:metadata is a child of a document node then we want to get the metadata for that node -->
+	<xsl:template match="xsl:template[@match = 'documentNode' or @match = 'classifierNode']//gsf:metadata | gsf:template[@match = 'documentNode' or @match = 'classifierNode']//gsf:metadata">
+		<xslt:value-of disable-output-escaping="yes">
+			<xsl:attribute name="select">
+				<xsl:text>metadataList/metadata[@name='</xsl:text>
+				<xsl:apply-templates select="." mode="get-metadata-name"/>
+				<xsl:text>']</xsl:text>
+			</xsl:attribute>
+		</xslt:value-of>
+	</xsl:template>
+	
 	<xsl:template match="gsf:metadata">
 		<xslt:value-of disable-output-escaping="yes">
 			<xsl:attribute name="select">
-			<xsl:text>metadataList/metadata[@name='</xsl:text>
-			<xsl:apply-templates select="." mode="get-metadata-name"/>
-			<xsl:text>']</xsl:text>
+				<xsl:text>/page/pageResponse/document/documentNode/metadataList/metadata[@name='</xsl:text>
+				<xsl:apply-templates select="." mode="get-metadata-name"/>
+				<xsl:text>']</xsl:text>
 			</xsl:attribute>
 		</xslt:value-of>
 	</xsl:template>
@@ -208,11 +223,25 @@
 		<xslt:apply-templates select="nodeContent"/>
 	</xsl:template>
   
-	<xsl:template match="gsf:choose-metadata">
+	<xsl:template match="xsl:template[@match = 'documentNode' or @match = 'classifierNode']//gsf:choose-metadata | gsf:template[@match = 'documentNode' or @match = 'classifierNode']//gsf:choose-metadata">
 		<xslt:choose>
 			<xsl:for-each select="gsf:metadata">
 				<xslt:when>
 					<xsl:attribute name="test">metadataList/metadata[@name='<xsl:apply-templates select="." mode="get-metadata-name"/>']</xsl:attribute>
+					<xsl:apply-templates select="."/>
+				</xslt:when>
+			</xsl:for-each>
+			<xsl:if test="gsf:default">
+				<xslt:otherwise><xsl:apply-templates select="gsf:default"/></xslt:otherwise>
+			</xsl:if>
+		</xslt:choose>
+	</xsl:template>
+	
+	<xsl:template match="gsf:choose-metadata">
+		<xslt:choose>
+			<xsl:for-each select="gsf:metadata">
+				<xslt:when>
+					<xsl:attribute name="test">/page/pageResponse/document/documentNode/metadataList/metadata[@name='<xsl:apply-templates select="." mode="get-metadata-name"/>']</xsl:attribute>
 					<xsl:apply-templates select="."/>
 				</xslt:when>
 			</xsl:for-each>
