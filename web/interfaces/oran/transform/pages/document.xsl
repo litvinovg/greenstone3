@@ -99,6 +99,16 @@
 			</tr></table>
 			
 			<div id="doc{@nodeID}" class="sectionContainer" style="display:block;"><!-- *** -->
+				<xsl:if test="/page/pageRequest/paramList/param[@name = 'db']/@value = 'true'">
+					<table id="meta{@nodeID}">
+						<xsl:for-each select="metadataList/metadata">
+							<tr>
+								<td class="metaTableCellName"><xsl:value-of select="@name"/></td>
+								<td class="metaTableCellValue editable"><xsl:value-of select="."/></td>
+							</tr>
+						</xsl:for-each>
+					</table>
+				</xsl:if>
 				<div id="text{@nodeID}" class="sectionText"><!-- *** -->
 					<!-- Get the section content from the document template -->
 					<xsl:apply-templates select="." mode="document"/>
@@ -112,6 +122,10 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse/document">
+		<xsl:if test="/page/pageRequest/paramList/param[@name = 'db']/@value = 'true'">
+			<gsf:metadata name="all"/>
+		</xsl:if>
+
 		<xsl:if test="$bookswitch = 'off'">
 			<div id="bookdiv" style="visibility:hidden; height:0px; display:inline;"><xsl:text> </xsl:text></div>
 		
@@ -130,41 +144,38 @@
 		
 			<!-- show the little berries for this document -->
 			<xsl:call-template name="documentBerryForDocumentPage"/>
-
-			<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']) or /page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']/@value='true'">
+			
+			<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']) or /page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']/@value='true'">
 				<table id="rightSidebar">
 					<tr><td>
 						<xsl:call-template name="viewOptions"/>
 					</td></tr>
 					<tr><td>
 						<div id="contentsArea">	
-
 							<!-- show the berry basket if it's turned on -->
 							<gslib:berryBasket/>
 
 							<!-- the book's cover image -->
-							<xsl:choose>
-								<xsl:when test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']) or /page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true'">
-									<div id="coverImage" class="visible"><gslib:coverImage/></div>
-								</xsl:when>
-								<xsl:otherwise>
-									<div id="coverImage" class="hidden"><gslib:coverImage/></div>
-								</xsl:otherwise>    
-							</xsl:choose>
+							<div id="coverImage">
+								<xsl:attribute name="class">
+									<xsl:choose>
+										<xsl:when test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']) or /page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true'">visible</xsl:when>
+										<xsl:otherwise>hidden</xsl:otherwise>    
+									</xsl:choose>
+								</xsl:attribute>
+								<gslib:coverImage/><xsl:text> </xsl:text>
+							</div>
 
 							<!-- the contents (if enabled) -->
-							<xsl:choose>
-								<xsl:when test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
-									<div id="tableOfContents" class="visible">
-										<xsl:apply-templates select="documentNode" mode="TOC"/>
-									</div>
-								</xsl:when>    
-								<xsl:otherwise>
-									<div id="tableOfContents" class="hidden">
-										<xsl:apply-templates select="documentNode" mode="TOC"/>
-									</div>
-								</xsl:otherwise>    
-							</xsl:choose>
+							<div id="tableOfContents">
+								<xsl:attribute name="class">
+									<xsl:choose>
+										<xsl:when test="count(//documentNode) > 1 and not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">visible</xsl:when>
+										<xsl:otherwise>hidden</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>
+								<xsl:apply-templates select="documentNode" mode="TOC"/>
+							</div>
 						</div>
 					</td></tr>
 				</table>
@@ -182,8 +193,8 @@
 				<xsl:apply-templates mode="flashxml"/>
 			</xsl:when>
 			<xsl:when test="$bookswitch = 'on'">
-				<!-- *** in document-scripts.xsl *** -->
 				<div id="bookdiv" style="display:inline;"><xsl:text> </xsl:text></div>
+				<!-- *** in document-scripts.js *** -->
 				<script type="text/javascript">
 					<xsl:text disable-output-escaping="yes">
 						if(document.URL.indexOf("book=on") != -1)
@@ -194,12 +205,21 @@
 				</script>
 			</xsl:when>
 			<xsl:otherwise>
-				<div id="gs-document-text" class="documenttext"> 
-					<xsl:call-template name="wrapDocumentNodes"/>
-				</div>	
+				<table><tbody><tr><td>
+					<div id="gs-document-image" class="sectionImage">
+						<!-- Get the section content from the document template -->
+						<xsl:call-template name="documentImage"/>
+					</div>
+				</td>
+				<td>
+					<div id="gs-document-text" class="documenttext" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
+						<xsl:call-template name="wrapDocumentNodes"/>
+					</div>
+				</td></tr></tbody></table>
+
 			</xsl:otherwise>
 		</xsl:choose>
-
+		
 		<div class="clear"><xsl:text> </xsl:text></div>
 	</xsl:template>
 	
@@ -250,6 +270,21 @@
 				</xsl:choose>
 			</xsl:for-each>
 		</xsl:for-each><xsl:text> </xsl:text>
+	</xsl:template>
+	
+	<!-- The default template for displaying the document image -->
+	<xsl:template name="documentImage">
+		<xsl:variable name="imageTest"><gsf:metadata name="ScreenWidth"/></xsl:variable>
+		<xsl:if test="$imageTest != ''">
+			<h3>   
+				<gsf:choose-metadata>
+					<gsf:metadata name="dc.Title"/>
+					<gsf:metadata name="ex.Title"/>
+					<gsf:default>Untitled</gsf:default>
+				</gsf:choose-metadata>
+			</h3>
+			<gsf:metadata name="screenicon"/>
+		</xsl:if>
 	</xsl:template>
 
 	<!-- This template is used to display the table of contents -->
@@ -401,6 +436,7 @@
 					</input>
 				</td>
 			</xsl:if>
+			<td class="tableOfContentsTitle">Table of Contents</td>
 			<td style="vertical-align:top;">
 				<a id="sidebarMinimizeButton" href="javascript:minimizeSidebar();" style="float: right; font-size:0.6em;">
 					<img class="icon">
