@@ -877,8 +877,24 @@ public class DocumentAction extends Action
 		int word_start = 0;
 		boolean in_word = false;
 		boolean preceding_word_matched = false;
+		boolean inTag = false;
 		for (int i = 0; i < content_characters.length; i++)
 		{
+			//We don't want to find words inside HTML tags
+			if(content_characters[i] == '<')
+			{
+				inTag = true;
+				continue;
+			}
+			else if (inTag && content_characters[i] == '>')
+			{
+				inTag = false;
+			}
+			else if (inTag)
+			{
+				continue;
+			}
+			
 			boolean is_character_letter_or_digit = Character.isLetterOrDigit(content_characters[i]);
 
 			// Has a word just started?
