@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.lang.ClassLoader; // to find files on the class path
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 
 import org.apache.log4j.*;
@@ -218,7 +219,6 @@ public class GSFile
 		return gsdl3_home + File.separatorChar + "interfaces" + File.separatorChar + interface_name;
 	}
 
-
 	static public String interfaceStylesheetFile(String gsdl3_home, String interface_name, String filename)
 	{
 		return gsdl3_home + File.separatorChar + "interfaces" + File.separatorChar + interface_name + File.separatorChar + "transform" + File.separatorChar + filename;
@@ -291,7 +291,7 @@ public class GSFile
 		// still can't find it and we have looked everywhere
 		return null;
 	}
-	
+
 	static public ArrayList<File> getStylesheetFiles(String gsdl3_home, String site_name, String collection, String interface_name, ArrayList base_interfaces, String filename)
 	{
 		ArrayList<File> stylesheets = new ArrayList<File>();
@@ -510,13 +510,15 @@ public class GSFile
 					output.getParentFile().mkdirs();
 					FileInputStream in = new FileInputStream(input[i]);
 					FileOutputStream out = new FileOutputStream(output);
-					int value = 0;
-					while ((value = in.read()) != -1)
-					{
-						out.write(value);
-					}
+
+					FileChannel inC = in.getChannel();
+					FileChannel outC = out.getChannel();
+
+					System.err.println(inC.transferTo(0, inC.size(), outC));
+					
 					in.close();
 					out.close();
+
 					// Delete file
 					input[i].delete();
 				}
