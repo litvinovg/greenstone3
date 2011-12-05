@@ -93,13 +93,13 @@ public class JDBMWrapper implements FlatDatabaseWrapper
 			// create or open a record manager
 			Properties props = new Properties();
 			recman_ = RecordManagerFactory.createRecordManager(db_filename, props);
-
+			
 			// load existing table (if exists) otherwise create new one
 			long recid = recman_.getNamedObject(TNAME);
 
 			if (recid != 0)
 			{
-				System.err.println("# Loading existing database table '" + TNAME + "' ...");
+				logger.info("# Loading existing database table '" + TNAME + "' ...");
 				hashtable_ = HTree.load(recman_, recid);
 			}
 			else
@@ -111,12 +111,12 @@ public class JDBMWrapper implements FlatDatabaseWrapper
 					recman_ = null;
 					db_filename_ = null;
 
-					System.err.println("Database table '" + TNAME + "' does not exist.");
+					logger.error("Database table '" + TNAME + "' does not exist.");
 					throw new IOException();
 				}
 				else
 				{
-					System.err.println("# No database table '" + TNAME + "' to set.  Creating new one");
+					logger.info("# No database table '" + TNAME + "' to set.  Creating new one");
 					hashtable_ = HTree.createInstance(recman_);
 					recman_.setNamedObject(TNAME, hashtable_.getRecid());
 				}
