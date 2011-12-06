@@ -881,11 +881,15 @@
     <pathconvert targetos="unix" property="src.gsdl3.home.unix">
       <path path="${web.home}"/>
     </pathconvert>
+	<stringutil string="${perl.path}" property="escaped.perl.path">
+                <replace regex="\\" replacement="\\\\" />
+    </stringutil>
+	
     <filter token="gsdl3home" value="${src.gsdl3.home.unix}"/>
     <filter token="gsdl3version" value="${app.version}"/>
     <filter token="tomcat.server" value="${tomcat.server}"/>
     <filter token="tomcat.port" value="${tomcat.port}"/>
-    <filter token="perlpath" value="${perl.path}"/>
+    <filter token="perlpath" value="${escaped.perl.path}"/>
     <copy file="${basedir}/resources/java/global.properties.in" tofile="${web.classes}/global.properties" filtering="true" overwrite="true"/>
     <copy file="${basedir}/resources/java/log4j.properties.in" tofile="${web.classes}/log4j.properties" filtering="true" overwrite="true"/>
     <chmod file="${web.classes}/global.properties" perm="600"/>
