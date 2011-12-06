@@ -9,9 +9,11 @@ import java.util.HashMap;
 
 public class GeneralAction extends Action
 {
+
 	/** process a request */
 	public Node process(Node message_node)
 	{
+
 		Element message = this.converter.nodeToElement(message_node);
 
 		// the result
@@ -58,12 +60,17 @@ public class GeneralAction extends Action
 			to = service_name;
 		}
 
-		if (request_type.equals("r"))
+		if (request_type.equals("r") || request_type.equals("s"))
 		{
 			//do the request
 
 			Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 			Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+			
+			if(request_type.equals("s"))
+			{
+				mr_query_request.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_STATUS);
+			}
 
 			mr_query_message.appendChild(mr_query_request);
 
@@ -100,7 +107,7 @@ public class GeneralAction extends Action
 		Element mr_info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, lang, uid);
 		mr_info_message.appendChild(mr_info_request);
 		Element mr_info_response = (Element) this.mr.process(mr_info_message);
-
+		
 		String path = GSXML.RESPONSE_ELEM;
 		path = GSPath.appendLink(path, GSXML.SERVICE_ELEM);
 
@@ -111,6 +118,7 @@ public class GeneralAction extends Action
 		}
 
 		addSiteMetadata(page_response, lang, uid);
+		
 		return result;
 	}
 
