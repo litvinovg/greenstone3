@@ -63,6 +63,8 @@ public class XMLConverter
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.XMLConverter.class.getName());
 
+	protected EntityResolver resolver = null;
+	
 	/** xerces parser */
 	protected DOMParser parser = null;
 
@@ -95,6 +97,7 @@ public class XMLConverter
 	/** sets the entity resolver. pass in null to unset it */
 	public void setEntityResolver(EntityResolver er)
 	{
+		this.resolver = er;
 		this.parser.setEntityResolver(er);
 	}
 
@@ -137,8 +140,18 @@ public class XMLConverter
 			Reader reader = new StringReader(in);
 			InputSource xml_source = new InputSource(reader);
 
-			this.parser.parse(xml_source);
-			Document doc = this.parser.getDocument();
+			DOMParser parser = new DOMParser();
+			parser.setFeature("http://xml.org/sax/features/validation", false);
+			parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
+			if(resolver != null)
+			{
+				parser.setEntityResolver(this.resolver);
+			}
+			parser.setErrorHandler(new ParseErrorHandler());
+			parser.parse(xml_source);
+			
+			Document doc = parser.getDocument();
 
 			return doc;
 
@@ -157,8 +170,19 @@ public class XMLConverter
 		{
 			FileReader reader = new FileReader(in);
 			InputSource xml_source = new InputSource(reader);
-			this.parser.parse(xml_source);
-			Document doc = this.parser.getDocument();
+			
+			DOMParser parser = new DOMParser();
+			parser.setFeature("http://xml.org/sax/features/validation", false);
+			parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
+			if(resolver != null)
+			{
+				parser.setEntityResolver(this.resolver);
+			}
+			parser.setErrorHandler(new ParseErrorHandler());
+			parser.parse(xml_source);
+			
+			Document doc = parser.getDocument();
 			return doc;
 
 		}
@@ -179,8 +203,18 @@ public class XMLConverter
 			InputStreamReader isr = new InputStreamReader(new FileInputStream(in), encoding);
 			InputSource xml_source = new InputSource(isr);
 
-			this.parser.parse(xml_source);
-			Document doc = this.parser.getDocument();
+			DOMParser parser = new DOMParser();
+			parser.setFeature("http://xml.org/sax/features/validation", false);
+			parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
+			if(resolver != null)
+			{
+				parser.setEntityResolver(this.resolver);
+			}
+			parser.setErrorHandler(new ParseErrorHandler());
+			parser.parse(xml_source);
+			
+			Document doc = parser.getDocument();
 
 			return doc;
 
