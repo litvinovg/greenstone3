@@ -83,7 +83,7 @@ function saveDocumentChanges()
     var prev_action = getSubstring(myurl, "&p.a", "&");
     var prev_service = getSubstring(myurl, "&p.s", "&");
 
-    var post_url = "http://localhost:8989/greenstone3/format?a=f&sa=saveDocument&c=" + collection_name + "&d=" + document_id + "&dt=" + document_type + "&p.a=" + prev_action + "&p.s=" + prev_service;
+    var post_url = "http://localhost:8383/greenstone3/dev?a=f&sa=saveDocument&c=" + collection_name + "&d=" + document_id + "&dt=" + document_type + "&p.a=" + prev_action + "&p.s=" + prev_service;
 
     // XML will be automatically wrapped in <display><format> tags when saved to collection config
     var xml = '<format><gsf:option name="TOC" value="'+$('input[name="TOC"]').attr('checked')+'"/><gsf:option name="coverImage" value="'+$('input[name="bookCover"]').attr('checked')+'"/></format>';
@@ -95,12 +95,14 @@ function saveDocumentChanges()
 
 /* FUNCTIONS FOR FORMAT EDITING */                                                                    
 
+// Ensures that a change to a text field is remembered
 function onTextChange(item, text)
 {
     console.log("I have set "+item+".value to "+text);
     item.setAttribute("value",text);
 }
 
+// Ensures that a change to a select field is remembered
 function onSelectChange(item)
 {
     console.log("I have set "+item.value+".selected to selected");
@@ -169,7 +171,7 @@ function updateFormatStatement()
     if(service_name == "ClassifierBrowse")
         classifier_name = getSubstring(myurl, "&cl", "&");
 
-    var post_url = "http://localhost:8989/greenstone3/format?a=f&sa=update&c=" + collection_name +"&s=" + service_name;
+    var post_url = "http://localhost:8383/greenstone3/dev?a=f&sa=update&c=" + collection_name +"&s=" + service_name;
 
     if(classifier_name != null)
         post_url = post_url + "&cl=" + classifier_name;
@@ -200,7 +202,7 @@ function saveFormatStatement()
     if(service_name == "ClassifierBrowse")
         classifier_name = getSubstring(myurl, "&cl", "&");
 
-    var post_url = "http://localhost:8989/greenstone3/format?a=f&sa=save&c=" + collection_name +"&s=" + service_name;
+    var post_url = "http://localhost:8383/greenstone3/dev?a=f&sa=save&c=" + collection_name +"&s=" + service_name;
 
     if(classifier_name != null)
         post_url = post_url + "&cl=" + classifier_name;
@@ -221,7 +223,7 @@ function getXSLT(classname)
     var prev_action = getSubstring(myurl, "&p.a", "&");
     var prev_service = getSubstring(myurl, "&p.s", "&");
 
-    var post_url = "http://localhost:8989/greenstone3/format?a=d&c=" + collection_name + "&d=" + document_id + "&dt=" + document_type + "&p.a=" + prev_action + "&p.s=" + prev_service + "&o=skinandlib";
+    var post_url = "http://localhost:8383/greenstone3/dev?a=d&c=" + collection_name + "&d=" + document_id + "&dt=" + document_type + "&p.a=" + prev_action + "&p.s=" + prev_service + "&o=skinandlib";
 
     $.post(post_url, {data: classname}, function(data) {
             console.log("Success, we have received data");
@@ -364,7 +366,7 @@ $(document).ready(function(){
 
     console.log("Document ready function\n");
 	
-    var CURRENT_SELECT_VALUE = "";
+    CURRENT_SELECT_VALUE = ""; //global - gets set by ui.draggable
 
     /* DOCUMENT SPECIFIC FUNCTIONS */
 
@@ -424,6 +426,27 @@ $(document).ready(function(){
 			gsf_metadata_element = str;
 		}
 	});
+
+	$.ui.draggable.prototype._createHelper = function(event) {
+
+                var o = this.options;
+                var helper = $.isFunction(o.helper) ? $(o.helper.apply(this.element[0], [event])) : (o.helper == 'clone' ? this.element.clone().removeAttr('id') : this.element);
+
+		var select = $(this.element).find('select');
+		var value = select.attr('value');
+		console.log("Found "+value+" in helper");
+		CURRENT_SELECT_VALUE = value;
+		helper.find('select').attr('value', value);
+
+                if(!helper.parents('body').length)
+                        helper.appendTo((o.appendTo == 'parent' ? this.element[0].parentNode : o.appendTo));
+
+                if(helper[0] != this.element[0] && !(/(fixed|absolute)/).test(helper.css("position")))
+                        helper.css("position", "absolute");
+
+                return helper;
+
+        };
 	
 	$.ui.sortable.prototype._removeCurrentsFromItems = function() {
 		//console.log("IN _removeCurrentsFromItems FUNCTION");
@@ -973,16 +996,21 @@ function replace_with(item, me)
     if(me.search("select") != -1)
     {
     // If select exists, then find CURRENT_SELECT_VALUE
-        var index = me.search(CURRENT_SELECT_VALUE);
-        if(index == -1)
-            console.log("Did not find " + CURRENT_SELECT_VALUE);
-        else
-            console.log("Found " + CURRENT_SELECT_VALUE + " at index " + index);    
-            index = index + CURRENT_SELECT_VALUE.length + 1;
-            console.log("Attempt inserting select at new index "+index);
-            a = me.substring(0,index);
-            b = me.substring(index);
-            me = a.concat("selected",b);
+	if(me.search(CURRENT_SELECT_VALUE) != -1)
+	{
+	    var index = me.search(CURRENT_SELECT_VALUE);
+            if(index == -1)
+                console.log("Did not find " + CURRENT_SELECT_VALUE);
+            else
+	    {
+                console.log("Found " + CURRENT_SELECT_VALUE + " at index " + index);    
+                index = index + CURRENT_SELECT_VALUE.length + 1;
+                console.log("Attempt inserting select at new index "+index);
+                a = me.substring(0,index);
+                b = me.substring(index);
+                me = a.concat("selected",b);
+            }
+	}
     }
 
     item.replaceWith(me); //'<div class="element element-txt">This text box has been added!</div>');
