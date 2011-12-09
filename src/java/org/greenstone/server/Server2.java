@@ -34,7 +34,8 @@ public class Server2 extends BaseServer
     private static final String URL_PENDING="URL_pending";	
 	
     protected String libraryURL;
-	protected String property_prefix;
+    protected String property_prefix;
+    protected String gsdlos_gsdlarch;
 	
     private class QuitListener extends Thread 
     {
@@ -105,14 +106,17 @@ public class Server2 extends BaseServer
     }
 
 
-    public Server2(String gsdl2_home, String lang, String configfile, int quitPort, String mode)
+    public Server2(String gsdl2_home, String gsdlos_arch, String lang, String configfile, int quitPort, String mode)
     {
 	super(gsdl2_home, lang, configfile, "etc"+File.separator+"logs-gsi");	
 	               // configfile can be either glisite.cfg or llssite.cfg	
 
 	//logger_.error("gsdlhome: " + gsdl2_home + " | lang: " + lang + " | configfile: " 
-		//+ configfile + " | mode: " + property_prefix + " | quitport: " + quitPort);
+		//+ configfile + " | gsdlos_gsdlarch: " + gsdlos_arch + " | mode: " + property_prefix + " | quitport: " + quitPort);
 	
+	// to get to the OS specific subdirectory of cgi-bin
+	gsdlos_gsdlarch = gsdlos_arch;
+
 	// property_prefix is the mode we're running in (gli or empty) and contains the prefix
 	// string to look for in config file for auto_enter, start_browser and url properties
 	property_prefix = mode;
@@ -247,7 +251,8 @@ public class Server2 extends BaseServer
 
 	// get the prefix from the gsdlsite.cfg and build.properties files (port number and servername)
 	try{
-	    File gsdlsite_cfg = new File(gsdl_home + File.separator + "cgi-bin" + File.separator + "gsdlsite.cfg");
+	    File gsdlsite_cfg = new File(gsdl_home + File.separator + "cgi-bin" + File.separator 
+					 + gsdlos_gsdlarch + File.separator + "gsdlsite.cfg");
 	    FileInputStream fin = new FileInputStream(gsdlsite_cfg); 
 	    Properties gsdlProperties = new Properties();
 	    if(fin != null) {
@@ -453,11 +458,13 @@ public class Server2 extends BaseServer
 	    System.exit(1);
 	}
 	
+	String gsdlos_arch = args[1];
+
 	//for(int i = 0; i < args.length; i++) { System.err.println("Arg[" + i + "]: |" + args[i] + "|");	}
 	
 	// for every subsequent argument, check whether we're dealing with amalgamated
 	// parameters in that argument. If so, split on whitespace and reconstruct arguments
-	for(int i = 1; i < args.length; i++) {
+	for(int i = 2; i < args.length; i++) {
 	
 		// if the *last* occurrence of a flag parameter is not at the start of 
 		// this argument then we're dealing with amalgamated parameters in this 
@@ -492,7 +499,7 @@ public class Server2 extends BaseServer
 	String mode = "";
 	String lang = "en";
 	
-	int index = 1; // move onto any subsequent arguments (past 1st GSDLHOME arg)
+	int index = 2; // move onto any subsequent arguments (past 1st GSDLHOME arg and 2nd GSDLOS_GSDLARCH arg)
 	if (args.length > index && !args[index].startsWith("--")) {
 		lang = args[index]; // 2nd arg is not a flag option, so must be language
 		index++;
@@ -534,6 +541,6 @@ public class Server2 extends BaseServer
 	configfile = configfile.trim(); // remove any trailing whitespace
 	//System.err.println("\n\n*******\n\ngsdlhome: " + gsdl2_home + " | lang: " + lang + " |configfile:"
 	//	+ configfile + "| mode: " + mode + " | quitport: " + port + "\n\n*************\n");
-	new Server2(gsdl2_home, lang, configfile, port, mode);
+	new Server2(gsdl2_home, gsdlos_arch, lang, configfile, port, mode);
     }
 }
