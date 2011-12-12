@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,30 +44,30 @@ public class GSDocumentModel
 	public static final int OPERATION_TYPE_SEC_TO_SEC = 4;
 
 	//Error codes
-	protected static final int NO_ERROR = 0;
-	protected static final int ERROR_OID_NOT_SPECIFIED = -1;
-	protected static final int ERROR_COLLECTION_NOT_SPECIFIED = -2;
-	protected static final int ERROR_SOURCE_DOCUMENT_OR_SECTION_DOES_NOT_EXIST = -3;
-	protected static final int ERROR_DESTINATION_DOCUMENT_OR_SECTION_DOES_NOT_EXIST = -4;
-	protected static final int ERROR_DESTINATION_DOCUMENT_OR_SECTION_ALREADY_EXISTS = -5;
-	protected static final int ERROR_COULD_NOT_DUPLICATE = -6;
-	protected static final int ERROR_COULD_NOT_MOVE = -7;
-	protected static final int ERROR_DOC_XML_COULD_NOT_BE_CREATED = -8;
-	protected static final int ERROR_EXCEPTION_CREATING_DOC_XML_FILE = -9;
-	protected static final int ERROR_METADATA_NAME_NOT_SPECIFIED = -10;
-	protected static final int ERROR_METADATA_VALUE_NOT_SPECIFIED = -11;
-	protected static final int ERROR_COULD_NOT_RETRIEVE_DOC_XML = -12;
-	protected static final int ERROR_COULD_NOT_WRITE_TO_DOC_XML = -13;
-	protected static final int ERROR_COULD_NOT_RETRIEVE_SECTION = -14;
-	protected static final int ERROR_COULD_NOT_OPEN_DATABASE = -15;
-	protected static final int ERROR_DATA_NOT_FOUND_IN_DATABASE = -16;
-	protected static final int ERROR_COULD_NOT_DELETE = -16;
-	protected static final int ERROR_OID_INCORRECT_FORMAT = -17;
-	protected static final int ERROR_INVALID_MERGE = -18;
-	protected static final int ERROR_INVALID_METADATA_POSITION = -19;
-	protected static final int ERROR_INVALID_SPLIT = -20;
-	protected static final int ERROR_DESTINATION_OID_NOT_SPECIFIED = -21;
-	protected static final HashMap<Integer, String> _errorMessageMap;
+	public static final int NO_ERROR = 0;
+	public static final int ERROR_OID_NOT_SPECIFIED = -1;
+	public static final int ERROR_COLLECTION_NOT_SPECIFIED = -2;
+	public static final int ERROR_SOURCE_DOCUMENT_OR_SECTION_DOES_NOT_EXIST = -3;
+	public static final int ERROR_DESTINATION_DOCUMENT_OR_SECTION_DOES_NOT_EXIST = -4;
+	public static final int ERROR_DESTINATION_DOCUMENT_OR_SECTION_ALREADY_EXISTS = -5;
+	public static final int ERROR_COULD_NOT_DUPLICATE = -6;
+	public static final int ERROR_COULD_NOT_MOVE = -7;
+	public static final int ERROR_DOC_XML_COULD_NOT_BE_CREATED = -8;
+	public static final int ERROR_EXCEPTION_CREATING_DOC_XML_FILE = -9;
+	public static final int ERROR_METADATA_NAME_NOT_SPECIFIED = -10;
+	public static final int ERROR_METADATA_VALUE_NOT_SPECIFIED = -11;
+	public static final int ERROR_COULD_NOT_RETRIEVE_DOC_XML = -12;
+	public static final int ERROR_COULD_NOT_WRITE_TO_DOC_XML = -13;
+	public static final int ERROR_COULD_NOT_RETRIEVE_SECTION = -14;
+	public static final int ERROR_COULD_NOT_OPEN_DATABASE = -15;
+	public static final int ERROR_DATA_NOT_FOUND_IN_DATABASE = -16;
+	public static final int ERROR_COULD_NOT_DELETE = -16;
+	public static final int ERROR_OID_INCORRECT_FORMAT = -17;
+	public static final int ERROR_INVALID_MERGE = -18;
+	public static final int ERROR_INVALID_METADATA_POSITION = -19;
+	public static final int ERROR_INVALID_SPLIT = -20;
+	public static final int ERROR_DESTINATION_OID_NOT_SPECIFIED = -21;
+	public static final HashMap<Integer, String> _errorMessageMap;
 
 	static
 	{
@@ -247,7 +248,7 @@ public class GSDocumentModel
 	 *            If this is null then the collection parameter will be used
 	 *            instead.
 	 */
-	public void documentDuplicate(String oid, String collection, String newOID, String newCollection, String lang, String uid)
+	public void documentMoveOrDuplicate(String oid, String collection, String newOID, String newCollection, int operation, boolean move, String lang, String uid)
 	{
 		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
 		{
@@ -266,17 +267,10 @@ public class GSDocumentModel
 			_errorStatus = ERROR_DESTINATION_OID_NOT_SPECIFIED;
 			return;
 		}
-		else if (archiveCheckDocumentOrSectionExists(newOID, newCollection, lang, uid))
-		{
-			_errorStatus = ERROR_DESTINATION_DOCUMENT_OR_SECTION_ALREADY_EXISTS;
-			return;
-		}
-
-		//Check what operation we are performing
-		int op = getOperation(oid, newOID);
 
 		boolean requiresDatabaseEntry = false;
-		switch (op)
+		int operationType = getOperation(oid, newOID);
+		switch (operationType)
 		{
 		case OPERATION_TYPE_DOC_TO_DOC:
 		{
@@ -301,6 +295,17 @@ public class GSDocumentModel
 					return;
 				}
 			}
+			else
+			{
+				_errorStatus = ERROR_COULD_NOT_DUPLICATE;
+				return;
+			}
+
+			if (move)
+			{
+				deleteDirectory(dirToDuplicate);
+			}
+
 			requiresDatabaseEntry = true;
 			break;
 		}
@@ -315,7 +320,23 @@ public class GSDocumentModel
 				return;
 			}
 
-			documentXMLSetSection(newOID, newCollection, originalSection, OPERATION_REPLACE, lang, uid);
+			documentXMLSetSection(newOID, newCollection, originalSection, operation, lang, uid);
+
+			if (move)
+			{
+				String archiveDirStr = archiveGetDocumentFilePath(oid, collection, lang, uid);
+				if (_errorStatus != NO_ERROR)
+				{
+					return;
+				}
+
+				File archiveDir = new File(archiveDirStr);
+
+				if (archiveDir.exists() && archiveDir.isDirectory())
+				{
+					deleteDirectory(archiveDir);
+				}
+			}
 			break;
 		}
 		case OPERATION_TYPE_SEC_TO_DOC:
@@ -335,7 +356,20 @@ public class GSDocumentModel
 				return;
 			}
 
-			documentXMLSetSection(newOID, newCollection, originalSection, OPERATION_REPLACE, lang, uid);
+			documentXMLSetSection(newOID, newCollection, originalSection, operation, lang, uid);
+
+			if (move)
+			{
+				originalDocument = getDocXML(oid, collection, lang, uid);
+				originalSection.getParentNode().removeChild(originalSection);
+
+				//Write the new change back into the file
+				if (!writeXMLFile(originalDocument, oid, collection, lang, uid))
+				{
+					_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
+					return;
+				}
+			}
 
 			requiresDatabaseEntry = true;
 			break;
@@ -345,13 +379,34 @@ public class GSDocumentModel
 			Document originalDocument = getDocXML(oid, collection, lang, uid);
 			Element originalSection = getSectionBySectionNumber(originalDocument, getSectionFromOID(oid));
 
-			documentXMLCreateSection(newOID, newCollection, lang, uid);
+			if (operation == OPERATION_REPLACE)
+			{
+				documentXMLCreateSection(newOID, newCollection, lang, uid);
+				if (_errorStatus != NO_ERROR)
+				{
+					return;
+				}
+			}
+
+			documentXMLSetSection(newOID, newCollection, originalSection, operation, lang, uid);
 			if (_errorStatus != NO_ERROR)
 			{
 				return;
 			}
+			
+			if (move)
+			{
+				originalDocument = getDocXML(oid, collection, lang, uid);
+				originalSection.getParentNode().removeChild(originalSection);
 
-			documentXMLSetSection(newOID, newCollection, originalSection, OPERATION_REPLACE, lang, uid);
+				//Write the new change back into the file
+				if (!writeXMLFile(originalDocument, oid, collection, lang, uid))
+				{
+					_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
+					return;
+				}
+			}
+
 			break;
 		}
 		}
@@ -395,36 +450,6 @@ public class GSDocumentModel
 		}
 		//TODO: Implement
 		return null;
-	}
-
-	/**
-	 * Can be used to move a document or section from one place to another.
-	 * 
-	 * @param oid
-	 *            is the identifier of the document/section to move.
-	 * @param collection
-	 *            is the collection the source document resides in.
-	 * @param newOID
-	 *            is the new identifer for the moved document.
-	 * @param newCollection
-	 *            is the collection the new document/section will be moved to.
-	 *            If this is null then the collection parameter will be used
-	 *            instead.
-	 */
-	public void documentMove(String oid, String collection, String newOID, String newCollection, String lang, String uid)
-	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
-		{
-			return;
-		}
-
-		documentDuplicate(oid, collection, newOID, newCollection, lang, uid);
-		if (_errorStatus != NO_ERROR)
-		{
-			return;
-		}
-
-		documentDelete(oid, collection, lang, uid);
 	}
 
 	/**
@@ -1140,6 +1165,7 @@ public class GSDocumentModel
 	 * @param operation
 	 *            can be one of OPERATION_REPLACE, OPERATION_INSERT_BEFORE,
 	 *            OPERATION_INSERT_AFTER or OPERATION_APPEND.
+	 * @throws IOException
 	 */
 	public void documentXMLSetSection(String oid, String collection, Element newSection, int operation, String lang, String uid)
 	{
@@ -1171,7 +1197,8 @@ public class GSDocumentModel
 			return;
 		}
 
-		Element importedSection = (Element) docXML.importNode(newSection, true);
+		Element importedSection = (Element) docXML.importNode(newSection.cloneNode(true), true);
+		Node sectionParent = existingSection.getParentNode();
 
 		if (operation == OPERATION_APPEND)
 		{
@@ -1179,8 +1206,6 @@ public class GSDocumentModel
 		}
 		else
 		{
-			Node sectionParent = existingSection.getParentNode();
-
 			//Remove the attributes that are only there to help us find the section
 			importedSection.removeAttribute(GSXML.NODE_ID_ATT);
 			importedSection.removeAttribute(GSXML.COLLECTION_ATT);
@@ -1191,10 +1216,15 @@ public class GSDocumentModel
 			}
 			else if (operation == OPERATION_INSERT_AFTER)
 			{
-				Element sibling = (Element) existingSection.getNextSibling();
-				if (sibling == null)
+				Node siblingNode = existingSection.getNextSibling();
+				while (siblingNode != null && siblingNode.getNodeType() != Node.ELEMENT_NODE)
 				{
-					sectionParent.insertBefore(importedSection, sibling);
+					siblingNode = siblingNode.getNextSibling();
+				}
+
+				if (siblingNode != null)
+				{
+					sectionParent.insertBefore(importedSection, siblingNode);
 				}
 				else
 				{
@@ -1207,7 +1237,7 @@ public class GSDocumentModel
 				sectionParent.removeChild(existingSection);
 			}
 		}
-
+		
 		//Write the new change back into the file
 		if (!writeXMLFile(docXML, oid, collection, lang, uid))
 		{
@@ -1606,8 +1636,12 @@ public class GSDocumentModel
 
 	/**
 	 * Gets the list of associated files for a given document.
-	 * @param oid is the identifier that will be used to search for associated documents.
-	 * @param collection is the collection whose database will be searched.
+	 * 
+	 * @param oid
+	 *            is the identifier that will be used to search for associated
+	 *            documents.
+	 * @param collection
+	 *            is the collection whose database will be searched.
 	 * @return the list of associated files.
 	 */
 	public ArrayList<String> archiveGetAssociatedImportFiles(String oid, String collection, String lang, String uid)
@@ -1955,7 +1989,6 @@ public class GSDocumentModel
 			int currentSectionNum = Integer.parseInt(levels[0]);
 
 			NodeList sections = GSXML.getChildrenByTagName(current, GSXML.DOCXML_SECTION_ELEM);
-
 			if (levels.length > 1)
 			{
 				return getSectionBySectionNumber((Element) sections.item(currentSectionNum - 1), sectionNum.substring(sectionNum.indexOf(".") + 1));
@@ -2002,8 +2035,33 @@ public class GSDocumentModel
 			return null;
 		}
 
-		coll_db.openDatabase(_siteHome + File.separatorChar + "collect" + File.separatorChar + collection + File.separatorChar + "archives" + File.separatorChar + dbName + dbExt, readWrite);
+		coll_db.openDatabase(GSFile.collectionArchiveDir(_siteHome, collection) + File.separatorChar + dbName + dbExt, readWrite);
 
 		return coll_db;
+	}
+
+	public int operationStringToInt(String operation)
+	{
+		if (operation.equals("insertBefore"))
+		{
+			return OPERATION_INSERT_BEFORE;
+		}
+		else if (operation.equals("insertAfter"))
+		{
+			return OPERATION_INSERT_AFTER;
+		}
+		else if (operation.equals("append"))
+		{
+			return OPERATION_APPEND;
+		}
+		else
+		{
+			return OPERATION_REPLACE;
+		}
+	}
+	
+	public int getErrorStatus()
+	{
+		return _errorStatus;
 	}
 }
