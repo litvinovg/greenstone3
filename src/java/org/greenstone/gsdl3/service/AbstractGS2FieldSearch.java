@@ -38,10 +38,10 @@ import org.apache.log4j.*;
 
 abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 {
-
 	// extra services offered by mgpp collections
 	protected static final String FIELD_QUERY_SERVICE = "FieldQuery";
 	protected static final String ADVANCED_FIELD_QUERY_SERVICE = "AdvancedFieldQuery";
+	protected static final String RAW_QUERY_SERVICE = "RawQuery";
 
 	// extra parameters used
 	protected static final String LEVEL_PARAM = "level";
@@ -50,6 +50,8 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	protected static final String RANK_PARAM_NONE = "0";
 	protected static final String SIMPLE_FIELD_PARAM = "simpleField";
 	protected static final String ADVANCED_FIELD_PARAM = "complexField";
+
+	protected static final String RAW_PARAM = "rawquery";
 
 	// more params for field query
 	protected static final String FIELD_QUERY_PARAM = "fqv";
@@ -67,6 +69,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	protected static final String SEARCH_TYPE_PLAIN = "plain";
 	protected static final String SEARCH_TYPE_SIMPLE_FORM = "simpleform";
 	protected static final String SEARCH_TYPE_ADVANCED_FORM = "advancedform";
+	protected static final String SEARCH_TYPE_RAW = "raw";
 
 	protected static final String DEFAULT_LEVEL_ELEM = "defaultLevel";
 	protected static final String DEFAULT_DB_LEVEL_ELEM = "defaultDBLevel";
@@ -76,6 +79,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	protected static final int TEXT_QUERY = 0;
 	protected static final int SIMPLE_QUERY = 1;
 	protected static final int ADVANCED_QUERY = 2;
+	protected static final int RAW_QUERY = 3;
 
 	protected String AND_OPERATOR = "&";
 	protected String OR_OPERATOR = "|";
@@ -89,6 +93,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	protected boolean plain_search = false;
 	protected boolean simple_form_search = false;
 	protected boolean advanced_form_search = false;
+	protected boolean raw_search = true;
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.AbstractGS2FieldSearch.class.getName());
 
@@ -164,6 +169,10 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 					else if (type_name.equals(SEARCH_TYPE_ADVANCED_FORM))
 					{
 						this.advanced_form_search = true;
+					}
+					else if (type_name.equals(SEARCH_TYPE_RAW))
+					{
+						this.raw_search = true;
 					}
 				}
 			}
@@ -241,6 +250,19 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			}
 		}
 
+		if (this.raw_search)
+		{
+			Element rq_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			rq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
+			rq_service.setAttribute(GSXML.NAME_ATT, RAW_QUERY_SERVICE);
+			this.short_service_info.appendChild(rq_service);
+
+			if (format_info != null)
+			{
+				this.format_info_map.put(RAW_QUERY_SERVICE, format_info);
+			}
+		}
+
 		return true;
 	}
 
@@ -248,7 +270,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	{
 		// should we check that the service is actually on offer? presumably we wont get asked for services that we haven't advertised previously.
 
-		if (!service_id.equals(FIELD_QUERY_SERVICE) && !service_id.equals(ADVANCED_FIELD_QUERY_SERVICE))
+		if (!service_id.equals(FIELD_QUERY_SERVICE) && !service_id.equals(ADVANCED_FIELD_QUERY_SERVICE) && !service_id.equals(RAW_QUERY_SERVICE))
 		{
 			return super.getServiceDescription(service_id, lang, subset);
 		}
@@ -294,7 +316,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				createParameter(FIELD_FIELD_PARAM, multiparam, lang);
 
 			}
-			else
+			else if (service_id.equals(ADVANCED_FIELD_QUERY_SERVICE))
 			{
 				createParameter(LEVEL_PARAM, param_list, lang);
 				createParameter(RANK_PARAM, param_list, lang);
@@ -334,6 +356,20 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				}
 				createParameter(FIELD_FIELD_PARAM, multiparam, lang);
 
+			}
+			else if (service_id.equals(RAW_QUERY_SERVICE))
+			{
+				if (does_chunking)
+				{
+					createParameter(MAXDOCS_PARAM, param_list, lang);
+				}
+				if (does_paging)
+				{
+					createParameter(HITS_PER_PAGE_PARAM, param_list, lang);
+					createParameter(START_PAGE_PARAM, param_list, lang);
+				}
+				createParameter(RAW_PARAM, param_list, lang);
+				service.appendChild(param_list);
 			}
 		}
 		return service;
@@ -478,6 +514,11 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		return processAnyQuery(request, ADVANCED_QUERY);
 	}
 
+	protected Element processRawQuery(Element request)
+	{
+		return processAnyQuery(request, RAW_QUERY);
+	}
+
 	/** process a query */
 	protected Element processAnyQuery(Element request, int query_type)
 	{
@@ -497,6 +538,10 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		case ADVANCED_QUERY:
 			service_name = ADVANCED_FIELD_QUERY_SERVICE;
 			empty_query_test_param = FIELD_QUERY_PARAM;
+			break;
+		case RAW_QUERY:
+			service_name = RAW_QUERY_SERVICE;
+			empty_query_test_param = RAW_PARAM;
 			break;
 		default:
 			// should never get here
