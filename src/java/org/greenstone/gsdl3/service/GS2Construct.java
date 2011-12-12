@@ -166,14 +166,24 @@ public class GS2Construct extends ServiceRack
 
 	protected Element processActivateCollection(Element request)
 	{
-		Element response = runCommand(request, GS2PerlConstructor.ACTIVATE);
 		// this activates the collection on disk. but now we need to tell
 		// the MR about it. but we have to wait until the process is finished.
-		Element status = (Element) GSXML.getChildByTagName(response, GSXML.STATUS_ELEM);
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		HashMap params = GSXML.extractParams(param_list, false);
 		String coll_name = (String) params.get(COL_PARAM);
 		String lang = request.getAttribute(GSXML.LANG_ATT);
+
+		systemRequest("delete", coll_name, null, lang);
+
+		Element response = runCommand(request, GS2PerlConstructor.ACTIVATE);
+		Element status = (Element) GSXML.getChildByTagName(response, GSXML.STATUS_ELEM);
+
+		String request_type = request.getAttribute(GSXML.TYPE_ATT);
+		if (request_type.equals(GSXML.REQUEST_TYPE_STATUS))
+		{
+			return response;
+		}
+
 		// check for finished
 		int status_code = Integer.parseInt(status.getAttribute(GSXML.STATUS_ERROR_CODE_ATT));
 		if (GSStatus.isCompleted(status_code) && GSStatus.isError(status_code))
@@ -319,7 +329,6 @@ public class GS2Construct extends ServiceRack
 	 */
 	protected void systemRequest(String action_name, String coll_name, Element status, String lang)
 	{
-
 		// send the request to the MR
 		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 		Element request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_SYSTEM, "", lang, "");
@@ -347,18 +356,21 @@ public class GS2Construct extends ServiceRack
 		Text t;
 		String[] args = { coll_name };
 
-		if (response == null)
+		if (status != null)
 		{
-			t = this.doc.createTextNode(getTextString(action_name + ".configure_error", lang, args));
-			status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
-			status.appendChild(t);
-			return;
-		}
+			if (response == null)
+			{
+				t = this.doc.createTextNode(getTextString(action_name + ".configure_error", lang, args));
+				status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
+				status.appendChild(t);
+				return;
+			}
 
-		// if we got here, we have succeeded!
-		t = this.doc.createTextNode(getTextString(action_name + ".success", lang, args));
-		status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.SUCCESS));
-		status.appendChild(t);
+			// if we got here, we have succeeded!
+			t = this.doc.createTextNode(getTextString(action_name + ".success", lang, args));
+			status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.SUCCESS));
+			status.appendChild(t);
+		}
 	}
 
 	/**
@@ -420,7 +432,6 @@ public class GS2Construct extends ServiceRack
 	/** returns a response element */
 	protected Element runCommand(Element request, int type)
 	{
-
 		// the response to send back
 		String name = GSPath.getFirstLink(request.getAttribute(GSXML.TO_ATT));
 		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
@@ -429,6 +440,7 @@ public class GS2Construct extends ServiceRack
 		response.appendChild(status);
 
 		String lang = request.getAttribute(GSXML.LANG_ATT);
+		String uid = request.getAttribute(GSXML.USER_ID_ATT);
 		String request_type = request.getAttribute(GSXML.TYPE_ATT);
 
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -478,12 +490,11 @@ public class GS2Construct extends ServiceRack
 		{
 			coll_name = (String) params.get(COL_PARAM);
 		}
-		logger.error("Coll name = " + coll_name);
+		logger.info("Coll name = " + coll_name);
 		// makes a paramList of the relevant params
 		Element other_params = extractOtherParams(params, type);
 
 		//create the constructor to do the work
-
 		GS2PerlConstructor constructor = new GS2PerlConstructor("perl_build");
 		if (!constructor.configure())
 		{
@@ -493,12 +504,12 @@ public class GS2Construct extends ServiceRack
 			return response;
 		}
 
+		GS2PerlListener listener = new GS2PerlListener();
 		constructor.setSiteHome(this.site_home);
 		constructor.setCollectionName(coll_name);
 		constructor.setActionType(type);
 		constructor.setProcessParams(other_params);
-		// the listener
-		GS2PerlListener listener = new GS2PerlListener();
+
 		constructor.addListener(listener);
 		constructor.start();
 
@@ -510,7 +521,6 @@ public class GS2Construct extends ServiceRack
 		Text t = this.doc.createTextNode(getTextString("general.process_start", lang));
 		status.appendChild(t);
 		return response;
-
 	}
 
 	//************************
