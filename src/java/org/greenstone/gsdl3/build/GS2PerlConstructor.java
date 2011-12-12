@@ -2,6 +2,7 @@ package org.greenstone.gsdl3.build;
 
 // greenstome classes
 import org.greenstone.gsdl3.util.*;
+import org.greenstone.util.GlobalProperties;
 
 // xml classes
 import org.w3c.dom.Element;
@@ -9,8 +10,11 @@ import org.w3c.dom.NodeList;
 
 //general java classes
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Vector;
 
 /**
@@ -46,13 +50,14 @@ public class GS2PerlConstructor extends CollectionConstructor
 	public boolean configure()
 	{
 		// try to get the environment variables
-		this.gsdl2home = System.getProperty("GSDLHOME");
-		this.gsdl3home = System.getProperty("GSDL3HOME");
-		this.gsdlos = System.getProperty("GSDLOS");
-		this.path = System.getProperty("PATH");
+		this.gsdl3home = GlobalProperties.getGSDL3Home();
+		this.gsdl2home = this.gsdl3home + File.separator + ".." + File.separator + "gs2build";
+		this.gsdlos = System.getProperty("os.name").startsWith("Windows") ? "Windows" : "Linux";
+		this.path = System.getenv("PATH");
+
 		if (this.gsdl2home == null)
 		{
-			System.err.println("You must have greenstone2 installed, and GSDLHOME set for GS2Perl building to work!!");
+			System.err.println("You must have gs2build installed, and GSDLHOME set for GS2Perl building to work!!");
 			return false;
 		}
 		if (this.gsdl3home == null || this.gsdlos == null)
@@ -161,11 +166,16 @@ public class GS2PerlConstructor extends CollectionConstructor
 	{
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "Collection construction: build collection."));
 		Vector command = new Vector();
-		command.add("buildcol.pl");
+		command.add(GlobalProperties.getProperty("perl.path", "perl"));
+		command.add("-S");
+		command.add(GlobalProperties.getGS2Build() + File.separator + "bin" + File.separator + "script" + File.separator + "buildcol.pl");
+		command.add("-site");
+		command.add(this.site_name);
 		command.add("-collectdir");
 		command.add(GSFile.collectDir(this.site_home));
 		command.addAll(extractParameters(this.process_params));
 		command.add(this.collection_name);
+
 		String[] command_str = {};
 		command_str = (String[]) command.toArray(command_str);
 
@@ -174,8 +184,6 @@ public class GS2PerlConstructor extends CollectionConstructor
 			// success!! - need to send the final completed message
 			sendProcessComplete(new ConstructionEvent(this, GSStatus.COMPLETED, ""));
 		}// else an error message has already been sent, do nothing
-			//  	    
-
 	}
 
 	protected void activateCollection()
@@ -195,10 +203,11 @@ public class GS2PerlConstructor extends CollectionConstructor
 		if (index_dir.exists())
 		{
 			sendMessage(new ConstructionEvent(this, GSStatus.INFO, "deleting index directory"));
-			index_dir.delete();
+			GSFile.deleteFile(index_dir);
 			if (index_dir.exists())
 			{
-				sendMessage(new ConstructionEvent(this, GSStatus.INFO, "index directory still exists!"));
+				sendMessage(new ConstructionEvent(this, GSStatus.ERROR, "index directory still exists!"));
+				return;
 			}
 		}
 
@@ -206,22 +215,6 @@ public class GS2PerlConstructor extends CollectionConstructor
 		if (!index_dir.exists())
 		{
 			sendMessage(new ConstructionEvent(this, GSStatus.ERROR, "index dir wasn't created!"));
-		}
-
-		// run the convert coll script to convert the gs2 coll to gs3
-		Vector command = new Vector();
-		command.add("convert_coll_from_gs2.pl");
-		command.add("-collectdir");
-		command.add(GSFile.collectDir(this.site_home));
-		command.addAll(extractParameters(this.process_params));
-		command.add(this.collection_name);
-		String[] command_str = {};
-		command_str = (String[]) command.toArray(command_str);
-
-		if (!runPerlCommand(command_str))
-		{
-			// an error has occurred, dont carry on
-			return;
 		}
 
 		// success!!  - need to send the final completed message
@@ -263,18 +256,29 @@ public class GS2PerlConstructor extends CollectionConstructor
 		String msg;
 		ConstructionEvent evt;
 
-		String args[] = { "GSDLHOME=" + this.gsdl2home, "GSDL3HOME=" + this.gsdl3home, "GSDLOS=" + this.gsdlos, "PATH=" + this.path };
+		ArrayList<String> args = new ArrayList<String>();
+		args.add("GSDLHOME=" + this.gsdl2home);
+		args.add("GSDL3HOME=" + this.gsdl3home);
+		args.add("GSDLOS=" + this.gsdlos);
+		args.add("GSDL-RUN-SETUP=true");
+
+		for (String a : System.getenv().keySet())
+		{
+			args.add(a + "=" + System.getenv(a));
+		}
+
 		String command_str = "";
 		for (int i = 0; i < command.length; i++)
 		{
 			command_str = command_str + command[i] + " ";
 		}
+
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "command = " + command_str));
 		try
 		{
 			Runtime rt = Runtime.getRuntime();
 			sendProcessBegun(new ConstructionEvent(this, GSStatus.ACCEPTED, "starting"));
-			Process prcs = rt.exec(command, args);
+			Process prcs = rt.exec(command, args.toArray(new String[args.size()]));
 
 			InputStreamReader eisr = new InputStreamReader(prcs.getErrorStream());
 			InputStreamReader stdinisr = new InputStreamReader(prcs.getInputStream());
@@ -282,19 +286,29 @@ public class GS2PerlConstructor extends CollectionConstructor
 			BufferedReader stdinbr = new BufferedReader(stdinisr);
 			// Captures the std err of a program and pipes it into
 			// std in of java
+
+			BufferedWriter bw = new BufferedWriter(new FileWriter(GSFile.collectDir(this.site_home) + File.separator + this.collection_name + File.separator + "log" + File.separator + "build_log." + (System.currentTimeMillis()) + ".txt"));
+			bw.write("Document Editor Build\n");
+
 			String eline = null;
 			String stdinline = null;
 			while (((eline = ebr.readLine()) != null || (stdinline = stdinbr.readLine()) != null) && !this.cancel)
 			{
 				if (eline != null)
 				{
+					//System.err.println("ERROR: " + eline);
+					bw.write(eline + "\n");
 					sendProcessStatus(new ConstructionEvent(this, GSStatus.CONTINUING, eline));
 				}
 				if (stdinline != null)
 				{
+					//System.err.println("OUT: " + stdinline);
+					bw.write(stdinline + "\n");
 					sendProcessStatus(new ConstructionEvent(this, GSStatus.CONTINUING, stdinline));
 				}
 			}
+			bw.close();
+
 			if (!this.cancel)
 			{
 				// Now display final message based on exit value

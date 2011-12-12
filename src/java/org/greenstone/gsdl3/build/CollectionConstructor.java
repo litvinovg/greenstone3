@@ -1,5 +1,7 @@
 package org.greenstone.gsdl3.build;
 
+import java.io.File;
+
 import org.greenstone.gsdl3.util.*;
 //import java.util.Thread
 import javax.swing.event.EventListenerList;
@@ -11,6 +13,8 @@ public abstract class CollectionConstructor
 
     /** the site in which building is to take place */
     protected String site_home = null;
+    /** the name of the site*/
+    protected String site_name = null;
     /** the name of the collection */
     protected String collection_name = null;
     /** the stage of construction */
@@ -41,6 +45,9 @@ public abstract class CollectionConstructor
     }
     public void setSiteHome(String site_home) {
 	this.site_home = site_home;
+	
+	File siteHomeFile = new File(site_home);
+	this.site_name = siteHomeFile.getName();
     }
     public void setCollectionName(String coll_name) {
 	this.collection_name = coll_name;
