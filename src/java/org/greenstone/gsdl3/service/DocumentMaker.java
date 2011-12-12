@@ -21,20 +21,35 @@
  */
 package org.greenstone.gsdl3.service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.log4j.*;
 
 import org.greenstone.gsdl3.util.GSDocumentModel;
+import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class DocumentMaker extends ServiceRack
 {
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.ArchiveIO.class.getName());
 
 	GSDocumentModel _GSDM = null;
-	
+
 	/****************************************************
 	 * The list of services the Document Maker supports *
 	 ***************************************************/
@@ -71,7 +86,7 @@ public class DocumentMaker extends ServiceRack
 			service.setAttribute(GSXML.NAME_ATT, services[i]);
 			this.short_service_info.appendChild(service);
 		}
-		
+
 		_GSDM = new GSDocumentModel(this.site_home, this.doc, this.router);
 
 		return true;
@@ -182,8 +197,9 @@ public class DocumentMaker extends ServiceRack
 			String collection = currentDoc.getAttribute(GSXML.COLLECTION_ATT);
 			String newOID = currentDoc.getAttribute("new" + GSXML.NODE_ID_ATT);
 			String newCollection = currentDoc.getAttribute("new" + GSXML.COLLECTION_ATT);
+			String operation = currentDoc.getAttribute("operation");
 
-			_GSDM.documentDuplicate(oid, collection, newOID, newCollection, lang, uid);
+			_GSDM.documentMoveOrDuplicate(oid, collection, newOID, newCollection, _GSDM.operationStringToInt(operation), false, lang, uid);
 			if (_GSDM.checkError(result, DOCUMENT_DUPLICATE))
 			{
 				return result;
@@ -217,11 +233,11 @@ public class DocumentMaker extends ServiceRack
 			NodeList requestedInfoList = currentDoc.getElementsByTagName("info"); //TODO: Replace info with a constant
 			String[] requestedInfo = new String[requestedInfoList.getLength()];
 
-			for(int j = 0; j < requestedInfoList.getLength(); j++)
+			for (int j = 0; j < requestedInfoList.getLength(); j++)
 			{
 				requestedInfo[j] = ((Element) requestedInfoList.item(j)).getAttribute(GSXML.NAME_ATT);
 			}
-			
+
 			_GSDM.documentGetInformation(oid, collection, requestedInfo, lang, uid);
 			if (_GSDM.checkError(result, DOCUMENT_GET_INFORMATION))
 			{
@@ -254,8 +270,9 @@ public class DocumentMaker extends ServiceRack
 			String collection = currentDoc.getAttribute(GSXML.COLLECTION_ATT);
 			String newOID = currentDoc.getAttribute("new" + GSXML.NODE_ID_ATT);
 			String newCollection = currentDoc.getAttribute("new" + GSXML.COLLECTION_ATT);
+			String operation = currentDoc.getAttribute("operation");
 
-			_GSDM.documentMove(oid, collection, newOID, newCollection, lang, uid);
+			_GSDM.documentMoveOrDuplicate(oid, collection, newOID, newCollection, _GSDM.operationStringToInt(operation), true, lang, uid);
 			if (_GSDM.checkError(result, DOCUMENT_MOVE))
 			{
 				return result;
@@ -287,7 +304,7 @@ public class DocumentMaker extends ServiceRack
 			String mergeOID = currentDoc.getAttribute("merge" + GSXML.NODE_ID_ATT);
 
 			_GSDM.documentMerge(oid, collection, mergeOID, lang, uid);
-			if(_GSDM.checkError(result, DOCUMENT_MERGE))
+			if (_GSDM.checkError(result, DOCUMENT_MERGE))
 			{
 				return result;
 			}
@@ -317,20 +334,20 @@ public class DocumentMaker extends ServiceRack
 			String oid = currentDoc.getAttribute(GSXML.NODE_ID_ATT);
 			String collection = currentDoc.getAttribute(GSXML.COLLECTION_ATT);
 			String splitPoint = currentDoc.getAttribute("splitpoint");
-			
+
 			int split;
 			try
 			{
 				split = Integer.parseInt(splitPoint);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				GSXML.addError(this.doc, result, DOCUMENT_SPLIT + ": The split point was not an integer", GSXML.ERROR_TYPE_SYNTAX);
 				return result;
 			}
-			
+
 			_GSDM.documentSplit(oid, collection, split, lang, uid);
-			if(_GSDM.checkError(result, DOCUMENT_SPLIT))
+			if (_GSDM.checkError(result, DOCUMENT_SPLIT))
 			{
 				return result;
 			}
@@ -341,6 +358,103 @@ public class DocumentMaker extends ServiceRack
 
 	protected Element processDocumentExecuteTransaction(Element request)
 	{
-		return null;
+		Element result = GSXML.createBasicResponse(this.doc, DOCUMENT_EXECUTE_TRANSACTION);
+
+		if (request == null)
+		{
+			GSXML.addError(this.doc, result, DOCUMENT_EXECUTE_TRANSACTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			return result;
+		}
+
+		String lang = request.getAttribute(GSXML.LANG_ATT);
+		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+
+		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		if (param_list == null)
+		{
+			GSXML.addError(this.doc, result, DOCUMENT_EXECUTE_TRANSACTION + ": Request has no parameter list", GSXML.ERROR_TYPE_SYNTAX);
+			return result;
+		}
+
+		HashMap params = GSXML.extractParams(param_list, false);
+		String transactionString = (String) params.get("transactions");
+
+		Gson gson = new Gson();
+		Type type = new TypeToken<List<Map<String, String>>>()
+		{
+		}.getType();
+		List<Map<String, String>> transactions = gson.fromJson(transactionString, type);
+
+		ArrayList<String> collectionsToBuild = new ArrayList<String>();
+		if (transactions != null && transactions.size() > 0)
+		{
+			for (int j = 0; j < transactions.size(); j++)
+			{
+				Map keyValueMap = (Map) transactions.get(j);
+				String operation = (String) keyValueMap.get("operation");
+				if (operation.equals("move") || operation.equals("duplicate"))
+				{
+					String origCollection = (String) keyValueMap.get("collection");
+					String origOID = (String) keyValueMap.get("oid");
+					String newCollection = (String) keyValueMap.get("newCollection");
+					String newOID = (String) keyValueMap.get("newOID");
+					String subOperation = (String) keyValueMap.get("subOperation");
+
+					_GSDM.documentMoveOrDuplicate(origOID, origCollection, newOID, newCollection, _GSDM.operationStringToInt(subOperation), operation.equals("move"), lang, uid);
+
+					if (_GSDM.getErrorStatus() == GSDocumentModel.NO_ERROR && origCollection != null && !collectionsToBuild.contains(origCollection))
+					{
+						collectionsToBuild.add(origCollection);
+					}
+
+					if (_GSDM.getErrorStatus() == GSDocumentModel.NO_ERROR && newCollection != null && !collectionsToBuild.contains(newCollection))
+					{
+						collectionsToBuild.add(newCollection);
+					}
+				}
+				else if (operation.equals("create"))
+				{
+					String oid = (String) keyValueMap.get("oid");
+					String collection = (String) keyValueMap.get("collection");
+					String subOperation = (String) keyValueMap.get("subOperation");
+
+					//_GSDM.documentCreate(oid, collection, lang, uid); <--- Maybe go back to this
+					_GSDM.documentXMLSetSection(oid, collection, this.doc.createElement(GSXML.DOCXML_SECTION_ELEM), _GSDM.operationStringToInt(subOperation), lang, uid);
+
+					if (_GSDM.getErrorStatus() == GSDocumentModel.NO_ERROR && collection != null && !collectionsToBuild.contains(collection))
+					{
+						collectionsToBuild.add(collection);
+					}
+				}
+				else if (operation.equals("delete"))
+				{
+					String oid = (String) keyValueMap.get("oid");
+					String collection = (String) keyValueMap.get("collection");
+
+					_GSDM.documentDelete(oid, collection, lang, uid);
+
+					if (_GSDM.getErrorStatus() == GSDocumentModel.NO_ERROR && collection != null && !collectionsToBuild.contains(collection))
+					{
+						collectionsToBuild.add(collection);
+					}
+				}
+				else if (operation.equals("setText"))
+				{
+					String oid = (String) keyValueMap.get("oid");
+					String collection = (String) keyValueMap.get("collection");
+					String newContent = (String) keyValueMap.get("text");
+					
+					_GSDM.documentXMLSetText(oid, collection, newContent, lang, uid);
+					
+					System.err.println(newContent);
+				}
+
+				if (_GSDM.checkError(result, DOCUMENT_EXECUTE_TRANSACTION))
+				{
+					return result;
+				}
+			}
+		}
+		return result;
 	}
 }
