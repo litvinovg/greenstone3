@@ -14,7 +14,9 @@ import org.xml.sax.InputSource;
 import org.w3c.dom.NamedNodeMap;
 
 // other java classes
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
@@ -448,13 +450,18 @@ public class TransformingReceptionist extends Receptionist
 
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		String collection = "";
+		String inlineTemplate = "";
 		if (cgi_param_list != null)
 		{
 			// Don't waste time getting all the parameters
-			HashMap params = GSXML.extractParams(cgi_param_list, false, GSParams.COLLECTION);
+			HashMap params = GSXML.extractParams(cgi_param_list, false);
 			collection = (String) params.get(GSParams.COLLECTION);
 			if (collection == null)
+			{
 				collection = "";
+			}
+
+			inlineTemplate = (String) params.get(GSParams.INLINE_TEMPLATE);
 		}
 
 		Document style_doc = getXSLTDocument(action, subaction, collection);
@@ -534,7 +541,7 @@ public class TransformingReceptionist extends Receptionist
 		Document preprocessingXsl;
 		try
 		{
-			preprocessingXsl = getPreprocessDoc();
+			preprocessingXsl = getDoc(preprocess_xsl_filename);
 			String errMsg = ((XMLConverter.ParseErrorHandler) parser.getErrorHandler()).getErrorMessage();
 			if (errMsg != null)
 			{
@@ -555,7 +562,7 @@ public class TransformingReceptionist extends Receptionist
 		Document libraryXsl = null;
 		try
 		{
-			libraryXsl = getLibraryDoc();
+			libraryXsl = getDoc(this.getLibraryXSLFilename());
 			String errMsg = ((XMLConverter.ParseErrorHandler) parser.getErrorHandler()).getErrorMessage();
 			if (errMsg != null)
 			{
@@ -754,17 +761,30 @@ public class TransformingReceptionist extends Receptionist
 
 		//System.out.println("Generate final HTML from current skin") ;
 		//Transformation of the XML message from the receptionist to HTML with doctype
+
+		if(inlineTemplate != null)
+		{
+			try
+			{
+				Document inlineTemplateDoc = this.converter.getDOM("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:java=\"http://xml.apache.org/xslt/java\" xmlns:util=\"xalan://org.greenstone.gsdl3.util.XSLTUtil\" xmlns:gsf=\"http://www.greenstone.org/greenstone3/schema/ConfigFormat\">" + inlineTemplate + "</xsl:stylesheet>");
+				GSXSLT.mergeStylesheets(skinAndLibraryDoc, inlineTemplateDoc.getDocumentElement());
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
 		
-		if(skinAndLibraryDoc.getElementsByTagName("gsf:metadata").getLength() > 0)
+		if (skinAndLibraryDoc.getElementsByTagName("gsf:metadata").getLength() > 0)
 		{
 			secondConfigFormatPass(collection, skinAndLibraryDoc, doc, request.getAttribute("lang"), request.getAttribute("uid"));
 		}
-		
+
 		if (output.equals("xmlfinal"))
 		{
 			return doc;
 		}
-		
+
 		return this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype); // The default
 
 		// The line below will do the transformation like we use to do before having Skin++ implemented,
@@ -773,7 +793,7 @@ public class TransformingReceptionist extends Receptionist
 		//return (Element)this.transformer.transform(style_doc, doc, config_params);  
 		//return null; // For now - change later
 	}
-	
+
 	protected void secondConfigFormatPass(String collection, Document skinAndLibraryDoc, Document doc, String lang, String uid)
 	{
 		String to = GSPath.appendLink(collection, "DocumentMetadataRetrieve"); // Hard-wired?
@@ -781,37 +801,37 @@ public class TransformingReceptionist extends Receptionist
 		Element metaRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
 		Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		Element docNodeList = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
-		
+
 		NodeList metaNodes = skinAndLibraryDoc.getElementsByTagName("gsf:metadata");
 
-		for(int i = 0; i < metaNodes.getLength(); i++)
+		for (int i = 0; i < metaNodes.getLength(); i++)
 		{
 			Element param = this.doc.createElement(GSXML.PARAM_ELEM);
 			param.setAttribute(GSXML.NAME_ATT, "metadata");
-			param.setAttribute(GSXML.VALUE_ATT, ((Element)metaNodes.item(i)).getAttribute(GSXML.NAME_ATT));
+			param.setAttribute(GSXML.VALUE_ATT, ((Element) metaNodes.item(i)).getAttribute(GSXML.NAME_ATT));
 			paramList.appendChild(param);
 		}
 		metaRequest.appendChild(paramList);
-		
+
 		NodeList docNodes = doc.getElementsByTagName("documentNode");
-		for(int i = 0; i < docNodes.getLength(); i++)
+		for (int i = 0; i < docNodes.getLength(); i++)
 		{
 			Element docNode = this.doc.createElement(GSXML.DOC_NODE_ELEM);
-			docNode.setAttribute(GSXML.NODE_ID_ATT, ((Element)docNodes.item(i)).getAttribute(GSXML.NODE_ID_ATT));
-			docNode.setAttribute(GSXML.NODE_TYPE_ATT, ((Element)docNodes.item(i)).getAttribute(GSXML.NODE_TYPE_ATT));
+			docNode.setAttribute(GSXML.NODE_ID_ATT, ((Element) docNodes.item(i)).getAttribute(GSXML.NODE_ID_ATT));
+			docNode.setAttribute(GSXML.NODE_TYPE_ATT, ((Element) docNodes.item(i)).getAttribute(GSXML.NODE_TYPE_ATT));
 			docNodeList.appendChild(docNode);
 		}
 		metaRequest.appendChild(docNodeList);
 
 		metaMessage.appendChild(metaRequest);
-		Element response = (Element)mr.process(metaMessage);
+		Element response = (Element) mr.process(metaMessage);
 
 		NodeList metaDocNodes = response.getElementsByTagName(GSXML.DOC_NODE_ELEM);
-		for(int i = 0; i < docNodes.getLength(); i++)
+		for (int i = 0; i < docNodes.getLength(); i++)
 		{
 			GSXML.mergeMetadataLists(docNodes.item(i), metaDocNodes.item(i));
 		}
-		
+
 		String configStylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, "config_format.xsl");
 		Document configStylesheet_doc = this.converter.getDOM(new File(configStylesheet_file));
 
@@ -820,7 +840,7 @@ public class TransformingReceptionist extends Receptionist
 			Document format_doc = this.converter.newDOM();
 			format_doc.appendChild(format_doc.importNode(skinAndLibraryDoc.getDocumentElement().cloneNode(true), true));
 			Node result = this.transformer.transform(configStylesheet_doc, format_doc, config_params);
-			GSXSLT.mergeStylesheets(skinAndLibraryDoc, ((Document)result).getDocumentElement());
+			GSXSLT.mergeStylesheets(skinAndLibraryDoc, ((Document) result).getDocumentElement());
 		}
 	}
 
@@ -849,29 +869,15 @@ public class TransformingReceptionist extends Receptionist
 		return content;
 	}
 
-	protected Document getPreprocessDoc() throws Exception
+	protected synchronized Document getDoc(String docName) throws Exception
 	{
-
-		File xslt_file = new File(preprocess_xsl_filename);
+		File xslt_file = new File(docName);
 
 		FileReader reader = new FileReader(xslt_file);
 		InputSource xml_source = new InputSource(reader);
 		this.parser.parse(xml_source);
 		Document doc = this.parser.getDocument();
 
-		return doc;
-	}
-
-	protected Document getLibraryDoc() throws Exception
-	{
-		Document doc = null;
-		File xslt_file = new File(this.getLibraryXSLFilename());
-
-		FileReader reader = new FileReader(xslt_file);
-		InputSource xml_source = new InputSource(reader);
-		this.parser.parse(xml_source);
-
-		doc = this.parser.getDocument();
 		return doc;
 	}
 
@@ -897,24 +903,24 @@ public class TransformingReceptionist extends Receptionist
 			return null;
 		}
 		logger.debug("Stylesheet: " + name);
-		
-		Document finalDoc = this.converter.getDOM(stylesheets.get(stylesheets.size() -1), "UTF-8");
-		if(finalDoc == null)
+
+		Document finalDoc = this.converter.getDOM(stylesheets.get(stylesheets.size() - 1), "UTF-8");
+		if (finalDoc == null)
 		{
 			return null;
 		}
-		
-		for(int i = stylesheets.size() - 2; i >= 0; i--)
+
+		for (int i = stylesheets.size() - 2; i >= 0; i--)
 		{
 			Document currentDoc = this.converter.getDOM(stylesheets.get(i), "UTF-8");
-			if(currentDoc == null)
+			if (currentDoc == null)
 			{
 				return null;
 			}
-			
+
 			GSXSLT.mergeStylesheets(finalDoc, currentDoc.getDocumentElement());
 		}
-		
+
 		return finalDoc;
 	}
 
