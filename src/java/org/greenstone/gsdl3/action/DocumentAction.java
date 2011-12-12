@@ -185,9 +185,18 @@ public class DocumentAction extends Action
 		Element ds_param = null;
 		boolean get_structure = false;
 		boolean get_structure_info = false;
-		if (document_type.equals("paged"))
+		if (document_type.equals(GSXML.DOC_TYPE_PAGED))
 		{
 			get_structure_info = true;
+
+			if (expand_contents)
+			{
+				ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+				ds_param_list.appendChild(ds_param);
+				ds_param.setAttribute(GSXML.NAME_ATT, "structure");
+				ds_param.setAttribute(GSXML.VALUE_ATT, "entire");
+			}
+
 			// get teh info needed for paged naviagtion
 			ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
 			ds_param_list.appendChild(ds_param);
@@ -202,8 +211,16 @@ public class DocumentAction extends Action
 			ds_param.setAttribute(GSXML.NAME_ATT, "info");
 			ds_param.setAttribute(GSXML.VALUE_ATT, "siblingPosition");
 
+			if (get_siblings)
+			{
+				ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+				ds_param_list.appendChild(ds_param);
+				ds_param.setAttribute(GSXML.NAME_ATT, "structure");
+				ds_param.setAttribute(GSXML.VALUE_ATT, "siblings");
+			}
+
 		}
-		else if (document_type.equals("hierarchy"))
+		else if (document_type.equals(GSXML.DOC_TYPE_HIERARCHY))
 		{
 			get_structure = true;
 			if (expand_contents)
@@ -329,7 +346,7 @@ public class DocumentAction extends Action
 		meta_names.add("Title"); // the default
 		if (format_elem != null)
 		{
-			extractMetadataNames(format_elem, meta_names);
+			getRequiredMetadataNames(format_elem, meta_names);
 		}
 
 		Element dm_param_list = createMetadataParamList(meta_names);
@@ -390,6 +407,7 @@ public class DocumentAction extends Action
 			doc_node.setAttribute("externalURL", has_rl);
 		}
 		doc_list.appendChild(doc_node);
+
 		Element dm_response_message = (Element) this.mr.process(dm_message);
 		if (processErrorElements(dm_response_message, page_response))
 		{
@@ -670,8 +688,8 @@ public class DocumentAction extends Action
 	 * requery the query service - uses the last selected service name. (if it
 	 * ends in query). should this action do the query or should it send a
 	 * message to the query action? but that will involve lots of extra stuff.
-	 * also doesn't handle phrases properly - just highlights all the terms found
-	 * in the text.
+	 * also doesn't handle phrases properly - just highlights all the terms
+	 * found in the text.
 	 */
 	protected Element highlightQueryTerms(Element request, Element dc_response_doc_content)
 	{
@@ -859,7 +877,6 @@ public class DocumentAction extends Action
 			}
 		}
 
-		System.err.println(query_term_variants + " *** " + phrase_query_term_variants_hierarchy);
 		return highlightQueryTermsInternal(content, query_term_variants, phrase_query_term_variants_hierarchy);
 	}
 
@@ -896,7 +913,7 @@ public class DocumentAction extends Action
 			}
 			
 			boolean is_character_letter_or_digit = Character.isLetterOrDigit(content_characters[i]);
-
+			
 			// Has a word just started?
 			if (in_word == false && is_character_letter_or_digit == true)
 			{

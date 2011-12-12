@@ -174,7 +174,7 @@ public class QueryAction extends Action {
 	    format_elem.setAttribute(GSXML.TYPE_ATT, "search");
 	    // for now just add to the response
 	    page_response.appendChild(this.doc.importNode(format_elem, true));
-	    extractMetadataNames(format_elem, metadata_names);
+	    getRequiredMetadataNames(format_elem, metadata_names);
 	} 
 	
 	// paging of the results is done here - we filter the list to remove unwanted entries before retrieving metadata

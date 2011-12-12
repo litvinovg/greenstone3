@@ -333,15 +333,15 @@ public class GS2BrowseAction extends Action {
 
    
     protected void extractMetadataNames(Element new_format, HashSet doc_meta_names, HashSet class_meta_names) {
-
+    
 	NodeList templates = new_format.getElementsByTagName("gsf:template");
 	for (int i=0; i<templates.getLength(); i++) {
 	    Element template = (Element)templates.item(i);
 	    String match = template.getAttribute("match");
 	    if (match.equals("documentNode")) {
-		extractMetadataNames(template, doc_meta_names);
+	    	getRequiredMetadataNames(template, doc_meta_names);
 	    } else if (match.equals("classifierNode")) {
-		extractMetadataNames(template, class_meta_names);
+	    	getRequiredMetadataNames(template, class_meta_names);
 	    }
 	}
     }

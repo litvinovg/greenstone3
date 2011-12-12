@@ -127,7 +127,7 @@ public class BrowseAction extends Action {
 		new_format.setAttribute(GSXML.TYPE_ATT, "browse");
 
 		page_response.appendChild(new_format);
-		extractMetadataNames(new_format, metadata_names);
+		getRequiredMetadataNames(new_format, metadata_names);
 	    }
 	}
 	

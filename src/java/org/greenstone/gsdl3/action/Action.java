@@ -20,6 +20,7 @@ import org.apache.log4j.*;
 /** base class for Actions */
 abstract public class Action
 {
+
 	/** the system set up variables */
 	protected HashMap config_params = null;
 	/** container Document to create XML Nodes */
@@ -90,6 +91,12 @@ abstract public class Action
 		return true;
 	}
 
+	protected void getRequiredMetadataNames(Element format, HashSet meta_names)
+	{
+		extractMetadataNames(format, meta_names);
+		addLinkMetadataNames(format, meta_names);
+	}
+
 	protected void extractMetadataNames(Element format, HashSet meta_names)
 	{
 		//NodeList nodes = format.getElementsByTagNameNS("metadata", "http://www.greenstone.org/configformat");
@@ -123,7 +130,10 @@ abstract public class Action
 			metadata.append(name);
 			meta_names.add(metadata.toString());
 		}
+	}
 
+	protected void addLinkMetadataNames(Element format, HashSet meta_names)
+	{
 		// The XSL tranform for
 		//   gsf:link type="source" 
 		// makes use of 'assocfilepath' so need to make sure it's asked for
@@ -143,9 +153,8 @@ abstract public class Action
 		// get all the metadata necessary for when the user has used "gsf:equivlink"
 		// so that we can build up the equivlink from the metadata components it needs
 		link_nodes = format.getElementsByTagName("gsf:equivlinkgs3");
-		if (link_nodes != null)
+		if (link_nodes.getLength() > 0)
 		{
-
 			String[] equivlink_metanames = { "equivDocIcon", "equivDocLink", "/equivDocLink" };
 
 			for (int i = 0; i < equivlink_metanames.length; i++)
@@ -162,6 +171,17 @@ abstract public class Action
 				// the name of the metadata we're retrieving
 				metadata.append(equivlink_metanames[i]);
 				meta_names.add(metadata.toString());
+			}
+		}
+		
+		NodeList image_nodes = format.getElementsByTagName("gsf:image");
+		for(int i = 0; i < image_nodes.getLength(); i++)
+		{
+			if(format.getElementsByTagName("gsf:image").getLength() > 0)
+			{
+				meta_names.add("Thumb");
+				meta_names.add("Screen");
+				meta_names.add("SourceFile");
 			}
 		}
 	}
