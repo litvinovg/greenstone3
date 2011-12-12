@@ -52,6 +52,7 @@ public abstract class AbstractSearch extends ServiceRack
 	// compulsory params
 	protected static final String INDEX_PARAM = "index";
 	protected static final String QUERY_PARAM = "query";
+	protected static final String RAW_PARAM = "rawquery";
 
 	// optional standard params - some of these have to be implemented
 	protected static final String MAXDOCS_PARAM = "maxDocs";
@@ -277,15 +278,14 @@ public abstract class AbstractSearch extends ServiceRack
 		Element param = null;
 		String param_default = default_value;
 
-		if (name.equals(QUERY_PARAM))
+		if (name.equals(QUERY_PARAM) || name.equals(RAW_PARAM))
 		{
-			param = GSXML.createParameterDescription(this.doc, QUERY_PARAM, getTextString("param." + QUERY_PARAM, lang), GSXML.PARAM_TYPE_STRING, param_default, null, null);
+			param = GSXML.createParameterDescription(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_STRING, param_default, null, null);
 			param_list.appendChild(param);
 			return true;
 		}
 		else if (name.equals(INDEX_PARAM))
 		{
-
 			// should we make these class fields?
 			ArrayList index_ids = new ArrayList();
 			ArrayList index_names = new ArrayList();
