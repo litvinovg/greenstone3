@@ -38,13 +38,12 @@ public class GSXSLT
 	 */
 	public static void mergeStylesheets(Document main_xsl, Element extra_xsl)
 	{
-
 		Element main = main_xsl.getDocumentElement();
-
 		NodeList children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "template");
 		for (int i = 0; i < children.getLength(); i++)
 		{
-			String name = ((Element) children.item(i)).getAttribute("name");
+			Node node = children.item(i);
+			String name = ((Element) node).getAttribute("name");
 			if (!name.equals(""))
 			{
 				Element old_template = GSXML.getNamedElement(main, "xsl:template", "name", name);
@@ -54,9 +53,8 @@ public class GSXSLT
 				}
 			}
 
-			main.appendChild(main_xsl.importNode(children.item(i), true));
+			main.appendChild(main_xsl.importNode(node, true));
 		}
-
 	}
 
 	/**
