@@ -23,6 +23,7 @@ import java.util.HashMap;
 /** keeps track of the interface parameters, and their defaults */
 public class GSParams
 {
+
 	public static final String ACTION = "a"; // the major type of action- eg query or browse or process
 	public static final String SUBACTION = "sa"; // subtype of action if we want different processing than the default
 	public static final String REQUEST_TYPE = "rt"; // whether the request is just to display the service form, or to actually do a request to the service
@@ -55,6 +56,10 @@ public class GSParams
 	// used for filtering out a piece of the final page
 	public static final String EXCERPT_ID = "excerptid";
 	public static final String EXCERPT_TAG = "excerpttag";
+
+	public static final String INLINE_TEMPLATE = "ilt";
+	public static final String DISPLAY_METADATA = "dmd";
+
 	protected HashMap param_map = null;
 
 	public GSParams()
@@ -83,6 +88,8 @@ public class GSParams
 		addParameter(EXPAND_DOCUMENT, false);
 		addParameter(EXPAND_CONTENTS, false);
 		addParameter(REALISTIC_BOOK, false);
+		addParameter(INLINE_TEMPLATE, false);
+		addParameter(DISPLAY_METADATA, false);
 
 		//addParameter();
 		// ugly hack so we don't save the extlink param
