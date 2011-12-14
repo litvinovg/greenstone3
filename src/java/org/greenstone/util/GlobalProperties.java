@@ -29,6 +29,7 @@ import org.apache.log4j.*;
  */
 public class GlobalProperties
 {
+
 	static Logger logger = Logger.getLogger(org.greenstone.util.GlobalProperties.class.getName());
 	private static Properties properties = null;
 	private static String properties_filename = "global.properties";
@@ -61,6 +62,11 @@ public class GlobalProperties
 	public static String getGSDL3Home()
 	{
 		return gsdl3_home;
+	}
+
+	public static String getGS2Build()
+	{
+		return gsdl3_home + File.separator + ".." + File.separator + "gs2build";
 	}
 
 	public static String getGSDL3WebAddress()
