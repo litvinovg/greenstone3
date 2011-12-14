@@ -93,7 +93,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	protected boolean plain_search = false;
 	protected boolean simple_form_search = false;
 	protected boolean advanced_form_search = false;
-	protected boolean raw_search = true;
+	protected boolean raw_search = false;
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.AbstractGS2FieldSearch.class.getName());
 
