@@ -447,7 +447,7 @@ public class Server2 extends BaseServer
     {
     	if ((args.length < 1) || (args.length > 5)) {
 	    System.err.println(
-	       "Usage: java org.greenstone.server.Server2 <gsdl2-home-dir> [lang] [--mode=\"gli\"] [--config=configfile] [--quitport=portNum]");
+	       "Usage: java org.greenstone.server.Server2 <gsdl2-home-dir> [GSDLOS_GSDLARCH] [lang] [--mode=\"gli\"] [--config=configfile] [--quitport=portNum]");
 	    System.exit(1);
 		}
 	
