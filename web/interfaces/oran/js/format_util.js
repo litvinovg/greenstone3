@@ -1,14 +1,14 @@
 
 console.log("Loading format_util.js\n");
 
-// Ensures that a change to a text field is remembered
+/* Ensures that a change to a text field is remembered */
 function onTextChange(item, text)
 {
     console.log("I have set "+item+".value to "+text);
     item.setAttribute("value",text);
 }
 
-// Ensures that a change to a select field is remembered
+/* Ensures that a change to a select field is remembered */
 function onSelectChange(item)
 {
     console.log("I have set "+item.value+".selected to selected");
@@ -23,6 +23,8 @@ function onSelectChange(item)
     //item.setAttribute("selected","selected");
 }
 
+
+/* Get substring */
 function getSubstring(str, first, last)
 {
     var first_index = str.indexOf(first)+first.length+1;
@@ -33,37 +35,29 @@ function getSubstring(str, first, last)
 
     var substring = str.substring(first_index, last_index);
 
-    console.log(substring);
-
     return substring;
 }
     
 function getXSLT(classname)
 {
+    console.log("*** Function getXSLT ***");
     var myurl = document.URL;
 
-    //var collection_name = getSubstring(myurl, "&c", "&");
     var document_id = getSubstring(myurl, "&d", "&");
     var document_type = getSubstring(myurl, "&dt", "&");
-    var prev_action = getSubstring(myurl, "&p.a", "&");
-    console.log("Prev action: "+ prev_action);
-    var prev_service = getSubstring(myurl, "&p.s", "&");
-    console.log("Prev service: "+ prev_service);
 
-    //var post_url = "http://localhost:8383/greenstone3/dev?a=d&c=" + collection_name + "&d=" + document_id + "&dt=" + document_type + "&p.a=" + prev_action + "&p.s=" + prev_service + "&o=skinandlib";
     var post_url = host_info.pre_URL +"?a=d&c=" + host_info.collection_name + "&d=" + document_id + "&dt=" + document_type + "&o=skinandlib";
 
-    $.post(post_url, {data: classname}, function(data) {
-            console.log("Success, we have received data");
-            console.log(data);
+    $.post(post_url, function(data) {
+            console.log("Success, we have received the XSLT for the relevant page part");
             classname = "." + classname;
-            console.log(classname); 
-            var content = $(data).find(classname);
-            console.log(content.innerXHTML());
-            console.log(content.xml());
-            console.log(content);
+            /* There seemed to be a problem with MIME types for the data received from the post. */ 
+            /* The best fix for now is to set the data type to text and then reparse as xml */
+            xml = $.parseXML(data);
+            var content = $( xml ).find(classname);
+            /* The xml() function is provided by jquery.xml.js (included by formatmanager.xsl) */
             $("#XSLTcode").val(content.xml());
-            }, 'xml');
+            }, 'text');
 }
 
 function traverse(node, formatstring)
@@ -161,9 +155,6 @@ $(document).ready(function(){
 	
     CURRENT_SELECT_VALUE = ""; //global - gets set by ui.draggable
 
-    console.log(gs.xsltParams.interface_name);
-    console.log(gs.collectionMetadata.httpPath);
-    console.log(document.URL);
     var r = /(https?:\/\/)?([\da-z\.-]+):(\d+)\/([\da-z]+)\/([\da-z]+)\?.*&c=([\da-z\.-]+).*/;
     var s = document.URL;
     s.match(r);
@@ -183,25 +174,6 @@ $(document).ready(function(){
 
     host_info.pre_URL = "http://" + host_info.host_name + ":" + host_info.port + "/" + host_info.library + "/" + host_info.servlet;
     console.log("Pre URL: " + host_info.pre_URL);
-
-    /*
-	var collection = "";
-	
-	var regex = new RegExp("[?&]c=");
-	var matches = regex.exec(document.URL);
-	if(matches != null)
-	{
-		var startIndex = matches.index;
-		var endIndex = document.URL.indexOf("&", startIndex + 1);
-		
-		if(endIndex == -1)
-		{
-			endIndex = document.URL.length;
-		}
-		
-		collection = document.URL.substring(startIndex, endIndex);
-	}
-    */
 
     /*
     var iframe = document.getElementById('iframe');

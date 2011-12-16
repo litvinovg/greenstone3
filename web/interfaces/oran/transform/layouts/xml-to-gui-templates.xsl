@@ -44,6 +44,8 @@ Recent changes:
 
 
     <!-- ********** GSF:METADATA ********** -->
+    <!-- This element is now created on-the-fly in javascript -->
+    <!--    
         <xsl:variable name="metadata">
         <div class="gsf_metadata css_gsf_metadata block leaf" title="gsf:metadata">
             <xsl:variable name="combo">
@@ -60,7 +62,7 @@ Recent changes:
         <script type="text/javascript">
             gsf_metadata_element = <xsl:text disable-output-escaping="yes">'</xsl:text><xsl:copy-of select="$metadata"/><xsl:text disable-output-escaping="yes">';</xsl:text> 
         </script>
-
+   -->
 
     <!-- ********** GSF:LINK ********** -->
         <xsl:variable name="link">

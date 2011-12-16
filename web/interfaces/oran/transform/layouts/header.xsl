@@ -26,9 +26,9 @@
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
 		<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
 		<link rel="shortcut icon" href="favicon.ico"/> 
-		<script type="text/javascript" src="interfaces/{$interface_name}/js/direct-edit.js"><xsl:text> </xsl:text></script>
+		<!--<script type="text/javascript" src="interfaces/{$interface_name}/js/direct-edit.js"><xsl:text> </xsl:text></script>-->
 		
-		<xsl:call-template name="init-seaweed"/>
+		<!--<xsl:call-template name="init-seaweed"/>-->
 		<xsl:call-template name="setup-gs-variable"/>
 		<xsl:call-template name="additionalHeaderContent"/>
 	</xsl:template>
