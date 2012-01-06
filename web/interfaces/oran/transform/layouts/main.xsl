@@ -14,7 +14,7 @@
 	extension-element-prefixes="java util result exsl"
 	exclude-result-prefixes="util java util">
 
-	<xsl:include href="header.xsl"/>
+	<xsl:import href="header.xsl"/>
 	<xsl:include href="formatmanager.xsl"/>
 	
 
