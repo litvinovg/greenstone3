@@ -414,4 +414,13 @@ public class XSLTUtil
 			return "sectionHeaderDepth" + count;
 		}
 	}
+	
+	public static String escapeNewLines(String str)
+	{
+		if(str == null || str.length() < 1)
+		{
+			return null;
+		}
+		return str.replace("\n", "\\\n");
+	}
 }
