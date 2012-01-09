@@ -21,6 +21,7 @@
 		<xsl:call-template name="populate-xslt-param-values"/>
 		<xsl:call-template name="populate-image-url-values"/>
 		<xsl:call-template name="populate-metadata-values"/>
+		<xsl:call-template name="include-global-javascript-functions"/>
 	</xsl:template>
 	
 	<xsl:template name="populate-cgi-param-values">
@@ -29,7 +30,7 @@
 			var value;
 			<xsl:for-each select="/page/pageRequest/paramList/param">
 				<xsl:text disable-output-escaping="yes">name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
-				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of select="@value"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of select="util:escapeNewLines(@value)"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				<xsl:text disable-output-escaping="yes">name = name.replace(".", "_");</xsl:text>
 				gs.cgiParams[name] = value;
 			</xsl:for-each>
@@ -103,7 +104,12 @@
 			<xsl:text disable-output-escaping="yes">gs.imageURLs.loading = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'loading_image')"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 			<xsl:text disable-output-escaping="yes">gs.imageURLs.pageIcon = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'page_icon_image')"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 			<xsl:text disable-output-escaping="yes">gs.imageURLs.trashFull = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'trash_full_image')"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+			<xsl:text disable-output-escaping="yes">gs.imageURLs.blank = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'blank_image')"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 		</script>
+	</xsl:template>
+	
+	<xsl:template name="include-global-javascript-functions">
+		<script type="text/javascript" src="interfaces/oran/js/javascript-global-functions.js"><xsl:text> </xsl:text></script>
 	</xsl:template>
 </xsl:stylesheet>
 
