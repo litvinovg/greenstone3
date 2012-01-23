@@ -356,26 +356,26 @@ public class LibraryServlet extends HttpServlet
 		logUsageInfo(request);
 
 		String query_string;
-		if(request.getMethod().equals("GET"))
+		if (request.getMethod().equals("GET"))
 		{
-			query_string = request.getQueryString();	
+			query_string = request.getQueryString();
 		}
-		else if(request.getMethod().equals("POST"))
+		else if (request.getMethod().equals("POST"))
 		{
 			query_string = "";
 			Map paramMap = request.getParameterMap();
 			Iterator keyIter = paramMap.keySet().iterator();
-			
-			while(keyIter.hasNext())
+
+			while (keyIter.hasNext())
 			{
-				String current = (String)keyIter.next();
-				query_string += current + "=" + ((String[])paramMap.get(current))[0];
-				if(keyIter.hasNext())
+				String current = (String) keyIter.next();
+				query_string += current + "=" + ((String[]) paramMap.get(current))[0];
+				if (keyIter.hasNext())
 				{
 					query_string += "&";
 				}
 			}
-			
+
 			DiskFileItemFactory fileItemFactory = new DiskFileItemFactory();
 
 			int sizeLimit = System.getProperties().containsKey("servlet.upload.filesize.limit") ? Integer.parseInt(System.getProperty("servlet.upload.filesize.limit")) : 20 * 1024 * 1024;
@@ -385,34 +385,62 @@ public class LibraryServlet extends HttpServlet
 
 			ServletFileUpload uploadHandler = new ServletFileUpload(fileItemFactory);
 
+			String storageLocation = "";
+			File uploadedFile = null;
 			try
 			{
 				List items = uploadHandler.parseRequest(request);
 				Iterator iter = items.iterator();
-				while(iter.hasNext())
+				while (iter.hasNext())
 				{
 					FileItem current = (FileItem) iter.next();
-					if(current.isFormField())
+					if (current.isFormField())
 					{
 						query_string += current.getFieldName() + "=" + current.getString();
-						if(iter.hasNext())
+						if (iter.hasNext())
 						{
 							query_string += "&";
+						}
+						
+						if(current.getFieldName().equals(GSParams.FILE_LOCATION))
+						{
+							storageLocation = current.getString();
 						}
 					}
 					else
 					{
 						File file = new File(GlobalProperties.getGSDL3Home() + File.separator + "tmp" + File.separator + current.getName());
+						File tmpFolder = new File(GlobalProperties.getGSDL3Home() + File.separator + "tmp");
+						if(!tmpFolder.exists())
+						{
+							tmpFolder.mkdirs();
+						}
 						current.write(file);
+						
+						uploadedFile = file;
+					}
+				}
+				
+				if(!storageLocation.equals("") && uploadedFile != null)
+				{
+					File toFile = new File(GlobalProperties.getGSDL3Home() + storageLocation);
+					if(toFile.exists())
+					{
+						logger.error("Cannot move the stored file because the file \"" + storageLocation + "\" already exists");
+					}
+					else
+					{
+						logger.info("Moving uploaded file (" + uploadedFile.getAbsolutePath() + ") to " + toFile.getAbsolutePath());
+						uploadedFile.renameTo(toFile);
 					}
 				}
 			}
-			catch (Exception e) 
+			catch (Exception e)
 			{
 				logger.error("Exception in LibraryServlet -> " + e.getMessage());
 			}
-			
-			if(query_string.equals(""))
+
+			if (query_string.equals(""))
 			{
 				query_string = null;
 			}
@@ -421,7 +449,7 @@ public class LibraryServlet extends HttpServlet
 		{
 			query_string = null;
 		}
-		
+
 		if (query_string != null)
 		{
 			String[] query_arr = StringUtils.split(query_string, "&");
@@ -472,6 +500,7 @@ public class LibraryServlet extends HttpServlet
 			uid = "" + getNextUserId();
 			session.setAttribute(GSXML.USER_ID_ATT, uid);
 		}
+
 		request.setCharacterEncoding("UTF-8");
 		response.setContentType("text/html;charset=UTF-8");
 		PrintWriter out = response.getWriter();
