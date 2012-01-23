@@ -59,6 +59,7 @@ public class GSParams
 
 	public static final String INLINE_TEMPLATE = "ilt";
 	public static final String DISPLAY_METADATA = "dmd";
+	public static final String FILE_LOCATION = "fl";
 
 	protected HashMap param_map = null;
 
