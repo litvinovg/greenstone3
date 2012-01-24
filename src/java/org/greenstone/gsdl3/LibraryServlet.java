@@ -426,13 +426,14 @@ public class LibraryServlet extends HttpServlet
 					File toFile = new File(GlobalProperties.getGSDL3Home() + storageLocation);
 					if(toFile.exists())
 					{
-						logger.error("Cannot move the stored file because the file \"" + storageLocation + "\" already exists");
-					}
-					else
-					{
+						File backupFile = new File(toFile.getAbsolutePath() + System.currentTimeMillis());
+						
 						logger.info("Moving uploaded file (" + uploadedFile.getAbsolutePath() + ") to " + toFile.getAbsolutePath());
-						uploadedFile.renameTo(toFile);
+						toFile.renameTo(backupFile);
 					}
+					
+					logger.info("Moving uploaded file (" + uploadedFile.getAbsolutePath() + ") to " + toFile.getAbsolutePath());
+					uploadedFile.renameTo(toFile);
 				}
 			}
 			catch (Exception e)
