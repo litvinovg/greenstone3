@@ -30,7 +30,7 @@
 			var value;
 			<xsl:for-each select="/page/pageRequest/paramList/param">
 				<xsl:text disable-output-escaping="yes">name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
-				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of select="util:escapeNewLines(@value)"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of select="util:escapeNewLinesAndQuotes(@value)"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				<xsl:text disable-output-escaping="yes">name = name.replace(".", "_");</xsl:text>
 				gs.cgiParams[name] = value;
 			</xsl:for-each>
@@ -70,21 +70,21 @@
 			</xsl:text>
 			<xsl:for-each select="/page/pageResponse/metadataList/metadata">
 				<xsl:text disable-output-escaping="yes">name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
-				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="."/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="util:escapeNewLinesAndQuotes(.)"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				<xsl:text disable-output-escaping="yes">lang = "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				addMetadataToList(name, value, gs.siteMetadata, lang);
 			</xsl:for-each>
 		
 			<xsl:for-each select="/page/pageResponse/collection/metadataList/metadata">
 				<xsl:text disable-output-escaping="yes">name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
-				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="."/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="util:escapeNewLinesAndQuotes(.)"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				<xsl:text disable-output-escaping="yes">lang = "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				addMetadataToList(name, value, gs.collectionMetadata, lang);
 			</xsl:for-each>
 		
 			<xsl:for-each select="/page/pageResponse/document/metadataList/metadata">
 				<xsl:text disable-output-escaping="yes">name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
-				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="."/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="util:escapeNewLinesAndQuotes(.)"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				<xsl:text disable-output-escaping="yes">lang = "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				addMetadataToList(name, value, gs.documentMetadata, lang);
 			</xsl:for-each>
