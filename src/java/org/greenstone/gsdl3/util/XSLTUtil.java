@@ -423,4 +423,22 @@ public class XSLTUtil
 		}
 		return str.replace("\n", "\\\n");
 	}
+	
+	public static String escapeQuotes(String str)
+	{
+		if(str == null || str.length() < 1)
+		{
+			return null;
+		}
+		return str.replace("\"", "\\\"");
+	}
+	
+	public static String escapeNewLinesAndQuotes(String str)
+	{
+		if(str == null || str.length() < 1)
+		{
+			return null;
+		}
+		return escapeNewLines(escapeQuotes(str));
+	}
 }
