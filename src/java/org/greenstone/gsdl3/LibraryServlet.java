@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.io.File;
 import java.lang.reflect.Type;
+import java.nio.channels.FileChannel;
 import java.util.Hashtable;
 import org.apache.log4j.*;
 
@@ -436,8 +437,28 @@ public class LibraryServlet extends HttpServlet
 							toFile.renameTo(backupFile);
 						}
 
-						logger.info("Moving uploaded file (" + uploadedFile.getAbsolutePath() + ") to " + toFile.getAbsolutePath());
-						uploadedFile.renameTo(toFile);
+						
+						FileChannel source = null;
+						FileChannel destination = null;
+						try
+						{
+							logger.info("Moving uploaded file (" + uploadedFile.getAbsolutePath() + ") to " + toFile.getAbsolutePath());
+							source = new FileInputStream(uploadedFile).getChannel();
+							destination = new FileOutputStream(toFile).getChannel();
+							destination.transferFrom(source, 0, source.size());
+						}
+						finally
+						{
+							if (source != null)
+							{
+								source.close();
+							}
+							if (destination != null)
+							{
+								destination.close();
+							}
+						}
+
 					}
 				}
 			}
