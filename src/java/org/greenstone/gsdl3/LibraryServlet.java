@@ -401,8 +401,8 @@ public class LibraryServlet extends HttpServlet
 						{
 							query_string += "&";
 						}
-						
-						if(current.getFieldName().equals(GSParams.FILE_LOCATION))
+
+						if (current.getFieldName().equals(GSParams.FILE_LOCATION))
 						{
 							storageLocation = current.getString();
 						}
@@ -411,29 +411,34 @@ public class LibraryServlet extends HttpServlet
 					{
 						File file = new File(GlobalProperties.getGSDL3Home() + File.separator + "tmp" + File.separator + current.getName());
 						File tmpFolder = new File(GlobalProperties.getGSDL3Home() + File.separator + "tmp");
-						if(!tmpFolder.exists())
+						if (!tmpFolder.exists())
 						{
 							tmpFolder.mkdirs();
 						}
 						current.write(file);
-						
+
 						uploadedFile = file;
 					}
 				}
-				
-				if(!storageLocation.equals("") && uploadedFile != null)
+
+				if (!storageLocation.equals("") && uploadedFile != null)
 				{
-					File toFile = new File(GlobalProperties.getGSDL3Home() + storageLocation);
-					if(toFile.exists())
+					String[] locations = storageLocation.split(":");
+
+					for (String location : locations)
 					{
-						File backupFile = new File(toFile.getAbsolutePath() + System.currentTimeMillis());
-						
+						File toFile = new File(GlobalProperties.getGSDL3Home() + location);
+						if (toFile.exists())
+						{
+							File backupFile = new File(toFile.getAbsolutePath() + System.currentTimeMillis());
+
+							logger.info("Backing up file (" + toFile.getAbsolutePath() + ") to " + backupFile.getAbsolutePath());
+							toFile.renameTo(backupFile);
+						}
+
 						logger.info("Moving uploaded file (" + uploadedFile.getAbsolutePath() + ") to " + toFile.getAbsolutePath());
-						toFile.renameTo(backupFile);
+						uploadedFile.renameTo(toFile);
 					}
-					
-					logger.info("Moving uploaded file (" + uploadedFile.getAbsolutePath() + ") to " + toFile.getAbsolutePath());
-					uploadedFile.renameTo(toFile);
 				}
 			}
 			catch (Exception e)
