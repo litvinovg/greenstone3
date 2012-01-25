@@ -51,7 +51,6 @@ import org.apache.log4j.*;
 
 public abstract class AbstractDocumentRetrieve extends ServiceRack
 {
-
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.AbstractDocumentRetrieve.class.getName());
 
 	// the services on offer
@@ -441,6 +440,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		for (int i = 0; i < node_list.getLength(); i++)
 		{
 			Element doc = (Element) node_list.item(i);
+
 			String doc_id = doc.getAttribute(GSXML.NODE_ID_ATT);
 			String is_external = doc.getAttribute("externalURL");
 
@@ -492,7 +492,6 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 
 				if (want_info)
 				{
-
 					Element node_info_elem = this.doc.createElement("nodeStructureInfo");
 					doc.appendChild(node_info_elem);
 
@@ -765,7 +764,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 			String child_id = (String) child_ids.get(i);
 			Element child_elem = createDocNode(child_id);
 			doc.appendChild(child_elem);
-			if (recursive && !child_elem.getAttribute(GSXML.NODE_TYPE_ATT).equals(GSXML.NODE_TYPE_LEAF))
+			if (recursive && (!child_elem.getAttribute(GSXML.NODE_TYPE_ATT).equals(GSXML.NODE_TYPE_LEAF) || child_elem.getAttribute(GSXML.DOC_TYPE_ATT).equals(GSXML.DOC_TYPE_PAGED)))
 			{
 				addDescendants(child_elem, child_id, recursive);
 			}
