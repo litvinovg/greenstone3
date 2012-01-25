@@ -51,8 +51,7 @@ public class XMLDocumentAction extends Action
 		{
 			return result;
 		}
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		// subaction used to decide if we are returning content or structure
 		String document_mode = request.getAttribute(GSXML.SUBACTION_ATT);
@@ -73,7 +72,7 @@ public class XMLDocumentAction extends Action
 		// make the request to the collection
 		Element mr_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 
-		Element ret_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+		Element ret_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		mr_message.appendChild(ret_request);
 
 		Element doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
@@ -84,7 +83,7 @@ public class XMLDocumentAction extends Action
 
 		// also add in a request for the Title metadata
 		to = GSPath.appendLink(collection, "DocumentMetadataRetrieve");
-		Element meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+		Element meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		// copy the doc list
 		meta_request.appendChild(doc_list.cloneNode(true));
 		// add in a metadata param

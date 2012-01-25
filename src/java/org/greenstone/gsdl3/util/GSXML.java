@@ -726,13 +726,13 @@ public class GSXML
 	}
 
 	/** returns a basic request message */
-	public static Element createBasicRequest(Document owner, String request_type, String to, String lang, String uid)
+	public static Element createBasicRequest(Document owner, String request_type, String to, UserContext userContext)
 	{
 		Element request = owner.createElement(REQUEST_ELEM);
 		request.setAttribute(TYPE_ATT, request_type);
-		request.setAttribute(LANG_ATT, lang);
+		request.setAttribute(LANG_ATT, userContext._lang);
 		request.setAttribute(TO_ATT, to);
-		request.setAttribute(USER_ID_ATT, uid);
+		request.setAttribute(USER_ID_ATT, userContext._userID);
 		return request;
 	}
 

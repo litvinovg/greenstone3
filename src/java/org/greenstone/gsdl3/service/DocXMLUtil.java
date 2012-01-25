@@ -23,6 +23,7 @@ package org.greenstone.gsdl3.service;
 import org.greenstone.gsdl3.util.GSDocumentModel;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserContext;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -121,8 +122,7 @@ public class DocXMLUtil extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Go through each of the document items that are requested
 		NodeList docList = request.getElementsByTagName(GSXML.DOCUMENT_ELEM);
@@ -132,7 +132,7 @@ public class DocXMLUtil extends ServiceRack
 			String oid = currentDoc.getAttribute(GSXML.NODE_ID_ATT);
 			String collection = currentDoc.getAttribute(GSXML.COLLECTION_ATT);
 
-			_GSDM.documentXMLCreateDocXML(oid, collection, lang, uid);
+			_GSDM.documentXMLCreateDocXML(oid, collection, userContext);
 			if(_GSDM.checkError(result, DOC_XML_CREATE_EMPTY_FILE))
 			{
 				return result;
@@ -151,8 +151,7 @@ public class DocXMLUtil extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Go through each of the metadata items that are requested
 		NodeList metadataList = request.getElementsByTagName(GSXML.METADATA_ELEM);
@@ -163,7 +162,7 @@ public class DocXMLUtil extends ServiceRack
 			String collection = currentMetadata.getAttribute(GSXML.COLLECTION_ATT);
 			String metadataName = currentMetadata.getAttribute(GSXML.NAME_ATT);
 
-			ArrayList<Element> metadataValues = _GSDM.documentXMLGetMetadata(oid, collection, metadataName, lang, uid);
+			ArrayList<Element> metadataValues = _GSDM.documentXMLGetMetadata(oid, collection, metadataName, userContext);
 			if(_GSDM.checkError(result, DOC_XML_GET_METADATA))
 			{
 				return result;
@@ -191,8 +190,7 @@ public class DocXMLUtil extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Go through each of the metadata items that are requested
 		NodeList metadataList = request.getElementsByTagName(GSXML.METADATA_ELEM);
@@ -236,7 +234,7 @@ public class DocXMLUtil extends ServiceRack
 					GSXML.addError(this.doc, result, DOC_XML_SET_METADATA + ": Error converting the position attribute to an integer", GSXML.ERROR_TYPE_SYNTAX);
 					return result;
 				}
-				_GSDM.documentXMLSetMetadata(oid, collection, metadataName, newMetadataValue, pos, op, lang, uid);
+				_GSDM.documentXMLSetMetadata(oid, collection, metadataName, newMetadataValue, pos, op, userContext);
 				if(_GSDM.checkError(result, DOC_XML_SET_METADATA))
 				{
 					return result;
@@ -245,7 +243,7 @@ public class DocXMLUtil extends ServiceRack
 			//If we are given a value to replace with then call the replacement method
 			else if (oldMetadataValue != null && !oldMetadataValue.equals(""))
 			{
-				_GSDM.documentXMLReplaceMetadata(oid, collection, metadataName, oldMetadataValue, newMetadataValue, lang, uid);
+				_GSDM.documentXMLReplaceMetadata(oid, collection, metadataName, oldMetadataValue, newMetadataValue, userContext);
 				if(_GSDM.checkError(result, DOC_XML_SET_METADATA))
 				{
 					return result;
@@ -271,8 +269,7 @@ public class DocXMLUtil extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Go through each of the requests 
 		NodeList sectionList = request.getElementsByTagName(GSXML.DOCXML_SECTION_ELEM); //TODO: Replace "Section" with a constant
@@ -282,7 +279,7 @@ public class DocXMLUtil extends ServiceRack
 			String oid = currentSection.getAttribute(GSXML.NODE_ID_ATT);
 			String collection = currentSection.getAttribute(GSXML.COLLECTION_ATT);
 
-			_GSDM.documentXMLCreateSection(oid, collection, lang, uid);
+			_GSDM.documentXMLCreateSection(oid, collection, userContext);
 			if(_GSDM.checkError(result, DOC_XML_CREATE_SECTION))
 			{
 				return result;
@@ -301,8 +298,7 @@ public class DocXMLUtil extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Go through each of the requests 
 		NodeList sectionList = request.getElementsByTagName(GSXML.DOCXML_SECTION_ELEM); 
@@ -312,7 +308,7 @@ public class DocXMLUtil extends ServiceRack
 			String oid = currentSection.getAttribute(GSXML.NODE_ID_ATT);
 			String collection = currentSection.getAttribute(GSXML.COLLECTION_ATT);
 
-			_GSDM.documentXMLDeleteSection(oid, collection, lang, uid);
+			_GSDM.documentXMLDeleteSection(oid, collection, userContext);
 			if(_GSDM.checkError(result, DOC_XML_DELETE_SECTION))
 			{
 				return result;
@@ -331,8 +327,7 @@ public class DocXMLUtil extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Go through each of the requests 
 		NodeList sectionList = request.getElementsByTagName(GSXML.DOCXML_SECTION_ELEM);
@@ -342,7 +337,7 @@ public class DocXMLUtil extends ServiceRack
 			String oid = currentSection.getAttribute(GSXML.NODE_ID_ATT);
 			String collection = currentSection.getAttribute(GSXML.COLLECTION_ATT);
 
-			_GSDM.documentXMLGetSection(oid, collection, lang, uid);
+			_GSDM.documentXMLGetSection(oid, collection, userContext);
 			if(_GSDM.checkError(result, DOC_XML_GET_SECTION))
 			{
 				return result;
@@ -361,8 +356,7 @@ public class DocXMLUtil extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Go through each of the requests 
 		NodeList sectionList = request.getElementsByTagName(GSXML.DOCXML_SECTION_ELEM);
@@ -387,7 +381,7 @@ public class DocXMLUtil extends ServiceRack
 				op = GSDocumentModel.OPERATION_APPEND;
 			}
 			
-			_GSDM.documentXMLSetSection(oid, collection, currentSection, op, lang, uid);
+			_GSDM.documentXMLSetSection(oid, collection, currentSection, op, userContext);
 			if(_GSDM.checkError(result, DOC_XML_SET_SECTION))
 			{
 				return result;
@@ -407,8 +401,7 @@ public class DocXMLUtil extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Go through each of the requests 
 		NodeList contentList = request.getElementsByTagName(GSXML.DOCXML_CONTENT_ELEM);
@@ -418,7 +411,7 @@ public class DocXMLUtil extends ServiceRack
 			String oid = currentContent.getAttribute(GSXML.NODE_ID_ATT);
 			String collection = currentContent.getAttribute(GSXML.COLLECTION_ATT);
 
-			String content = _GSDM.documentXMLGetText(oid, collection, lang, uid);
+			String content = _GSDM.documentXMLGetText(oid, collection, userContext);
 			if(_GSDM.checkError(result, DOC_XML_GET_TEXT))
 			{
 				return result;
@@ -450,8 +443,7 @@ public class DocXMLUtil extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Go through each of the requests 
 		NodeList contentList = request.getElementsByTagName(GSXML.DOCXML_CONTENT_ELEM);
@@ -461,7 +453,7 @@ public class DocXMLUtil extends ServiceRack
 			String oid = currentContent.getAttribute(GSXML.NODE_ID_ATT);
 			String collection = currentContent.getAttribute(GSXML.COLLECTION_ATT);
 
-			_GSDM.documentXMLSetText(oid, collection, currentContent, lang, uid);
+			_GSDM.documentXMLSetText(oid, collection, currentContent, userContext);
 			if(_GSDM.checkError(result, DOC_XML_SET_TEXT))
 			{
 				return result;

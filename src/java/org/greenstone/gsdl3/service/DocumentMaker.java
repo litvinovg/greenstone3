@@ -37,6 +37,7 @@ import org.apache.log4j.*;
 import org.greenstone.gsdl3.util.GSDocumentModel;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserContext;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -122,8 +123,7 @@ public class DocumentMaker extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Get the list of documents to create
 		NodeList documents = request.getElementsByTagName(GSXML.DOCUMENT_ELEM);
@@ -134,7 +134,7 @@ public class DocumentMaker extends ServiceRack
 			String oid = currentDoc.getAttribute(GSXML.NODE_ID_ATT);
 			String collection = currentDoc.getAttribute(GSXML.COLLECTION_ATT);
 
-			_GSDM.documentCreate(oid, collection, lang, uid);
+			_GSDM.documentCreate(oid, collection, userContext);
 			if (_GSDM.checkError(result, DOCUMENT_CREATE))
 			{
 				return result;
@@ -154,8 +154,7 @@ public class DocumentMaker extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Get the list of documents to delete
 		NodeList documents = request.getElementsByTagName(GSXML.DOCUMENT_ELEM);
@@ -165,7 +164,7 @@ public class DocumentMaker extends ServiceRack
 			String oid = currentDoc.getAttribute(GSXML.NODE_ID_ATT);
 			String collection = currentDoc.getAttribute(GSXML.COLLECTION_ATT);
 
-			_GSDM.documentDelete(oid, collection, lang, uid);
+			_GSDM.documentDelete(oid, collection, userContext);
 			if (_GSDM.checkError(result, DOCUMENT_DELETE))
 			{
 				return result;
@@ -185,8 +184,7 @@ public class DocumentMaker extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Get the list of documents to duplicate
 		NodeList documents = request.getElementsByTagName(GSXML.DOCUMENT_ELEM);
@@ -199,7 +197,7 @@ public class DocumentMaker extends ServiceRack
 			String newCollection = currentDoc.getAttribute("new" + GSXML.COLLECTION_ATT);
 			String operation = currentDoc.getAttribute("operation");
 
-			_GSDM.documentMoveOrDuplicate(oid, collection, newOID, newCollection, _GSDM.operationStringToInt(operation), false, lang, uid);
+			_GSDM.documentMoveOrDuplicate(oid, collection, newOID, newCollection, _GSDM.operationStringToInt(operation), false, userContext);
 			if (_GSDM.checkError(result, DOCUMENT_DUPLICATE))
 			{
 				return result;
@@ -219,8 +217,7 @@ public class DocumentMaker extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Get the list of documents to duplicate
 		NodeList documents = request.getElementsByTagName(GSXML.DOCUMENT_ELEM);
@@ -238,7 +235,7 @@ public class DocumentMaker extends ServiceRack
 				requestedInfo[j] = ((Element) requestedInfoList.item(j)).getAttribute(GSXML.NAME_ATT);
 			}
 
-			_GSDM.documentGetInformation(oid, collection, requestedInfo, lang, uid);
+			_GSDM.documentGetInformation(oid, collection, requestedInfo, userContext);
 			if (_GSDM.checkError(result, DOCUMENT_GET_INFORMATION))
 			{
 				return result;
@@ -258,8 +255,7 @@ public class DocumentMaker extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Get the list of documents to duplicate
 		NodeList documents = request.getElementsByTagName(GSXML.DOCUMENT_ELEM);
@@ -272,7 +268,7 @@ public class DocumentMaker extends ServiceRack
 			String newCollection = currentDoc.getAttribute("new" + GSXML.COLLECTION_ATT);
 			String operation = currentDoc.getAttribute("operation");
 
-			_GSDM.documentMoveOrDuplicate(oid, collection, newOID, newCollection, _GSDM.operationStringToInt(operation), true, lang, uid);
+			_GSDM.documentMoveOrDuplicate(oid, collection, newOID, newCollection, _GSDM.operationStringToInt(operation), true, userContext);
 			if (_GSDM.checkError(result, DOCUMENT_MOVE))
 			{
 				return result;
@@ -291,8 +287,7 @@ public class DocumentMaker extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Get the list of documents to duplicate
 		NodeList documents = request.getElementsByTagName(GSXML.DOCUMENT_ELEM);
@@ -303,7 +298,7 @@ public class DocumentMaker extends ServiceRack
 			String collection = currentDoc.getAttribute(GSXML.COLLECTION_ATT);
 			String mergeOID = currentDoc.getAttribute("merge" + GSXML.NODE_ID_ATT);
 
-			_GSDM.documentMerge(oid, collection, mergeOID, lang, uid);
+			_GSDM.documentMerge(oid, collection, mergeOID, userContext);
 			if (_GSDM.checkError(result, DOCUMENT_MERGE))
 			{
 				return result;
@@ -323,8 +318,7 @@ public class DocumentMaker extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		//Get the list of documents to duplicate
 		NodeList documents = request.getElementsByTagName(GSXML.DOCUMENT_ELEM);
@@ -346,7 +340,7 @@ public class DocumentMaker extends ServiceRack
 				return result;
 			}
 
-			_GSDM.documentSplit(oid, collection, split, lang, uid);
+			_GSDM.documentSplit(oid, collection, split, userContext);
 			if (_GSDM.checkError(result, DOCUMENT_SPLIT))
 			{
 				return result;
@@ -366,8 +360,7 @@ public class DocumentMaker extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
@@ -400,7 +393,7 @@ public class DocumentMaker extends ServiceRack
 					String newOID = (String) keyValueMap.get("newOID");
 					String subOperation = (String) keyValueMap.get("subOperation");
 
-					_GSDM.documentMoveOrDuplicate(origOID, origCollection, newOID, newCollection, _GSDM.operationStringToInt(subOperation), operation.equals("move"), lang, uid);
+					_GSDM.documentMoveOrDuplicate(origOID, origCollection, newOID, newCollection, _GSDM.operationStringToInt(subOperation), operation.equals("move"), userContext);
 
 					if (_GSDM.getErrorStatus() == GSDocumentModel.NO_ERROR && origCollection != null && !collectionsToBuild.contains(origCollection))
 					{
@@ -418,8 +411,8 @@ public class DocumentMaker extends ServiceRack
 					String collection = (String) keyValueMap.get("collection");
 					String subOperation = (String) keyValueMap.get("subOperation");
 
-					//_GSDM.documentCreate(oid, collection, lang, uid); <--- Maybe go back to this
-					_GSDM.documentXMLSetSection(oid, collection, this.doc.createElement(GSXML.DOCXML_SECTION_ELEM), _GSDM.operationStringToInt(subOperation), lang, uid);
+					//_GSDM.documentCreate(oid, collection, userContext); <--- Maybe go back to this
+					_GSDM.documentXMLSetSection(oid, collection, this.doc.createElement(GSXML.DOCXML_SECTION_ELEM), _GSDM.operationStringToInt(subOperation), userContext);
 
 					if (_GSDM.getErrorStatus() == GSDocumentModel.NO_ERROR && collection != null && !collectionsToBuild.contains(collection))
 					{
@@ -431,7 +424,7 @@ public class DocumentMaker extends ServiceRack
 					String oid = (String) keyValueMap.get("oid");
 					String collection = (String) keyValueMap.get("collection");
 
-					_GSDM.documentDelete(oid, collection, lang, uid);
+					_GSDM.documentDelete(oid, collection, userContext);
 
 					if (_GSDM.getErrorStatus() == GSDocumentModel.NO_ERROR && collection != null && !collectionsToBuild.contains(collection))
 					{
@@ -444,7 +437,7 @@ public class DocumentMaker extends ServiceRack
 					String collection = (String) keyValueMap.get("collection");
 					String newContent = (String) keyValueMap.get("text");
 					
-					_GSDM.documentXMLSetText(oid, collection, newContent, lang, uid);
+					_GSDM.documentXMLSetText(oid, collection, newContent, userContext);
 					
 					System.err.println(newContent);
 				}

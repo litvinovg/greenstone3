@@ -57,8 +57,7 @@ public class GS2BrowseAction extends Action
 
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 		String to = GSPath.appendLink(collection, service_name);
 
 		// the first part of the response is the service description 
@@ -66,11 +65,11 @@ public class GS2BrowseAction extends Action
 		// this should be cached somehow later on. 
 
 		Element info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, lang, uid);
+		Element info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
 		info_message.appendChild(info_request);
 
 		// also get the format stuff now if there is some
-		Element format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, to, lang, uid);
+		Element format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, to, userContext);
 		info_message.appendChild(format_request);
 		// process the requests
 
@@ -85,7 +84,7 @@ public class GS2BrowseAction extends Action
 		page_response.appendChild(this.doc.importNode(service_description, true));
 
 		//append site metadata
-		addSiteMetadata(page_response, lang, uid);
+		addSiteMetadata(page_response, userContext);
 
 		// if rt=d, then we are just displaying the service
 		String request_type = (String) params.get(GSParams.REQUEST_TYPE);
@@ -153,7 +152,7 @@ public class GS2BrowseAction extends Action
 
 		// get the browse structure for the selected node
 		Element classify_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element classify_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+		Element classify_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		classify_message.appendChild(classify_request);
 
 		//Create a parameter list to specify the required structure information
@@ -251,7 +250,7 @@ public class GS2BrowseAction extends Action
 		if (cl_nodes.getLength() > 0)
 		{
 			did_classifier = true;
-			Element cl_meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to + "MetadataRetrieve", lang, uid);
+			Element cl_meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to + "MetadataRetrieve", userContext);
 			metadata_message.appendChild(cl_meta_request);
 
 			Element new_cl_nodes_list = this.doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
@@ -280,7 +279,7 @@ public class GS2BrowseAction extends Action
 		if (doc_nodes.getLength() > 0)
 		{
 			did_documents = true;
-			Element doc_meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, GSPath.appendLink(collection, "DocumentMetadataRetrieve"), lang, uid);
+			Element doc_meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, GSPath.appendLink(collection, "DocumentMetadataRetrieve"), userContext);
 			metadata_message.appendChild(doc_meta_request);
 
 			Element doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);

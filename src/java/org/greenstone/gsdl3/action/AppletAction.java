@@ -44,8 +44,7 @@ public class AppletAction extends Action
 		String collection = (String) params.get(GSParams.COLLECTION);
 		boolean coll_specified = true;
 		String service_name = (String) params.get(GSParams.SERVICE);
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 		String to = null;
 		if (collection == null || collection.equals(""))
 		{
@@ -62,7 +61,7 @@ public class AppletAction extends Action
 			// we are processing stuff for the applet send a message to the service, type="query", and take out the something element, and return that as our result - the applet must take xml
 
 			Element mr_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+			Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 			mr_message.appendChild(mr_request);
 			// just append all the params for now - should filter out unneeded ones
 			mr_request.appendChild(this.doc.importNode(cgi_param_list, true));
@@ -80,7 +79,7 @@ public class AppletAction extends Action
 		// get the applet description, and the collection info if a collection is specified
 
 		Element mr_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element applet_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, lang, uid);
+		Element applet_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
 		mr_message.appendChild(applet_request);
 
 		Element mr_response = (Element) this.mr.process(mr_message);

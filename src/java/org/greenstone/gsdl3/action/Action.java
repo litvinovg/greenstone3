@@ -231,10 +231,10 @@ abstract public class Action
 	 * @param uid
 	 *            the current user id
 	 */
-	protected void addSiteMetadata(Element element, String lang, String uid)
+	protected void addSiteMetadata(Element element, UserContext userContext)
 	{
 		//ADD SITE METADATA
-		Element metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", lang, uid);
+		Element metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
 		//create a hashmap of params
 		HashMap subset_params = new HashMap(1);
 		subset_params.put(GSXML.SUBSET_PARAM, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);

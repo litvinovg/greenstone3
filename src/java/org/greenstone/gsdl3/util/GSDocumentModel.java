@@ -120,7 +120,7 @@ public class GSDocumentModel
 	 * @param collection
 	 *            is the collection we want to create the document/section in.
 	 */
-	public void documentCreate(String oid, String collection, String lang, String uid)
+	public void documentCreate(String oid, String collection, UserContext userContext)
 	{
 		_errorStatus = NO_ERROR;
 		//If the collection is not specified then we cannot continue
@@ -135,7 +135,7 @@ public class GSDocumentModel
 		{
 			oid = generateOID();
 		}
-		else if (archiveCheckDocumentOrSectionExists(oid, collection, lang, uid))
+		else if (archiveCheckDocumentOrSectionExists(oid, collection, userContext))
 		{
 			_errorStatus = ERROR_DESTINATION_DOCUMENT_OR_SECTION_ALREADY_EXISTS;
 			return;
@@ -163,18 +163,18 @@ public class GSDocumentModel
 			entries.put("doc-file", values);
 
 			//Write the new entry to the archive database 
-			archiveWriteEntryToDatabase(oid, collection, entries, lang, uid);
+			archiveWriteEntryToDatabase(oid, collection, entries, userContext);
 			if (_errorStatus != NO_ERROR)
 			{
 				return;
 			}
 
 			//Create a basic doc.xml file to go in the new folder
-			documentXMLCreateDocXML(oid, collection, lang, uid);
+			documentXMLCreateDocXML(oid, collection, userContext);
 		}
 		else
 		{
-			documentXMLCreateSection(oid, collection, lang, uid);
+			documentXMLCreateSection(oid, collection, userContext);
 		}
 	}
 
@@ -186,7 +186,7 @@ public class GSDocumentModel
 	 * @param collection
 	 *            is the collection to delete the document/section from.
 	 */
-	public void documentDelete(String oid, String collection, String lang, String uid)
+	public void documentDelete(String oid, String collection, UserContext userContext)
 	{
 		_errorStatus = NO_ERROR;
 		if (oid == null || oid.equals(""))
@@ -200,7 +200,7 @@ public class GSDocumentModel
 			return;
 		}
 
-		if (!archiveCheckDocumentOrSectionExists(oid, collection, lang, uid))
+		if (!archiveCheckDocumentOrSectionExists(oid, collection, userContext))
 		{
 			_errorStatus = ERROR_SOURCE_DOCUMENT_OR_SECTION_DOES_NOT_EXIST;
 			return;
@@ -224,11 +224,11 @@ public class GSDocumentModel
 			}
 
 			//Remove the entry from the archive database 
-			archiveRemoveEntryFromDatabase(oid, collection, lang, uid);
+			archiveRemoveEntryFromDatabase(oid, collection, userContext);
 		}
 		else
 		{
-			documentXMLDeleteSection(oid, collection, lang, uid);
+			documentXMLDeleteSection(oid, collection, userContext);
 		}
 	}
 
@@ -248,9 +248,9 @@ public class GSDocumentModel
 	 *            If this is null then the collection parameter will be used
 	 *            instead.
 	 */
-	public void documentMoveOrDuplicate(String oid, String collection, String newOID, String newCollection, int operation, boolean move, String lang, String uid)
+	public void documentMoveOrDuplicate(String oid, String collection, String newOID, String newCollection, int operation, boolean move, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return;
 		}
@@ -274,7 +274,7 @@ public class GSDocumentModel
 		{
 		case OPERATION_TYPE_DOC_TO_DOC:
 		{
-			String archiveDir = archiveGetDocumentFilePath(oid, collection, lang, uid);
+			String archiveDir = archiveGetDocumentFilePath(oid, collection, userContext);
 			if (_errorStatus != NO_ERROR)
 			{
 				return;
@@ -311,20 +311,20 @@ public class GSDocumentModel
 		}
 		case OPERATION_TYPE_DOC_TO_SEC:
 		{
-			Document originalDocument = getDocXML(oid, collection, lang, uid);
+			Document originalDocument = getDocXML(oid, collection, userContext);
 			Element originalSection = getTopLevelSectionElement(originalDocument);
 
-			documentXMLCreateSection(newOID, newCollection, lang, uid);
+			documentXMLCreateSection(newOID, newCollection, userContext);
 			if (_errorStatus != NO_ERROR)
 			{
 				return;
 			}
 
-			documentXMLSetSection(newOID, newCollection, originalSection, operation, lang, uid);
+			documentXMLSetSection(newOID, newCollection, originalSection, operation, userContext);
 
 			if (move)
 			{
-				String archiveDirStr = archiveGetDocumentFilePath(oid, collection, lang, uid);
+				String archiveDirStr = archiveGetDocumentFilePath(oid, collection, userContext);
 				if (_errorStatus != NO_ERROR)
 				{
 					return;
@@ -341,30 +341,30 @@ public class GSDocumentModel
 		}
 		case OPERATION_TYPE_SEC_TO_DOC:
 		{
-			Document originalDocument = getDocXML(oid, collection, lang, uid);
+			Document originalDocument = getDocXML(oid, collection, userContext);
 			Element originalSection = getSectionBySectionNumber(originalDocument, getSectionFromOID(oid));
 
-			documentCreate(newOID, newCollection, lang, uid);
+			documentCreate(newOID, newCollection, userContext);
 			if (_errorStatus != NO_ERROR)
 			{
 				return;
 			}
 
-			documentXMLCreateSection(newOID, newCollection, lang, uid);
+			documentXMLCreateSection(newOID, newCollection, userContext);
 			if (_errorStatus != NO_ERROR)
 			{
 				return;
 			}
 
-			documentXMLSetSection(newOID, newCollection, originalSection, operation, lang, uid);
+			documentXMLSetSection(newOID, newCollection, originalSection, operation, userContext);
 
 			if (move)
 			{
-				originalDocument = getDocXML(oid, collection, lang, uid);
+				originalDocument = getDocXML(oid, collection, userContext);
 				originalSection.getParentNode().removeChild(originalSection);
 
 				//Write the new change back into the file
-				if (!writeXMLFile(originalDocument, oid, collection, lang, uid))
+				if (!writeXMLFile(originalDocument, oid, collection, userContext))
 				{
 					_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
 					return;
@@ -376,19 +376,19 @@ public class GSDocumentModel
 		}
 		case OPERATION_TYPE_SEC_TO_SEC:
 		{
-			Document originalDocument = getDocXML(oid, collection, lang, uid);
+			Document originalDocument = getDocXML(oid, collection, userContext);
 			Element originalSection = getSectionBySectionNumber(originalDocument, getSectionFromOID(oid));
 
 			if (operation == OPERATION_REPLACE)
 			{
-				documentXMLCreateSection(newOID, newCollection, lang, uid);
+				documentXMLCreateSection(newOID, newCollection, userContext);
 				if (_errorStatus != NO_ERROR)
 				{
 					return;
 				}
 			}
 
-			documentXMLSetSection(newOID, newCollection, originalSection, operation, lang, uid);
+			documentXMLSetSection(newOID, newCollection, originalSection, operation, userContext);
 			if (_errorStatus != NO_ERROR)
 			{
 				return;
@@ -396,11 +396,11 @@ public class GSDocumentModel
 			
 			if (move)
 			{
-				originalDocument = getDocXML(oid, collection, lang, uid);
+				originalDocument = getDocXML(oid, collection, userContext);
 				originalSection.getParentNode().removeChild(originalSection);
 
 				//Write the new change back into the file
-				if (!writeXMLFile(originalDocument, oid, collection, lang, uid))
+				if (!writeXMLFile(originalDocument, oid, collection, userContext))
 				{
 					_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
 					return;
@@ -419,7 +419,7 @@ public class GSDocumentModel
 			entries.put("doc-file", values);
 
 			//Write the new entry to the archive database 
-			archiveWriteEntryToDatabase(newOID, newCollection, entries, lang, uid);
+			archiveWriteEntryToDatabase(newOID, newCollection, entries, userContext);
 		}
 	}
 
@@ -434,9 +434,9 @@ public class GSDocumentModel
 	 *            is an array containing the various requests.
 	 * @return This returns an array containing the requested information.
 	 */
-	public String[] documentGetInformation(String oid, String collection, String[] requestedInfo, String lang, String uid)
+	public String[] documentGetInformation(String oid, String collection, String[] requestedInfo, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return null;
 		}
@@ -466,14 +466,14 @@ public class GSDocumentModel
 	 *            the identifier of the section that the source section will be
 	 *            merged into.
 	 */
-	public void documentMerge(String oid, String collection, String mergeOID, String lang, String uid)
+	public void documentMerge(String oid, String collection, String mergeOID, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return;
 		}
 
-		if ((_errorStatus = checkOIDandCollection(mergeOID, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(mergeOID, collection, userContext)) != NO_ERROR)
 		{
 			return;
 		}
@@ -503,7 +503,7 @@ public class GSDocumentModel
 			}
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -568,13 +568,13 @@ public class GSDocumentModel
 			sourceTextNode.setNodeValue(destinationTextNode.getNodeValue() + " " + sourceTextNode.getNodeValue());
 		}
 
-		documentXMLSetSection(mergeOID, collection, sourceSection, OPERATION_REPLACE, lang, uid);
+		documentXMLSetSection(mergeOID, collection, sourceSection, OPERATION_REPLACE, userContext);
 		if (_errorStatus != NO_ERROR)
 		{
 			return;
 		}
 
-		documentXMLDeleteSection(oid, collection, lang, uid);
+		documentXMLDeleteSection(oid, collection, userContext);
 	}
 
 	/**
@@ -589,14 +589,14 @@ public class GSDocumentModel
 	 * @param splitPoint
 	 *            is the point in the text we want to split at.
 	 */
-	public void documentSplit(String oid, String collection, int splitPoint, String lang, String uid)
+	public void documentSplit(String oid, String collection, int splitPoint, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return;
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -643,7 +643,7 @@ public class GSDocumentModel
 		newContent.appendChild(newTextNode);
 		newSection.appendChild(newContent);
 
-		documentXMLSetSection(oid, collection, newSection, OPERATION_INSERT_BEFORE, lang, uid);
+		documentXMLSetSection(oid, collection, newSection, OPERATION_INSERT_BEFORE, userContext);
 		if (_errorStatus != NO_ERROR)
 		{
 			return;
@@ -651,7 +651,7 @@ public class GSDocumentModel
 		textNode.setNodeValue(secondPart);
 
 		//Write the new change back into the file
-		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		if (!writeXMLFile(docXML, oid, collection, userContext))
 		{
 			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
 		}
@@ -665,14 +665,14 @@ public class GSDocumentModel
 	 * @param collection
 	 *            is the collection the new document will reside in.
 	 */
-	public void documentXMLCreateDocXML(String oid, String collection, String lang, String uid)
+	public void documentXMLCreateDocXML(String oid, String collection, UserContext userContext)
 	{
 		_errorStatus = NO_ERROR;
 		try
 		{
 			Document docXML = null;
 
-			String filePath = archiveGetDocumentFilePath(oid, collection, lang, uid);
+			String filePath = archiveGetDocumentFilePath(oid, collection, userContext);
 			File docFile = new File(filePath);
 			if (!docFile.exists() && !docFile.createNewFile())
 			{
@@ -713,9 +713,9 @@ public class GSDocumentModel
 	 *            is the name of metadata to retrieve
 	 * @return an array of metadata elements containing the resquested metadata
 	 */
-	public ArrayList<Element> documentXMLGetMetadata(String oid, String collection, String metadataName, String lang, String uid)
+	public ArrayList<Element> documentXMLGetMetadata(String oid, String collection, String metadataName, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return null;
 		}
@@ -725,7 +725,7 @@ public class GSDocumentModel
 			return null;
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -752,9 +752,9 @@ public class GSDocumentModel
 	 *            can be one of OPERATION_REPLACE, OPERATION_INSERT_BEFORE,
 	 *            OPERATION_INSERT_AFTER or OPERATION_APPEND.
 	 */
-	public void documentXMLSetMetadata(String oid, String collection, String metadataName, String newMetadataValue, int position, int operation, String lang, String uid)
+	public void documentXMLSetMetadata(String oid, String collection, String metadataName, String newMetadataValue, int position, int operation, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return;
 		}
@@ -769,7 +769,7 @@ public class GSDocumentModel
 			return;
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -824,7 +824,7 @@ public class GSDocumentModel
 		}
 
 		//Write the new change back into the file
-		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		if (!writeXMLFile(docXML, oid, collection, userContext))
 		{
 			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
 		}
@@ -844,9 +844,9 @@ public class GSDocumentModel
 	 * @param position
 	 *            is position of the item that is to be deleted.
 	 */
-	public void documentXMLDeleteMetadata(String oid, String collection, String metadataName, int position, String lang, String uid)
+	public void documentXMLDeleteMetadata(String oid, String collection, String metadataName, int position, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return;
 		}
@@ -856,7 +856,7 @@ public class GSDocumentModel
 			return;
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -883,9 +883,9 @@ public class GSDocumentModel
 	 * @param metadataName
 	 *            is the name of the metadata to delete.
 	 */
-	public void documentXMLDeleteMetadata(String oid, String collection, String metadataName, String lang, String uid)
+	public void documentXMLDeleteMetadata(String oid, String collection, String metadataName, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return;
 		}
@@ -895,7 +895,7 @@ public class GSDocumentModel
 			return;
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -928,9 +928,9 @@ public class GSDocumentModel
 	 *            is the new value of the metadata that will replace the old
 	 *            value.
 	 */
-	public void documentXMLReplaceMetadata(String oid, String collection, String metadataName, String oldMetadataValue, String newMetadataValue, String lang, String uid)
+	public void documentXMLReplaceMetadata(String oid, String collection, String metadataName, String oldMetadataValue, String newMetadataValue, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return;
 		}
@@ -950,7 +950,7 @@ public class GSDocumentModel
 			return;
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -970,7 +970,7 @@ public class GSDocumentModel
 		}
 
 		//Write the new change back into the file
-		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		if (!writeXMLFile(docXML, oid, collection, userContext))
 		{
 			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
 		}
@@ -984,7 +984,7 @@ public class GSDocumentModel
 	 * @param collection
 	 *            is the collection the document resides in.
 	 */
-	public void documentXMLCreateSection(String oid, String collection, String lang, String uid)
+	public void documentXMLCreateSection(String oid, String collection, UserContext userContext)
 	{
 		_errorStatus = NO_ERROR;
 		if (oid == null || oid.equals(""))
@@ -998,16 +998,16 @@ public class GSDocumentModel
 			return;
 		}
 
-		if (oid.contains(".") && !archiveCheckDocumentOrSectionExists(oid.substring(0, oid.indexOf(".")), collection, lang, uid))
+		if (oid.contains(".") && !archiveCheckDocumentOrSectionExists(oid.substring(0, oid.indexOf(".")), collection, userContext))
 		{
-			documentCreate(oid.substring(0, oid.indexOf(".")), collection, lang, uid);
+			documentCreate(oid.substring(0, oid.indexOf(".")), collection, userContext);
 			if (_errorStatus != NO_ERROR)
 			{
 				return;
 			}
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -1067,7 +1067,7 @@ public class GSDocumentModel
 		}
 
 		//Write the new change back into the file
-		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		if (!writeXMLFile(docXML, oid, collection, userContext))
 		{
 			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
 		}
@@ -1081,14 +1081,14 @@ public class GSDocumentModel
 	 * @param collection
 	 *            is the collection the document resides in.
 	 */
-	public void documentXMLDeleteSection(String oid, String collection, String lang, String uid)
+	public void documentXMLDeleteSection(String oid, String collection, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return;
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -1105,7 +1105,7 @@ public class GSDocumentModel
 		section.getParentNode().removeChild(section);
 
 		//Write the new change back into the file
-		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		if (!writeXMLFile(docXML, oid, collection, userContext))
 		{
 			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
 		}
@@ -1120,14 +1120,14 @@ public class GSDocumentModel
 	 *            is the collection the document resides in.
 	 * @return the requested section.
 	 */
-	public Element documentXMLGetSection(String oid, String collection, String lang, String uid)
+	public Element documentXMLGetSection(String oid, String collection, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return null;
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -1167,14 +1167,14 @@ public class GSDocumentModel
 	 *            OPERATION_INSERT_AFTER or OPERATION_APPEND.
 	 * @throws IOException
 	 */
-	public void documentXMLSetSection(String oid, String collection, Element newSection, int operation, String lang, String uid)
+	public void documentXMLSetSection(String oid, String collection, Element newSection, int operation, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return;
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -1239,7 +1239,7 @@ public class GSDocumentModel
 		}
 		
 		//Write the new change back into the file
-		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		if (!writeXMLFile(docXML, oid, collection, userContext))
 		{
 			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
 			return;
@@ -1255,14 +1255,14 @@ public class GSDocumentModel
 	 *            is the collection the document resides in.
 	 * @return the text from the section.
 	 */
-	public String documentXMLGetText(String oid, String collection, String lang, String uid)
+	public String documentXMLGetText(String oid, String collection, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return null;
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -1310,14 +1310,14 @@ public class GSDocumentModel
 	 * @param newContent
 	 *            is the new content element for the section.
 	 */
-	public void documentXMLSetText(String oid, String collection, Element newContent, String lang, String uid)
+	public void documentXMLSetText(String oid, String collection, Element newContent, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return;
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -1362,7 +1362,7 @@ public class GSDocumentModel
 		}
 
 		//Write the new change back into the file
-		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		if (!writeXMLFile(docXML, oid, collection, userContext))
 		{
 			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
 			return;
@@ -1379,14 +1379,14 @@ public class GSDocumentModel
 	 * @param newContent
 	 *            is the new text for the section.
 	 */
-	public void documentXMLSetText(String oid, String collection, String newContent, String lang, String uid)
+	public void documentXMLSetText(String oid, String collection, String newContent, UserContext userContext)
 	{
-		if ((_errorStatus = checkOIDandCollection(oid, collection, lang, uid)) != NO_ERROR)
+		if ((_errorStatus = checkOIDandCollection(oid, collection, userContext)) != NO_ERROR)
 		{
 			return;
 		}
 
-		Document docXML = getDocXML(oid, collection, lang, uid);
+		Document docXML = getDocXML(oid, collection, userContext);
 		if (docXML == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_RETRIEVE_DOC_XML;
@@ -1432,7 +1432,7 @@ public class GSDocumentModel
 		}
 
 		//Write the new change back into the file
-		if (!writeXMLFile(docXML, oid, collection, lang, uid))
+		if (!writeXMLFile(docXML, oid, collection, userContext))
 		{
 			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
 			return;
@@ -1450,7 +1450,7 @@ public class GSDocumentModel
 	 *            is the collection the document resides in.
 	 * @return the file path to the doc.xml file.
 	 */
-	public String archiveGetDocumentFilePath(String oid, String collection, String lang, String uid)
+	public String archiveGetDocumentFilePath(String oid, String collection, UserContext userContext)
 	{
 		_errorStatus = NO_ERROR;
 
@@ -1459,7 +1459,7 @@ public class GSDocumentModel
 			oid = oid.substring(0, oid.indexOf("."));
 		}
 
-		String assocFilePath = getDocFilePathFromDatabase(oid, collection, lang, uid);
+		String assocFilePath = getDocFilePathFromDatabase(oid, collection, userContext);
 		if (assocFilePath == null)
 		{
 			_errorStatus = ERROR_DATA_NOT_FOUND_IN_DATABASE;
@@ -1484,10 +1484,10 @@ public class GSDocumentModel
 	 *            is the collection the source file resides in.
 	 * @return the OID of the document that the source file is used in.
 	 */
-	public String archiveGetSourceFileOID(String srcFile, String collection, String lang, String uid)
+	public String archiveGetSourceFileOID(String srcFile, String collection, UserContext userContext)
 	{
 		_errorStatus = NO_ERROR;
-		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFSRC, SimpleCollectionDatabase.READ, lang, uid);
+		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFSRC, SimpleCollectionDatabase.READ, userContext);
 		if (coll_db == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_OPEN_DATABASE;
@@ -1517,10 +1517,10 @@ public class GSDocumentModel
 	 *            is the collection to search in.
 	 * @return true if the document/section exists, false otherwise.
 	 */
-	public boolean archiveCheckDocumentOrSectionExists(String oid, String collection, String lang, String uid)
+	public boolean archiveCheckDocumentOrSectionExists(String oid, String collection, UserContext userContext)
 	{
 		_errorStatus = NO_ERROR;
-		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.READ, lang, uid);
+		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.READ, userContext);
 		if (coll_db == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_OPEN_DATABASE;
@@ -1547,7 +1547,7 @@ public class GSDocumentModel
 		coll_db.closeDatabase();
 		if (section && exists)
 		{
-			Document docXML = getDocXML(oid, collection, lang, uid);
+			Document docXML = getDocXML(oid, collection, userContext);
 			if (getSectionBySectionNumber(docXML, getSectionFromOID(oid)) == null)
 			{
 				return false;
@@ -1568,7 +1568,7 @@ public class GSDocumentModel
 	 * @param infoList
 	 *            is the list of entries to write.
 	 */
-	public void archiveWriteEntryToDatabase(String oid, String collection, HashMap<String, ArrayList<String>> infoList, String lang, String uid)
+	public void archiveWriteEntryToDatabase(String oid, String collection, HashMap<String, ArrayList<String>> infoList, UserContext userContext)
 	{
 		_errorStatus = NO_ERROR;
 		if (oid == null || oid.equals(""))
@@ -1592,7 +1592,7 @@ public class GSDocumentModel
 			}
 		}
 
-		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.WRITE, lang, uid);
+		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.WRITE, userContext);
 		if (coll_db == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_OPEN_DATABASE;
@@ -1610,7 +1610,7 @@ public class GSDocumentModel
 	 * @param collection
 	 *            is the collection whose database will have the entry removed.
 	 */
-	public void archiveRemoveEntryFromDatabase(String oid, String collection, String lang, String uid)
+	public void archiveRemoveEntryFromDatabase(String oid, String collection, UserContext userContext)
 	{
 		_errorStatus = NO_ERROR;
 		if (oid == null || oid.equals(""))
@@ -1624,7 +1624,7 @@ public class GSDocumentModel
 			return;
 		}
 
-		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.WRITE, lang, uid);
+		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.WRITE, userContext);
 		if (coll_db == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_OPEN_DATABASE;
@@ -1644,7 +1644,7 @@ public class GSDocumentModel
 	 *            is the collection whose database will be searched.
 	 * @return the list of associated files.
 	 */
-	public ArrayList<String> archiveGetAssociatedImportFiles(String oid, String collection, String lang, String uid)
+	public ArrayList<String> archiveGetAssociatedImportFiles(String oid, String collection, UserContext userContext)
 	{
 		_errorStatus = NO_ERROR;
 		if (oid == null || oid.equals(""))
@@ -1658,7 +1658,7 @@ public class GSDocumentModel
 			return null;
 		}
 
-		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.READ, lang, uid);
+		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.READ, userContext);
 		if (coll_db == null)
 		{
 			_errorStatus = ERROR_COULD_NOT_OPEN_DATABASE;
@@ -1755,9 +1755,9 @@ public class GSDocumentModel
 		return intLevels;
 	}
 
-	public String getDocFilePathFromDatabase(String oid, String collection, String lang, String uid)
+	public String getDocFilePathFromDatabase(String oid, String collection, UserContext userContext)
 	{
-		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.WRITE, lang, uid);
+		SimpleCollectionDatabase coll_db = openDatabase(collection, ARCHIVEINFDOC, SimpleCollectionDatabase.WRITE, userContext);
 		if (coll_db == null)
 		{
 			return null;
@@ -1809,7 +1809,7 @@ public class GSDocumentModel
 		return true;
 	}
 
-	public int checkOIDandCollection(String oid, String collection, String lang, String uid)
+	public int checkOIDandCollection(String oid, String collection, UserContext userContext)
 	{
 		if (oid == null || oid.equals(""))
 		{
@@ -1821,7 +1821,7 @@ public class GSDocumentModel
 			return ERROR_COLLECTION_NOT_SPECIFIED;
 		}
 
-		if (!archiveCheckDocumentOrSectionExists(oid, collection, lang, uid))
+		if (!archiveCheckDocumentOrSectionExists(oid, collection, userContext))
 		{
 			return ERROR_SOURCE_DOCUMENT_OR_SECTION_DOES_NOT_EXIST;
 		}
@@ -1882,13 +1882,13 @@ public class GSDocumentModel
 		return (Element) GSXML.getChildByTagName(docXML.getDocumentElement(), GSXML.DOCXML_SECTION_ELEM);
 	}
 
-	public boolean writeXMLFile(Document doc, String oid, String collection, String lang, String uid)
+	public boolean writeXMLFile(Document doc, String oid, String collection, UserContext userContext)
 	{
 		try
 		{
 			DOMSource source = new DOMSource(doc);
 
-			String test = archiveGetDocumentFilePath(oid, collection, lang, uid);
+			String test = archiveGetDocumentFilePath(oid, collection, userContext);
 			File xmlFile = new File(test);
 			Result result = new StreamResult(xmlFile);
 
@@ -1902,7 +1902,7 @@ public class GSDocumentModel
 		return true;
 	}
 
-	public Document getDocXML(String oid, String collection, String lang, String uid)
+	public Document getDocXML(String oid, String collection, UserContext userContext)
 	{
 		if (oid.contains("."))
 		{
@@ -1912,7 +1912,7 @@ public class GSDocumentModel
 		Document docXML = null;
 		if ((docXML = _docCache.get(oid + "__" + collection)) == null)
 		{
-			String filePath = archiveGetDocumentFilePath(oid, collection, lang, uid);
+			String filePath = archiveGetDocumentFilePath(oid, collection, userContext);
 			File docFile = new File(filePath);
 
 			if (!docFile.exists())
@@ -2004,11 +2004,11 @@ public class GSDocumentModel
 		}
 	}
 
-	public String getDatabaseTypeFromCollection(String collection, String lang, String uid)
+	public String getDatabaseTypeFromCollection(String collection, UserContext userContext)
 	{
 		//Find out what kind of database we have
 		Element dbTypeMessage = _mainDoc.createElement(GSXML.MESSAGE_ELEM);
-		Element dbTypeRequest = GSXML.createBasicRequest(_mainDoc, GSXML.REQUEST_TYPE_DESCRIBE, collection, lang, uid);
+		Element dbTypeRequest = GSXML.createBasicRequest(_mainDoc, GSXML.REQUEST_TYPE_DESCRIBE, collection, userContext);
 		dbTypeMessage.appendChild(dbTypeRequest);
 		Element dbTypeResponse = (Element) _router.process(dbTypeMessage);
 
@@ -2022,10 +2022,10 @@ public class GSDocumentModel
 		return "gdbm"; //The default collection database type
 	}
 
-	public SimpleCollectionDatabase openDatabase(String collection, String dbName, int readWrite, String lang, String uid)
+	public SimpleCollectionDatabase openDatabase(String collection, String dbName, int readWrite, UserContext userContext)
 	{
 		//Find out what kind of database we have
-		String databaseType = getDatabaseTypeFromCollection(collection, lang, uid);
+		String databaseType = getDatabaseTypeFromCollection(collection, userContext);
 		String dbExt = DBHelper.getDBExtFromDBType(databaseType);
 
 		SimpleCollectionDatabase coll_db = new SimpleCollectionDatabase(databaseType);

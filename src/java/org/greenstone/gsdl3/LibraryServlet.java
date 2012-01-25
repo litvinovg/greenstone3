@@ -543,6 +543,9 @@ public class LibraryServlet extends HttpServlet
 				lang = this.default_lang;
 			}
 		}
+		UserContext userContext = new UserContext();
+		userContext.setLanguage(lang);
+		userContext.setUserID(uid);
 
 		// set the lang in the session
 		session.setAttribute(GSParams.LANGUAGE, lang);
@@ -581,7 +584,7 @@ public class LibraryServlet extends HttpServlet
 
 		// the request to the receptionist
 		Element xml_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element xml_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PAGE, "", lang, uid);
+		Element xml_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PAGE, "", userContext);
 		xml_request.setAttribute(GSXML.OUTPUT_ATT, output);
 
 		xml_message.appendChild(xml_request);

@@ -762,22 +762,22 @@ public class TransformingReceptionist extends Receptionist
 		//System.out.println("Generate final HTML from current skin") ;
 		//Transformation of the XML message from the receptionist to HTML with doctype
 
-		if(inlineTemplate != null)
+		if (inlineTemplate != null)
 		{
 			try
 			{
 				Document inlineTemplateDoc = this.converter.getDOM("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:java=\"http://xml.apache.org/xslt/java\" xmlns:util=\"xalan://org.greenstone.gsdl3.util.XSLTUtil\" xmlns:gsf=\"http://www.greenstone.org/greenstone3/schema/ConfigFormat\">" + inlineTemplate + "</xsl:stylesheet>");
 				GSXSLT.mergeStylesheets(skinAndLibraryDoc, inlineTemplateDoc.getDocumentElement());
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				ex.printStackTrace();
 			}
 		}
-		
+
 		if (skinAndLibraryDoc.getElementsByTagName("gsf:metadata").getLength() > 0)
 		{
-			secondConfigFormatPass(collection, skinAndLibraryDoc, doc, request.getAttribute("lang"), request.getAttribute("uid"));
+			secondConfigFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request));
 		}
 
 		if (output.equals("xmlfinal"))
@@ -794,11 +794,11 @@ public class TransformingReceptionist extends Receptionist
 		//return null; // For now - change later
 	}
 
-	protected void secondConfigFormatPass(String collection, Document skinAndLibraryDoc, Document doc, String lang, String uid)
+	protected void secondConfigFormatPass(String collection, Document skinAndLibraryDoc, Document doc, UserContext userContext)
 	{
 		String to = GSPath.appendLink(collection, "DocumentMetadataRetrieve"); // Hard-wired?
 		Element metaMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element metaRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+		Element metaRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		Element docNodeList = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 

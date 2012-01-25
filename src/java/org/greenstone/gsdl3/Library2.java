@@ -131,7 +131,7 @@ final public class Library2
 	{
 
 		Element xml_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element xml_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PAGE, "", "", "");
+		Element xml_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PAGE, "", new UserContext());
 		xml_message.appendChild(xml_request);
 		Element xml_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		xml_request.appendChild(xml_param_list);

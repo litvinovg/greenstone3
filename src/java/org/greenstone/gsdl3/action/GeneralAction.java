@@ -25,8 +25,7 @@ public class GeneralAction extends Action
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 		logger.debug(" request=" + this.converter.getString(request));
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		// get the param list
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -65,7 +64,7 @@ public class GeneralAction extends Action
 			//do the request
 
 			Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+			Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 			
 			if(request_type.equals("s"))
 			{
@@ -90,7 +89,7 @@ public class GeneralAction extends Action
 			if (response_only)
 			{
 				// just send the reponse as is
-				addSiteMetadata(result_response, lang, uid);
+				addSiteMetadata(result_response, userContext);
 				return result_response;
 			}
 			if (result_response != null)
@@ -104,7 +103,7 @@ public class GeneralAction extends Action
 
 		// request the service info for the selected service - should be cached
 		Element mr_info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, lang, uid);
+		Element mr_info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
 		mr_info_message.appendChild(mr_info_request);
 		Element mr_info_response = (Element) this.mr.process(mr_info_message);
 		
@@ -117,7 +116,7 @@ public class GeneralAction extends Action
 			page_response.appendChild((Element) this.doc.importNode(desNode, true));
 		}
 
-		addSiteMetadata(page_response, lang, uid);
+		addSiteMetadata(page_response, userContext);
 		
 		return result;
 	}

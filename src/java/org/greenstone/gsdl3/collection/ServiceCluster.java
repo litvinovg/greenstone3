@@ -346,7 +346,7 @@ public class ServiceCluster implements ModuleInterface
 			// the xml request to send to the serviceRack to query what
 			// services it provides
 			Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", "", "");
+			Element request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
 			message.appendChild(request);
 
 			Element n = (Element) nodes.item(i);

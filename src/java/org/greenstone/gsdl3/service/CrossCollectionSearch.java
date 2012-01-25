@@ -20,6 +20,7 @@ package org.greenstone.gsdl3.service;
 
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.UserContext;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -146,7 +147,8 @@ public class CrossCollectionSearch extends ServiceRack
 		result.setAttribute(GSXML.FROM_ATT, TEXT_QUERY_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
+		UserContext userContext = new UserContext(request);
+		
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
@@ -181,7 +183,7 @@ public class CrossCollectionSearch extends ServiceRack
 
 		}
 		// send the query to all colls
-		Element query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to_att.toString(), lang, "");
+		Element query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to_att.toString(), userContext);
 		query_message.appendChild(query_request);
 		// should we add params individually?
 		Element new_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -256,11 +258,13 @@ public class CrossCollectionSearch extends ServiceRack
 	//     }
 	protected boolean initCollectionList()
 	{
-		String lang = "en";
-		String uid = "";
+		UserContext userContext = new UserContext();
+		userContext.setLanguage("en");
+		userContext.setUserID("");
+
 		// first, get the message router info
 		Element coll_list_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element coll_list_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", lang, ""); // uid
+		Element coll_list_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext); // uid
 		coll_list_message.appendChild(coll_list_request);
 		logger.debug("coll list request = " + this.converter.getPrettyString(coll_list_request));
 		Element coll_list_response = (Element) this.router.process(coll_list_message);
@@ -280,7 +284,7 @@ public class CrossCollectionSearch extends ServiceRack
 		{
 			Element c = (Element) colls.item(i);
 			String name = c.getAttribute(GSXML.NAME_ATT);
-			Element metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, name, lang, uid);
+			Element metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, name, userContext);
 			metadata_message.appendChild(metadata_request);
 		}
 		logger.debug("metadata request = " + this.converter.getPrettyString(metadata_message));
@@ -330,7 +334,7 @@ public class CrossCollectionSearch extends ServiceRack
 		result.setAttribute(GSXML.FROM_ATT, DOCUMENT_METADATA_RETRIEVE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
+		UserContext userContext = new UserContext(request);
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
@@ -381,7 +385,7 @@ public class CrossCollectionSearch extends ServiceRack
 			Map.Entry e = (Map.Entry) iter.next();
 			String cname = (String) e.getKey();
 			Element doc_nodes = (Element) e.getValue();
-			Element meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, GSPath.appendLink(cname, DOCUMENT_METADATA_RETRIEVE_SERVICE), lang, "");
+			Element meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, GSPath.appendLink(cname, DOCUMENT_METADATA_RETRIEVE_SERVICE), userContext);
 			meta_request.appendChild(doc_nodes);
 			meta_request.appendChild(new_param_list.cloneNode(true));
 			meta_request_message.appendChild(meta_request);

@@ -68,11 +68,10 @@ public class PageAction extends Action
 	protected Element homePage(Element request)
 	{
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 		// first, get the message router info
 		Element info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element coll_list_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", lang, uid);
+		Element coll_list_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
 		info_message.appendChild(coll_list_request);
 		Element info_response_message = (Element) this.mr.process(info_message);
 		if (info_response_message == null)
@@ -96,7 +95,7 @@ public class PageAction extends Action
 			NodeList colls = GSXML.getChildrenByTagName(collection_list, GSXML.COLLECTION_ELEM);
 			if (colls.getLength() > 0)
 			{
-				sendMultipleRequests(colls, null, GSXML.REQUEST_TYPE_DESCRIBE, lang, uid);
+				sendMultipleRequests(colls, null, GSXML.REQUEST_TYPE_DESCRIBE, userContext);
 			}
 		}
 
@@ -107,7 +106,7 @@ public class PageAction extends Action
 			NodeList services = GSXML.getChildrenByTagName(service_list, GSXML.SERVICE_ELEM);
 			if (services.getLength() > 0)
 			{
-				sendMultipleRequests(services, null, GSXML.REQUEST_TYPE_DESCRIBE, lang, uid);
+				sendMultipleRequests(services, null, GSXML.REQUEST_TYPE_DESCRIBE, userContext);
 			}
 		}
 
@@ -118,7 +117,7 @@ public class PageAction extends Action
 			NodeList clusters = GSXML.getChildrenByTagName(cluster_list, GSXML.CLUSTER_ELEM);
 			if (clusters.getLength() > 0)
 			{
-				sendMultipleRequests(clusters, null, GSXML.REQUEST_TYPE_DESCRIBE, lang, uid);
+				sendMultipleRequests(clusters, null, GSXML.REQUEST_TYPE_DESCRIBE, userContext);
 
 			}
 		}
@@ -131,8 +130,7 @@ public class PageAction extends Action
 	protected Element aboutPage(Element request)
 	{
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 		// extract the params from the cgi-request, 
 		Element cgi_paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		HashMap params = GSXML.extractParams(cgi_paramList, false);
@@ -143,14 +141,14 @@ public class PageAction extends Action
 			logger.error("about page requested with no collection or cluster specified!");
 			// return an empty response
 			Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
-			addSiteMetadata(response, lang, uid);
+			addSiteMetadata(response, userContext);
 			return response;
 		}
 
 		// get the collection or cluster description
 		Element coll_about_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 
-		Element coll_about_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, coll_name, lang, uid);
+		Element coll_about_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, coll_name, userContext);
 		coll_about_message.appendChild(coll_about_request);
 		Element coll_about_response = (Element) this.mr.process(coll_about_message);
 
@@ -195,12 +193,12 @@ public class PageAction extends Action
 		NodeList services = coll_about_response.getElementsByTagName(GSXML.SERVICE_ELEM);
 		if (services.getLength() > 0)
 		{
-			sendMultipleRequests(services, coll_name, GSXML.REQUEST_TYPE_DESCRIBE, lang, uid);
+			sendMultipleRequests(services, coll_name, GSXML.REQUEST_TYPE_DESCRIBE, userContext);
 		}
 
 		Element response = (Element) GSXML.getChildByTagName(coll_about_response, GSXML.RESPONSE_ELEM);
 		//add the site metadata
-		addSiteMetadata(response, lang, uid);
+		addSiteMetadata(response, userContext);
 		return response;
 	}
 
@@ -212,9 +210,7 @@ public class PageAction extends Action
 	/** if we dont know the page type, use this method */
 	protected Element unknownPage(Element request)
 	{
-
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 		String page_name = request.getAttribute(GSXML.SUBACTION_ATT);
 
 		// extract the params from the cgi-request, 
@@ -226,7 +222,7 @@ public class PageAction extends Action
 		{
 			// just return an empty response
 			Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
-			addSiteMetadata(response, lang, uid);
+			addSiteMetadata(response, userContext);
 			return response;
 		}
 
@@ -236,7 +232,7 @@ public class PageAction extends Action
 		// get the collection or cluster description
 		Element coll_about_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 
-		Element coll_about_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, coll_name, lang, uid);
+		Element coll_about_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, coll_name, userContext);
 		coll_about_message.appendChild(coll_about_request);
 
 		Element coll_about_response = (Element) this.mr.process(coll_about_message);
@@ -244,13 +240,13 @@ public class PageAction extends Action
 		Element response = (Element) GSXML.getChildByTagName(coll_about_response, GSXML.RESPONSE_ELEM);
 
 		//add the site metadata
-		addSiteMetadata(response, lang, uid);
+		addSiteMetadata(response, userContext);
 
 		return response;
 
 	}
 
-	protected boolean sendMultipleRequests(NodeList items, String path_prefix, String request_type, String lang, String uid)
+	protected boolean sendMultipleRequests(NodeList items, String path_prefix, String request_type, UserContext userContext)
 	{
 
 		// we will send all the requests in a single message
@@ -263,7 +259,7 @@ public class PageAction extends Action
 			{
 				path = GSPath.appendLink(path_prefix, path);
 			}
-			Element request = GSXML.createBasicRequest(this.doc, request_type, path, lang, uid);
+			Element request = GSXML.createBasicRequest(this.doc, request_type, path, userContext);
 			message.appendChild(request);
 		}
 

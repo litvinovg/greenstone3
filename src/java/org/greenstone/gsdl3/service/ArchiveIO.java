@@ -27,6 +27,7 @@ import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
+import org.greenstone.gsdl3.util.UserContext;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -107,8 +108,7 @@ public class ArchiveIO extends ServiceRack
 		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_GET_DOCUMENT_FILE_PATH);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -122,7 +122,7 @@ public class ArchiveIO extends ServiceRack
 		String oid = (String) params.get(GSXML.NODE_ID_ATT);
 		String collection = (String) params.get(GSXML.COLLECTION_ATT);
 
-		String filePath = _GSDM.archiveGetDocumentFilePath(oid, collection, lang, uid);
+		String filePath = _GSDM.archiveGetDocumentFilePath(oid, collection, userContext);
 		
 		Element metadataList = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		metadataList.appendChild(GSXML.createMetadataElement(this.doc, "docfilepath", filePath)); //TODO: Replace "docfilepath" with a constant 
@@ -138,8 +138,7 @@ public class ArchiveIO extends ServiceRack
 		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_GET_SOURCE_FILE_OID);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -153,7 +152,7 @@ public class ArchiveIO extends ServiceRack
 		String srcFile = (String) params.get("sourcefile"); //TODO: Replace with a constant
 		String collection = (String) params.get(GSXML.COLLECTION_ATT);
 
-		String oid = _GSDM.archiveGetSourceFileOID(srcFile, collection, lang, uid);
+		String oid = _GSDM.archiveGetSourceFileOID(srcFile, collection, userContext);
 		if(_GSDM.checkError(result, ARCHIVE_GET_SOURCE_FILE_OID))
 		{
 			return result;
@@ -173,8 +172,7 @@ public class ArchiveIO extends ServiceRack
 		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_CHECK_DOCUMENT_OR_SECTION_EXISTS);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -188,7 +186,7 @@ public class ArchiveIO extends ServiceRack
 		String oid = (String) params.get(GSXML.NODE_ID_ATT);
 		String collection = (String) params.get(GSXML.COLLECTION_ATT);
 		
-		boolean exists = _GSDM.archiveCheckDocumentOrSectionExists(oid, collection, lang, uid);
+		boolean exists = _GSDM.archiveCheckDocumentOrSectionExists(oid, collection, userContext);
 		if(_GSDM.checkError(result, ARCHIVE_CHECK_DOCUMENT_OR_SECTION_EXISTS))
 		{
 			return result;
@@ -206,8 +204,7 @@ public class ArchiveIO extends ServiceRack
 		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_WRITE_ENTRY_TO_DATABASE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -254,7 +251,7 @@ public class ArchiveIO extends ServiceRack
 			}
 		}
 		
-		_GSDM.archiveWriteEntryToDatabase(oid, collection, info, lang, uid);
+		_GSDM.archiveWriteEntryToDatabase(oid, collection, info, userContext);
 		_GSDM.checkError(result, ARCHIVE_WRITE_ENTRY_TO_DATABASE);
 
 		return result;
@@ -267,8 +264,7 @@ public class ArchiveIO extends ServiceRack
 		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_REMOVE_ENTRY_FROM_DATABASE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -298,7 +294,7 @@ public class ArchiveIO extends ServiceRack
 			}
 		}
 		
-		_GSDM.archiveRemoveEntryFromDatabase(oid, collection, lang, uid);
+		_GSDM.archiveRemoveEntryFromDatabase(oid, collection, userContext);
 		_GSDM.checkError(result, ARCHIVE_REMOVE_ENTRY_FROM_DATABASE);
 
 		return result;
@@ -311,8 +307,7 @@ public class ArchiveIO extends ServiceRack
 		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_GET_ASSOCIATED_IMPORT_FILES);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -326,7 +321,7 @@ public class ArchiveIO extends ServiceRack
 		String oid = (String) params.get(GSXML.NODE_ID_ATT);
 		String collection = (String) params.get(GSXML.COLLECTION_ATT);
 
-		ArrayList<String> assocFiles = _GSDM.archiveGetAssociatedImportFiles(oid, collection, lang, uid);
+		ArrayList<String> assocFiles = _GSDM.archiveGetAssociatedImportFiles(oid, collection, userContext);
 		if(_GSDM.checkError(result, ARCHIVE_GET_ASSOCIATED_IMPORT_FILES))
 		{
 			return result;

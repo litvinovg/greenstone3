@@ -96,8 +96,7 @@ public class DocumentAction extends Action
 		has_href = (String) params.get("href");//for an external link : get the href URL if it is existing in the params list 
 		has_rl = (String) params.get("rl");//for an external link : get the rl value if it is existing in the params list
 		String collection = (String) params.get(GSParams.COLLECTION);
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 		String document_name = (String) params.get(GSParams.DOCUMENT);
 		if ((document_name == null || document_name.equals("")) && (has_href == null || has_href.equals("")))
 		{
@@ -146,10 +145,10 @@ public class DocumentAction extends Action
 		}
 
 		//append site metadata
-		addSiteMetadata(page_response, lang, uid);
+		addSiteMetadata(page_response, userContext);
 
 		// get the additional data needed for the page
-		getBackgroundData(page_response, collection, lang, uid);
+		getBackgroundData(page_response, collection, userContext);
 		Element format_elem = (Element) GSXML.getChildByTagName(page_response, GSXML.FORMAT_ELEM);
 
 		// the_document is where all the doc info - structure and metadata etc
@@ -262,7 +261,7 @@ public class DocumentAction extends Action
 			// Build a request to obtain the document structure
 			Element ds_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 			String to = GSPath.appendLink(collection, "DocumentStructureRetrieve");// Hard-wired?
-			Element ds_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+			Element ds_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 			ds_message.appendChild(ds_request);
 			ds_request.appendChild(ds_param_list);
 
@@ -338,7 +337,7 @@ public class DocumentAction extends Action
 		// Build a request to obtain some document metadata
 		Element dm_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 		String to = GSPath.appendLink(collection, "DocumentMetadataRetrieve"); // Hard-wired?
-		Element dm_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+		Element dm_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		dm_message.appendChild(dm_request);
 		// Create a parameter list to specify the required metadata information
 
@@ -377,7 +376,7 @@ public class DocumentAction extends Action
 
 		// we also want a metadata request to the top level document to get
 		// assocfilepath - this could be cached too
-		Element doc_meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+		Element doc_meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		dm_message.appendChild(doc_meta_request);
 		Element doc_meta_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (service_params != null)
@@ -431,7 +430,7 @@ public class DocumentAction extends Action
 		// Build a request to obtain some document content
 		Element dc_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 		to = GSPath.appendLink(collection, "DocumentContentRetrieve"); // Hard-wired?
-		Element dc_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+		Element dc_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		dc_message.appendChild(dc_request);
 
 		// Create a parameter list to specify the request parameters - empty for now
@@ -516,7 +515,7 @@ public class DocumentAction extends Action
 					String enrich_service = (String) params.get(GSParams.SERVICE);
 					// send a message to the service
 					Element enrich_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-					Element enrich_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, enrich_service, lang, uid);
+					Element enrich_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, enrich_service, userContext);
 					enrich_message.appendChild(enrich_request);
 					// check for parameters
 					HashMap e_service_params = (HashMap) params.get("s1");
@@ -609,7 +608,7 @@ public class DocumentAction extends Action
 	 * enrich services, etc - stuff that is needed for the page, but is the same
 	 * whatever the query is - should be cached
 	 */
-	protected boolean getBackgroundData(Element page_response, String collection, String lang, String uid)
+	protected boolean getBackgroundData(Element page_response, String collection, UserContext userContext)
 	{
 
 		// create a message to process - contains requests for the collection 
@@ -618,14 +617,14 @@ public class DocumentAction extends Action
 		Element info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 		String path = GSPath.appendLink(collection, "DocumentContentRetrieve");
 		// the format request - ignore for now, where does this request go to??
-		Element format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, path, lang, uid);
+		Element format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, path, userContext);
 		info_message.appendChild(format_request);
 
 		// the enrich_services request - only do this if provide_annotations is true
 
 		if (provide_annotations)
 		{
-			Element enrich_services_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", lang, uid);
+			Element enrich_services_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
 			enrich_services_request.setAttribute(GSXML.INFO_ATT, "serviceList");
 			info_message.appendChild(enrich_services_request);
 		}
@@ -658,7 +657,7 @@ public class DocumentAction extends Action
 			{
 				if (((Element) e_services.item(j)).getAttribute(GSXML.TYPE_ATT).equals("enrich"))
 				{
-					Element s = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, ((Element) e_services.item(j)).getAttribute(GSXML.NAME_ATT), lang, uid);
+					Element s = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, ((Element) e_services.item(j)).getAttribute(GSXML.NAME_ATT), userContext);
 					enrich_message.appendChild(s);
 					service_found = true;
 				}
@@ -710,12 +709,11 @@ public class DocumentAction extends Action
 			return dc_response_doc_content;
 		}
 		String collection = (String) params.get(GSParams.COLLECTION);
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 		String to = GSPath.appendLink(collection, service_name);
 
 		Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+		Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		mr_query_message.appendChild(mr_query_request);
 
 		// paramList
@@ -898,7 +896,7 @@ public class DocumentAction extends Action
 		for (int i = 0; i < content_characters.length; i++)
 		{
 			//We don't want to find words inside HTML tags
-			if(content_characters[i] == '<')
+			if (content_characters[i] == '<')
 			{
 				inTag = true;
 				continue;
@@ -911,9 +909,9 @@ public class DocumentAction extends Action
 			{
 				continue;
 			}
-			
+
 			boolean is_character_letter_or_digit = Character.isLetterOrDigit(content_characters[i]);
-			
+
 			// Has a word just started?
 			if (in_word == false && is_character_letter_or_digit == true)
 			{

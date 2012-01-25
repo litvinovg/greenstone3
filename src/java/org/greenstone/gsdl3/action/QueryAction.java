@@ -67,8 +67,7 @@ public class QueryAction extends Action
 			collection = null;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 		String to = service_name;
 		if (collection != null)
 		{
@@ -79,12 +78,13 @@ public class QueryAction extends Action
 		{
 			// we have been asked for the service description
 			Element mr_info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element mr_info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, lang, uid);
+			Element mr_info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
 			mr_info_message.appendChild(mr_info_request);
 
 			// process the message
 			Element mr_info_response = (Element) this.mr.process(mr_info_message);
 			// the response
+			
 			Element service_response = (Element) GSXML.getChildByTagName(mr_info_response, GSXML.RESPONSE_ELEM);
 
 			Element service_description = (Element) this.doc.importNode(GSXML.getChildByTagName(service_response, GSXML.SERVICE_ELEM), true);
@@ -95,7 +95,7 @@ public class QueryAction extends Action
 		{
 			// just a display request, no actual processing to do
 			//append site metadata
-			addSiteMetadata(page_response, lang, uid);
+			addSiteMetadata(page_response, userContext);
 			return page_response;
 		}
 
@@ -104,13 +104,13 @@ public class QueryAction extends Action
 		if (service_params == null)
 		{ // no query
 			//append site metadata
-			addSiteMetadata(page_response, lang, uid);
+			addSiteMetadata(page_response, userContext);
 			return page_response;
 		}
 
 		// create the query request
 		Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+		Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		mr_query_message.appendChild(mr_query_request);
 
 		Element query_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -118,7 +118,7 @@ public class QueryAction extends Action
 		mr_query_request.appendChild(query_param_list);
 
 		// also get the format stuff now if there is some
-		Element format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, to, lang, uid);
+		Element format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, to, userContext);
 		mr_query_message.appendChild(format_request);
 
 		logger.debug(GSXML.xmlNodeToString(mr_query_message, false));
@@ -130,7 +130,7 @@ public class QueryAction extends Action
 		if (processErrorElements(mr_query_response, page_response))
 		{
 			//append site metadata
-			addSiteMetadata(page_response, lang, uid);
+			addSiteMetadata(page_response, userContext);
 			return page_response;
 		}
 
@@ -166,7 +166,7 @@ public class QueryAction extends Action
 			// add in a dummy doc node list - used by the display. need to think about this
 			page_response.appendChild(this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER));
 			//append site metadata
-			addSiteMetadata(page_response, lang, uid);
+			addSiteMetadata(page_response, userContext);
 			return page_response;
 		}
 
@@ -178,7 +178,7 @@ public class QueryAction extends Action
 			// append the doc list to the result
 			page_response.appendChild(this.doc.importNode(document_list, true));
 			//append site metadata
-			addSiteMetadata(page_response, lang, uid);
+			addSiteMetadata(page_response, userContext);
 			return page_response;
 		}
 
@@ -206,7 +206,7 @@ public class QueryAction extends Action
 		{
 			to = GSPath.prependLink(to, collection);
 		}
-		Element mr_metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+		Element mr_metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		mr_metadata_message.appendChild(mr_metadata_request);
 
 		// just get all for now - the receptionist should perhaps pass in some
@@ -234,7 +234,7 @@ public class QueryAction extends Action
 
 		logger.debug("Query page:\n" + this.converter.getPrettyString(page_response));
 		//append site metadata
-		addSiteMetadata(page_response, lang, uid);
+		addSiteMetadata(page_response, userContext);
 		return page_response;
 	}
 

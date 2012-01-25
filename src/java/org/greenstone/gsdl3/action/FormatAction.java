@@ -11,7 +11,6 @@ import org.w3c.dom.Document;
 
 // other java stuff
 import java.io.File;
-import java.util.HashMap;
 import java.util.*;
 import java.io.StringReader;
 import org.xml.sax.InputSource;
@@ -45,8 +44,7 @@ public class FormatAction extends Action {
 	    Element request = (Element)GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 	
     	String subaction = request.getAttribute(GSXML.SUBACTION_ATT);
-	    String lang = request.getAttribute(GSXML.LANG_ATT);
-    	String uid = request.getAttribute(GSXML.USER_ID_ATT);
+    	UserContext userContext = new UserContext(request);
 	    // get the param list
     	Element cgi_param_list = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 	    HashMap params = GSXML.extractParams(cgi_param_list, false);
@@ -63,7 +61,7 @@ public class FormatAction extends Action {
         }
 
         Element mr_request_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-        Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT_STRING, to, lang, uid);
+        Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT_STRING, to, userContext);
 
         mr_request.setAttribute("service", service);
         mr_request.setAttribute("subaction", subaction);

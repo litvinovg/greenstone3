@@ -42,8 +42,7 @@ public class ProcessAction extends Action
 			response_only = (response_only_p.equals("1") ? true : false);
 		}
 		String request_type = (String) params.get(GSParams.REQUEST_TYPE);
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 		// what is carried out depends on the request_type
 		// if rt=d, then a describe request is done,
 		// is rt=r, a request and then a describe request is done
@@ -93,7 +92,7 @@ public class ProcessAction extends Action
 				}
 
 			}
-			Element mr_query_request = GSXML.createBasicRequest(this.doc, request_type_att, to, lang, uid);
+			Element mr_query_request = GSXML.createBasicRequest(this.doc, request_type_att, to, userContext);
 			if (param_list != null)
 			{
 				mr_query_request.appendChild(param_list);
@@ -118,7 +117,7 @@ public class ProcessAction extends Action
 
 		// request the service info for the selected service - should be cached
 		Element mr_info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, lang, uid);
+		Element mr_info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
 		mr_info_message.appendChild(mr_info_request);
 		Element mr_info_response = (Element) this.mr.process(mr_info_message);
 

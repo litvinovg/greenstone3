@@ -32,6 +32,7 @@ import org.w3c.dom.NodeList;
 import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.UserContext;
 
 import java.net.InetAddress;
 import java.util.Properties;
@@ -261,7 +262,11 @@ public class BerryBasket extends ServiceRack
 		String to = GSPath.appendLink(collection, "DocumentMetadataRetrieve");
 		ArrayList tmp = new ArrayList();
 		tmp.add(id);
-		Element response = getDocumentMetadata(to, "en", "dumy", tmp.iterator());
+		
+		UserContext userContext = new UserContext();
+		userContext.setLanguage("en");
+		userContext.setUserID("dumy");
+		Element response = getDocumentMetadata(to, userContext, tmp.iterator());
 		Element doc_node = (Element) response.getElementsByTagName(GSXML.DOC_NODE_ELEM).item(0);
 
 		String node_id = doc_node.getAttribute(GSXML.NODE_ID_ATT);
@@ -431,12 +436,12 @@ public class BerryBasket extends ServiceRack
 		return result;
 	}
 
-	private Element getDocumentMetadata(String to, String lang, String uid, Iterator ids)
+	private Element getDocumentMetadata(String to, UserContext userContext, Iterator ids)
 	{
 
 		// Build a request to obtain some document metadata
 		Element dm_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element dm_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, lang, uid);
+		Element dm_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		dm_message.appendChild(dm_request);
 
 		// Create a parameter list to specify the required metadata information

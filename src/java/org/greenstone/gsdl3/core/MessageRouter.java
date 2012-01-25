@@ -453,7 +453,7 @@ public class MessageRouter implements  ModuleInterface {
     }
     
     Element service_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-    Element service_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", "", "");
+    Element service_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
     service_message.appendChild(service_request);
     
     for(int i=0; i<service_racks.getLength(); i++) {
@@ -773,7 +773,7 @@ public class MessageRouter implements  ModuleInterface {
     logger.info(" getting info from site:"+site_name);
     
     Element info_request = this.doc.createElement(GSXML.MESSAGE_ELEM);
-    Element req = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", "", "");
+    Element req = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
     info_request.appendChild(req);
     
     // process the message

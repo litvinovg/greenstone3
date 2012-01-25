@@ -173,7 +173,9 @@ public class GS2Construct extends ServiceRack
 		String coll_name = (String) params.get(COL_PARAM);
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 
-		systemRequest("delete", coll_name, null, lang);
+		UserContext userContext = new UserContext(request);
+		
+		systemRequest("delete", coll_name, null, userContext);
 
 		Element response = runCommand(request, GS2PerlConstructor.ACTIVATE);
 		Element status = (Element) GSXML.getChildByTagName(response, GSXML.STATUS_ELEM);
@@ -226,7 +228,7 @@ public class GS2Construct extends ServiceRack
 		status.appendChild(t);
 		// once have got here, we assume
 		// the first bit proceeded successfully, now reload the collection
-		systemRequest("reload", coll_name, status, lang); // this will append more messages to the status, and overwrite the error code att
+		systemRequest("reload", coll_name, status, userContext); // this will append more messages to the status, and overwrite the error code att
 		return response;
 
 	}
@@ -281,7 +283,10 @@ public class GS2Construct extends ServiceRack
 			status.appendChild(t);
 			return response;
 		}
-		systemRequest("delete", coll_name, status, lang);
+		
+		UserContext userContext = new UserContext(request);
+
+		systemRequest("delete", coll_name, status, userContext);
 		return response;
 	}
 
@@ -318,7 +323,10 @@ public class GS2Construct extends ServiceRack
 		}
 
 		String coll_name = (String) params.get(COL_PARAM);
-		systemRequest("reload", coll_name, status, lang);
+		
+		UserContext userContext = new UserContext(request);
+
+		systemRequest("reload", coll_name, status, userContext);
 		return response;
 
 	}
@@ -327,11 +335,11 @@ public class GS2Construct extends ServiceRack
 	 * send a configure request to the message router action name should be
 	 * "delete" or "reload" response will be put into the status element
 	 */
-	protected void systemRequest(String action_name, String coll_name, Element status, String lang)
+	protected void systemRequest(String action_name, String coll_name, Element status, UserContext userContext)
 	{
 		// send the request to the MR
 		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_SYSTEM, "", lang, "");
+		Element request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_SYSTEM, "", userContext);
 		message.appendChild(request);
 		Element command = this.doc.createElement(GSXML.SYSTEM_ELEM);
 		request.appendChild(command);
@@ -360,14 +368,14 @@ public class GS2Construct extends ServiceRack
 		{
 			if (response == null)
 			{
-				t = this.doc.createTextNode(getTextString(action_name + ".configure_error", lang, args));
+				t = this.doc.createTextNode(getTextString(action_name + ".configure_error", userContext.getLanguage(), args));
 				status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
 				status.appendChild(t);
 				return;
 			}
 
 			// if we got here, we have succeeded!
-			t = this.doc.createTextNode(getTextString(action_name + ".success", lang, args));
+			t = this.doc.createTextNode(getTextString(action_name + ".success", userContext.getLanguage(), args));
 			status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.SUCCESS));
 			status.appendChild(t);
 		}
@@ -440,7 +448,6 @@ public class GS2Construct extends ServiceRack
 		response.appendChild(status);
 
 		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
 		String request_type = request.getAttribute(GSXML.TYPE_ATT);
 
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);

@@ -24,6 +24,7 @@ import org.greenstone.gsdl3.util.DBInfo;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
+import org.greenstone.gsdl3.util.UserContext;
 
 import org.w3c.dom.Element; 
 
@@ -105,8 +106,7 @@ public class ArchiveRetrieve extends ServiceRack
 		result.setAttribute(GSXML.FROM_ATT, DOCUMENT_FILE_PATH_RETRIEVE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 		
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 		
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
@@ -119,7 +119,7 @@ public class ArchiveRetrieve extends ServiceRack
 		String oid = (String) params.get("oid");
 		String collection = (String) params.get("c");
 		
-		String assocFilePath = getAssocFilePathFromDocID(oid, collection, lang, uid);
+		String assocFilePath = getAssocFilePathFromDocID(oid, collection, userContext);
 		
 		String docFilePath = this.site_home + File.separatorChar + 
 			"collect" + File.separatorChar +
@@ -142,8 +142,7 @@ public class ArchiveRetrieve extends ServiceRack
 		result.setAttribute(GSXML.FROM_ATT, SOURCE_FILE_OID_RETRIEVE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 		
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 		
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
@@ -158,7 +157,7 @@ public class ArchiveRetrieve extends ServiceRack
 		String collection = (String) params.get("c");
 		
 		//Find out what kind of database we have
-		String databaseType = getDatabaseTypeFromCollection(collection, lang, uid);
+		String databaseType = getDatabaseTypeFromCollection(collection, userContext);
 		if (databaseType == null || databaseType.equals("")) 
 		{
 			databaseType = "gdbm"; // the default
@@ -214,8 +213,7 @@ public class ArchiveRetrieve extends ServiceRack
 		result.setAttribute(GSXML.FROM_ATT, ASSOCIATED_IMPORT_FILES_RETRIEVE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 		
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(request);
 		
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
@@ -229,7 +227,7 @@ public class ArchiveRetrieve extends ServiceRack
 		String oid = (String) params.get("oid");
 		String collection = (String) params.get("c");
 		
-		String databaseType = getDatabaseTypeFromCollection(collection, lang, uid);
+		String databaseType = getDatabaseTypeFromCollection(collection, userContext);
 		if (databaseType == null || databaseType.equals("")) 
 		{
 			databaseType = "gdbm"; // the default
@@ -293,10 +291,10 @@ public class ArchiveRetrieve extends ServiceRack
 		return metaElem;
 	}
 	
-	public String getAssocFilePathFromDocID(String oid, String collection, String lang, String uid)
+	public String getAssocFilePathFromDocID(String oid, String collection, UserContext userContext)
 	{
 		Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_query_request = GSXML.createBasicRequest (this.doc, GSXML.REQUEST_TYPE_PAGE, collection + "/DocumentMetadataRetrieve", lang, uid);
+		Element mr_query_request = GSXML.createBasicRequest (this.doc, GSXML.REQUEST_TYPE_PAGE, collection + "/DocumentMetadataRetrieve", userContext);
 		mr_query_message.appendChild(mr_query_request);
 		
 		Element paramList = this.doc.createElement(GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
@@ -321,11 +319,11 @@ public class ArchiveRetrieve extends ServiceRack
 		return metadataElem.getFirstChild().getNodeValue();
 	}
 	
-	public String getDatabaseTypeFromCollection(String collection, String lang, String uid)
+	public String getDatabaseTypeFromCollection(String collection, UserContext userContext)
 	{
 		//Find out what kind of database we have
 		Element dbTypeMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element dbTypeRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, collection, lang, uid);
+		Element dbTypeRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, collection, userContext);
 		dbTypeMessage.appendChild(dbTypeRequest);
 		Element dbTypeResponse = (Element)this.router.process(dbTypeMessage);
 		

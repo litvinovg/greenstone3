@@ -54,8 +54,7 @@ public class DefaultReceptionist extends TransformingReceptionist
 
 		// see if the collection/cluster element is already there
 		String coll_name = coll_param.getAttribute(GSXML.VALUE_ATT);
-		String lang = page_request.getAttribute(GSXML.LANG_ATT);
-		String uid = page_request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext userContext = new UserContext(page_request);
 
 		if (coll_name.equals(""))
 		{
@@ -83,7 +82,7 @@ public class DefaultReceptionist extends TransformingReceptionist
 
 			// we dont have one yet - get it
 			Element coll_about_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element coll_about_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, coll_name, lang, uid);
+			Element coll_about_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, coll_name, userContext);
 			coll_about_message.appendChild(coll_about_request);
 
 			Node coll_about_response_message = this.mr.process(coll_about_message);
@@ -157,7 +156,7 @@ public class DefaultReceptionist extends TransformingReceptionist
 			Element c = (Element) services.item(i);
 			String name = c.getAttribute(GSXML.NAME_ATT);
 			String address = GSPath.appendLink(coll_name, name);
-			Element info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, address, lang, uid);
+			Element info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, address, userContext);
 			//Element req_param_list = this.doc.createElement(GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 			//req_param_list.appendChild(GSXML.createParameter(this.doc, GSXML.SUBSET_PARAM, GSXML.DISPLAY_TEXT_ELEM+GSXML.LIST_MODIFIER));
 			//info_request.appendChild(req_param_list);
