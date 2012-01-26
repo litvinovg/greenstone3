@@ -4,9 +4,7 @@ html {
 }
 body {
 	font-family: sans-serif;
-	padding: 20px;
 	margin: 0;
-	color: #444;
 	background-color: #eae4d9;
 }
 
@@ -79,6 +77,7 @@ p {
 .icon{
 	cursor:pointer;
 	padding:2px;
+	border:0px;
 }
 
 .emptyIcon {
@@ -130,22 +129,50 @@ p {
 	padding: 0;
 	line-height: 120%;
 	background-color: #fff;
-	border: 1px solid #c8c3b9;
+	border-top-width: 0px;
+}
+
+#topArea {
+	border-bottom-width: 0px;
+	max-width: 998px;
+	margin: 20px auto 0;
+}
+
+#topArea table {
+	width: 100%;
+}
+
+#topArea td {
+	width: 50%;
 }
 
 #gs_banner {
-	/*background: transparent url('../images/gsdlhead.gif') scroll no-repeat left top;*/
-	background-color: #008800;
-	padding: 10px 20px 30px 20px;
-	min-height: 80px;
+	padding:0px;
+	height:100px;
 	position: relative;
 }
 
 #gs_content {
-	padding: 1em;
-	padding-right: 2em;
+	margin-top:-10px;
+	padding: 20px 20px 10px;
 	min-height: 300px;
 	/* background-color: #ff0; */
+}
+
+#gs_footer {
+	position: relative;
+	display: block;
+	/*background: transparent url('../images/gsdlhead.gif') scroll no-repeat left top;*/
+	margin: -1px auto;
+	text-align: center;
+	vertical-align: middle;
+	font-size: 70%;
+	padding-top:5px;
+	padding-bottom:5px;
+}
+
+#gs_footer a {
+	/*color:#FFF;*/
 }
 
 .termList {
@@ -163,34 +190,33 @@ p {
 
 .viewOptions {
 	width: 100%;
-	background:#008800;
 }
 
 .viewOptions td {
 	padding: 5px;
 }
 
+.tableOfContentsTitle{
+	font-weight:bold;
+	text-align:left;
+}
+
 .viewOptions a:link, .viewOptions a:hover, .viewOptions a:active, .viewOptions a:visited {
-	color:white;
 	text-decoration:none;
 }
 
 #rightSidebar {
 	border: 1px solid #cdc;
-	width: 25%;
-	min-width: 180px;
-	float: right;
+	width: 30%;
+	min-width:180px;
+	float:right;
 	margin: 0 0 10px 20px;
-	/* background-color: #f0f; */
+	background-color: #FFFFFF;
 }
 
 #contentsArea {
 	padding:10px;
 }
-
-#quickSearch {
-}
-
 
 #collectionLinks {
 	position: relative;
@@ -211,25 +237,6 @@ collectionLinkImage {
 	float: left;
 }
 
-#gs_footer {
-	position: relative;
-	display: block;
-	background: transparent url('../images/gsdlhead.gif') scroll no-repeat left top;
-	margin: 0 auto;
-	text-align: center;
-	vertical-align: middle;
-	font-size: 70%;
-	color: #fff;
-	padding-top:5px;
-	padding-bottom:5px;
-}
-
-#gs_footer a {
-	color:#FFF;
-}
-
-
-
 /* some text should not be rendered as it is just there for search engines */
 #collectionLinks a b {
 	display: none;
@@ -237,7 +244,7 @@ collectionLinkImage {
 
 /* make sure h1s and h2s are readable on the green banner */
 #breadcrumbs, #gs_banner h2, #breadcrumbs a, #gs_banner h2 a {
-	color: #fff;
+	/*color: #fff;*/
 }
 body.dAction #gs_banner h2 {
 	max-width: 600px;
@@ -245,112 +252,78 @@ body.dAction #gs_banner h2 {
 }
 
 #titlearea {
-	padding-left: 1em;
-	padding-right: 1em;
-	height:60px;
-	background-color: #007200;
+	padding-left: 20px;
 	width:40%;
 }
 
-#titlesearchcontainer {
-	width:100%;
-	margin: 5px 0 5px;
+#titlesearchcontainer {	
+	height: 70px;
+	width: 100%;
+}
+
+#titlesearchcontainer h2 {	
+	padding-left: 0px;
+}
+
+#titlesearchcontainer, #titlesearchcontainer form, #titlesearchcontainer h2{
+	padding-top: 0px;
+	padding-bottom: 0px;
+	margin-top: 0px;
+	margin-bottom: 0px;
 }
 
 #quicksearcharea {
-	width:60%;
-	text-align:right;
-	padding: 0.4em;
-	color:white;
-	background-color:#007200;
+	width: 60%;
+	text-align: right;
+	padding-right: 20px;
+	padding-top: 10px;
 }
 
-#quicksearcharea table{
-	font-size:70%; 
-	margin:0; 
-	float: right;
+#quicksearcharea ul{
+	margin:0;
+}
+
+#quicksearcharea li{
+	display:inline;
+	list-style:none;
+	margin-left:5px; 
+	padding: 2px 3px 2px 5px;
+	font-size: 10px;
 }
 
 #quicksearcharea a{
-	color:white; 
 	text-transform:lowercase;
-	padding-left:10px; 
 }
 
 #breadcrumbs {
-	/*margin: 0 0 10px 0;*/
-	height: 25px;
-	line-height: 15px;
+	margin-left: 20px;
 }
 
-/* css to make the tabs work */
-#nav {
-	position:absolute;
-	width: auto;
-	bottom: 0;
-	left: 0;
-	list-style: none;
-	margin:0;
-	padding: 0 0 0 20px;
-	font-size: 14px;
+#breadcrumbs a{
+	text-decoration:underline;
 }
-
-#nav li {
-	float: left;
-	color: #fff;
-	background: transparent url('../images/tab-right.png') scroll no-repeat 100% -100px;
-	margin: 0 5px 0 0;
-	padding: 0 8px 0 0;
-	text-transform: capitalize;
-}
-
-#nav a{
-
-	display: block;
-	float:left;
-	background: transparent url('../images/tab-left.png') no-repeat scroll 0 -100px;
-	margin:0;
-	padding: 5px 4px 3px 10px;
-	font-weight: bold;
-	color: #fff;
-	text-decoration: none;
-	line-height: 1;
-}
-
-#nav li:hover, #nav li.current { background-position: 100% 0; }
-#nav li:hover a, #nav li.current a { background-position: 0 0; cursor:default; }
 
 
 /* css to make the page links work (home, help, preference) */
 #bannerLinks {
-	width: auto;
-	position: absolute;
+	text-align: right;
 	list-style: none;
-	margin:0;
-	top: 7px;
-	right: 0;
-	padding: 0 15px 0 0;
-	text-transform: lowercase;
+	margin: 0 20px;
+	text-transform: capitalize;
+	font-size: 14px;
 }
 
 #bannerLinks li {
-	float: right;
-	margin: 0;
-	padding: 0 2px 0 0;
+	/*display: inline;*/
+	float:right;
+	margin-left: 5px;
+	padding: 1px 4px 1px 0px;
 }
 
-#bannerLinks a {
-	display: block;
-	float: left;
-	display: table-cell;
-	min-width: 1em;
-	margin:0;
-	padding: 5px 5px 3px 10px;
-	font-weight: normal;
-	text-align: center;
-	color: #fff;
-	text-decoration: none;
-	line-height: 1;
+#bannerLinks ul {
+	padding: 0px 3px 0px 0px;
+	text-align: right;
+	list-style: none;
 }
 
 #bannerLinks li.current a {
@@ -401,6 +374,37 @@ body.dAction #gs_banner h2 {
 	color: #444;
 	cursor: default;
 }
+
+/* css to make the tabs work */
+#nav {
+	list-style: none outside none;
+	padding: 0px;
+	margin: 9px 0 0 20px;
+	font-size: 14px;
+}
+
+#nav ul {
+	margin:0px;
+	padding:0px;
+}
+
+#nav li {
+	display: inline;
+	margin-right: 5px;
+	padding: 3px 5px 4px 7px;
+	text-transform: capitalize;
+	text-align: center;
+	border-bottom: none;
+}
+
+#nav a{
+	margin:0px;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+#nav li:hover, #nav li.current { background-position: 100% 0; }
+#nav li:hover a, #nav li.current a { background-position: 0 0; cursor:default; }
 
 /* style the search and classifier results */
 #results {
@@ -464,7 +468,7 @@ body.dAction #gs_banner h2 {
 }
 
 
-a:link, a:hover, a:active, a:visited { color: #050; }
+/*a:link, a:hover, a:active, a:visited { color: #050; }*/
 
 /* bg image set in style macro */
 div.divbar { 
@@ -662,6 +666,40 @@ table{
 }
 .childrenlist td {
 	padding:3px 0px 0px 10px;
+}
+
+/* ------- PAGED IMAGE ------- */
+
+.pageSlider {
+	width: 250px;
+	overflow: auto;
+	margin-left: auto;
+	margin-right: auto;
+	background: #BBFFBB;
+	border:2px solid #00AA00;
+	padding: 2px;
+}
+
+.pageSliderSpacer {
+	width:2px;
+}
+
+.pageSliderCol {
+	width:75px;
+	height:100px;
+	margin: 3px;
+	text-align: center;
+}
+
+/* ------- SPATIAL COLLECTIONS ------- */
+
+#nearbyDocs td, #nearbyDocs th {
+	padding: 5px;
+	border: 1px solid black;
+}
+
+#nearbyDocs th {
+	font-weight: bold;
 }
 
 /*
