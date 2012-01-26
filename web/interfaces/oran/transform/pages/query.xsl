@@ -4,11 +4,12 @@
 	xmlns:java="http://xml.apache.org/xslt/java"
 	xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
 	xmlns:gslib="http://www.greenstone.org/skinning"
+	xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
 	extension-element-prefixes="java util"
-	exclude-result-prefixes="java util">
+	exclude-result-prefixes="java util gsf">
 	
 	<!-- use the 'main' layout -->
-	<xsl:include href="layouts/main.xsl"/>
+	<xsl:import href="layouts/main.xsl"/>
 
 	<!-- set page title -->
 	<xsl:template name="pageTitle"><gslib:serviceName/></xsl:template>
@@ -20,169 +21,150 @@
 	<xsl:template match="/page">
 		<xsl:choose>
 			<xsl:when test="not(pageResponse/documentNodeList)">
-				<xsl:for-each select="pageResponse/service">
-					<form name="QueryForm" method="get" action="{$library_name}">
-						<div>
-							<input type="hidden" name="a" value="q"/>
-							<input type="hidden" name="sa"><xsl:attribute name="value"><xsl:value-of select="/page/pageRequest/@subaction"/></xsl:attribute></input>
-							<input type="hidden" name="rt" value="rd"/>
-							<input type="hidden" name="s" value="{@name}"/>
-							<input type="hidden" name="c" value="{$collName}"/>
-							<xsl:if test="not(paramList/param[@name='startPage'])">
-								<input type="hidden" name="startPage" value="1"/>
-							</xsl:if>
-							<xsl:choose>
-								<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.maxDocs']">
-									<input type="hidden" name="s1.maxDocs">
-										<xsl:attribute name="value">
-											<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.maxDocs']/@value"/>
-										</xsl:attribute>
-									</input>
-								</xsl:when>
-								<xsl:otherwise>
-									<input type="hidden" name="s1.maxDocs" value="100"/>
-								</xsl:otherwise>
-							</xsl:choose>
-							<xsl:choose>
-								<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.hitsPerPage']">
-									<input type="hidden" name="s1.hitsPerPage">
-										<xsl:attribute name="value">
-											<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.hitsPerPage']/@value"/>
-										</xsl:attribute>
-									</input>
-								</xsl:when>
-								<xsl:otherwise>
-									<input type="hidden" name="s1.hitsPerPage" value="20"/>
-								</xsl:otherwise>
-							</xsl:choose>
-
-							<xsl:variable name="ns">s1.</xsl:variable>
-							<xsl:for-each select="paramList/param">
-								<xsl:choose>
-									<xsl:when test="@name='case' or @name='stem' or @name='accent'">
-									</xsl:when>
-									<xsl:when test="@type='multi'">
-										<xsl:apply-templates select="."><xsl:with-param name="ns" select="$ns"/></xsl:apply-templates>
-									</xsl:when>
-									<xsl:when test="@name = 'maxDocs' or @name = 'hitsPerPage'"></xsl:when>
-									<xsl:otherwise>
-										<xsl:variable name="pvalue"><xsl:apply-templates select="." mode="calculate-default"><xsl:with-param name="ns" select="$ns"/></xsl:apply-templates></xsl:variable>
-										<div class="paramLabel"><xsl:value-of select="displayItem[@name='name']"/></div>
-										<div class="paramValue">
-											<xsl:apply-templates select=".">
-												<xsl:with-param name="default" select="$pvalue"/>
-												<xsl:with-param name="ns" select="$ns"/>
-											</xsl:apply-templates>
-										</div>
-										<br class="clear"/>
-									</xsl:otherwise>
-								</xsl:choose>
-							</xsl:for-each>
-
-							<br/>
-
-							<input type="submit"><xsl:attribute name="value"><xsl:value-of select="displayItem[@name='submit']"/></xsl:attribute></input>
-			
-						</div>
-					</form>
-				</xsl:for-each>
+				<xsl:call-template name="queryPage"/>
 			</xsl:when>
-
 			<xsl:otherwise>
-				<!-- The list of search terms with their frequency and document count -->
-				<p class="termList">
-					<xsl:if test="count(/page/pageResponse/termList/stopword) &gt; 0">
-						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.common')"/><xsl:text> </xsl:text>
-					</xsl:if>
-					
-					<xsl:for-each select="/page/pageResponse/termList/stopword">
-						<span style="font-style:italic;"><xsl:value-of select="@name"/></span><xsl:text> </xsl:text>
-					</xsl:for-each>
-					<br /><br />
-				
-					<xsl:for-each select="/page/pageResponse/termList/term">
+				<xsl:call-template name="resultsPage"/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+	
+	<xsl:template name="resultsPage">
+		<xsl:call-template name="resultsPagePre"/>
+		<xsl:call-template name="displayTermInfo"/>
+		<xsl:call-template name="displayResults"/>
+		<xsl:call-template name="resultsPagePost"/>
+	</xsl:template>
+	
+	<xsl:template name="displayResults">
+		<table id="results">
+			<xsl:for-each select="pageResponse/documentNodeList/documentNode">
+				<tr class="document">
+					<xsl:apply-templates select="."/>
+					<xsl:call-template name="documentNodePost"/>
+				</tr>
+			</xsl:for-each>
+			<br/>
+		</table>
+		
+		<!-- Previous/Next buttons-->
+		<xsl:call-template name="prevNextButtons"/>
+	</xsl:template>
+	
+	<xsl:template name="displayTermInfo">
+		<!-- The list of search terms with their frequency and document count -->
+		<p class="termList">
+			<xsl:if test="count(/page/pageResponse/termList/stopword) &gt; 0">
+				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.common')"/><xsl:text> </xsl:text>
+			</xsl:if>
+			
+			<xsl:for-each select="/page/pageResponse/termList/stopword">
+				<span style="font-style:italic;"><xsl:value-of select="@name"/></span><xsl:text> </xsl:text>
+			</xsl:for-each>
+			<br /><br />
+		
+			<xsl:for-each select="/page/pageResponse/termList/term">
+				<xsl:choose>
+					<!-- If there is only one or two search terms then show the expanded information -->
+					<xsl:when test="count(/page/pageResponse/termList/term) &lt; 3">
+						<span style="font-style:italic;"><xsl:value-of select="@name"/></span>
+						<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.occurs')"/><xsl:text> </xsl:text>
+						<xsl:value-of select="@freq"/>
 						<xsl:choose>
-							<!-- If there is only one or two search terms then show the expanded information -->
-							<xsl:when test="count(/page/pageResponse/termList/term) &lt; 3">
-								<span style="font-style:italic;"><xsl:value-of select="@name"/></span>
-								<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.occurs')"/><xsl:text> </xsl:text>
-								<xsl:value-of select="@freq"/>
-								<xsl:choose>
-									<xsl:when test="@freq = 1">
-										<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.time')"/>
-									</xsl:when>
-									<xsl:otherwise>
-										<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.time_plural')"/>
-									</xsl:otherwise>
-								</xsl:choose>
-								<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.in')"/><xsl:text> </xsl:text>
-								<xsl:value-of select="@numDocsMatch"/>
-								<xsl:choose>
-									<xsl:when test="@numDocsMatch = 1">
-										<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document')"/>
-									</xsl:when>
-									<xsl:otherwise>
-										<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document_plural')"/>
-									</xsl:otherwise>
-								</xsl:choose>
-								<br />
+							<xsl:when test="@freq = 1">
+								<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.time')"/>
 							</xsl:when>
 							<xsl:otherwise>
-								<span style="font-style:italic;"><xsl:value-of select="@name"/></span> (<xsl:value-of select="@freq"/>)
+								<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.time_plural')"/>
+							</xsl:otherwise>
+						</xsl:choose>
+						<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.in')"/><xsl:text> </xsl:text>
+						<xsl:value-of select="@numDocsMatch"/>
+						<xsl:choose>
+							<xsl:when test="@numDocsMatch = 1">
+								<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document')"/>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document_plural')"/>
+							</xsl:otherwise>
+						</xsl:choose>
+						<br />
+					</xsl:when>
+					<xsl:otherwise>
+						<span style="font-style:italic;"><xsl:value-of select="@name"/></span> (<xsl:value-of select="@freq"/>)
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:for-each>
+		</p>
+	</xsl:template>
+	
+	<xsl:template name="queryPage">
+		<xsl:for-each select="pageResponse/service">
+			<form name="QueryForm" method="get" action="{$library_name}">
+				<div>
+					<input type="hidden" name="a" value="q"/>
+					<input type="hidden" name="sa"><xsl:attribute name="value"><xsl:value-of select="/page/pageRequest/@subaction"/></xsl:attribute></input>
+					<input type="hidden" name="rt" value="rd"/>
+					<input type="hidden" name="s" value="{@name}"/>
+					<input type="hidden" name="c" value="{$collName}"/>
+					<xsl:if test="not(paramList/param[@name='startPage'])">
+						<input type="hidden" name="startPage" value="1"/>
+					</xsl:if>
+					<xsl:choose>
+						<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.maxDocs']">
+							<input type="hidden" name="s1.maxDocs">
+								<xsl:attribute name="value">
+									<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.maxDocs']/@value"/>
+								</xsl:attribute>
+							</input>
+						</xsl:when>
+						<xsl:otherwise>
+							<input type="hidden" name="s1.maxDocs" value="100"/>
+						</xsl:otherwise>
+					</xsl:choose>
+					<xsl:choose>
+						<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.hitsPerPage']">
+							<input type="hidden" name="s1.hitsPerPage">
+								<xsl:attribute name="value">
+									<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.hitsPerPage']/@value"/>
+								</xsl:attribute>
+							</input>
+						</xsl:when>
+						<xsl:otherwise>
+							<input type="hidden" name="s1.hitsPerPage" value="20"/>
+						</xsl:otherwise>
+					</xsl:choose>
+
+					<xsl:variable name="ns">s1.</xsl:variable>
+					<xsl:for-each select="paramList/param">
+						<xsl:choose>
+							<xsl:when test="@name='case' or @name='stem' or @name='accent'">
+							</xsl:when>
+							<xsl:when test="@type='multi'">
+								<xsl:apply-templates select="."><xsl:with-param name="ns" select="$ns"/></xsl:apply-templates>
+							</xsl:when>
+							<xsl:when test="@name = 'maxDocs' or @name = 'hitsPerPage'"></xsl:when>
+							<xsl:otherwise>
+								<xsl:variable name="pvalue"><xsl:apply-templates select="." mode="calculate-default"><xsl:with-param name="ns" select="$ns"/></xsl:apply-templates></xsl:variable>
+								<div class="paramLabel"><xsl:value-of select="displayItem[@name='name']"/></div>
+								<div class="paramValue">
+									<xsl:apply-templates select=".">
+										<xsl:with-param name="default" select="$pvalue"/>
+										<xsl:with-param name="ns" select="$ns"/>
+									</xsl:apply-templates>
+								</div>
+								<br class="clear"/>
 							</xsl:otherwise>
 						</xsl:choose>
 					</xsl:for-each>
-				</p>
-				
-				<!-- <ul id="results"> -->
-				<table id="results">
-					<xsl:for-each select="pageResponse/documentNodeList/documentNode">
 
-					  <tr class="document">
-
-					        <xsl:apply-templates select="."/>
-					  </tr>
-<!--
-
-						<li class="document">
-							<a>
-								<xsl:choose>
-									<xsl:when test="/page/pageResponse/collection/@name">
-										<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=q&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;hl=on&amp;ed=1#<xsl:value-of select="@nodeID"/></xsl:attribute>
-									</xsl:when>
-									<xsl:when test="@collection">
-										<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="@collection"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=q&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;hl=on&amp;ed=1#<xsl:value-of select="@nodeID"/></xsl:attribute>
-									</xsl:when>
-								</xsl:choose>
-								
-								<xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
-							</a>
-							***** -->
-							<!-- If this is results from a cross collection search then add a link to the collection that it is from --><!--
-							<xsl:if test="@collection">
-								(<a style="background-image:none; padding:3px;">
-									<xsl:attribute name="href">
-										<xsl:value-of select="$library_name"/>?a=p&amp;sa=about&amp;c=<xsl:value-of select="@collection"/>
-									</xsl:attribute>
-									<xsl:value-of select="@collection"/>
-								</a>)
-							</xsl:if>
-							<xsl:call-template name="documentBerryForClassifierOrSearchPage"/>
-						</li>
--->
-
-					</xsl:for-each>
 					<br/>
-					
-					<!-- Previous/Next buttons-->
-					<xsl:call-template name="prevNextButtons"/>
-				</table>
-				<!-- </ul> -->
 
-			</xsl:otherwise>
-			
-		</xsl:choose>
+					<input type="submit"><xsl:attribute name="value"><xsl:value-of select="displayItem[@name='submit']"/></xsl:attribute></input>
 
+				</div>
+			</form>
+		</xsl:for-each>
 	</xsl:template>
 	
 	<xsl:template name="prevNextButtons">	
@@ -438,5 +420,57 @@
 			<xsl:apply-templates select="." mode="contents"><xsl:with-param name="occurs" select="$occurs - 1"/><xsl:with-param name="ns" select="$ns"/></xsl:apply-templates>
 		</xsl:if>
 	</xsl:template>
-
+	
+	<xsl:template name="resultsPagePre">
+		<!-- OVERWRITE TO INSERT CONTENT BEFORE THE RESULTS PAGE -->
+		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
+			<xsl:call-template name="mapFeaturesJSONNodes"/>
+		</xsl:if>
+	</xsl:template>
+	
+	<xsl:template name="resultsPagePost">
+		<!-- OVERWRITE TO INSERT CONTENT AFTER THE RESULTS PAGE -->
+	</xsl:template>
+	
+	<xsl:template name="documentNodePre">
+		<!-- OVERWRITE TO INSERT CONTENT BEFORE EVERY DOCUMENT NODE -->
+	</xsl:template>
+	
+	<xsl:template name="documentNodePost">
+		<!-- OVERWRITE TO INSERT CONTENT AFTER EVERY DOCUMENT NODE -->
+		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
+			<xsl:call-template name="mapFeaturesIcon"/>
+		</xsl:if>
+	</xsl:template>
+	
+	<xsl:template name="mapFeaturesJSONNodes">
+		<div id="jsonNodes" style="display:none;">
+			<xsl:text>[</xsl:text>
+			<xsl:for-each select="//documentNode">
+				<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
+					<xsl:text>{</xsl:text>
+					<xsl:text disable-output-escaping="yes">"nodeID":"</xsl:text><xsl:value-of select="@nodeID"/><xsl:text disable-output-escaping="yes">",</xsl:text>
+					<xsl:text disable-output-escaping="yes">"title":"</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Title']"/><xsl:text disable-output-escaping="yes">",</xsl:text>
+					<xsl:text disable-output-escaping="yes">"lat":</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Latitude']"/><xsl:text>,</xsl:text>
+					<xsl:text disable-output-escaping="yes">"lng":</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Longitude']"/>
+					<xsl:text>}</xsl:text>
+					<xsl:if test="not(position() = count(//documentNode))">
+						<xsl:text>,</xsl:text>
+					</xsl:if>
+				</xsl:if>
+			</xsl:for-each>
+			<xsl:text>]</xsl:text>
+		</div>
+		
+		<div id="map_canvas" style="margin:0px auto; width:450px; height:500px; float:right;"><xsl:text> </xsl:text></div>
+		
+		<gsf:metadata name="Latitude"/>
+		<gsf:metadata name="Longitude"/>
+	</xsl:template>
+	
+	<xsl:template name="mapFeaturesIcon">
+		<td style="padding-left:5px; padding-right:5px;" valign="top">
+			<a href="javascript:focusDocument('{@nodeID}');"><img src="interfaces/{$interface_name}/images/bluemarker.png"/></a>
+		</td>
+	</xsl:template>
 </xsl:stylesheet>
