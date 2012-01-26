@@ -110,13 +110,7 @@ function httpRequest(sectionID)
 	if(!inProgress[sectionID])
 	{
 		inProgress[sectionID] = true;
-		var httpRequest;
-		if (window.XMLHttpRequest) {
-			httpRequest = new XMLHttpRequest();
-		}
-		else if (window.ActiveXObject) {
-			httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
-		}
+		var httpRequest = new gs.functions.ajaxRequest();
 		
 		var sectionToggle = document.getElementById("toggle" + sectionID);
 		sectionToggle.setAttribute("src", gs.imageURLs.loading);
