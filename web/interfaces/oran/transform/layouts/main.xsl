@@ -42,18 +42,30 @@
 				
 				<xsl:call-template name="displayErrorsIfAny"/>
 				<a name="top"><xsl:text> </xsl:text></a>
-				<div id="container">
+				
+				<div id="topArea" class="ui-state-default ui-corner-top">
+					<table>
+						<tbody>
+							<tr>
+								<td><div id="breadcrumbs"><xsl:call-template name="breadcrumbs"/><xsl:text> </xsl:text></div></td>
+								
+								<!-- ***** in header.xsl ***** -->
+								<td><xsl:call-template name="home-help-preferences"/></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				
+				<div id="container" class="ui-corner-all">
 
-					<div id="gs_banner">
-						<!-- ***** in header.xsl ***** -->
-						<xsl:call-template name="create-banner"/>
-					</div>
+					<!-- ***** in header.xsl ***** -->
+					<xsl:call-template name="create-banner"/>
 					
 					<xsl:if test="/page/pageRequest/paramList/param[(@name='formatedit') and (@value='on')]">
 						<xsl:call-template name="formatmanagerpre"/>
 					</xsl:if>
     
-					<div id="gs_content">
+					<div id="gs_content" class="ui-widget-content">
 						<!--
 							show the content of the page.
 							to customise this part, edit the xsl file for the page you want to edit
@@ -61,21 +73,12 @@
 						<xsl:apply-templates select="/page"/>
 
 					</div>
-					
-					<!--<xsl:call-template name="formatmanagerpost"/>-->
 
-					<div id="gs_footer">
+					<div id="gs_footer" class="ui-widget-header ui-corner-bottom">
 						<a href="http://www.greenstone.org"><xsl:call-template name="poweredByGS3TextBar"/></a>
 					</div>
-
-					<div class="corner" id="cornerTopLeft"><xsl:text> </xsl:text></div>
-					<div class="corner" id="cornerTopRight"><xsl:text> </xsl:text></div>
-					<div class="corner" id="cornerBottomLeft"><xsl:text> </xsl:text></div>
-					<div class="corner" id="cornerBottomRight"><xsl:text> </xsl:text></div>
 				</div>
 			</body>
 		</html>
 	</xsl:template>
 </xsl:stylesheet>
-
-
