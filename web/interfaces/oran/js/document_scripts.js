@@ -2,11 +2,6 @@
 * EXPANSION SCRIPTS *
 ********************/
 
-var collapseImageURL = gs.imageURLs.collapse;
-var expandImageURL = gs.imageURLs.expand;
-var chapterImageURL = gs.imageURLs.chapter;
-var pageImageURL = gs.imageURLs.page;
-
 function toggleSection(sectionID)
 {
 	var docElem = document.getElementById("doc" + sectionID);
@@ -18,11 +13,11 @@ function toggleSection(sectionID)
 	if(docElem.style.display == "none")
 	{
 		docElem.style.display = "block";
-		docToggleElem.setAttribute("src", collapseImageURL);
+		docToggleElem.setAttribute("src", gs.imageURLs.collapse);
 		
 		if(tocToggleElem)
 		{
-			tocToggleElem.setAttribute("src", collapseImageURL);
+			tocToggleElem.setAttribute("src", gs.imageURLs.collapse);
 		}
 		
 		if(tocElem)
@@ -35,11 +30,11 @@ function toggleSection(sectionID)
 		docElem.style.display = "none";
 		
 		//Use the page image if this is a leaf node and the chapter image if it not
-		docToggleElem.setAttribute("src", expandImageURL);
+		docToggleElem.setAttribute("src", gs.imageURLs.expand);
 		
 		if(tocToggleElem)
 		{
-			tocToggleElem.setAttribute("src", expandImageURL);
+			tocToggleElem.setAttribute("src", gs.imageURLs.expand);
 		}
 		
 		if(tocElem)
@@ -68,47 +63,10 @@ function isParentOf(parent, child)
 	return false;
 }
 
-function focusSection(sectionID)
-{
-	var tableOfContentsDiv = document.getElementById("tableOfContents");
-	var images = tableOfContentsDiv.getElementsByTagName("img");
-	var nodeArray = new Array();
-	
-	for(var i = 0; i < images.length; i++)
-	{	
-		nodeArray[i] = images[i].getAttribute("id").substring(7);
-	}
-	
-	for(var j = 0; j < nodeArray.length; j++)
-	{
-		//If this is the node that was clicked and it is not expanded then expand it
-		if(nodeArray[j] == sectionID)
-		{
-			if(!isExpanded(nodeArray[j]))
-			{
-				toggleSection(nodeArray[j]);
-			}
-			
-			continue;
-		}
-		
-		//If the node is a parent or child of the node that is clicked and is not expanded then expand it
-		if((isParentOf(nodeArray[j], sectionID) || isParentOf(sectionID, nodeArray[j])) && !isExpanded(nodeArray[j]))
-		{
-			toggleSection(nodeArray[j]);
-		}
-		//If the node is not a parent or child and is expanded then collapse it
-		else if(!(isParentOf(nodeArray[j], sectionID) || isParentOf(sectionID, nodeArray[j])) && isExpanded(nodeArray[j]))
-		{
-			toggleSection(nodeArray[j]);
-		}
-	}
-}
-
 function minimizeSidebar()
 {
 	var coverImage = document.getElementById("coverImage");
-	var toc = document.getElementById("tableOfContents");
+	var toc = document.getElementById("contentsArea");
 	var maxLink = document.getElementById("sidebarMaximizeButton");
 	var minLink = document.getElementById("sidebarMinimizeButton");
 	
@@ -129,7 +87,7 @@ function minimizeSidebar()
 function maximizeSidebar()
 {
 	var coverImage = document.getElementById("coverImage");
-	var toc = document.getElementById("tableOfContents");
+	var toc = document.getElementById("contentsArea");
 	var maxLink = document.getElementById("sidebarMaximizeButton");
 	var minLink = document.getElementById("sidebarMinimizeButton");
 	
@@ -145,6 +103,295 @@ function maximizeSidebar()
 	
 	maxLink.style.display = "none";
 	minLink.style.display = "block";
+}
+
+/**********************
+* PAGED-IMAGE SCRIPTS *
+**********************/
+
+function changePage(href)
+{
+	var ajax = new gs.functions.ajaxRequest();
+	ajax.open("GET", href + "&excerptid=gs-document");
+	ajax.onreadystatechange = function()
+	{
+		if(ajax.readyState == 4 && ajax.status == 200)
+		{
+			var contentElem = document.getElementById("gs-document");
+			contentElem.innerHTML = ajax.responseText;
+		}
+	}
+	ajax.send();
+}
+
+function changeView()
+{
+	var viewList = document.getElementById("viewSelection");
+	var currentVal = viewList.value;
+	
+	var view;
+	if(currentVal == "Image view")
+	{
+		setImageVisible(true);
+		setTextVisible(false);
+		view = "image";
+	}
+	else if(currentVal == "Text view")
+	{
+		setImageVisible(false);
+		setTextVisible(true);
+		view = "text";
+	}
+	else
+	{
+		setImageVisible(true);
+		setTextVisible(true);
+		view = "";
+	}
+	
+	var ajax = gs.functions.ajaxRequest();
+	ajax.open("GET", gs.xsltParams.library_name + "?a=d&view=" + view + "&c=" + gs.cgiParams.c);
+	ajax.send();
+}
+
+function setImageVisible(visible)
+{
+	var image = document.getElementById("gs-document-image");
+	if(visible)
+	{
+		image.setAttribute("class", image.getAttribute("class").replace(/\bhidden\b/g, ""));
+	}
+	else
+	{
+		if(image.getAttribute("class").search(/\bhidden\b/) == -1)
+		{
+			image.setAttribute("class", image.getAttribute("class") + " hidden");
+		}
+	}
+}
+
+function setTextVisible(visible)
+{
+	var text = document.getElementById("gs-document-text");
+	if(visible)
+	{
+		text.setAttribute("class", text.getAttribute("class").replace(/\bhidden\b/g, ""));
+	}
+	else
+	{
+		if(text.getAttribute("class").search(/\bhidden\b/) == -1)
+		{
+			text.setAttribute("class", text.getAttribute("class") + " hidden");
+		}
+	}
+}
+
+function retrieveTableOfContents()
+{
+	var ajax = gs.functions.ajaxRequest();
+	
+	ajax.open("GET", gs.xsltParams.library_name + "?a=d&ed=1&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&excerptid=tableOfContents");
+	ajax.onreadystatechange = function()
+	{
+		if(ajax.readyState == 4 && ajax.status == 200)
+		{
+			document.getElementById("contentsArea").innerHTML = document.getElementById("contentsArea").innerHTML + ajax.responseText;
+			replaceLinksWithSlider();
+		}
+	}
+	ajax.send();
+}
+
+function replaceLinksWithSlider()
+{
+	var tableOfContents = document.getElementById("tableOfContents");
+	var liElems = tableOfContents.getElementsByTagName("LI");
+	
+	var leafSections = new Array();
+	for (var i = 0; i < liElems.length; i++)
+	{
+		var section = liElems[i];
+		var add = true;
+		for(var j = 0; j < leafSections.length; j++)
+		{
+			if(leafSections[j] == undefined){continue;}
+			
+			var leaf = leafSections[j];
+			if(leaf.getAttribute("id").search(section.getAttribute("id")) != -1)
+			{
+				add = false;
+			}
+			
+			if(section.getAttribute("id").search(leaf.getAttribute("id")) != -1)
+			{
+				delete leafSections[j];
+			}
+		}
+		
+		if(add)
+		{
+			leafSections.push(section);
+		}
+	}
+	
+	for(var i = 0 ; i < leafSections.length; i++)
+	{
+		if(leafSections[i] == undefined){continue;}
+		leafSections[i].style.display = "none";
+		var links = leafSections[i].getElementsByTagName("A");
+		var widget = new SliderWidget(links);
+		leafSections[i].parentNode.insertBefore(widget.getElem(), leafSections[i]);
+	}
+}
+
+function SliderWidget(_links)
+{
+	//****************
+	//MEMBER VARIABLES
+	//****************
+
+	//The container for the widget
+	var _mainDiv = document.createElement("DIV");
+	_mainDiv.setAttribute("class", "pageSlider");
+	
+	//The table of images
+	var _linkTable = document.createElement("TABLE");
+	_mainDiv.appendChild(_linkTable);
+	_linkTable.style.width = (75 * _links.length) + "px";
+	
+	//The image row of the table
+	var _linkRow = document.createElement("TR");
+	_linkTable.appendChild(_linkRow);
+	
+	//The label row
+	var _numberRow = document.createElement("TR");
+	_linkTable.appendChild(_numberRow);
+
+	//****************
+	//PUBLIC FUNCTIONS
+	//****************
+	
+	//Function that returns the widget element
+	this.getElem = function()
+	{
+		return _mainDiv;
+	}
+	
+	//*****************
+	//PRIVATE FUNCTIONS
+	//*****************
+	
+	var getImage = function(page)
+	{
+		var ajax = gs.functions.ajaxRequest();
+
+		var href = page.getAttribute("href");
+		//ajax.open("GET", href + "&excerptid=meta&dmd=true");
+		var template = '<xsl:template match="/"><html><gsf:metadata name="thumbicon"/></html></xsl:template>';
+		ajax.open("GET", href + "&ilt=" + template.replace(" ", "%20"));
+		ajax.onreadystatechange = function()
+		{
+			if(ajax.readyState == 4 && ajax.status == 200)
+			{
+				var text = ajax.responseText;
+
+				var start = text.indexOf("<img", text);
+				if(start == -1)
+				{
+					page.isLoading = false;
+					page.noImage = true;
+					page.image.setAttribute("src", gs.imageURLs.blank);
+					return;
+				}
+				var end = text.indexOf(">", start) + 4;
+				
+				var image = text.substring(start, end);
+				image = image.replace("[parent(Top):assocfilepath]", gs.documentMetadata.assocfilepath);
+				page.link.innerHTML = image;
+				
+				page.isLoading = false;
+				page.imageLoaded = true;
+			}
+			else if (ajax.readyState == 4 && !page.failed)
+			{
+				page.failed = true;
+				getImage(page);
+			}
+		}
+		ajax.send();
+	}
+	
+	var startCheckFunction = function()
+	{
+		var checkFunction = function()
+		{
+			var widgetLeft = _mainDiv.scrollLeft;
+			var widgetRight = _mainDiv.clientWidth + _mainDiv.scrollLeft;
+
+			var visiblePages = new Array();
+			for(var i = 0; i < _links.length; i++)
+			{
+				var current = _links[i].cell;
+				var currentLeft = current.offsetLeft;
+				var currentRight = currentLeft + current.clientWidth;
+				if(currentRight > widgetLeft && currentLeft < widgetRight)
+				{
+					visiblePages.push(_links[i]);
+				}
+			}
+
+			for(var i = 0; i < visiblePages.length; i++)
+			{
+				var page = visiblePages[i];
+				if(!page || page.imageLoaded || page.noImage || page.isLoading)
+				{
+					continue;
+				}
+				
+				page.isLoading = true;
+				getImage(page);
+			}
+		}
+		setInterval(checkFunction, 1000);
+	}
+	
+	//***********
+	//CONSTRUCTOR
+	//***********
+	
+	for(var i = 0; i < _links.length; i++)
+	{
+		var col = document.createElement("TD");
+		_linkRow.appendChild(col);
+		col.setAttribute("class", "pageSliderCol");
+		_links[i].cell = col;
+		
+		var link = document.createElement("A");
+		col.appendChild(link);
+		_links[i].link = link;
+		var href = _links[i].getAttribute("href");
+		link.setAttribute("href", "javascript:changePage(\"" + href + "\");");
+		
+		var image = document.createElement("IMG");
+		link.appendChild(image);
+		image.setAttribute("src", gs.imageURLs.loading);
+		_links[i].image = image;
+		
+		var spacer = document.createElement("TD");
+		_linkRow.appendChild(spacer);
+		spacer.setAttribute("class", "pageSliderSpacer");
+		
+		var num = document.createElement("TD");
+		_numberRow.appendChild(num);
+		num.innerHTML = "Page " + (i + 1);
+		num.style.textAlign = "center";
+		
+		var spacer = document.createElement("TD");
+		_numberRow.appendChild(spacer);
+		spacer.setAttribute("class", "pageSliderSpacer");
+	}
+	
+	startCheckFunction();
 }
 
 /***********************
