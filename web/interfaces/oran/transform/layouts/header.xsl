@@ -25,7 +25,7 @@
 	<!-- Creates a header for the html page -->
 	<xsl:template name="create-html-header">
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
-		<link rel="stylesheet" href="interfaces/{$interface_name}/style/jquery-ui-1.8.16.custom.css" type="text/css"/>
+		<link rel="stylesheet" href="interfaces/{$interface_name}/style/themes/main/jquery-ui-1.8.16.custom.css" type="text/css"/>
 		<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
 		<link rel="shortcut icon" href="favicon.ico"/> 
 		
