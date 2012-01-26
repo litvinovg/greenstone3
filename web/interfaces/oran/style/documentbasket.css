@@ -24,9 +24,7 @@
 	padding: 0;
 	overflow: hidden;   
 }
-#trashbin {
-	float:right;
-}
+
 #documentpages img {
 	margin: 3px 2px;
 }
@@ -35,11 +33,9 @@
 	display:block;
 	cursor: pointer;
 	text-align: left;
-
-	#doclist {
-
 	margin-bottom:0;
 }
+
 li.documentitem {
    padding: 0;
    margin: 0 ;
@@ -60,16 +56,6 @@ li.documentitem {
  font-family:sans-serif;
  text-align:left;
 }
-.mailinput {
-  border:1px solid #2E8B57; 
-  width: 20em;
-  height: 1.5em;
-  font-size: 90%
-}
-
-.mailitem{
-   text-align: left;
- }
  
 textarea#pretextarea {
   font-family:sans-serif;
@@ -81,30 +67,76 @@ textarea#pretextarea {
   padding:0;
 }
 
-div#trashbin{
-   float: right;
-   height: 60px;
-   width:  55px;
-   padding: 0;
-   background: url("../images/trash-empty.png") 0 0 no-repeat;
-   margin:0;
-   z-index:10;
+/****************************
+* MAIN DOCUMENT MAKER STYLE *
+****************************/
+
+.dragList{
+	margin-left:1.5em;
+	padding-left:0px;
+	background-color:rgba(50,255,50,0.2);
+	list-style-type:none;
 }
 
-div#binhandle{
- height: 60px;
- width:  55px;
- cursor: move;
+.dragItem{
+	cursor:pointer;
+	list-style-type:none;
+	padding: 3px;
+	border: 1px dashed #FFFFFF;
 }
 
-span.extralink {
-  cursor:pointer;
-  font-size:80%;
-  font-weight:bold;
-  margin:0 2em 0 0;
-  color:black;
+.renderedText{
+	padding: 3px 3px 3px 3px;
+	background: #FFFFFF;
+	border:1px solid #000000;
 }
 
-span.extralink:hover {
-   color: #2E8B57;
+.menuLink{
+	font-size:0.6em;
+}
+
+.topLevel{
+	padding-left:0px;
+}
+
+.deleteLink{
+	float:right;
+}
+
+.placeHolder{
+	height: 1em;
+	list-style-type:none;
+	padding: 3px;
+}
+
+.emptyList{
+	border: 1px dashed #000000;
+}
+
+.newSection{
+	background: #BBFFBB;
+}
+
+.headerTableTD{
+	padding-left:10px;
+	padding-right:10px;
+}
+
+.metaTableCellName{
+	border:1px solid black;
+	background:#BBFFBB;
+}
+
+.metaTableCell{
+	border:1px solid black;
+	background:white;
+}
+
+.statusBar{
+	margin-top:10px;
+	text-align:center;
+}
+
+.statusMessage{
+	font-size:1.1em;
 }
