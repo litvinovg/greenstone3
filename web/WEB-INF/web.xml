@@ -391,7 +391,7 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
   HttpSession.getMaxInactiveInterval(). -->
 
   <session-config>
-    <session-timeout>30</session-timeout>    <!-- 30 minutes -->
+    <session-timeout>240</session-timeout>    <!-- 4 hours -->
   </session-config>
 
   <!-- axis mime-mappings -->
