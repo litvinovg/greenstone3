@@ -213,7 +213,12 @@
 							$(document).ready(function(){
 								$("#switcher").themeswitcher({
 									imgpath: "interfaces/" + gs.xsltParams.interface_name + "/style/images/",
-									additionalThemes: [{title:"Greenstone", name:"custom-theme", icon:"theme_90_greenstone.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/jquery-ui-1.8.16.custom.css"}]
+									additionalThemes: [
+										{title:"Greenstone Default", name:"custom-theme0", icon:"theme_90_greenstone.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/main/jquery-ui-1.8.16.custom.css"},
+										{title:"Greenstone Custom 1", name:"custom-theme1", icon:"theme_90_start_menu.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_1/jquery-ui-1.8.16.custom.css"},
+										{title:"Greenstone Custom 2", name:"custom-theme2", icon:"theme_90_mint_choco.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_2/jquery-ui-1.8.16.custom.css"},
+										{title:"Greenstone Custom 3", name:"custom-theme3", icon:"theme_90_trontastic.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_3/jquery-ui-1.8.16.custom.css"}
+									]
 								});
 							});
 						</xsl:text>
