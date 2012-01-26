@@ -301,7 +301,7 @@
 	<xsl:template name="map-scripts">
 		<meta content="initial-scale=1.0, user-scalable=no" name="viewport"/>
 		<script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"><xsl:text> </xsl:text></script>
-		<script src="sites/localsite/collect/tipple-paradise-gardens/js/map-scripts.js" type="text/javascript"><xsl:text> </xsl:text></script>
+		<script src="interfaces/{$interface_name}/js/map-scripts.js" type="text/javascript"><xsl:text> </xsl:text></script>
 		<script type="text/javascript">$(window).load(initializeMapScripts);</script>
 	</xsl:template>
 </xsl:stylesheet>
