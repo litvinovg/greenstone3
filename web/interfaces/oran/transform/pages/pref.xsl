@@ -205,6 +205,21 @@
 					</div>
 					<br class="clear"/>
 				</xsl:if>
+				
+				<!-- Theme Changer -->
+				<xsl:if test="/page/pageResponse/authenticationNode/service/@asn = '1' and util:contains(/page/pageResponse/authenticationNode/service/@umgp, 'administrator')">
+					<script type="text/javascript">
+						<xsl:text disable-output-escaping="yes">
+							$(document).ready(function(){
+								$("#switcher").themeswitcher({
+									imgpath: "interfaces/" + gs.xsltParams.interface_name + "/style/images/",
+									additionalThemes: [{title:"Greenstone", name:"custom-theme", icon:"theme_90_greenstone.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/jquery-ui-1.8.16.custom.css"}]
+								});
+							});
+						</xsl:text>
+					</script>
+					<div id="switcher"><xsl:text> </xsl:text></div>
+				</xsl:if>
 
 				<!-- search preferences -->
 				<h3><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.searchpref')"/></h3>
