@@ -4,22 +4,26 @@
 	xmlns:java="http://xml.apache.org/xslt/java"
 	xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
 	xmlns:gslib="http://www.greenstone.org/skinning"
+	xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
 	extension-element-prefixes="java util"
-	exclude-result-prefixes="java util">
+	exclude-result-prefixes="java util gsf">
 	
 	<!-- use the 'main' layout -->
 	<xsl:import href="layouts/main.xsl"/>
-	<xsl:include href="classifiertools.xsl"/>
+	<xsl:import href="classifiertools.xsl"/>
 
 	<!-- set page title -->
 	<xsl:template name="pageTitle"><gslib:serviceName/></xsl:template>
 
 	<!-- set page breadcrumbs -->
-	<xsl:template name="breadcrumbs"><gslib:siteLink/><gslib:rightArrow/> <gslib:collectionNameLinked/><gslib:rightArrow/></xsl:template>
+	<xsl:template name="breadcrumbs"><gslib:siteLink/><gslib:rightArrow/><gslib:collectionNameLinked/><gslib:rightArrow/></xsl:template>
 
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse">
+		<xsl:call-template name="classifierPre"/>
+		
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/classifier_scripts.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript">$(window).load(openStoredClassifiers);</script>
 		
 		<!-- this right sidebar -->
 		<xsl:if test="$berryBasketOn or $documentBasketOn">
@@ -46,19 +50,20 @@
 			<xsl:variable name="collName"><xsl:value-of select="/page/pageRequest/paramList/param[@name='c']/@value"/></xsl:variable>
 			<xsl:variable name="serviceName"><xsl:value-of select="service/@name"/></xsl:variable>
 
+			<xsl:call-template name="classifierResultsPre"/>
+			
 			<xsl:apply-templates select="classifier">
 				<xsl:with-param name="collName" select="$collName"/>
 				<xsl:with-param name="serviceName" select="$serviceName"/>
 			</xsl:apply-templates>
 		</div>
-		<script type="text/javascript">openStoredClassifiers();</script>
+
 		<div class="clear"><xsl:text> </xsl:text></div>
 	</xsl:template>
 
 	<!--
 	TEMPLATE FOR DOCUMENTS
 	-->
-
 	<xsl:template match="documentNode"><!-- priority="3"-->
 		<!-- The book icon -->
 		<td>
@@ -71,7 +76,14 @@
 		<!-- The document link -->
 		<td>
 			<a>
-				<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;ed=1</xsl:attribute>
+				<xsl:choose>
+					<xsl:when test="@docType = 'paged'">
+						<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/></xsl:attribute>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;ed=1</xsl:attribute>
+					</xsl:otherwise>
+				</xsl:choose>
 				<xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
 			</a>
 		</td>
@@ -81,7 +93,6 @@
 		</td>
 	</xsl:template>
 
-
 	<!--
 	TEMPLATE FOR GROUPS OF DOCUMENTS
 	-->
@@ -89,13 +100,13 @@
 
 		<table id="title{@nodeID}"><tbody><tr>
 			<!-- Expand/collapse button -->
-			<td class="headerTD">
+			<!--<td class="headerTD">
 				<img id="toggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
 					<xsl:attribute name="src">
 						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
 					</xsl:attribute>
 				</img>
-			</td>
+			</td>-->
 			<!-- Bookshelf icon -->
 			<td>
 				<img>
@@ -122,6 +133,46 @@
 				</table>
 			</div>
 		</xsl:if>
+	</xsl:template>
+	
+	<xsl:template name="classifierPre">
+		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
+			<xsl:call-template name="mapFeaturesJSONNodes"/>
+		</xsl:if>
+	</xsl:template>
+	
+	<xsl:template name="classifierResultsPre">
+		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
+			<xsl:call-template name="mapFeaturesMap"/>
+		</xsl:if>
+	</xsl:template>
+	
+	<xsl:template name="mapFeaturesJSONNodes">
+		<div id="jsonNodes" style="display:none;">
+			<xsl:text>[</xsl:text>
+			<xsl:for-each select="//documentNode">
+				<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
+					<xsl:text>{</xsl:text>
+					<xsl:text disable-output-escaping="yes">"nodeID":"</xsl:text><xsl:value-of select="@nodeID"/><xsl:text disable-output-escaping="yes">",</xsl:text>
+					<xsl:text disable-output-escaping="yes">"title":"</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Title']"/><xsl:text disable-output-escaping="yes">",</xsl:text>
+					<xsl:text disable-output-escaping="yes">"lat":</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Latitude']"/><xsl:text>,</xsl:text>
+					<xsl:text disable-output-escaping="yes">"lng":</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Longitude']"/>
+					<xsl:text>}</xsl:text>
+					<xsl:if test="not(position() = count(//documentNode))">
+						<xsl:text>,</xsl:text>
+					</xsl:if>
+				</xsl:if>
+			</xsl:for-each>
+			<xsl:text>]</xsl:text>
+		</div>
+		
+		<!-- Although these aren't visible, they are necessary because it forces Greenstone to include this metadata in the page xml -->
+		<gsf:metadata name="Latitude"/>
+		<gsf:metadata name="Longitude"/>
+	</xsl:template>
+	
+	<xsl:template name="mapFeaturesMap">
+		<div id="map_canvas" style="margin:0px auto; width:450px; height:500px; float:right;"><xsl:text> </xsl:text></div>
 	</xsl:template>
 </xsl:stylesheet>
 
