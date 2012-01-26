@@ -79,7 +79,7 @@
 				<td id="header{@nodeID}" class="headerTD sectionTitle"><!-- *** -->
 					<!-- Get the title from the title sectionTitle template -->
 					<xsl:choose>
-						<xsl:when test="not(/page/pageRequest/paramList/param[@name = 'db']) or /page/pageRequest/paramList/param[@name = 'db']/@value = 'false'">
+						<xsl:when test="not(/page/pageRequest/paramList/param[@name = 'dmd']) or /page/pageRequest/paramList/param[@name = 'dmd']/@value = 'false'">
 							<xsl:apply-templates select="." mode="sectionTitleFormat"/>
 						</xsl:when>
 						<xsl:otherwise>
@@ -99,12 +99,12 @@
 			</tr></table>
 			
 			<div id="doc{@nodeID}" class="sectionContainer" style="display:block;"><!-- *** -->
-				<xsl:if test="/page/pageRequest/paramList/param[@name = 'db']/@value = 'true'">
+				<xsl:if test="/page/pageRequest/paramList/param[@name = 'dmd']/@value = 'true'">
 					<table id="meta{@nodeID}">
 						<xsl:for-each select="metadataList/metadata">
 							<tr>
 								<td class="metaTableCellName"><xsl:value-of select="@name"/></td>
-								<td class="metaTableCellValue editable"><xsl:value-of select="."/></td>
+								<td class="metaTableCell editable"><xsl:value-of select="."/></td>
 							</tr>
 						</xsl:for-each>
 					</table>
@@ -122,7 +122,7 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse/document">
-		<xsl:if test="/page/pageRequest/paramList/param[@name = 'db']/@value = 'true'">
+		<xsl:if test="/page/pageRequest/paramList/param[@name = 'dmd']/@value = 'true'">
 			<gsf:metadata name="all"/>
 		</xsl:if>
 
@@ -167,15 +167,36 @@
 							</div>
 
 							<!-- the contents (if enabled) -->
-							<div id="tableOfContents">
-								<xsl:attribute name="class">
-									<xsl:choose>
-										<xsl:when test="count(//documentNode) > 1 and not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">visible</xsl:when>
-										<xsl:otherwise>hidden</xsl:otherwise>
-									</xsl:choose>
-								</xsl:attribute>
-								<xsl:apply-templates select="documentNode" mode="TOC"/>
-							</div>
+							<xsl:choose>
+								<xsl:when test="/page/pageResponse/document/@docType = 'paged' and not(/page/pageRequest/paramList/param[@name = 'ed']/@value = '1')">
+									<!-- Table of contents will be dynamically retrieved when viewing a paged document -->
+									<script type="text/javascript">
+										<xsl:text disable-output-escaping="yes">
+											retrieveTableOfContents();
+										</xsl:text>
+									</script>
+								</xsl:when>
+								<xsl:otherwise>
+									<div id="tableOfContents">
+										<xsl:attribute name="class">
+											<xsl:choose>
+												<xsl:when test="count(//documentNode) > 1 and not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">visible</xsl:when>
+												<xsl:otherwise>hidden</xsl:otherwise>
+											</xsl:choose>
+										</xsl:attribute>
+										<xsl:apply-templates select="documentNode" mode="TOC"/>
+										<xsl:if test="@docType = 'paged'">
+											<table style="width:100%;"><tbody><tr>
+												<td style="width:10%; text-align:left;"><a href="?a=d&amp;ed=1&amp;book=off&amp;dt=paged&amp;c={/page/pageResponse/collection/@name}&amp;d={/page/pageResponse/document/documentNode/@nodeID}"><img src="interfaces/{$interface_name}/images/previous.png"/></a></td>
+												<td style="width:20%; text-align:left;"><a href="?a=d&amp;ed=1&amp;book=off&amp;dt=paged&amp;c={/page/pageResponse/collection/@name}&amp;d={/page/pageResponse/document/documentNode/@nodeID}">Previous</a></td>
+												<td style="width:40%; text-align:center;"><xsl:text>Go to page</xsl:text><input type="text" size="3"/></td>
+												<td style="width:20%; text-align:right;"><a href="?a=d&amp;ed=1&amp;book=off&amp;dt=paged&amp;c={/page/pageResponse/collection/@name}&amp;d={/page/pageResponse/document/documentNode/@nodeID}">Next</a></td>
+												<td style="width:10%; text-align:right;"><a href="?a=d&amp;ed=1&amp;book=off&amp;dt=paged&amp;c={/page/pageResponse/collection/@name}&amp;d={/page/pageResponse/document/documentNode/@nodeID}"><img src="interfaces/{$interface_name}/images/next.png"/></a></td>
+											</tr></tbody></table>
+										</xsl:if>
+									</div>
+								</xsl:otherwise>
+							</xsl:choose>
 						</div>
 					</td></tr>
 				</table>
@@ -205,18 +226,24 @@
 				</script>
 			</xsl:when>
 			<xsl:otherwise>
-				<table><tbody><tr><td>
-					<div id="gs-document-image" class="sectionImage">
+				<div id="gs-document">
+					<div id="gs-document-image">
+						<xsl:attribute name="class">
+							<xsl:text>sectionImage</xsl:text>
+							<xsl:if test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'text'"><xsl:text> hidden</xsl:text></xsl:if>
+						</xsl:attribute>
 						<!-- Get the section content from the document template -->
 						<xsl:call-template name="documentImage"/>
+						<xsl:text> </xsl:text>
 					</div>
-				</td>
-				<td>
-					<div id="gs-document-text" class="documenttext" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
+					<div id="gs-document-text" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
+						<xsl:attribute name="class">
+							<xsl:text>documenttext</xsl:text>
+							<xsl:if test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'"><xsl:text> hidden</xsl:text></xsl:if>
+						</xsl:attribute>
 						<xsl:call-template name="wrapDocumentNodes"/>
 					</div>
-				</td></tr></tbody></table>
-
+				</div>
 			</xsl:otherwise>
 		</xsl:choose>
 		
@@ -257,6 +284,7 @@
 	
 	<!-- The default template for displaying the document content -->
 	<xsl:template match="documentNode" mode="document">
+		<xsl:call-template name="documentNodePre"/>
 		<!-- Section text -->
 		<xsl:for-each select="nodeContent">
 			<xsl:for-each select="node()">
@@ -283,7 +311,7 @@
 					<gsf:default>Untitled</gsf:default>
 				</gsf:choose-metadata>
 			</h3>
-			<gsf:metadata name="screenicon"/>
+			<gsf:image type="screen"/>
 		</xsl:if>
 	</xsl:template>
 
@@ -341,7 +369,14 @@
 				<!-- The section name, links to the section in the document -->
 				<td>				
 					<a>
-						<xsl:attribute name="href">#<xsl:value-of select="@nodeID"/></xsl:attribute>
+						<xsl:choose>
+							<xsl:when test="/page/pageResponse/document/@docType = 'paged'">
+								<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/></xsl:attribute>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:attribute name="href">#<xsl:value-of select="@nodeID"/></xsl:attribute>
+							</xsl:otherwise>
+						</xsl:choose>
 						<xsl:if test="util:hashToSectionId(@nodeID)">
 							<xsl:value-of select="util:hashToSectionId(@nodeID)"/>
 							<xsl:text> </xsl:text>
@@ -402,7 +437,33 @@
 	<xsl:template match="/page"><xsl:apply-templates select="/page/pageResponse/document"/></xsl:template> <!-- this to be deleted eventually -->
 	
 	<xsl:template name="viewOptions">
-		<table class="viewOptions"><tr>
+		<table class="viewOptions ui-state-default ui-corner-all"><tr>
+		
+			<!-- Paged-image options -->
+			<xsl:if test="/page/pageResponse/document/@docType = 'paged'">
+				<td>
+					<select id="viewSelection" onchange="changeView();">
+						<xsl:choose>
+							<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
+								<option>Default view</option>
+								<option selected="true">Image view</option>
+								<option>Text view</option>
+							</xsl:when>
+							<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'text'">
+								<option>Default view</option>
+								<option>Image view</option>
+								<option selected="true">Text view</option>
+							</xsl:when>
+							<xsl:otherwise test="not(/page/pageRequest/paramList/param[@name = 'view']/@value)">
+								<option selected="true">Default view</option>
+								<option>Image view</option>
+								<option>Text view</option>
+							</xsl:otherwise>
+						</xsl:choose>
+					</select>
+				</td>
+			</xsl:if>
+		
 			<!-- Realistic books link -->
 			<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
 				<td>
@@ -436,17 +497,19 @@
 					</input>
 				</td>
 			</xsl:if>
-			<td class="tableOfContentsTitle">Table of Contents</td>
-			<td style="vertical-align:top;">
+			<td style="vertical-align:top; text-align:right;">
+				<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
+					<span class="tableOfContentsTitle">Table of Contents</span>
+				</xsl:if>
 				<a id="sidebarMinimizeButton" href="javascript:minimizeSidebar();" style="float: right; font-size:0.6em;">
-					<img class="icon">
+					<img class="icon" style="padding-top:3px;">
 						<xsl:attribute name="src">
 							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
 						</xsl:attribute>
 					</img>
 				</a>
 				<a id="sidebarMaximizeButton" href="javascript:maximizeSidebar();" style="float: right; font-size:0.6em; display:none;">
-					<img class="icon">
+					<img class="icon" style="padding-top:3px;">
 						<xsl:attribute name="src">
 							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
 						</xsl:attribute>
@@ -454,6 +517,52 @@
 				</a>
 			</td>
 		</tr></table>	
+	</xsl:template>
+	
+	<xsl:template name="documentNodePre">
+		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
+			<xsl:call-template name="mapFeatures"/>
+		</xsl:if>
+	</xsl:template>
+	
+	<xsl:template name="mapFeatures">
+		<div id="map_canvas" style="margin:0px auto; width:900px; height:500px;"><xsl:text> </xsl:text></div>
+
+		<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
+			<div style="background:#BBFFBB; padding: 5px; margin:0px auto; width:890px;">
+				<xsl:text>Show documents near here </xsl:text>
+				<img id="nearbyDocumentsToggle" src="interfaces/oran/images/expand.png">
+					<xsl:attribute name="onclick">
+						<xsl:text>performDistanceSearch('</xsl:text>
+						<xsl:value-of select="@nodeID"/>
+						<xsl:text>', '</xsl:text>
+						<gsf:metadata name="Latitude"/>
+						<xsl:text>', '</xsl:text>
+						<gsf:metadata name="Longitude"/>
+						<xsl:text>', 2);</xsl:text>
+					</xsl:attribute>
+				</img>
+				<div id="nearbyDocuments"><xsl:text> </xsl:text></div>
+			</div>
+		</xsl:if>
+		
+		<div id="jsonNodes" style="display:none;">
+			<xsl:text>[</xsl:text>
+			<xsl:for-each select="//documentNode">
+				<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
+					<xsl:text>{</xsl:text>
+					<xsl:text disable-output-escaping="yes">"nodeID":"</xsl:text><xsl:value-of select="@nodeID"/><xsl:text disable-output-escaping="yes">",</xsl:text>
+					<xsl:text disable-output-escaping="yes">"title":"</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Title']"/><xsl:text disable-output-escaping="yes">",</xsl:text>
+					<xsl:text disable-output-escaping="yes">"lat":</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Latitude']"/><xsl:text>,</xsl:text>
+					<xsl:text disable-output-escaping="yes">"lng":</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Longitude']"/>
+					<xsl:text>}</xsl:text>
+					<xsl:if test="not(position() = count(//documentNode))">
+						<xsl:text>,</xsl:text>
+					</xsl:if>
+				</xsl:if>
+			</xsl:for-each>
+			<xsl:text>]</xsl:text>
+		</div>
 	</xsl:template>
 </xsl:stylesheet>
 
