@@ -7,7 +7,7 @@
 	exclude-result-prefixes="java util gsf">
 
 	<!-- use the 'main' layout -->
-	<xsl:include href="layouts/main.xsl"/>
+	<xsl:import href="layouts/main.xsl"/>
 	
 	<!-- set page title -->
 	<xsl:template name="pageTitle">Document Basket</xsl:template>
@@ -16,28 +16,19 @@
 	<xsl:template name="breadcrumbs"><gslib:siteLink/><gslib:rightArrow/> 
 	<gslib:collectionNameLinked/><gslib:rightArrow/></xsl:template>
 
+	<xsl:template name="init-seaweed"/>
+	
 	<!-- the page content -->
 	<xsl:template match="/page">
+		<script src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
+		<script src="interfaces/{$interface_name}/js/documentmaker_scripts_dd.js"><xsl:text> </xsl:text></script>
+		<script src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
+		<link src="interfaces/{$interface_name}/style/documentbasket.js"/>
 		<xsl:for-each select="//item">
-			<input type="checkbox" align="center">
-				<xsl:attribute name="id">
-					<xsl:text>doc</xsl:text>
-					<xsl:value-of select="position()"/>
-				</xsl:attribute>
-				
-				<xsl:attribute name="value">
-					<xsl:value-of select="@name"/>
-				</xsl:attribute>
-			</input>
-			<xsl:value-of select="position()"/><xsl:text>. </xsl:text>
-			
-			<a>  
-				<xsl:attribute name="href">   
-					<xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@name"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;ed=1
-				</xsl:attribute>
+			<a class="dbdoc">
+				<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;dt=hierarchy&amp;d=<xsl:value-of select="@name"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;ed=1</xsl:attribute>
 				<xsl:value-of select="@title"/>
 			</a>
-			<br />
 		</xsl:for-each>
 	</xsl:template>
 
