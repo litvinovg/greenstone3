@@ -3,8 +3,9 @@
 	xmlns:java="http://xml.apache.org/xslt/java"
 	xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
 	xmlns:gslib="http://www.greenstone.org/skinning"
+	xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
 	extension-element-prefixes="java util"
-	exclude-result-prefixes="java util">
+	exclude-result-prefixes="java util gsf">
 		
 	<xsl:include href="../query-common.xsl"/>
 	<xsl:include href="../javascript-global-setup.xsl"/>
@@ -24,10 +25,19 @@
 	<!-- Creates a header for the html page -->
 	<xsl:template name="create-html-header">
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
+		<link rel="stylesheet" href="interfaces/{$interface_name}/style/jquery-ui-1.8.16.custom.css" type="text/css"/>
 		<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
 		<link rel="shortcut icon" href="favicon.ico"/> 
-		<!--<script type="text/javascript" src="interfaces/{$interface_name}/js/direct-edit.js"><xsl:text> </xsl:text></script>-->
 		
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery.themeswitcher.min.js"><xsl:text> </xsl:text></script>
+		
+		<script type="text/javascript" src="interfaces/{$interface_name}/js/direct-edit.js"><xsl:text> </xsl:text></script>
+		
+		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
+			<xsl:call-template name="map-scripts"/>
+		</xsl:if>
 		<!--<xsl:call-template name="init-seaweed"/>-->
 		<xsl:call-template name="setup-gs-variable"/>
 		<xsl:call-template name="additionalHeaderContent"/>
@@ -36,7 +46,7 @@
 	<xsl:template name="additionalHeaderContent">
 		<!-- This template should be overridden in the collectionConfig.xml file if you want to add extra header content -->
 	</xsl:template>
-		
+	
 	<xsl:template name="init-seaweed">
 		<script type="text/javascript">
 			<xsl:text disable-output-escaping="yes">
@@ -44,15 +54,15 @@
 					try {
 						de.init();
 
-							de.doc.declarePropertySets({
-								metadata: {
-									phMarkup: '[Enter metadata value]',
-									name: "metadata"
-								}
-							});
+						de.doc.declarePropertySets({
+							metadata: {
+								phMarkup: '[Enter metadata value]',
+								name: "metadata"
+							}
+						});
 					}
 					catch (err) {
-						//alert("Seaweed failed to initialise: " + err.message);
+						alert("Seaweed failed to initialise: " + err.message);
 					}
 				});
 			</xsl:text>
@@ -60,16 +70,16 @@
 	</xsl:template>
 		
 	<!-- ***** HEADER LAYOUT TEMPLATE ***** -->
-	<xsl:template name="create-banner">
-		<div id="breadcrumbs"><xsl:call-template name="breadcrumbs"/><xsl:text> </xsl:text></div>
-		<table id="titlesearchcontainer">
-			<tr>
-				<xsl:call-template name="page-title-area"/>
-				<xsl:call-template name="quick-search-area"/>
-			</tr>
-		</table>
-		<xsl:call-template name="home-help-preferences"/>
-		<xsl:call-template name="browsing-tabs"/>
+	<xsl:template name="create-banner">		
+		<div id="gs_banner" class="ui-widget-header ui-corner-bottom">
+			<table id="titlesearchcontainer">
+				<tr>
+					<xsl:call-template name="page-title-area"/>
+					<xsl:call-template name="quick-search-area"/>
+				</tr>
+			</table>
+			<xsl:call-template name="browsing-tabs"/>
+		</div>
 	</xsl:template>
 	
 	<!-- ***** BROWSING TABS ***** -->
@@ -80,18 +90,18 @@
 				<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='browse' and @name='ClassifierBrowse']">
 					<!-- Loop through each classifier -->
 					<xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='ClassifierBrowse']/classifierList/classifier">
-						<xsl:element name="li">
-							<!-- If this tab is selected then colour it differently (right part) -->
-							<xsl:if test="@name = /page/pageRequest/paramList/param[@name = 'cl' and /page/pageRequest/@action = 'b']/@value">
-								<xsl:attribute name='style'>background: transparent url('interfaces/oran/images/tab-right-selected.png') scroll no-repeat 100% -100px;</xsl:attribute>
-							</xsl:if>
+						<li>
+							<xsl:choose>
+								<!-- If this tab is selected then colour it differently -->
+								<xsl:when test="@name = /page/pageRequest/paramList/param[@name = 'cl' and /page/pageRequest/@action = 'b']/@value">
+									<xsl:attribute name='class'>ui-state-default ui-corner-top ui-tabs-selected ui-state-active</xsl:attribute>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:attribute name='class'>ui-state-default ui-corner-top</xsl:attribute>
+								</xsl:otherwise>
+							</xsl:choose>
 							
-							<xsl:element name="a">
-								<!-- If this tab is selected then colour it differently (left part) -->
-								<xsl:if test="@name = /page/pageRequest/paramList/param[@name = 'cl' and /page/pageRequest/@action = 'b']/@value">
-									<xsl:attribute name='style'>background: transparent url('interfaces/oran/images/tab-left-selected.png') no-repeat scroll 0 -100px;</xsl:attribute>
-								</xsl:if>
-								
+							<a>
 								<!-- Add a title element to the <a> tag if a description exists for this classifier -->
 								<xsl:if test="displayItem[@name='description']">
 									<xsl:attribute name='title'><xsl:value-of select="displayItem[@name='description']"/></xsl:attribute>
@@ -109,8 +119,8 @@
 								
 								<!-- Add the actual text of the <a> tag -->
 								<xsl:value-of select="displayItem[@name='name']"/>
-							</xsl:element>
-						</xsl:element>
+							</a>
+						</li>
 					</xsl:for-each>
 				</xsl:if>
 
@@ -122,33 +132,65 @@
 		</xsl:if>
 	</xsl:template>
 	
-	<!-- ***** HOME HELP PREFERENCES ***** -->
+	<!-- ***** HOME HELP PREFERENCES LOGIN ***** -->
 	<xsl:template name="home-help-preferences">
 		<xsl:if test="/page/pageResponse/collection">
 			<ul id="bannerLinks">
-
 				<!-- preferences -->
-				<li>
+				<li class="ui-state-default ui-corner-all">
 					<a href="{$library_name}?a=p&amp;amp;sa=pref&amp;amp;c={$collNameChecked}">
 						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_tip')"/></xsl:attribute>
-						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/>
+						<ul>
+							<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/></span></li>
+							<li><span class="ui-icon ui-icon-wrench"><xsl:text> </xsl:text></span></li>
+						</ul>
 					</a>
 				</li>
 
 				<!-- help -->
-				<li>
+				<li class="ui-state-default ui-corner-all">
 					<a href="{$library_name}?a=p&amp;amp;sa=help&amp;amp;c={$collNameChecked}">
 						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_tip')"/></xsl:attribute>
-						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/>
+						<ul>
+							<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></span></li>
+							<li><span class="ui-icon ui-icon-help"><xsl:text> </xsl:text></span></li>
+						</ul>
 					</a>
 				</li>
 
 				<!-- home -->
-				<li>
+				<li class="ui-state-default ui-corner-all">
 					<a href="{$library_name}?a=p&amp;amp;sa=home">
 						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_tip')"/></xsl:attribute>
-						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_b')"/>
+						<ul>
+							<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_b')"/></span></li>
+							<li><span class="ui-icon ui-icon-home"><xsl:text> </xsl:text></span></li>
+						</ul>
 					</a>
+				</li>
+				
+				<!-- login -->
+				<li class="ui-state-default ui-corner-all">
+					<xsl:choose>
+						<xsl:when test="/page/pageResponse/authenticationNode/service/@asn = '1'">
+							<a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s=Authentication&amp;s1.asn=&amp;s1.aup=Login">
+								<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'logout_tip')"/></xsl:attribute>
+								<ul>
+									<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'logout_b')"/></span></li>
+									<li><span class="ui-icon ui-icon-unlocked"><xsl:text> </xsl:text></span></li>
+								</ul>
+							</a>
+						</xsl:when>
+						<xsl:otherwise>
+							<a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s=Authentication&amp;s1.asn=&amp;s1.aup=Login">
+								<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_tip')"/></xsl:attribute>
+								<ul>
+									<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_b')"/></span></li>
+									<li><span class="ui-icon ui-icon-locked"><xsl:text> </xsl:text></span></li>
+								</ul>
+							</a>
+						</xsl:otherwise>
+					</xsl:choose>
 				</li>
 			</ul>
 		</xsl:if>
@@ -163,31 +205,31 @@
 				<xsl:attribute name="style">
 					<xsl:choose>
 						<xsl:when test="string-length($pageTitleVar) &lt; 20">
-							<xsl:text>font-size: 1.5em; line-height: 1.5em;</xsl:text>
+							<xsl:text>font-size: 1.5em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 30">
-							<xsl:text>font-size: 1.4em; line-height: 1.4em;</xsl:text>
+							<xsl:text>font-size: 1.4em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 40">
-							<xsl:text>font-size: 1.3em; line-height: 1.3em;</xsl:text>
+							<xsl:text>font-size: 1.3em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 50">
-							<xsl:text>font-size: 1.2em; line-height: 1.2em;</xsl:text>
+							<xsl:text>font-size: 1.2em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 60">
-							<xsl:text>font-size: 1.1em; line-height: 1.2em;</xsl:text>
+							<xsl:text>font-size: 1.1em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 70">
-							<xsl:text>font-size: 1em; line-height: 1.1em;</xsl:text>
+							<xsl:text>font-size: 1em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 80">
-							<xsl:text>font-size: 0.9em; line-height: 1em;</xsl:text>
+							<xsl:text>font-size: 0.9em;</xsl:text>
 						</xsl:when>
 						<xsl:when test="string-length($pageTitleVar) &lt; 90">
-							<xsl:text>font-size: 0.8em; line-height: 0.9em;</xsl:text>
+							<xsl:text>font-size: 0.8em;</xsl:text>
 						</xsl:when>
 						<xsl:otherwise>
-							<xsl:text>font-size: 0.7em; line-height: 0.9em;</xsl:text>
+							<xsl:text>font-size: 0.7em;</xsl:text>
 						</xsl:otherwise>
 					</xsl:choose>
 				</xsl:attribute>
@@ -232,29 +274,34 @@
 						</span>
 					</xsl:if>
 					<!-- The submit button -->
-					<input type="submit">
+					<input type="submit" id="quickSearchSubmitButton">
 						<xsl:attribute name="value">
 							<xsl:value-of select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/displayItem[@name='submit']"/>
 						</xsl:attribute>
 					</input>
 					<br/>
 					<!-- The list of other search types -->
-					<table>
-						<tr>
-							<xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']">
-								<td>
-									<a>
-										<xsl:attribute name="href">
-										    <xsl:value-of select="$library_name"/>?a=q&amp;rt=d&amp;c=<xsl:value-of select="$collNameChecked"/>&amp;s=<xsl:value-of select="@name"/>
-										</xsl:attribute>
-										<xsl:value-of select="displayItem[@name='name']"/>
-									</a>
-								</td>
-							</xsl:for-each>
-						</tr>
-					</table>
+					<ul>
+						<xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']">
+							<li class="ui-state-default ui-corner-all">
+								<a>
+									<xsl:attribute name="href">
+										<xsl:value-of select="$library_name"/>?a=q&amp;rt=d&amp;c=<xsl:value-of select="$collNameChecked"/>&amp;s=<xsl:value-of select="@name"/>
+									</xsl:attribute>
+									<xsl:value-of select="displayItem[@name='name']"/>
+								</a>
+							</li>
+						</xsl:for-each>
+					</ul>
 				</form>
 			</td>
 		</xsl:if>
+	</xsl:template>
+	
+	<xsl:template name="map-scripts">
+		<meta content="initial-scale=1.0, user-scalable=no" name="viewport"/>
+		<script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"><xsl:text> </xsl:text></script>
+		<script src="sites/localsite/collect/tipple-paradise-gardens/js/map-scripts.js" type="text/javascript"><xsl:text> </xsl:text></script>
+		<script type="text/javascript">$(window).load(initializeMapScripts);</script>
 	</xsl:template>
 </xsl:stylesheet>
