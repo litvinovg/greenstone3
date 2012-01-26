@@ -390,7 +390,7 @@
   
   <xsl:template match="serviceList">	
 	<xsl:param name="collName"/>
-	<xsl:if test="service[not(@type = 'query' or @type = 'browse' or @type = 'retrieve')]">
+	<xsl:if test="service[not(@type = 'query' or @type = 'browse' or @type = 'retrieve' or @type = 'oai')]">
 		<h3>
 		  <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'about.services')"/>
 		</h3>
@@ -571,6 +571,8 @@ berry basket function to the site
     <script type="text/javascript" src="interfaces/{$interface_name}/js/yui/dom-min.js"><xsl:text> </xsl:text></script>
     <script type="text/javascript" src="interfaces/{$interface_name}/js/yui/dragdrop-min.js"><xsl:text> </xsl:text></script>
 	<script type="text/javascript" src="interfaces/{$interface_name}/js/yui/cookie-min.js"><xsl:text> </xsl:text></script>
+	<script type="text/javascript" src="interfaces/{$interface_name}/js/yui/animation-min.js"><xsl:text> </xsl:text></script>
+	
 	<script type="text/javascript" src="interfaces/{$interface_name}/js/berrybasket/ygDDPlayer.js"><xsl:text> </xsl:text></script>
     <script type="text/javascript" src="interfaces/{$interface_name}/js/berrybasket/ygDDOnTop.js"><xsl:text> </xsl:text></script>
     <script type="text/javascript" src="interfaces/{$interface_name}/js/berrybasket/berrybasket.js"><xsl:text> </xsl:text></script>
