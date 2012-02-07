@@ -437,7 +437,6 @@ public class LibraryServlet extends HttpServlet
 							toFile.renameTo(backupFile);
 						}
 
-						
 						FileChannel source = null;
 						FileChannel destination = null;
 						try
@@ -483,7 +482,6 @@ public class LibraryServlet extends HttpServlet
 			boolean redirect = false;
 			String href = null;
 			String rl = null;
-			String[] nameval = new String[2]; // Reuse it for memory efficiency purposes	
 
 			for (int i = 0; i < query_arr.length; i++)
 			{
@@ -505,6 +503,39 @@ public class LibraryServlet extends HttpServlet
 				else if (query_arr[i].startsWith("rl="))
 				{
 					rl = query_arr[i].substring(query_arr[i].indexOf("=") + 1, query_arr[i].length());
+				}
+			}
+
+			for (String arg : query_arr)
+			{
+				if (arg.startsWith("downloadFile"))
+				{
+					int index = arg.indexOf("=");
+					if (index > -1 && index < arg.length() - 1)
+					{
+						String fileLocation = arg.substring(index + 1);
+						File fileToGet = new File(GlobalProperties.getGSDL3Home() + File.separator + fileLocation);
+
+						if (fileToGet.exists())
+						{
+							response.setContentType("application/octet-stream");
+							response.addHeader("Content-Disposition","attachment;filename=" + fileToGet.getName());
+							FileInputStream fis = new FileInputStream(fileToGet);
+							ServletOutputStream sos = response.getOutputStream();
+
+							byte[] buffer = new byte[4096];
+							int len;
+							while ((len = fis.read(buffer)) != -1)
+							{
+								sos.write(buffer, 0, len);
+							}
+							sos.flush();
+							fis.close();
+							sos.close();
+							
+							return;
+						}
+					}
 				}
 			}
 
