@@ -170,8 +170,9 @@ public class FileLoaderServlet extends LibraryServlet
 					}
 				}
 			}
-			super.doGet(request, response);
 		}
+
+		super.doGet(request, response);
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
