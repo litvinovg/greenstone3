@@ -355,187 +355,36 @@ public class LibraryServlet extends HttpServlet
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		logUsageInfo(request);
-
-		String query_string;
-		if (request.getMethod().equals("GET"))
+		
+		Map<String,String[]> queryMap = request.getParameterMap();
+		if (queryMap != null)
 		{
-			query_string = request.getQueryString();
-		}
-		else if (request.getMethod().equals("POST"))
-		{
-			query_string = "";
-			Map paramMap = request.getParameterMap();
-			Iterator keyIter = paramMap.keySet().iterator();
-
-			while (keyIter.hasNext())
-			{
-				String current = (String) keyIter.next();
-				query_string += current + "=" + ((String[]) paramMap.get(current))[0];
-				if (keyIter.hasNext())
-				{
-					query_string += "&";
-				}
-			}
-
-			DiskFileItemFactory fileItemFactory = new DiskFileItemFactory();
-
-			int sizeLimit = System.getProperties().containsKey("servlet.upload.filesize.limit") ? Integer.parseInt(System.getProperty("servlet.upload.filesize.limit")) : 20 * 1024 * 1024;
-
-			fileItemFactory.setSizeThreshold(sizeLimit);
-			fileItemFactory.setRepository(new File(GlobalProperties.getGSDL3Home() + File.separator + "tmp"));
-
-			ServletFileUpload uploadHandler = new ServletFileUpload(fileItemFactory);
-
-			String storageLocation = "";
-			File uploadedFile = null;
-			try
-			{
-				List items = uploadHandler.parseRequest(request);
-				Iterator iter = items.iterator();
-				while (iter.hasNext())
-				{
-					FileItem current = (FileItem) iter.next();
-					if (current.isFormField())
-					{
-						query_string += current.getFieldName() + "=" + current.getString();
-						if (iter.hasNext())
-						{
-							query_string += "&";
-						}
-
-						if (current.getFieldName().equals(GSParams.FILE_LOCATION))
-						{
-							storageLocation = current.getString();
-						}
-					}
-					else
-					{
-						File file = new File(GlobalProperties.getGSDL3Home() + File.separator + "tmp" + File.separator + current.getName());
-						File tmpFolder = new File(GlobalProperties.getGSDL3Home() + File.separator + "tmp");
-						if (!tmpFolder.exists())
-						{
-							tmpFolder.mkdirs();
-						}
-						current.write(file);
-
-						uploadedFile = file;
-					}
-				}
-
-				if (!storageLocation.equals("") && uploadedFile != null)
-				{
-					String[] locations = storageLocation.split(":");
-
-					for (String location : locations)
-					{
-						File toFile = new File(GlobalProperties.getGSDL3Home() + location);
-						if (toFile.exists())
-						{
-							File backupFile = new File(toFile.getAbsolutePath() + System.currentTimeMillis());
-
-							logger.info("Backing up file (" + toFile.getAbsolutePath() + ") to " + backupFile.getAbsolutePath());
-							toFile.renameTo(backupFile);
-						}
-
-						FileChannel source = null;
-						FileChannel destination = null;
-						try
-						{
-							logger.info("Moving uploaded file (" + uploadedFile.getAbsolutePath() + ") to " + toFile.getAbsolutePath());
-							source = new FileInputStream(uploadedFile).getChannel();
-							destination = new FileOutputStream(toFile).getChannel();
-							destination.transferFrom(source, 0, source.size());
-						}
-						finally
-						{
-							if (source != null)
-							{
-								source.close();
-							}
-							if (destination != null)
-							{
-								destination.close();
-							}
-						}
-
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				logger.error("Exception in LibraryServlet -> " + e.getMessage());
-			}
-
-			if (query_string.equals(""))
-			{
-				query_string = null;
-			}
-		}
-		else
-		{
-			query_string = null;
-		}
-
-		if (query_string != null)
-		{
-			String[] query_arr = StringUtils.split(query_string, "&");
+			Iterator<String> queryIter = queryMap.keySet().iterator();
 			boolean redirect = false;
 			String href = null;
 			String rl = null;
 
-			for (int i = 0; i < query_arr.length; i++)
+			while (queryIter.hasNext())
 			{
-				if (query_arr[i].startsWith("el="))
+				String q = queryIter.next();
+				if (q.equals("el"))
 				{
-					if (query_arr[i].substring(query_arr[i].indexOf("=") + 1, query_arr[i].length()).equals("direct"))
+					if ((queryMap.get(q)[0]).equals("direct"))
 					{
 						redirect = true;
 					}
 				}
-				else if (query_arr[i].startsWith("href="))
+				else if (q.equals("href"))
 				{
-					href = query_arr[i].substring(query_arr[i].indexOf("=") + 1, query_arr[i].length());
+					href = queryMap.get(q)[0];
 					href = StringUtils.replace(href, "%2f", "/");
 					href = StringUtils.replace(href, "%7e", "~");
 					href = StringUtils.replace(href, "%3f", "?");
 					href = StringUtils.replace(href, "%3A", "\\:");
 				}
-				else if (query_arr[i].startsWith("rl="))
+				else if (q.equals("rl"))
 				{
-					rl = query_arr[i].substring(query_arr[i].indexOf("=") + 1, query_arr[i].length());
-				}
-			}
-
-			for (String arg : query_arr)
-			{
-				if (arg.startsWith("downloadFile"))
-				{
-					int index = arg.indexOf("=");
-					if (index > -1 && index < arg.length() - 1)
-					{
-						String fileLocation = arg.substring(index + 1);
-						File fileToGet = new File(GlobalProperties.getGSDL3Home() + File.separator + fileLocation);
-
-						if (fileToGet.exists())
-						{
-							response.setContentType("application/octet-stream");
-							response.addHeader("Content-Disposition","attachment;filename=" + fileToGet.getName());
-							FileInputStream fis = new FileInputStream(fileToGet);
-							ServletOutputStream sos = response.getOutputStream();
-
-							byte[] buffer = new byte[4096];
-							int len;
-							while ((len = fis.read(buffer)) != -1)
-							{
-								sos.write(buffer, 0, len);
-							}
-							sos.flush();
-							fis.close();
-							sos.close();
-							
-							return;
-						}
-					}
+					rl = queryMap.get(q)[0];
 				}
 			}
 
