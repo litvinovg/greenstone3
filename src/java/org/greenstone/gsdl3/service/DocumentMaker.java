@@ -371,12 +371,21 @@ public class DocumentMaker extends ServiceRack
 
 		HashMap params = GSXML.extractParams(param_list, false);
 		String transactionString = (String) params.get("transactions");
+		transactionString = transactionString.replace("%26", "&");
 
-		Gson gson = new Gson();
-		Type type = new TypeToken<List<Map<String, String>>>()
+		List<Map<String, String>> transactions = null;
+		try
 		{
-		}.getType();
-		List<Map<String, String>> transactions = gson.fromJson(transactionString, type);
+			Gson gson = new Gson();
+			Type type = new TypeToken<List<Map<String, String>>>()
+			{
+			}.getType();
+			transactions = gson.fromJson(transactionString, type);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
 
 		ArrayList<String> collectionsToBuild = new ArrayList<String>();
 		if (transactions != null && transactions.size() > 0)
@@ -438,8 +447,6 @@ public class DocumentMaker extends ServiceRack
 					String newContent = (String) keyValueMap.get("text");
 					
 					_GSDM.documentXMLSetText(oid, collection, newContent, userContext);
-					
-					System.err.println(newContent);
 				}
 
 				if (_GSDM.checkError(result, DOCUMENT_EXECUTE_TRANSACTION))
