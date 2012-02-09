@@ -154,6 +154,10 @@ function httpRequest(sectionID)
 					{
 						checkout();
 					}
+					else if(gs.cgiParams.documentbasket == "on")
+					{
+						dmcheckout();
+					}
 					updateOpenClassifiers();
 				}
 				else
