@@ -454,7 +454,7 @@
 								<option>Image view</option>
 								<option selected="true">Text view</option>
 							</xsl:when>
-							<xsl:otherwise test="not(/page/pageRequest/paramList/param[@name = 'view']/@value)">
+							<xsl:otherwise>
 								<option selected="true">Default view</option>
 								<option>Image view</option>
 								<option>Text view</option>
