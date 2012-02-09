@@ -173,10 +173,6 @@ public class GS2Construct extends ServiceRack
 		String coll_name = (String) params.get(COL_PARAM);
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 
-		UserContext userContext = new UserContext(request);
-		
-		systemRequest("delete", coll_name, null, userContext);
-
 		Element response = runCommand(request, GS2PerlConstructor.ACTIVATE);
 		Element status = (Element) GSXML.getChildByTagName(response, GSXML.STATUS_ELEM);
 
@@ -185,6 +181,9 @@ public class GS2Construct extends ServiceRack
 		{
 			return response;
 		}
+		
+		UserContext userContext = new UserContext(request);
+		systemRequest("delete", coll_name, null, userContext);
 
 		// check for finished
 		int status_code = Integer.parseInt(status.getAttribute(GSXML.STATUS_ERROR_CODE_ATT));
@@ -201,6 +200,7 @@ public class GS2Construct extends ServiceRack
 			status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
 			return response;
 		}
+
 		while (!GSStatus.isCompleted(status_code))
 		{
 			// wait for the process, and keep checking the status code
@@ -283,7 +283,7 @@ public class GS2Construct extends ServiceRack
 			status.appendChild(t);
 			return response;
 		}
-		
+
 		UserContext userContext = new UserContext(request);
 
 		systemRequest("delete", coll_name, status, userContext);
@@ -323,7 +323,7 @@ public class GS2Construct extends ServiceRack
 		}
 
 		String coll_name = (String) params.get(COL_PARAM);
-		
+
 		UserContext userContext = new UserContext(request);
 
 		systemRequest("reload", coll_name, status, userContext);
