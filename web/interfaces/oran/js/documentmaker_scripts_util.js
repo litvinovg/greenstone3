@@ -181,7 +181,7 @@ function save()
 		{
 			//Save content
 			var section = changedElem.parentDiv.parentItem;
-			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"") + '", "collection":"' + section.collection + '", "oid":"' + section.nodeID + '"}');
+			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + section.collection + '", "oid":"' + section.nodeID + '"}');
 			addCollectionToBuild(section.collection);
 		}
 	}
