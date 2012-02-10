@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import org.greenstone.util.GlobalProperties;
+import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.UserContext;
@@ -61,6 +62,7 @@ public class DocumentBasket extends ServiceRack
 	protected static final String ITEM_NUM_SERVICE = "GetDocuments";
 	protected static final String DELETE_ITEMS_SERVICE = "DeleteDocuments";
 	protected static final String DELETE_ITEM_SERVICE = "DeleteDocument";
+	protected static final String CLEAR_ITEMS_SERVICE = "ClearDocuments";
 	//added
 	protected static final String MERGE_ITEM_SERVICE = "MergeDocument";
 	protected static final String ITEM_PARAM = "item";
@@ -140,6 +142,12 @@ public class DocumentBasket extends ServiceRack
 		deleteone_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 		deleteone_service.setAttribute(GSXML.NAME_ATT, DELETE_ITEM_SERVICE);
 		this.short_service_info.appendChild(deleteone_service);
+		
+		// set up short_service_info_ - for now just has name and type
+		Element deleteall_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		deleteall_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
+		deleteall_service.setAttribute(GSXML.NAME_ATT, CLEAR_ITEMS_SERVICE);
+		this.short_service_info.appendChild(deleteall_service);
 
 		// set up short_service_info_ - for now just has name and type
 		Element merge_service = this.doc.createElement(GSXML.SERVICE_ELEM);
@@ -185,6 +193,15 @@ public class DocumentBasket extends ServiceRack
 			del_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 			del_service.setAttribute(GSXML.NAME_ATT, DELETE_ITEMS_SERVICE);
 			return del_service;
+		}
+		
+		if (service_id.equals(CLEAR_ITEMS_SERVICE))
+		{
+
+			Element clear_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			clear_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
+			clear_service.setAttribute(GSXML.NAME_ATT, CLEAR_ITEMS_SERVICE);
+			return clear_service;
 		}
 
 		if (service_id.equals(DELETE_ITEM_SERVICE))
@@ -234,6 +251,7 @@ public class DocumentBasket extends ServiceRack
 			collection = item.substring(startIndex, pos);
 			item = item.substring(pos + 1);
 		}
+		System.err.println("COLLECTION ADD IS " + collection);
 		//logger.error("COLLECTION = " + collection + " *** ITEM = " + item);
 		if (docsMap.containsKey(collection))
 		{
@@ -400,6 +418,33 @@ public class DocumentBasket extends ServiceRack
 
 		return item;
 	}
+	
+	protected Element processClearDocuments(Element request)
+	{
+		Hashtable docsMap = updateDocMap(request);
+		
+		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		
+		// Get the parameters of the request
+		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		
+		if (param_list == null)
+		{
+			logger.error("DocumentBasket Error: DeleteDocument request had no paramList.");
+			return result; // Return the empty result
+		}
+
+		HashMap params = GSXML.extractParams(param_list, false);
+		String collection = (String) params.get(GSParams.COLLECTION);
+
+		System.err.println("COLLECTION = " + collection);
+		if (collection == null)
+			return result;
+		
+		docsMap.put(collection, new Hashtable());
+		
+		return result;
+	}
 
 	protected Element processDeleteDocuments(Element request)
 	{
@@ -479,12 +524,10 @@ public class DocumentBasket extends ServiceRack
 
 		HashMap params = GSXML.extractParams(param_list, false);
 
-		String param = (String) params.get("item");
+		String item = (String) params.get("item");
 
-		if (param == null)
+		if (item == null)
 			return result;
-
-		String item = param;
 
 		String collection = "";
 		int pos = item.indexOf(":");
