@@ -75,6 +75,19 @@ var dmcheckout = function(){
 	YAHOO.util.Connect.asyncRequest(request_type , url , callback);
 }
 
+function clearBasket()
+{
+	var delurlPath ="?a=pr&rt=r&ro=1&s=ClearDocuments&c=&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.c=" + gs.cgiParams.c;
+	var callback =
+	{
+		success:function(){console.log("Successfully removed document");},
+		failed:function(){console.log("Failed to remove document " + docList[i].id + " from the document basket");}
+	}
+	YAHOO.util.Connect.asyncRequest("GET", delurlPath, callback);
+	docList = new Array();
+	updateDocumentImages();
+}
+
 function updateDocumentImages(){
 
 	var docs = YAHOO.util.Dom.get('documentpages');
