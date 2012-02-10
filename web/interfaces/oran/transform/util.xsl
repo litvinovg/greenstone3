@@ -540,28 +540,31 @@ berry basket function to the site
     </xsl:if>
   </xsl:template>
   
-  <!-- put the drag&drop document basket on the page -->
-  <xsl:template name="documentBasket">
-    <xsl:if test="$documentBasketOn">
-      <div id="documentbasket" class="hide">
-        <span>Document Basket</span>
-		<span id="documentBasketExpandCollapseLinks" style="display: none;">
-          <a id="documentBasketExpandLink" href="javascript:showDocumentBox()">Expand</a>
-          <a id="documentBasketCollapseLink" style="display: none;" href="javascript:hideDocumentBox()">Collapse</a>
-        </span>
-        <div id="documenthandle">
-          <span>
-            <xsl:text> </xsl:text>
-          </span>
-        </div>
-        <div id="documentpages">
-          <span>
-            <xsl:text> </xsl:text>
-          </span>
-        </div>
-      </div>
-    </xsl:if>
-  </xsl:template>
+	<!-- put the drag&drop document basket on the page -->
+	<xsl:template name="documentBasket">
+		<xsl:if test="$documentBasketOn">
+			<div id="documentbasket" class="hide">
+				<span>Document Basket</span>
+				<span id="documentBasketExpandCollapseLinks" style="display: none;">
+					<a id="documentBasketExpandLink" href="javascript:showDocumentBox()">Expand</a>
+					<a id="documentBasketCollapseLink" style="display: none;" href="javascript:hideDocumentBox()">Collapse</a>
+				</span>
+				<div id="documenthandle">
+					<span>
+						<xsl:text> </xsl:text>
+					</span>
+				</div>
+				<div id="documentpages">
+					<span>
+						<xsl:text> </xsl:text>
+					</span>
+				</div>
+				<div>
+					<a href="javascript:clearBasket();">Clear basket</a>
+				</div>
+			</div>
+		</xsl:if>
+	</xsl:template>
   
   <!-- include the required javascript and css for berry baskets -->
   <xsl:template name="berryBasketHeadTags">
