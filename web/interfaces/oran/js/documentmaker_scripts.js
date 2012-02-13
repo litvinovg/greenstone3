@@ -24,6 +24,15 @@ function init()
 		}
 	}
 	
+	if(gs.cgiParams.docToEdit)
+	{
+		var content = document.getElementById("gs_content");
+		var newLink = document.createElement("A");
+		newLink.setAttribute("href", gs.xsltParams.library_name + "?a=d&c=" + gs.cgiParams.p_c + "&dt=hierarchy&ed=1&d=" + gs.cgiParams.docToEdit);
+		content.appendChild(newLink);
+		docLinks.push(newLink);
+	}
+	
 	if(docLinks.length == 0)
 	{
 		document.getElementById("gs_content").innerHTML = "No documents in the Document Basket";

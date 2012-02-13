@@ -145,6 +145,18 @@
 			<!-- show the little berries for this document -->
 			<xsl:call-template name="documentBerryForDocumentPage"/>
 			
+			<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on'">
+				<table style="width:100%"><tr><td style="width:70%"><xsl:text> </xsl:text></td>
+					<td>
+						<div style="text-align:center;">
+							<div class="ui-state-default ui-corner-all">
+								<a style="padding: 3px; text-decoration:none;" href="{$library_name}?a=g&amp;sa=documentbasket&amp;c=&amp;s=DisplayDocumentList&amp;rt=r&amp;p.c={/page/pageResponse/collection/@name}&amp;docToEdit={/page/pageResponse/document/documentNode/@nodeID}">Edit this document</a>
+							</div>
+						</div>
+					</td>
+				</tr></table>
+			</xsl:if>
+
 			<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']) or /page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']/@value='true'">
 				<table id="rightSidebar">
 					<tr><td>
