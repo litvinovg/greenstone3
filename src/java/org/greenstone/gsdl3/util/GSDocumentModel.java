@@ -215,7 +215,9 @@ public class GSDocumentModel
 
 		if (!section)
 		{
-			File dirToDelete = new File(_siteHome + File.separatorChar + "collect" + File.separatorChar + collection + File.separatorChar + "archives" + File.separatorChar + oid);
+			String archivesFile = archiveGetDocumentFilePath(oid, collection, userContext);
+			String archivesFolder = archivesFile.substring(0, archivesFile.lastIndexOf(File.separator));
+			File dirToDelete = new File(archivesFolder);
 
 			if (!dirToDelete.exists() || !dirToDelete.isDirectory() || !deleteDirectory(dirToDelete))
 			{
