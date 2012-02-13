@@ -102,6 +102,7 @@
 				<xsl:if test="/page/pageRequest/paramList/param[@name = 'dmd']/@value = 'true'">
 					<table id="meta{@nodeID}">
 						<xsl:for-each select="metadataList/metadata">
+							<xsl:sort select="@name"/>
 							<tr>
 								<td class="metaTableCellName"><xsl:value-of select="@name"/></td>
 								<td class="metaTableCell editable"><xsl:value-of select="."/></td>
