@@ -26,6 +26,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 
 public class DerbyWrapper
@@ -34,6 +36,7 @@ public class DerbyWrapper
 	static final String DRIVER = "org.apache.derby.jdbc.EmbeddedDriver";
 	static final String USERSDB = "usersDB";
 	static final String USERS = "users";
+	static final String ROLES = "roles";
 	private Connection conn = null;
 	private Statement state = null;
 	private String protocol_str;
@@ -97,30 +100,58 @@ public class DerbyWrapper
 		}
 	}
 
-	public void createDatabase() throws SQLException
+	public void createDatabase()
 	{
-		conn.setAutoCommit(false);
-		state.execute("create table users (username varchar(40) not null, password varchar(40) not null, groups varchar(500), accountstatus varchar(10), comment varchar(100), primary key(username))");
-		//ystem.out.println("table users created successfully!");
-		state.execute("insert into " + USERS + " values ('admin', 'admin', 'administrator,all-collections-editor', 'true', 'change the password for this account as soon as possible')");
-		conn.commit();
+		try
+		{
+			conn.setAutoCommit(false);
+			state.execute("create table users (username varchar(40) not null, password varchar(40) not null, accountstatus varchar(10), comment varchar(100), primary key(username))");
+			state.execute("create table roles (username varchar(40) not null, role varchar(40) not null, primary key (username, role))");
+			//ystem.out.println("table users created successfully!");
+			state.execute("insert into " + USERS + " values ('admin', 'admin', 'true', 'change the password for this account as soon as possible')");
+			state.execute("insert into " + ROLES + " values ('admin', 'administrator')");
+			state.execute("insert into " + ROLES + " values ('admin', 'all-collections-editor')");
+			conn.commit();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 
 	public UserQueryResult listAllUser() throws SQLException
 	{
 		UserQueryResult userQueryResult = new UserQueryResult();
-		String sql_list_all_user = "select username, password, groups, accountstatus, comment from " + USERS;
+		String sql_list_all_user = "SELECT username, password, accountstatus, comment FROM " + USERS;
 
+		ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String,String>>();
 		ResultSet rs = state.executeQuery(sql_list_all_user);
 		while (rs.next())
 		{
-			String returned_username = rs.getString("username");
-			String returned_password = rs.getString("password");
-			String returned_groups = rs.getString("groups");
-			String returned_accountstatus = rs.getString("accountstatus");
-			String returned_comment = rs.getString("comment");
-			userQueryResult.addUserTerm(returned_username, returned_password, returned_groups, returned_accountstatus, returned_comment);
+			HashMap<String, String> user = new HashMap<String, String>();
+			user.put("username", rs.getString("username"));
+			user.put("password", rs.getString("password"));
+			user.put("as", rs.getString("accountstatus"));
+			user.put("comment", rs.getString("comment"));
+			
+			users.add(user);
 		}
+		
+		for(HashMap<String, String> user : users)
+		{
+			ResultSet gs = state.executeQuery("SELECT role FROM roles WHERE username = '" + user.get("username") + "'");
+			String group = "";
+			while(gs.next())
+			{
+				if(!group.equals(""))
+				{
+					group += ",";
+				}
+				group += gs.getString("role");
+			}
+			userQueryResult.addUserTerm(user.get("username"), user.get("password"), group, user.get("as"), user.get("comment"));
+		}
+		
 		if (userQueryResult.getSize() == 0)
 		{
 			System.out.println("couldn't find any users");
@@ -132,13 +163,21 @@ public class DerbyWrapper
 		}
 	}
 
-	public String addUser(String username, String password, String groups, String accountstatus, String comment) throws SQLException
+	public String addUser(String username, String password, String groups, String accountstatus, String comment)
 	{
-		conn.setAutoCommit(false);
-		String sql_insert_user = "insert into " + USERS + " values ('" + username + "', '" + password + "', '" + groups + "', '" + accountstatus + "', '" + comment + "')";
 		try
 		{
+			conn.setAutoCommit(false);
+			String sql_insert_user = "insert into " + USERS + " values ('" + username + "', '" + password + "', '" + accountstatus + "', '" + comment + "')";
 			state.execute(sql_insert_user);
+			
+			String[] groupArray = groups.split(",");
+			for(String g : groupArray)
+			{
+				String sql_insert_group = "insert into " + ROLES + " values ('" + username + "', '" + g + "')";
+				state.execute(sql_insert_group);
+			}
+			
 			conn.commit();
 		}
 		catch (Throwable e)
@@ -156,16 +195,19 @@ public class DerbyWrapper
 			System.out.println("Error:" + e.getMessage());
 			return "Error:" + e.getMessage();
 		}
+		
 		return "succeed";
 	}
 
-	public String deleteUser(String del_username) throws SQLException
+	public String deleteUser(String del_username)
 	{
-		conn.setAutoCommit(false);
-		String sql_delete_user = "delete from " + USERS + " where username='" + del_username + "'";
 		try
 		{
+			conn.setAutoCommit(false);
+			String sql_delete_user = "delete from " + USERS + " where username='" + del_username + "'";
+			String sql_delete_groups = "delete from " + ROLES + " where username='" + del_username + "'";
 			state.execute(sql_delete_user);
+			state.execute(sql_delete_groups);
 			conn.commit();
 		}
 		catch (Throwable e)
@@ -191,6 +233,7 @@ public class DerbyWrapper
 		try
 		{
 			state.execute("delete from " + USERS);
+			state.execute("delete from " + ROLES);
 			conn.commit();
 		}
 		catch (Throwable e)
@@ -215,7 +258,7 @@ public class DerbyWrapper
 		UserQueryResult userQueryResult = new UserQueryResult();
 
 		conn.setAutoCommit(false);
-		String sql_find_user = "SELECT  username, password, groups, accountstatus, comment FROM " + USERS;
+		String sql_find_user = "SELECT  username, password, accountstatus, comment FROM " + USERS;
 		String append_sql = "";
 
 		if (username != null)
@@ -237,23 +280,40 @@ public class DerbyWrapper
 		{
 			sql_find_user += append_sql;
 		}
+		
+		ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String,String>>();
 		ResultSet rs = state.executeQuery(sql_find_user);
 		while (rs.next())
 		{
-			String returned_username = rs.getString("username");
-			//System.out.println("returned_username :" + returned_username);
-			String returned_password = rs.getString("password");
-			//System.out.println("returned_password :" + returned_password);
-			String returned_groups = rs.getString("groups");
-			//System.out.println("returned_groups :" + returned_groups);
-			String returned_accountstatus = rs.getString("accountstatus");
-			//System.out.println("returned_accountstatus :" + returned_accountstatus);
-			String returned_comment = rs.getString("comment");
-			//System.out.println("returned_comment :" + returned_comment);
-			userQueryResult.addUserTerm(returned_username, returned_password, returned_groups, returned_accountstatus, returned_comment);
-			//System.out.println(userQueryResult.toString());
+			HashMap<String, String> user = new HashMap<String, String>();
+			user.put("username", rs.getString("username"));
+			user.put("password", rs.getString("password"));
+			user.put("as", rs.getString("accountstatus"));
+			user.put("comment", rs.getString("comment"));
+			
+			users.add(user);
 		}
 		conn.commit();
+		
+		for(HashMap<String, String> user : users)
+		{
+			ResultSet gs = state.executeQuery("SELECT role FROM " + ROLES + " WHERE username = '" + user.get("username") + "'");
+			
+			String group = "";
+			while(gs.next())
+			{
+				if(!group.equals(""))
+				{
+					group += ",";
+				}
+				group += gs.getString("role");
+			}
+			
+			System.out.println("GROUP = " + group);
+			
+			userQueryResult.addUserTerm(user.get("username"), user.get("password"), group, user.get("as"), user.get("comment"));
+		}
+		
 		if (userQueryResult.getSize() > 0)
 		{
 			return userQueryResult;
@@ -265,25 +325,35 @@ public class DerbyWrapper
 		}
 	}
 
-	public String modifyUserInfo(String username, String new_password, String groups, String accountstatus, String comment) throws SQLException
+	public String modifyUserInfo(String username, String new_password, String groups, String accountstatus, String comment)
 	{
-		conn.setAutoCommit(false);
-		String sql_modify_user_info = "update " + USERS + " set ";
-		if (new_password != null && !new_password.equals(""))
-		{
-			sql_modify_user_info += "password='" + new_password + "'";
-		}
-
-		if (groups != null && accountstatus != null && comment != null)
-		{
-			sql_modify_user_info += ", groups='" + groups + "'" + ", accountstatus='" + accountstatus + "'" + ", comment='" + comment + "'";
-		}
-		sql_modify_user_info += " where username='" + username + "'";
-
 		try
 		{
+			conn.setAutoCommit(false);
+			String sql_modify_user_info = "update " + USERS + " set ";
+			if (new_password != null && !new_password.equals(""))
+			{
+				sql_modify_user_info += "password='" + new_password + "'";
+			}
+	
+			if (accountstatus != null && comment != null)
+			{
+				sql_modify_user_info += ", accountstatus='" + accountstatus + "'" + ", comment='" + comment + "'";
+			}
+			sql_modify_user_info += " where username='" + username + "'";
 			System.out.println(sql_modify_user_info);
 			state.execute(sql_modify_user_info);
+			
+			String sql_delete_groups = "delete from " + ROLES + " where username='" + username + "'";
+			state.execute(sql_delete_groups);
+			
+			String[] groupsArray = groups.split(",");
+			for(String g : groupsArray)
+			{
+				String sql_insert_group = "insert into " + ROLES + " values ('" + username + "', '" + g + "')";
+				state.execute(sql_insert_group);
+			}
+			
 			conn.commit();
 		}
 		catch (Throwable e)
@@ -306,7 +376,7 @@ public class DerbyWrapper
 	public void db2txt() throws SQLException
 	{
 		UserQueryResult userQueryResult = new UserQueryResult();
-		String sql_list_all_user = "select username, password, groups, accountstatus, comment from " + USERS;
+		String sql_list_all_user = "select username, password, accountstatus, comment from " + USERS;
 		ResultSet rs = state.executeQuery(sql_list_all_user);
 
 		while (rs.next())
@@ -317,7 +387,16 @@ public class DerbyWrapper
 			System.out.println("<comment>" + returned_comment);
 			String returned_accountstatus = rs.getString("accountstatus");
 			System.out.println("<enabled>" + returned_accountstatus);
-			String returned_groups = rs.getString("groups");
+			ResultSet groupsSet = state.executeQuery("SELECT role FROM " + ROLES + " WHERE username = '" + returned_username + "'");
+			String returned_groups = "";
+			while(groupsSet.next())
+			{
+				if(!returned_groups.equals(""))
+				{
+					returned_groups += ",";
+				}
+				returned_groups += groupsSet.getString("role");
+			}
 			System.out.println("<groups>" + returned_groups);
 			String returned_password = rot13(rs.getString("password"));
 			System.out.println("<password>" + returned_password);

@@ -12,6 +12,9 @@ import org.w3c.dom.NodeList;
 import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
+
+import java.security.Principal;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,7 +98,7 @@ public class LibraryServlet extends HttpServlet
 	 * form: sid -> (UserSessionCache object)
 	 */
 	protected Hashtable session_ids_table = new Hashtable();
-
+	
 	/**
 	 * the maximum interval that the cached info remains in session_ids_table
 	 * (in seconds) This is set in web.xml
@@ -355,8 +358,8 @@ public class LibraryServlet extends HttpServlet
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		logUsageInfo(request);
-		
-		Map<String,String[]> queryMap = request.getParameterMap();
+
+		Map<String, String[]> queryMap = request.getParameterMap();
 		if (queryMap != null)
 		{
 			Iterator<String> queryIter = queryMap.keySet().iterator();
@@ -472,6 +475,7 @@ public class LibraryServlet extends HttpServlet
 		String action = request.getParameter(GSParams.ACTION);
 		String subaction = request.getParameter(GSParams.SUBACTION);
 		String collection = request.getParameter(GSParams.COLLECTION);
+		String document = request.getParameter(GSParams.DOCUMENT);
 		String service = request.getParameter(GSParams.SERVICE);
 
 		// We clean up the cache session_ids_table if system
@@ -694,6 +698,100 @@ public class LibraryServlet extends HttpServlet
 					{
 						response.setHeader(name, value);
 					}
+				}
+			}
+		}
+
+		//Check if we need to login or logout
+		Map<String, String[]> params = request.getParameterMap();
+		String[] username = params.get("username");
+		String[] password = params.get("password");
+		String[] logout = params.get("logout");
+
+		if (logout != null)
+		{
+			request.logout();
+		}
+
+		if (username != null && password != null)
+		{
+			if (request.getAuthType() != null)
+			{
+				request.logout();
+			}
+			request.login(username[0], password[0]);
+		}
+		
+		if(request.getAuthType() != null)
+		{
+			Element userInformation = this.doc.createElement("userInformation");
+			xml_request.appendChild(userInformation);
+			userInformation.setAttribute("username", request.getUserPrincipal().getName());
+		}
+			
+
+		//If we are in a collection-related page then make sure this user is allowed to access it
+		if (collection != null && !collection.equals(""))
+		{
+			//Get the security info for this collection
+			Element securityMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
+			Element securityRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_SECURITY, collection, userContext);
+			securityMessage.appendChild(securityRequest);
+			if (document != null && !document.equals(""))
+			{
+				securityRequest.setAttribute("oid", document);
+			}
+
+			Element securityResponse = (Element) GSXML.getChildByTagName(this.recept.process(securityMessage), GSXML.RESPONSE_ELEM);
+			ArrayList<String> groups = GSXML.getGroupsFromSecurityResponse(securityResponse);
+
+			//If guests are not allowed to access this page then check to see if the user is in a group that is allowed to access the page
+			if (!groups.contains(""))
+			{
+				boolean found = false;
+				for (String group : groups)
+				{
+					if (request.isUserInRole(group))
+					{
+						found = true;
+						break;
+					}
+				}
+
+				//The current user is not allowed to access the page so produce a login page
+				if (!found)
+				{
+					Element loginPageMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
+					Element loginPageRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PAGE, "", userContext);
+					loginPageRequest.setAttribute(GSXML.ACTION_ATT, "p");
+					loginPageRequest.setAttribute(GSXML.SUBACTION_ATT, "login");
+					loginPageRequest.setAttribute(GSXML.OUTPUT_ATT, "html");
+					loginPageMessage.appendChild(loginPageRequest);
+
+					Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+					loginPageRequest.appendChild(paramList);
+					
+					Element messageParam = this.doc.createElement(GSXML.PARAM_ELEM);
+					messageParam.setAttribute(GSXML.NAME_ATT, "loginMessage");
+					if(request.getAuthType() == null)
+					{
+						messageParam.setAttribute(GSXML.VALUE_ATT, "Please log in to view this page");
+					}
+					else
+					{
+						messageParam.setAttribute(GSXML.VALUE_ATT, "You are not in the correct group to view this page");
+					}
+					paramList.appendChild(messageParam);
+					
+					Element urlParam = this.doc.createElement(GSXML.PARAM_ELEM);
+					urlParam.setAttribute(GSXML.NAME_ATT, "redirectURL");
+					urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName() + "?" + request.getQueryString().replace("&", "&amp;"));
+					paramList.appendChild(urlParam);
+
+					Node loginPageResponse = this.recept.process(loginPageMessage);
+					out.println(this.converter.getPrettyString(loginPageResponse));
+
+					return;
 				}
 			}
 		}

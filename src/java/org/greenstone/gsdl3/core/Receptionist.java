@@ -169,7 +169,6 @@ public class Receptionist implements ModuleInterface
 	 */
 	public Node process(Node message_node)
 	{
-
 		Element message = this.converter.nodeToElement(message_node);
 
 		// get the request out of the message - assume that there is only one
@@ -181,6 +180,11 @@ public class Receptionist implements ModuleInterface
 		}
 		// check the request type 
 		String type = request.getAttribute(GSXML.TYPE_ATT); // returns "" if no att of this name
+		if(type.equals(GSXML.REQUEST_TYPE_SECURITY))
+		{
+			return this.mr.process(message);
+		}
+		
 		if (!type.equals(GSXML.REQUEST_TYPE_PAGE))
 		{
 			// now Receptionist forwards non-page requests straight to the MR, and returns the responses
@@ -234,6 +238,7 @@ public class Receptionist implements ModuleInterface
 
 		//logger.info(a+" mesa=" + this.converter.getPrettyString(message));
 		// get the page data from the action
+
 		Node action_response = a.process(message);
 
 		boolean response_only = false;

@@ -29,8 +29,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.io.*;
-import java.io.File;
-import java.util.HashMap;
 import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -69,6 +67,15 @@ public class Collection extends ServiceCluster
 	protected long lastmodified = 0;
 	/** earliestDatestamp of this collection. Necessary for OAI */
 	protected long earliestDatestamp = 0;
+
+	/** Stores the default accessibility of guest users */
+	protected boolean _publicAccess = true;
+	/** Stores the scope of any security rules (either collection or document) */
+	protected boolean _securityScopeCollection = true;
+
+	protected HashMap<String, ArrayList<Element>> _documentSets = new HashMap<String, ArrayList<Element>>();
+
+	protected ArrayList<HashMap<String, ArrayList<String>>> _securityExceptions = new ArrayList<HashMap<String, ArrayList<String>>>();
 
 	/**
 	 * An element containing the serviceRackList element of buildConfig.xml,
@@ -124,7 +131,7 @@ public class Collection extends ServiceCluster
 		{
 			col_type = search.getAttribute(GSXML.TYPE_ATT);
 		}
-		
+
 		Element browse = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.INFODB_ELEM);
 		if (browse != null)
 		{
@@ -137,6 +144,8 @@ public class Collection extends ServiceCluster
 
 		// process the metadata and display items
 		findAndLoadInfo(coll_config_xml, build_config_xml);
+
+		loadSecurityInformation(coll_config_xml);
 
 		// now do the services
 		configureServiceRacks(coll_config_xml, build_config_xml);
@@ -206,7 +215,6 @@ public class Collection extends ServiceCluster
 	 */
 	protected Element loadBuildConfigFile()
 	{
-
 		File build_config_file = new File(GSFile.collectionBuildConfigFile(this.site_home, this.cluster_name));
 		if (!build_config_file.exists())
 		{
@@ -231,8 +239,6 @@ public class Collection extends ServiceCluster
 	 */
 	protected boolean findAndLoadInfo(Element coll_config_xml, Element build_config_xml)
 	{
-
-		// metadata
 		Element meta_list = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		addMetadata(meta_list);
 		meta_list = (Element) GSXML.getChildByTagName(build_config_xml, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
@@ -292,6 +298,94 @@ public class Collection extends ServiceCluster
 		}
 		return true;
 
+	}
+
+	protected void loadSecurityInformation(Element coll_config_xml)
+	{
+		Element securityBlock = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.SECURITY_ELEM);
+
+		if(securityBlock == null)
+		{
+			return;
+		}
+		
+		String scope = securityBlock.getAttribute(GSXML.SCOPE_ATT);
+		String defaultAccess = securityBlock.getAttribute(GSXML.DEFAULT_ACCESS_ATT);
+
+		if (defaultAccess.toLowerCase().equals("public"))
+		{
+			_publicAccess = true;
+		}
+		else if (defaultAccess.toLowerCase().equals("private"))
+		{
+			_publicAccess = false;
+		}
+		else
+		{
+			logger.warn("Default access for collection " + this.cluster_name + " is neither public or private, assuming public");
+		}
+
+		if (scope.toLowerCase().equals("collection"))
+		{
+			_securityScopeCollection = true;
+		}
+		else if (scope.toLowerCase().equals("documents") || scope.toLowerCase().equals("document"))
+		{
+			_securityScopeCollection = false;
+		}
+		else
+		{
+			logger.warn("Security scope is neither collection or document, assuming collection");
+		}
+
+		NodeList exceptions = GSXML.getChildrenByTagName(securityBlock, GSXML.EXCEPTION_ELEM);
+
+		if (exceptions.getLength() > 0)
+		{
+			if (!_securityScopeCollection)
+			{
+				NodeList documentSetElems = GSXML.getChildrenByTagName(securityBlock, GSXML.DOCUMENT_SET_ELEM);
+				for (int i = 0; i < documentSetElems.getLength(); i++)
+				{
+					Element documentSet = (Element) documentSetElems.item(i);
+					String setName = documentSet.getAttribute(GSXML.NAME_ATT);
+					NodeList matchStatements = GSXML.getChildrenByTagName(documentSet, GSXML.MATCH_ELEM);
+					ArrayList<Element> matchStatementList = new ArrayList<Element>();
+					for (int j = 0; j < matchStatements.getLength(); j++)
+					{
+						matchStatementList.add((Element) matchStatements.item(j));
+					}
+					_documentSets.put(setName, matchStatementList);
+				}
+			}
+
+			for (int i = 0; i < exceptions.getLength(); i++)
+			{
+				HashMap<String, ArrayList<String>> securityException = new HashMap<String, ArrayList<String>>();
+				ArrayList<String> exceptionGroups = new ArrayList<String>();
+				ArrayList<String> exceptionSets = new ArrayList<String>();
+
+				Element exception = (Element) exceptions.item(i);
+				NodeList groups = GSXML.getChildrenByTagName(exception, GSXML.GROUP_ELEM);
+				for (int j = 0; j < groups.getLength(); j++)
+				{
+					Element group = (Element) groups.item(j);
+					String groupName = group.getAttribute(GSXML.NAME_ATT);
+					exceptionGroups.add(groupName);
+				}
+				NodeList docSets = GSXML.getChildrenByTagName(exception, GSXML.DOCUMENT_SET_ELEM);
+				for (int j = 0; j < docSets.getLength(); j++)
+				{
+					Element docSet = (Element) docSets.item(j);
+					String docSetName = docSet.getAttribute(GSXML.NAME_ATT);
+					exceptionSets.add(docSetName);
+				}
+
+				securityException.put("groups", exceptionGroups);
+				securityException.put("sets", exceptionSets);
+				_securityExceptions.add(securityException);
+			}
+		}
 	}
 
 	protected boolean configureServiceRacks(Element coll_config_xml, Element build_config_xml)
@@ -430,7 +524,7 @@ public class Collection extends ServiceCluster
 			{
 				classifier = request.getAttribute("classifier");
 			}
-			
+
 			// check for version file
 			String directory = new File(GSFile.collectionConfigFile(this.site_home, this.cluster_name)).getParent() + File.separator;
 
@@ -660,6 +754,21 @@ public class Collection extends ServiceCluster
 
 			}
 		}
+		else if (type.equals(GSXML.REQUEST_TYPE_SECURITY))
+		{
+			String oid = request.getAttribute("oid");
+			ArrayList<String> groups = getPermittedGroups(oid);
+			
+			Element groupList = this.doc.createElement(GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
+			response.appendChild(groupList);
+			
+			for(String groupName : groups)
+			{
+				Element group = this.doc.createElement(GSXML.GROUP_ELEM);
+				groupList.appendChild(group);
+				group.setAttribute(GSXML.NAME_ATT, groupName);
+			}
+		}
 		else
 		{ // unknown type
 			return super.processMessage(request);
@@ -668,4 +777,153 @@ public class Collection extends ServiceCluster
 		return response;
 	}
 
+	protected ArrayList<String> getPermittedGroups(String oid)
+	{
+		ArrayList<String> groups = new ArrayList<String>();
+		
+		if (_securityScopeCollection)
+		{
+			if (_publicAccess)
+			{
+				groups.add("");
+			}
+			else
+			{
+				for (HashMap<String, ArrayList<String>> exception : _securityExceptions)
+				{
+					for (String group : exception.get("groups"))
+					{
+						groups.add(group);
+					}
+				}
+			}
+		}
+		else
+		{
+			if(oid != null && !oid.equals(""))
+			{
+				boolean inSet = false;
+				for (HashMap<String, ArrayList<String>> exception : _securityExceptions)
+				{
+					for (String setName : exception.get("sets"))
+					{
+						if (documentIsInSet(oid, setName))
+						{
+							inSet = true;
+							for (String group : exception.get("groups"))
+							{
+								groups.add(group);
+							}
+						}
+					}
+				}
+				
+				if(!inSet && _publicAccess)
+				{
+					groups.add("");
+				}
+			}
+			else
+			{
+				groups.add("");
+			}
+		}
+
+		return groups;
+	}
+
+	protected boolean documentIsInSet(String oid, String setName)
+	{
+		ArrayList<Element> matchStatements = _documentSets.get(setName);
+		if (matchStatements == null || matchStatements.size() == 0)
+		{
+			return false;
+		}
+
+		for (Element currentMatchStatement : matchStatements)
+		{
+			String fieldName = currentMatchStatement.getAttribute(GSXML.FIELD_ATT);
+			if (fieldName == null || fieldName.equals(""))
+			{
+				fieldName = "oid";
+			}
+
+			String type = currentMatchStatement.getAttribute(GSXML.TYPE_ATT);
+			if (type == null || type.equals(""))
+			{
+				type = "match";
+			}
+
+			String fieldValue = "";
+			if (!fieldName.equals("oid"))
+			{
+				fieldValue = getFieldValue(oid, fieldName);
+				if(fieldValue == null)
+				{
+					return false;
+				}
+			}
+			else
+			{
+				fieldValue = oid;
+			}
+
+			String matchValue = GSXML.getNodeText(currentMatchStatement);
+			if (type.equals("match"))
+			{ 
+				if(matchValue.equals(fieldValue))
+				{
+					return true;
+				}
+			}
+			else if (type.equals("regex"))
+			{
+				if(fieldValue.matches(matchValue))
+				{
+					return true;
+				}
+			}
+			else
+			{
+				logger.warn("Unknown type of match specified in security block of collection " + this.cluster_name + ".");
+			}
+		}
+
+		return false;
+	}
+
+	protected String getFieldValue(String oid, String fieldName)
+	{
+		Element metadataMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element metadataRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, this.cluster_name + "/DocumentMetadataRetrieve", new UserContext());
+		metadataMessage.appendChild(metadataRequest);
+
+		Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		metadataRequest.appendChild(paramList);
+		
+		Element param = this.doc.createElement(GSXML.PARAM_ELEM);
+		paramList.appendChild(param);
+		
+		param.setAttribute(GSXML.NAME_ATT, "metadata");
+		param.setAttribute(GSXML.VALUE_ATT, fieldName);
+		
+		Element docList = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		metadataRequest.appendChild(docList);
+		
+		Element doc = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+		docList.appendChild(doc);
+		
+		doc.setAttribute(GSXML.NODE_ID_ATT, oid);
+		
+		Element response = (Element) this.router.process(metadataMessage);
+		NodeList metadataElems = response.getElementsByTagName(GSXML.METADATA_ELEM);
+		
+		if(metadataElems.getLength() > 0)
+		{
+			Element metadata = (Element) metadataElems.item(0);
+			return GSXML.getNodeText(metadata);
+		}
+		
+		return null;
+	}
 }

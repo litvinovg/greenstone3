@@ -208,6 +208,8 @@ public class GSXML
 	public static final String REQUEST_TYPE_MESSAGING = "messaging";
 	// save the format string
 	public static final String REQUEST_TYPE_FORMAT_STRING = "formatString";
+	// check credentials
+	public static final String REQUEST_TYPE_SECURITY = "security";
 
 	// service types
 	public static final String SERVICE_TYPE_QUERY = "query";
@@ -252,6 +254,16 @@ public class GSXML
 	//for configure action results
 	public static final String SUCCESS = "success";
 	public static final String ERROR = "error";
+
+	//security tags and attributes
+	public static final String SECURITY_ELEM = "security";
+	public static final String SCOPE_ATT = "scope";
+	public static final String DEFAULT_ACCESS_ATT = "default_access";
+	public static final String EXCEPTION_ELEM = "exception";
+	public static final String DOCUMENT_SET_ELEM = "documentSet";
+	public static final String GROUP_ELEM = "group";
+	public static final String MATCH_ELEM = "match";
+	public static final String FIELD_ATT = "field";
 
 	/**
 	 * takes a list of elements, and returns an array of strings of the values
@@ -1089,7 +1101,11 @@ public class GSXML
 
 	private static void xmlNodeToString(StringBuffer sb, Node e, int depth, boolean printText)
 	{
-
+		if(e == null)
+		{
+			return;
+		}
+		
 		for (int i = 0; i < depth; i++)
 			sb.append(' ');
 
@@ -1222,5 +1238,26 @@ public class GSXML
 		{
 			System.err.println("couldn't write " + e + " to log");
 		}
+	}
+
+	public static ArrayList<String> getGroupsFromSecurityResponse(Element securityResponse)
+	{
+		ArrayList<String> groups = new ArrayList<String>();
+		
+		Element groupList = (Element) GSXML.getChildByTagName(securityResponse, GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
+		if(groupList == null)
+		{
+			return groups;
+		}
+		
+		NodeList groupElems = GSXML.getChildrenByTagName(groupList, GSXML.GROUP_ELEM);
+		
+		for(int i = 0; i < groupElems.getLength(); i++)
+		{
+			Element groupElem = (Element) groupElems.item(i);
+			groups.add(groupElem.getAttribute(GSXML.NAME_ATT));
+		}
+		
+		return groups;
 	}
 }
