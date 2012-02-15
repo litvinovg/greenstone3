@@ -267,7 +267,10 @@ public class MessageRouter implements  ModuleInterface {
           result = processMessage(req);
         }
 
-        mainResult.appendChild(this.doc.importNode(result, true));
+        if(result != null)
+        {
+        	mainResult.appendChild(this.doc.importNode(result, true));
+        }
       } else {
         // The message needs to go to another module. The same message can 
         // be passed to multiple modules  - they will be in a comma 
