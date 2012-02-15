@@ -251,7 +251,7 @@ public class DocumentBasket extends ServiceRack
 			collection = item.substring(startIndex, pos);
 			item = item.substring(pos + 1);
 		}
-		System.err.println("COLLECTION ADD IS " + collection);
+		
 		//logger.error("COLLECTION = " + collection + " *** ITEM = " + item);
 		if (docsMap.containsKey(collection))
 		{
@@ -437,7 +437,6 @@ public class DocumentBasket extends ServiceRack
 		HashMap params = GSXML.extractParams(param_list, false);
 		String collection = (String) params.get(GSParams.COLLECTION);
 
-		System.err.println("COLLECTION = " + collection);
 		if (collection == null)
 			return result;
 		
