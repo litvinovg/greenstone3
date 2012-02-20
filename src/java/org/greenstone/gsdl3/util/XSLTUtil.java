@@ -18,7 +18,9 @@
  */
 package org.greenstone.gsdl3.util;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.io.File;
@@ -35,7 +37,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class XSLTUtil
 {
-
+	protected static HashMap<String, ArrayList<String>> _foundTableValues = new HashMap<String, ArrayList<String>>();
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.XSLTUtil.class.getName());
 
 	/* some tests */
@@ -175,7 +177,7 @@ public class XSLTUtil
 	public static String getInterfaceText(String interface_name, String lang, String key, String args_str)
 	{
 		key = key.replaceAll("__INTERFACE_NAME__", interface_name);
-		
+
 		String[] args = null;
 		if (args_str != null && !args_str.equals(""))
 		{
@@ -414,31 +416,59 @@ public class XSLTUtil
 			return "sectionHeaderDepth" + count;
 		}
 	}
-	
+
 	public static String escapeNewLines(String str)
 	{
-		if(str == null || str.length() < 1)
+		if (str == null || str.length() < 1)
 		{
 			return null;
 		}
 		return str.replace("\n", "\\\n");
 	}
-	
+
 	public static String escapeQuotes(String str)
 	{
-		if(str == null || str.length() < 1)
+		if (str == null || str.length() < 1)
 		{
 			return null;
 		}
 		return str.replace("\"", "\\\"");
 	}
-	
+
 	public static String escapeNewLinesAndQuotes(String str)
 	{
-		if(str == null || str.length() < 1)
+		if (str == null || str.length() < 1)
 		{
 			return null;
 		}
 		return escapeNewLines(escapeQuotes(str));
+	}
+
+	public static void clearMetadataStorage()
+	{
+		_foundTableValues.clear();
+	}
+
+	public static boolean checkMetadataNotDuplicate(String name, String value)
+	{
+		if(_foundTableValues.containsKey(name))
+		{
+			for(String mapValue : _foundTableValues.get(name))
+			{
+				if(mapValue.equals(value))
+				{
+					return false;
+				}
+			}
+			_foundTableValues.get(name).add(value);
+			return true;
+		}
+		
+		ArrayList<String> newList = new ArrayList<String>();
+		newList.add(value);
+		
+		_foundTableValues.put(name, newList);
+		
+		return true;
 	}
 }
