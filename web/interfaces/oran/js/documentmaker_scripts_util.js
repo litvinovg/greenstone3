@@ -147,6 +147,15 @@ function undo()
 		}
 		updateFromTop();
 	}
+	else if(undoOp.op == "display")
+	{
+		undoOp.srcElem.style.display = undoOp.subOp;
+	}
+	
+	if(undoOp.removeDeletedMetadata)
+	{
+		_deletedMetadata.pop();
+	}
 
 	if(undoOp.removeTransaction)
 	{
@@ -168,8 +177,29 @@ function addCollectionToBuild(collection)
 
 function save()
 {
+	for(var i = 0; i < _deletedMetadata.length; i++)
+	{
+		var currentRow = _deletedMetadata[i];
+		console.log(currentRow.parentNode);
+		//Get document ID
+		var currentElem = currentRow;
+		while((currentElem = currentElem.parentNode).tagName != "TABLE");
+		var docID = currentElem.getAttribute("id").substring(4);
+
+		//Get metadata name
+		var cells = currentRow.getElementsByTagName("TD");
+		var nameCell = cells[0];
+		var name = nameCell.innerHTML;
+		var valueCell = cells[1];
+		var value = valueCell.innerHTML;
+		
+		gs.functions.removeArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, value, function(){console.log("REMOVED ARCHIVES");});
+		addCollectionToBuild(gs.cgiParams.p_c);
+		
+		removeFromParent(currentRow);
+	}
+
 	var changes = de.Changes.getChangedEditableSections();
-	var metaBuild = false;
 	
 	for(var i = 0; i < changes.length; i++)
 	{
@@ -192,7 +222,6 @@ function save()
 			gs.functions.setArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, changedElem.originalValue, function(){console.log("SAVED ARCHIVES");});
 			changedElem.originalValue = changedElem.innerHTML;
 			addCollectionToBuild(gs.cgiParams.p_c);
-			metaBuild = true;
 		}
 		//Save content
 		else if(hasClass(changedElem, "renderedText"))
@@ -209,7 +238,7 @@ function save()
 		request += _transactions[i];
 		if(i != _transactions.length - 1)
 		{
-			request +=",";
+			request += ",";
 		}
 	}
 	request += "]";
@@ -242,8 +271,8 @@ function save()
 			buildCollections(_collectionsToBuild);
 		}
 	}
-	
-	if(metaBuild || request != "[]")
+
+	if(_collectionsToBuild.length > 0)
 	{
 		var saveButton = document.getElementById("saveButton");
 		saveButton.innerHTML = "Saving...";
@@ -629,35 +658,13 @@ function addRemoveLinkToRow(row)
 	removeLink.onclick = function()
 	{
 		var undo = new Array();
-		var prev = getPrevSiblingOfType(row, "tr");
-		var next = getNextSiblingOfType(row, "tr");
-		var parent = row.parentNode;
-		if(prev)
-		{
-			undo.op = "mva";
-			undo.refElem = prev;
-		}
-		else if(next)
-		{
-			undo.op = "mvb";
-			undo.refElem = next;
-		}
-		else
-		{
-			undo.op = "mvi";
-			undo.refElem = parent;
-		}
 		undo.srcElem = row;
-		undo.removeTransaction = true;
+		undo.op = "display";
+		undo.subOp = "table-row";
+		undo.removeDeletedMetadata = true;
 		_undoOperations.push(undo);
-
-		/*
-		saveTransaction('{"operation":"deleteMetadata", "collection":"' + section.collection + '", "oid":"' + section.nodeID + '"}');
-		addCollectionToBuild(section.collection);
-		*/
-
-		_deletedSections.push(row);
-		removeFromParent(row);
+		_deletedMetadata.push(row);
+		row.style.display = "none";
 	}
 	newCell.appendChild(removeLink);
 	newCell.setAttribute("class", "metaTableCell");

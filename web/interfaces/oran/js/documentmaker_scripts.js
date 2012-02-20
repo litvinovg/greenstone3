@@ -4,6 +4,7 @@ var _allContents = new Array();
 var _idCounter = 0;
 var _indexCounter = 0;
 var _deletedSections = new Array();
+var _deletedMetadata = new Array();
 var _undoOperations = new Array();
 var _baseURL;
 var _statusBar;

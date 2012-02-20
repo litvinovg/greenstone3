@@ -309,11 +309,11 @@ gs.functions.removeArchivesMetadata = function(collection, site, documentID, met
 {	
 	if(metadataPosition != null)
 	{
-		callMetadataServer("removeArchiveMetadata", "cgi-bin/metadata-server.pl?a=remove-archive-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metapos=" + metadataPosition, responseFunction);
+		callMetadataServer("removeArchiveMetadata", "cgi-bin/metadata-server.pl?a=remove-archives-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metapos=" + metadataPosition, responseFunction);
 	}
 	else if(metadataValue != null)
 	{
-		callMetadataServer("removeArchiveMetadata", "cgi-bin/metadata-server.pl?a=remove-archive-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue, responseFunction);
+		callMetadataServer("removeArchiveMetadata", "cgi-bin/metadata-server.pl?a=remove-archives-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue, responseFunction);
 	}
 }
 
