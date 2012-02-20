@@ -7,6 +7,7 @@ var _deletedSections = new Array();
 var _undoOperations = new Array();
 var _baseURL;
 var _statusBar;
+var _metadataSetList = new Array();
 
 function init()
 {

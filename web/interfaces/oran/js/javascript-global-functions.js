@@ -195,6 +195,7 @@ function callMetadataServer(callingFunction, url, responseFunction)
 			console.log("(" + callingFunction + ") Failed");
 		}
 	}
+	ajax.send();
 }
 
 /*************************

@@ -70,8 +70,6 @@ var dmcheckout = function(){
 		failure: responseFailure
 	}
 
-	//var date = new Date();
-	//url += "&rand=" + date.getTime();
 	YAHOO.util.Connect.asyncRequest(request_type , url , callback);
 }
 

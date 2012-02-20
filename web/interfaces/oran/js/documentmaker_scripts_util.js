@@ -173,13 +173,27 @@ function save()
 	for(var i = 0; i < changes.length; i++)
 	{
 		var changedElem = changes[i];
-		if(hasClass(changedElem, "metadataTableCellValue"))
+
+		//Save metadata 
+		if(hasClass(changedElem, "metaTableCell")) 
 		{
-			//Save metadata
+			//Get document ID
+			var currentElem = changedElem;
+			while((currentElem = currentElem.parentNode).tagName != "TABLE");
+			var docID = currentElem.getAttribute("id").substring(4);
+			
+			//Get metadata name
+			var row = changedElem.parentNode;
+			var cells = row.getElementsByTagName("TD");
+			var nameCell = cells[0];
+			var name = nameCell.innerHTML;
+
+			gs.functions.setArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, function(){console.log("SAVED ARCHIVES");});
+			gs.functions.setIndexMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, function(){alert("SAVED INDEX");});
 		}
+		//Save content
 		else if(hasClass(changedElem, "renderedText"))
 		{
-			//Save content
 			var section = changedElem.parentDiv.parentItem;
 			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + section.collection + '", "oid":"' + section.nodeID + '"}');
 			addCollectionToBuild(section.collection);
@@ -226,12 +240,15 @@ function save()
 		}
 	}
 	
-	var saveButton = document.getElementById("saveButton");
-	saveButton.innerHTML = "Saving...";
-	saveButton.disabled = true;
-	
-	statusID = _statusBar.addStatus("Modifying archive files...");
-	ajax.send("a=g&rt=r&s=DocumentExecuteTransaction&s1.transactions=" + request);
+	if(request != "[]")
+	{
+		var saveButton = document.getElementById("saveButton");
+		saveButton.innerHTML = "Saving...";
+		saveButton.disabled = true;
+		
+		statusID = _statusBar.addStatus("Modifying archive files...");
+		ajax.send("a=g&rt=r&s=DocumentExecuteTransaction&s1.transactions=" + request);
+	}
 }
 
 function buildCollections(collections)
@@ -463,16 +480,100 @@ function validateXML(txt)
 	return null;
 }
 
+function onVisibleMetadataSetChange()
+{
+	var metadataList = document.getElementById("metadataSetList");
+	var index = metadataList.selectedIndex;
+	var options = metadataList.getElementsByTagName("OPTION");
+	var selectedOption = options[index];
+	
+	var selectedSet = selectedOption.innerHTML;
+	changeVisibleMetadata(selectedSet);
+}
+
+function changeVisibleMetadata(metadataSetName)
+{
+	var tables = document.getElementsByTagName("TABLE");
+	for(var i = 0; i < tables.length; i++)
+	{
+		var id = tables[i].getAttribute("id");
+		if(id && id.search(/^meta/) != -1)
+		{
+			var rows = tables[i].getElementsByTagName("TR");
+			for(var j = 0; j < rows.length; j++)
+			{
+				if(metadataSetName == "All")
+				{
+					rows[j].style.display = "table-row";
+				}
+				else
+				{
+					var cells = rows[j].getElementsByTagName("TD");
+					var cellName = cells[0].innerHTML;
+					
+					if(cellName.indexOf(".") == -1)
+					{
+						rows[j].style.display = "none";
+					}
+					else
+					{
+						var setName = cellName.substring(0, cellName.lastIndexOf("."));
+						if(setName == metadataSetName)
+						{
+							rows[j].style.display = "table-row";
+						}
+						else
+						{
+							rows[j].style.display = "none";
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+function asyncRegisterEditSection(cell)
+{
+	//This registering can cause a sizeable delay so we'll thread it (effectively) so the browser is not paused
+	setTimeout(function(){de.doc.registerEditSection(cell)}, 0);
+}
+
 function addFunctionalityToTable(table)
 {
 	var rows = table.getElementsByTagName("TR");
 	for(var i = 0; i < rows.length; i++)
 	{
 		var cells = rows[i].getElementsByTagName("TD");
-			
-		//This registering can cause a sizeable delay so we'll thread it (effectively) so the browser is not paused
-		setTimeout(function(){de.doc.registerEditSection(cells[1])}, 0);
+		var metadataName = cells[0].innerHTML;
 		
+		if(metadataName.indexOf(".") != -1)
+		{
+			var metadataSetName = metadataName.substring(0, metadataName.lastIndexOf("."));
+			
+			var found = false;
+			for(var j = 0; j < _metadataSetList.length; j++)
+			{
+				if(metadataSetName == _metadataSetList[j])
+				{
+					found = true;
+					break;
+				}
+			}
+			
+			if(!found)
+			{
+				_metadataSetList.push(metadataSetName);
+				
+				var metadataSetList = document.getElementById("metadataSetList");
+				var newOption = document.createElement("OPTION");
+				newOption.innerHTML = metadataSetName;
+				metadataSetList.appendChild(newOption);
+			}
+		}
+			
+		asyncRegisterEditSection(cells[1]);
+
 		addRemoveLinkToRow(rows[i]);
 	}
 
@@ -496,7 +597,7 @@ function addFunctionalityToTable(table)
 		var valueCell = document.createElement("TD");
 		nameCell.setAttribute("class", "metaTableCellName");
 		nameCell.innerHTML = name;
-		valueCell.setAttribute("class", "metaTableCell editable");
+		valueCell.setAttribute("class", "metaTableCell");
 		
 		newRow.appendChild(nameCell);
 		newRow.appendChild(valueCell);
@@ -570,6 +671,20 @@ function createTopMenuBar()
 	var newSecCell = document.createElement("TD");
 	var saveCell = document.createElement("TD");
 	var undoCell = document.createElement("TD");
+	var metadataListCell = document.createElement("TD");
+	
+	var metadataListLabel = document.createElement("SPAN");
+	metadataListLabel.innerHTML = "Visible metadata: ";
+	var metadataList = document.createElement("SELECT");
+	metadataList.setAttribute("id", "metadataSetList");
+	metadataList.onchange = onVisibleMetadataSetChange;
+	var allMetadataOption = document.createElement("OPTION");
+	metadataList.appendChild(allMetadataOption);
+	allMetadataOption.innerHTML = "All";
+	metadataListCell.appendChild(metadataListLabel);
+	metadataListCell.appendChild(metadataList);
+
+	metadataListCell.setAttribute("class", "headerTableTD");
 	newDocCell.setAttribute("class", "headerTableTD");
 	newSecCell.setAttribute("class", "headerTableTD");
 	undoCell.setAttribute("class", "headerTableTD");
@@ -581,6 +696,7 @@ function createTopMenuBar()
 	row.appendChild(undoCell);
 	row.appendChild(newDocCell);
 	row.appendChild(newSecCell);
+	row.appendChild(metadataListCell);
 
 	//The "Save changes" button
 	var saveButton = document.createElement("BUTTON");
