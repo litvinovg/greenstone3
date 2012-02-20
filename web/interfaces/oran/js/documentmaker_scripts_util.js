@@ -188,8 +188,9 @@ function save()
 			var nameCell = cells[0];
 			var name = nameCell.innerHTML;
 
-			gs.functions.setArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, function(){console.log("SAVED ARCHIVES");});
-			gs.functions.setIndexMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, function(){alert("SAVED INDEX");});
+			gs.functions.setArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, changedElem.originalValue, function(){console.log("SAVED ARCHIVES");});
+			changedElem.originalValue = changedElem.innerHTML;
+			addCollectionToBuild(gs.cgiParams.p_c);
 		}
 		//Save content
 		else if(hasClass(changedElem, "renderedText"))
@@ -536,6 +537,7 @@ function changeVisibleMetadata(metadataSetName)
 function asyncRegisterEditSection(cell)
 {
 	//This registering can cause a sizeable delay so we'll thread it (effectively) so the browser is not paused
+	cell.originalValue = cell.innerHTML;
 	setTimeout(function(){de.doc.registerEditSection(cell)}, 0);
 }
 
