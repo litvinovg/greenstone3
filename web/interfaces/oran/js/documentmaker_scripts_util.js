@@ -180,7 +180,7 @@ function save()
 	for(var i = 0; i < _deletedMetadata.length; i++)
 	{
 		var currentRow = _deletedMetadata[i];
-		console.log(currentRow.parentNode);
+
 		//Get document ID
 		var currentElem = currentRow;
 		while((currentElem = currentElem.parentNode).tagName != "TABLE");
@@ -212,14 +212,21 @@ function save()
 			var currentElem = changedElem;
 			while((currentElem = currentElem.parentNode).tagName != "TABLE");
 			var docID = currentElem.getAttribute("id").substring(4);
-			
+
 			//Get metadata name
 			var row = changedElem.parentNode;
 			var cells = row.getElementsByTagName("TD");
 			var nameCell = cells[0];
 			var name = nameCell.innerHTML;
 
-			gs.functions.setArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, changedElem.originalValue, function(){console.log("SAVED ARCHIVES");});
+			if(changedElem.originalValue)
+			{
+				gs.functions.setArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, changedElem.originalValue, "override", function(){console.log("SAVED ARCHIVES");});
+			}
+			else
+			{
+				gs.functions.setArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, null, "accumulate", function(){console.log("SAVED ARCHIVES");});
+			}
 			changedElem.originalValue = changedElem.innerHTML;
 			addCollectionToBuild(gs.cgiParams.p_c);
 		}
