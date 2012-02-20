@@ -169,7 +169,8 @@ function addCollectionToBuild(collection)
 function save()
 {
 	var changes = de.Changes.getChangedEditableSections();
-
+	var metaBuild = false;
+	
 	for(var i = 0; i < changes.length; i++)
 	{
 		var changedElem = changes[i];
@@ -191,6 +192,7 @@ function save()
 			gs.functions.setArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, changedElem.originalValue, function(){console.log("SAVED ARCHIVES");});
 			changedElem.originalValue = changedElem.innerHTML;
 			addCollectionToBuild(gs.cgiParams.p_c);
+			metaBuild = true;
 		}
 		//Save content
 		else if(hasClass(changedElem, "renderedText"))
@@ -241,7 +243,7 @@ function save()
 		}
 	}
 	
-	if(request != "[]")
+	if(metaBuild || request != "[]")
 	{
 		var saveButton = document.getElementById("saveButton");
 		saveButton.innerHTML = "Saving...";
