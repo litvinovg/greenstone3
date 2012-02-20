@@ -202,32 +202,32 @@ function callMetadataServer(callingFunction, url, responseFunction)
 * SET METADATA FUNCTIONS *
 *************************/
 
-gs.functions.setImportMetadata = function(collection, site, documentID, metadataName, metadataValue, responseFunction)
+gs.functions.setImportMetadata = function(collection, site, documentID, metadataName, metadataValue, prevMetadataValue, responseFunction)
 {
-	callMetadataServer("setImportMetadata", "cgi-bin/metadata-server.pl?a=set-import-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue, responseFunction);
+	callMetadataServer("setImportMetadata", "cgi-bin/metadata-server.pl?a=set-import-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue + "&prevmetavalue=" + prevMetadataValue, responseFunction);
 }
 
-gs.functions.setArchivesMetadata = function(collection, site, documentID, metadataName, metadataPosition, metadataValue, responseFunction)
+gs.functions.setArchivesMetadata = function(collection, site, documentID, metadataName, metadataPosition, metadataValue, prevMetadataValue, responseFunction)
 {
 	if(metadataPosition != null)
 	{
-		callMetadataServer("setArchivesMetadata", "cgi-bin/metadata-server.pl?a=set-archives-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metapos=" + metadataPosition, responseFunction);
+		callMetadataServer("setArchivesMetadata", "cgi-bin/metadata-server.pl?a=set-archives-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metapos=" + metadataPosition + "&metavalue=" + metadataValue, responseFunction);
 	}
-	else if(metadataValue != null)
+	else if(prevMetadataValue != null)
 	{
-		callMetadataServer("setArchivesMetadata", "cgi-bin/metadata-server.pl?a=set-archives-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue, responseFunction);
+		callMetadataServer("setArchivesMetadata", "cgi-bin/metadata-server.pl?a=set-archives-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue + "&prevmetavalue=" + prevMetadataValue, responseFunction);
 	}
 }
 
-gs.functions.setIndexMetadata = function(collection, site, documentID, metadataName, metadataPosition, metadataValue, responseFunction)
+gs.functions.setIndexMetadata = function(collection, site, documentID, metadataName, metadataPosition, metadataValue, prevMetadataValue, responseFunction)
 {
 	if(metadataPosition != null)
 	{
-		callMetadataServer("setIndexMetadata", "cgi-bin/metadata-server.pl?a=set-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metapos=" + metadataPosition, responseFunction);
+		callMetadataServer("setIndexMetadata", "cgi-bin/metadata-server.pl?a=set-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metapos=" + metadataPosition + "&metavalue=" + metadataValue, responseFunction);
 	}
-	else if(metadataValue != null)
+	else if(prevMetadataValue != null)
 	{
-		callMetadataServer("setIndexMetadata", "cgi-bin/metadata-server.pl?a=set-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue, responseFunction);
+		callMetadataServer("setIndexMetadata", "cgi-bin/metadata-server.pl?a=set-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue + "&prevmetavalue=" + prevMetadataValue, responseFunction);
 	}
 }
 
