@@ -483,6 +483,11 @@
     <fileset dir="${lib.jni}">
       <include name="*.jar"/>
     </fileset>
+	
+	<pathelement location="${web.lib}"/>
+    <fileset dir="${web.lib}">
+      <include name="derby.jar"/>
+    </fileset>
   </path>
   
   <path id="local.tomcat.path">
@@ -1041,6 +1046,10 @@
     <property name="tomcat.classpath" refid="local.tomcat.classpath"/>
     <property name="tomcat.path" refid="local.tomcat.path"/>
     <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx400M"/>
+
+	<echo file="${catalina.home}/bin/setenv.bat">set CLASSPATH=${tomcat.classpath}</echo>
+	<echo file="${catalina.home}/bin/setenv.sh">export CLASSPATH=${tomcat.classpath}</echo>
+	
     <exec executable="${catalina.home}/bin/startup.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
       <!--<env key="GSDLOS" value="linux"/> do we need this?? -->
       <env key="GSDL3HOME" value="${basedir}"/>
@@ -1052,7 +1061,7 @@
       <env key="DYLD_LIBRARY_PATH" path="${env.DYLD_LIBRARY_PATH}:${lib.jni}:${gdbm.home}/lib"/> <!-- for mac os --> <!-- need gdbm here these days ??-->
       <env key="WNHOME" path="${wn.home}"/>
     </exec>
-    <exec executable="${catalina.home}/bin/startup.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="true">
+    <exec executable="${catalina.home}/bin/startup.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="false">
       <env key="GSDLOS" value="windows"/>
       <env key="GSDL3HOME" value="${basedir}"/>
       <env key="Path" path="${tomcat.path}"/>
