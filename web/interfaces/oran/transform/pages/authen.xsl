@@ -292,7 +292,7 @@
 		<xsl:param name="authen_service"/>
 		<xsl:param name="pro_action"/>
 		<div>
-			<form id="LoginForm" method="get" action="{$library_name}">
+			<form id="LoginForm" method="post" action="{$library_name}">
 				<input type='hidden' name='a' value='g'/>
 				<input type='hidden' name='sa' value='{$sub_action}'/>
 				<input type='hidden' name='s' value='{$authen_service}'/>
@@ -369,7 +369,7 @@
 					</td>
 					<td bgcolor="#eeeeee"><xsl:value-of select="@umc"/></td>
 					<td bgcolor="#eeeeee">
-						<form name="ListUsersForm" method="get" action="{$library_name}">
+						<form name="ListUsersForm" method="post" action="{$library_name}">
 							<input type='hidden' name='a' value='g'/>
 							<input type='hidden' name='sa' value='authen'/>
 							<input type='hidden' name='s' value='Authentication'/>
@@ -399,7 +399,7 @@
 		<xsl:param name="pw_s"/>
 		<xsl:param name="asn"/>
 		<div>
-			<form id="modifyForm" method="get" action="{$library_name}">
+			<form id="modifyForm" method="post" action="{$library_name}">
 				<input type='hidden' name='a' value='g'/>
 				<input type='hidden' name='sa' value='{$sub_action}'/>
 				<input type='hidden' name='s' value='{$authen_service}'/>
@@ -434,7 +434,7 @@
 		<xsl:param name="umun_s"/>
 		<xsl:param name="asn"/>
 		<div>
-			<form id="deleteForm" method="get" action="{$library_name}">
+			<form id="deleteForm" method="post" action="{$library_name}">
 				<input type='hidden' name='a' value='g'/>
 				<input type='hidden' name='sa' value='{$sub_action}'/>
 				<input type='hidden' name='s' value='{$authen_service}'/>
@@ -464,7 +464,7 @@
 		<xsl:param name="umc_s"/>
 		<xsl:param name="oumun_s"/>	
 		<xsl:param name="asn"/>
-			<form id="editForm" method="get" action="{$library_name}">
+			<form id="editForm" method="post" action="{$library_name}">
 				<input type='hidden' name='a' value='g'/>
 				<input type='hidden' name='sa' value='{$sub_action}'/>
 				<input type='hidden' name='s' value='{$authen_service}'/>

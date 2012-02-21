@@ -207,7 +207,7 @@
 				</xsl:if>
 				
 				<!-- Theme Changer -->
-				<xsl:if test="/page/pageResponse/authenticationNode/service/@asn = '1' and util:contains(/page/pageResponse/authenticationNode/service/@umgp, 'administrator')">
+				<xsl:if test="/page/pageRequest/userInformation and util:contains(/page/pageRequest/userInformation/@groups, 'administrator')">
 					<script type="text/javascript">
 						<xsl:text disable-output-escaping="yes">
 							$(document).ready(function(){

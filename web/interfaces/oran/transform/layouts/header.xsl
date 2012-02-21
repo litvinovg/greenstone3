@@ -25,7 +25,15 @@
 	<!-- Creates a header for the html page -->
 	<xsl:template name="create-html-header">
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
-		<link rel="stylesheet" href="interfaces/{$interface_name}/style/themes/main/jquery-ui-1.8.16.custom.css" type="text/css"/>
+		
+		<xsl:choose>
+			<xsl:when test="/page/pageResponse/interfaceOptions/option[@name = 'cssTheme']/@value">
+				<link rel="stylesheet" href="{/page/pageResponse/interfaceOptions/option[@name = 'cssTheme']/@value}" type="text/css"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<link rel="stylesheet" href="interfaces/{$interface_name}/style/themes/main/jquery-ui-1.8.16.custom.css" type="text/css"/>
+			</xsl:otherwise>
+		</xsl:choose>
 		<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
 		<link rel="shortcut icon" href="favicon.ico"/> 
 		
@@ -38,7 +46,7 @@
 		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
 			<xsl:call-template name="map-scripts"/>
 		</xsl:if>
-		<!--<xsl:call-template name="init-seaweed"/>-->
+		<xsl:call-template name="init-seaweed"/>
 		<xsl:call-template name="setup-gs-variable"/>
 		<xsl:call-template name="additionalHeaderContent"/>
 	</xsl:template>
@@ -53,13 +61,6 @@
 				de.onready(function() {
 					try {
 						de.init();
-
-						de.doc.declarePropertySets({
-							metadata: {
-								phMarkup: '[Enter metadata value]',
-								name: "metadata"
-							}
-						});
 					}
 					catch (err) {
 						alert("Seaweed failed to initialise: " + err.message);
@@ -159,6 +160,7 @@
 				</li>
 
 				<!-- home -->
+				<!--
 				<li class="ui-state-default ui-corner-all">
 					<a href="{$library_name}?a=p&amp;amp;sa=home">
 						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_tip')"/></xsl:attribute>
@@ -168,21 +170,62 @@
 						</ul>
 					</a>
 				</li>
+				-->
 				
-				<!-- login -->
+				<!-- login/logout -->
 				<li class="ui-state-default ui-corner-all">
 					<xsl:choose>
-						<xsl:when test="/page/pageResponse/authenticationNode/service/@asn = '1'">
-							<a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s=Authentication&amp;s1.asn=&amp;s1.aup=Login">
+						<xsl:when test="/page/pageRequest/userInformation/@username">
+							<a>
+								<xsl:attribute name="href">
+									<xsl:value-of select="$library_name"/>
+									<xsl:text>?logout=</xsl:text>
+									<xsl:if test="/page/pageRequest/@action">
+										<xsl:text>&amp;a=</xsl:text>
+										<xsl:value-of select="/page/pageRequest/@action"/>
+									</xsl:if>
+									<xsl:if test="/page/pageRequest/@subaction">
+										<xsl:text>&amp;sa=</xsl:text>
+										<xsl:value-of select="/page/pageRequest/@subaction"/>
+									</xsl:if>
+									<xsl:for-each select="/page/pageRequest/paramList/param">
+										<xsl:if test="not(@name = 'username' or @name = 'password')">
+											<xsl:text>&amp;</xsl:text>
+											<xsl:value-of select="@name"/>
+											<xsl:text>=</xsl:text>
+											<xsl:value-of select="@value"/>
+										</xsl:if>
+									</xsl:for-each>
+								</xsl:attribute>
 								<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'logout_tip')"/></xsl:attribute>
 								<ul>
-									<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'logout_b')"/></span></li>
+									<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'logout_b')"/><xsl:text> </xsl:text><xsl:value-of select="/page/pageRequest/userInformation/@username"/></span></li>
 									<li><span class="ui-icon ui-icon-unlocked"><xsl:text> </xsl:text></span></li>
 								</ul>
 							</a>
 						</xsl:when>
 						<xsl:otherwise>
-							<a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s=Authentication&amp;s1.asn=&amp;s1.aup=Login">
+							<a>
+								<xsl:attribute name="href">
+									<xsl:value-of select="$library_name"/>
+									<xsl:text>?a=p&amp;sa=login&amp;redirectURL=</xsl:text>
+									<xsl:value-of select="$library_name"/>
+									<xsl:text>%3F</xsl:text>
+									<xsl:if test="/page/pageRequest/@action">
+										<xsl:text>a=</xsl:text>
+										<xsl:value-of select="/page/pageRequest/@action"/>
+									</xsl:if>
+									<xsl:if test="/page/pageRequest/@subaction">
+										<xsl:text>%26sa=</xsl:text>
+										<xsl:value-of select="/page/pageRequest/@subaction"/>
+									</xsl:if>
+									<xsl:for-each select="/page/pageRequest/paramList/param">
+										<xsl:text>%26</xsl:text>
+										<xsl:value-of select="@name"/>
+										<xsl:text>=</xsl:text>
+										<xsl:value-of select="@value"/>
+									</xsl:for-each>
+								</xsl:attribute>
 								<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_tip')"/></xsl:attribute>
 								<ul>
 									<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_b')"/></span></li>
