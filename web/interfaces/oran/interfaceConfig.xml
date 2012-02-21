@@ -5,6 +5,7 @@
       <subaction name='about' xslt='pages/about.xsl'/>
       <subaction name='pref' xslt='pages/pref.xsl'/>
       <subaction name='help' xslt='pages/help.xsl'/>
+      <subaction name='login' xslt='pages/login.xsl'/>
       <subaction name='gli4gs3' xslt='gli4gs3.xsl'/>
       <subaction name='nav' xslt='nav.xsl'/><!-- used for the collection header frame -->
       <subaction name="html" xslt="html.xsl"/> <!-- use to put an external page into a frame with a collection header-->
@@ -185,6 +186,7 @@
     </language>
   </languageList>
   <optionList>
+    <option name="cssTheme" value="interfaces/oran/style/themes/main/jquery-ui-1.8.16.custom.css"/>
     <option name="highlightQueryTerms" value="true"/>
     <option name="berryBaskets" value="true"/>
 	<option name="documentBasket" value="true"/>
