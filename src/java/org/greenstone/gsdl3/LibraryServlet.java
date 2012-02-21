@@ -718,9 +718,42 @@ public class LibraryServlet extends HttpServlet
 			{
 				request.logout();
 			}
-			request.login(username[0], password[0]);
+			
+			try
+			{
+				request.login(username[0], password[0]);
+			}
+			catch(Exception ex)
+			{
+				//The user entered in either the wrong username or the wrong password
+				Element loginPageMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
+				Element loginPageRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PAGE, "", userContext);
+				loginPageRequest.setAttribute(GSXML.ACTION_ATT, "p");
+				loginPageRequest.setAttribute(GSXML.SUBACTION_ATT, "login");
+				loginPageRequest.setAttribute(GSXML.OUTPUT_ATT, "html");
+				loginPageMessage.appendChild(loginPageRequest);
+
+				Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+				loginPageRequest.appendChild(paramList);
+
+				Element messageParam = this.doc.createElement(GSXML.PARAM_ELEM);
+				messageParam.setAttribute(GSXML.NAME_ATT, "loginMessage");
+				messageParam.setAttribute(GSXML.VALUE_ATT, "Either your username or password was incorrect, please try again.");
+				paramList.appendChild(messageParam);
+
+				Element urlParam = this.doc.createElement(GSXML.PARAM_ELEM);
+				urlParam.setAttribute(GSXML.NAME_ATT, "redirectURL");
+				urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName() + "?" + request.getQueryString().replace("&", "&amp;"));
+				paramList.appendChild(urlParam);
+
+				Node loginPageResponse = this.recept.process(loginPageMessage);
+				out.println(this.converter.getPrettyString(loginPageResponse));
+
+				return;
+			}
 		}
 
+		//If a user is logged in
 		if (request.getAuthType() != null)
 		{
 			Element userInformation = this.doc.createElement("userInformation");
