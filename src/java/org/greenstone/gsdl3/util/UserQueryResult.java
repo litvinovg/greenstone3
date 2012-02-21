@@ -23,10 +23,10 @@ import org.greenstone.gsdl3.util.UserTermInfo;
 
 public class UserQueryResult{
     /** the list of UserInfo */
-    public Vector users_=null;
+    public Vector<UserTermInfo> users_=null;
 
     UserQueryResult(){
-	users_=new Vector();
+	users_=new Vector<UserTermInfo>();
     }
 
     public void clear(){
@@ -43,7 +43,7 @@ public class UserQueryResult{
 	users_.add(ui);
     }
 
-    public Vector getUserTerms(){
+    public Vector<UserTermInfo> getUserTerms(){
 	return users_;
     }
 
