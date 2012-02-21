@@ -113,7 +113,7 @@ public class DerbyWrapper
 			state.execute("insert into " + ROLES + " values ('admin', 'all-collections-editor')");
 			conn.commit();
 		}
-		catch(Exception ex)
+		catch (Exception ex)
 		{
 			ex.printStackTrace();
 		}
@@ -124,7 +124,7 @@ public class DerbyWrapper
 		UserQueryResult userQueryResult = new UserQueryResult();
 		String sql_list_all_user = "SELECT username, password, accountstatus, comment FROM " + USERS;
 
-		ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String,String>>();
+		ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String, String>>();
 		ResultSet rs = state.executeQuery(sql_list_all_user);
 		while (rs.next())
 		{
@@ -133,17 +133,17 @@ public class DerbyWrapper
 			user.put("password", rs.getString("password"));
 			user.put("as", rs.getString("accountstatus"));
 			user.put("comment", rs.getString("comment"));
-			
+
 			users.add(user);
 		}
-		
-		for(HashMap<String, String> user : users)
+
+		for (HashMap<String, String> user : users)
 		{
 			ResultSet gs = state.executeQuery("SELECT role FROM roles WHERE username = '" + user.get("username") + "'");
 			String group = "";
-			while(gs.next())
+			while (gs.next())
 			{
-				if(!group.equals(""))
+				if (!group.equals(""))
 				{
 					group += ",";
 				}
@@ -151,7 +151,7 @@ public class DerbyWrapper
 			}
 			userQueryResult.addUserTerm(user.get("username"), user.get("password"), group, user.get("as"), user.get("comment"));
 		}
-		
+
 		if (userQueryResult.getSize() == 0)
 		{
 			System.out.println("couldn't find any users");
@@ -170,14 +170,14 @@ public class DerbyWrapper
 			conn.setAutoCommit(false);
 			String sql_insert_user = "insert into " + USERS + " values ('" + username + "', '" + password + "', '" + accountstatus + "', '" + comment + "')";
 			state.execute(sql_insert_user);
-			
+
 			String[] groupArray = groups.split(",");
-			for(String g : groupArray)
+			for (String g : groupArray)
 			{
 				String sql_insert_group = "insert into " + ROLES + " values ('" + username + "', '" + g + "')";
 				state.execute(sql_insert_group);
 			}
-			
+
 			conn.commit();
 		}
 		catch (Throwable e)
@@ -195,7 +195,7 @@ public class DerbyWrapper
 			System.out.println("Error:" + e.getMessage());
 			return "Error:" + e.getMessage();
 		}
-		
+
 		return "succeed";
 	}
 
@@ -280,8 +280,8 @@ public class DerbyWrapper
 		{
 			sql_find_user += append_sql;
 		}
-		
-		ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String,String>>();
+
+		ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String, String>>();
 		ResultSet rs = state.executeQuery(sql_find_user);
 		while (rs.next())
 		{
@@ -290,30 +290,87 @@ public class DerbyWrapper
 			user.put("password", rs.getString("password"));
 			user.put("as", rs.getString("accountstatus"));
 			user.put("comment", rs.getString("comment"));
-			
+
 			users.add(user);
 		}
 		conn.commit();
-		
-		for(HashMap<String, String> user : users)
+
+		for (HashMap<String, String> user : users)
 		{
 			ResultSet gs = state.executeQuery("SELECT role FROM " + ROLES + " WHERE username = '" + user.get("username") + "'");
-			
+
 			String group = "";
-			while(gs.next())
+			while (gs.next())
 			{
-				if(!group.equals(""))
+				if (!group.equals(""))
 				{
 					group += ",";
 				}
 				group += gs.getString("role");
 			}
-			
-			System.out.println("GROUP = " + group);
-			
+
 			userQueryResult.addUserTerm(user.get("username"), user.get("password"), group, user.get("as"), user.get("comment"));
 		}
-		
+
+		if (userQueryResult.getSize() > 0)
+		{
+			return userQueryResult;
+		}
+		else
+		{
+			System.out.println("couldn't find the user");
+			return null;
+		}
+	}
+
+	public UserQueryResult findUser(String username) throws SQLException
+	{
+		UserQueryResult userQueryResult = new UserQueryResult();
+
+		conn.setAutoCommit(false);
+		String sql_find_user = "SELECT  username, password, accountstatus, comment FROM " + USERS;
+		String append_sql = "";
+
+		if (username != null)
+		{
+			append_sql = " WHERE username = '" + username + "'";
+		}
+		if (!append_sql.equals(""))
+		{
+			sql_find_user += append_sql;
+		}
+
+		ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String, String>>();
+		ResultSet rs = state.executeQuery(sql_find_user);
+		while (rs.next())
+		{
+			HashMap<String, String> user = new HashMap<String, String>();
+			user.put("username", rs.getString("username"));
+			user.put("password", rs.getString("password"));
+			user.put("as", rs.getString("accountstatus"));
+			user.put("comment", rs.getString("comment"));
+
+			users.add(user);
+		}
+		conn.commit();
+
+		for (HashMap<String, String> user : users)
+		{
+			ResultSet gs = state.executeQuery("SELECT role FROM " + ROLES + " WHERE username = '" + user.get("username") + "'");
+
+			String group = "";
+			while (gs.next())
+			{
+				if (!group.equals(""))
+				{
+					group += ",";
+				}
+				group += gs.getString("role");
+			}
+
+			userQueryResult.addUserTerm(user.get("username"), user.get("password"), group, user.get("as"), user.get("comment"));
+		}
+
 		if (userQueryResult.getSize() > 0)
 		{
 			return userQueryResult;
@@ -335,7 +392,7 @@ public class DerbyWrapper
 			{
 				sql_modify_user_info += "password='" + new_password + "'";
 			}
-	
+
 			if (accountstatus != null && comment != null)
 			{
 				sql_modify_user_info += ", accountstatus='" + accountstatus + "'" + ", comment='" + comment + "'";
@@ -343,17 +400,17 @@ public class DerbyWrapper
 			sql_modify_user_info += " where username='" + username + "'";
 			System.out.println(sql_modify_user_info);
 			state.execute(sql_modify_user_info);
-			
+
 			String sql_delete_groups = "delete from " + ROLES + " where username='" + username + "'";
 			state.execute(sql_delete_groups);
-			
+
 			String[] groupsArray = groups.split(",");
-			for(String g : groupsArray)
+			for (String g : groupsArray)
 			{
 				String sql_insert_group = "insert into " + ROLES + " values ('" + username + "', '" + g + "')";
 				state.execute(sql_insert_group);
 			}
-			
+
 			conn.commit();
 		}
 		catch (Throwable e)
@@ -389,9 +446,9 @@ public class DerbyWrapper
 			System.out.println("<enabled>" + returned_accountstatus);
 			ResultSet groupsSet = state.executeQuery("SELECT role FROM " + ROLES + " WHERE username = '" + returned_username + "'");
 			String returned_groups = "";
-			while(groupsSet.next())
+			while (groupsSet.next())
 			{
-				if(!returned_groups.equals(""))
+				if (!returned_groups.equals(""))
 				{
 					returned_groups += ",";
 				}
