@@ -8,6 +8,7 @@ import org.greenstone.gsdl3.util.UserTermInfo;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.util.HashMap;
 import java.util.Vector;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
@@ -18,6 +19,7 @@ public class Authentication extends ServiceRack
 {
 	//the services on offer
 	protected static final String AUTHENTICATION_SERVICE = "Authentication";
+	protected static final String GET_USER_INFORMATION_SERVICE = "GetUserInformation";
 
 	/** constructor */
 	public Authentication()
@@ -35,6 +37,12 @@ public class Authentication extends ServiceRack
 		authentication_service.setAttribute(GSXML.NAME_ATT, AUTHENTICATION_SERVICE);
 		this.short_service_info.appendChild(authentication_service);
 
+		// set up Authentication service info - for now just has name and type
+		Element getUserInformation_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		getUserInformation_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
+		getUserInformation_service.setAttribute(GSXML.NAME_ATT, GET_USER_INFORMATION_SERVICE);
+		this.short_service_info.appendChild(getUserInformation_service);
+
 		return true;
 	}
 
@@ -48,12 +56,17 @@ public class Authentication extends ServiceRack
 			authen_service.setAttribute(GSXML.TYPE_ATT, "authen");
 			authen_service.setAttribute(GSXML.NAME_ATT, AUTHENTICATION_SERVICE);
 		}
+		else if (service_id.equals(GET_USER_INFORMATION_SERVICE))
+		{
+			authen_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
+			authen_service.setAttribute(GSXML.NAME_ATT, GET_USER_INFORMATION_SERVICE);
+		}
 		else
 		{
 			return null;
 		}
 
-		if (subset == null || subset.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER))
+		if (service_id.equals(AUTHENTICATION_SERVICE) && (subset == null || subset.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER)))
 		{
 			authen_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_NAME, getServiceName(service_id, lang)));
 			authen_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getServiceDescription(service_id, lang)));
@@ -82,6 +95,72 @@ public class Authentication extends ServiceRack
 
 	protected void createParameter(String name, Element param_list, String lang)
 	{
+	}
+
+	protected Element processGetUserInformation(Element request)
+	{
+		// Create a new (empty) result message
+		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+
+		result.setAttribute(GSXML.FROM_ATT, GET_USER_INFORMATION_SERVICE);
+		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
+
+		Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		if (paramList == null)
+		{
+			logger.error(GET_USER_INFORMATION_SERVICE + ": Param list does not exist ");
+			return null;
+		}
+
+		HashMap params = GSXML.extractParams(paramList, true);
+
+		String username = (String) params.get("username");
+
+		if (username == null)
+		{
+			logger.error(GET_USER_INFORMATION_SERVICE + ": No username specified");
+			return result;
+		}
+
+		DerbyWrapper dbWrapper = new DerbyWrapper();
+
+		String usersDB_dir = this.site_home + File.separatorChar + "etc" + File.separatorChar + "usersDB";
+		dbWrapper.connectDatabase(usersDB_dir, true);
+
+		UserQueryResult userQueryResult;
+		try
+		{
+			userQueryResult = dbWrapper.findUser(username);
+			Vector<UserTermInfo> terms = userQueryResult.getUserTerms();
+
+			if (terms.size() == 0)
+			{
+				logger.error(GET_USER_INFORMATION_SERVICE + ": Requested user was not found");
+				return result;
+			}
+
+			UserTermInfo userInfo = terms.get(0);
+			Element userInfoList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			result.appendChild(userInfoList);
+
+			Element usernameField = GSXML.createParameter(this.doc, "username", userInfo.username_);
+			Element passwordField = GSXML.createParameter(this.doc, "password", userInfo.password_);
+			Element groupsField = GSXML.createParameter(this.doc, "groups", userInfo.groups_);
+			Element accountStatusField = GSXML.createParameter(this.doc, "accountstatus", userInfo.accountstatus_);
+			Element commentField = GSXML.createParameter(this.doc, "comment", userInfo.comment_);
+
+			userInfoList.appendChild(usernameField);
+			userInfoList.appendChild(passwordField);
+			userInfoList.appendChild(groupsField);
+			userInfoList.appendChild(accountStatusField);
+			userInfoList.appendChild(commentField);
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+
+		return result;
 	}
 
 	protected Element processAuthentication(Element request) throws SQLException, UnsupportedEncodingException
