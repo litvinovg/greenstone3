@@ -96,6 +96,7 @@ public class QueryAction extends Action
 			// just a display request, no actual processing to do
 			//append site metadata
 			addSiteMetadata(page_response, userContext);
+			addInterfaceOptions(page_response);
 			return page_response;
 		}
 
@@ -105,6 +106,7 @@ public class QueryAction extends Action
 		{ // no query
 			//append site metadata
 			addSiteMetadata(page_response, userContext);
+			addInterfaceOptions(page_response);
 			return page_response;
 		}
 
@@ -131,6 +133,7 @@ public class QueryAction extends Action
 		{
 			//append site metadata
 			addSiteMetadata(page_response, userContext);
+			addInterfaceOptions(page_response);
 			return page_response;
 		}
 
@@ -167,6 +170,7 @@ public class QueryAction extends Action
 			page_response.appendChild(this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER));
 			//append site metadata
 			addSiteMetadata(page_response, userContext);
+			addInterfaceOptions(page_response);
 			return page_response;
 		}
 
@@ -179,6 +183,7 @@ public class QueryAction extends Action
 			page_response.appendChild(this.doc.importNode(document_list, true));
 			//append site metadata
 			addSiteMetadata(page_response, userContext);
+			addInterfaceOptions(page_response);
 			return page_response;
 		}
 
@@ -235,6 +240,7 @@ public class QueryAction extends Action
 		logger.debug("Query page:\n" + this.converter.getPrettyString(page_response));
 		//append site metadata
 		addSiteMetadata(page_response, userContext);
+		addInterfaceOptions(page_response);
 		return page_response;
 	}
 

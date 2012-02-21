@@ -1,11 +1,23 @@
 package org.greenstone.gsdl3.action;
 
 import org.greenstone.gsdl3.util.*;
+import org.greenstone.util.GlobalProperties;
 // XML classes
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
+import java.io.File;
 import java.util.HashMap;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 public class GeneralAction extends Action
 {
@@ -30,6 +42,15 @@ public class GeneralAction extends Action
 		// get the param list
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		HashMap params = GSXML.extractParams(cgi_param_list, false);
+
+		if (params.get("configChangeName") != null && params.get("configChangeValue") != null)
+		{
+			String optionName = (String) params.get("configChangeName");
+			String optionValue = (String) params.get("configChangeValue");
+			
+			changeConfig(optionName, optionValue);
+		}
+
 		String service_name = (String) params.get(GSParams.SERVICE);
 		String cluster_name = (String) params.get(GSParams.CLUSTER);
 		String response_only_p = (String) params.get(GSParams.RESPONSE_ONLY);
@@ -65,8 +86,8 @@ public class GeneralAction extends Action
 
 			Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 			Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
-			
-			if(request_type.equals("s"))
+
+			if (request_type.equals("s"))
 			{
 				mr_query_request.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_STATUS);
 			}
@@ -90,6 +111,7 @@ public class GeneralAction extends Action
 			{
 				// just send the reponse as is
 				addSiteMetadata(result_response, userContext);
+				addInterfaceOptions(result_response);
 				return result_response;
 			}
 			if (result_response != null)
@@ -106,7 +128,7 @@ public class GeneralAction extends Action
 		Element mr_info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
 		mr_info_message.appendChild(mr_info_request);
 		Element mr_info_response = (Element) this.mr.process(mr_info_message);
-		
+
 		String path = GSXML.RESPONSE_ELEM;
 		path = GSPath.appendLink(path, GSXML.SERVICE_ELEM);
 
@@ -117,8 +139,53 @@ public class GeneralAction extends Action
 		}
 
 		addSiteMetadata(page_response, userContext);
-		
+		addInterfaceOptions(page_response);
+
 		return result;
 	}
+	
+	protected void changeConfig (String optionName, String optionValue)
+	{
+		if(this.config_params.get(optionName) != null)
+		{
+			this.config_params.put(optionName, optionValue);
+			
+			File interfaceConfigFile = new File(GSFile.interfaceConfigFile(GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), (String)this.config_params.get("interface_name"))));
+			
+			Document interfaceXML = null;
+			try
+			{
+				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				interfaceXML = db.parse(interfaceConfigFile);
+				Element topElement = interfaceXML.getDocumentElement();
+				Element optionListElem = (Element) GSXML.getChildByTagName(topElement, "optionList");
 
+				NodeList optionList = optionListElem.getElementsByTagName("option");
+				
+				for(int i = 0; i < optionList.getLength(); i++)
+				{
+					Element currentOption = (Element)optionList.item(i);
+					if(currentOption.getAttribute(GSXML.NAME_ATT) != null && currentOption.getAttribute(GSXML.NAME_ATT).equals(optionName))
+					{
+						currentOption.setAttribute(GSXML.VALUE_ATT, optionValue);
+					}
+				}
+				
+				DOMSource source = new DOMSource(interfaceXML);
+				Result xmlresult = new StreamResult(interfaceConfigFile);
+
+				Transformer transformer = TransformerFactory.newInstance().newTransformer();
+				transformer.transform(source, xmlresult);
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+		else
+		{
+			logger.error("Could not set param \"" + optionName + "\" to \"" + optionValue + "\" because that option does not exist.");
+		}
+	}
 }

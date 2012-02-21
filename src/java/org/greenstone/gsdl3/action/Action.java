@@ -254,4 +254,16 @@ abstract public class Action
 		GSXML.mergeMetadataLists(element, metadata_response);
 	}
 
+	protected void addInterfaceOptions(Element elem)
+	{
+		Element documentOptionList = this.doc.createElement("interfaceOptions");
+		for(Object key : this.config_params.keySet())
+		{
+			Element option = this.doc.createElement("option");
+			option.setAttribute(GSXML.NAME_ATT, (String)key);
+			option.setAttribute(GSXML.VALUE_ATT, this.config_params.get(key).toString());
+			documentOptionList.appendChild(option);
+		}
+		elem.appendChild(elem.getOwnerDocument().importNode(documentOptionList, true));
+	}
 }

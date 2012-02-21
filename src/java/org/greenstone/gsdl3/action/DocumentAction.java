@@ -146,6 +146,7 @@ public class DocumentAction extends Action
 
 		//append site metadata
 		addSiteMetadata(page_response, userContext);
+		addInterfaceOptions(page_response);
 
 		// get the additional data needed for the page
 		getBackgroundData(page_response, collection, userContext);

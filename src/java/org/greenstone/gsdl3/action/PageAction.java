@@ -16,7 +16,6 @@ import org.apache.log4j.*;
 
 public class PageAction extends Action
 {
-
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.action.PageAction.class.getName());
 
 	public static final String HOME_PAGE = "home";
@@ -26,7 +25,6 @@ public class PageAction extends Action
 
 	public Node process(Node message_node)
 	{
-
 		Element message = this.converter.nodeToElement(message_node);
 
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
@@ -67,7 +65,6 @@ public class PageAction extends Action
 
 	protected Element homePage(Element request)
 	{
-
 		UserContext userContext = new UserContext(request);
 		// first, get the message router info
 		Element info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
@@ -129,7 +126,6 @@ public class PageAction extends Action
 
 	protected Element aboutPage(Element request)
 	{
-
 		UserContext userContext = new UserContext(request);
 		// extract the params from the cgi-request, 
 		Element cgi_paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -142,6 +138,7 @@ public class PageAction extends Action
 			// return an empty response
 			Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 			addSiteMetadata(response, userContext);
+			addInterfaceOptions(response);
 			return response;
 		}
 
@@ -199,6 +196,7 @@ public class PageAction extends Action
 		Element response = (Element) GSXML.getChildByTagName(coll_about_response, GSXML.RESPONSE_ELEM);
 		//add the site metadata
 		addSiteMetadata(response, userContext);
+		addInterfaceOptions(response);
 		return response;
 	}
 
@@ -223,6 +221,7 @@ public class PageAction extends Action
 			// just return an empty response
 			Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 			addSiteMetadata(response, userContext);
+			addInterfaceOptions(response);
 			return response;
 		}
 
@@ -241,6 +240,7 @@ public class PageAction extends Action
 
 		//add the site metadata
 		addSiteMetadata(response, userContext);
+		addInterfaceOptions(response);
 
 		return response;
 
@@ -248,7 +248,6 @@ public class PageAction extends Action
 
 	protected boolean sendMultipleRequests(NodeList items, String path_prefix, String request_type, UserContext userContext)
 	{
-
 		// we will send all the requests in a single message
 		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 		for (int i = 0; i < items.getLength(); i++)
@@ -320,5 +319,4 @@ public class PageAction extends Action
 
 		return page_response;
 	}
-
 }

@@ -13,7 +13,6 @@ import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import java.security.Principal;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.ArrayList;
@@ -98,7 +97,7 @@ public class LibraryServlet extends HttpServlet
 	 * form: sid -> (UserSessionCache object)
 	 */
 	protected Hashtable session_ids_table = new Hashtable();
-	
+
 	/**
 	 * the maximum interval that the cached info remains in session_ids_table
 	 * (in seconds) This is set in web.xml
@@ -721,14 +720,37 @@ public class LibraryServlet extends HttpServlet
 			}
 			request.login(username[0], password[0]);
 		}
-		
-		if(request.getAuthType() != null)
+
+		if (request.getAuthType() != null)
 		{
 			Element userInformation = this.doc.createElement("userInformation");
 			xml_request.appendChild(userInformation);
 			userInformation.setAttribute("username", request.getUserPrincipal().getName());
+
+			Element userInfoMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
+			Element userInfoRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_SECURITY, "GetUserInformation", userContext);
+			userInfoMessage.appendChild(userInfoRequest);
+
+			Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			userInfoRequest.appendChild(paramList);
+
+			Element param = this.doc.createElement(GSXML.PARAM_ELEM);
+			param.setAttribute(GSXML.NAME_ATT, "username");
+			param.setAttribute(GSXML.VALUE_ATT, request.getUserPrincipal().getName());
+			paramList.appendChild(param);
+
+			Element userInformationResponse = (Element) GSXML.getChildByTagName(this.recept.process(userInfoMessage), GSXML.RESPONSE_ELEM);
+			Element responseParamList = (Element) GSXML.getChildByTagName(userInformationResponse, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			if (responseParamList == null)
+			{
+				logger.error("Can't get the groups for user " + request.getUserPrincipal().getName());
+			}
+
+			HashMap responseParams = GSXML.extractParams(responseParamList, true);
+			String groups = (String) responseParams.get("groups");
+
+			userInformation.setAttribute("groups", groups);
 		}
-			
 
 		//If we are in a collection-related page then make sure this user is allowed to access it
 		if (collection != null && !collection.equals(""))
@@ -770,19 +792,19 @@ public class LibraryServlet extends HttpServlet
 
 					Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 					loginPageRequest.appendChild(paramList);
-					
+
 					Element messageParam = this.doc.createElement(GSXML.PARAM_ELEM);
 					messageParam.setAttribute(GSXML.NAME_ATT, "loginMessage");
-					if(request.getAuthType() == null)
+					if (request.getAuthType() == null)
 					{
 						messageParam.setAttribute(GSXML.VALUE_ATT, "Please log in to view this page");
 					}
 					else
 					{
-						messageParam.setAttribute(GSXML.VALUE_ATT, "You are not in the correct group to view this page");
+						messageParam.setAttribute(GSXML.VALUE_ATT, "You are not in the correct group to view this page, would you like to log in as a different user?");
 					}
 					paramList.appendChild(messageParam);
-					
+
 					Element urlParam = this.doc.createElement(GSXML.PARAM_ELEM);
 					urlParam.setAttribute(GSXML.NAME_ATT, "redirectURL");
 					urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName() + "?" + request.getQueryString().replace("&", "&amp;"));

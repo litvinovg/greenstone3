@@ -91,6 +91,7 @@ public class BrowseAction extends Action {
 	
 	//append site metadata
 	addSiteMetadata(page_response, userContext);
+	addInterfaceOptions(page_response);
 
 	// if rt=d, then we are just displaying the service
 	String request_type = (String)params.get(GSParams.REQUEST_TYPE);
