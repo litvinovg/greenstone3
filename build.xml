@@ -82,11 +82,11 @@
     
   <!-- version properties for external packages -->
   <!-- for Java versions < 1.4, we print out the message that Java is too old.
-	For Java 1.4, we use Tomcat 5.5, for Java5 and higher, we use Tomcat 6.0-->
-  <condition property="tomcat.version" value="apache-tomcat-5.5.25" else="apache-tomcat-6.0.20"> 
+	For Java 1.4, we use Tomcat 5.5, for Java5 and higher, we use Tomcat 7.0-->
+  <condition property="tomcat.version" value="apache-tomcat-5.5.25" else="apache-tomcat-7.0.26"> 
     <equals arg1="1.4" arg2="${ant.java.version}"/>
   </condition>
-  <condition property="tomcat.version.major" value="5" else="6"> 
+  <condition property="tomcat.version.major" value="5" else="7"> 
     <equals arg1="1.4" arg2="${ant.java.version}"/>
   </condition>
   <condition property="privileged.attribute" value="privileged='true'" else=""> 
@@ -144,7 +144,7 @@
       </not>
     </and>
   </condition>
-  
+ 
   <property name="os.linux" value="Linux"/> 
   <property name="os.mac" value="Mac OS X"/>
   <property name="os.solaris" value="SunOS"/>
@@ -441,8 +441,8 @@
     </fileset>
   </path>
   
-  <!-- All elements that Tomcat 6 exposes to applications -->
-  <path id="tomcat6">
+  <!-- All elements that Tomcat 7 exposes to applications -->
+  <path id="tomcat7">
     <fileset dir="${catalina.home}/lib">
       <include name="*.jar"/>
     </fileset>
@@ -730,21 +730,21 @@
 
     <!--
     the next block checks if the bundled tomcat is present in the 'packages' directory,
-    and checks for the lethal combination of tomcat 6 and java 1.4. Test for
+    and checks for the lethal combination of tomcat 7 and java 1.4. Test for
     tomcat6 is based on the presence of a file inserted by greenstone into the tomcat6
     download, as there is no other surefire way to check tomcat version under java 1.4
     -->
     <condition property="packages.tomcat.ispresent" value="true" else="false">
       <available file="packages/tomcat"/>
     </condition>
-    <condition property="packages.tomcat.istomcat6" value="true" else="false">
-      <available file="packages/tomcat/tomcat6.txt"/>
+    <condition property="packages.tomcat.istomcat7" value="true" else="false">
+      <available file="packages/tomcat/tomcat7.txt"/>
     </condition>
     <if>
       <bool>
         <and>
           <istrue value="${packages.tomcat.ispresent}"/>
-          <istrue value="${packages.tomcat.istomcat6}"/>
+          <istrue value="${packages.tomcat.istomcat7}"/>
           <equals arg1="1.4" arg2="${ant.java.version}"/>
         </and>
       </bool>
@@ -954,10 +954,10 @@
   <!-- ======================= Tomcat Targets ========================== -->
   
   <!-- this target downloads and installs Tomcat -->
-  <!-- we download tomcat (version 6 for Java 1.5 and later, version 5 for Java 1.4 plus the 1.4 compatibility package). -->
+  <!-- we download tomcat (version 7 for Java 1.5 and later, version 5 for Java 1.4 plus the 1.4 compatibility package). -->
   <target name="prepare-tomcat" depends="init,setup-proxy" if="tomcat.islocal"
-    description="downloads the appropriate version of Tomcat (Tomcat 5 if using Java 1.4, Tomcat 6 if using Java 1.5 or higher). If you want to change which version of Java you are using between 1.4 and 1.5/6 then you need to run prepare-tomcat">
-    <if>
+    description="downloads the appropriate version of Tomcat (Tomcat 5 if using Java 1.4, Tomcat 7 if using Java 1.5 or higher). If you want to change which version of Java you are using between 1.4 and 1.5/7 then you need to run prepare-tomcat">
+  <if>
       <bool>
         <not><available file="${packages.home}/tomcat/.flagfile"/></not>
       </bool>
@@ -986,12 +986,14 @@
       <move todir="${packages.home}/tomcat">
         <fileset dir="${packages.home}/${tomcat.version}"/>
       </move>
+	  
       <copy file="${basedir}/resources/tomcat/setclasspath.bat"
         tofile="${packages.home}/tomcat/bin/setclasspath.bat"
         overwrite="true"/>
       <copy file="${basedir}/resources/tomcat/setclasspath.sh"
         tofile="${packages.home}/tomcat/bin/setclasspath.sh"
         overwrite="true"/>
+
       <!-- make sure we have execute permission for the .sh files -->
       <chmod dir="${packages.home}/tomcat/bin" perm="ugo+rx" 
         includes="*.sh"/>   
@@ -1345,6 +1347,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <target name="compile-core" depends="init" 
     description="Compile only the Greenstone core">
     <mkdir dir="${build.home}"/>
+	
     <if><bool><isset property="with.jni"/></bool>
 	<javac srcdir="${src.home}"
 	       destdir="${build.home}"
