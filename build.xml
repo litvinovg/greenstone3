@@ -986,14 +986,14 @@
       <move todir="${packages.home}/tomcat">
         <fileset dir="${packages.home}/${tomcat.version}"/>
       </move>
-	  
+	  <!--
       <copy file="${basedir}/resources/tomcat/setclasspath.bat"
         tofile="${packages.home}/tomcat/bin/setclasspath.bat"
         overwrite="true"/>
       <copy file="${basedir}/resources/tomcat/setclasspath.sh"
         tofile="${packages.home}/tomcat/bin/setclasspath.sh"
         overwrite="true"/>
-
+	  -->
       <!-- make sure we have execute permission for the .sh files -->
       <chmod dir="${packages.home}/tomcat/bin" perm="ugo+rx" 
         includes="*.sh"/>   
