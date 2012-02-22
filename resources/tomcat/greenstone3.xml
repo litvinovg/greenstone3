@@ -3,9 +3,9 @@
 <!-- see http://tomcat.apache.org/tomcat-5.5-doc/config/context.html for more Context attributes -->
 		
 <Context path="/greenstone3" 
-	docBase="C:\Users\sjm84\Desktop\greenstone3/web" 
+	docBase="@gsdl3webhome@" 
 	debug="1" reloadable="true" 
-	privileged='true'
+	@privilegedattribute@
 	allowLinking="false">
   
 	<Realm className="org.apache.catalina.realm.JDBCRealm" 
