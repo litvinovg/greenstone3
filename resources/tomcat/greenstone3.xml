@@ -1,9 +1,17 @@
 <!-- set allowLinking to true if you want to use symlinks to files or directories outside the docBase directory -->
 <!-- set reloadable to false for a production version. if true, automatically reloads the webapp if it detects changes in classes or lib directories -->
 <!-- see http://tomcat.apache.org/tomcat-5.5-doc/config/context.html for more Context attributes -->
+		
 <Context path="/greenstone3" 
-  docBase="@gsdl3webhome@" 
-  debug="1" reloadable="true" 
-  @privilegedattribute@
-  allowLinking="false">
+	docBase="C:\Users\sjm84\Desktop\greenstone3/web" 
+	debug="1" reloadable="true" 
+	privileged='true'
+	allowLinking="false">
+  
+	<Realm className="org.apache.catalina.realm.JDBCRealm" 
+		driverName="org.apache.derby.jdbc.EmbeddedDriver"
+		connectionURL="jdbc:derby:C:/Users/sjm84/Desktop/greenstone3/web/sites/localsite/etc/usersDB"
+		userTable="users" userNameCol="username" userCredCol="password"
+		userRoleTable="roles" roleNameCol="role"
+		/>
 </Context>

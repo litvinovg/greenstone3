@@ -25,7 +25,7 @@
 		<include name="gs2build/win32cfg.h"/>
 	</patternset>
 
-	<!-- source component without gli- files that get compiled and could be safely removed from a binary distribution -->
+	<!-- source component without gli - files that get compiled and could be safely removed from a binary distribution -->
 	<patternset id="greenstone3.source.no.gli.component">
 		<include name="src"/>
 		<include name="src/**/*"/>
@@ -50,30 +50,30 @@
 	<!-- imagemagick -->
 	<patternset id="greenstone3.imagemagick.component">
 		<include name="gs2build/bin/**/imagemagick"/>
-                <include name="gs2build/bin/**/imagemagick/**/*"/>
+		<include name="gs2build/bin/**/imagemagick/**/*"/>
 	</patternset>
 
-        <!-- ghostscript -->
-        <patternset id="greenstone3.ghostscript.component">
-                <include name="gs2build/bin/**/ghostscript"/>
-                <include name="gs2build/bin/**/ghostscript/**/*"/>
-        </patternset>
+	<!-- ghostscript -->
+	<patternset id="greenstone3.ghostscript.component">
+		<include name="gs2build/bin/**/ghostscript"/>
+		<include name="gs2build/bin/**/ghostscript/**/*"/>
+	</patternset>
 
-        <!-- tomcat -->
-        <patternset id="greenstone3.tomcat.component">
-                <include name="packages/tomcat"/>
-                <include name="packages/tomcat/**/*"/>
-        </patternset>
+	<!-- tomcat -->
+	<patternset id="greenstone3.tomcat.component">
+		<include name="packages/tomcat"/>
+		<include name="packages/tomcat/**/*"/>
+	</patternset>
 
-        <!-- the core component - defined by antithesis -->
-        <patternset id="greenstone3.core.component">
+	<!-- the core component - defined by antithesis -->
+	<patternset id="greenstone3.core.component">
 		<invert>
 			<patternset refid="greenstone3.source.component"/>
 			<patternset refid="greenstone3.imagemagick.component"/>
 			<patternset refid="greenstone3.ghostscript.component"/>
 			<patternset refid="greenstone3.tomcat.component"/>
 		</invert>
-        </patternset>
+	</patternset>
 
 </project>
 
