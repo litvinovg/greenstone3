@@ -194,7 +194,7 @@ function save()
 		var value = valueCell.innerHTML;
 		
 		gs.functions.removeArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, value, function(){console.log("REMOVED ARCHIVES");});
-		addCollectionToBuild(gs.cgiParams.p_c);
+		addCollectionToBuild(gs.cgiParams.p_c); /*bad*/
 		
 		removeFromParent(currentRow);
 	}
@@ -236,6 +236,13 @@ function save()
 			var section = changedElem.parentDiv.parentItem;
 			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + section.collection + '", "oid":"' + section.nodeID + '"}');
 			addCollectionToBuild(section.collection);
+		}
+		else if(hasClass(changedElem, "sectionText"))
+		{
+			var id = changedElem.getAttribute("id");
+			var sectionID = id.substring(4);
+			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + gs.cgiParams.c + '", "oid":"' + sectionID + '"}');
+			addCollectionToBuild(gs.cgiParams.c);
 		}
 	}
 
@@ -284,7 +291,7 @@ function save()
 		var saveButton = document.getElementById("saveButton");
 		saveButton.innerHTML = "Saving...";
 		saveButton.disabled = true;
-		
+
 		statusID = _statusBar.addStatus("Modifying archive files...");
 		ajax.send("a=g&rt=r&s=DocumentExecuteTransaction&s1.transactions=" + request);
 	}

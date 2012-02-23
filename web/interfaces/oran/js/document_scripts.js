@@ -521,7 +521,7 @@ function loadBook()
 	flash_plug_html += '    <PARAM name="allowScriptAccess" value="always" />\n';
 	flash_plug_html += '    <PARAM name="movie" value="Book.swf';
 	flash_plug_html += '?src_image=' + escape(img_cover);
-	flash_plug_html += '&doc_url=' + escape(doc_url)
+	flash_plug_html += '&doc_url=' + escape(doc_url);
 	flash_plug_html += '" />\n';
 	flash_plug_html += '    <PARAM name="quality" value="high" />\n';
 	flash_plug_html += '    <PARAM name="bgcolor" value="#FFFFFF" />\n';
@@ -538,4 +538,27 @@ function loadBook()
 	flash_plug_html += '</OBJECT>\n';
 	var flash_div = document.getElementById("bookdiv");
 	flash_div.innerHTML = flash_plug_html;
+}
+
+function readyPageForEditing()
+{
+	var textDivs = gs.functions.getElementsByClassName("sectionText");
+	
+	for(var i = 0; i < textDivs.length; i++)
+	{
+		de.doc.registerEditSection(textDivs[i]);
+	}
+	
+	var editBar = document.getElementById("editBarLeft");
+	var saveButton = document.createElement("BUTTON");
+	saveButton.onclick = save;
+	saveButton.innerHTML = "Save changes";
+	saveButton.setAttribute("id", "saveButton");
+	editBar.appendChild(saveButton);
+	
+	var statusBarDiv = document.createElement("DIV");
+	editBar.appendChild(statusBarDiv);
+	_statusBar = new StatusBar(statusBarDiv);
+	
+	_baseURL = gs.xsltParams.library_name;
 }

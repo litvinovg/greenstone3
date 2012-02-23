@@ -24,6 +24,23 @@ gs.functions.ajaxRequest = function()
 	}
 }
 
+gs.functions.getElementsByClassName = function(cl) 
+{
+	var nodes = new Array();
+	var classRegEx = new RegExp('\\b'+cl+'\\b');
+	var allElems = document.getElementsByTagName('*');
+	
+	for (var i = 0; i < allElems.length; i++) 
+	{
+		var classes = allElems[i].className;
+		if (classRegEx.test(classes)) 
+		{
+			nodes.push(allElems[i]);
+		}
+	}
+	return nodes;
+}; 
+
 gs.functions.makeToggle = function(buttons, divs)
 {
 	var buttonArray = (buttons.length) ? buttons : [buttons];

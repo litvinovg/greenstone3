@@ -126,6 +126,11 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse/document">
+		<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on'">
+			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
+			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
+		</xsl:if>
+		
 		<xsl:if test="/page/pageRequest/paramList/param[@name = 'dmd']/@value = 'true'">
 			<gsf:metadata name="all"/>
 		</xsl:if>
@@ -150,11 +155,15 @@
 			<xsl:call-template name="documentBerryForDocumentPage"/>
 			
 			<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on'">
-				<table style="width:100%"><tr><td style="width:70%"><xsl:text> </xsl:text></td>
-					<td>
+				<table style="width:100%"><tr>
+					<td id="editBarLeft" style="width:70%"><xsl:text> </xsl:text></td>
+					<td id="editBarRight">
 						<div style="text-align:center;">
-							<div class="ui-state-default ui-corner-all">
-								<a style="padding: 3px; text-decoration:none;" href="{$library_name}?a=g&amp;sa=documentbasket&amp;c=&amp;s=DisplayDocumentList&amp;rt=r&amp;p.c={/page/pageResponse/collection/@name}&amp;docToEdit={/page/pageResponse/document/documentNode/@nodeID}">Edit this document</a>
+							<div style="margin:5px;" class="ui-state-default ui-corner-all">
+								<a style="padding: 3px; text-decoration:none;" href="{$library_name}?a=g&amp;sa=documentbasket&amp;c=&amp;s=DisplayDocumentList&amp;rt=r&amp;p.c={/page/pageResponse/collection/@name}&amp;docToEdit={/page/pageResponse/document/documentNode/@nodeID}">Edit structure</a>
+							</div>
+							<div style="margin:5px;" class="ui-state-default ui-corner-all">
+								<a style="padding: 3px; text-decoration:none;" href="javascript:readyPageForEditing();">Edit content</a>
 							</div>
 						</div>
 					</td>

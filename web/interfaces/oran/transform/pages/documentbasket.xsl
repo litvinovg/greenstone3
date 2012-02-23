@@ -20,9 +20,11 @@
 	
 	<!-- the page content -->
 	<xsl:template match="/page">
-		<script src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
-		<script src="interfaces/{$interface_name}/js/documentmaker_scripts_dd.js"><xsl:text> </xsl:text></script>
-		<script src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_dd.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript">YAHOO.util.Event.onDOMReady(initDocumentMaker);</script>
+
 		<link src="interfaces/{$interface_name}/style/documentbasket.js"/>
 		<xsl:for-each select="//item">
 			<a class="dbdoc">

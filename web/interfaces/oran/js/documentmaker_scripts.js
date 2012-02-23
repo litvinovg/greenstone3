@@ -10,9 +10,8 @@ var _baseURL;
 var _statusBar;
 var _metadataSetList = new Array();
 
-function init()
+function initDocumentMaker()
 {
-	de.init();
 	//Get all of the links on the page
 	var allLinks = document.getElementsByTagName("a");
 	
@@ -702,5 +701,3 @@ function updateRecursive(parent, currentDocument, currentPosition, level)
 		}
 	}
 }
-
-YAHOO.util.Event.onDOMReady(init);

@@ -28,6 +28,7 @@
 		
 		<xsl:choose>
 			<xsl:when test="/page/pageResponse/interfaceOptions/option[@name = 'cssTheme']/@value">
+				<!-- Get the theme from the interfaceConfig.xml file -->
 				<link rel="stylesheet" href="{/page/pageResponse/interfaceOptions/option[@name = 'cssTheme']/@value}" type="text/css"/>
 			</xsl:when>
 			<xsl:otherwise>
@@ -46,7 +47,8 @@
 		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
 			<xsl:call-template name="map-scripts"/>
 		</xsl:if>
-		<xsl:call-template name="init-seaweed"/>
+		
+		<xsl:call-template name="init-direct-edit"/>
 		<xsl:call-template name="setup-gs-variable"/>
 		<xsl:call-template name="additionalHeaderContent"/>
 	</xsl:template>
@@ -55,14 +57,17 @@
 		<!-- This template should be overridden in the collectionConfig.xml file if you want to add extra header content -->
 	</xsl:template>
 	
-	<xsl:template name="init-seaweed">
+	<xsl:template name="init-direct-edit">
 		<script type="text/javascript">
 			<xsl:text disable-output-escaping="yes">
-				de.onready(function() {
-					try {
+				de.onready(function() 
+				{
+					try 
+					{
 						de.init();
 					}
-					catch (err) {
+					catch (err) 
+					{
 						alert("Seaweed failed to initialise: " + err.message);
 					}
 				});
