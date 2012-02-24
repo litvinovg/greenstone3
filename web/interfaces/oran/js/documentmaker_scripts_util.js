@@ -177,6 +177,16 @@ function addCollectionToBuild(collection)
 
 function save()
 {
+	var collection;
+	if(gs.cgiParams.c && gs.cgiParams.c != "")
+	{
+		collection = gs.cgiParams.c
+	}
+	else
+	{
+		collection = gs.cgiParams.p_c
+	}
+
 	for(var i = 0; i < _deletedMetadata.length; i++)
 	{
 		var currentRow = _deletedMetadata[i];
@@ -193,8 +203,8 @@ function save()
 		var valueCell = cells[1];
 		var value = valueCell.innerHTML;
 		
-		gs.functions.removeArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, value, function(){console.log("REMOVED ARCHIVES");});
-		addCollectionToBuild(gs.cgiParams.p_c); /*bad*/
+		gs.functions.removeArchivesMetadata(collection /*bad*/, "localsite" /*bad*/, docID, name, null, value, function(){console.log("REMOVED ARCHIVES");});
+		addCollectionToBuild(collection); /*bad*/
 		
 		removeFromParent(currentRow);
 	}
@@ -221,14 +231,14 @@ function save()
 
 			if(changedElem.originalValue)
 			{
-				gs.functions.setArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, changedElem.originalValue, "override", function(){console.log("SAVED ARCHIVES");});
+				gs.functions.setArchivesMetadata(collection, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, changedElem.originalValue, "override", function(){console.log("SAVED ARCHIVES");});
 			}
 			else
 			{
-				gs.functions.setArchivesMetadata(gs.cgiParams.p_c /*bad*/, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, null, "accumulate", function(){console.log("SAVED ARCHIVES");});
+				gs.functions.setArchivesMetadata(collection, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, null, "accumulate", function(){console.log("SAVED ARCHIVES");});
 			}
 			changedElem.originalValue = changedElem.innerHTML;
-			addCollectionToBuild(gs.cgiParams.p_c);
+			addCollectionToBuild(collection);
 		}
 		//Save content
 		else if(hasClass(changedElem, "renderedText"))
@@ -627,6 +637,7 @@ function addFunctionalityToTable(table)
 	var metaNameField = document.createElement("INPUT");
 	metaNameField.setAttribute("type", "text");
 	insertAfter(metaNameField, table);
+	table.metaNameField = metaNameField;
 	
 	var addRowButton = document.createElement("BUTTON");
 	addRowButton.innerHTML = "Add new metadata";
@@ -660,6 +671,7 @@ function addFunctionalityToTable(table)
 		//Threading this function here probably isn't necessary like the other times it is called
 		de.doc.registerEditSection(valueCell);
 	};
+	table.addRowButton = addRowButton;
 	insertAfter(addRowButton, metaNameField);
 }
 

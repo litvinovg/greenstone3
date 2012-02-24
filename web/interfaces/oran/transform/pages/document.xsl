@@ -98,9 +98,19 @@
 				</xsl:if>
 			</tr></table>
 			
-			<div id="doc{@nodeID}" class="sectionContainer" style="display:block;"><!-- *** -->
-				<xsl:if test="/page/pageRequest/paramList/param[@name = 'dmd']/@value = 'true'">
+			<div id="doc{@nodeID}" class="sectionContainer"><!-- *** -->
+				<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on'">
 					<table id="meta{@nodeID}">
+						<xsl:attribute name="style">
+							<xsl:choose>
+								<xsl:when test="/page/pageRequest/paramList/param[@name = 'dmd']/@value = 'true'">
+									<xsl:text>display:block;</xsl:text>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:text>display:none;</xsl:text>
+								</xsl:otherwise>
+							</xsl:choose>
+						</xsl:attribute>
 						<xsl:value-of select="util:clearMetadataStorage()"/>
 						<xsl:for-each select="metadataList/metadata">
 							<xsl:sort select="@name"/>
@@ -131,7 +141,7 @@
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
 		</xsl:if>
 		
-		<xsl:if test="/page/pageRequest/paramList/param[@name = 'dmd']/@value = 'true'">
+		<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on'">
 			<gsf:metadata name="all"/>
 		</xsl:if>
 

@@ -540,10 +540,43 @@ function loadBook()
 	flash_div.innerHTML = flash_plug_html;
 }
 
+function addEditMetadataLink(cell)
+{
+	var id = cell.getAttribute("id").substring(6);
+	var metaTable = document.getElementById("meta" + id);
+
+	var row = cell.parentNode;
+	var newCell = document.createElement("TD");
+	newCell.setAttribute("style", "font-size:0.7em; padding:0px 10px");
+	var newLink = document.createElement("A");
+	newLink.innerHTML = "edit metadata";
+	newLink.setAttribute("href", "javascript:;");
+	newLink.onclick = function()
+	{
+		if(metaTable.style.display == "none")
+		{
+			metaTable.style.display = "block";
+			metaTable.metaNameField.style.display = "inline";
+			metaTable.addRowButton.style.display = "inline";
+		}
+		else
+		{
+			metaTable.style.display = "none";
+			metaTable.metaNameField.style.display = "none";
+			metaTable.addRowButton.style.display = "none";
+		}
+	}
+	newCell.appendChild(newLink);
+	row.appendChild(newCell);
+	
+	addFunctionalityToTable(metaTable);
+	metaTable.metaNameField.style.display = "none";
+	metaTable.addRowButton.style.display = "none";
+}
+
 function readyPageForEditing()
 {
 	var textDivs = gs.functions.getElementsByClassName("sectionText");
-	
 	for(var i = 0; i < textDivs.length; i++)
 	{
 		de.doc.registerEditSection(textDivs[i]);
@@ -556,9 +589,26 @@ function readyPageForEditing()
 	saveButton.setAttribute("id", "saveButton");
 	editBar.appendChild(saveButton);
 	
+	var visibleMetadataList = document.createElement("SELECT");
+	var allOption = document.createElement("OPTION");
+	allOption.innerHTML = "All";
+	visibleMetadataList.appendChild(allOption);
+	visibleMetadataList.setAttribute("id", "metadataSetList");
+	var metadataListLabel = document.createElement("SPAN");
+	metadataListLabel.setAttribute("style", "margin-left:20px;");
+	metadataListLabel.innerHTML = "Visible metadata: ";
+	editBar.appendChild(metadataListLabel);
+	editBar.appendChild(visibleMetadataList);
+	
 	var statusBarDiv = document.createElement("DIV");
 	editBar.appendChild(statusBarDiv);
 	_statusBar = new StatusBar(statusBarDiv);
+	
+	var titleDivs = gs.functions.getElementsByClassName("sectionTitle");
+	for(var i = 0; i < titleDivs.length; i++)
+	{
+		addEditMetadataLink(titleDivs[i]);
+	}
 	
 	_baseURL = gs.xsltParams.library_name;
 }
