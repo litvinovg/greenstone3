@@ -179,17 +179,19 @@
 				</div>
 				
 				<!-- document maker -->
-				<div id="documentmakerprefs">
-					<xsl:variable name="documentbasket"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='documentbasket']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='documentbasket']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
-					<div class="paramLabel">Document basket</div>
-					<div class="paramValue">
-						<select name="documentbasket">
-							<option value="on"><xsl:if test="$documentbasket='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.on')"/></option> 
-							<option value="off"><xsl:if test="$documentbasket='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.off')"/></option>
-						</select>
+				<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
+					<div id="documentmakerprefs">
+						<xsl:variable name="documentbasket"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='documentbasket']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='documentbasket']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
+						<div class="paramLabel">Document basket</div>
+						<div class="paramValue">
+							<select name="documentbasket">
+								<option value="on"><xsl:if test="$documentbasket='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.on')"/></option> 
+								<option value="off"><xsl:if test="$documentbasket='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.off')"/></option>
+							</select>
+						</div>
+						<br class="clear"/>
 					</div>
-					<br class="clear"/>
-				</div>
+				</xsl:if>
 
 				<!-- tidy (?) -->
 				<xsl:if test="$tidyoption='tidy'">

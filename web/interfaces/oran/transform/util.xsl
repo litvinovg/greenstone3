@@ -29,6 +29,11 @@
   <xsl:variable name="berryBasketOn" select="/page/pageRequest/paramList/param[@name='berrybasket' and @value='on']"/>
   <xsl:variable name="documentBasketOn" select="/page/pageRequest/paramList/param[@name='documentbasket' and @value='on']"/>
   
+	<xsl:variable name="thisCollectionEditor">
+		<xsl:value-of select="/page/pageRequest/paramList/param[@name = 'c']/@value"/>
+		<xsl:text>-collection-editor</xsl:text>
+	</xsl:variable>
+  
   <!-- template to get the name of the current collection -->
   <xsl:template name="collectionName">
     <xsl:choose>
@@ -542,7 +547,7 @@ berry basket function to the site
   
 	<!-- put the drag&drop document basket on the page -->
 	<xsl:template name="documentBasket">
-		<xsl:if test="$documentBasketOn">
+		<xsl:if test="$documentBasketOn and /page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 			<div id="documentbasket" class="hide">
 				<span>Document Basket</span>
 				<span id="documentBasketExpandCollapseLinks" style="display: none;">

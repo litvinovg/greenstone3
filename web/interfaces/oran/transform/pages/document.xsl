@@ -99,7 +99,7 @@
 			</tr></table>
 			
 			<div id="doc{@nodeID}" class="sectionContainer"><!-- *** -->
-				<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on'">
+				<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on' and /page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 					<table id="meta{@nodeID}">
 						<xsl:attribute name="style">
 							<xsl:choose>
@@ -136,12 +136,9 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse/document">
-		<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on'">
+		<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on' and /page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
-		</xsl:if>
-		
-		<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on'">
 			<gsf:metadata name="all"/>
 		</xsl:if>
 
@@ -164,7 +161,7 @@
 			<!-- show the little berries for this document -->
 			<xsl:call-template name="documentBerryForDocumentPage"/>
 			
-			<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on'">
+			<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on' and /page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 				<table style="width:100%"><tr>
 					<td id="editBarLeft" style="width:70%"><xsl:text> </xsl:text></td>
 					<td id="editBarRight">

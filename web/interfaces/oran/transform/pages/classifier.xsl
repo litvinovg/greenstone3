@@ -26,7 +26,7 @@
 		<script type="text/javascript">$(window).load(openStoredClassifiers);</script>
 		
 		<!-- this right sidebar -->
-		<xsl:if test="$berryBasketOn or $documentBasketOn">
+		<xsl:if test="$berryBasketOn or ($documentBasketOn and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor)))">
 			<div id="rightSidebar">
 				<xsl:if test="$berryBasketOn">
 					<!-- show the berry basket if it's turned on -->
