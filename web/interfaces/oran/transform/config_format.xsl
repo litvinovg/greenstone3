@@ -49,17 +49,17 @@
 			<xslt:attribute name='src'>
 				<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name = 'httpPath']"/>
 				<xsl:text>/index/assoc/</xsl:text>
-				<xslt:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'assocfilepath']"/>
+				<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name = 'assocfilepath']"/>
 				<xsl:text>/</xsl:text>
 				<xsl:choose>
 					<xsl:when test="@type = 'thumb'">
-						<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/documentNode/metadataList/metadata[@name = 'Thumb']"/>
+						<xslt:value-of disable-output-escaping="yes" select=".//metadataList/metadata[@name = 'Thumb']"/>
 					</xsl:when>
 					<xsl:when test="@type = 'screen'">
-						<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/documentNode/metadataList/metadata[@name = 'Screen']"/>
+						<xslt:value-of disable-output-escaping="yes" select=".//metadataList/metadata[@name = 'Screen']"/>
 					</xsl:when>
 					<xsl:when test="@type = 'source'">
-						<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/documentNode/metadataList/metadata[@name = 'SourceFile']"/>
+						<xslt:value-of disable-output-escaping="yes" select=".//metadataList/metadata[@name = 'SourceFile']"/>
 					</xsl:when>
 				</xsl:choose>
 			</xslt:attribute>
@@ -168,38 +168,22 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<xsl:template match="gsf:metadata[@format]">
-		<xslt:value-of disable-output-escaping="yes">
-			<xsl:attribute name="select">
-				<xsl:text>java:org.greenstone.gsdl3.util.XSLTUtil.</xsl:text>
-				<xsl:value-of select="@format"/>
-				<xsl:text>(metadataList/metadata[@name='</xsl:text>
-				<xsl:apply-templates select="." mode="get-metadata-name"/>
-				<xsl:text>'], /page/@lang )</xsl:text>
-			</xsl:attribute>
-		</xslt:value-of>
-	</xsl:template>
-
 	<!-- if this gsf:metadata is a child of a document node then we want to get the metadata for that node -->
-	<xsl:template match="xsl:template[@match = 'documentNode' or @match = 'classifierNode']//gsf:metadata | gsf:template[@match = 'documentNode' or @match = 'classifierNode']//gsf:metadata">
+	<xsl:template match="gsf:metadata">
 		<xslt:if test="not(@hidden = 'true')">		
 			<xslt:value-of disable-output-escaping="yes">
 				<xsl:attribute name="select">
-					<xsl:text>metadataList/metadata[@name='</xsl:text>
+					<xsl:if test="@format">
+						<xsl:text>java:org.greenstone.gsdl3.util.XSLTUtil.</xsl:text>
+						<xsl:value-of select="@format"/>
+						<xsl:text>(</xsl:text>
+					</xsl:if>
+					<xsl:text>.//metadataList/metadata[@name='</xsl:text>
 					<xsl:apply-templates select="." mode="get-metadata-name"/>
 					<xsl:text>']</xsl:text>
-				</xsl:attribute>
-			</xslt:value-of>
-		</xslt:if>
-	</xsl:template>
-	
-	<xsl:template match="gsf:metadata">
-		<xslt:if test="not(@hidden = 'true')">	
-			<xslt:value-of disable-output-escaping="yes">
-				<xsl:attribute name="select">
-					<xsl:text>/page/pageResponse/document/documentNode/metadataList/metadata[@name='</xsl:text>
-					<xsl:apply-templates select="." mode="get-metadata-name"/>
-					<xsl:text>']</xsl:text>
+					<xsl:if test="@format">
+						<xsl:text>, /page/@lang )</xsl:text>
+					</xsl:if>
 				</xsl:attribute>
 			</xslt:value-of>
 		</xslt:if>
@@ -224,7 +208,7 @@
 	<xsl:template match="gsf:metadata-old">
 		<xslt:value-of disable-output-escaping="yes">
 			<xsl:attribute name="select">
-				<xsl:text>metadataList/metadata[@name="</xsl:text>
+				<xsl:text>.//metadataList/metadata[@name="</xsl:text>
 				<xsl:choose>
 					<xsl:when test="@select='parent'">
 						<xsl:text>parent_</xsl:text>
@@ -253,25 +237,11 @@
 		<xslt:apply-templates select="nodeContent"/>
 	</xsl:template>
   
-	<xsl:template match="xsl:template[@match = 'documentNode' or @match = 'classifierNode']//gsf:choose-metadata | gsf:template[@match = 'documentNode' or @match = 'classifierNode']//gsf:choose-metadata">
-		<xslt:choose>
-			<xsl:for-each select="gsf:metadata">
-				<xslt:when>
-					<xsl:attribute name="test">metadataList/metadata[@name='<xsl:apply-templates select="." mode="get-metadata-name"/>']</xsl:attribute>
-					<xsl:apply-templates select="."/>
-				</xslt:when>
-			</xsl:for-each>
-			<xsl:if test="gsf:default">
-				<xslt:otherwise><xsl:apply-templates select="gsf:default"/></xslt:otherwise>
-			</xsl:if>
-		</xslt:choose>
-	</xsl:template>
-	
 	<xsl:template match="gsf:choose-metadata">
 		<xslt:choose>
 			<xsl:for-each select="gsf:metadata">
 				<xslt:when>
-					<xsl:attribute name="test">/page/pageResponse/document/documentNode/metadataList/metadata[@name='<xsl:apply-templates select="." mode="get-metadata-name"/>']</xsl:attribute>
+					<xsl:attribute name="test">.//metadataList/metadata[@name='<xsl:apply-templates select="." mode="get-metadata-name"/>']</xsl:attribute>
 					<xsl:apply-templates select="."/>
 				</xslt:when>
 			</xsl:for-each>
@@ -283,7 +253,7 @@
   
 	<xsl:template match="gsf:switch">
 		<xsl:variable name="meta-name"><xsl:apply-templates select="gsf:metadata" mode="get-metadata-name"/></xsl:variable>
-		<xslt:variable name="meta"><xsl:choose><xsl:when test="@preprocess"><xslt:value-of select="util:{@preprocess}(metadataList/metadata[@name='{$meta-name}'])"/></xsl:when><xsl:otherwise><xslt:value-of select="metadataList/metadata[@name='{$meta-name}']"/></xsl:otherwise></xsl:choose></xslt:variable>
+		<xslt:variable name="meta"><xsl:choose><xsl:when test="@preprocess"><xslt:value-of select="util:{@preprocess}(.//metadataList/metadata[@name='{$meta-name}'])"/></xsl:when><xsl:otherwise><xslt:value-of select=".//metadataList/metadata[@name='{$meta-name}']"/></xsl:otherwise></xsl:choose></xslt:variable>
 		<xslt:choose>
 			<xsl:for-each select="gsf:when">
 				<xslt:when test="util:{@test}($meta, '{@test-value}')">
