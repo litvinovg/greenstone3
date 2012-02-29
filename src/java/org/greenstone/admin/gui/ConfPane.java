@@ -746,11 +746,14 @@ public class ConfPane extends JPanel implements ActionListener
 				{
 					//This line is Setting line
 					int end_index = fileLine.indexOf("=");
-					conf_setting[i][1] = fileLine.substring(0, end_index).toUpperCase();
-					conf_setting[i][2] = fileLine.substring(end_index + 1);
-					conf_table.put(conf_setting[i][1], conf_setting[i][2]);
-					i++; //calculat the number of settings
-					conf_array.add(fileLine);
+					if(end_index != -1)
+					{
+						conf_setting[i][1] = fileLine.substring(0, end_index).toUpperCase();
+						conf_setting[i][2] = fileLine.substring(end_index + 1);
+						conf_table.put(conf_setting[i][1], conf_setting[i][2]);
+						i++; //calculat the number of settings
+						conf_array.add(fileLine);
+					}
 				}
 				else
 				{
