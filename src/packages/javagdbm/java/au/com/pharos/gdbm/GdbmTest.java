@@ -202,7 +202,7 @@ public class GdbmTest {
 	    testLongData(db);
 
 	    // Store strings containing non-ASCII characters
-	    final String euroString = "Some funny characters: «¡ æ ø â ß !»";
+	    final String euroString = "Some funny characters: Â«Â¡ Ã¦ Ã¸ Ã¢ ÃŸ !Â»";
 	    db.store("high ASCII", euroString);
 	    Test.ok(50, db.fetch("high ASCII").equals(euroString));
 
