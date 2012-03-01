@@ -49,29 +49,20 @@ esac
 
 if test "$arch_64bit" = yes; then
   AC_MSG_RESULT(yes)
-  if test -z "$COMPAT32BITFLAGS" ; then
-    COMPAT32BITFLAGS="-m32"
+  if test -z "$ARCH_DEP_FLAGS" ; then
+    ARCH_DEP_FLAGS="-fPIC"
+    gsdlarch='64'
   fi
 else
   AC_MSG_RESULT(no)
-  if test -z "$COMPAT32BITFLAGS" ; then
-    COMPAT32BITFLAGS=
+  if test -z "$ARCH_DEP_FLAGS" ; then
+    ARCH_DEP_FLAGS=
+    gsdlarch='32'
   fi
 fi
 
-# Only need compat32bitflag if using MG or MGPP
-if test "$ENABLE_MG" = "0" ; then
-  COMPAT32BITFLAGS=
-else
-  if test "$ENABLE_MGPP" = "0" ; then
-    COMPAT32BITFLAGS=
-  fi
-fi
-
-export COMPAT32BITFLAGS
-AC_SUBST(COMPAT32BITFLAGS)
-
-
+export ARCH_DEP_FLAGS
+AC_SUBST(ARCH_DEP_FLAGS)
 
 AC_CHECK_SIZEOF(void *)
 AC_CHECK_SIZEOF(int)
