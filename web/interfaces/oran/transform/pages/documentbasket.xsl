@@ -34,7 +34,7 @@
 					<xsl:value-of select="@title"/>
 				</a>
 			</xsl:for-each>
-		<xsl:if>
+		</xsl:if>
 	</xsl:template>
 
 </xsl:stylesheet>  
