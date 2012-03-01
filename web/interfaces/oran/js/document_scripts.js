@@ -156,32 +156,52 @@ function changeView()
 
 function setImageVisible(visible)
 {
-	var image = document.getElementById("gs-document-image");
-	if(visible)
+	var divs = document.getElementsByTagName("DIV");
+	var images = new Array();
+	for (var i = 0; i < divs.length; i++)
 	{
-		image.setAttribute("class", image.getAttribute("class").replace(/\bhidden\b/g, ""));
-	}
-	else
-	{
-		if(image.getAttribute("class").search(/\bhidden\b/) == -1)
+		if(divs[i].id && divs[i].id.search(/^image/) != -1)
 		{
-			image.setAttribute("class", image.getAttribute("class") + " hidden");
+			images.push(divs[i]);
+		}
+	}
+	
+	for(var i = 0; i < images.length; i++)
+	{
+		var image = images[i];
+		if(visible)
+		{
+			image.style.display = "block";
+		}
+		else
+		{
+			image.style.display = "none";
 		}
 	}
 }
 
 function setTextVisible(visible)
 {
-	var text = document.getElementById("gs-document-text");
-	if(visible)
+	var divs = document.getElementsByTagName("DIV");
+	var textDivs = new Array();
+	for (var i = 0; i < divs.length; i++)
 	{
-		text.setAttribute("class", text.getAttribute("class").replace(/\bhidden\b/g, ""));
-	}
-	else
-	{
-		if(text.getAttribute("class").search(/\bhidden\b/) == -1)
+		if(divs[i].id && divs[i].id.search(/^text/) != -1)
 		{
-			text.setAttribute("class", text.getAttribute("class") + " hidden");
+			textDivs.push(divs[i]);
+		}
+	}
+
+	for(var i = 0; i < textDivs.length; i++)
+	{
+		var text = textDivs[i];
+		if(visible)
+		{
+			text.style.display = "block";
+		}
+		else
+		{
+			text.style.display = "none";
 		}
 	}
 }
@@ -197,6 +217,13 @@ function retrieveTableOfContents()
 		{
 			document.getElementById("contentsArea").innerHTML = document.getElementById("contentsArea").innerHTML + ajax.responseText;
 			replaceLinksWithSlider();
+			var loading = document.getElementById("tocLoadingImage");
+			loading.parentNode.removeChild(loading);
+		}
+		else if(ajax.readyState == 4)
+		{
+			var loading = document.getElementById("tocLoadingImage");
+			loading.parentNode.removeChild(loading);
 		}
 	}
 	ajax.send();
@@ -252,7 +279,7 @@ function SliderWidget(_links)
 
 	//The container for the widget
 	var _mainDiv = document.createElement("DIV");
-	_mainDiv.setAttribute("class", "pageSlider");
+	_mainDiv.setAttribute("class", "ui-widget-content pageSlider");
 	
 	//The table of images
 	var _linkTable = document.createElement("TABLE");
@@ -286,31 +313,52 @@ function SliderWidget(_links)
 		var ajax = gs.functions.ajaxRequest();
 
 		var href = page.getAttribute("href");
-		//ajax.open("GET", href + "&excerptid=meta&dmd=true");
-		var template = '<xsl:template match="/"><html><gsf:metadata name="thumbicon"/></html></xsl:template>';
+		var template = '';
+		template += '<xsl:template match="/">';
+		template +=   '<html>';
+		template +=     '<img>';
+		template +=       '<xsl:attribute name="src">';
+		template +=         "<xsl:value-of disable-output-escaping=\"yes\" select=\"/page/pageResponse/collection/metadataList/metadata[@name = 'httpPath']\"/>";
+		template +=         '<xsl:text>/index/assoc/</xsl:text>';
+		template +=         "<xsl:value-of disable-output-escaping=\"yes\" select=\"/page/pageResponse/document/metadataList/metadata[@name = 'assocfilepath']\"/>";
+		template +=         '<xsl:text>/</xsl:text>';
+		template +=         "<xsl:value-of disable-output-escaping=\"yes\" select=\"/page/pageResponse/document/documentNode/metadataList/metadata[@name = 'Thumb']\"/>";
+		template +=       '</xsl:attribute>';
+		template +=     '</img>';
+		template +=   '</html>';
+		template += '</xsl:template>';
 		ajax.open("GET", href + "&ilt=" + template.replace(" ", "%20"));
 		ajax.onreadystatechange = function()
 		{
 			if(ajax.readyState == 4 && ajax.status == 200)
 			{
 				var text = ajax.responseText;
-
-				var start = text.indexOf("<img", text);
-				if(start == -1)
+				var hrefStart = text.indexOf("src=\"") + 5;
+				if(hrefStart == -1)
 				{
 					page.isLoading = false;
 					page.noImage = true;
 					page.image.setAttribute("src", gs.imageURLs.blank);
 					return;
 				}
-				var end = text.indexOf(">", start) + 4;
-				
-				var image = text.substring(start, end);
-				image = image.replace("[parent(Top):assocfilepath]", gs.documentMetadata.assocfilepath);
-				page.link.innerHTML = image;
-				
-				page.isLoading = false;
-				page.imageLoaded = true;
+				var hrefEnd = text.indexOf("\"", hrefStart);
+				var href = text.substring(hrefStart, hrefEnd);
+				console.log(href);
+				var image = document.createElement("IMG");
+				$(image).load(function()
+				{
+					page.link.innerHTML = "";
+					page.link.appendChild(image);
+					page.isLoading = false;
+					page.imageLoaded = true;
+				});
+				$(image).error(function()
+				{
+					page.isLoading = false;
+					page.noImage = true;
+					image.setAttribute("src", gs.imageURLs.blank);
+				});
+				image.setAttribute("src", href);
 			}
 			else if (ajax.readyState == 4 && !page.failed)
 			{
@@ -548,25 +596,52 @@ function addEditMetadataLink(cell)
 	var row = cell.parentNode;
 	var newCell = document.createElement("TD");
 	newCell.setAttribute("style", "font-size:0.7em; padding:0px 10px");
+	
+	var linkSpan = document.createElement("SPAN");
+	linkSpan.setAttribute("class", "ui-state-default ui-corner-all");
+	linkSpan.setAttribute("style", "padding: 2px; float:left;");
+	
+	var linkLabel = document.createElement("SPAN");
+	linkLabel.innerHTML = "edit metadata";
+	var linkIcon = document.createElement("SPAN");
+	linkIcon.setAttribute("class", "ui-icon ui-icon-folder-collapsed");
+	
+	var uList = document.createElement("UL");
+	var labelItem = document.createElement("LI");
+	var iconItem = document.createElement("LI");
+	uList.appendChild(iconItem);
+	uList.appendChild(labelItem);
+	labelItem.appendChild(linkLabel);
+	iconItem.appendChild(linkIcon);
+	
+	uList.setAttribute("style", "outline: 0 none; margin:0px; padding:0px;");
+	labelItem.setAttribute("style", "float:left; list-style:none outside none;");
+	iconItem.setAttribute("style", "float:left; list-style:none outside none;");
+	
 	var newLink = document.createElement("A");
-	newLink.innerHTML = "edit metadata";
 	newLink.setAttribute("href", "javascript:;");
 	newLink.onclick = function()
 	{
 		if(metaTable.style.display == "none")
 		{
+			linkLabel.innerHTML = "hide metadata";
+			linkIcon.setAttribute("class", "ui-icon ui-icon-folder-open");
 			metaTable.style.display = "block";
 			metaTable.metaNameField.style.display = "inline";
 			metaTable.addRowButton.style.display = "inline";
 		}
 		else
 		{
+			linkLabel.innerHTML = "edit metadata";
+			linkIcon.setAttribute("class", "ui-icon ui-icon-folder-collapsed");
 			metaTable.style.display = "none";
 			metaTable.metaNameField.style.display = "none";
 			metaTable.addRowButton.style.display = "none";
 		}
 	}
-	newCell.appendChild(newLink);
+	newLink.appendChild(uList);
+	linkSpan.appendChild(newLink);
+	newCell.appendChild(linkSpan);
 	row.appendChild(newCell);
 	
 	addFunctionalityToTable(metaTable);

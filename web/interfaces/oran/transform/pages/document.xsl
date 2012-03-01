@@ -99,7 +99,7 @@
 			</tr></table>
 			
 			<div id="doc{@nodeID}" class="sectionContainer"><!-- *** -->
-				<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on' and /page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
+				<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 					<table id="meta{@nodeID}">
 						<xsl:attribute name="style">
 							<xsl:choose>
@@ -123,7 +123,77 @@
 						</xsl:for-each>
 					</table>
 				</xsl:if>
+
+				<gsf:variable name="screenImageWidth"><gsf:metadata name="ScreenWidth"/></gsf:variable>
+				<gsf:variable name="screenImageHeight"><gsf:metadata name="ScreenHeight"/></gsf:variable>
+				<gsf:variable name="imageWidth"><gsf:metadata name="ImageWidth"/></gsf:variable>
+				<gsf:variable name="imageHeight"><gsf:metadata name="ImageHeight"/></gsf:variable>
+
+				<xsl:choose>
+					<xsl:when test="metadataList/metadata[@name = 'Screen'] and metadataList/metadata[@name = 'Source'] and /page/pageRequest/paramList/param[@name = 'zoom']/@value = 'true'">
+						<div id="wrap{util:replace(@nodeID, '.', '_')}" class="zoomImage" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
+							<div id="small{util:replace(@nodeID, '.', '_')}" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
+								<gsf:image type="screen"/>
+							</div>
+							<div id="mover{util:replace(@nodeID, '.', '_')}" style="border: 1px solid green; position: absolute; top: 0; left: 0; width: 198px; height: 198px; overflow: hidden; z-index: 100; background: white; display: none;">
+								<div id="overlay{util:replace(@nodeID, '.', '_')}" style="width: 200px; height: 200px; position: absolute; top: 0; left: 0; z-index: 200;">
+									<xsl:text> </xsl:text>
+								</div>
+								<div id="large{util:replace(@nodeID, '.', '_')}" style="position: relative;">
+									<gsf:image type="source"/>
+								</div>
+							</div>
+						</div>
+						<script type="text/javascript">
+							<xsl:text disable-output-escaping="yes">
+								$(window).load(function()
+								{
+									var nodeID = "</xsl:text><xsl:value-of select="@nodeID"/><xsl:text disable-output-escaping="yes">";
+									var bigHeight = </xsl:text><xsl:value-of select="$imageHeight"/><xsl:text disable-output-escaping="yes">;
+									var smallHeight = </xsl:text><xsl:value-of select="$screenImageHeight"/><xsl:text disable-output-escaping="yes">
+									
+									nodeID = nodeID.replace(/\./g, "_");
+									var multiplier = bigHeight / smallHeight;
+
+									$("#wrap" + nodeID).anythingZoomer({
+										smallArea: "#small" + nodeID,
+										largeArea: "#large" + nodeID,
+										zoomPort: "#overlay" + nodeID,
+										mover: "#mover" + nodeID,
+										expansionSize:50,  
+										speedMultiplier:multiplier   
+									}); 
+								});
+							</xsl:text>
+						</script>
+					</xsl:when>
+					<xsl:when test="metadataList/metadata[@name = 'Screen']">
+						<div id="image{@nodeID}">
+							<xsl:attribute name="style">
+								<xsl:choose>
+									<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'text'">
+										<xsl:text>display:none;</xsl:text>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:text>display:block;</xsl:text>
+									</xsl:otherwise>
+								</xsl:choose>
+							</xsl:attribute>
+							<gsf:image type="screen"/>
+						</div>
+					</xsl:when>
+				</xsl:choose>
 				<div id="text{@nodeID}" class="sectionText"><!-- *** -->
+					<xsl:attribute name="style">
+						<xsl:choose>
+							<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
+								<xsl:text>display:none;</xsl:text>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:text>display:block;</xsl:text>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:attribute>
 					<!-- Get the section content from the document template -->
 					<xsl:apply-templates select="." mode="document"/>
 				</div>
@@ -136,7 +206,7 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse/document">
-		<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on' and /page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
+		<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
 			<gsf:metadata name="all"/>
@@ -161,7 +231,7 @@
 			<!-- show the little berries for this document -->
 			<xsl:call-template name="documentBerryForDocumentPage"/>
 			
-			<xsl:if test="/page/pageRequest/paramList/param[@name = 'documentbasket']/@value = 'on' and /page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
+			<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 				<table style="width:100%"><tr>
 					<td id="editBarLeft" style="width:70%"><xsl:text> </xsl:text></td>
 					<td id="editBarRight">
@@ -204,9 +274,15 @@
 									<!-- Table of contents will be dynamically retrieved when viewing a paged document -->
 									<script type="text/javascript">
 										<xsl:text disable-output-escaping="yes">
-											retrieveTableOfContents();
+											$(window).load(function()
+											{
+												retrieveTableOfContents();
+											});
 										</xsl:text>
 									</script>
+									<div id="tocLoadingImage" style="text-align:center;">
+										<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:text> loading...</xsl:text>
+									</div>
 								</xsl:when>
 								<xsl:otherwise>
 									<div id="tableOfContents">
@@ -259,20 +335,7 @@
 			</xsl:when>
 			<xsl:otherwise>
 				<div id="gs-document">
-					<div id="gs-document-image">
-						<xsl:attribute name="class">
-							<xsl:text>sectionImage</xsl:text>
-							<xsl:if test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'text'"><xsl:text> hidden</xsl:text></xsl:if>
-						</xsl:attribute>
-						<!-- Get the section content from the document template -->
-						<xsl:call-template name="documentImage"/>
-						<xsl:text> </xsl:text>
-					</div>
-					<div id="gs-document-text" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
-						<xsl:attribute name="class">
-							<xsl:text>documenttext</xsl:text>
-							<xsl:if test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'"><xsl:text> hidden</xsl:text></xsl:if>
-						</xsl:attribute>
+					<div id="gs-document-text" class="documenttext" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
 						<xsl:call-template name="wrapDocumentNodes"/>
 					</div>
 				</div>
@@ -336,7 +399,7 @@
 	<xsl:template name="documentImage">
 		<xsl:variable name="imageTest"><gsf:metadata name="ScreenWidth"/></xsl:variable>
 		<xsl:if test="$imageTest != ''">
-			<h3>   
+			<h3>
 				<gsf:choose-metadata>
 					<gsf:metadata name="dc.Title"/>
 					<gsf:metadata name="ex.Title"/>
@@ -473,29 +536,27 @@
 		<table class="viewOptions ui-state-default ui-corner-all"><tr>
 		
 			<!-- Paged-image options -->
-			<xsl:if test="/page/pageResponse/document/@docType = 'paged'">
-				<td>
-					<select id="viewSelection" onchange="changeView();">
-						<xsl:choose>
-							<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
-								<option>Default view</option>
-								<option selected="true">Image view</option>
-								<option>Text view</option>
-							</xsl:when>
-							<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'text'">
-								<option>Default view</option>
-								<option>Image view</option>
-								<option selected="true">Text view</option>
-							</xsl:when>
-							<xsl:otherwise>
-								<option selected="true">Default view</option>
-								<option>Image view</option>
-								<option>Text view</option>
-							</xsl:otherwise>
-						</xsl:choose>
-					</select>
-				</td>
-			</xsl:if>
+			<td>
+				<select id="viewSelection" onchange="changeView();">
+					<xsl:choose>
+						<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
+							<option>Default view</option>
+							<option selected="true">Image view</option>
+							<option>Text view</option>
+						</xsl:when>
+						<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'text'">
+							<option>Default view</option>
+							<option>Image view</option>
+							<option selected="true">Text view</option>
+						</xsl:when>
+						<xsl:otherwise>
+							<option selected="true">Default view</option>
+							<option>Image view</option>
+							<option>Text view</option>
+						</xsl:otherwise>
+					</xsl:choose>
+				</select>
+			</td>
 		
 			<!-- Realistic books link -->
 			<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
