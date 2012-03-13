@@ -837,6 +837,7 @@
     <antcall target="gs2mgdemo-install"/>
     <antcall target="gs2mgppdemo-install"/>
     <antcall target="gberg-install"/>
+    <antcall target="lucene-jdbm-demo-install"/>
   </target>
 
   <target name="gs2mgdemo-prepare" if="collect.dir">
@@ -850,7 +851,6 @@
   </target>
 
   <target name="gs2mgdemo-install" if="gs2mgdemo.present" depends="gs2mgdemo-prepare">
-    <echo> installing gs2mgdemo</echo>
     <unzip dest="${gs2mgdemo.dir}" src="${gs2mgdemo.dir}/${index.zip}" />
     <echo>collection gs2mgdemo installed</echo>
   </target>
@@ -878,6 +878,16 @@
   <target name="gberg-install" if="gberg.present" depends="gberg-prepare">
     <unzip dest="${gberg.dir}/index" src="${gberg.dir}/index/${index.zip}"/>
     <echo>collection gberg installed</echo>
+  </target>
+
+  <target name="lucene-jdbm-demo-prepare" if="collect.dir">
+    <property name="lucene-jdbm-demo.dir" value="${collect.dir}/lucene-jdbm-demo"/>
+    <available file="${lucene-jdbm-demo.dir}/index/${index.zip}" property="lucene-jdbm-demo.present"/>
+  </target>
+
+  <target name="lucene-jdbm-demo-install" if="lucene-jdbm-demo.present" depends="lucene-jdbm-demo-prepare">
+    <unzip dest="${lucene-jdbm-demo.dir}/index" src="${lucene-jdbm-demo.dir}/index/${index.zip}"/>
+    <echo>collection lucene-jdbm-demo installed</echo>
   </target>
 
   <target name="configure-web" depends="init,perl-for-building"
