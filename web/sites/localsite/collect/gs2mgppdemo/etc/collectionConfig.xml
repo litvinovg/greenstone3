@@ -3,7 +3,7 @@
     <metadataList>
         <metadata lang="en" name="creator"/>
         <metadata lang="en" name="maintainer"/>
-        <metadata lang="en" name="public">false</metadata>
+        <metadata lang="en" name="public">true</metadata>
     </metadataList>
     <displayItemList>
         <displayItem assigned="true" lang="en" name="description">This is a demonstration collection for the Greenstone3 digital library software. It contains a small subset (11 books) of the Humanitarian and Development Libraries. It is the Greenstone 3 equivalent of the Greenstone 2 demo collection, built with MGPP.</displayItem>
