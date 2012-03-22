@@ -4,7 +4,7 @@
     <!-- uncomment to provide the GATE tagging service -->
     <!--<serviceRack name="GATEServices"/>-->
     <!-- uncomment to provide the Authentication service -->
-    <!--<serviceRack name='Authentication'/>-->
+    <serviceRack name='Authentication'/>
     <serviceRack name="ArchiveIO"/>
     <serviceRack name="DocumentMaker"/>
     <serviceRack name="DocXMLUtil"/>
