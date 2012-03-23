@@ -130,7 +130,7 @@
 				<gsf:variable name="imageHeight"><gsf:metadata name="ImageHeight"/></gsf:variable>
 
 				<xsl:choose>
-					<xsl:when test="metadataList/metadata[@name = 'Screen'] and metadataList/metadata[@name = 'Source'] and /page/pageRequest/paramList/param[@name = 'zoom']/@value = 'true'">
+					<xsl:when test="metadataList/metadata[@name = 'Screen'] and metadataList/metadata[@name = 'Source']">
 						<div id="wrap{util:replace(@nodeID, '.', '_')}" class="zoomImage" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
 							<div id="small{util:replace(@nodeID, '.', '_')}" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
 								<gsf:image type="screen"/>
@@ -150,7 +150,7 @@
 								{
 									var nodeID = "</xsl:text><xsl:value-of select="@nodeID"/><xsl:text disable-output-escaping="yes">";
 									var bigHeight = </xsl:text><xsl:value-of select="$imageHeight"/><xsl:text disable-output-escaping="yes">;
-									var smallHeight = </xsl:text><xsl:value-of select="$screenImageHeight"/><xsl:text disable-output-escaping="yes">
+									var smallHeight = </xsl:text><xsl:value-of select="$screenImageHeight"/><xsl:text disable-output-escaping="yes">;
 									
 									nodeID = nodeID.replace(/\./g, "_");
 									var multiplier = bigHeight / smallHeight;
@@ -237,10 +237,10 @@
 					<td id="editBarRight">
 						<div style="text-align:center;">
 							<div style="margin:5px;" class="ui-state-default ui-corner-all">
-								<a style="padding: 3px; text-decoration:none;" href="{$library_name}?a=g&amp;sa=documentbasket&amp;c=&amp;s=DisplayDocumentList&amp;rt=r&amp;p.c={/page/pageResponse/collection/@name}&amp;docToEdit={/page/pageResponse/document/documentNode/@nodeID}">Edit structure</a>
+								<a style="padding: 3px; text-decoration:none;" href="{$library_name}?a=g&amp;sa=documentbasket&amp;c=&amp;s=DisplayDocumentList&amp;rt=r&amp;p.c={/page/pageResponse/collection/@name}&amp;docToEdit={/page/pageResponse/document/documentNode/@nodeID}"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.edit_structure')"/></a>
 							</div>
 							<div style="margin:5px;" class="ui-state-default ui-corner-all">
-								<a style="padding: 3px; text-decoration:none;" href="javascript:readyPageForEditing();">Edit content</a>
+								<a id="editContentButton" style="padding: 3px; text-decoration:none;" href="javascript:readyPageForEditing();"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.edit_content')"/></a>
 							</div>
 						</div>
 					</td>
@@ -276,12 +276,12 @@
 										<xsl:text disable-output-escaping="yes">
 											$(window).load(function()
 											{
-												retrieveTableOfContents();
+												retrieveTableOfContentsAndTitles();
 											});
 										</xsl:text>
 									</script>
 									<div id="tocLoadingImage" style="text-align:center;">
-										<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:text> loading...</xsl:text>
+										<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.loading')"/><xsl:text>...</xsl:text>
 									</div>
 								</xsl:when>
 								<xsl:otherwise>
@@ -295,11 +295,7 @@
 										<xsl:apply-templates select="documentNode" mode="TOC"/>
 										<xsl:if test="@docType = 'paged'">
 											<table style="width:100%;"><tbody><tr>
-												<td style="width:10%; text-align:left;"><a href="?a=d&amp;ed=1&amp;book=off&amp;dt=paged&amp;c={/page/pageResponse/collection/@name}&amp;d={/page/pageResponse/document/documentNode/@nodeID}"><img src="interfaces/{$interface_name}/images/previous.png"/></a></td>
-												<td style="width:20%; text-align:left;"><a href="?a=d&amp;ed=1&amp;book=off&amp;dt=paged&amp;c={/page/pageResponse/collection/@name}&amp;d={/page/pageResponse/document/documentNode/@nodeID}">Previous</a></td>
-												<td style="width:40%; text-align:center;"><xsl:text>Go to page</xsl:text><input type="text" size="3"/></td>
-												<td style="width:20%; text-align:right;"><a href="?a=d&amp;ed=1&amp;book=off&amp;dt=paged&amp;c={/page/pageResponse/collection/@name}&amp;d={/page/pageResponse/document/documentNode/@nodeID}">Next</a></td>
-												<td style="width:10%; text-align:right;"><a href="?a=d&amp;ed=1&amp;book=off&amp;dt=paged&amp;c={/page/pageResponse/collection/@name}&amp;d={/page/pageResponse/document/documentNode/@nodeID}"><img src="interfaces/{$interface_name}/images/next.png"/></a></td>
+												<td><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.filter_pages')"/><xsl:text>: </xsl:text><input id="filterText" type="text" size="27"/></td>
 											</tr></tbody></table>
 										</xsl:if>
 									</div>
@@ -393,22 +389,6 @@
 				</xsl:choose>
 			</xsl:for-each>
 		</xsl:for-each><xsl:text> </xsl:text>
-	</xsl:template>
-	
-	<!-- The default template for displaying the document image -->
-	<xsl:template name="documentImage">
-		<xsl:variable name="imageTest"><gsf:metadata name="ScreenWidth"/></xsl:variable>
-		<xsl:if test="$imageTest != ''">
-			<h3>
-				<gsf:choose-metadata>
-					<gsf:metadata name="dc.Title"/>
-					<gsf:metadata name="ex.Title"/>
-					<gsf:metadata name="Title"/>
-					<gsf:default>Untitled</gsf:default>
-				</gsf:choose-metadata>
-			</h3>
-			<gsf:image type="screen"/>
-		</xsl:if>
 	</xsl:template>
 
 	<!-- This template is used to display the table of contents -->
@@ -536,27 +516,29 @@
 		<table class="viewOptions ui-state-default ui-corner-all"><tr>
 		
 			<!-- Paged-image options -->
-			<td>
-				<select id="viewSelection" onchange="changeView();">
-					<xsl:choose>
-						<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
-							<option>Default view</option>
-							<option selected="true">Image view</option>
-							<option>Text view</option>
-						</xsl:when>
-						<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'text'">
-							<option>Default view</option>
-							<option>Image view</option>
-							<option selected="true">Text view</option>
-						</xsl:when>
-						<xsl:otherwise>
-							<option selected="true">Default view</option>
-							<option>Image view</option>
-							<option>Text view</option>
-						</xsl:otherwise>
-					</xsl:choose>
-				</select>
-			</td>
+			<xsl:if test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageRequest/paramList/param[@name = 'dt']/@value = 'paged'">
+				<td>
+					<select id="viewSelection" onchange="changeView();">
+						<xsl:choose>
+							<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
+								<option>Default view</option>
+								<option selected="true">Image view</option>
+								<option>Text view</option>
+							</xsl:when>
+							<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'text'">
+								<option>Default view</option>
+								<option>Image view</option>
+								<option selected="true">Text view</option>
+							</xsl:when>
+							<xsl:otherwise>
+								<option selected="true">Default view</option>
+								<option>Image view</option>
+								<option>Text view</option>
+							</xsl:otherwise>
+						</xsl:choose>
+					</select>
+				</td>
+			</xsl:if>
 		
 			<!-- Realistic books link -->
 			<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
@@ -593,24 +575,71 @@
 			</xsl:if>
 			<td style="vertical-align:top; text-align:right;">
 				<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
-					<span class="tableOfContentsTitle">Table of Contents</span>
+					<span class="tableOfContentsTitle"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.table_of_contents')"/></span>
+
+					<a id="sidebarMinimizeButton" href="javascript:minimizeSidebar();" style="float: right; font-size:0.6em;">
+						<img class="icon" style="padding-top:3px;">
+							<xsl:attribute name="src">
+								<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
+							</xsl:attribute>
+						</img>
+					</a>
+					<a id="sidebarMaximizeButton" href="javascript:maximizeSidebar();" style="float: right; font-size:0.6em; display:none;">
+						<img class="icon" style="padding-top:3px;">
+							<xsl:attribute name="src">
+								<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
+							</xsl:attribute>
+						</img>
+					</a>
 				</xsl:if>
-				<a id="sidebarMinimizeButton" href="javascript:minimizeSidebar();" style="float: right; font-size:0.6em;">
-					<img class="icon" style="padding-top:3px;">
-						<xsl:attribute name="src">
-							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
-						</xsl:attribute>
-					</img>
-				</a>
-				<a id="sidebarMaximizeButton" href="javascript:maximizeSidebar();" style="float: right; font-size:0.6em; display:none;">
-					<img class="icon" style="padding-top:3px;">
-						<xsl:attribute name="src">
-							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
-						</xsl:attribute>
-					</img>
-				</a>
 			</td>
-		</tr></table>	
+		</tr>
+		<xsl:if test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 and count(//documentNode/metadataList/metadata[@name = 'Source']) > 0">
+			<tr>
+				<td style="width:40%;">
+					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoom')"/><input id="zoomToggle" type="checkbox"/>
+					<script type="text/javascript">
+						<xsl:text disable-output-escaping="yes">
+							$("#zoomToggle").change(function()
+							{
+								_imageZoomEnabled = !_imageZoomEnabled;
+							});
+						</xsl:text>
+					</script>
+				</td>
+				<td style="width:60%;">
+					<div>
+						<div style="float:left; width:30%;"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoom')"/><xsl:text>:</xsl:text></div>
+						<div id="zoomSlider" style="float:right; width:65%; height:5px; margin-top:6px;"><xsl:text> </xsl:text></div>
+						<script type="text/javascript">
+							<xsl:text disable-output-escaping="yes">
+								$("#zoomSlider").slider(
+								{
+									change: function(event, ui)
+									{
+										var sliderValue = ui.value;
+										var divs = document.getElementsByTagName("DIV");
+										for(var i = 0; i &lt; divs.length; i++)
+										{
+											if(divs[i].getAttribute("id") &amp;&amp; divs[i].getAttribute("id").search(/^mover.*/) != -1)
+											{
+												divs[i].style.height = 200 + (2 * sliderValue) + "px";
+												divs[i].style.width = 200 + (2 * sliderValue) + "px";
+											}
+										}
+									}
+								});
+							</xsl:text>
+						</script>
+						<style>
+							.ui-slider .ui-slider-handle{height:0.8em; width:1.0em;}
+						</style>
+						<div style="float:clear;"><xsl:text> </xsl:text></div>
+					</div>
+				</td>
+			</tr>
+		</xsl:if>
+		</table>	
 	</xsl:template>
 	
 	<xsl:template name="documentNodePre">
@@ -624,7 +653,7 @@
 
 		<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
 			<div style="background:#BBFFBB; padding: 5px; margin:0px auto; width:890px;">
-				<xsl:text>Show documents near here </xsl:text>
+				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.maps.nearby_docs')"/>
 				<img id="nearbyDocumentsToggle" src="interfaces/oran/images/expand.png">
 					<xsl:attribute name="onclick">
 						<xsl:text>performDistanceSearch('</xsl:text>
