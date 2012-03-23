@@ -3,12 +3,14 @@
   <!-- some global parameters - these are set by whoever is invoking the transformation -->
   <xsl:param name="interface_name"/>
   <xsl:param name="library_name"/>
+  <xsl:param name="site_name"/>
   <xsl:include href="xml-to-string.xsl"/>
   <!-- every pages ....................................................................... -->
+
   <xsl:template name="siteName">
     <xsl:value-of select="/page/pageResponse/metadataList/metadata[@name='siteName']"/>
   </xsl:template>
-  
+
   <xsl:template name="siteLink">
     <a href="./{$library_name}">
       <xsl:call-template name="siteName"/>
@@ -238,7 +240,7 @@
   <xsl:template name="authenticationLink">
     <xsl:for-each select="//serviceList/service[@type='authen']">
 		<div class="paramLabel">
-			<a href="{$library_name}?a=g&amp;rt=r&amp;sa=authen&amp;s={@name}&amp;s1.aup=Login&amp;s1.un=&amp;s1.asn=">
+			<a href="{$library_name}/admin/ListUsers">
 				<xsl:value-of select="displayItem[@name='name']"/>
 			</a>
 		</div>
@@ -247,7 +249,20 @@
 		</div>
     </xsl:for-each>
   </xsl:template>
-  
+
+  <xsl:template name="registerLink">
+    <xsl:for-each select="//serviceList/service[@type='authen']">
+		<div class="paramLabel">
+			<a href="{$library_name}/admin/Register">
+				<xsl:text>Register</xsl:text>
+			</a>
+		</div>
+		<div class="paramValue">
+			<xsl:text>Register as a new user</xsl:text>
+		</div>
+    </xsl:for-each>
+  </xsl:template>
+
   <xsl:template name="libraryInterfaceLink">
     <li>
       <a href="{$library_name}?a=p&amp;sa=gli4gs3">
