@@ -60,6 +60,12 @@ public class GSParams
 	public static final String INLINE_TEMPLATE = "ilt";
 	public static final String DISPLAY_METADATA = "dmd";
 	public static final String FILE_LOCATION = "fl";
+	
+	//Administration
+	public static final String PASSWORD = "password";
+	public static final String S_PASSWORD = "s1.password";
+	public static final String S_NEW_PASSWORD = "s1.newPassword";
+	public static final String S_OLD_PASSWORD = "s1.oldPassword";
 
 	protected HashMap param_map = null;
 
@@ -91,6 +97,10 @@ public class GSParams
 		addParameter(REALISTIC_BOOK, false);
 		addParameter(INLINE_TEMPLATE, false);
 		addParameter(DISPLAY_METADATA, false);
+		addParameter(PASSWORD, false);
+		addParameter(S_PASSWORD, false);
+		addParameter(S_NEW_PASSWORD, false);
+		addParameter(S_OLD_PASSWORD, false);
 
 		//addParameter();
 		// ugly hack so we don't save the extlink param
