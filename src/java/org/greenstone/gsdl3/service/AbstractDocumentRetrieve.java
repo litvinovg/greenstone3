@@ -311,7 +311,10 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 				try
 				{
 					Element metadata_list = getMetadataList(node_id, all_metadata, metadata_names_list);
-					request_node.appendChild(metadata_list);
+					if(metadata_list != null)
+					{
+						request_node.appendChild(metadata_list);
+					}
 				}
 				catch (GSException e)
 				{
