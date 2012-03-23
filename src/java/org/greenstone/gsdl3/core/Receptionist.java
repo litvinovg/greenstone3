@@ -84,6 +84,14 @@ public class Receptionist implements ModuleInterface
 	{
 		this.mr = m;
 	}
+	
+	/**
+	 * gets the message router
+	 */
+	public ModuleInterface getMessageRouter()
+	{
+		return this.mr;
+	}
 
 	/** configures the receptionist */
 	public boolean configure()
