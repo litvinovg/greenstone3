@@ -26,6 +26,9 @@ import java.util.MissingResourceException;
 import java.io.File;
 import java.text.SimpleDateFormat;
 
+import net.tanesha.recaptcha.ReCaptcha;
+import net.tanesha.recaptcha.ReCaptchaFactory;
+
 import org.apache.log4j.*;
 import org.w3c.dom.Node;
 
@@ -104,7 +107,6 @@ public class XSLTUtil
 
 	public static byte[] toUTF8(String orig)
 	{
-
 		try
 		{
 			byte[] utf8 = orig.getBytes("UTF-8");
@@ -115,6 +117,11 @@ public class XSLTUtil
 			logger.error("unsupported encoding");
 			return orig.getBytes();
 		}
+	}
+	
+	public static String replace(String orig, String match, String replacement)
+	{
+		return orig.replace(match, replacement);
 	}
 
 	public static String getNumberedItem(String list, int number)
@@ -470,5 +477,11 @@ public class XSLTUtil
 		_foundTableValues.put(name, newList);
 		
 		return true;
+	}
+	
+	public static String reCAPTCHAimage()
+	{
+		ReCaptcha c = ReCaptchaFactory.newReCaptcha("6LckI88SAAAAACUYjj97WMcnz5HPjVp3lI-x-ue8", "6LckI88SAAAAAGnGy1PwuXYZzIMXZYoPxN51bWWG", false);
+		return c.createRecaptchaHtml(null, null);
 	}
 }
