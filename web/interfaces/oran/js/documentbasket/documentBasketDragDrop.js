@@ -123,8 +123,8 @@ documentBasketDDPlayer.prototype.resetTargets = function() {
 };
 
 var request_type = "GET";
-var docAddurlPath ="?a=pr&rt=r&ro=1&s=AddDocument&c=&s1.id=2&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=";
-var docDelurlPath ="?a=pr&rt=r&ro=1&s=DeleteDocument&c=&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=";
+var docAddurlPath = gs.xsltParams.library_name + "?a=pr&rt=r&ro=1&s=AddDocument&c=&s1.id=2&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=";
+var docDelurlPath = gs.xsltParams.library_name + "?a=pr&rt=r&ro=1&s=DeleteDocument&c=&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=";
 var postdata = null;
 
 documentBasketDDPlayer.prototype.onDragDrop = function(e, id) {

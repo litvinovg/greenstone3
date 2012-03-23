@@ -17,7 +17,7 @@ var dmcheckout = function(){
 	if ( document.getElementById('documentbasket') == null ) return;
 	
 	var request_type = "GET";
-	var url = "?a=pr&rt=r&ro=1&s=GetDocuments&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&c=";
+	var url = gs.xsltParams.library_name + "?a=pr&rt=r&ro=1&s=GetDocuments&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&c=";
 
 	var responseSuccess = function(o){
 		//alert(o.responseText);
@@ -75,7 +75,7 @@ var dmcheckout = function(){
 
 function clearBasket()
 {
-	var delurlPath ="?a=pr&rt=r&ro=1&s=ClearDocuments&c=&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.c=" + gs.cgiParams.c;
+	var delurlPath = gs.xsltParams.library_name + "?a=pr&rt=r&ro=1&s=ClearDocuments&c=&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.c=" + gs.cgiParams.c;
 	var callback =
 	{
 		success:function(){console.log("Successfully removed document");},
@@ -229,7 +229,7 @@ function showDocumentBox() {
 	}
 	
 	fullView.appendChild(document.createTextNode('Full View »'));
-	fullView.setAttribute("href","?a=g&sa=documentbasket&c=&s=DisplayDocumentList&rt=r&p.c=" + collectionName);
+	fullView.setAttribute("href", gs.xsltParams.library_name + "?a=g&sa=documentbasket&c=&s=DisplayDocumentList&rt=r&p.c=" + collectionName);
 	fullView.setAttribute("id","documentpagesFullViewLink");
 
 	//toggle expand/collapse links
@@ -277,7 +277,7 @@ function hideDocumentBox() {
 
 
 function addDocument(el){
-	var addurl = "?a=pr&rt=r&ro=1&s=AddDocument&c=&s1.id=2&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=" + el.id;
+	var addurl = gs.xsltParams.library_name + "?a=pr&rt=r&ro=1&s=AddDocument&c=&s1.id=2&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=" + el.id;
 
 	var addSuccess = function(o){
 		var result = o.responseXML;

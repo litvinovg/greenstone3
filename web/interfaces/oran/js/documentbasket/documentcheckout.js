@@ -148,7 +148,7 @@ function showFullView(){
 		img.setAttribute("width", "15px");
 		li.appendChild(img);
 		
-		a.href ="?a=d&c="+doc['collection']+"&d="+doc['name'];
+		a.href = gs.xsltParams.library_name + "?a=d&c="+doc['collection']+"&d="+doc['name'];
 		
 		if(window.interfaceName && window.interfaceName == "dev")
 		{
@@ -396,7 +396,7 @@ function populateUrlsAndMetadata(parea){
 }
 
 function sendMail(){
-	var url = "?a=pr&rt=r&ro=1&s=SendMail&c=";
+	var url = gs.xsltParams.library_name + "?a=pr&rt=r&ro=1&s=SendMail&c=";
 	var request_type = "POST";
 	var postdata = "";
 	var i;
