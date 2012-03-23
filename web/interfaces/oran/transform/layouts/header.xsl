@@ -24,6 +24,8 @@
 	
 	<!-- Creates a header for the html page -->
 	<xsl:template name="create-html-header">
+		<base href="{/page/pageRequest/@baseURL}"/><xsl:comment>[if lte IE 6]&gt;&lt;/base&gt;&lt;![endif]</xsl:comment>
+	
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
 		
 		<xsl:choose>
@@ -143,108 +145,148 @@
 	
 	<!-- ***** HOME HELP PREFERENCES LOGIN ***** -->
 	<xsl:template name="home-help-preferences">
-		<xsl:if test="/page/pageResponse/collection">
-			<ul id="bannerLinks">
-				<!-- preferences -->
-				<li class="ui-state-default ui-corner-all">
-					<a href="{$library_name}?a=p&amp;amp;sa=pref&amp;amp;c={$collNameChecked}">
-						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_tip')"/></xsl:attribute>
-						<ul>
-							<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/></span></li>
-							<li><span class="ui-icon ui-icon-wrench"><xsl:text> </xsl:text></span></li>
-						</ul>
-					</a>
-				</li>
+		<ul id="bannerLinks">
+			<!-- preferences -->
+			<li class="ui-state-default ui-corner-all">
+				<a href="{$library_name}?a=p&amp;amp;sa=pref&amp;amp;c={$collNameChecked}">
+					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_tip')"/></xsl:attribute>
+					<ul>
+						<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/></span></li>
+						<li><span class="ui-icon ui-icon-wrench"><xsl:text> </xsl:text></span></li>
+					</ul>
+				</a>
+			</li>
 
-				<!-- help -->
-				<li class="ui-state-default ui-corner-all">
-					<a href="{$library_name}?a=p&amp;amp;sa=help&amp;amp;c={$collNameChecked}">
-						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_tip')"/></xsl:attribute>
-						<ul>
-							<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></span></li>
-							<li><span class="ui-icon ui-icon-help"><xsl:text> </xsl:text></span></li>
-						</ul>
-					</a>
-				</li>
+			<!-- help -->
+			<li class="ui-state-default ui-corner-all">
+				<a href="{$library_name}?a=p&amp;amp;sa=help&amp;amp;c={$collNameChecked}">
+					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_tip')"/></xsl:attribute>
+					<ul>
+						<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></span></li>
+						<li><span class="ui-icon ui-icon-help"><xsl:text> </xsl:text></span></li>
+					</ul>
+				</a>
+			</li>
+			
+			<!-- login/logout -->
+			<li class="ui-state-default ui-corner-all" id="userMenuButton">
+				<xsl:choose>
+					<xsl:when test="/page/pageRequest/userInformation/@username">
+						<a>
+							<xsl:attribute name="href">javascript:toggleUserMenu();</xsl:attribute>
+							<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'logout_tip')"/></xsl:attribute>
+							<script type="text/javascript">
+								<xsl:text disable-output-escaping="yes">
+									function toggleUserMenu()
+									{
+										var button = $("#userMenuButton");
+										var menu;
 
-				<!-- home -->
-				<!--
-				<li class="ui-state-default ui-corner-all">
-					<a href="{$library_name}?a=p&amp;amp;sa=home">
-						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_tip')"/></xsl:attribute>
-						<ul>
-							<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home_b')"/></span></li>
-							<li><span class="ui-icon ui-icon-home"><xsl:text> </xsl:text></span></li>
-						</ul>
-					</a>
-				</li>
-				-->
-				
-				<!-- login/logout -->
-				<li class="ui-state-default ui-corner-all">
-					<xsl:choose>
-						<xsl:when test="/page/pageRequest/userInformation/@username">
-							<a>
-								<xsl:attribute name="href">
-									<xsl:value-of select="$library_name"/>
-									<xsl:text>?logout=</xsl:text>
-									<xsl:if test="/page/pageRequest/@action">
-										<xsl:text>&amp;a=</xsl:text>
-										<xsl:value-of select="/page/pageRequest/@action"/>
-									</xsl:if>
-									<xsl:if test="/page/pageRequest/@subaction">
-										<xsl:text>&amp;sa=</xsl:text>
-										<xsl:value-of select="/page/pageRequest/@subaction"/>
-									</xsl:if>
-									<xsl:for-each select="/page/pageRequest/paramList/param">
-										<xsl:if test="not(@name = 'username' or @name = 'password')">
-											<xsl:text>&amp;</xsl:text>
-											<xsl:value-of select="@name"/>
-											<xsl:text>=</xsl:text>
-											<xsl:value-of select="@value"/>
-										</xsl:if>
-									</xsl:for-each>
-								</xsl:attribute>
-								<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'logout_tip')"/></xsl:attribute>
-								<ul>
-									<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'logout_b')"/><xsl:text> </xsl:text><xsl:value-of select="/page/pageRequest/userInformation/@username"/></span></li>
-									<li><span class="ui-icon ui-icon-unlocked"><xsl:text> </xsl:text></span></li>
-								</ul>
-							</a>
-						</xsl:when>
-						<xsl:otherwise>
-							<a>
-								<xsl:attribute name="href">
-									<xsl:value-of select="$library_name"/>
-									<xsl:text>?a=p&amp;sa=login&amp;redirectURL=</xsl:text>
-									<xsl:value-of select="$library_name"/>
-									<xsl:text>%3F</xsl:text>
-									<xsl:if test="/page/pageRequest/@action">
-										<xsl:text>a=</xsl:text>
-										<xsl:value-of select="/page/pageRequest/@action"/>
-									</xsl:if>
-									<xsl:if test="/page/pageRequest/@subaction">
-										<xsl:text>%26sa=</xsl:text>
-										<xsl:value-of select="/page/pageRequest/@subaction"/>
-									</xsl:if>
-									<xsl:for-each select="/page/pageRequest/paramList/param">
+										if(button.data("userMenu"))
+										{
+											menu = button.data("userMenu");
+											if(menu.css("display") == "block")
+											{
+												menu.hide();
+											}
+											else
+											{
+												menu.show();
+											}
+										}
+										else
+										{
+											menu = $("&lt;UL&gt;")
+												.css("position", "absolute")
+												.css("display", "block")
+												.css("z-index", "100")
+												.css("list-style", "none outside none")
+												.css("margin-left", "0px")
+												.css("padding", "0px")
+												.css("font-size", "90%");
+
+											button.data("userMenu", menu);
+
+											var settingsLink = $("&lt;a&gt;")
+												.attr("href", gs.xsltParams.library_name + "/admin/AccountSettings?s1.username=</xsl:text><xsl:value-of select="/page/pageRequest/userInformation/@username"/><xsl:text disable-output-escaping="yes">");
+											var settingsButton = $("&lt;LI&gt;")
+												.css("padding", "3px")
+												.html("Account settings")
+												.addClass("ui-state-default");
+											settingsLink.append(settingsButton);
+
+											var url = document.URL;
+											var hasQueryString = (url.indexOf("?") != -1);
+											var hashIndex = url.indexOf("#");
+											
+											var hashPart;
+											if(hashIndex != -1)
+											{
+												hashPart = url.substring(hashIndex);
+												url = url.substring(0, hashIndex);
+											}
+											
+											var logoutLink = $("&lt;a&gt;")
+												.attr("href", url + (hasQueryString ? "&amp;" : "?") + "logout=" + (hashPart ? hashPart : ""));
+											var logoutButton = $("&lt;LI&gt;")
+												.css("padding", "3px")
+												.html("Logout")
+												.addClass("ui-state-default");
+											logoutLink.append(logoutButton);
+
+											menu.append(settingsLink);
+											menu.append(logoutLink);
+
+											var buttonLeft = button.offset().left;
+											var buttonTop = button.offset().top;
+											var buttonHeight = button.height();
+
+											menu.offset({top: buttonTop + buttonHeight + 4, left: buttonLeft});
+											$("#topArea").append(menu);
+										}
+									}
+								</xsl:text>
+							</script>
+							<ul>
+								<li><span><xsl:value-of select="/page/pageRequest/userInformation/@username"/></span></li>
+								<li><span class="ui-icon ui-icon-unlocked"><xsl:text> </xsl:text></span></li>
+							</ul>
+						</a>
+					</xsl:when>
+					<xsl:otherwise>
+						<a>
+							<xsl:attribute name="href">
+								<xsl:value-of select="$library_name"/>
+								<xsl:text>?a=p&amp;sa=login&amp;redirectURL=</xsl:text>
+								<xsl:value-of select="$library_name"/>
+								<xsl:text>%3F</xsl:text>
+								<xsl:if test="/page/pageRequest/@action">
+									<xsl:text>a=</xsl:text>
+									<xsl:value-of select="/page/pageRequest/@action"/>
+								</xsl:if>
+								<xsl:if test="/page/pageRequest/@subaction">
+									<xsl:text>%26sa=</xsl:text>
+									<xsl:value-of select="/page/pageRequest/@subaction"/>
+								</xsl:if>
+								<xsl:for-each select="/page/pageRequest/paramList/param">
+									<xsl:if test="@name != 'password' and @name != 's1.password' and @name != 's1.newPassword' and @name != 's1.oldPassword'">
 										<xsl:text>%26</xsl:text>
 										<xsl:value-of select="@name"/>
 										<xsl:text>=</xsl:text>
 										<xsl:value-of select="@value"/>
-									</xsl:for-each>
-								</xsl:attribute>
-								<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_tip')"/></xsl:attribute>
-								<ul>
-									<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_b')"/></span></li>
-									<li><span class="ui-icon ui-icon-locked"><xsl:text> </xsl:text></span></li>
-								</ul>
-							</a>
-						</xsl:otherwise>
-					</xsl:choose>
-				</li>
-			</ul>
-		</xsl:if>
+									</xsl:if>
+								</xsl:for-each>
+							</xsl:attribute>
+							<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_tip')"/></xsl:attribute>
+							<ul>
+								<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_b')"/></span></li>
+								<li><span class="ui-icon ui-icon-locked"><xsl:text> </xsl:text></span></li>
+							</ul>
+						</a>
+					</xsl:otherwise>
+				</xsl:choose>
+			</li>
+		</ul>
 	</xsl:template>
 	
 	<!-- ***** PAGE TITLE ***** -->
