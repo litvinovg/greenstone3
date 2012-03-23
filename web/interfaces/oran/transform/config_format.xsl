@@ -121,6 +121,8 @@
 								<xsl:value-of select="/page/pageRequest/@subaction"/>
 								<xsl:text>&amp;p.s=</xsl:text>
 								<xslt:value-of select="/page/pageResponse/service/@name"/>
+								<xsl:text>#</xsl:text>
+								<xslt:value-of select="@nodeID"/>
 							</xslt:attribute>
 							<xsl:apply-templates/>
 						</a>
@@ -148,6 +150,8 @@
 								<xsl:value-of select="/page/pageRequest/@subaction"/>
 								<xsl:text>&amp;p.s=</xsl:text>
 								<xslt:value-of select="/page/pageResponse/service/@name"/>
+								<xsl:text>#</xsl:text>
+								<xslt:value-of select="@nodeID"/>
 							</xslt:attribute>
 							<xsl:apply-templates/>
 						</a>
