@@ -155,6 +155,7 @@ public class GSXML
 	public static final String NODE_CONTENT_ELEM = "nodeContent";
 	public static final String NODE_STRUCTURE_ELEM = "nodeStructure";
 	public static final String NODE_ID_ATT = "nodeID";
+	public static final String NODE_OID = "oid";
 	public static final String NODE_NAME_ATT = "nodeName";
 	public static final String NODE_TYPE_ATT = "nodeType";
 	public static final String NODE_RANK_ATT = "rank";
@@ -264,6 +265,10 @@ public class GSXML
 	public static final String GROUP_ELEM = "group";
 	public static final String MATCH_ELEM = "match";
 	public static final String FIELD_ATT = "field";
+	public static final String USER_INFORMATION_ELEM = "userInformation";
+	public static final String USERNAME_ATT = "username";
+	public static final String GROUPS_ATT = "groups";
+	public static final String BASE_URL = "baseURL";
 
 	/**
 	 * takes a list of elements, and returns an array of strings of the values
