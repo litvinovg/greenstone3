@@ -41,6 +41,7 @@
 		<script type="text/javascript">
 			<xsl:text disable-output-escaping="yes">gs.xsltParams.library_name = "</xsl:text><xsl:value-of select="$library_name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 			<xsl:text disable-output-escaping="yes">gs.xsltParams.interface_name = "</xsl:text><xsl:value-of select="$interface_name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+			<xsl:text disable-output-escaping="yes">gs.xsltParams.site_name = "</xsl:text><xsl:value-of select="$site_name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 		</script>
 	</xsl:template>
 	
