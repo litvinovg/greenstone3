@@ -6,20 +6,121 @@ import org.greenstone.gsdl3.util.UserQueryResult;
 import org.greenstone.gsdl3.util.UserTermInfo;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Properties;
+import java.util.UUID;
 import java.util.Vector;
+import java.security.MessageDigest;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
+
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
+import net.tanesha.recaptcha.ReCaptchaImpl;
+import net.tanesha.recaptcha.ReCaptchaImpl;
+import net.tanesha.recaptcha.ReCaptchaResponse;
 
 public class Authentication extends ServiceRack
 {
+	//Error codes
+	protected static final int NO_ERROR = 0;
+	protected static final int ERROR_REQUEST_HAS_NO_PARAM_LIST = -1;
+	protected static final int ERROR_NOT_LOGGED_IN = -2;
+	protected static final int ERROR_ADMIN_NOT_LOGGED_IN = -3;
+	protected static final int ERROR_COULD_NOT_GET_USER_INFO = -4;
+	protected static final int ERROR_USERNAME_NOT_SPECIFIED = -5;
+	protected static final int ERROR_REQUESTED_USER_NOT_FOUND = -6;
+	protected static final int ERROR_SQL_EXCEPTION = -7;
+	protected static final int ERROR_INVALID_USERNAME = -8;
+	protected static final int ERROR_INVALID_PASSWORD = -9;
+	protected static final int ERROR_INCORRECT_PASSWORD = -10;
+	protected static final int ERROR_USER_ALREADY_EXISTS = -11;
+	protected static final int ERROR_ADDING_USER = -12;
+	protected static final int ERROR_REMOVING_USER = -13;
+	protected static final int ERROR_CAPTCHA_DOES_NOT_MATCH = -14;
+	protected static final int ERROR_CAPTCHA_MISSING = -15;
+	protected static final int ERROR_NOT_AUTHORISED = -16;
+	protected static final int ERROR_COULD_NOT_RESET_PASSWORD = -17;
+
+	protected static final HashMap<Integer, String> _errorMessageMap;
+	static
+	{
+		//Corresponding error messages
+		HashMap<Integer, String> errorMessageMap = new HashMap<Integer, String>();
+		errorMessageMap.put(ERROR_REQUEST_HAS_NO_PARAM_LIST, "The list of parameters for this request was empty.");
+		errorMessageMap.put(ERROR_NOT_LOGGED_IN, "You must be logged in to access this page.");
+		errorMessageMap.put(ERROR_ADMIN_NOT_LOGGED_IN, "You must be logged in as an administrator to access this page.");
+		errorMessageMap.put(ERROR_COULD_NOT_GET_USER_INFO, "There was a error getting the user information.");
+		errorMessageMap.put(ERROR_USERNAME_NOT_SPECIFIED, "No username was specified.");
+		errorMessageMap.put(ERROR_REQUESTED_USER_NOT_FOUND, "The requested user was not found in the database.");
+		errorMessageMap.put(ERROR_SQL_EXCEPTION, "There was an SQL exception while accessing the database.");
+		errorMessageMap.put(ERROR_INVALID_USERNAME, "The username specified was invalid.");
+		errorMessageMap.put(ERROR_INVALID_PASSWORD, "The password specified was invalid.");
+		errorMessageMap.put(ERROR_INCORRECT_PASSWORD, "The password specified was incorrect.");
+		errorMessageMap.put(ERROR_USER_ALREADY_EXISTS, "This user already exists and therefore cannot be added.");
+		errorMessageMap.put(ERROR_ADDING_USER, "There was an error adding this user to the database.");
+		errorMessageMap.put(ERROR_REMOVING_USER, "There was an error removing this user from the database.");
+		errorMessageMap.put(ERROR_CAPTCHA_DOES_NOT_MATCH, "The words you entered did not match the image, please try again.");
+		errorMessageMap.put(ERROR_CAPTCHA_MISSING, "The information from the captcha is missing.");
+		errorMessageMap.put(ERROR_NOT_AUTHORISED, "You are not authorised to access this page.");
+		errorMessageMap.put(ERROR_COULD_NOT_RESET_PASSWORD, "Your password could not be reset, your email address may be invalid.");
+
+		_errorMessageMap = errorMessageMap;
+	}
+
+	//Admin-required operations
+	protected static final String LIST_USERS = "ListUsers";
+	protected static final String PERFORM_ADD = "PerformAdd";
+	protected static final String PERFORM_EDIT = "PerformEdit";
+	protected static final String ADD_USER = "AddUser";
+	protected static final String EDIT_USER = "EditUser";
+	protected static final String PERFORM_DELETE_USER = "PerformDeleteUser";
+
+	protected static final ArrayList<String> _adminOpList;
+	static
+	{
+		ArrayList<String> opList = new ArrayList<String>();
+		opList.add(LIST_USERS);
+		opList.add(PERFORM_ADD);
+		opList.add(PERFORM_EDIT);
+		opList.add(EDIT_USER);
+		opList.add(PERFORM_DELETE_USER);
+
+		_adminOpList = opList;
+	}
+
+	//User-required operations
+	protected static final String ACCOUNT_SETTINGS = "AccountSettings";
+	protected static final String PERFORM_ACCOUNT_EDIT = "PerformAccEdit";
+	protected static final String PERFORM_RESET_PASSWORD = "PerformResetPassword";
+	protected static final ArrayList<String> _userOpList;
+	static
+	{
+		ArrayList<String> opList = new ArrayList<String>();
+		opList.add(ACCOUNT_SETTINGS);
+		opList.add(PERFORM_ACCOUNT_EDIT);
+		opList.add(PERFORM_RESET_PASSWORD);
+		opList.addAll(_adminOpList);
+		_userOpList = opList;
+	}
+
+	//Other operations
+	protected static final String REGISTER = "Register";
+	protected static final String PERFORM_REGISTER = "PerformRegister";
+	protected static final String LOGIN = "Login";
+
 	//the services on offer
 	protected static final String AUTHENTICATION_SERVICE = "Authentication";
 	protected static final String GET_USER_INFORMATION_SERVICE = "GetUserInformation";
+
+	protected DerbyWrapper _derbyWrapper = null;
 
 	/** constructor */
 	public Authentication()
@@ -108,8 +209,8 @@ public class Authentication extends ServiceRack
 		Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (paramList == null)
 		{
-			logger.error(GET_USER_INFORMATION_SERVICE + ": Param list does not exist ");
-			return null;
+			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUEST_HAS_NO_PARAM_LIST));
+			return result;
 		}
 
 		HashMap params = GSXML.extractParams(paramList, true);
@@ -118,7 +219,7 @@ public class Authentication extends ServiceRack
 
 		if (username == null)
 		{
-			logger.error(GET_USER_INFORMATION_SERVICE + ": No username specified");
+			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_USERNAME_NOT_SPECIFIED));
 			return result;
 		}
 
@@ -135,7 +236,7 @@ public class Authentication extends ServiceRack
 
 			if (terms.size() == 0)
 			{
-				logger.error(GET_USER_INFORMATION_SERVICE + ": Requested user was not found");
+				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUESTED_USER_NOT_FOUND));
 				return result;
 			}
 
@@ -143,11 +244,11 @@ public class Authentication extends ServiceRack
 			Element userInfoList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			result.appendChild(userInfoList);
 
-			Element usernameField = GSXML.createParameter(this.doc, "username", userInfo.username_);
-			Element passwordField = GSXML.createParameter(this.doc, "password", userInfo.password_);
-			Element groupsField = GSXML.createParameter(this.doc, "groups", userInfo.groups_);
-			Element accountStatusField = GSXML.createParameter(this.doc, "accountstatus", userInfo.accountstatus_);
-			Element commentField = GSXML.createParameter(this.doc, "comment", userInfo.comment_);
+			Element usernameField = GSXML.createParameter(this.doc, "username", userInfo.username);
+			Element passwordField = GSXML.createParameter(this.doc, "password", userInfo.password);
+			Element groupsField = GSXML.createParameter(this.doc, "groups", userInfo.groups);
+			Element accountStatusField = GSXML.createParameter(this.doc, "accountstatus", userInfo.accountstatus);
+			Element commentField = GSXML.createParameter(this.doc, "comment", userInfo.comment);
 
 			userInfoList.appendChild(usernameField);
 			userInfoList.appendChild(passwordField);
@@ -155,140 +256,385 @@ public class Authentication extends ServiceRack
 			userInfoList.appendChild(accountStatusField);
 			userInfoList.appendChild(commentField);
 		}
-		catch (Exception ex)
+		catch (SQLException ex)
 		{
+			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_SQL_EXCEPTION));
 			ex.printStackTrace();
 		}
 
 		return result;
 	}
 
-	protected Element processAuthentication(Element request) throws SQLException, UnsupportedEncodingException
+	protected Element processAuthentication(Element request)
 	{
+		checkAdminUserExists();
 
 		// Create a new (empty) result message
 		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
-
 		result.setAttribute(GSXML.FROM_ATT, AUTHENTICATION_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
+		// Create an Authentication node put into the result
+		Element authenNode = this.doc.createElement(GSXML.AUTHEN_NODE_ELEM);
+		result.appendChild(authenNode);
+		result.appendChild(getCollectList(this.site_home + File.separatorChar + "collect"));
+
+		// Create a service node added into the Authentication node
+		Element serviceNode = this.doc.createElement(GSXML.SERVICE_ELEM);
+		authenNode.appendChild(serviceNode);
+
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-
 		if (param_list == null)
 		{
-			logger.error("AddUsers request had no paramList.");
+			serviceNode.setAttribute("operation", LOGIN);
+			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUEST_HAS_NO_PARAM_LIST));
 			return result; // Return the empty result
 		}
+		HashMap paramMap = GSXML.extractParams(param_list, false);
+		String op = (String) paramMap.get("authpage");
+		serviceNode.setAttribute("operation", op);
 
-		String aup = null; //Actions: ListUsers, AddUser, ModifyPassword, DeleteUser, Login
-		String un = ""; //login user's name
-		String pw = ""; //login user's password
-		String asn = ""; //whether a user is authenticated
-		String uan = ""; //whether a authentication for a particular action is needed
-		String cm = ""; //whether the action is confirmed
+		String username = null;
+		String groups = null;
 
-		String umun = ""; //the new user name
-		String umpw = ""; //user's new password
-		String umas = ""; //user account status
-		String umgp = ""; //user greoups
-		String umc = ""; // comments for the user
-
-		String oumun = ""; //the original user's name
-		String umpw1 = ""; //user's new password
-		String umpw2 = ""; //user's retyped new password
-
-		//used for adding a list of users at one time. Format: name,password,role]name,password,role]...
-		//in which, role may be in the format: student:[teacher's username]
-		String unpwlist = "";
-		String service = "";
-
-		// get parameters from the request
-		NodeList params = param_list.getElementsByTagName(GSXML.PARAM_ELEM);
-		for (int i = 0; i < params.getLength(); i++)
+		Element userInformation = (Element) GSXML.getChildByTagName(request, GSXML.USER_INFORMATION_ELEM);
+		if (userInformation == null && _userOpList.contains(op))
 		{
-			Element param = (Element) params.item(i);
-			String p_name = param.getAttribute(GSXML.NAME_ATT);
-			String p_value = GSXML.getValue(param);
-
-			if (p_name.equals("aup"))
-			{
-				aup = p_value;
-			}
-			else if (p_name.equals("un"))
-			{
-				un = p_value;
-			}
-			else if (p_name.equals("pw"))
-			{
-				pw = p_value;
-			}
-			else if (p_name.equals("umun"))
-			{
-				umun = p_value;
-			}
-			else if (p_name.equals("umpw"))
-			{
-				umpw = p_value;
-			}
-			else if (p_name.equals("umas"))
-			{
-				umas = p_value;
-			}
-			else if (p_name.equals("umgp"))
-			{
-				umgp = p_value;
-			}
-			else if (p_name.equals("umc"))
-			{
-				umc = p_value;
-			}
-			else if (p_name.equals("asn"))
-			{
-				asn = p_value;
-			}
-			else if (p_name.equals("uan"))
-			{
-				uan = p_value;
-			}
-			else if (p_name.equals("cm"))
-			{
-				cm = p_value;
-			}
-			else if (p_name.equals("umpw1"))
-			{
-				umpw1 = p_value;
-			}
-			else if (p_name.equals("umpw2"))
-			{
-				umpw2 = p_value;
-			}
-			else if (p_name.equals("oumun"))
-			{
-				oumun = p_value;
-			}
-			else if (p_name.equals("unpwlist"))
-			{
-				unpwlist = p_value;
-			}
-
+			serviceNode.setAttribute("operation", LOGIN);
+			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_NOT_LOGGED_IN));
+			return result;
 		}
 
-		// create a Authentication node put into the result
-		Element authen_node = this.doc.createElement(GSXML.AUTHEN_NODE_ELEM);
-		result.appendChild(authen_node);
-		result.appendChild(getCollectList(this.site_home + File.separatorChar + "collect"));
-		// create a service node added into the Authentication node
-		Element service_node = this.doc.createElement(GSXML.SERVICE_ELEM);
-		authen_node.appendChild(service_node);
-		service_node.setAttribute("aup", aup);
-		// user's info 
-		UserQueryResult userQueryResult = null;
+		if (userInformation != null)
+		{
+			username = userInformation.getAttribute(GSXML.USERNAME_ATT);
+			groups = userInformation.getAttribute(GSXML.GROUPS_ATT);
+		}
+
+		if (username == null && _userOpList.contains(op))
+		{
+			serviceNode.setAttribute("operation", LOGIN);
+			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_NOT_LOGGED_IN));
+			return result;
+		}
+
+		if (_adminOpList.contains(op) && (groups == null || !groups.matches(".*\\badministrator\\b.*")))
+		{
+			serviceNode.setAttribute("operation", LOGIN);
+			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_ADMIN_NOT_LOGGED_IN));
+			return result;
+		}
+
+		if (op.equals(LIST_USERS))
+		{
+			int error = addUserInformationToNode(null, serviceNode);
+			if (error != NO_ERROR)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+			}
+		}
+		else if (op.equals(PERFORM_ADD))
+		{
+			String newUsername = (String) paramMap.get("username");
+			String newPassword = (String) paramMap.get("password");
+			String newGroups = (String) paramMap.get("groups");
+			String newStatus = (String) paramMap.get("status");
+			String newComment = (String) paramMap.get("comment");
+			String newEmail = (String) paramMap.get("email");
+
+			int error = addUser(newUsername, newPassword, newGroups, newStatus, newComment, newEmail);
+			if (error != NO_ERROR)
+			{
+				serviceNode.setAttribute("operation", ADD_USER);
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+			}
+			else
+			{
+				addUserInformationToNode(null, serviceNode);
+				serviceNode.setAttribute("operation", LIST_USERS);
+			}
+		}
+		else if (op.equals(PERFORM_REGISTER))
+		{
+			String newUsername = (String) paramMap.get("username");
+			String newPassword = (String) paramMap.get("password");
+			String newEmail = (String) paramMap.get("email");
+
+			ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
+			reCaptcha.setPrivateKey("6LckI88SAAAAAGnGy1PwuXYZzIMXZYoPxN51bWWG"); //TODO: MOVE TO SITECONFIG.XML FILE
+
+			String challenge = (String) paramMap.get("recaptcha_challenge_field");
+			String uResponse = (String) paramMap.get("recaptcha_response_field");
+
+			if (challenge == null || uResponse == null)
+			{
+				serviceNode.setAttribute("operation", REGISTER);
+				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_MISSING));
+				return result;
+			}
+
+			ReCaptchaResponse reCaptchaResponse = reCaptcha.checkAnswer(request.getAttribute("remoteAddress"), challenge, uResponse);
+
+			if (!reCaptchaResponse.isValid())
+			{
+				serviceNode.setAttribute("operation", REGISTER);
+				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_DOES_NOT_MATCH));
+				return result;
+			}
+
+			int error = addUser(newUsername, newPassword, "", "true", "", newEmail);
+			if (error != NO_ERROR)
+			{
+				serviceNode.setAttribute("operation", REGISTER);
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+			}
+		}
+		else if (op.equals(PERFORM_EDIT))
+		{
+			String previousUsername = (String) paramMap.get("prevUsername");
+			String newUsername = (String) paramMap.get("newUsername");
+			String newPassword = (String) paramMap.get("password");
+			String newGroups = (String) paramMap.get("groups");
+			String newStatus = (String) paramMap.get("status");
+			String newComment = (String) paramMap.get("comment");
+			String newEmail = (String) paramMap.get("email");
+
+			if (newPassword == null)
+			{
+				newPassword = retrieveDataForUser(previousUsername, "password");
+			}
+
+			int error = removeUser(previousUsername);
+			if (error != NO_ERROR)
+			{
+				if (error == ERROR_USERNAME_NOT_SPECIFIED)
+				{
+					addUserInformationToNode(null, serviceNode);
+					serviceNode.setAttribute("operation", LIST_USERS);
+				}
+				else
+				{
+					serviceNode.setAttribute("operation", EDIT_USER);
+					GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				}
+				return result;
+			}
+			error = addUser(newUsername, newPassword, newGroups, newStatus, newComment, newEmail);
+			if (error != NO_ERROR)
+			{
+				serviceNode.setAttribute("operation", EDIT_USER);
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+			}
+			else
+			{
+				addUserInformationToNode(null, serviceNode);
+				serviceNode.setAttribute("operation", LIST_USERS);
+			}
+		}
+		else if (op.equals(PERFORM_ACCOUNT_EDIT))
+		{
+			String previousUsername = (String) paramMap.get("prevUsername");
+			String newUsername = (String) paramMap.get("newUsername");
+			String oldPassword = (String) paramMap.get("oldPassword");
+			String newPassword = (String) paramMap.get("newPassword");
+			String newEmail = (String) paramMap.get("newEmail");
+
+			//Make sure the user name does not already exist
+			if (!previousUsername.equals(newUsername) && checkUserExists(newUsername))
+			{
+				addUserInformationToNode(previousUsername, serviceNode);
+				serviceNode.setAttribute("operation", ACCOUNT_SETTINGS);
+				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_USER_ALREADY_EXISTS));
+				return result;
+			}
+
+			String prevPassword = retrieveDataForUser(previousUsername, "password");
+
+			if (newPassword != null)
+			{
+				oldPassword = hashPassword(oldPassword);
+
+				if (oldPassword == null || !oldPassword.equals(prevPassword))
+				{
+					addUserInformationToNode(previousUsername, serviceNode);
+					serviceNode.setAttribute("operation", ACCOUNT_SETTINGS);
+					GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_INCORRECT_PASSWORD));
+					return result;
+				}
+			}
+			else
+			{
+				newPassword = prevPassword;
+			}
+
+			String prevGroups = retrieveDataForUser(previousUsername, "groups");
+			String prevStatus = retrieveDataForUser(previousUsername, "status");
+			String prevComment = retrieveDataForUser(previousUsername, "comment");
+
+			int error = removeUser(previousUsername);
+			if (error != NO_ERROR)
+			{
+				if (error == ERROR_USERNAME_NOT_SPECIFIED)
+				{
+					addUserInformationToNode(null, serviceNode);
+					serviceNode.setAttribute("operation", LIST_USERS);
+				}
+				else
+				{
+					addUserInformationToNode(previousUsername, serviceNode);
+					serviceNode.setAttribute("operation", ACCOUNT_SETTINGS);
+					GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				}
+				return result;
+			}
+
+			error = addUser(newUsername, newPassword, prevGroups, prevStatus, prevComment, newEmail);
+			if (error != NO_ERROR)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+			}
+
+			addUserInformationToNode(null, serviceNode);
+			serviceNode.setAttribute("operation", LIST_USERS);
+		}
+		else if (op.equals(EDIT_USER))
+		{
+			String editUsername = (String) paramMap.get("username");
+			int error = addUserInformationToNode(editUsername, serviceNode);
+			if (error != NO_ERROR)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+			}
+		}
+		else if (op.equals(ACCOUNT_SETTINGS))
+		{
+			String editUsername = (String) paramMap.get("username");
+			
+			if(editUsername == null)
+			{
+				serviceNode.setAttribute("operation", "");
+				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_USERNAME_NOT_SPECIFIED));
+				return result;
+			}
+			
+			if(!editUsername.equals(username))
+			{
+				serviceNode.setAttribute("operation", LOGIN);
+				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_NOT_AUTHORISED));
+				return result;
+			}
+			int error = addUserInformationToNode(editUsername, serviceNode);
+			if (error != NO_ERROR)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+			}
+		}
+		else if (op.equals(PERFORM_RESET_PASSWORD))
+		{
+			String passwordResetUser = (String) paramMap.get("username");
+			
+			String newPassword = UUID.randomUUID().toString();
+			newPassword = newPassword.substring(0, newPassword.indexOf("-"));
+			
+			String email = retrieveDataForUser(passwordResetUser, "email");
+			String from = "admin@greenstone.org";
+			String host = request.getAttribute("remoteAddress");
+			
+			Properties props = System.getProperties();
+			props.setProperty("mail.smtp.host", host);
+			
+			Session session = Session.getDefaultInstance(props);
+			
+			try
+			{
+				MimeMessage message = new MimeMessage(session);
+				message.setFrom(new InternetAddress(from));
+				message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
+				message.setSubject("Password reset");
+				message.setText("Your password was reset to " + newPassword);
+				
+				Transport.send(message);
+			}
+			catch(Exception ex)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_COULD_NOT_RESET_PASSWORD));
+				serviceNode.setAttribute("operation", ACCOUNT_SETTINGS);
+				ex.printStackTrace();
+				return result;
+			}
+			
+			System.err.println("MAIL SUCCESS");
+		}
+		else if (op.equals(PERFORM_DELETE_USER))
+		{
+			String usernameToDelete = (String) paramMap.get("username");
+			int error = removeUser(usernameToDelete);
+			if (error != NO_ERROR)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+			}
+			addUserInformationToNode(null, serviceNode);
+			serviceNode.setAttribute("operation", LIST_USERS);
+		}
+
+		return result;
+	}
+
+	public static String hashPassword(String password)
+	{
+		String hashedPassword = null;
+		try
+		{
+			MessageDigest digest = MessageDigest.getInstance("SHA-1");
+			digest.reset();
+			hashedPassword = new String(digest.digest(password.getBytes("UTF-8")));
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		return hashedPassword;
+	}
+
+	private void checkAdminUserExists()
+	{
+		if (_derbyWrapper == null)
+		{
+			openDatabase();
+		}
+
+		UserQueryResult userQueryResult = _derbyWrapper.findUser(null, null);
+		closeDatabase();
+
+		if (userQueryResult != null)
+		{
+			Vector userInfo = userQueryResult.users;
+
+			boolean adminFound = false;
+			for (int i = 0; i < userQueryResult.getSize(); i++)
+			{
+				if (((UserTermInfo) userInfo.get(i)).groups != null && ((UserTermInfo) userInfo.get(i)).groups.matches(".*\\badministrator\\b.*"))
+				{
+					adminFound = true;
+				}
+			}
+
+			if (!adminFound)
+			{
+				addUser("admin", "admin", "administrator", "true", "Change the password for this account as soon as possible", "");
+			}
+		}
+
+		closeDatabase();
+	}
+
+	private boolean openDatabase()
+	{
+		_derbyWrapper = new DerbyWrapper();
 
 		// check the usersDb database, if it isn't existing, check the etc dir, create the etc dir if it isn't existing, then create the  user database and add a "admin" user
 		String usersDB_dir = this.site_home + File.separatorChar + "etc" + File.separatorChar + "usersDB";
-		DerbyWrapper derbyWrapper = new DerbyWrapper();
 		File usersDB_file = new File(usersDB_dir);
 		if (!usersDB_file.exists())
 		{
@@ -300,564 +646,215 @@ public class Authentication extends ServiceRack
 				if (!success)
 				{
 					logger.error("Couldn't create the etc dir under " + this.site_home + ".");
-					return result;
+					return false;
 				}
 			}
-			derbyWrapper.connectDatabase(usersDB_dir, true);
-			derbyWrapper.createDatabase();
+			_derbyWrapper.connectDatabase(usersDB_dir, true);
+			_derbyWrapper.createDatabase();
 		}
 		else
 		{
-			derbyWrapper.connectDatabase(usersDB_dir, false);
+			_derbyWrapper.connectDatabase(usersDB_dir, false);
+		}
+		return true;
+	}
+
+	private void closeDatabase()
+	{
+		if (_derbyWrapper != null)
+		{
+			_derbyWrapper.closeDatabase();
+			_derbyWrapper = null;
+		}
+	}
+
+	private int addUserInformationToNode(String username, Element serviceNode)
+	{
+		if (_derbyWrapper == null)
+		{
+			openDatabase();
 		}
 
-		// Action: login
-		if (aup.equals("Login"))
-		{
-			if (uan.equals(""))
-			{ //return a login page, if the user's name is not given
-				service_node.setAttribute("info", "Login");
-				derbyWrapper.closeDatabase();
-				return result;
-			}
-			String groups = "";
-			// if the authentication(uan=1) is required,but the user hasn't been authenticated(asn=0),the user is asked to login first
-			if ((uan.equals("1") && asn.equals("0")))
-			{
-				if ((un.length() == 0) && (pw.length() == 0))
-				{
-					service_node.setAttribute("asn", "0");
-					service_node.setAttribute("info", "Login");
-					derbyWrapper.closeDatabase();
-					return result;
-				}
-				if ((un.length() == 0) || (pw.length() == 0))
-				{
-					service_node.setAttribute("asn", "0");
-					service_node.setAttribute("info", "Login");
-					service_node.setAttribute("err", "un-pw-err");
-					derbyWrapper.closeDatabase();
-					return result;
-				}
-				else
-				{
-					userQueryResult = derbyWrapper.findUser(un, pw);//looking for the user from the users table
-					service_node.setAttribute(GSXML.NAME_ATT, "Authentication");
-					service_node.setAttribute("un", un);
-					if (userQueryResult == null)
-					{
-						//the user isn't a vaild user
-						service_node.setAttribute("asn", "0");
-						service_node.setAttribute("err", "un-pw-err");// either unsername or password is wrong
-						service_node.setAttribute("info", "Login");
-						derbyWrapper.closeDatabase();
-						return result;
-					}
-					else
-					{
-						// asn="1"; //the user is a member of the "administrator" group
-						Vector userInfo = userQueryResult.users_;
-						groups = ((UserTermInfo) userInfo.get(0)).groups_;
-						String accountstatus = ((UserTermInfo) userInfo.get(0)).accountstatus_;
-						if (accountstatus.trim().equals("false"))
-						{
-							service_node.setAttribute("asn", "0");
-							service_node.setAttribute("err", "as-false");//the account status is false
-							service_node.setAttribute("info", "Login");
-							derbyWrapper.closeDatabase();
-							return result;
-						}
-						String[] groups_array = groups.split(",");
-						for (int i = 0; i < groups_array.length; i++)
-						{
-							if ((groups_array[i].trim().toLowerCase()).equals("administrator"))
-							{// check whether the user is in the administrator group
-								asn = "1";
-								service_node.setAttribute("asn", "1");
-								break;
-							}
-						}
-						if (!asn.equals("1"))
-						{
-							asn = "2";
-							service_node.setAttribute("asn", "2");//the user is authenticated							
-						}
-					}
-				}
-			}
+		UserQueryResult userQueryResult = _derbyWrapper.findUser(username, null);
+		closeDatabase();
 
-			//asn!=0 This is a valid user 
-			if (!asn.equals("0"))
-			{
-				service_node.setAttribute("info", "Login");
-				service_node.setAttribute("un", un);
-				service_node.setAttribute("pw", pw);
-				service_node.setAttribute("asn", asn);
-				service_node.setAttribute("umgp", groups);
-				derbyWrapper.closeDatabase();
-				return result;
-			}
+		if (userQueryResult != null)
+		{
+			Element user_node = getUserNode(userQueryResult);
+			serviceNode.appendChild(user_node);
+			closeDatabase();
+			return NO_ERROR;
 		}
 
-		//Action: listuser
-		if (aup.equals("ListUsers"))
-		{
-			if (asn.equals("") && un.equals(""))
-			{
-				service_node.setAttribute("info", "Login");
-				derbyWrapper.closeDatabase();
-				return result;
-			}
+		closeDatabase();
+		return ERROR_COULD_NOT_GET_USER_INFO;
+	}
 
-			//valid users but not in the administrator group(asn=2), they cannot list all users
-			if (asn.equals("2"))
-			{
-				service_node.setAttribute("info", "Login");
-				service_node.setAttribute("err", "no-permission");
-				service_node.setAttribute("un", un);
-				service_node.setAttribute("asn", asn);
-				derbyWrapper.closeDatabase();
-				return result;
-			}
-			//valid users belong to the administrator group(asn=1), they can list all users
-			if (asn.equals("1"))
-			{
-				userQueryResult = derbyWrapper.findUser(null, null);
-				derbyWrapper.closeDatabase();
-				service_node.setAttribute(GSXML.NAME_ATT, "Authentication");
-				service_node.setAttribute("un", un);
-				service_node.setAttribute("asn", asn);
-
-				if (userQueryResult != null && userQueryResult.getSize() > 0)
-				{
-					service_node.setAttribute("info", "all-un"); // got a user list
-					Element user_node = getUserNode(userQueryResult);
-					service_node.appendChild(user_node);
-					derbyWrapper.closeDatabase();
-					return result;
-				}
-				else
-				{
-					service_node.setAttribute("err", "no-un"); // no user returned
-					derbyWrapper.closeDatabase();
-					return result;
-				}
-			}
-		}
-		//TODO: Action : addStudents (bulk adding)
-		if (aup.equals("AddStudents"))
+	private int removeUser(String username)
+	{
+		if (username == null)
 		{
-			String[] users = unpwlist.split("]");
-			for (int i = 0; i < users.length; i++)
-			{
-				String[] user = users[i].split(",");
-				String uname = user[0];
-				String password = user[1];
-				String group = user[2].split(":")[0];
-				String add_user = derbyWrapper.addUser(uname, password, group, "true", "");
-				if (add_user.equals("succeed"))
-				{
-					userQueryResult = derbyWrapper.findUser(null, null);
-					derbyWrapper.closeDatabase();
-					service_node.setAttribute("info", "all-un"); // return a list of all users if the user has been added
-					Element user_node = getUserNode(userQueryResult);
-					service_node.appendChild(user_node);
-					derbyWrapper.closeDatabase();
-					return result;
-				}
-			}
+			return ERROR_USERNAME_NOT_SPECIFIED;
 		}
 
-		//Action : adduder
-		if (aup.equals("AddUser"))
+		if (_derbyWrapper == null)
 		{
-			if (asn.equals("") && un.equals(""))
-			{
-				service_node.setAttribute("info", "Login");
-				derbyWrapper.closeDatabase();
-				return result;
-			}
-			//valid users can't add a new user because they aren't in the administrator group(asn=2)
-			if (asn.equals("2"))
-			{
-				service_node.setAttribute("info", "Login");
-				service_node.setAttribute("err", "no-permission");
-				service_node.setAttribute("un", un);
-				service_node.setAttribute("asn", asn);
-				derbyWrapper.closeDatabase();
-				return result;
-			}
-			//valid users are in the administrator group, they can add a new user(asn=1)
-			if (asn.equals("1"))
-			{
-				service_node.setAttribute(GSXML.NAME_ATT, "Authentication");
-				service_node.setAttribute("un", un);
-				service_node.setAttribute("asn", asn);
-
-				if (umun.length() == 0 && umpw.length() == 0 && umgp.length() == 0 && umas.length() == 0 && umc.length() == 0)
-				{
-					service_node.setAttribute("info", "adduser_interface");
-					derbyWrapper.closeDatabase();
-					return result;
-				}
-
-				//check the strings of username and password
-				if ((umun == null) || (umun.length() < 2) || (umun.length() > 30) || (!(Pattern.matches("[a-zA-Z0-9//_//.]+", umun))))
-				{
-					service_node.setAttribute("err", "un-err"); //the input username string is illegal
-					service_node.setAttribute("info", "adduser_interface");
-					derbyWrapper.closeDatabase();
-					return result;
-				}
-
-				if ((umpw == null) || (umpw.length() < 3) || (umpw.length() > 8) || (!(Pattern.matches("[\\p{ASCII}]+", umpw))))
-				{
-					service_node.setAttribute("err", "pw-err"); //the input passwrod string is illegal
-					service_node.setAttribute("info", "adduser_interface");
-					derbyWrapper.closeDatabase();
-					return result;
-				}
-
-				// add the new users into the users table
-				umgp = umgp.replaceAll(" ", "");//get rid of the space of the groups string
-				userQueryResult = derbyWrapper.findUser(umun, null);// check whether the new user name has existed in the table.
-				if (userQueryResult != null)
-				{
-					service_node.setAttribute("err", "un-exist"); //the new username string is duplicated
-					service_node.setAttribute("info", "adduser_interface");
-					derbyWrapper.closeDatabase();
-					return result;
-				}
-				else
-				{
-					String add_user = derbyWrapper.addUser(umun, umpw, umgp, umas, umc);
-					if (add_user.equals("succeed"))
-					{
-						userQueryResult = derbyWrapper.findUser(null, null);
-						derbyWrapper.closeDatabase();
-						service_node.setAttribute("info", "all-un"); // return a list of all users if the user has been added
-						Element user_node = getUserNode(userQueryResult);
-						service_node.appendChild(user_node);
-						derbyWrapper.closeDatabase();
-						return result;
-					}
-					else
-					{
-						derbyWrapper.closeDatabase();
-						service_node.setAttribute("err", add_user);// return the error message if the user couldn't be added 
-						derbyWrapper.closeDatabase();
-						return result;
-					}
-				}
-			}
+			openDatabase();
 		}
 
-		//Action: edituser
-		if (aup.equals("EditUser"))
+		boolean success = _derbyWrapper.deleteUser(username);
+		closeDatabase();
+
+		if (success)
 		{
-			service_node.setAttribute(GSXML.NAME_ATT, "Authentication");
-			service_node.setAttribute("un", un);
-			service_node.setAttribute("asn", asn);
-
-			//Get the user's info from the database
-			if (cm.length() == 0)
-			{
-				service_node.setAttribute("info", "edituser-interface");
-				userQueryResult = derbyWrapper.findUser(umun, null);
-				derbyWrapper.closeDatabase();
-				Vector userInfo = userQueryResult.users_;
-				String username = ((UserTermInfo) userInfo.get(0)).username_;
-				String password = ((UserTermInfo) userInfo.get(0)).password_;
-				String groups = ((UserTermInfo) userInfo.get(0)).groups_;
-				String accountstatus = ((UserTermInfo) userInfo.get(0)).accountstatus_;
-				String comment = ((UserTermInfo) userInfo.get(0)).comment_;
-
-				service_node.setAttribute("oumun", oumun);
-				service_node.setAttribute("umun", username);
-				service_node.setAttribute("umpw", password);
-				service_node.setAttribute("umgp", groups);
-				service_node.setAttribute("umas", accountstatus);
-				service_node.setAttribute("umc", comment);
-				derbyWrapper.closeDatabase();
-				return result;
-			}
-
-			//Commit the modified user's info to the database
-			if (cm.toLowerCase().equals("submit"))
-			{
-				if (oumun.equals(umun))
-				{// the user's name hasn't been changed, update the user's info
-					if (umpw.length() == 0)
-					{
-						derbyWrapper.modifyUserInfo(umun, null, umgp, umas, umc);
-						userQueryResult = derbyWrapper.findUser(null, null);
-						derbyWrapper.closeDatabase();
-						service_node.setAttribute("info", "all-un"); // the user's info has been updated, return a list of all users 
-						Element user_node = getUserNode(userQueryResult);
-						service_node.appendChild(user_node);
-						derbyWrapper.closeDatabase();
-						return result;
-					}
-					else
-					{
-						if ((umpw.length() == 0) || (umpw.length() < 3) || (umpw.length() > 8) || (!(Pattern.matches("[\\p{ASCII}]+", umpw))))
-						{
-							service_node.setAttribute("err", "umpw-err"); //the input passwrod string is illegal
-							service_node.setAttribute("info", "edituser-interface");
-							service_node.setAttribute("umun", umun);
-							service_node.setAttribute("umpw", umpw);
-							service_node.setAttribute("umgp", umgp);
-							service_node.setAttribute("umas", umas);
-							service_node.setAttribute("umc", umc);
-							service_node.setAttribute("oumun", oumun);
-							derbyWrapper.closeDatabase();
-							return result;
-						}
-						umgp = umgp.replaceAll(" ", "");// get rid of the space
-						derbyWrapper.modifyUserInfo(umun, umpw, umgp, umas, umc);
-						userQueryResult = derbyWrapper.listAllUser();
-						derbyWrapper.closeDatabase();
-						service_node.setAttribute("info", "all-un"); // if the new user has been added successfully, return a list of all users 
-						Element user_node = getUserNode(userQueryResult);
-						service_node.appendChild(user_node);
-						derbyWrapper.closeDatabase();
-						return result;
-					}
-				}
-				// The user's name has been changed, add a new user record to the database
-				else
-				{
-					if ((umun.length() == 0) || (umun.length() < 2) || (umun.length() > 30) || (!(Pattern.matches("[a-zA-Z0-9//_//.]+", umun))))
-					{
-						service_node.setAttribute("err", "umun-err"); //the input username string is illegal
-						service_node.setAttribute("umun", umun);
-						service_node.setAttribute("umpw", umpw);
-						service_node.setAttribute("umgp", umgp);
-						service_node.setAttribute("umas", umas);
-						service_node.setAttribute("umc", umc);
-						service_node.setAttribute("oumun", oumun);
-						service_node.setAttribute("info", "edituser-interface");
-						derbyWrapper.closeDatabase();
-						return result;
-					}
-					if (umpw.length() == 0)
-					{
-						service_node.setAttribute("err", "ini-umpw-err"); //the input passwrod string is illegal
-						service_node.setAttribute("info", "edituser-interface");
-						service_node.setAttribute("umun", umun);
-						service_node.setAttribute("umpw", umpw);
-						service_node.setAttribute("umgp", umgp);
-						service_node.setAttribute("umas", umas);
-						service_node.setAttribute("umc", umc);
-						service_node.setAttribute("oumun", oumun);
-						derbyWrapper.closeDatabase();
-						return result;
-					}
-					if ((umpw.length() < 3) || (umpw.length() > 8) || (!(Pattern.matches("[\\p{ASCII}]+", umpw))))
-					{
-						service_node.setAttribute("err", "umpw-err"); //the input passwrod string is illegal
-						service_node.setAttribute("info", "edituser-interface");
-						service_node.setAttribute("umun", umun);
-						service_node.setAttribute("umpw", umpw);
-						service_node.setAttribute("umgp", umgp);
-						service_node.setAttribute("umas", umas);
-						service_node.setAttribute("umc", umc);
-						service_node.setAttribute("oumun", oumun);
-						derbyWrapper.closeDatabase();
-						return result;
-					}
-					umgp = umgp.replaceAll(" ", "");// get rid of the space
-					userQueryResult = derbyWrapper.findUser(umun, null);// check whether the new user name has existed in the table.
-					if (userQueryResult != null)
-					{
-						service_node.setAttribute("err", "un-exist"); //the new username string is duplicated
-						service_node.setAttribute("info", "edituser-interface");
-						service_node.setAttribute("umun", "");
-						service_node.setAttribute("umpw", "");
-						service_node.setAttribute("umgp", umgp);
-						service_node.setAttribute("umas", umas);
-						service_node.setAttribute("umc", umc);
-						service_node.setAttribute("oumun", oumun);
-						derbyWrapper.closeDatabase();
-						return result;
-					}
-					else
-					{
-						derbyWrapper.addUser(umun, umpw, umgp, umas, umc);
-						userQueryResult = derbyWrapper.listAllUser();
-						derbyWrapper.closeDatabase();
-						service_node.setAttribute("info", "all-un"); // if the new user has been added successfully, return a list of all users 
-						Element user_node = getUserNode(userQueryResult);
-						service_node.appendChild(user_node);
-						derbyWrapper.closeDatabase();
-						return result;
-					}
-				}
-			}
-
-			if (cm.toLowerCase().equals("cancel"))
-			{
-				userQueryResult = derbyWrapper.listAllUser();
-				derbyWrapper.closeDatabase();
-				service_node.setAttribute("info", "all-un"); // if the new user has been added successfully, return a list of all users 
-				Element user_node = getUserNode(userQueryResult);
-				service_node.appendChild(user_node);
-				derbyWrapper.closeDatabase();
-				return result;
-			}
+			return NO_ERROR;
 		}
 
-		//Action: modifypassword
-		if (aup.equals("ModifyPassword"))
+		return ERROR_REMOVING_USER;
+	}
+
+	private int addUser(String newUsername, String newPassword, String newGroups, String newStatus, String newComment, String newEmail)
+	{
+		if (_derbyWrapper == null)
 		{
-			if (un.equals(""))
-			{
-				service_node.setAttribute("info", "Login");
-				derbyWrapper.closeDatabase();
-				return result;
-			}
+			openDatabase();
+		}
 
-			service_node.setAttribute(GSXML.NAME_ATT, "Authentication");
-			service_node.setAttribute("un", un);
-			service_node.setAttribute("asn", asn);
+		//Check the given user name
+		if ((newUsername == null) || (newUsername.length() < 2) || (newUsername.length() > 30) || (!(Pattern.matches("[a-zA-Z0-9//_//.]+", newUsername))))
+		{
+			closeDatabase();
+			return ERROR_INVALID_USERNAME;
+		}
 
-			userQueryResult = derbyWrapper.findUser(un, null);
-			Vector userInfo = userQueryResult.users_;
-			pw = ((UserTermInfo) userInfo.get(0)).password_;
+		//Check the given password
+		if ((newPassword == null) || (newPassword.length() < 3) || (newPassword.length() > 8) || (!(Pattern.matches("[\\p{ASCII}]+", newPassword))))
+		{
+			closeDatabase();
+			return ERROR_INVALID_PASSWORD;
+		}
 
-			if ((umpw1.length() == 0) && (umpw2.length() == 0) && (umpw.length() == 0))
-			{
-				service_node.setAttribute("info", "modify_interface");// call the interface of the modifying password 
-				derbyWrapper.closeDatabase();
-				return result;
-			}
+		newPassword = hashPassword(newPassword);
 
-			if (!pw.equals(umpw) && umpw.length() > 0)
-			{
-				service_node.setAttribute("info", "modify_interface");
-				service_node.setAttribute("err", "pw-umpw-nm-err");//if the original password is not match
-				derbyWrapper.closeDatabase();
-				return result;
-			}
+		newGroups = newGroups.replaceAll(" ", "");
 
-			if ((umpw1.length() == 0) || (umpw2.length() == 0))
+		//Check if the user already exists
+		UserQueryResult userQueryResult = _derbyWrapper.findUser(newUsername, null);
+		if (userQueryResult != null)
+		{
+			return ERROR_USER_ALREADY_EXISTS;
+		}
+		else
+		{
+			System.err.println("ADDING " + newUsername + " " + newPassword);
+			boolean success = _derbyWrapper.addUser(newUsername, newPassword, newGroups, newStatus, newComment, newEmail);
+			if (!success)
 			{
-				service_node.setAttribute("info", "modify_interface");
-				service_node.setAttribute("err", "umpw1-umpw2-null-err");//if one of the password strings is none,return the err info back
-				derbyWrapper.closeDatabase();
-				return result;
+				closeDatabase();
+				return ERROR_ADDING_USER;
 			}
+		}
+		closeDatabase();
+		return NO_ERROR;
+	}
 
-			if (!umpw1.equals(umpw2))
-			{
-				service_node.setAttribute("info", "modify_interface");
-				service_node.setAttribute("err", "umpw1-umpw2-nm-err");//if one of the password strings is none,return the err info back
-				derbyWrapper.closeDatabase();
-				return result;
-			}
+	private boolean checkUserExists(String username)
+	{
+		if (_derbyWrapper == null)
+		{
+			openDatabase();
+		}
 
-			if (umpw.length() == 0)
-			{
-				service_node.setAttribute("info", "modify_interface");
-				service_node.setAttribute("err", "umpw-null-err");//if one of the password strings is none,return the err info back
-				derbyWrapper.closeDatabase();
-				return result;
-			}
-			//check the new password and the retyped password
-			if ((umpw1 == null) || (umpw1.length() < 3) || (umpw1.length() > 8) || (!(Pattern.matches("[\\p{ASCII}]+", umpw1))))
-			{
-				service_node.setAttribute("info", "modify_interface");
-				service_node.setAttribute("err", "umpw1-err");// the new password is illegal
-				derbyWrapper.closeDatabase();
-				return result;
-			}
+		try
+		{
+			UserQueryResult result = _derbyWrapper.findUser(username);
 
-			if ((umpw2 == null) || (umpw2.length() < 3) || (umpw2.length() > 8) || (!(Pattern.matches("[\\p{ASCII}]+", umpw2))))
+			if (result != null)
 			{
-				service_node.setAttribute("info", "modify_interface");
-				service_node.setAttribute("err", "umpw2-err"); // the retyped password is illegal
-				derbyWrapper.closeDatabase();
-				return result;
-			}
-			String modify_user_info = derbyWrapper.modifyUserInfo(un, umpw1, null, null, null);
-			if (modify_user_info.equals("succeed"))
-			{
-				service_node.setAttribute("err", "");// the passsword has been changed successfully
-				derbyWrapper.closeDatabase();
-				return result;
+				return true;
 			}
 			else
 			{
-				service_node.setAttribute("err", modify_user_info);// return the error message of the pasword couldn't be modified 
-				derbyWrapper.closeDatabase();
-				return result;
+				return false;
 			}
-		}
 
-		//Action: deleteuser
-		if (aup.equals("DeleteUser"))
+		}
+		catch (Exception ex)
 		{
-			service_node.setAttribute("un", un);
-			service_node.setAttribute("asn", asn);
-			service_node.setAttribute("umun", umun);
-			if (cm.equals("yes"))
-			{
-				String delete_user = derbyWrapper.deleteUser(umun);
-				if (delete_user.equals("succeed"))
-				{
-					service_node.setAttribute("err", "");
-					userQueryResult = derbyWrapper.listAllUser();
-					service_node.setAttribute("info", "all-un"); //  return a list of all users 
-					Element user_node = getUserNode(userQueryResult);
-					service_node.appendChild(user_node);
-				}
-				else
-				{
-					service_node.setAttribute("err", delete_user);//return the error message
-					derbyWrapper.closeDatabase();
-					return result;
-				}
-			}
-			else if (cm.equals("no"))
-			{
-				service_node.setAttribute("err", "");
-				userQueryResult = derbyWrapper.listAllUser();
-				service_node.setAttribute("info", "all-un"); //  return a list of all users 
-				Element user_node = getUserNode(userQueryResult);
-				service_node.appendChild(user_node);
-				derbyWrapper.closeDatabase();
-				return result;
-			}
-			else
-			{
-				service_node.setAttribute("info", "confirm");
-				derbyWrapper.closeDatabase();
-				return result;
-			}
+			return false;
+		}
+		finally
+		{
+			closeDatabase();
+		}
+	}
+
+	private String retrieveDataForUser(String username, String dataType)
+	{
+		if (_derbyWrapper == null)
+		{
+			openDatabase();
 		}
 
-		return result;
+		String password = null;
+
+		try
+		{
+			UserQueryResult result = _derbyWrapper.findUser(username);
+			Vector userInfo = result.users;
+
+			for (int i = 0; i < result.getSize(); i++)
+			{
+				if (dataType.equals("password"))
+				{
+					return ((UserTermInfo) userInfo.get(i)).password;
+				}
+				else if (dataType.equals("groups"))
+				{
+					return ((UserTermInfo) userInfo.get(i)).groups;
+				}
+				else if (dataType.equals("status"))
+				{
+					return ((UserTermInfo) userInfo.get(i)).accountstatus;
+				}
+				else if (dataType.equals("comment"))
+				{
+					return ((UserTermInfo) userInfo.get(i)).comment;
+				}
+				else if (dataType.equals("email"))
+				{
+					return ((UserTermInfo) userInfo.get(i)).email;
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+
+		closeDatabase();
+		return password;
 	}
 
 	private Element getUserNode(UserQueryResult userQueryResult)
 	{
 		Element user_list_node = this.doc.createElement(GSXML.USER_NODE_ELEM + "List");
 
-		Vector userInfo = userQueryResult.users_;
+		Vector userInfo = userQueryResult.users;
 
 		for (int i = 0; i < userQueryResult.getSize(); i++)
 		{
 			Element user_node = this.doc.createElement(GSXML.USER_NODE_ELEM);
-			String username = ((UserTermInfo) userInfo.get(i)).username_;
-			String password = ((UserTermInfo) userInfo.get(i)).password_;
-			String groups = ((UserTermInfo) userInfo.get(i)).groups_;
-			String accountstatus = ((UserTermInfo) userInfo.get(i)).accountstatus_;
-			String comment = ((UserTermInfo) userInfo.get(i)).comment_;
-			user_node.setAttribute("umun", username);
-			user_node.setAttribute("umpw", password);
-			user_node.setAttribute("umgp", groups);
-			user_node.setAttribute("umas", accountstatus);
-			user_node.setAttribute("umc", comment);
+			String username = ((UserTermInfo) userInfo.get(i)).username;
+			String groups = ((UserTermInfo) userInfo.get(i)).groups;
+			String accountstatus = ((UserTermInfo) userInfo.get(i)).accountstatus;
+			String comment = ((UserTermInfo) userInfo.get(i)).comment;
+			String email = ((UserTermInfo) userInfo.get(i)).email;
+			user_node.setAttribute("username", username);
+			user_node.setAttribute("groups", groups);
+			user_node.setAttribute("status", accountstatus);
+			user_node.setAttribute("comment", comment);
+			user_node.setAttribute("email", email);
 
 			user_list_node.appendChild(user_node);
 		}
