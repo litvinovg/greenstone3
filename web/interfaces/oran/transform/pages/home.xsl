@@ -40,7 +40,8 @@
 		</xsl:for-each>
 		
 		<xsl:for-each select="serviceList/service[@type='authen']">
-			<gslib:authenticationLink/><br/>
+			<gslib:authenticationLink/><br/><br/>
+			<gslib:registerLink/><br/>
 		</xsl:for-each>
 
 	</xsl:template>
