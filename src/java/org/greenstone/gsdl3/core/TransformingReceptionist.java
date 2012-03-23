@@ -434,6 +434,11 @@ public class TransformingReceptionist extends Receptionist
 			intname.setAttribute("name", "interface_name");
 			Text intnametext = theXML.createTextNode((String) config_params.get(GSConstants.INTERFACE_NAME));
 			intname.appendChild(intnametext);
+			
+			Element siteName = theXML.createElement("param");
+			siteName.setAttribute("name", "site_name");
+			Text siteNameText = theXML.createTextNode((String) config_params.get(GSConstants.SITE_NAME));
+			siteName.appendChild(siteNameText);
 
 			Element filepath = theXML.createElement("param");
 			filepath.setAttribute("name", "filepath");
@@ -442,6 +447,7 @@ public class TransformingReceptionist extends Receptionist
 
 			root.appendChild(libname);
 			root.appendChild(intname);
+			root.appendChild(siteName);
 			root.appendChild(filepath);
 
 			if (output.equals("xml"))
