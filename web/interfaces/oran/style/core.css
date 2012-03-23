@@ -699,6 +699,38 @@ table{
 	font-weight: bold;
 }
 
+#auth_navbar {
+	width: 90%;
+	margin: 10px auto;
+}
+
+#auth_navbar span{
+	padding:3px;
+}
+
+#userListTable {
+	text-align: center;
+	width: 90%;
+	margin: auto;
+}
+
+#userListTable td{
+	border: black 1px solid;
+	padding: 5px;
+}
+
+#gs_error{
+	padding: 5px;
+	margin: auto;
+	width: 50%;
+	text-align: center;
+}
+
+#loginTable{
+	margin: auto;
+	width: 25%;
+}
+
 /*
 ul.childrenlist li {
 list-style-type:none;
