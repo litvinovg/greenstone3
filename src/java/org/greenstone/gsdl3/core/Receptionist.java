@@ -84,7 +84,7 @@ public class Receptionist implements ModuleInterface
 	{
 		this.mr = m;
 	}
-	
+
 	/**
 	 * gets the message router
 	 */
@@ -188,11 +188,11 @@ public class Receptionist implements ModuleInterface
 		}
 		// check the request type 
 		String type = request.getAttribute(GSXML.TYPE_ATT); // returns "" if no att of this name
-		if(type.equals(GSXML.REQUEST_TYPE_SECURITY))
+		if (type.equals(GSXML.REQUEST_TYPE_SECURITY))
 		{
 			return this.mr.process(message);
 		}
-		
+
 		if (!type.equals(GSXML.REQUEST_TYPE_PAGE))
 		{
 			// now Receptionist forwards non-page requests straight to the MR, and returns the responses
