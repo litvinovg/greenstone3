@@ -155,8 +155,8 @@ public class GlobalProperties
 			}
 
 			//string it all together
-			gsdl3_web_address = protocolSpecifier + hostSpecifier + portSpecifier + contextSpecifier;
-
+			//gsdl3_web_address = protocolSpecifier + hostSpecifier + portSpecifier + contextSpecifier;
+			gsdl3_web_address = contextSpecifier;
 		}
 		catch (Exception e)
 		{
