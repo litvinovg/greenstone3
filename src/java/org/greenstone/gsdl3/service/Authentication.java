@@ -17,13 +17,6 @@ import java.sql.SQLException;
 import java.util.regex.Pattern;
 import java.io.File;
 
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
-import net.tanesha.recaptcha.ReCaptchaImpl;
 import net.tanesha.recaptcha.ReCaptchaImpl;
 import net.tanesha.recaptcha.ReCaptchaResponse;
 
@@ -47,7 +40,6 @@ public class Authentication extends ServiceRack
 	protected static final int ERROR_CAPTCHA_DOES_NOT_MATCH = -14;
 	protected static final int ERROR_CAPTCHA_MISSING = -15;
 	protected static final int ERROR_NOT_AUTHORISED = -16;
-	protected static final int ERROR_COULD_NOT_RESET_PASSWORD = -17;
 
 	protected static final HashMap<Integer, String> _errorMessageMap;
 	static
@@ -70,7 +62,6 @@ public class Authentication extends ServiceRack
 		errorMessageMap.put(ERROR_CAPTCHA_DOES_NOT_MATCH, "The words you entered did not match the image, please try again.");
 		errorMessageMap.put(ERROR_CAPTCHA_MISSING, "The information from the captcha is missing.");
 		errorMessageMap.put(ERROR_NOT_AUTHORISED, "You are not authorised to access this page.");
-		errorMessageMap.put(ERROR_COULD_NOT_RESET_PASSWORD, "Your password could not be reset, your email address may be invalid.");
 
 		_errorMessageMap = errorMessageMap;
 	}
@@ -541,30 +532,7 @@ public class Authentication extends ServiceRack
 			String from = "admin@greenstone.org";
 			String host = request.getAttribute("remoteAddress");
 			
-			Properties props = System.getProperties();
-			props.setProperty("mail.smtp.host", host);
-			
-			Session session = Session.getDefaultInstance(props);
-			
-			try
-			{
-				MimeMessage message = new MimeMessage(session);
-				message.setFrom(new InternetAddress(from));
-				message.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
-				message.setSubject("Password reset");
-				message.setText("Your password was reset to " + newPassword);
-				
-				Transport.send(message);
-			}
-			catch(Exception ex)
-			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_COULD_NOT_RESET_PASSWORD));
-				serviceNode.setAttribute("operation", ACCOUNT_SETTINGS);
-				ex.printStackTrace();
-				return result;
-			}
-			
-			System.err.println("MAIL SUCCESS");
+			//TODO: FINISH THIS
 		}
 		else if (op.equals(PERFORM_DELETE_USER))
 		{
