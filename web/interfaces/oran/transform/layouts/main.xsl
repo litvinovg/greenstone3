@@ -40,7 +40,7 @@
 			
 			<body><xsl:call-template name="textDirectionAttribute"/><xsl:call-template name="actionClass"/>
 				
-				<xsl:call-template name="displayErrorsIfAny"/>
+				<!--<xsl:call-template name="displayErrorsIfAny"/>-->
 				<a name="top"><xsl:text> </xsl:text></a>
 				
 				<div id="topArea" class="ui-state-default ui-corner-top">
