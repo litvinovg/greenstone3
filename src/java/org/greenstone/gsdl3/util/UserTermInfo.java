@@ -19,20 +19,23 @@
 
 package org.greenstone.gsdl3.util;
 
-public class UserTermInfo{
-    public String username_=null;
-    public String password_=null;
-    public String groups_=null;
-    public String accountstatus_=null;
-    public String comment_=null;
-    
-    public String toString(){
-	String result="";
-	result +="<username = "+username_+">";
-	result +="<password = "+password_+">";
-	result +="<groups = "+groups_+">";
-	result +="<enable = "+accountstatus_+">";
-	result +="<comment = "+comment_+">";
-	return result;
-    }
+public class UserTermInfo
+{
+	public String username = null;
+	public String password = null;
+	public String groups = null;
+	public String accountstatus = null;
+	public String comment = null;
+	public String email = null;
+
+	public String toString()
+	{
+		String result = "";
+		result += "<username = " + username + ">";
+		result += "<password = " + password + ">";
+		result += "<groups = " + groups + ">";
+		result += "<enable = " + accountstatus + ">";
+		result += "<comment = " + comment + ">";
+		return result;
+	}
 }
