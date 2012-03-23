@@ -2,9 +2,9 @@ package org.greenstone.gsdl3;
 
 import org.greenstone.gsdl3.comms.*;
 import org.greenstone.gsdl3.core.*;
+import org.greenstone.gsdl3.service.Authentication;
 import org.greenstone.gsdl3.util.*;
 import org.greenstone.gsdl3.action.PageAction; // used to get the default action
-import org.greenstone.util.GlobalProperties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -13,17 +13,13 @@ import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.io.File;
 import java.lang.reflect.Type;
-import java.nio.channels.FileChannel;
 import java.util.Hashtable;
 import org.apache.log4j.*;
 
@@ -31,9 +27,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 // Apache Commons
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang3.*;
 
 /**
@@ -276,6 +269,9 @@ public class LibraryServlet extends HttpServlet
 		this.recept.setParams(this.params);
 		this.recept.configure();
 
+		//Allow the message router and the document to be accessed from anywhere in this servlet context
+		this.getServletContext().setAttribute("GSRouter", this.recept.getMessageRouter());
+		this.getServletContext().setAttribute("GSDocument", this.doc);
 	}
 
 	private void logUsageInfo(HttpServletRequest request)
@@ -525,7 +521,6 @@ public class LibraryServlet extends HttpServlet
 				}
 
 			}
-
 		}
 
 		// cache_key is the collection name, or service name
@@ -545,7 +540,6 @@ public class LibraryServlet extends HttpServlet
 			String name = (String) attributeNames.nextElement();
 			if (!name.equals(GSXML.USER_SESSION_CACHE_ATT) && !name.equals(GSParams.LANGUAGE) && !name.equals(GSXML.USER_ID_ATT))
 			{
-
 				session.removeAttribute(name);
 			}
 		}
@@ -605,10 +599,8 @@ public class LibraryServlet extends HttpServlet
 			Element xml_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			xml_request.appendChild(xml_param_list);
 
-			Enumeration params = request.getParameterNames();
-			while (params.hasMoreElements())
+			for (String name : queryMap.keySet())
 			{
-				String name = (String) params.nextElement();
 				if (!name.equals(GSParams.ACTION) && !name.equals(GSParams.SUBACTION) && !name.equals(GSParams.LANGUAGE) && !name.equals(GSParams.OUTPUT))
 				{// we have already dealt with these
 
@@ -649,7 +641,7 @@ public class LibraryServlet extends HttpServlet
 			}
 
 			// put in all the params from the session cache
-			params = session.getAttributeNames();
+			Enumeration params = session.getAttributeNames();
 			while (params.hasMoreElements())
 			{
 				String name = (String) params.nextElement();
@@ -700,7 +692,27 @@ public class LibraryServlet extends HttpServlet
 				}
 			}
 		}
+		
+		String requestedURL = request.getRequestURL().toString();
+		String baseURL = requestedURL.substring(0, requestedURL.indexOf(this.getServletName()));
+		xml_request.setAttribute("baseURL", baseURL);
+		xml_request.setAttribute("remoteAddress", request.getRemoteAddr());
+		
+		if(!runSecurityChecks(request, xml_request, userContext, out, baseURL, collection, document))
+		{
+			return;
+		}
 
+		Node xml_result = this.recept.process(xml_message);
+		encodeURLs(xml_result, response);
+		out.println(this.converter.getPrettyString(xml_result));
+
+		displaySize(session_ids_table);
+
+	} //end of doGet(HttpServletRequest, HttpServletResponse)
+
+	private boolean runSecurityChecks(HttpServletRequest request, Element xml_request, UserContext userContext, PrintWriter out, String baseURL, String collection, String document) throws ServletException
+	{
 		//Check if we need to login or logout
 		Map<String, String[]> params = request.getParameterMap();
 		String[] username = params.get("username");
@@ -718,12 +730,13 @@ public class LibraryServlet extends HttpServlet
 			{
 				request.logout();
 			}
-			
+
 			try
 			{
+				password[0] = Authentication.hashPassword(password[0]);
 				request.login(username[0], password[0]);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				//The user entered in either the wrong username or the wrong password
 				Element loginPageMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
@@ -731,6 +744,7 @@ public class LibraryServlet extends HttpServlet
 				loginPageRequest.setAttribute(GSXML.ACTION_ATT, "p");
 				loginPageRequest.setAttribute(GSXML.SUBACTION_ATT, "login");
 				loginPageRequest.setAttribute(GSXML.OUTPUT_ATT, "html");
+				loginPageRequest.setAttribute(GSXML.BASE_URL, baseURL);
 				loginPageMessage.appendChild(loginPageRequest);
 
 				Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -743,21 +757,25 @@ public class LibraryServlet extends HttpServlet
 
 				Element urlParam = this.doc.createElement(GSXML.PARAM_ELEM);
 				urlParam.setAttribute(GSXML.NAME_ATT, "redirectURL");
-				urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName() + "?" + request.getQueryString().replace("&", "&amp;"));
+				String queryString = "";
+				if(request.getQueryString() != null)
+				{
+					queryString = "?" + request.getQueryString().replace("&", "&amp;");
+				}
+				urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName() + queryString);
 				paramList.appendChild(urlParam);
 
 				Node loginPageResponse = this.recept.process(loginPageMessage);
 				out.println(this.converter.getPrettyString(loginPageResponse));
 
-				return;
+				return false;
 			}
 		}
 
 		//If a user is logged in
 		if (request.getAuthType() != null)
 		{
-			Element userInformation = this.doc.createElement("userInformation");
-			xml_request.appendChild(userInformation);
+			Element userInformation = this.doc.createElement(GSXML.USER_INFORMATION_ELEM);
 			userInformation.setAttribute("username", request.getUserPrincipal().getName());
 
 			Element userInfoMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
@@ -768,7 +786,7 @@ public class LibraryServlet extends HttpServlet
 			userInfoRequest.appendChild(paramList);
 
 			Element param = this.doc.createElement(GSXML.PARAM_ELEM);
-			param.setAttribute(GSXML.NAME_ATT, "username");
+			param.setAttribute(GSXML.NAME_ATT, GSXML.USERNAME_ATT);
 			param.setAttribute(GSXML.VALUE_ATT, request.getUserPrincipal().getName());
 			paramList.appendChild(param);
 
@@ -778,11 +796,14 @@ public class LibraryServlet extends HttpServlet
 			{
 				logger.error("Can't get the groups for user " + request.getUserPrincipal().getName());
 			}
+			else
+			{
+				HashMap responseParams = GSXML.extractParams(responseParamList, true);
+				String groups = (String) responseParams.get(GSXML.GROUPS_ATT);
 
-			HashMap responseParams = GSXML.extractParams(responseParamList, true);
-			String groups = (String) responseParams.get("groups");
-
-			userInformation.setAttribute("groups", groups);
+				userInformation.setAttribute(GSXML.GROUPS_ATT, groups);
+				xml_request.appendChild(userInformation);
+			}
 		}
 
 		//If we are in a collection-related page then make sure this user is allowed to access it
@@ -794,7 +815,7 @@ public class LibraryServlet extends HttpServlet
 			securityMessage.appendChild(securityRequest);
 			if (document != null && !document.equals(""))
 			{
-				securityRequest.setAttribute("oid", document);
+				securityRequest.setAttribute(GSXML.NODE_OID, document);
 			}
 
 			Element securityResponse = (Element) GSXML.getChildByTagName(this.recept.process(securityMessage), GSXML.RESPONSE_ELEM);
@@ -821,6 +842,7 @@ public class LibraryServlet extends HttpServlet
 					loginPageRequest.setAttribute(GSXML.ACTION_ATT, "p");
 					loginPageRequest.setAttribute(GSXML.SUBACTION_ATT, "login");
 					loginPageRequest.setAttribute(GSXML.OUTPUT_ATT, "html");
+					loginPageRequest.setAttribute(GSXML.BASE_URL, baseURL);
 					loginPageMessage.appendChild(loginPageRequest);
 
 					Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -846,19 +868,13 @@ public class LibraryServlet extends HttpServlet
 					Node loginPageResponse = this.recept.process(loginPageMessage);
 					out.println(this.converter.getPrettyString(loginPageResponse));
 
-					return;
+					return false;
 				}
 			}
 		}
-
-		Node xml_result = this.recept.process(xml_message);
-		encodeURLs(xml_result, response);
-		out.println(this.converter.getPrettyString(xml_result));
-
-		displaySize(session_ids_table);
-
-	} //end of doGet(HttpServletRequest, HttpServletResponse)
-
+		return true;
+	}
+	
 	//a debugging method
 	private void displaySize(Hashtable table)
 	{
