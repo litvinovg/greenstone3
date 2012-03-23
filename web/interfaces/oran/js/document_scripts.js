@@ -1,3 +1,7 @@
+var _imageZoomEnabled = false;
+var _linkCellMap = new Array();
+var _onCells = new Array();
+
 /********************
 * EXPANSION SCRIPTS *
 ********************/
@@ -109,21 +113,6 @@ function maximizeSidebar()
 * PAGED-IMAGE SCRIPTS *
 **********************/
 
-function changePage(href)
-{
-	var ajax = new gs.functions.ajaxRequest();
-	ajax.open("GET", href + "&excerptid=gs-document");
-	ajax.onreadystatechange = function()
-	{
-		if(ajax.readyState == 4 && ajax.status == 200)
-		{
-			var contentElem = document.getElementById("gs-document");
-			contentElem.innerHTML = ajax.responseText;
-		}
-	}
-	ajax.send();
-}
-
 function changeView()
 {
 	var viewList = document.getElementById("viewSelection");
@@ -206,7 +195,7 @@ function setTextVisible(visible)
 	}
 }
 
-function retrieveTableOfContents()
+function retrieveTableOfContentsAndTitles()
 {
 	var ajax = gs.functions.ajaxRequest();
 	
@@ -224,6 +213,7 @@ function retrieveTableOfContents()
 		{
 			var loading = document.getElementById("tocLoadingImage");
 			loading.parentNode.removeChild(loading);
+			console.log("Error Loading TOC");
 		}
 	}
 	ajax.send();
@@ -271,6 +261,37 @@ function replaceLinksWithSlider()
 	}
 }
 
+function changePage(href)
+{
+	var ajax = new gs.functions.ajaxRequest();
+	ajax.open("GET", href + "&excerptid=gs-document");
+	ajax.onreadystatechange = function()
+	{
+		if(ajax.readyState == 4 && ajax.status == 200)
+		{
+			var contentElem = document.getElementById("gs-document");
+			contentElem.innerHTML = ajax.responseText;
+			
+			for(var i = 0; i < _onCells.length; i++)
+			{
+				cells[i].cell.style.border = "";
+			}
+			_onCells = new Array;
+			
+			if(_linkCellMap[href])
+			{
+				cells = _linkCellMap[href];
+				for(var i = 0; i < cells.length; i++)
+				{
+					cells[i].cell.style.border = "3px red solid";
+					_onCells.push(cells[i]);
+				}
+			}
+		}
+	}
+	ajax.send();
+}
+
 function SliderWidget(_links)
 {
 	//****************
@@ -284,15 +305,13 @@ function SliderWidget(_links)
 	//The table of images
 	var _linkTable = document.createElement("TABLE");
 	_mainDiv.appendChild(_linkTable);
-	_linkTable.style.width = (75 * _links.length) + "px";
 	
 	//The image row of the table
 	var _linkRow = document.createElement("TR");
 	_linkTable.appendChild(_linkRow);
 	
-	//The label row
-	var _numberRow = document.createElement("TR");
-	_linkTable.appendChild(_numberRow);
+	//The list of titles we can search through
+	var _titles = new Array();
 
 	//****************
 	//PUBLIC FUNCTIONS
@@ -307,6 +326,27 @@ function SliderWidget(_links)
 	//*****************
 	//PRIVATE FUNCTIONS
 	//*****************
+	
+	var setUpFilterBox = function()
+	{
+		var filter = $("#filterText");
+		filter.keyup(function()
+		{
+			var currentValue = filter.val();
+			for(var i = 0; i < _titles.length; i++)
+			{
+				var currentTitle = _titles[i];
+				if(currentTitle[0].search(/*"^" +*/ currentValue.replace(/\./g, "\\.")) != -1)
+				{
+					currentTitle[1].cell.style.display = "table-cell";
+				}
+				else
+				{
+					currentTitle[1].cell.style.display = "none";
+				}
+			}
+		});
+	}
 	
 	var getImage = function(page)
 	{
@@ -325,6 +365,9 @@ function SliderWidget(_links)
 		template +=         "<xsl:value-of disable-output-escaping=\"yes\" select=\"/page/pageResponse/document/documentNode/metadataList/metadata[@name = 'Thumb']\"/>";
 		template +=       '</xsl:attribute>';
 		template +=     '</img>';
+		template +=     '<p>';
+		template +=       "<xsl:value-of disable-output-escaping=\"yes\" select=\"/page/pageResponse/document/documentNode/metadataList/metadata[@name = 'Title']\"/>";
+		template +=     '</p>';
 		template +=   '</html>';
 		template += '</xsl:template>';
 		ajax.open("GET", href + "&ilt=" + template.replace(" ", "%20"));
@@ -343,7 +386,7 @@ function SliderWidget(_links)
 				}
 				var hrefEnd = text.indexOf("\"", hrefStart);
 				var href = text.substring(hrefStart, hrefEnd);
-				console.log(href);
+
 				var image = document.createElement("IMG");
 				$(image).load(function()
 				{
@@ -359,6 +402,10 @@ function SliderWidget(_links)
 					image.setAttribute("src", gs.imageURLs.blank);
 				});
 				image.setAttribute("src", href);
+				
+				var titleStart = text.indexOf("<p>") + 3;
+				var titleEnd = text.indexOf("</p>");
+				var title = text.substring(titleStart, titleEnd);
 			}
 			else if (ajax.readyState == 4 && !page.failed)
 			{
@@ -420,25 +467,34 @@ function SliderWidget(_links)
 		var href = _links[i].getAttribute("href");
 		link.setAttribute("href", "javascript:changePage(\"" + href + "\");");
 		
+		if(!_linkCellMap[href])
+		{
+			_linkCellMap[href] = new Array();
+		}
+		_linkCellMap[href].push(_links[i]);
+		
 		var image = document.createElement("IMG");
 		link.appendChild(image);
 		image.setAttribute("src", gs.imageURLs.loading);
 		_links[i].image = image;
 		
-		var spacer = document.createElement("TD");
-		_linkRow.appendChild(spacer);
-		spacer.setAttribute("class", "pageSliderSpacer");
+		var title = _links[i].innerHTML;
+		if(title.search(/^[^ ]+ [^ ]+$/) != -1)
+		{
+			var section = title.replace(/^([^ ]+) [^ ]+$/, "$1");
+			var page = title.replace(/^[^ ]+ ([^ ]+)$/, "$1");
+			if(page.search(/^[0-9]+$/) != -1)
+			{
+				title = page;
+			}
+		}
+		_titles.push([title, _links[i]]);
 		
-		var num = document.createElement("TD");
-		_numberRow.appendChild(num);
-		num.innerHTML = "Page " + (i + 1);
-		num.style.textAlign = "center";
-		
-		var spacer = document.createElement("TD");
-		_numberRow.appendChild(spacer);
-		spacer.setAttribute("class", "pageSliderSpacer");
+		var text = document.createTextNode(title);
+		col.appendChild(text);
 	}
 	
+	setUpFilterBox();
 	startCheckFunction();
 }
 
@@ -596,6 +652,7 @@ function addEditMetadataLink(cell)
 	var row = cell.parentNode;
 	var newCell = document.createElement("TD");
 	newCell.setAttribute("style", "font-size:0.7em; padding:0px 10px");
+	newCell.setAttribute("class", "editMetadataButton");
 	
 	var linkSpan = document.createElement("SPAN");
 	linkSpan.setAttribute("class", "ui-state-default ui-corner-all");
@@ -603,8 +660,10 @@ function addEditMetadataLink(cell)
 	
 	var linkLabel = document.createElement("SPAN");
 	linkLabel.innerHTML = "edit metadata";
+	newCell.linkLabel = linkLabel;
 	var linkIcon = document.createElement("SPAN");
 	linkIcon.setAttribute("class", "ui-icon ui-icon-folder-collapsed");
+	newCell.linkIcon = linkIcon;
 	
 	var uList = document.createElement("UL");
 	var labelItem = document.createElement("LI");
@@ -649,8 +708,66 @@ function addEditMetadataLink(cell)
 	metaTable.addRowButton.style.display = "none";
 }
 
+function setEditingFeaturesVisible(visible)
+{
+	if(visible)
+	{
+		document.getElementById("editContentButton").innerHTML = "Hide editor";
+	}
+	else
+	{
+		document.getElementById("editContentButton").innerHTML = "Edit content";
+	}
+
+	var saveButton = document.getElementById("saveButton");
+	var metadataListLabel = document.getElementById("metadataListLabel");
+	var metadataList = document.getElementById("metadataSetList");
+	
+	var visibility = (visible ? "" : "none");
+	saveButton.style.display = visibility;
+	metadataListLabel.style.display = visibility;
+	metadataList.style.display = visibility;
+	
+	var buttons = gs.functions.getElementsByClassName("editMetadataButton");
+	
+	for(var i = 0; i < buttons.length; i++)
+	{
+		buttons[i].style.display = visibility;
+		buttons[i].linkLabel.innerHTML = "edit metadata";
+		buttons[i].linkIcon.setAttribute("class", "ui-icon ui-icon-folder-collapsed");
+	}
+	
+	var tables = document.getElementsByTagName("TABLE");
+	for(var i = 0; i < tables.length; i++)
+	{
+		var currentTable = tables[i];
+		if(currentTable.getAttribute("id") && currentTable.getAttribute("id").search(/^meta/) != -1)
+		{
+			currentTable.style.display = "none";
+			currentTable.metaNameField.style.display = "none";
+			currentTable.addRowButton.style.display = "none";
+		}
+	}
+}
+
 function readyPageForEditing()
 {
+	if(document.getElementById("metadataSetList"))
+	{
+		var setList = document.getElementById("metadataSetList");
+		if(!setList.style.display || setList.style.display == "")
+		{
+			setEditingFeaturesVisible(false);
+		}
+		else
+		{
+			setEditingFeaturesVisible(true);
+		}
+		return;
+	}
+
+	document.getElementById("editContentButton").innerHTML = "Hide Editor";
+	
 	var textDivs = gs.functions.getElementsByClassName("sectionText");
 	for(var i = 0; i < textDivs.length; i++)
 	{
@@ -670,10 +787,12 @@ function readyPageForEditing()
 	visibleMetadataList.appendChild(allOption);
 	visibleMetadataList.setAttribute("id", "metadataSetList");
 	var metadataListLabel = document.createElement("SPAN");
+	metadataListLabel.setAttribute("id", "metadataListLabel");
 	metadataListLabel.setAttribute("style", "margin-left:20px;");
 	metadataListLabel.innerHTML = "Visible metadata: ";
 	editBar.appendChild(metadataListLabel);
 	editBar.appendChild(visibleMetadataList);
+	visibleMetadataList.onchange = onVisibleMetadataSetChange;
 	
 	var statusBarDiv = document.createElement("DIV");
 	editBar.appendChild(statusBarDiv);
