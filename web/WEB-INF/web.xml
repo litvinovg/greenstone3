@@ -3,276 +3,276 @@
 http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 -->
 <web-app>
+	<display-name>GSDL3</display-name>
+	<description>
+		Greenstone digital library version 3.
+	</description>
+  
+	<filter>
+		<filter-name>Greenstone URL Filter</filter-name>
+		<filter-class>org.greenstone.gsdl3.core.URLFilter</filter-class>
+	</filter>
 
-  <!-- General description of your web application -->
+	<filter-mapping>
+		<filter-name>Greenstone URL Filter</filter-name>
+		<url-pattern>*</url-pattern>
+	</filter-mapping>
   
-  <display-name>GSDL3</display-name>
-  <description>
-    Greenstone digital library version 3.
-  </description>
+	<!-- Context initialization parameters that define shared
+	String constants used within your application, which
+	can be customized by the system administrator who is
+	installing your application.  The values actually
+	assigned to these parameters can be retrieved in a
+	servlet or JSP page by calling:
+
+	String value =
+	getServletContext().getInitParameter("name");
+
+	where "name" matches the <param-name> element of
+	one of these initialization parameters.
+
+	You can define any number of context initialization
+	parameters, including zero.
+	-->
   
-  
-  <!-- Context initialization parameters that define shared
-  String constants used within your application, which
-  can be customized by the system administrator who is
-  installing your application.  The values actually
-  assigned to these parameters can be retrieved in a
-  servlet or JSP page by calling:
-  
-  String value =
-  getServletContext().getInitParameter("name");
-  
-  where "name" matches the <param-name> element of
-  one of these initialization parameters.
-  
-  You can define any number of context initialization
-  parameters, including zero.
-  -->
-  
-  <context-param>
-    <param-name>webmaster</param-name>
-    <param-value>greenstone3@list.scms.waikato.ac.nz</param-value>
-    <description>
-      The EMAIL address of the administrator to whom questions
-      and comments about this application should be addressed.
-    </description>
-  </context-param>
+	<context-param>
+		<param-name>webmaster</param-name>
+		<param-value>greenstone3@list.scms.waikato.ac.nz</param-value>
+		<description>
+			The EMAIL address of the administrator to whom questions
+			and comments about this application should be addressed.
+		</description>
+	</context-param>
   
 
-  <!-- Servlet definitions for the servlets that make up
-  your web application, including initialization
-  parameters.  With Tomcat, you can also send requests
-  to servlets not listed here with a request like this:
+	<!-- Servlet definitions for the servlets that make up
+	your web application, including initialization
+	parameters.  With Tomcat, you can also send requests
+	to servlets not listed here with a request like this:
 
-  http://localhost:8080/{context-path}/servlet/{classname}
-  
-  but this usage is not guaranteed to be portable.  It also
-  makes relative references to images and other resources
-  required by your servlet more complicated, so defining
-  all of your servlets (and defining a mapping to them with
-  a servlet-mapping element) is recommended.
-  
-  Servlet initialization parameters can be retrieved in a
-  servlet or JSP page by calling:
-  
-  String value =
-  getServletConfig().getInitParameter("name");
-  
-  where "name" matches the <param-name> element of
-  one of these initialization parameters.
-  
-  You can define any number of servlets, including zero.
-  -->
+	http://localhost:8080/{context-path}/servlet/{classname}
 
-  <servlet>
-    <servlet-name>tester</servlet-name>
-    <description>a test servlet</description>
-    <servlet-class>TestServlet</servlet-class>
-  </servlet>
-  
-  <!-- For client side text fetching -->
-  <servlet>
-    <servlet-name>grabtext</servlet-name>
-    <description>Grabs text for client-side display with minimal overhead.</description>
-    <servlet-class>org.greenstone.gsdl3.ClientSideServlet</servlet-class>
-  </servlet>
-  
-  
-   <servlet>
-    <servlet-name>dev</servlet-name>
-    <description>A new skin engine still in development based on the standard gsdl3 library program</description>
-    <servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
-    <init-param>
-      <param-name>library_name</param-name>
-      <param-value>dev</param-value>
-    </init-param>
-    <init-param>
-      <param-name>site_name</param-name>
-      <param-value>localsite</param-value>
-    </init-param>
-    <init-param>
-      <param-name>interface_name</param-name>
-      <param-value>oran</param-value>
-    </init-param>
-    <init-param>
-      <param-name>receptionist_class</param-name>
-      <param-value>DefaultReceptionist</param-value>
-    </init-param>
-    <init-param>
-      <param-name>default_lang</param-name>
-      <param-value>en</param-value>
-    </init-param>
-  </servlet>
-  
-  <servlet>
-    <servlet-name>gs2-library</servlet-name>
-    <description>Greenstone 2 lookalike library program: uses localsite with the gs2 interface</description>
-    <servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
-    <init-param>
-      <param-name>library_name</param-name>
-      <param-value>library</param-value>
-    </init-param>
-    <init-param>
-      <param-name>site_name</param-name>
-      <param-value>localsite</param-value>
-    </init-param>
-    <init-param>
-      <param-name>interface_name</param-name>
-      <param-value>gs2</param-value>
-    </init-param>
-    <init-param>
-      <param-name>default_lang</param-name>
-      <param-value>en</param-value>
-    </init-param>
-    <init-param>
-      <param-name>session_expiration</param-name>
-      <param-value>1800</param-value>
-    </init-param>
-    <init-param>
-      <param-name>params_class</param-name>
-      <param-value>GS2Params</param-value>
-    </init-param>
-  </servlet>
-  
-  <servlet>
-    <servlet-name>nzdl-library</servlet-name>
-    <description>gsdl3 library program</description>
-    <servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
-    <init-param>
-      <param-name>library_name</param-name>
-      <param-value>nzdl</param-value>
-    </init-param>
-    <init-param>
-      <param-name>site_name</param-name>
-      <param-value>nzdl</param-value>
-    </init-param>
-    <init-param>
-      <param-name>interface_name</param-name>
-      <param-value>nzdl</param-value>
-    </init-param>
-    <init-param>
-      <param-name>default_lang</param-name>
-      <param-value>en</param-value>
-    </init-param>
-    <init-param>
-      <param-name>params_class</param-name>
-      <param-value>NZDLParams</param-value>
-    </init-param>
-    <init-param>
-      <param-name>session_expiration</param-name>
-      <param-value>600</param-value>
-    </init-param>
-  </servlet>
+	but this usage is not guaranteed to be portable.  It also
+	makes relative references to images and other resources
+	required by your servlet more complicated, so defining
+	all of your servlets (and defining a mapping to them with
+	a servlet-mapping element) is recommended.
 
-  <servlet>
-    <servlet-name>gateway</servlet-name>
-    <description>gsdl3 library based on gateway site and default interface. It uses SOAP to talk to localsite</description>
-    <servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
-    <init-param>
-      <param-name>library_name</param-name>
-      <param-value>gateway</param-value>
-    </init-param>
-    <init-param>
-      <param-name>site_name</param-name>
-      <param-value>gateway</param-value>
-    </init-param>
-    <init-param>
-      <param-name>interface_name</param-name>
-      <param-value>default</param-value>
-    </init-param>
-    <init-param>
-      <param-name>default_lang</param-name>
-      <param-value>en</param-value>
-    </init-param>
-  </servlet>
+	Servlet initialization parameters can be retrieved in a
+	servlet or JSP page by calling:
+
+	String value =
+	getServletConfig().getInitParameter("name");
+
+	where "name" matches the <param-name> element of
+	one of these initialization parameters.
+
+	You can define any number of servlets, including zero.
+	-->
+
+	<servlet>
+		<servlet-name>tester</servlet-name>
+		<description>a test servlet</description>
+		<servlet-class>TestServlet</servlet-class>
+	</servlet>
   
-  <servlet>
-    <servlet-name>gs3-library</servlet-name>
-    <description>standard gsdl3 library program: uses localsite and the default interface</description>
-    <servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
-    <init-param>
-      <param-name>library_name</param-name>
-      <param-value>gs3library</param-value>
-    </init-param>
-    <init-param>
-      <param-name>site_name</param-name>
-      <param-value>localsite</param-value>
-    </init-param>
-    <init-param>
-      <param-name>interface_name</param-name>
-      <param-value>default</param-value>
-    </init-param>
-    <init-param>
-      <param-name>default_lang</param-name>
-      <param-value>en</param-value>
-    </init-param>
-	<!--<init-param>
-	 <param-name>allow_client_side_xslt</param-name>
-	 <param-value>true</param-value>
-	</init-param>-->
+	<!-- For client side text fetching -->
+	<servlet>
+		<servlet-name>grabtext</servlet-name>
+		<description>Grabs text for client-side display with minimal overhead.</description>
+		<servlet-class>org.greenstone.gsdl3.ClientSideServlet</servlet-class>
+	</servlet>
+  
+  
+	<servlet>
+		<servlet-name>dev</servlet-name>
+		<description>A new skin engine still in development based on the standard gsdl3 library program</description>
+		<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
+		<init-param>
+			<param-name>library_name</param-name>
+			<param-value>dev</param-value>
+		</init-param>
+		<init-param>
+			<param-name>site_name</param-name>
+			<param-value>localsite</param-value>
+		</init-param>
+		<init-param>
+			<param-name>interface_name</param-name>
+			<param-value>oran</param-value>
+		</init-param>
+		<init-param>
+			<param-name>receptionist_class</param-name>
+			<param-value>DefaultReceptionist</param-value>
+		</init-param>
+		<init-param>
+			<param-name>default_lang</param-name>
+			<param-value>en</param-value>
+		</init-param>
+	</servlet>
+  
+	<servlet>
+		<servlet-name>gs2-library</servlet-name>
+		<description>Greenstone 2 lookalike library program: uses localsite with the gs2 interface</description>
+		<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
+		<init-param>
+			<param-name>library_name</param-name>
+			<param-value>library</param-value>
+		</init-param>
+		<init-param>
+			<param-name>site_name</param-name>
+			<param-value>localsite</param-value>
+		</init-param>
+		<init-param>
+			<param-name>interface_name</param-name>
+			<param-value>gs2</param-value>
+		</init-param>
+		<init-param>
+			<param-name>default_lang</param-name>
+			<param-value>en</param-value>
+		</init-param>
+		<init-param>
+			<param-name>session_expiration</param-name>
+			<param-value>1800</param-value>
+		</init-param>
+		<init-param>
+			<param-name>params_class</param-name>
+			<param-value>GS2Params</param-value>
+		</init-param>
+	</servlet>
+  
+	<servlet>
+		<servlet-name>nzdl-library</servlet-name>
+		<description>gsdl3 library program</description>
+		<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
+		<init-param>
+			<param-name>library_name</param-name>
+			<param-value>nzdl</param-value>
+		</init-param>
+		<init-param>
+			<param-name>site_name</param-name>
+			<param-value>nzdl</param-value>
+		</init-param>
+		<init-param>
+			<param-name>interface_name</param-name>
+			<param-value>nzdl</param-value>
+		</init-param>
+		<init-param>
+			<param-name>default_lang</param-name>
+			<param-value>en</param-value>
+		</init-param>
+		<init-param>
+			<param-name>params_class</param-name>
+			<param-value>NZDLParams</param-value>
+		</init-param>
+		<init-param>
+			<param-name>session_expiration</param-name>
+			<param-value>600</param-value>
+		</init-param>
   </servlet>
 
-  <!-- axis servlets -->
-  <servlet>
-    <servlet-name>AxisServlet</servlet-name>
-    <display-name>Apache-Axis Servlet</display-name>
-    <servlet-class>
-        org.apache.axis.transport.http.AxisServlet
-    </servlet-class>
-  </servlet>
+	<servlet>
+		<servlet-name>gateway</servlet-name>
+		<description>gsdl3 library based on gateway site and default interface. It uses SOAP to talk to localsite</description>
+		<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
+		<init-param>
+			<param-name>library_name</param-name>
+			<param-value>gateway</param-value>
+		</init-param>
+		<init-param>
+			<param-name>site_name</param-name>
+			<param-value>gateway</param-value>
+		</init-param>
+		<init-param>
+			<param-name>interface_name</param-name>
+			<param-value>default</param-value>
+		</init-param>
+		<init-param>
+			<param-name>default_lang</param-name>
+			<param-value>en</param-value>
+		</init-param>
+	</servlet>
+  
+	<servlet>
+		<servlet-name>gs3-library</servlet-name>
+		<description>standard gsdl3 library program: uses localsite and the default interface</description>
+		<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
+		<init-param>
+			<param-name>library_name</param-name>
+			<param-value>gs3library</param-value>
+		</init-param>
+		<init-param>
+			<param-name>site_name</param-name>
+			<param-value>localsite</param-value>
+		</init-param>
+		<init-param>
+			<param-name>interface_name</param-name>
+			<param-value>default</param-value>
+		</init-param>
+		<init-param>
+			<param-name>default_lang</param-name>
+			<param-value>en</param-value>
+		</init-param>
+		<!--<init-param>
+			<param-name>allow_client_side_xslt</param-name>
+			<param-value>true</param-value>
+		</init-param>-->
+	</servlet>
 
-  <servlet>
-    <servlet-name>AdminServlet</servlet-name>
-    <display-name>Axis Admin Servlet</display-name>
-    <servlet-class>
-        org.apache.axis.transport.http.AdminServlet
-    </servlet-class>
-    <load-on-startup>100</load-on-startup>
-  </servlet>
+	<!-- axis servlets -->
+	<servlet>
+		<servlet-name>AxisServlet</servlet-name>
+		<display-name>Apache-Axis Servlet</display-name>
+		<servlet-class>
+			org.apache.axis.transport.http.AxisServlet
+		</servlet-class>
+	</servlet>
 
-  <servlet>
-    <servlet-name>SOAPMonitorService</servlet-name>
-    <display-name>SOAPMonitorService</display-name>
-    <servlet-class>
-        org.apache.axis.monitor.SOAPMonitorService
-    </servlet-class>
-    <init-param>
-      <param-name>SOAPMonitorPort</param-name>
-      <param-value>5001</param-value>
-    </init-param>
-    <load-on-startup>100</load-on-startup>
-  </servlet>
-<servlet>
-         <servlet-name>oaiserver</servlet-name>
-	 <description>an oai servlet</description>
-         <servlet-class>org.greenstone.gsdl3.OAIServer</servlet-class>
-         <init-param>
-           <param-name>default_lang</param-name>
-           <param-value>en</param-value>
-         </init-param>
-         <init-param>
-           <param-name>site_name</param-name>
-           <!-- More than one site name can be specified using the comma separation style: localsite1,localsite2 -->
-           <param-value>localsite</param-value>
-         </init-param>
-</servlet>
-<servlet>
-    <servlet-name>mat</servlet-name>
-    <description>Metadata Analysis Tool</description>
-    <servlet-class>org.greenstone.mat.servlet.MatServlet</servlet-class>
-  </servlet>
+	<servlet>
+		<servlet-name>AdminServlet</servlet-name>
+		<display-name>Axis Admin Servlet</display-name>
+		<servlet-class>
+			org.apache.axis.transport.http.AdminServlet
+		</servlet-class>
+		<load-on-startup>100</load-on-startup>
+	</servlet>
 
-<!--
-<filter>
-  <filter-name>UrlRewriteFilter</filter-name>
-  <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
-</filter>
+	<servlet>
+		<servlet-name>SOAPMonitorService</servlet-name>
+		<display-name>SOAPMonitorService</display-name>
+		<servlet-class>
+			org.apache.axis.monitor.SOAPMonitorService
+		</servlet-class>
+		<init-param>
+			<param-name>SOAPMonitorPort</param-name>
+			<param-value>5001</param-value>
+		</init-param>
+		<load-on-startup>100</load-on-startup>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>oaiserver</servlet-name>
+		<description>an oai servlet</description>
+		<servlet-class>org.greenstone.gsdl3.OAIServer</servlet-class>
+		<init-param>
+			<param-name>default_lang</param-name>
+			<param-value>en</param-value>
+		</init-param>
+		<init-param>
+			<param-name>site_name</param-name>
+			<!-- More than one site name can be specified using the comma separation style: localsite1,localsite2 -->
+			<param-value>localsite</param-value>
+		</init-param>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>mat</servlet-name>
+		<description>Metadata Analysis Tool</description>
+		<servlet-class>org.greenstone.mat.servlet.MatServlet</servlet-class>
+	</servlet>
 
-<filter-mapping>
-  <filter-name>UrlRewriteFilter</filter-name>
-  <url-pattern>/*</url-pattern>
-</filter-mapping>
--->
+
+
+
  
     <!-- Define mappings that are used by the servlet container to
          translate a particular request URI (context-relative) to a
@@ -287,8 +287,9 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 
          will be mapped to the "controller" servlet.
 
- Note: context path is determined by the servlet container - 
- in Tomcat, specified in server.xml -kjdon
+		Note: context path is determined by the servlet container - 
+		in Tomcat, specified in server.xml -kjdon
+		
          You may define any number of servlet mappings, including zero.
          It is also legal to define more than one mapping for the same
          servlet, if you wish to.
@@ -308,64 +309,66 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
     
 
 <!--There is no need for this mapping, I think -->
-<servlet-mapping>
-      <servlet-name>oaiserver</servlet-name>
-      <url-pattern>/oaiserver</url-pattern>
-</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>oaiserver</servlet-name>
+		<url-pattern>/oaiserver</url-pattern>
+	</servlet-mapping>
 
-    <servlet-mapping>
-      <servlet-name>nzdl-library</servlet-name>
-      <url-pattern>/nzdl</url-pattern>
+	<servlet-mapping>
+		<servlet-name>nzdl-library</servlet-name>
+		<url-pattern>/nzdl</url-pattern>
     </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>tester</servlet-name>
-    <url-pattern>/testing</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>tester</servlet-name>
+		<url-pattern>/testing</url-pattern>
+	</servlet-mapping>
   
-  <servlet-mapping>
-    <servlet-name>dev</servlet-name>
-    <url-pattern>/dev</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>dev</servlet-name>
+		<url-pattern>/dev/*</url-pattern>
+	</servlet-mapping>
 
-  <servlet-mapping>
-    <servlet-name>gs2-library</servlet-name>
-    <url-pattern>/library</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>gs2-library</servlet-name>
+		<url-pattern>/library</url-pattern>
+	</servlet-mapping>
   
-  <servlet-mapping>
-    <servlet-name>gateway</servlet-name>
-    <url-pattern>/gateway</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>gateway</servlet-name>
+		<url-pattern>/gateway</url-pattern>
+	</servlet-mapping>
   
-  <servlet-mapping>
-    <servlet-name>gs3-library</servlet-name>
-    <url-pattern>/gs3library</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>gs3-library</servlet-name>
+		<url-pattern>/gs3library</url-pattern>
+	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>grabtext</servlet-name>
 		<url-pattern>/grabtext</url-pattern>
 	</servlet-mapping>
   
-  <!-- axis mappings -->
-  <servlet-mapping>
-    <servlet-name>AxisServlet</servlet-name>
-    <url-pattern>/servlet/AxisServlet</url-pattern>
-  </servlet-mapping>
+	<!-- axis mappings -->
+	<servlet-mapping>
+		<servlet-name>AxisServlet</servlet-name>
+		<url-pattern>/servlet/AxisServlet</url-pattern>
+	</servlet-mapping>
 
-  <servlet-mapping>
-    <servlet-name>AxisServlet</servlet-name>
-    <url-pattern>*.jws</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AxisServlet</servlet-name>
+		<url-pattern>*.jws</url-pattern>
+	</servlet-mapping>
 
-  <servlet-mapping>
-    <servlet-name>AxisServlet</servlet-name>
-    <url-pattern>/services/*</url-pattern>
-  </servlet-mapping>
-<servlet-mapping>
-    <servlet-name>mat</servlet-name>
-    <url-pattern>/mat</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>AxisServlet</servlet-name>
+		<url-pattern>/services/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet-mapping>
+		<servlet-name>mat</servlet-name>
+		<url-pattern>/mat</url-pattern>
+	</servlet-mapping>
+
 
   <!-- uncomment this if you want to use the SOAPMonitorService. You will also 
   need to copy the SOAPMonitorApplet*.class files from 
