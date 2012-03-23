@@ -55,7 +55,7 @@
 					}
 					else
 					{
-						if (!over)
+						if (!over && _imageZoomEnabled)
 						{
 							mover.fadeIn();
 							over = true;
