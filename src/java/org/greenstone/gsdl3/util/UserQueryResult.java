@@ -21,42 +21,51 @@ package org.greenstone.gsdl3.util;
 import java.util.Vector;
 import org.greenstone.gsdl3.util.UserTermInfo;
 
-public class UserQueryResult{
-    /** the list of UserInfo */
-    public Vector<UserTermInfo> users_=null;
+public class UserQueryResult
+{
+	/** the list of UserInfo */
+	public Vector<UserTermInfo> users = null;
 
-    UserQueryResult(){
-	users_=new Vector<UserTermInfo>();
-    }
-
-    public void clear(){
-	users_.clear();
-    }
-
-    public void addUserTerm(String username, String password, String groups, String accountstatus, String comment){
-	UserTermInfo ui=new UserTermInfo();
-	ui.username_=username;
-	ui.password_=password;
-	ui.groups_=groups;
-	ui.accountstatus_=accountstatus;
-	ui.comment_=comment;
-	users_.add(ui);
-    }
-
-    public Vector<UserTermInfo> getUserTerms(){
-	return users_;
-    }
-
-    public String toString(){
-	String result="";
-	for (int i=0;i<users_.size();i++){
-	    result +=((UserTermInfo)users_.elementAt(i)).toString()+", ";
+	UserQueryResult()
+	{
+		users = new Vector<UserTermInfo>();
 	}
-	
-	return result;
-    }
 
-    public int getSize(){
-	return users_.size();
-    }
+	public void clear()
+	{
+		users.clear();
+	}
+
+	public void addUserTerm(String username, String password, String groups, String accountstatus, String comment, String email)
+	{
+		UserTermInfo ui = new UserTermInfo();
+		ui.username = username;
+		ui.password = password;
+		ui.groups = groups;
+		ui.accountstatus = accountstatus;
+		ui.comment = comment;
+		ui.email = email;
+		users.add(ui);
+	}
+
+	public Vector<UserTermInfo> getUserTerms()
+	{
+		return users;
+	}
+
+	public String toString()
+	{
+		String result = "";
+		for (int i = 0; i < users.size(); i++)
+		{
+			result += ((UserTermInfo) users.elementAt(i)).toString() + ", ";
+		}
+
+		return result;
+	}
+
+	public int getSize()
+	{
+		return users.size();
+	}
 }
