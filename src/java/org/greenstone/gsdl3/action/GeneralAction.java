@@ -25,7 +25,6 @@ public class GeneralAction extends Action
 	/** process a request */
 	public Node process(Node message_node)
 	{
-
 		Element message = this.converter.nodeToElement(message_node);
 
 		// the result
@@ -47,7 +46,7 @@ public class GeneralAction extends Action
 		{
 			String optionName = (String) params.get("configChangeName");
 			String optionValue = (String) params.get("configChangeValue");
-			
+
 			changeConfig(optionName, optionValue);
 		}
 
@@ -83,7 +82,6 @@ public class GeneralAction extends Action
 		if (request_type.equals("r") || request_type.equals("s"))
 		{
 			//do the request
-
 			Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 			Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 
@@ -103,6 +101,13 @@ public class GeneralAction extends Action
 				GSXML.addParametersToList(this.doc, param_list, service_params);
 				mr_query_request.appendChild(param_list);
 			}
+
+			Element userInformation = (Element) GSXML.getChildByTagName(request, GSXML.USER_INFORMATION_ELEM);
+			if (userInformation != null)
+			{
+				mr_query_request.appendChild(this.doc.importNode(userInformation, true));
+			}
+			mr_query_request.setAttribute("remoteAddress", request.getAttribute("remoteAddress"));
 
 			Element mr_query_response = (Element) this.mr.process(mr_query_message);
 			Element result_response = (Element) GSXML.getChildByTagName(mr_query_response, GSXML.RESPONSE_ELEM);
@@ -143,15 +148,15 @@ public class GeneralAction extends Action
 
 		return result;
 	}
-	
-	protected void changeConfig (String optionName, String optionValue)
+
+	protected void changeConfig(String optionName, String optionValue)
 	{
-		if(this.config_params.get(optionName) != null)
+		if (this.config_params.get(optionName) != null)
 		{
 			this.config_params.put(optionName, optionValue);
-			
-			File interfaceConfigFile = new File(GSFile.interfaceConfigFile(GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), (String)this.config_params.get("interface_name"))));
-			
+
+			File interfaceConfigFile = new File(GSFile.interfaceConfigFile(GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), (String) this.config_params.get("interface_name"))));
+
 			Document interfaceXML = null;
 			try
 			{
@@ -162,23 +167,23 @@ public class GeneralAction extends Action
 				Element optionListElem = (Element) GSXML.getChildByTagName(topElement, "optionList");
 
 				NodeList optionList = optionListElem.getElementsByTagName("option");
-				
-				for(int i = 0; i < optionList.getLength(); i++)
+
+				for (int i = 0; i < optionList.getLength(); i++)
 				{
-					Element currentOption = (Element)optionList.item(i);
-					if(currentOption.getAttribute(GSXML.NAME_ATT) != null && currentOption.getAttribute(GSXML.NAME_ATT).equals(optionName))
+					Element currentOption = (Element) optionList.item(i);
+					if (currentOption.getAttribute(GSXML.NAME_ATT) != null && currentOption.getAttribute(GSXML.NAME_ATT).equals(optionName))
 					{
 						currentOption.setAttribute(GSXML.VALUE_ATT, optionValue);
 					}
 				}
-				
+
 				DOMSource source = new DOMSource(interfaceXML);
 				Result xmlresult = new StreamResult(interfaceConfigFile);
 
 				Transformer transformer = TransformerFactory.newInstance().newTransformer();
 				transformer.transform(source, xmlresult);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				ex.printStackTrace();
 			}
