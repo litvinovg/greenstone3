@@ -686,6 +686,7 @@ table{
 	height:100px;
 	margin: 3px;
 	text-align: center;
+	vertical-align: bottom;
 }
 
 /* ------- SPATIAL COLLECTIONS ------- */
