@@ -245,6 +245,7 @@
 						</div>
 					</td>
 				</tr></table>
+				<xsl:call-template name="document-editor-language-fragments"/>
 			</xsl:if>
 
 			<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']) or /page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']/@value='true'">
