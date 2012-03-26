@@ -391,6 +391,47 @@
 		</xsl:if>
 	</xsl:template>
 	
+	<xsl:template name="document-editor-language-fragments">
+		<script type="text/javascript">
+			<xsl:text disable-output-escaping="yes">
+				gs.text = new Array();
+				gs.text.dse = new Array();
+				gs.text.dse.no_docs="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.no_docs')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.untitled="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.untitled')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.delete_section="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.delete_section')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.edit="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.edit')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.hide="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.hide')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.add_sub_section="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.add_sub_section')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.duplicate="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.duplicate')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.error_saving="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.error_saving')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.save_changes="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.save_changes')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.saving="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.saving')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.modifying_archives="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.modifying_archives')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.empty_collection_list="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.empty_collection_list')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.could_not_build_p1="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.could_not_build_p1')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.could_not_build_p2="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.could_not_build_p2')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.could_not_activate_p1="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.could_not_activate_p1')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.could_not_activate_p2="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.could_not_activate_p2')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.activating="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.activating')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.building="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.building')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.could_not_check_status_p1="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.could_not_check_status_p1')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.could_not_check_status_p2a="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.could_not_check_status_p2a')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.could_not_check_status_p2b="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.could_not_check_status_p2b')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.error_saving_changes="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.error_saving_changes')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.error_code="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.error_code')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.error_reason="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.error_reason')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.error_line="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.error_line')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.xml_error="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.xml_error')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.browse_cannot_validate_xml="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.browse_cannot_validate_xml')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.add_new_metadata="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.add_new_metadata')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.no_value_given="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.no_value_given')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.create_new_document="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.create_new_document')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.untitled_section="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.untitled_section')"/><xsl:text disable-output-escaping="yes">";
+				gs.text.dse.insert_new_section="</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.insert_new_section')"/><xsl:text disable-output-escaping="yes">";
+			</xsl:text>
+		</script>
+	</xsl:template>
+	
 	<xsl:template name="map-scripts">
 		<meta content="initial-scale=1.0, user-scalable=no" name="viewport"/>
 		<script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"><xsl:text> </xsl:text></script>
