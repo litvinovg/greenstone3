@@ -10,7 +10,7 @@
 	<xsl:import href="layouts/main.xsl"/>
 	
 	<!-- set page title -->
-	<xsl:template name="pageTitle">Document Basket</xsl:template>
+	<xsl:template name="pageTitle"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'db.doc_basket')"/></xsl:template>
 	
 	<!-- set page breadcrumbs -->
 	<xsl:template name="breadcrumbs"><gslib:siteLink/><gslib:rightArrow/> 
@@ -34,6 +34,8 @@
 					<xsl:value-of select="@title"/>
 				</a>
 			</xsl:for-each>
+			
+			<xsl:call-template name="document-editor-language-fragments"/>
 		</xsl:if>
 	</xsl:template>
 
