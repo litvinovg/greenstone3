@@ -177,6 +177,7 @@ function addCollectionToBuild(collection)
 
 function save()
 {
+	//This works in most cases but will not work when taking a doc from one collection to another, will need to be fixed at some point
 	var collection;
 	if(gs.cgiParams.c && gs.cgiParams.c != "")
 	{
@@ -203,8 +204,8 @@ function save()
 		var valueCell = cells[1];
 		var value = valueCell.innerHTML;
 		
-		gs.functions.removeArchivesMetadata(collection /*bad*/, "localsite" /*bad*/, docID, name, null, value, function(){console.log("REMOVED ARCHIVES");});
-		addCollectionToBuild(collection); /*bad*/
+		gs.functions.removeArchivesMetadata(collection, gs.xsltParams.site_name, docID, name, null, value, function(){console.log("REMOVED ARCHIVES");});
+		addCollectionToBuild(collection);
 		
 		removeFromParent(currentRow);
 	}
@@ -231,11 +232,11 @@ function save()
 
 			if(changedElem.originalValue)
 			{
-				gs.functions.setArchivesMetadata(collection, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, changedElem.originalValue, "override", function(){console.log("SAVED ARCHIVES");});
+				gs.functions.setArchivesMetadata(collection, gs.xsltParams.site_name, docID, name, null, changedElem.innerHTML, changedElem.originalValue, "override", function(){console.log("SAVED ARCHIVES");});
 			}
 			else
 			{
-				gs.functions.setArchivesMetadata(collection, "localsite" /*bad*/, docID, name, null, changedElem.innerHTML, null, "accumulate", function(){console.log("SAVED ARCHIVES");});
+				gs.functions.setArchivesMetadata(collection, gs.xsltParams.site_name, docID, name, null, changedElem.innerHTML, null, "accumulate", function(){console.log("SAVED ARCHIVES");});
 			}
 			changedElem.originalValue = changedElem.innerHTML;
 			addCollectionToBuild(collection);
@@ -281,10 +282,10 @@ function save()
 			var errorElems;
 			if(!xml || checkForErrors(xml))
 			{
-				alert("There was an error saving, aborting");
+				alert(gs.text.dse.error_saving);
 			
 				var saveButton = document.getElementById("saveButton");
-				saveButton.innerHTML = "Save changes";
+				saveButton.innerHTML = gs.text.dse.save_changes;
 				saveButton.disabled = false;
 				
 				_statusBar.removeStatus(statusID);
@@ -299,10 +300,10 @@ function save()
 	if(_collectionsToBuild.length > 0)
 	{
 		var saveButton = document.getElementById("saveButton");
-		saveButton.innerHTML = "Saving...";
+		saveButton.innerHTML = gs.text.dse.saving + "...";
 		saveButton.disabled = true;
 
-		statusID = _statusBar.addStatus("Modifying archive files...");
+		statusID = _statusBar.addStatus(gs.text.dse.modifying_archives + "...");
 		ajax.send("a=g&rt=r&s=DocumentExecuteTransaction&s1.transactions=" + request);
 	}
 }
@@ -312,8 +313,8 @@ function buildCollections(collections)
 	var saveButton = document.getElementById("saveButton");
 	if(!collections || collections.length == 0)
 	{
-		console.log("List of collections to build is empty");
-		saveButton.innerHTML = "Save changes";
+		console.log(gs.text.dse.empty_collection_list);
+		saveButton.innerHTML = gs.text.save_changes;
 		saveButton.disabled = false;
 		return;
 	}
@@ -333,10 +334,10 @@ function buildCollections(collections)
 
 				if(!xml || checkForErrors(xml))
 				{
-					alert("Could not build collection -> " + collections[counter] + ", aborting");
+					alert(gs.text.dse.could_not_build_p1 + " " + collections[counter] + gs.text.dse.could_not_build_p2);
 					
 					_statusBar.removeStatus(statusID);
-					saveButton.innerHTML = "Save changes";
+					saveButton.innerHTML = gs.text.dse.save_changes;
 					saveButton.disabled = false;
 					
 					return;
@@ -358,10 +359,10 @@ function buildCollections(collections)
 							
 							if(!xml || checkForErrors(xml))
 							{
-								alert("Could not activate collection -> " + collections[counter] + ", aborting");
+								alert(gs.text.dse.could_not_activate_p1 + " " + collections[counter] + gs.text.dse.could_not_activate_p2);
 								
 								_statusBar.removeStatus(statusID);
-								saveButton.innerHTML = "Save changes";
+								saveButton.innerHTML = gs.text.dse.save_changes;
 								saveButton.disabled = false;
 								
 								return;
@@ -386,18 +387,18 @@ function buildCollections(collections)
 									_transactions = new Array();
 
 									_statusBar.removeStatus(statusID);
-									saveButton.innerHTML = "Save changes";
+									saveButton.innerHTML = gs.text.dse.save_changes;
 									saveButton.disabled = false;
 								});
 							}
 						}
 					}
-					_statusBar.changeStatus(statusID, "Activating collection " + collections[counter] + "...");
+					_statusBar.changeStatus(statusID, gs.text.dse.activating + " " + collections[counter] + "...");
 					localAjax.send();
 				});
 			}
 		}
-		statusID = _statusBar.addStatus("Building collection " + collections[counter] + "...");
+		statusID = _statusBar.addStatus(gs.text.dse.activating + " " + collections[counter] + "...");
 		ajax.send();
 	}
 	buildFunction();
@@ -420,10 +421,10 @@ function startCheckLoop(pid, serverFunction, statusID, callbackFunction)
 				
 				if(!xml || checkForErrors(xml))
 				{
-					alert("Could not check status of " + serverFunction + ", there was an error in the XML, aborting");
+					alert(gs.text.dse.could_not_check_status_p1 + " " + serverFunction + gs.text.dse.could_not_check_status_p2a);
 					
 					_statusBar.removeStatus(statusID);
-					saveButton.innerHTML = "Save changes";
+					saveButton.innerHTML = gs.text.dse.save_changes;
 					saveButton.disabled = false;
 					
 					return;
@@ -438,10 +439,10 @@ function startCheckLoop(pid, serverFunction, statusID, callbackFunction)
 				}
 				else if (code == HALTED || code == ERROR)
 				{
-					alert("Could not check status of " + serverFunction + ", there was an error on the server, aborting");
+					alert(gs.text.dse.could_not_check_status_p1 + " " + serverFunction + gs.text.dse.could_not_check_status_p2b);
 					
 					_statusBar.removeStatus(statusID);
-					saveButton.innerHTML = "Save changes";
+					saveButton.innerHTML = gs.text.dse.save_changes;
 					saveButton.disabled = false;
 				}
 				else
@@ -484,7 +485,7 @@ function checkForErrors(xml)
 	
 	if(errorElems && errorElems.length > 0)
 	{
-		var errorString = "There was an error saving your changes: ";
+		var errorString = gs.text.dse.error_saving_changes + ": ";
 		for(var i = 0; i < errorElems.length; i++)
 		{
 			errorString += " " + errorElems.item(i).firstChild.nodeValue;
@@ -506,9 +507,9 @@ function validateXML(txt)
 
 		if(xmlDoc.parseError.errorCode!=0)
 		{
-			txt = "Error Code: " + xmlDoc.parseError.errorCode + "\n";
-			txt = txt + "Error Reason: " + xmlDoc.parseError.reason;
-			txt = txt + "Error Line: " + xmlDoc.parseError.line;
+			txt = dse.error_code + ": " + xmlDoc.parseError.errorCode + "\n";
+			txt = txt + dse.error_reason + ": " + xmlDoc.parseError.reason;
+			txt = txt + dse.error_line + ": " + xmlDoc.parseError.line;
 			console.log(txt);
 			return null;
 		}
@@ -523,7 +524,7 @@ function validateXML(txt)
 
 		if (xmlDoc.getElementsByTagName("parsererror").length > 0)
 		{
-			console.log("There was an error parsing the XML");
+			console.log(gs.text.dse.xml_error);
 			return null;
 		}
 		
@@ -531,7 +532,7 @@ function validateXML(txt)
 	}
 	else
 	{
-		console.log('Your browser cannot handle XML validation');
+		console.log(gs.text.dse.browse_cannot_validate_xml);
 	}
 	return null;
 }
@@ -640,13 +641,13 @@ function addFunctionalityToTable(table)
 	table.metaNameField = metaNameField;
 	
 	var addRowButton = document.createElement("BUTTON");
-	addRowButton.innerHTML = "Add new metadata";
+	addRowButton.innerHTML = gs.text.dse.add_new_metadata;
 	addRowButton.onclick = function() 
 	{ 
 		var name = metaNameField.value;
 		if(!name || name == "")
 		{
-			console.log("No value given for new metadata name");
+			console.log(gs.text.dse.no_value_given);
 			return;
 		}
 		
@@ -737,7 +738,7 @@ function createTopMenuBar()
 
 	//The "Save changes" button
 	var saveButton = document.createElement("BUTTON");
-	saveButton.innerHTML = "Save changes";
+	saveButton.innerHTML = gs.text.dse.save_changes;
 	saveButton.setAttribute("onclick", "save();");
 	saveButton.setAttribute("id", "saveButton");
 	saveCell.appendChild(saveButton);
@@ -750,7 +751,7 @@ function createTopMenuBar()
 
 	//The "Create new document" button
 	var newDocButton = document.createElement("BUTTON");
-	newDocButton.innerHTML = "Create new document";
+	newDocButton.innerHTML = gs.text.dse.create_new_document;
 	newDocButton.setAttribute("onclick", "createNewDocumentArea();");
 	newDocCell.appendChild(newDocButton);
 
@@ -783,7 +784,7 @@ function getMetadataFromNode(node, name)
 		
 		currentNode = currentNode.nextSibling;
 	}
-	return "{UNTITLED}";
+	return "";
 }
 
 function storeMetadata(node, listItem)
@@ -870,12 +871,12 @@ function toggleTextDiv(section)
 		if(isExpanded(textDiv))
 		{
 			textDiv.style.display = "none";
-			section.menu.editTextLink.innerHTML = "edit";
+			section.menu.editTextLink.innerHTML = gs.text.dse.edit;
 		}
 		else
 		{
 			textDiv.style.display = "block";
-			section.menu.editTextLink.innerHTML = "hide";
+			section.menu.editTextLink.innerHTML = gs.text.dse.hide;
 		}
 	}
 }
@@ -911,7 +912,7 @@ function createSectionTitle(text)
 	}
 	else
 	{
-		textSpan.appendChild(document.createTextNode(" [UNTITLED SECTION] "));
+		textSpan.appendChild(document.createTextNode(" [" + gs.text.dse.untitled_section + "] "));
 	}
 	return textSpan;
 }
@@ -936,7 +937,7 @@ function createDraggableNewSection(parent)
 {
 	var newSecLI = document.createElement("LI");
 	var newSpan = document.createElement("SPAN");
-	newSpan.innerHTML = "Insert new section ";
+	newSpan.innerHTML = gs.text.dse.insert_new_section + " ";
 	
 	newSecLI.sectionTitle = newSpan;
 	newSecLI.appendChild(newSpan);

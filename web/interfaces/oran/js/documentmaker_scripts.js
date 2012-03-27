@@ -36,7 +36,7 @@ function initDocumentMaker()
 	
 	if(docLinks.length == 0)
 	{
-		document.getElementById("gs_content").innerHTML = "No documents in the Document Basket";
+		document.getElementById("gs_content").innerHTML = gs.text.dse.no_docs;
 		return;
 	}
 	
@@ -240,7 +240,7 @@ function createNewDocumentArea()
 	topLevelUL.appendChild(textDiv);
 	
 	//Add a title to the top-level item
-	var title = createSectionTitle("UNTITLED DOCUMENT");
+	var title = createSectionTitle(gs.text.dse.untitled);
 	topLevelLI.appendChild(title);
 	topLevelLI.sectionTitle = title;
 	
@@ -292,7 +292,7 @@ function createPlaceholder(parent, parentList, mouseEvents)
 		
 		//Create the delete section link
 		var deleteSectionLink = document.createElement("A");
-		deleteSectionLink.innerHTML = "delete section";
+		deleteSectionLink.innerHTML = gs.text.dse.delete_section;
 		deleteSectionLink.setAttribute("href", "javascript:;");
 		deleteSectionLink.setAttribute("class", "menuLink");
 		deleteSectionLink.style.display = "none";
@@ -508,7 +508,7 @@ function createSectionMenu(section)
 	
 	//"Edit" link
 	var toggleLink = document.createElement("A");
-	toggleLink.innerHTML = "edit";
+	toggleLink.innerHTML = gs.text.dse.edit;
 	toggleLink.setAttribute("class", "menuLink");
 	toggleLink.setAttribute("href", "javascript:;");
 	toggleLink.onclick = function(){toggleTextDiv(section);};
@@ -519,7 +519,7 @@ function createSectionMenu(section)
 	menuBar.appendChild(document.createTextNode(" "));
 		
 	var newSectionLink = document.createElement("A");
-	newSectionLink.innerHTML = "add&nbsp;sub-section";
+	newSectionLink.innerHTML = gs.text.dse.add_sub_section.replace(/ /g, "&nbsp;");
 	newSectionLink.setAttribute("class", "menuLink");
 	newSectionLink.setAttribute("href", "javascript:;");
 	newSectionLink.onclick = function()
@@ -541,7 +541,7 @@ function createSectionMenu(section)
 		
 	//"Duplicate" link
 	var duplicateLink = document.createElement("A");
-	duplicateLink.innerHTML = "duplicate";
+	duplicateLink.innerHTML = gs.text.dse.duplicate;
 	duplicateLink.setAttribute("class", "menuLink");
 	duplicateLink.setAttribute("href", "javascript:;");
 	duplicateLink.onclick = function()
