@@ -48,7 +48,7 @@ public class GSXML
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.GSXML.class.getName());
 
-	// greenstone xml elements
+	// greenstone message xml elements
 	public static final String MESSAGE_ELEM = "message";
 	public static final String REQUEST_ELEM = "request";
 	public static final String RESPONSE_ELEM = "response";
@@ -91,6 +91,7 @@ public class GSXML
 	public static final String BROWSE_ELEM = "browse";
 	public static final String DISPLAY_ELEM = "display";
 	public static final String LEVEL_ELEM = "level";
+        public static final String REPLACE_ELEM = "replace";
 
 	public static final String DBINFO_ELEM = "dbInfo";
 	public static final String DBNAME_ATT = "dbname";
@@ -121,7 +122,8 @@ public class GSXML
 
 	// add on to another elem type to get a list of that type
 	public static final String LIST_MODIFIER = "List";
-
+  // used to refer back to another element type
+        public static final String REF_MODIFIER = "Ref";
 	// greenstone xml attributes
 	public static final String COLLECTION_ATT = "collection";
 	public static final String NAME_ATT = "name";
@@ -155,6 +157,8 @@ public class GSXML
 	public static final String NODE_CONTENT_ELEM = "nodeContent";
 	public static final String NODE_STRUCTURE_ELEM = "nodeStructure";
 	public static final String NODE_ID_ATT = "nodeID";
+        public static final String HREF_ID_ATT = "hrefId"; // for ids that need translating
+        public static final String ID_MOD_ATT = "idMod"; // might hold .rt etc for hrefIds
 	public static final String NODE_OID = "oid";
 	public static final String NODE_NAME_ATT = "nodeName";
 	public static final String NODE_TYPE_ATT = "nodeType";

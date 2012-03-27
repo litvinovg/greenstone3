@@ -77,7 +77,7 @@ abstract public class MacroResolver {
     }
     
     public void addMacros(Element replace_list_elem) {
-	NodeList replaces = replace_list_elem.getElementsByTagName("replace");
+	NodeList replaces = replace_list_elem.getElementsByTagName(GSXML.REPLACE_ELEM);
 	for (int i=0; i<replaces.getLength(); i++) {
 	    Element e = (Element)replaces.item(i);
 	    String scope = e.getAttribute("scope");

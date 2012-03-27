@@ -24,34 +24,34 @@ import java.util.HashMap;
 public class GSParams
 {
 
+  // cgi parameter names
 	public static final String ACTION = "a"; // the major type of action- eg query or browse or process
 	public static final String SUBACTION = "sa"; // subtype of action if we want different processing than the default
 	public static final String REQUEST_TYPE = "rt"; // whether the request is just to display the service form, or to actually do a request to the service
 	public static final String RESPONSE_ONLY = "ro"; // if == 1 do the request and pass back the response xml - no page formatting
 	public static final String OUTPUT = "o"; // if processing is to be done, what type of output - html/xml/other??
-	public static final String HTTPHEADERFIELDS = "hhf";
 	public static final String SERVICE = "s"; // the name of the service
+
 	public static final String CLUSTER = "c"; // these two are the same
-	public static final String SYSTEM = "s";
-	public static final String CONFIGURE = "c";
 	public static final String COLLECTION = "c";
+	public static final String COLLECTION_TYPE = "ct"; // collection type - mg, mgpp, lucene etc
+
 	public static final String LANGUAGE = "l";
 	public static final String DOCUMENT = "d";
 	public static final String DOCUMENT_TYPE = "dt";
-	public static final String RESOURCE = "r";
+  public static final String HREF = "href"; // url. might be an external url, or a relative one that needs translating
+  public static final String RELATIVE_LINK = "rl"; // whether the href url is relative to the collection or not.
+  public static final String EXTERNAL_LINK_TYPE = "el"; // for an external link, go direct to the page or frame it in the collection
 	public static final String PROCESS_ID = "pid"; // if a request wasn't completed, this identifies the request - used when asking for a status update
-	public static final String COLLECTION_TYPE = "ct";
 
-	public static final String SIBLING = "sib"; // this should not be in here
+	
+  public static final String HTTPHEADERFIELDS = "hhf";
+
 	// internal configure args
 	public static final String SYSTEM_SUBSET = "ss";
 	public static final String SYSTEM_CLUSTER = "sc";
 	public static final String SYSTEM_MODULE_NAME = "sn";
 	public static final String SYSTEM_MODULE_TYPE = "st";
-
-	public static final String EXPAND_DOCUMENT = "ed";
-	public static final String EXPAND_CONTENTS = "ec";
-	public static final String REALISTIC_BOOK = "book";
 
 	// used for filtering out a piece of the final page
 	public static final String EXCERPT_ID = "excerptid";
@@ -67,6 +67,12 @@ public class GSParams
 	public static final String S_NEW_PASSWORD = "s1.newPassword";
 	public static final String S_OLD_PASSWORD = "s1.oldPassword";
 
+  // some standard arg values
+  public static final String SYSTEM_ACTION = "s";
+ 
+  public static final String EXTERNAL_LINK_TYPE_DIRECT = "direct";
+  public static final String EXTERNAL_LINK_TYPE_FRAMED = "frame";
+
 	protected HashMap param_map = null;
 
 	public GSParams()
@@ -78,11 +84,13 @@ public class GSParams
 		addParameter(SUBACTION, false);
 		addParameter(REQUEST_TYPE, false);
 		addParameter(RESPONSE_ONLY, false);
-		addParameter(CLUSTER, false); // we don't want to save collection 
-		//addParameter(COLLECTION); 
+		addParameter(CLUSTER, false); // we don't want to save cluster/collection 
 		addParameter(LANGUAGE, true);
 		addParameter(DOCUMENT, true);
-		addParameter(RESOURCE, true);
+		addParameter(DOCUMENT_TYPE, true);
+		// should the following two just be in doc action??
+		addParameter(HREF, false);
+		addParameter(RELATIVE_LINK, false);
 		addParameter(OUTPUT, false);
 		addParameter(SERVICE, false);
 		addParameter(PROCESS_ID, true);
@@ -90,11 +98,6 @@ public class GSParams
 		addParameter(SYSTEM_CLUSTER, false);
 		addParameter(SYSTEM_MODULE_NAME, false);
 		addParameter(SYSTEM_MODULE_TYPE, false);
-		addParameter(SIBLING, false);
-		addParameter(DOCUMENT_TYPE, true);
-		addParameter(EXPAND_DOCUMENT, false);
-		addParameter(EXPAND_CONTENTS, false);
-		addParameter(REALISTIC_BOOK, false);
 		addParameter(INLINE_TEMPLATE, false);
 		addParameter(DISPLAY_METADATA, false);
 		addParameter(PASSWORD, false);
@@ -102,11 +105,8 @@ public class GSParams
 		addParameter(S_NEW_PASSWORD, false);
 		addParameter(S_OLD_PASSWORD, false);
 
-		//addParameter();
-		// ugly hack so we don't save the extlink param
-		addParameter("s0.ext", false);
-		addParameter(COLLECTION_TYPE, true); // collection type - mg or mgpp
-
+		addParameter(COLLECTION_TYPE, true); 
+		addParameter(EXTERNAL_LINK_TYPE, false);
 		// filtering args must be specified each time
 		addParameter(EXCERPT_ID, false);
 		addParameter(EXCERPT_TAG, false);
@@ -140,6 +140,7 @@ public class GSParams
 
 	public boolean shouldSave(String name)
 	{
+	  // p. is used to store previous settings
 		if (name.startsWith("p."))
 			return false;
 		Param p = (Param) this.param_map.get(name);
