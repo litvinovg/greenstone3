@@ -333,16 +333,62 @@ function SliderWidget(_links)
 		filter.keyup(function()
 		{
 			var currentValue = filter.val();
+			var isRange = (currentValue.search(/\d+-\d+/) != -1)
+			
+			var found = false;
 			for(var i = 0; i < _titles.length; i++)
 			{
-				var currentTitle = _titles[i];
-				if(currentTitle[0].search(/*"^" +*/ currentValue.replace(/\./g, "\\.")) != -1)
+				if(_titles[i][0] == currentValue)
 				{
-					currentTitle[1].cell.style.display = "table-cell";
+					found = true;
 				}
-				else
+			}
+			
+			if(!found && isRange)
+			{
+				var firstNumber = currentValue.replace(/^(\d+)-\d+$/, "$1");
+				var secondNumber = currentValue.replace(/^\d+-(\d+)$/, "$1");
+				
+				if(firstNumber <= secondNumber)
 				{
-					currentTitle[1].cell.style.display = "none";
+					var matchingTitles = new Array();
+					for(var i = firstNumber; i <= secondNumber; i++)
+					{
+						var numString = i + "";
+						for(var j = 0; j < _titles.length; j++)
+						{
+							var currentTitle = _titles[j];
+							if(currentTitle[0].search(numString) != -1)
+							{
+								matchingTitles.push(currentTitle);
+							}
+						}
+					}
+					
+					for(var i = 0; i < _titles.length; i++)
+					{
+						_titles[i][1].cell.style.display = "none";
+					}
+					
+					for(var i = 0; i < matchingTitles.length; i++)
+					{
+						matchingTitles[i][1].cell.style.display = "table-cell";
+					}
+				}
+			}
+			else
+			{
+				for(var i = 0; i < _titles.length; i++)
+				{
+					var currentTitle = _titles[i];
+					if(currentTitle[0].search(currentValue.replace(/\./g, "\\.")) != -1)
+					{
+						currentTitle[1].cell.style.display = "table-cell";
+					}
+					else
+					{
+						currentTitle[1].cell.style.display = "none";
+					}
 				}
 			}
 		});
