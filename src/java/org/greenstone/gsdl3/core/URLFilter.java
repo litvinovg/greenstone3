@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.action.DocumentAction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -152,7 +153,7 @@ public class URLFilter implements Filter
 					{
 						gRequest.setParameter(GSParams.DOCUMENT, segments[i + 1]);
 
-						additionalParameters = new String[] { GSParams.ACTION, GSParams.DOCUMENT_TYPE, GSParams.EXPAND_DOCUMENT };
+						additionalParameters = new String[] { GSParams.ACTION, GSParams.DOCUMENT_TYPE, DocumentAction.EXPAND_DOCUMENT_ARG };
 						defaultParamValues = new String[] { "d", "hierarchy", "1" };
 					}
 					//PAGE
