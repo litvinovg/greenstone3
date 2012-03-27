@@ -147,7 +147,7 @@ public class TransformingReceptionist extends Receptionist
 			ac.setConfigParams(this.config_params);
 			ac.setMessageRouter(this.mr);
 			ac.configure();
-			ac.getActionParameters(this.params);
+			ac.addActionParameters(this.params);
 			this.action_map.put(action_name, ac);
 
 			// now do the xslt map
