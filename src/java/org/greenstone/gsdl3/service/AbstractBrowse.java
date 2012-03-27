@@ -86,7 +86,7 @@ public abstract class AbstractBrowse
       	if (macro_resolver != null) {
 	    macro_resolver.setSiteDetails(this.site_http_address, this.cluster_name, this.library_name);
 	    // set up the macro resolver
-	    Element replacement_elem = (Element)GSXML.getChildByTagName(extra_info, "replaceList");
+	    Element replacement_elem = (Element)GSXML.getChildByTagName(extra_info, GSXML.REPLACE_ELEM+GSXML.LIST_MODIFIER);
 	    if (replacement_elem != null) {
 		macro_resolver.addMacros(replacement_elem);
 	    }
