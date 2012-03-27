@@ -45,8 +45,6 @@ import org.apache.log4j.*;
 
 /**
  * Abstract class for Document Retrieval Services
- * 
- * @author <a href="mailto:greenstone@cs.waikato.ac.nz">Katherine Don</a>
  */
 
 public abstract class AbstractDocumentRetrieve extends ServiceRack
@@ -73,7 +71,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	protected static final String INFO_SIB_POS = "siblingPosition";
 
 	// means the id is not a greenstone id and needs translating
-	protected static final String EXTID_PARAM = "ext";
+  //	protected static final String EXTID_PARAM = "ext";
 
 	protected Element config_info = null; // the xml from the config file
 
@@ -149,19 +147,19 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		{
 			macro_resolver.setSiteDetails(this.site_http_address, this.cluster_name, this.getLibraryName());
 			// set up the macro resolver
-			Element replacement_elem = (Element) GSXML.getChildByTagName(extra_info, "replaceList");
+			Element replacement_elem = (Element) GSXML.getChildByTagName(extra_info, GSXML.REPLACE_ELEM+GSXML.LIST_MODIFIER);
 			if (replacement_elem != null)
 			{
 				macro_resolver.addMacros(replacement_elem);
 			}
 			// look for any refs to global replace lists
-			NodeList replace_refs_elems = extra_info.getElementsByTagName("replaceListRef");
+			NodeList replace_refs_elems = extra_info.getElementsByTagName(GSXML.REPLACE_ELEM+GSXML.LIST_MODIFIER+GSXML.REF_MODIFIER);
 			for (int i = 0; i < replace_refs_elems.getLength(); i++)
 			{
 				String id = ((Element) replace_refs_elems.item(i)).getAttribute("id");
 				if (!id.equals(""))
 				{
-					Element replace_list = GSXML.getNamedElement(this.router.config_info, "replaceList", "id", id);
+					Element replace_list = GSXML.getNamedElement(this.router.config_info, GSXML.REPLACE_ELEM+GSXML.LIST_MODIFIER, "id", id);
 					if (replace_list != null)
 					{
 						macro_resolver.addMacros(replace_list);
@@ -205,7 +203,6 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 			return result;
 		}
 
-		boolean external_id = false;
 		// The metadata information required
 		ArrayList metadata_names_list = new ArrayList();
 		boolean all_metadata = false;
@@ -224,10 +221,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 				}
 				metadata_names_list.add(metadata);
 			}
-			else if (param.getAttribute(GSXML.NAME_ATT).equals(EXTID_PARAM) && GSXML.getValue(param).equals("1"))
-			{
-				external_id = true;
-			}
+			
 			param = (Element) param.getNextSibling();
 		}
 
@@ -264,73 +258,50 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		{
 			Element request_node = (Element) request_nodes.item(i);
 			String node_id = request_node.getAttribute(GSXML.NODE_ID_ATT);
-
-			boolean is_external_link = false;
-			if (!node_id.startsWith("HASH") && !node_id.startsWith("D"))
-			{
-				if (node_id.endsWith(".rt"))
-				{
-					node_id = getHrefOID(node_id.substring(0, node_id.length() - 3));
-					if (node_id != null)
-					{
-						node_id += ".rt";
-					}
-					else
-					{
-						is_external_link = true;
-					}
-				}
-				else
-				{
-					node_id = getHrefOID(node_id);
-					if (node_id == null)
-					{
-						is_external_link = true;
-					}
-				}
+			boolean is_href_id = false;
+			if (node_id.equals("")) {
+			  node_id = getGreenstoneIdFromHref(request_node);
+			  if(node_id == null) {
+			    // **** TODO, is this good enough???
+			    request_node.setAttribute("external_link", "true");
+			    continue;
+			  }
+			 
 			}
-			if (!is_external_link)
-			{
-				if (external_id)
-				{
-					// can we have .pr etc extensions with external ids?
-					node_id = translateExternalId(node_id);
-				}
-				else if (idNeedsTranslating(node_id))
-				{
-					node_id = translateId(node_id);
-				}
-			}
+			  
+			System.err.println("getting meta for node"+node_id);
 
+			// may have modifiers .rt, .1.ss etc
+			if (idNeedsTranslating(node_id))
+			{
+			    node_id = translateId(node_id);
+			}
+			
 			if (node_id == null)
 			{
 				continue;
 			}
-			if (!is_external_link)
-			{
-				try
-				{
-					Element metadata_list = getMetadataList(node_id, all_metadata, metadata_names_list);
-					if(metadata_list != null)
-					{
-						request_node.appendChild(metadata_list);
-					}
-				}
-				catch (GSException e)
-				{
-					GSXML.addError(this.doc, result, e.getMessage(), e.getType());
-					if (e.getType().equals(GSXML.ERROR_TYPE_SYSTEM))
-					{
-						// there is no point trying any others
-						return result;
-					}
-				}
-			}
-			else
-			{
-				request_node.setAttribute("external_link", request_node.getAttribute(GSXML.NODE_ID_ATT));
-			}
-		}
+			try
+			  {
+			    Element metadata_list = getMetadataList(node_id, all_metadata, metadata_names_list);
+			    if(metadata_list != null)
+			      {
+				request_node.appendChild(metadata_list);
+			      }
+			  }
+			catch (GSException e)
+			  {
+			    GSXML.addError(this.doc, result, e.getMessage(), e.getType());
+			    if (e.getType().equals(GSXML.ERROR_TYPE_SYSTEM))
+			      {
+				// there is no point trying any others
+				return result;
+			      }
+			  }
+		
+			
+		} // for each doc node
+
 		return result;
 	}
 
@@ -376,13 +347,6 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		{
 			GSXML.addError(this.doc, result, "DocumentStructureRetrieve: no " + GSXML.DOC_NODE_ELEM + " found in the " + GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
-		}
-
-		Element extid_param = GSXML.getNamedElement(param_list, GSXML.PARAM_ELEM, GSXML.NAME_ATT, EXTID_PARAM);
-		boolean external_id = false;
-		if (extid_param != null && GSXML.getValue(extid_param).equals("1"))
-		{
-			external_id = true;
 		}
 
 		// the type of info required
@@ -445,53 +409,27 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 			Element doc = (Element) node_list.item(i);
 
 			String doc_id = doc.getAttribute(GSXML.NODE_ID_ATT);
-			String is_external = doc.getAttribute("externalURL");
-
-			boolean is_external_link = false;
-			if (is_external.equals("0"))
-			{
-				is_external_link = true;
+			boolean is_href_id = false;
+			if (doc_id.equals("")) {
+			  doc_id = getGreenstoneIdFromHref(doc);
+			  if(doc_id == null) {
+			    // **** TODO, is this good enough???
+			    doc.setAttribute("external_link", "true");
+			    continue;
+			  }
+			  doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
 			}
-			if (is_external.equals("1") && !doc_id.startsWith("HASH") && !is_external_link)
-			{
-				if (doc_id.endsWith(".rt"))
-				{
-					doc_id = getHrefOID(doc_id.substring(0, doc_id.length() - 3));
-					if (doc_id != null)
-					{
-						doc_id += ".rt";
-					}
-					else
-					{
-						is_external_link = true;
-					}
-				}
-				else
-				{
-					doc_id = getHrefOID(doc_id);
-					if (doc_id == null)
-					{
-						is_external_link = true;
-					}
-				}
-			}
-			if (!is_external_link)
-			{
-				if (external_id)
-				{
-					doc_id = translateExternalId(doc_id);
-					doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
-				}
-				else if (idNeedsTranslating(doc_id))
-				{
-					doc_id = translateId(doc_id);
-					doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
-				}
 
-				if (doc_id == null)
-				{
-					continue;
-				}
+			if (idNeedsTranslating(doc_id))
+			  {
+			    doc_id = translateId(doc_id);
+			    doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
+			  }
+
+			if (doc_id == null)
+			  {
+			    continue;
+			  }
 
 				if (want_info)
 				{
@@ -590,13 +528,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 					}
 				} // if want structure
 
-			}
-			else
-			{
-				Element external_link_elem = this.doc.createElement("external");
-				external_link_elem.setAttribute("external_link", doc.getAttribute(GSXML.NODE_ID_ATT));
-				doc.appendChild(external_link_elem);
-			}// if is_external_link
+				
 		} // for each doc
 		return result;
 	}
@@ -617,12 +549,6 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		Element extid_param = GSXML.getNamedElement(param_list, GSXML.PARAM_ELEM, GSXML.NAME_ATT, EXTID_PARAM);
-		boolean external_id = false;
-		if (extid_param != null && GSXML.getValue(extid_param).equals("1"))
-		{
-			external_id = true;
-		}
 		// Get the request content 
 		Element query_doc_list = (Element) GSXML.getChildByTagName(request, GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		if (query_doc_list == null)
@@ -632,102 +558,66 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		}
 
 		String lang = request.getAttribute(GSXML.LANG_ATT);
-		Element doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
-		result.appendChild(doc_list);
+
+		// copy the request doc node list to the response
+		Element response_node_list = (Element) this.doc.importNode(query_doc_list, true);
+		result.appendChild(response_node_list);
+
+		NodeList request_nodes = GSXML.getChildrenByTagName(response_node_list, GSXML.DOC_NODE_ELEM);
+		if (request_nodes.getLength() == 0)
+		{
+			GSXML.addError(this.doc, result, "DocumentContentRetrieve: no " + GSXML.DOC_NODE_ELEM + " found in the " + GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			return result;
+		}
+
+		//Element doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		//result.appendChild(doc_list);
 
 		// set up the retrieval??
 
 		// Get the documents
-		String[] doc_ids = GSXML.getAttributeValuesFromList(query_doc_list, GSXML.NODE_ID_ATT);
-		String[] is_externals = GSXML.getAttributeValuesFromList(query_doc_list, "externalURL");
+		//String[] doc_ids = GSXML.getAttributeValuesFromList(query_doc_list, GSXML.NODE_ID_ATT);
+		//String[] is_externals = GSXML.getAttributeValuesFromList(query_doc_list, "externalURL");
 
-		for (int i = 0; i < doc_ids.length; i++)
+		for (int i = 0; i < request_nodes.getLength(); i++)
 		{
-			String doc_id = doc_ids[i];
-			String is_external = is_externals[i];
-
-			boolean is_external_link = false;
-			if (is_external.equals("0"))
-			{
-				is_external_link = true;
-			}
-			if (is_external.equals("1") && !doc_id.startsWith("HASH") && !is_external_link)
-			{
-				//if (!doc_id.startsWith("HASH")){
-				if (doc_id.endsWith(".rt"))
-				{
-					String find_doc_id = getHrefOID(doc_id.substring(0, doc_id.length() - 3));
-					if (find_doc_id != null)
-					{
-						doc_id = doc_id + ".rt";
-					}
-					else
-					{
-						is_external_link = true;
-					}
-
-				}
-				else
-				{
-					String find_doc_id = getHrefOID(doc_id);
-					if (find_doc_id == null)
-					{
-						is_external_link = true;
-					}
-					else
-					{
-						doc_id = find_doc_id;
-					}
-				}
+			Element request_node = (Element) request_nodes.item(i);
+			String node_id = request_node.getAttribute(GSXML.NODE_ID_ATT);
+			boolean is_href_id = false;
+			if (node_id.equals("")) {
+			  node_id = getGreenstoneIdFromHref(request_node);
+			  if(node_id == null) {
+			    // **** TODO, is this good enough???
+			    request_node.setAttribute("external_link", "true");
+			    continue;
+			  }
+			 
 			}
 
-			if (!is_external_link)
+			// may have modifiers .rt, .1.ss etc
+			if (idNeedsTranslating(node_id))
 			{
-				// Create the document node
-				Element doc = this.doc.createElement(GSXML.DOC_NODE_ELEM);
-				doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
-				doc_list.appendChild(doc);
-
-				if (external_id)
-				{
-					doc_id = translateExternalId(doc_id);
-					doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
-				}
-				else if (idNeedsTranslating(doc_id))
-				{
-					doc_id = translateId(doc_id);
-					doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
-				}
-				if (doc_id == null)
-				{
-					continue;
-				}
-				try
-				{
-					Element node_content = getNodeContent(doc_id, lang);
-					doc.appendChild(node_content);
-				}
-				catch (GSException e)
-				{
-					GSXML.addError(this.doc, result, e.getMessage());
-					return result;
-
-				}
+			    node_id = translateId(node_id);
 			}
-			else
+			
+			if (node_id == null)
 			{
-				Element doc = this.doc.createElement(GSXML.DOC_NODE_ELEM);
-				doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
-				//doc.setAttribute("external_link", doc_id);
-				Element external_link_elem = this.doc.createElement("external");
-				external_link_elem.setAttribute("external_link", doc_id);
-				doc.appendChild(external_link_elem);
-
-				doc_list.appendChild(doc);
+				continue;
 			}
-		}
+			try
+			  {
+			    Element node_content = getNodeContent(node_id, lang);
+			    request_node.appendChild(node_content);
+			  }
+			catch (GSException e)
+			  {
+			    GSXML.addError(this.doc, result, e.getMessage());
+			    return result;
+			    
+			  }
+		} // for each node
 		return result;
-	}
+	} // processDocumentContentRetrieve
 
 	/**
 	 * create an element to go into the structure. A node element has the form
@@ -868,6 +758,20 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		return id;
 	}
 
+  protected String getGreenstoneIdFromHref(Element doc_node)
+  {
+    String node_id = doc_node.getAttribute(GSXML.HREF_ID_ATT);
+    node_id = translateExternalId(node_id);
+    if (node_id == null) {
+      return node_id;
+    }
+    // check for id modifiers
+    String id_mods = doc_node.getAttribute(GSXML.ID_MOD_ATT);
+    if (!id_mods.equals("")) {
+      node_id = node_id+id_mods;
+    }
+    return node_id;
+  }
 	/**
 	 * returns the document type of the doc that the specified node belongs to.
 	 * should be one of GSXML.DOC_TYPE_SIMPLE, GSXML.DOC_TYPE_PAGED,

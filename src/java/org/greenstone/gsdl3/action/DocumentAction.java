@@ -47,6 +47,9 @@ public class DocumentAction extends Action
 	public static final String SIBLING_ARG = "sib";
 	public static final String GOTO_PAGE_ARG = "gp";
 	public static final String ENRICH_DOC_ARG = "end";
+	public static final String EXPAND_DOCUMENT_ARG = "ed";
+	public static final String EXPAND_CONTENTS_ARG = "ec";
+	public static final String REALISTIC_BOOK_ARG = "book";
 
 	/**
 	 * if this is set to true, when a document is displayed, any annotation type
@@ -91,20 +94,28 @@ public class DocumentAction extends Action
 		// just in case there are some that need to get passed to the services
 		HashMap service_params = (HashMap) params.get("s0");
 
-		String has_rl = null;
-		String has_href = null;
-		has_href = (String) params.get("href");//for an external link : get the href URL if it is existing in the params list 
-		has_rl = (String) params.get("rl");//for an external link : get the rl value if it is existing in the params list
 		String collection = (String) params.get(GSParams.COLLECTION);
-		UserContext userContext = new UserContext(request);
-		String document_name = (String) params.get(GSParams.DOCUMENT);
-		if ((document_name == null || document_name.equals("")) && (has_href == null || has_href.equals("")))
+		String document_id = (String) params.get(GSParams.DOCUMENT);
+		if (document_id != null && document_id.equals("")) {
+		  document_id = null;
+		}
+		String href = (String) params.get(GSParams.HREF);//for an external link : get the href URL if it is existing in the params list 
+		if (href != null && href.equals("")) {
+		  href = null;
+		}
+		String rl = (String) params.get(GSParams.RELATIVE_LINK);//for an external link : get the rl value if it is existing in the params list
+		if (document_id == null && href == null)
 		{
 			logger.error("no document specified!");
 			return result;
 		}
+		if (rl != null && rl.equals("0")) {
+		  // this is a true external link, we should have been directed to a different page or action
+		  logger.error("rl value was 0, shouldn't get here");
+		  return result;
+		}
 		String document_type = (String) params.get(GSParams.DOCUMENT_TYPE);
-		if (document_type == null)
+		if (document_type == null ||  document_type.equals(""))
 		{
 			document_type = "simple";
 		}
@@ -116,15 +127,16 @@ public class DocumentAction extends Action
 			get_siblings = true;
 		}
 
+		String doc_id_modifier = "";
 		String sibling_num = (String) params.get(GOTO_PAGE_ARG);
 		if (sibling_num != null && !sibling_num.equals(""))
 		{
 			// we have to modify the doc name
-			document_name = document_name + "." + sibling_num + ".ss";
+			doc_id_modifier =  "." + sibling_num + ".ss";
 		}
 
 		boolean expand_document = false;
-		String ed_arg = (String) params.get(GSParams.EXPAND_DOCUMENT);
+		String ed_arg = (String) params.get(EXPAND_DOCUMENT_ARG);
 		if (ed_arg != null && ed_arg.equals("1"))
 		{
 			expand_document = true;
@@ -137,12 +149,14 @@ public class DocumentAction extends Action
 		}
 		else
 		{
-			String ec_arg = (String) params.get(GSParams.EXPAND_CONTENTS);
+			String ec_arg = (String) params.get(EXPAND_CONTENTS_ARG);
 			if (ec_arg != null && ec_arg.equals("1"))
 			{
 				expand_contents = true;
 			}
 		}
+		
+		UserContext userContext = new UserContext(request);
 
 		//append site metadata
 		addSiteMetadata(page_response, userContext);
@@ -164,14 +178,15 @@ public class DocumentAction extends Action
 		Element basic_doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		Element current_doc = this.doc.createElement(GSXML.DOC_NODE_ELEM);
 		basic_doc_list.appendChild(current_doc);
-		if (document_name.length() != 0)
+		if (document_id != null)
 		{
-			current_doc.setAttribute(GSXML.NODE_ID_ATT, document_name);
+			current_doc.setAttribute(GSXML.NODE_ID_ATT, document_id+doc_id_modifier);
 		}
-		else if (has_href.length() != 0)
+		else 
 		{
-			current_doc.setAttribute(GSXML.NODE_ID_ATT, has_href);
-			current_doc.setAttribute("externalURL", has_rl);
+			current_doc.setAttribute(GSXML.HREF_ID_ATT, href);
+			// do we need this??
+			current_doc.setAttribute(GSXML.ID_MOD_ATT, doc_id_modifier);
 		}
 
 		// Create a parameter list to specify the required structure information
@@ -197,7 +212,7 @@ public class DocumentAction extends Action
 				ds_param.setAttribute(GSXML.VALUE_ATT, "entire");
 			}
 
-			// get teh info needed for paged naviagtion
+			// get the info needed for paged naviagtion
 			ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
 			ds_param_list.appendChild(ds_param);
 			ds_param.setAttribute(GSXML.NAME_ATT, "info");
@@ -304,14 +319,14 @@ public class DocumentAction extends Action
 			{
 				// no structure nodes, so put in a dummy doc node
 				Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
-				if (document_name.length() != 0)
+				if (document_id != null)
 				{
-					doc_node.setAttribute(GSXML.NODE_ID_ATT, document_name);
+					doc_node.setAttribute(GSXML.NODE_ID_ATT, document_id);
 				}
-				else if (has_href.length() != 0)
+				else 
 				{
-					doc_node.setAttribute(GSXML.NODE_ID_ATT, has_href);
-					doc_node.setAttribute("externalURL", has_rl);
+					doc_node.setAttribute(GSXML.HREF_ID_ATT, href);
+				
 				}
 				the_document.appendChild(doc_node);
 				has_dummy = true;
@@ -322,14 +337,13 @@ public class DocumentAction extends Action
 			// should think about this more
 			// no structure request, so just put in a dummy doc node
 			Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
-			if (document_name.length() != 0)
+			if (document_id != null)
 			{
-				doc_node.setAttribute(GSXML.NODE_ID_ATT, document_name);
+				doc_node.setAttribute(GSXML.NODE_ID_ATT, document_id);
 			}
-			else if (has_href.length() != 0)
+			else 
 			{
-				doc_node.setAttribute(GSXML.NODE_ID_ATT, has_href);
-				doc_node.setAttribute("externalURL", has_rl);
+				doc_node.setAttribute(GSXML.HREF_ID_ATT, href);
 			}
 			the_document.appendChild(doc_node);
 			has_dummy = true;
@@ -397,14 +411,16 @@ public class DocumentAction extends Action
 
 		Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
 		// the node we want is the root document node
-		if (document_name.length() != 0)
+		if (document_id != null) 
 		{
-			doc_node.setAttribute(GSXML.NODE_ID_ATT, document_name + ".rt");
+			doc_node.setAttribute(GSXML.NODE_ID_ATT, document_id + ".rt");
 		}
-		else if (has_href.length() != 0)
+		else 
 		{
-			doc_node.setAttribute(GSXML.NODE_ID_ATT, has_href + ".rt");
-			doc_node.setAttribute("externalURL", has_rl);
+		  doc_node.setAttribute(GSXML.HREF_ID_ATT, href);// + ".rt");
+		  // can we assume that href is always a top level doc??
+		  //doc_node.setAttribute(GSXML.ID_MOD_ATT, ".rt");
+			//doc_node.setAttribute("externalURL", has_rl);
 		}
 		doc_list.appendChild(doc_node);
 
@@ -485,19 +501,21 @@ public class DocumentAction extends Action
 			//path = GSPath.appendLink(path, GSXML.DOC_NODE_ELEM);
 			Element dc_response_doc = (Element) GSXML.getChildByTagName(dc_response_doc_list, GSXML.DOC_NODE_ELEM);
 			Element dc_response_doc_content = (Element) GSXML.getChildByTagName(dc_response_doc, GSXML.NODE_CONTENT_ELEM);
-			Element dc_response_doc_external = (Element) GSXML.getChildByTagName(dc_response_doc, "external");
+			//Element dc_response_doc_external = (Element) GSXML.getChildByTagName(dc_response_doc, "external");
 
 			if (dc_response_doc_content == null)
 			{
 				// no content to add
-				if (dc_response_doc_external != null)
-				{
-					String modified_doc_id = dc_response_doc.getAttribute(GSXML.NODE_ID_ATT);
+			  if (dc_response_doc.getAttribute("external").equals("true")) {
+			    
+			    //if (dc_response_doc_external != null)
+			    //{
+					String href_id = dc_response_doc.getAttribute(GSXML.HREF_ID_ATT);
 
-					the_document.setAttribute("selectedNode", modified_doc_id);
-					the_document.setAttribute("external", dc_response_doc_external.getAttribute("external_link"));
-				}
-				return result;
+					the_document.setAttribute("selectedNode", href_id);
+					the_document.setAttribute("external", href_id);
+			  }
+			  return result;
 			}
 			if (highlight_query_terms)
 			{
@@ -597,10 +615,14 @@ public class DocumentAction extends Action
 	 * arguments, this should add them to the params object - particularly
 	 * important for args that should not be saved
 	 */
-	public boolean getActionParameters(GSParams params)
+	public boolean addActionParameters(GSParams params)
 	{
 		params.addParameter(GOTO_PAGE_ARG, false);
 		params.addParameter(ENRICH_DOC_ARG, false);
+		params.addParameter(EXPAND_DOCUMENT_ARG, false);
+		params.addParameter(EXPAND_CONTENTS_ARG, false);
+		params.addParameter(REALISTIC_BOOK_ARG, false);
+
 		return true;
 	}
 
