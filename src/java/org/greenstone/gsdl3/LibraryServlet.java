@@ -361,18 +361,15 @@ public class LibraryServlet extends HttpServlet
 			boolean redirect = false;
 			String href = null;
 			String rl = null;
-
+			String el = null;
 			while (queryIter.hasNext())
 			{
 				String q = queryIter.next();
-				if (q.equals("el"))
+				if (q.equals(GSParams.EXTERNAL_LINK_TYPE))
 				{
-					if ((queryMap.get(q)[0]).equals("direct"))
-					{
-						redirect = true;
-					}
+				  el = queryMap.get(q)[0];
 				}
-				else if (q.equals("href"))
+				else if (q.equals(GSParams.HREF))
 				{
 					href = queryMap.get(q)[0];
 					href = StringUtils.replace(href, "%2f", "/");
@@ -380,19 +377,28 @@ public class LibraryServlet extends HttpServlet
 					href = StringUtils.replace(href, "%3f", "?");
 					href = StringUtils.replace(href, "%3A", "\\:");
 				}
-				else if (q.equals("rl"))
+				else if (q.equals(GSParams.RELATIVE_LINK))
 				{
 					rl = queryMap.get(q)[0];
 				}
 			}
 
-			//if query_string contains "el=", the web page will be redirected to the external URl, otherwise a greenstone page with an external URL will be displayed
+			//if query_string contains "el=direct", an href is specified, and its not a relative link, then the web page will be redirected to the external URl, otherwise a greenstone page with an external URL will be displayed
 			//"rl=0" this is an external link
 			//"rl=1" this is an internal link
-			if ((redirect) && (href != null) && (rl.equals("0")))
-			{// This is an external link, the web page is re-directed to the external URL (&el=&rl=0&href="http://...")
+			if ((href != null) && (rl.equals("0")))
+			{// This is an external link, 
+
+			  if (el.equals("framed")) {
+			    //TODO **** how best to change to a=p&sa=html&c=collection&url=href
+			    // response.setContentType("text/xml");
+			    //response.sendRedirect("http://localhost:8383/greenstone3/gs3library?a=p&sa=html&c=external&url="+href);
+			  } else {
+			    // el = '' or direct
+			    //the web page is re-directed to the external URL (&el=&rl=0&href="http://...")
 				response.setContentType("text/xml");
 				response.sendRedirect(href);
+			  }
 			}
 		}
 
@@ -476,7 +482,7 @@ public class LibraryServlet extends HttpServlet
 		// We clean up the cache session_ids_table if system
 		// commands are issued (and also don't need to do caching for this request)
 		boolean should_cache = true;
-		if (action != null && action.equals(GSParams.SYSTEM))
+		if (action != null && action.equals(GSParams.SYSTEM_ACTION))
 		{
 			should_cache = false;
 
