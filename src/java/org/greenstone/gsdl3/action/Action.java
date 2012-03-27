@@ -86,7 +86,7 @@ abstract public class Action
 	 * arguments, this should add them to the params object - particularly
 	 * important for args that should not be saved
 	 */
-	public boolean getActionParameters(GSParams params)
+	public boolean addActionParameters(GSParams params)
 	{
 		return true;
 	}
