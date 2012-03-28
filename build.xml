@@ -1222,6 +1222,7 @@
     <input addproperty="admin.password" defaultvalue="admin" message="New admin password (3-8 characters):&gt;">
       <handler classname="org.apache.tools.ant.input.SecureInputHandler" /> <!-- password won't be visible on screen -->
     </input>
+    <antcall target="stop-tomcat"/>
     <!--<echo>${admin.password}</echo>--> <!-- for testing -->
     <java classname="org.greenstone.gsdl3.util.ChangePwdUsersDB">
       <classpath refid="compile.classpath"/> <!--for ${web.lib}/gsdl3.jar and supporting files-->
@@ -1229,6 +1230,7 @@
       <arg value="admin"/>
       <arg value="${admin.password}"/>
     </java>
+    <antcall target="start-tomcat"/>
   </target>
 
   <target name="soap-deploy-site" depends="init,get-sitename,get-siteuri,get-webservices,create-deployment-files,deploy-site"
