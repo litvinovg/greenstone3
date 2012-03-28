@@ -6,6 +6,7 @@ import org.greenstone.gsdl3.util.UserQueryResult;
 import org.greenstone.gsdl3.util.UserTermInfo;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -112,6 +113,9 @@ public class Authentication extends ServiceRack
 
 	protected DerbyWrapper _derbyWrapper = null;
 
+	protected String _recaptchaPrivateKey = null;
+	protected String _recaptchaPublicKey = null;
+
 	/** constructor */
 	public Authentication()
 	{
@@ -133,6 +137,27 @@ public class Authentication extends ServiceRack
 		getUserInformation_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		getUserInformation_service.setAttribute(GSXML.NAME_ATT, GET_USER_INFORMATION_SERVICE);
 		this.short_service_info.appendChild(getUserInformation_service);
+
+		NodeList recaptchaElems = info.getElementsByTagName("recaptcha");
+
+		for (int i = 0; i < recaptchaElems.getLength(); i++)
+		{
+			Element currentElem = (Element) recaptchaElems.item(i);
+			if (currentElem.getAttribute(GSXML.NAME_ATT) != null && currentElem.getAttribute(GSXML.NAME_ATT).equals("public_key"))
+			{
+				if (currentElem.getAttribute(GSXML.VALUE_ATT) != null)
+				{
+					_recaptchaPublicKey = currentElem.getAttribute(GSXML.VALUE_ATT);
+				}
+			}
+			else if (currentElem.getAttribute(GSXML.NAME_ATT) != null && currentElem.getAttribute(GSXML.NAME_ATT).equals("private_key"))
+			{
+				if (currentElem.getAttribute(GSXML.VALUE_ATT) != null)
+				{
+					_recaptchaPrivateKey = currentElem.getAttribute(GSXML.VALUE_ATT);
+				}
+			}
+		}
 
 		return true;
 	}
@@ -332,8 +357,25 @@ public class Authentication extends ServiceRack
 			String newStatus = (String) paramMap.get("status");
 			String newComment = (String) paramMap.get("comment");
 			String newEmail = (String) paramMap.get("email");
+			
+			//Check the given user name
+			int error;
+			if ((error = checkUsername(newUsername)) != NO_ERROR)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				return result;
+			}
 
-			int error = addUser(newUsername, newPassword, newGroups, newStatus, newComment, newEmail);
+			//Check the given password
+			if ((error = checkPassword(newPassword)) != NO_ERROR)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				return result;
+			}
+
+			newPassword = hashPassword(newPassword);
+
+			error = addUser(newUsername, newPassword, newGroups, newStatus, newComment, newEmail);
 			if (error != NO_ERROR)
 			{
 				serviceNode.setAttribute("operation", ADD_USER);
@@ -350,30 +392,50 @@ public class Authentication extends ServiceRack
 			String newUsername = (String) paramMap.get("username");
 			String newPassword = (String) paramMap.get("password");
 			String newEmail = (String) paramMap.get("email");
-
-			ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
-			reCaptcha.setPrivateKey("6LckI88SAAAAAGnGy1PwuXYZzIMXZYoPxN51bWWG"); //TODO: MOVE TO SITECONFIG.XML FILE
-
-			String challenge = (String) paramMap.get("recaptcha_challenge_field");
-			String uResponse = (String) paramMap.get("recaptcha_response_field");
-
-			if (challenge == null || uResponse == null)
+			
+			//Check the given user name
+			int error;
+			if ((error = checkUsername(newUsername)) != NO_ERROR)
 			{
-				serviceNode.setAttribute("operation", REGISTER);
-				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_MISSING));
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
 				return result;
 			}
 
-			ReCaptchaResponse reCaptchaResponse = reCaptcha.checkAnswer(request.getAttribute("remoteAddress"), challenge, uResponse);
-
-			if (!reCaptchaResponse.isValid())
+			//Check the given password
+			if ((error = checkPassword(newPassword)) != NO_ERROR)
 			{
-				serviceNode.setAttribute("operation", REGISTER);
-				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_DOES_NOT_MATCH));
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
 				return result;
 			}
+			
+			newPassword = hashPassword(newPassword);
 
-			int error = addUser(newUsername, newPassword, "", "true", "", newEmail);
+			if(_recaptchaPrivateKey != null)
+			{
+				ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
+				reCaptcha.setPrivateKey(_recaptchaPrivateKey);
+	
+				String challenge = (String) paramMap.get("recaptcha_challenge_field");
+				String uResponse = (String) paramMap.get("recaptcha_response_field");
+	
+				if (challenge == null || uResponse == null)
+				{
+					serviceNode.setAttribute("operation", REGISTER);
+					GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_MISSING));
+					return result;
+				}
+	
+				ReCaptchaResponse reCaptchaResponse = reCaptcha.checkAnswer(request.getAttribute("remoteAddress"), challenge, uResponse);
+	
+				if (!reCaptchaResponse.isValid())
+				{
+					serviceNode.setAttribute("operation", REGISTER);
+					GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_DOES_NOT_MATCH));
+					return result;
+				}
+			}
+
+			error = addUser(newUsername, newPassword, "", "true", "", newEmail);
 			if (error != NO_ERROR)
 			{
 				serviceNode.setAttribute("operation", REGISTER);
@@ -390,12 +452,31 @@ public class Authentication extends ServiceRack
 			String newComment = (String) paramMap.get("comment");
 			String newEmail = (String) paramMap.get("email");
 
+			//Check the given user name
+			int error;
+			if ((error = checkUsername(newUsername)) != NO_ERROR)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				return result;
+			}
+
 			if (newPassword == null)
 			{
 				newPassword = retrieveDataForUser(previousUsername, "password");
 			}
-
-			int error = removeUser(previousUsername);
+			else
+			{
+				//Check the given password
+				if ((error = checkPassword(newPassword)) != NO_ERROR)
+				{
+					GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+					return result;
+				}
+				
+				newPassword = hashPassword(newPassword);
+			}
+			
+			error = removeUser(previousUsername);
 			if (error != NO_ERROR)
 			{
 				if (error == ERROR_USERNAME_NOT_SPECIFIED)
@@ -410,6 +491,7 @@ public class Authentication extends ServiceRack
 				}
 				return result;
 			}
+
 			error = addUser(newUsername, newPassword, newGroups, newStatus, newComment, newEmail);
 			if (error != NO_ERROR)
 			{
@@ -452,17 +534,35 @@ public class Authentication extends ServiceRack
 					GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_INCORRECT_PASSWORD));
 					return result;
 				}
+				
+				//Check the given password
+				int error;
+				if ((error = checkPassword(newPassword)) != NO_ERROR)
+				{
+					GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+					return result;
+				}
+				
+				newPassword = hashPassword(newPassword);
 			}
 			else
 			{
 				newPassword = prevPassword;
 			}
-
+			
+			//Check the given user name
+			int error;
+			if ((error = checkUsername(newUsername)) != NO_ERROR)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				return result;
+			}
+			
 			String prevGroups = retrieveDataForUser(previousUsername, "groups");
 			String prevStatus = retrieveDataForUser(previousUsername, "status");
 			String prevComment = retrieveDataForUser(previousUsername, "comment");
 
-			int error = removeUser(previousUsername);
+			error = removeUser(previousUsername);
 			if (error != NO_ERROR)
 			{
 				if (error == ERROR_USERNAME_NOT_SPECIFIED)
@@ -500,15 +600,15 @@ public class Authentication extends ServiceRack
 		else if (op.equals(ACCOUNT_SETTINGS))
 		{
 			String editUsername = (String) paramMap.get("username");
-			
-			if(editUsername == null)
+
+			if (editUsername == null)
 			{
 				serviceNode.setAttribute("operation", "");
 				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_USERNAME_NOT_SPECIFIED));
 				return result;
 			}
-			
-			if(!editUsername.equals(username))
+
+			if (!editUsername.equals(username))
 			{
 				serviceNode.setAttribute("operation", LOGIN);
 				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_NOT_AUTHORISED));
@@ -523,15 +623,25 @@ public class Authentication extends ServiceRack
 		else if (op.equals(PERFORM_RESET_PASSWORD))
 		{
 			String passwordResetUser = (String) paramMap.get("username");
-			
+
 			String newPassword = UUID.randomUUID().toString();
 			newPassword = newPassword.substring(0, newPassword.indexOf("-"));
-			
+
 			String email = retrieveDataForUser(passwordResetUser, "email");
 			String from = "admin@greenstone.org";
 			String host = request.getAttribute("remoteAddress");
-			
+
 			//TODO: FINISH THIS
+		}
+		else if (op.equals(REGISTER))
+		{
+			if(_recaptchaPublicKey != null && _recaptchaPrivateKey != null)
+			{
+				Element recaptchaElem = this.doc.createElement("recaptcha");
+				recaptchaElem.setAttribute("publicKey", _recaptchaPublicKey);
+				recaptchaElem.setAttribute("privateKey", _recaptchaPrivateKey);
+				result.appendChild(recaptchaElem);
+			}
 		}
 		else if (op.equals(PERFORM_DELETE_USER))
 		{
@@ -546,6 +656,34 @@ public class Authentication extends ServiceRack
 		}
 
 		return result;
+	}
+	
+	public int checkUsernameAndPassword(String username, String password)
+	{
+		int uResult = checkUsername(username);
+		int pResult = checkPassword(password);
+		
+		return (uResult != NO_ERROR ? uResult : (pResult != NO_ERROR ? pResult : NO_ERROR));
+	}
+	
+	public int checkUsername(String username)
+	{
+		//Check the given user name
+		if ((username == null) || (username.length() < 2) || (username.length() > 30) || (!(Pattern.matches("[a-zA-Z0-9//_//.]+", username))))
+		{
+			return ERROR_INVALID_USERNAME;
+		}
+		return NO_ERROR;
+	}
+	
+	public int checkPassword(String password)
+	{
+		//Check the given password
+		if ((password == null) || (password.length() < 3) || (password.length() > 8) || (!(Pattern.matches("[\\p{ASCII}]+", password))))
+		{
+			return ERROR_INVALID_PASSWORD;
+		}
+		return NO_ERROR;
 	}
 
 	public static String hashPassword(String password)
@@ -687,28 +825,13 @@ public class Authentication extends ServiceRack
 			openDatabase();
 		}
 
-		//Check the given user name
-		if ((newUsername == null) || (newUsername.length() < 2) || (newUsername.length() > 30) || (!(Pattern.matches("[a-zA-Z0-9//_//.]+", newUsername))))
-		{
-			closeDatabase();
-			return ERROR_INVALID_USERNAME;
-		}
-
-		//Check the given password
-		if ((newPassword == null) || (newPassword.length() < 3) || (newPassword.length() > 8) || (!(Pattern.matches("[\\p{ASCII}]+", newPassword))))
-		{
-			closeDatabase();
-			return ERROR_INVALID_PASSWORD;
-		}
-
-		newPassword = hashPassword(newPassword);
-
 		newGroups = newGroups.replaceAll(" ", "");
 
 		//Check if the user already exists
 		UserQueryResult userQueryResult = _derbyWrapper.findUser(newUsername, null);
 		if (userQueryResult != null)
 		{
+			closeDatabase();
 			return ERROR_USER_ALREADY_EXISTS;
 		}
 		else
