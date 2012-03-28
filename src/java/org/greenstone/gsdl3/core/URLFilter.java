@@ -21,6 +21,7 @@ import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.action.DocumentAction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class URLFilter implements Filter
 {
@@ -133,7 +134,48 @@ public class URLFilter implements Filter
 				doc.setAttribute(GSXML.NODE_ID_ATT, dir);
 
 				Element metaResponse = (Element) gsRouter.process(metaMessage);
-				//GSXML.printXMLNode(metaResponse, true);
+				GSXML.printXMLNode(metaResponse, true);
+				
+				NodeList metadataList = metaResponse.getElementsByTagName(GSXML.METADATA_ELEM);
+				if(metadataList.getLength() == 0)
+				{
+					_logger.error("Could not find the document related to this url");
+				}
+				else
+				{
+					Element metadata = (Element)metadataList.item(0);
+					String document = metadata.getTextContent();
+					
+					//Get the security info for this collection
+					Element securityMessage = gsDoc.createElement(GSXML.MESSAGE_ELEM);
+					Element securityRequest = GSXML.createBasicRequest(gsDoc, GSXML.REQUEST_TYPE_SECURITY, collection, new UserContext());
+					securityMessage.appendChild(securityRequest);
+					if (document != null && !document.equals(""))
+					{
+						securityRequest.setAttribute(GSXML.NODE_OID, document);
+					}
+
+					Element securityResponse = (Element) GSXML.getChildByTagName(gsRouter.process(securityMessage), GSXML.RESPONSE_ELEM);
+					ArrayList<String> groups = GSXML.getGroupsFromSecurityResponse(securityResponse);
+					
+					if (!groups.contains(""))
+					{
+						boolean found = false;
+						for (String group : groups)
+						{
+							if (((HttpServletRequest)request).isUserInRole(group))
+							{
+								found = true;
+								break;
+							}
+						}
+						
+						if(!found)
+						{
+							return;
+						}
+					}
+				}
 			}
 			else
 			{
