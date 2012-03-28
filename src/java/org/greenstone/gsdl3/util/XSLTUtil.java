@@ -479,9 +479,9 @@ public class XSLTUtil
 		return true;
 	}
 	
-	public static String reCAPTCHAimage()
+	public static String reCAPTCHAimage(String publicKey, String privateKey)
 	{
-		ReCaptcha c = ReCaptchaFactory.newReCaptcha("6LckI88SAAAAACUYjj97WMcnz5HPjVp3lI-x-ue8", "6LckI88SAAAAAGnGy1PwuXYZzIMXZYoPxN51bWWG", false);
+		ReCaptcha c = ReCaptchaFactory.newReCaptcha(publicKey, privateKey, false);
 		return c.createRecaptchaHtml(null, null);
 	}
 }
