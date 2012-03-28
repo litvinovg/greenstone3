@@ -91,7 +91,7 @@ public class GSXML
 	public static final String BROWSE_ELEM = "browse";
 	public static final String DISPLAY_ELEM = "display";
 	public static final String LEVEL_ELEM = "level";
-        public static final String REPLACE_ELEM = "replace";
+	public static final String REPLACE_ELEM = "replace";
 
 	public static final String DBINFO_ELEM = "dbInfo";
 	public static final String DBNAME_ATT = "dbname";
@@ -122,8 +122,8 @@ public class GSXML
 
 	// add on to another elem type to get a list of that type
 	public static final String LIST_MODIFIER = "List";
-  // used to refer back to another element type
-        public static final String REF_MODIFIER = "Ref";
+	// used to refer back to another element type
+	public static final String REF_MODIFIER = "Ref";
 	// greenstone xml attributes
 	public static final String COLLECTION_ATT = "collection";
 	public static final String NAME_ATT = "name";
@@ -157,8 +157,8 @@ public class GSXML
 	public static final String NODE_CONTENT_ELEM = "nodeContent";
 	public static final String NODE_STRUCTURE_ELEM = "nodeStructure";
 	public static final String NODE_ID_ATT = "nodeID";
-        public static final String HREF_ID_ATT = "hrefId"; // for ids that need translating
-        public static final String ID_MOD_ATT = "idMod"; // might hold .rt etc for hrefIds
+	public static final String HREF_ID_ATT = "hrefId"; // for ids that need translating
+	public static final String ID_MOD_ATT = "idMod"; // might hold .rt etc for hrefIds
 	public static final String NODE_OID = "oid";
 	public static final String NODE_NAME_ATT = "nodeName";
 	public static final String NODE_TYPE_ATT = "nodeType";
@@ -1110,11 +1110,11 @@ public class GSXML
 
 	private static void xmlNodeToString(StringBuffer sb, Node e, int depth, boolean printText)
 	{
-		if(e == null)
+		if (e == null)
 		{
 			return;
 		}
-		
+
 		for (int i = 0; i < depth; i++)
 			sb.append(' ');
 
@@ -1252,21 +1252,21 @@ public class GSXML
 	public static ArrayList<String> getGroupsFromSecurityResponse(Element securityResponse)
 	{
 		ArrayList<String> groups = new ArrayList<String>();
-		
+
 		Element groupList = (Element) GSXML.getChildByTagName(securityResponse, GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
-		if(groupList == null)
+		if (groupList == null)
 		{
 			return groups;
 		}
-		
+
 		NodeList groupElems = GSXML.getChildrenByTagName(groupList, GSXML.GROUP_ELEM);
-		
-		for(int i = 0; i < groupElems.getLength(); i++)
+
+		for (int i = 0; i < groupElems.getLength(); i++)
 		{
 			Element groupElem = (Element) groupElems.item(i);
 			groups.add(groupElem.getAttribute(GSXML.NAME_ATT));
 		}
-		
+
 		return groups;
 	}
 }
