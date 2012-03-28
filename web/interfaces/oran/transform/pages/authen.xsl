@@ -428,10 +428,10 @@
 									</td>
 								</tr>
 							</xsl:if>
-							<xsl:if test="/page/pageResponse/authenticationNode/service/@operation = 'Register'">
+							<xsl:if test="/page/pageResponse/authenticationNode/service/@operation = 'Register' and /page/pageResponse/recaptcha/@privateKey and /page/pageResponse/recaptcha/@publicKey">
 								<tr>
 									<td colspan="2">
-										<xsl:value-of disable-output-escaping="yes" select="util:reCAPTCHAimage()"/>
+										<xsl:value-of disable-output-escaping="yes" select="util:reCAPTCHAimage(/page/pageResponse/recaptcha/@publicKey, /page/pageResponse/recaptcha/@privateKey)"/>
 									</td>
 									<script type="text/javascript">
 										<xsl:text disable-output-escaping="yes">
