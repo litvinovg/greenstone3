@@ -18,9 +18,12 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page">
-		<div style="color:red;"><xsl:value-of select="/page/pageRequest/paramList/param[@name = 'loginMessage']/@value"/><xsl:text> </xsl:text></div>
+		<div id="gs_error" class="ui-state-error ui-corner-all">
+			<span class="ui-icon ui-icon-alert" style="float: left;"><xsl:text> </xsl:text></span><xsl:value-of select="/page/pageRequest/paramList/param[@name = 'loginMessage']/@value"/>
+		</div>
+		<br/>
 		<form method="post" action="{/page/pageRequest/paramList/param[@name = 'redirectURL']/@value}">
-			<table>
+			<table id="loginTable">
 				<tr><td>Username: </td><td><input type="text" name="username"/></td></tr>
 				<tr><td>Password: </td><td><input type="password" name="password"/></td></tr>
 				<tr><td><input type="submit" value="Login"/></td><td><xsl:text> </xsl:text></td></tr>
