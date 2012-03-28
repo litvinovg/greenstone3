@@ -344,6 +344,8 @@ public class DerbyWrapper
 		}
 	}
 
+    // findUser(null) will return all users, which is why a UserQueryResult 
+    // (a vector of UserTermInfo) is returned
 	public UserQueryResult findUser(String username) throws SQLException
 	{
 		UserQueryResult userQueryResult = new UserQueryResult();
@@ -463,9 +465,20 @@ public class DerbyWrapper
 
 	public void db2txt()
 	{
+	    System.err.println(db2txtString());		
+	}
+
+	public String db2txtString()
+	{
+	    //String db2txt = "Error in converting db2txt string.";
+	    String db2txt = "";
 		try
 		{
-			conn.setAutoCommit(false);
+		    conn.setAutoCommit(false); // An exception at this line can happen when the GS3 tomcat server is already running
+		                               // and GS3 is already accessing the usersDB when this function independently tries to
+		                               // connect to it (via usersDB2txt.java's main(). For an explanation of the possible 
+		                               // reasons, see http://db.apache.org/derby/papers/DerbyTut/embedded_intro.html
+		                               // section "Embedded Derby supports multiple users in one JVM".
 			String sql_list_all_user = "select username, password, accountstatus, comment, email from " + USERS;
 			ResultSet rs = state.executeQuery(sql_list_all_user);
 
@@ -496,15 +509,16 @@ public class DerbyWrapper
 					returnedGroups += groupsSet.getString("role");
 				}
 				conn.commit();
-
-				System.err.println("-------------------------------------");
-				System.err.println("USERNAME = " + user.get("username"));
-				System.err.println("PASSWORD = " + user.get("password"));
-				System.err.println("GROUPS = " + returnedGroups);
-				System.err.println("STATUS = " + user.get("status"));
-				System.err.println("COMMENT = " + user.get("comment"));
-				System.err.println("EMAIL = " + user.get("email"));
-				System.err.println("-------------------------------------");
+				
+				StringBuffer buffer = new StringBuffer();//("-------------------------------------");
+				buffer.append("USERNAME = " + user.get("username"));
+				buffer.append("\nPASSWORD = " + user.get("password"));
+				buffer.append("\nGROUPS = " + returnedGroups);
+				buffer.append("\nSTATUS = " + user.get("status"));
+				buffer.append("\nCOMMENT = " + user.get("comment"));
+				buffer.append("\nEMAIL = " + user.get("email"));
+				buffer.append("\n-------------------------------------\n");
+				db2txt = buffer.toString();
 			}
 
 			conn.commit();
@@ -513,6 +527,8 @@ public class DerbyWrapper
 		catch (Exception ex)
 		{
 			ex.printStackTrace();
+		} finally {
+		    return db2txt;
 		}
 	}
 

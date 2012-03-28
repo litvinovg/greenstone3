@@ -1215,6 +1215,22 @@
     </if>
   </target>
 
+  <!-- This target won't work with Eclipse because the SecureInputHandler used below conflicts with it. 
+    See http://www.dcepler.net/post.cfm/hiding-password-input-in-ant 
+    But you can do: echo mypassword | ant config-admin -->
+  <target name="config-admin" description="Reset admin password">
+    <input addproperty="admin.password" defaultvalue="admin" message="New admin password (3-8 characters):&gt;">
+      <handler classname="org.apache.tools.ant.input.SecureInputHandler" /> <!-- password won't be visible on screen -->
+    </input>
+    <!--<echo>${admin.password}</echo>--> <!-- for testing -->
+    <java classname="org.greenstone.gsdl3.util.ChangePwdUsersDB">
+      <classpath refid="compile.classpath"/> <!--for ${web.lib}/gsdl3.jar and supporting files-->
+      <arg file="${web.home}/sites/localsite/etc/usersDB"/>
+      <arg value="admin"/>
+      <arg value="${admin.password}"/>
+    </java>
+  </target>
+
   <target name="soap-deploy-site" depends="init,get-sitename,get-siteuri,get-webservices,create-deployment-files,deploy-site"
     description="Deploy a SOAP web service for a local Greenstone site. Tomcat must be running for this to work."/>
     
