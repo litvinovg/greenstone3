@@ -698,13 +698,13 @@ public class LibraryServlet extends HttpServlet
 				}
 			}
 		}
-		
+
 		String requestedURL = request.getRequestURL().toString();
 		String baseURL = requestedURL.substring(0, requestedURL.indexOf(this.getServletName()));
 		xml_request.setAttribute("baseURL", baseURL);
 		xml_request.setAttribute("remoteAddress", request.getRemoteAddr());
-		
-		if(!runSecurityChecks(request, xml_request, userContext, out, baseURL, collection, document))
+
+		if (!runSecurityChecks(request, xml_request, userContext, out, baseURL, collection, document))
 		{
 			return;
 		}
@@ -732,6 +732,7 @@ public class LibraryServlet extends HttpServlet
 
 		if (username != null && password != null)
 		{
+			//We are changing to another user, so log out first
 			if (request.getAuthType() != null)
 			{
 				request.logout();
@@ -764,7 +765,7 @@ public class LibraryServlet extends HttpServlet
 				Element urlParam = this.doc.createElement(GSXML.PARAM_ELEM);
 				urlParam.setAttribute(GSXML.NAME_ATT, "redirectURL");
 				String queryString = "";
-				if(request.getQueryString() != null)
+				if (request.getQueryString() != null)
 				{
 					queryString = "?" + request.getQueryString().replace("&", "&amp;");
 				}
@@ -880,7 +881,7 @@ public class LibraryServlet extends HttpServlet
 		}
 		return true;
 	}
-	
+
 	//a debugging method
 	private void displaySize(Hashtable table)
 	{
