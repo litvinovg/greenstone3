@@ -1107,7 +1107,7 @@
 
   <!-- windows: do we want to launch a webrowser?? -->
   <!-- shouldn't this test whether anything is running first? -->
-  <target name="stop-tomcat" description="Shutdown only Tomcat" depends="init" if="tomcat.islocal">
+  <target name="force-stop-tomcat" description="Shutdown only Tomcat" depends="init" if="tomcat.islocal">
     <exec executable="${catalina.home}/bin/shutdown.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
       <env key="CATALINA_HOME" value="${catalina.home}"/>
     </exec>
@@ -1115,6 +1115,18 @@
       <env key="CATALINA_HOME" value="${catalina.home}"/>
     </exec>
   </target>
+
+  <target name="check-tomcat-running">
+    <!--can also try the "socket" condition in place of the "http" condition-->
+    <condition property="tomcat.isrunning"><!--<waitfor maxwait="5" maxwaitunit="second" timeoutproperty="tomcat.isstopped">-->
+      <http url="http://${tomcat.server}:${tomcat.port}${app.path}"/> <!--host:port/greenstone3-->
+    </condition><!--</waitfor>-->
+  </target>
+
+  <target name="stop-tomcat" description="Shutdown only Tomcat if running" depends="check-tomcat-running" if="tomcat.isrunning">
+     <antcall target="force-stop-tomcat"/>
+  </target>
+
 
   <target name="restart-tomcat" description="Shutdown and restart only Tomcat" depends="init,stop-tomcat,start-tomcat"/>
 
@@ -1222,7 +1234,21 @@
     <input addproperty="admin.password" defaultvalue="admin" message="New admin password (3-8 characters):&gt;">
       <handler classname="org.apache.tools.ant.input.SecureInputHandler" /> <!-- password won't be visible on screen -->
     </input>
-    <antcall target="stop-tomcat"/>
+
+    <!-- stop tomcat if running, since derby db is embedded and only allows connections from one jvm instance at a time 
+      See http://db.apache.org/derby/papers/DerbyTut/embedded_intro.html -->
+
+    <!--<antcall target="check-tomcat-running"/>--><!--won't set the tomcat.isrunning property for use below-->
+    <condition property="tomcat.isrunning">
+      <http url="http://${tomcat.server}:${tomcat.port}${app.path}"/><!--can also try the "socket" condition in place of the "http" condition-->
+    </condition>
+    <if>
+      <bool>
+	<istrue value="${tomcat.isrunning}"/>
+      </bool>
+      <antcall target="force-stop-tomcat"/>
+    </if>
+
     <!--<echo>${admin.password}</echo>--> <!-- for testing -->
     <java classname="org.greenstone.gsdl3.util.ChangePwdUsersDB">
       <classpath refid="compile.classpath"/> <!--for ${web.lib}/gsdl3.jar and supporting files-->
@@ -1230,7 +1256,14 @@
       <arg value="admin"/>
       <arg value="${admin.password}"/>
     </java>
-    <antcall target="start-tomcat"/>
+
+    <!-- run tomcat again if it used to be running -->
+    <if>
+      <bool>
+	<istrue value="${tomcat.isrunning}"/>
+	</bool>
+      <antcall target="start-tomcat"/>
+    </if>
   </target>
 
   <target name="soap-deploy-site" depends="init,get-sitename,get-siteuri,get-webservices,create-deployment-files,deploy-site"
