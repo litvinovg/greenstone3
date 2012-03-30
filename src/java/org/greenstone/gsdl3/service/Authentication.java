@@ -8,6 +8,7 @@ import org.greenstone.gsdl3.util.UserTermInfo;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -693,7 +694,8 @@ public class Authentication extends ServiceRack
 		{
 			MessageDigest digest = MessageDigest.getInstance("SHA-1");
 			digest.reset();
-			hashedPassword = new String(digest.digest(password.getBytes("UTF-8")));
+			hashedPassword = new String(digest.digest(password.getBytes("US-ASCII"))); // toHex after using ASCII charset will result in acceptable length of hex string
+			hashedPassword = toHex(hashedPassword); // this conversion is required to avoid the strange error of login failure on some legal password strings
 		}
 		catch (Exception ex)
 		{
@@ -701,6 +703,21 @@ public class Authentication extends ServiceRack
 		}
 		return hashedPassword;
 	}
+
+
+    
+    // This method can also be used for printing out the password in hex (in case
+    // the password used the UTF-8 Charset), or the hex values in any unicode string.
+    // From http://stackoverflow.com/questions/923863/converting-a-string-to-hexadecimal-in-java
+    public static String toHex(String arg) {
+	try {
+	    return String.format("%x", new BigInteger(arg.getBytes("US-ASCII"))); // set to same charset as used by hashPassword
+	} catch (Exception e) { // UnsupportedEncodingException
+	    e.printStackTrace();
+	} 
+	return "Unable to print";
+    }
+
 
 	private void checkAdminUserExists()
 	{
