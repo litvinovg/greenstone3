@@ -27,7 +27,7 @@ public class ChangePwdUsersDB {
     public static void main(String[] args) throws SQLException {
 	
 	if (args.length!=3){
-	    System.out.println("Usage: java org.greenstone.gsdl3.ModifyUsersDB <full_path_of_the_usersDB> <username> <password>");
+	    System.out.println("Usage: java org.greenstone.gsdl3.ChangePwdUsersDB <full_path_of_the_usersDB> <username> <password>");
 	    System.exit(0);
 	}
 
@@ -59,8 +59,7 @@ public class ChangePwdUsersDB {
 		// Use the same encryption technique used by the Admin Authentication page
 		// This ensures that the password generated for a string remains consistent
 		password = Authentication.hashPassword(password);
-		System.err.println("**** Password: " + password);
-		//password = new String(PropertiesStep.encrypt(password.toCharArray())); // see org/greenstone/admin/guiext/PropertiesStep.java
+		//System.err.println("**** Password: " + password);
 		
 		//System.err.println("**** " + username + " " + password + " " + groups + " " + accountstatus + " " + comment + " " + email);
 		dw.modifyUserInfo(username, password, groups, accountstatus, comment, email); // remaining fields are allowed to be ""
