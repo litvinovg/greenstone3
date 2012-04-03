@@ -496,6 +496,7 @@ public class DerbyWrapper
 			}
 			conn.commit();
 
+			StringBuffer buffer = new StringBuffer();//("-------------------------------------");
 			for (HashMap<String, String> user : infoMap)
 			{
 				ResultSet groupsSet = state.executeQuery("SELECT role FROM " + ROLES + " WHERE username = '" + user.get("username") + "'");
@@ -509,17 +510,16 @@ public class DerbyWrapper
 					returnedGroups += groupsSet.getString("role");
 				}
 				conn.commit();
-				
-				StringBuffer buffer = new StringBuffer();//("-------------------------------------");
+								
 				buffer.append("USERNAME = " + user.get("username"));
 				buffer.append("\nPASSWORD = " + user.get("password"));
 				buffer.append("\nGROUPS = " + returnedGroups);
 				buffer.append("\nSTATUS = " + user.get("status"));
 				buffer.append("\nCOMMENT = " + user.get("comment"));
 				buffer.append("\nEMAIL = " + user.get("email"));
-				buffer.append("\n-------------------------------------\n");
-				db2txt = buffer.toString();
+				buffer.append("\n-------------------------------------\n");				
 			}
+			db2txt = buffer.toString();
 
 			conn.commit();
 			closeDatabase();
