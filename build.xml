@@ -1188,7 +1188,7 @@
     <input addproperty="admin.password" defaultvalue="admin" message="New admin password (3-8 characters):&gt;">
       <handler classname="org.apache.tools.ant.input.SecureInputHandler" /> <!-- password won't be visible on screen -->
     </input>
-    <echo>PWD: ${admin.password}</echo>
+    <!--<echo>PWD: ${admin.password}</echo>-->
     <antcall target="update-userdb">
       <param name="user.username" value="admin"/>
       <param name="user.password" value="${admin.password}"/>
@@ -1216,9 +1216,6 @@
     See http://www.dcepler.net/post.cfm/hiding-password-input-in-ant 
     But you can do: echo mypassword | ant config-admin -->
   <target name="update-userdb" description="Add or modify users">
-    <echo>username: ${user.username}</echo>
-    <echo>groups: ${user.groups}</echo>
-
     <!-- stop tomcat if running, since derby db is embedded and only allows connections from one jvm instance at a time 
       See http://db.apache.org/derby/papers/DerbyTut/embedded_intro.html -->
     <!--<antcall target="check-tomcat-running"/>--><!--won't set the tomcat.isrunning property for use below-->
