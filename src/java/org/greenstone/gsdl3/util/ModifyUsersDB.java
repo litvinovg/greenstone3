@@ -52,12 +52,12 @@ public class ModifyUsersDB {
 		
 		if(password.length() < 3 || password.length() > 8) {
 		    if(!password.equals("")) {
-			System.err.println("Password not updated. It should be between 3 and 8 characters (inclusive).");
+			System.out.println("Password not updated. It should be between 3 and 8 characters (inclusive).");
 		    }
 		} else {
 		    // Use the same encryption technique used by the Admin Authentication page
 		    // This ensures that the password generated for a string remains consistent
-		    System.err.println("**** Password entered was: " + password);
+		    //System.err.println("**** Password entered was: " + password);
 		    password = Authentication.hashPassword(password);
 		}
 		
@@ -81,10 +81,10 @@ public class ModifyUsersDB {
 	
 	if(findUserResult == null) {
 	    if(noAdd) {
-		System.err.println("Failed to update user. Cannot find user " + username + " in " + usersDB + " database.");
+		System.out.println("Failed to update user. Cannot find user " + username + " in " + usersDB + " database.");
 	    } else { // add new user
-		System.err.println("**** Trying to add user: ");
-		System.err.println("**** " + username + " " + password + " " + groups + " " + accountstatus + " " + comment + " " + email);
+		//System.err.println("**** Trying to add user: ");
+		//System.err.println("**** " + username + " " + password + " " + groups + " " + accountstatus + " " + comment + " " + email);
 		dw.addUser(username, password, groups, accountstatus, comment, email);
 	    }
 	}
@@ -109,7 +109,7 @@ public class ModifyUsersDB {
 		email = user.email;
 	    }    
 	    
-	    System.err.println("**** " + username + " " + password + " " + groups + " " + accountstatus + " " + comment + " " + email);
+	    //System.err.println("**** " + username + " " + password + " " + groups + " " + accountstatus + " " + comment + " " + email);
 	    dw.modifyUserInfo(username, password, groups, accountstatus, comment, email); // other than username and pwd, remaining fields are allowed to be ""
 	}
 	    
