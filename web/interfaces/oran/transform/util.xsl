@@ -676,5 +676,15 @@ used on the document page
       <img class="morearrow" src="interfaces/{$interface_name}/images/next.png"/>
     </a>
   </xsl:template>
-  
+
+  <!-- needs to be name=attrvalue else xsl:param -->
+  <!-- call function with the name prefix (e.g. dse) and the file -->
+  <xsl:template name="langfrag">
+    <script type="text/javascript">      
+      gs.text = new Array();
+      gs.text.<xsl:value-of select="@name"/> = new Array();
+      <xsl:value-of disable-output-escaping="yes" select="util:getInterfaceStringsAsJavascript($interface_name, /page/@lang, @name, 'gs.text')"/>
+    </script>
+  </xsl:template>
+
 </xsl:stylesheet>

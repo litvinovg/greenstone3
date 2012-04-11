@@ -20,6 +20,7 @@ package org.greenstone.gsdl3.util;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -484,4 +485,41 @@ public class XSLTUtil
 		ReCaptcha c = ReCaptchaFactory.newReCaptcha(publicKey, privateKey, false);
 		return c.createRecaptchaHtml(null, null);
 	}
+
+    public static String getInterfaceStringsAsJavascript(String interface_name, String lang, String prefix, String prependToPrefix) {	
+	StringBuffer outputStr = new StringBuffer();
+	
+	Dictionary dict = new Dictionary("interface_" + interface_name, lang);
+	Enumeration keys = dict.getKeys();	
+	if(keys == null) { // try default interface
+	    logger.error("****** Interface name: " + interface_name + " does not have any keys. Trying interface_default.");
+	    dict = new Dictionary("interface_default", lang);
+	    keys = dict.getKeys();
+	}
+	
+	// get all properties in the language-specific dictionary with the given key prefix
+	// Create a string of prependToPrefix.key= "value";\n
+
+	while(keys.hasMoreElements()) {	    
+	    String key = (String)keys.nextElement();
+	    if(key.startsWith(prefix)) {
+		String value = getInterfaceText(interface_name, lang, key);
+
+		outputStr.append(prependToPrefix);
+		outputStr.append(".");
+		outputStr.append(key);
+		outputStr.append("=\"");
+		outputStr.append(value);
+		outputStr.append("\";\n");
+	    }
+	}	
+	
+	return outputStr.toString();
+	
+    }
+
+
+    public static void main(String args[]) {
+	System.out.println("\n@@@@@\n" + XSLTUtil.getInterfaceStringsAsJavascript("default", "en", "dse", "gs.text") + "@@@@@\n");
+    }
 }
