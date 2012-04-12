@@ -19,7 +19,7 @@ function initDocumentMaker()
 	var docLinks = new Array();
 	for(var i = 0; i < allLinks.length; i++)
 	{
-		if(allLinks[i].getAttribute("class") && (hasClass(allLinks[i], "dbdoc")))
+		if(allLinks[i].getAttribute("class") && (gs.functions.hasClass(allLinks[i], "dbdoc")))
 		{
 			docLinks.push(allLinks[i]);
 		}
@@ -59,7 +59,8 @@ function initDocumentMaker()
 	//Request the html for each link's page
 	for(var i = 0; i < docLinks.length; i++)
 	{
-		var callback = {
+		var callback = 
+		{
 			success: addDocumentStructureToPage,
 			failure: function(data){/*alert("FAILED");*/}
 		}
@@ -239,6 +240,9 @@ function createNewDocumentArea()
 	topLevelLI.textDiv = textDiv;
 	topLevelUL.appendChild(textDiv);
 	
+	//Create a blank metadata table
+	//TODO: INSERT THIS!
+	
 	//Add a title to the top-level item
 	var title = createSectionTitle(gs.text.dse.untitled);
 	topLevelLI.appendChild(title);
@@ -412,7 +416,7 @@ function duplicateSectionChildrenRecursive(duplicate, original)
 	for(var i = 0; i < children.length; i++)
 	{
 		current = children[i];
-		if(current.nodeName.toLowerCase() == "li" && !hasClass(current, "placeHolder"))
+		if(current.nodeName.toLowerCase() == "li" && !gs.functions.hasClass(current, "placeHolder"))
 		{
 			var newSection = duplicateSection(current);
 			newUL.appendChild(newSection);
@@ -618,7 +622,7 @@ function updateRecursive(parent, currentDocument, currentPosition, level)
 			
 			updateRecursive(current, currentDocument, pos, level);
 		}
-		else if (current.nodeName.toLowerCase() == "li" && hasClass(current, "dragItem") && !hasClass(current, "placeHolder"))
+		else if (current.nodeName.toLowerCase() == "li" && gs.functions.hasClass(current, "dragItem") && !gs.functions.hasClass(current, "placeHolder"))
 		{
 			if(currentDocument == null && current.nodeID)
 			{
@@ -635,7 +639,7 @@ function updateRecursive(parent, currentDocument, currentPosition, level)
 				pos = currentPosition + "." + posCount;
 			}
 			
-			if(!hasClass(current, "topLevel"))
+			if(!gs.functions.hasClass(current, "topLevel"))
 			{
 				current.nodeID = currentDocument + "." + pos;
 				current.position = pos;
@@ -645,7 +649,7 @@ function updateRecursive(parent, currentDocument, currentPosition, level)
 			
 			current.index = _indexCounter++;
 		}
-		else if (hasClass(current, "placeHolder") && !current.isEmptyList)
+		else if (gs.functions.hasClass(current, "placeHolder") && !current.isEmptyList)
 		{
 			var pos;
 			if(!currentPosition)
@@ -678,7 +682,7 @@ function updateRecursive(parent, currentDocument, currentPosition, level)
 		}
 
 		//If this list is empty or has 1 placeholder child
-		if(liCount == 0 || (liCount == 1 && hasClass(lastItem, "placeHolder")))
+		if(liCount == 0 || (liCount == 1 && gs.functions.hasClass(lastItem, "placeHolder")))
 		{
 			//Give it the emptyList css class (if it does not already have it)
 			if(!parent.getAttribute("class") || parent.getAttribute("class").search("emptyList") == -1)
@@ -695,7 +699,7 @@ function updateRecursive(parent, currentDocument, currentPosition, level)
 			}
 		}
 		//Remove the empty list class if the list is no longer empty
-		else if(hasClass(parent, "emptyList"))
+		else if(gs.functions.hasClass(parent, "emptyList"))
 		{
 			parent.setAttribute("class", parent.getAttribute("class").replace(/emptyList/g, ""));
 		}
