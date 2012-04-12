@@ -24,7 +24,7 @@ import java.util.HashMap;
 public class GSParams
 {
 
-  // cgi parameter names
+	// cgi parameter names
 	public static final String ACTION = "a"; // the major type of action- eg query or browse or process
 	public static final String SUBACTION = "sa"; // subtype of action if we want different processing than the default
 	public static final String REQUEST_TYPE = "rt"; // whether the request is just to display the service form, or to actually do a request to the service
@@ -39,13 +39,12 @@ public class GSParams
 	public static final String LANGUAGE = "l";
 	public static final String DOCUMENT = "d";
 	public static final String DOCUMENT_TYPE = "dt";
-  public static final String HREF = "href"; // url. might be an external url, or a relative one that needs translating
-  public static final String RELATIVE_LINK = "rl"; // whether the href url is relative to the collection or not.
-  public static final String EXTERNAL_LINK_TYPE = "el"; // for an external link, go direct to the page or frame it in the collection
+	public static final String HREF = "href"; // url. might be an external url, or a relative one that needs translating
+	public static final String RELATIVE_LINK = "rl"; // whether the href url is relative to the collection or not.
+	public static final String EXTERNAL_LINK_TYPE = "el"; // for an external link, go direct to the page or frame it in the collection
 	public static final String PROCESS_ID = "pid"; // if a request wasn't completed, this identifies the request - used when asking for a status update
 
-	
-  public static final String HTTPHEADERFIELDS = "hhf";
+	public static final String HTTPHEADERFIELDS = "hhf";
 
 	// internal configure args
 	public static final String SYSTEM_SUBSET = "ss";
@@ -60,18 +59,18 @@ public class GSParams
 	public static final String INLINE_TEMPLATE = "ilt";
 	public static final String DISPLAY_METADATA = "dmd";
 	public static final String FILE_LOCATION = "fl";
-	
+
 	//Administration
 	public static final String PASSWORD = "password";
 	public static final String S_PASSWORD = "s1.password";
 	public static final String S_NEW_PASSWORD = "s1.newPassword";
 	public static final String S_OLD_PASSWORD = "s1.oldPassword";
 
-  // some standard arg values
-  public static final String SYSTEM_ACTION = "s";
- 
-  public static final String EXTERNAL_LINK_TYPE_DIRECT = "direct";
-  public static final String EXTERNAL_LINK_TYPE_FRAMED = "frame";
+	// some standard arg values
+	public static final String SYSTEM_ACTION = "s";
+
+	public static final String EXTERNAL_LINK_TYPE_DIRECT = "direct";
+	public static final String EXTERNAL_LINK_TYPE_FRAMED = "frame";
 
 	protected HashMap param_map = null;
 
@@ -105,7 +104,7 @@ public class GSParams
 		addParameter(S_NEW_PASSWORD, false);
 		addParameter(S_OLD_PASSWORD, false);
 
-		addParameter(COLLECTION_TYPE, true); 
+		addParameter(COLLECTION_TYPE, true);
 		addParameter(EXTERNAL_LINK_TYPE, false);
 		// filtering args must be specified each time
 		addParameter(EXCERPT_ID, false);
@@ -140,7 +139,7 @@ public class GSParams
 
 	public boolean shouldSave(String name)
 	{
-	  // p. is used to store previous settings
+		// p. is used to store previous settings
 		if (name.startsWith("p."))
 			return false;
 		Param p = (Param) this.param_map.get(name);
