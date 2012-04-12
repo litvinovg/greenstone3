@@ -32,7 +32,7 @@
 		<gslib:collectionNameLinked/><gslib:rightArrow/> 
 		<a>
 			<xsl:attribute name="href">
-				<xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="$collName"/>&amp;d=<xsl:value-of select="/page/pageResponse/document/documentNode[1]/@nodeID"/>&amp;dt=<xsl:value-of select="/page/pageResponse/document/documentNode/@docType"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>
+				<xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="$collName"/>/document/<xsl:value-of select="/page/pageResponse/document/documentNode[1]/@nodeID"/>
 			</xsl:attribute>
 			<xsl:variable name="documentTitleVar">
 				<gslib:documentTitle/>
@@ -67,13 +67,22 @@
 			<table class="sectionHeader"><tr>
 			
 				<!-- Expand/collapse button -->
-				<td class="headerTD">
-					<img id="dtoggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
-						<xsl:attribute name="src">
-							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
-						</xsl:attribute>
-					</img>
-				</td>
+				<xsl:if test="not(/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='sectionExpandCollapse']/@value) or /page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='sectionExpandCollapse']/@value = 'true'">
+					<td class="headerTD">
+						<img id="dtoggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
+							<xsl:attribute name="src">
+								<xsl:choose>
+									<xsl:when test="/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or util:oidIsMatchOrParent(@nodeID, /page/pageResponse/document/@selectedNode)">
+										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
+									</xsl:otherwise>
+								</xsl:choose>
+							</xsl:attribute>
+						</img>
+					</td>
+				</xsl:if>
 				
 				<!-- Title -->
 				<td id="header{@nodeID}" class="headerTD sectionTitle"><!-- *** -->
@@ -91,14 +100,41 @@
 				<!-- "back to top" link -->
 				<xsl:if test="util:hashToDepthClass(@nodeID) != 'sectionHeaderDepthTitle'">
 					<td class="backToTop headerTD">
-						<a href="#top">
+						<a href="javascript:scrollToTop();">
 							<xsl:text disable-output-escaping="yes">&#9650;</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.back_to_top')"/>
 						</a>
 					</td>
 				</xsl:if>
 			</tr></table>
 			
-			<div id="doc{@nodeID}" class="sectionContainer"><!-- *** -->
+			<div id="doc{@nodeID}"><!-- *** -->
+				<xsl:choose>
+					<xsl:when test="/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or /page/pageResponse/document/@selectedNode = @nodeID">
+						<xsl:attribute name="class">
+							<xsl:text>sectionContainer hasText</xsl:text>
+						</xsl:attribute>
+						<xsl:attribute name="style">
+							<xsl:text>display:block;</xsl:text>
+						</xsl:attribute>
+					</xsl:when>
+					<xsl:when test="/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or util:oidIsMatchOrParent(@nodeID, /page/pageResponse/document/@selectedNode)">
+						<xsl:attribute name="class">
+							<xsl:text>sectionContainer noText</xsl:text>
+						</xsl:attribute>
+						<xsl:attribute name="style">
+							<xsl:text>display:block;</xsl:text>
+						</xsl:attribute>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:attribute name="class">
+							<xsl:text>sectionContainer noText</xsl:text>
+						</xsl:attribute>
+						<xsl:attribute name="style">
+							<xsl:text>display:none;</xsl:text>
+						</xsl:attribute>
+					</xsl:otherwise>
+				</xsl:choose>
+			
 				<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 					<table id="meta{@nodeID}">
 						<xsl:attribute name="style">
@@ -232,79 +268,11 @@
 			<xsl:call-template name="documentBerryForDocumentPage"/>
 			
 			<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
-				<table style="width:100%"><tr>
-					<td id="editBarLeft" style="width:70%"><xsl:text> </xsl:text></td>
-					<td id="editBarRight">
-						<div style="text-align:center;">
-							<div style="margin:5px;" class="ui-state-default ui-corner-all">
-								<a style="padding: 3px; text-decoration:none;" href="{$library_name}?a=g&amp;sa=documentbasket&amp;c=&amp;s=DisplayDocumentList&amp;rt=r&amp;p.c={/page/pageResponse/collection/@name}&amp;docToEdit={/page/pageResponse/document/documentNode/@nodeID}"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.edit_structure')"/></a>
-							</div>
-							<div style="margin:5px;" class="ui-state-default ui-corner-all">
-								<a id="editContentButton" style="padding: 3px; text-decoration:none;" href="javascript:readyPageForEditing();"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.edit_content')"/></a>
-							</div>
-						</div>
-					</td>
-				</tr></table>
-				<xsl:call-template name="document-editor-language-fragments"/>
+				<xsl:call-template name="editBar"/>
 			</xsl:if>
 
 			<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']) or /page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']/@value='true'">
-				<table id="rightSidebar">
-					<tr><td>
-						<xsl:call-template name="viewOptions"/>
-					</td></tr>
-					<tr><td>
-						<div id="contentsArea">	
-							<!-- show the berry basket if it's turned on -->
-							<gslib:berryBasket/>
-
-							<!-- the book's cover image -->
-							<div id="coverImage">
-								<xsl:attribute name="class">
-									<xsl:choose>
-										<xsl:when test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']) or /page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true'">visible</xsl:when>
-										<xsl:otherwise>hidden</xsl:otherwise>    
-									</xsl:choose>
-								</xsl:attribute>
-								<gslib:coverImage/><xsl:text> </xsl:text>
-							</div>
-
-							<!-- the contents (if enabled) -->
-							<xsl:choose>
-								<xsl:when test="/page/pageResponse/document/@docType = 'paged' and not(/page/pageRequest/paramList/param[@name = 'ed']/@value = '1')">
-									<!-- Table of contents will be dynamically retrieved when viewing a paged document -->
-									<script type="text/javascript">
-										<xsl:text disable-output-escaping="yes">
-											$(window).load(function()
-											{
-												retrieveTableOfContentsAndTitles();
-											});
-										</xsl:text>
-									</script>
-									<div id="tocLoadingImage" style="text-align:center;">
-										<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.loading')"/><xsl:text>...</xsl:text>
-									</div>
-								</xsl:when>
-								<xsl:otherwise>
-									<div id="tableOfContents">
-										<xsl:attribute name="class">
-											<xsl:choose>
-												<xsl:when test="count(//documentNode) > 1 and not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">visible</xsl:when>
-												<xsl:otherwise>hidden</xsl:otherwise>
-											</xsl:choose>
-										</xsl:attribute>
-										<xsl:apply-templates select="documentNode" mode="TOC"/>
-										<xsl:if test="@docType = 'paged'">
-											<table style="width:100%;"><tbody><tr>
-												<td><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.filter_pages')"/><xsl:text>: </xsl:text><input id="filterText" type="text" size="27"/></td>
-											</tr></tbody></table>
-										</xsl:if>
-									</div>
-								</xsl:otherwise>
-							</xsl:choose>
-						</div>
-					</td></tr>
-				</table>
+				<xsl:call-template name="rightSidebar"/>
 			</xsl:if>
 		</xsl:if>
 		
@@ -331,15 +299,130 @@
 				</script>
 			</xsl:when>
 			<xsl:otherwise>
-				<div id="gs-document">
-					<div id="gs-document-text" class="documenttext" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
-						<xsl:call-template name="wrapDocumentNodes"/>
-					</div>
-				</div>
+				<xsl:choose>
+					<xsl:when test="/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or not(util:contains(/page/pageResponse/document/@selectedNode, '.'))">
+						<div id="gs-document">
+							<xsl:call-template name="documentPre"/>
+							<div id="gs-document-text" class="documenttext" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
+								<xsl:call-template name="wrapDocumentNodes"/>
+							</div>
+						</div>
+					</xsl:when>
+					<xsl:otherwise>
+						<div id="gs-document">							
+							<div id="tocLoadingImage" style="text-align:center;">
+								<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.loading')"/><xsl:text>...</xsl:text>
+							</div>
+						</div>
+						<script type="text/javascript">
+							<xsl:text disable-output-escaping="yes">
+								$(window).load(function()
+								{
+									loadTopLevelPage(function()
+									{
+										focusSection("</xsl:text><xsl:value-of select="/page/pageResponse/document/@selectedNode"/><xsl:text disable-output-escaping="yes">");
+									});
+									console.log("HASH IS " + gs.functions.hashString("" + (new Date()).getTime()) + " ON " + (new Date()).getTime());
+								});
+							</xsl:text>
+						</script>
+					</xsl:otherwise>
+				</xsl:choose>
 			</xsl:otherwise>
 		</xsl:choose>
 		
 		<div class="clear"><xsl:text> </xsl:text></div>
+	</xsl:template>
+	
+	<xsl:template name="editBar">
+		<table style="width:100%"><tr>
+			<td id="editBarLeft" style="width:70%"><xsl:text> </xsl:text></td>
+			<td id="editBarRight">
+				<div style="text-align:center;">
+					<div style="margin:5px;" class="ui-state-default ui-corner-all">
+						<a style="padding: 3px; text-decoration:none;" href="{$library_name}?a=g&amp;sa=documentbasket&amp;c=&amp;s=DisplayDocumentList&amp;rt=r&amp;p.c={/page/pageResponse/collection/@name}&amp;docToEdit={/page/pageResponse/document/documentNode/@nodeID}"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.edit_structure')"/></a>
+					</div>
+					<div style="margin:5px;" class="ui-state-default ui-corner-all">
+						<a id="editContentButton" style="padding: 3px; text-decoration:none;" href="javascript:readyPageForEditing();"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.edit_content')"/></a>
+					</div>
+				</div>
+			</td>
+		</tr></table>
+		<xsl:call-template name="document-editor-language-fragments"/>
+	</xsl:template>
+	
+	<xsl:template name="rightSidebar">
+		<table id="rightSidebar">
+			<tr><td>
+				<xsl:call-template name="viewOptions"/>
+			</td></tr>
+			<tr><td>
+				<div id="contentsArea">	
+					<!-- show the berry basket if it's turned on -->
+					<gslib:berryBasket/>
+
+					<!-- the book's cover image -->
+					<div id="coverImage">
+						<xsl:attribute name="class">
+							<xsl:choose>
+								<xsl:when test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']) or /page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true'">visible</xsl:when>
+								<xsl:otherwise>hidden</xsl:otherwise>    
+							</xsl:choose>
+						</xsl:attribute>
+						<gslib:coverImage/><xsl:text> </xsl:text>
+					</div>
+
+					<!-- the contents (if enabled) -->
+					<xsl:choose>
+						<xsl:when test="/page/pageResponse/document/@docType = 'paged'">
+							<!-- Table of contents will be dynamically retrieved when viewing a paged document -->
+							<script type="text/javascript">
+								<xsl:text disable-output-escaping="yes">
+									$(window).load(function()
+									{
+										retrieveTableOfContentsAndTitles();
+									});
+								</xsl:text>
+							</script>
+							<div id="tocLoadingImage" style="text-align:center;">
+								<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.loading')"/><xsl:text>...</xsl:text>
+							</div>
+						</xsl:when>
+						<xsl:when test="not(/page/pageRequest/paramList/param[@name = 'ed']/@value = '1')">
+							<div id="tableOfContents">
+								<div id="tocLoadingImage" style="text-align:center;">
+									<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.loading')"/><xsl:text>...</xsl:text>
+								</div>
+							</div>
+							<script type="text/javascript">
+								<xsl:text disable-output-escaping="yes">
+									$(window).load(function()
+									{
+										retrieveFullTableOfContents();
+									});
+								</xsl:text>
+							</script>
+						</xsl:when>
+						<xsl:otherwise>
+							<div id="tableOfContents">
+								<xsl:attribute name="class">
+									<xsl:choose>
+										<xsl:when test="count(//documentNode) > 1 and not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">visible</xsl:when>
+										<xsl:otherwise>hidden</xsl:otherwise>
+									</xsl:choose>
+								</xsl:attribute>
+								<xsl:apply-templates select="documentNode" mode="TOC"/>
+								<xsl:if test="@docType = 'paged'">
+									<table style="width:100%;"><tbody><tr>
+										<td><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.filter_pages')"/><xsl:text>: </xsl:text><input id="filterText" type="text" size="27"/></td>
+									</tr></tbody></table>
+								</xsl:if>
+							</div>
+						</xsl:otherwise>
+					</xsl:choose>
+				</div>
+			</td></tr>
+		</table>
 	</xsl:template>
 	
 	<!-- Highlight annotations if requested -->
@@ -376,7 +459,6 @@
 	
 	<!-- The default template for displaying the document content -->
 	<xsl:template match="documentNode" mode="document">
-		<xsl:call-template name="documentNodePre"/>
 		<!-- Section text -->
 		<xsl:for-each select="nodeContent">
 			<xsl:for-each select="node()">
@@ -412,7 +494,14 @@
 							<xsl:when test="not(nodeContent and not(documentNode))">
 								<img id="ttoggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">
 									<xsl:attribute name="src">
-										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
+										<xsl:choose>
+											<xsl:when test="/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or /page/pageResponse/document/@selectedNode = @nodeID">
+												<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
+											</xsl:when>
+											<xsl:otherwise>
+												<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
+											</xsl:otherwise>
+										</xsl:choose>
 									</xsl:attribute>
 								</img>
 							</xsl:when>
@@ -445,13 +534,13 @@
 				
 				<!-- The section name, links to the section in the document -->
 				<td>				
-					<a>
+					<a id="toclink{@nodeID}">
 						<xsl:choose>
 							<xsl:when test="/page/pageResponse/document/@docType = 'paged'">
 								<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/></xsl:attribute>
 							</xsl:when>
 							<xsl:otherwise>
-								<xsl:attribute name="href">#<xsl:value-of select="@nodeID"/></xsl:attribute>
+								<xsl:attribute name="href">javascript:focusSection('<xsl:value-of select="@nodeID"/>');</xsl:attribute>
 							</xsl:otherwise>
 						</xsl:choose>
 						<xsl:if test="util:hashToSectionId(@nodeID)">
@@ -465,7 +554,17 @@
 		
 			<!-- display any child items -->		
 			<xsl:if test="documentNode">
-				<li id="toc{@nodeID}" style="display:block;">
+				<li id="toc{@nodeID}">
+					<xsl:attribute name="style">
+						<xsl:choose>
+							<xsl:when test="/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or /page/pageResponse/document/@selectedNode = @nodeID">
+								<xsl:text>display:block;</xsl:text>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:text>display:none;</xsl:text>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:attribute>
 					<xsl:apply-templates select="documentNode" mode="TOC"/>
 				</li>
 			</xsl:if>
@@ -552,7 +651,7 @@
 			</xsl:if>
 			
 			<!-- Highlight on/off button -->
-			<xsl:if test="/page/pageRequest/paramList/param[@name = 'p.a']/@value = 'q' and count(//annotation) > 0">
+			<xsl:if test="/page/pageRequest/paramList/param[@name = 'p.a']/@value = 'q' or /page/pageRequest/paramList/param[@name = 's1.query']">
 				<td>
 					<img>
 						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'highlight_image')"/></xsl:attribute>
@@ -610,7 +709,7 @@
 				</td>
 				<td style="width:60%;">
 					<div>
-						<div style="float:left; width:30%;"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoom')"/><xsl:text>:</xsl:text></div>
+						<div style="float:left; width:30%;"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoom_size')"/><xsl:text>:</xsl:text></div>
 						<div id="zoomSlider" style="float:right; width:65%; height:5px; margin-top:6px;"><xsl:text> </xsl:text></div>
 						<script type="text/javascript">
 							<xsl:text disable-output-escaping="yes">
@@ -643,14 +742,14 @@
 		</table>	
 	</xsl:template>
 	
-	<xsl:template name="documentNodePre">
+	<xsl:template name="documentPre">
 		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
 			<xsl:call-template name="mapFeatures"/>
 		</xsl:if>
 	</xsl:template>
 	
 	<xsl:template name="mapFeatures">
-		<div id="map_canvas" style="margin:0px auto; width:900px; height:500px;"><xsl:text> </xsl:text></div>
+		<div id="map_canvas"><xsl:text> </xsl:text></div>
 
 		<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
 			<div style="background:#BBFFBB; padding: 5px; margin:0px auto; width:890px;">
