@@ -189,51 +189,72 @@
 									</tr>
 								</xsl:when>
 								<xsl:when test="/page/pageResponse/authenticationNode/service/@operation = 'AccountSettings'">
-									<tr>
-										<td><button id="changePasswordButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.change_password')"/>...</button></td>
-										<script type="text/javascript">
-											<xsl:text disable-output-escaping="yes">
-												var oldPasswordLabelText = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.old_password')"/><xsl:text disable-output-escaping="yes">";
-												var newPasswordLabelText = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.new_password')"/><xsl:text disable-output-escaping="yes">";
-												var rtNewPasswordLabelText = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.retype_password')"/><xsl:text disable-output-escaping="yes">";
-												
-												var changePasswordButton = document.getElementById("changePasswordButton");
-												changePasswordButton.onclick = function()
-												{
-													changePasswordButton.parentNode.removeChild(changePasswordButton);
+									<tr>										
+										<xsl:if test="not(/page/pageResponse/error/@type = 'Incorrect Password')">
+											<td><button id="changePasswordButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.change_password')"/>...</button></td>
+											<script type="text/javascript">
+												<xsl:text disable-output-escaping="yes">
+													var oldPasswordLabelText = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.old_password')"/><xsl:text disable-output-escaping="yes">";
+													var newPasswordLabelText = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.new_password')"/><xsl:text disable-output-escaping="yes">";
+													var rtNewPasswordLabelText = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.retype_password')"/><xsl:text disable-output-escaping="yes">";
 													
-													var names = ["s1.oldPassword", "s1.newPassword", ""];
-													var ids = ["oldPassword", "passwordOne", "passwordTwo"];
-													var labels = [oldPasswordLabelText, newPasswordLabelText, rtNewPasswordLabelText];
-													var parents = ["oldPassword", "password", "retypePassword"];
-													
-													for(var i = 0; i &lt; names.length; i++)
+													var changePasswordButton = document.getElementById("changePasswordButton");
+													changePasswordButton.onclick = function()
 													{
-														$("#" + parents[i] + "LabelCell").append(labels[i] + ": ");
+														changePasswordButton.parentNode.removeChild(changePasswordButton);
 														
-														var input = $("&lt;input&gt;");
-														input.attr("name", names[i]);
-														input.attr("type", "password");
-														input.attr("id", ids[i]);
+														var names = ["s1.oldPassword", "s1.newPassword", ""];
+														var ids = ["oldPassword", "passwordOne", "passwordTwo"];
+														var labels = [oldPasswordLabelText, newPasswordLabelText, rtNewPasswordLabelText];
+														var parents = ["oldPassword", "password", "retypePassword"];
 														
-														$("#" + parents[i] + "InputCell").append(input);
+														for(var i = 0; i &lt; names.length; i++)
+														{
+															$("#" + parents[i] + "LabelCell").append(labels[i] + ": ");
+															
+															var input = $("&lt;input&gt;");
+															input.attr("name", names[i]);
+															input.attr("type", "password");
+															input.attr("id", ids[i]);
+															
+															$("#" + parents[i] + "InputCell").append(input);
+														}
 													}
-												}
-											</xsl:text>
-										</script>
+												</xsl:text>
+											</script>
+										</xsl:if>
 									</tr>
-									<tr>
-										<td id="oldPasswordLabelCell"><xsl:text> </xsl:text></td>
-										<td id="oldPasswordInputCell"><xsl:text> </xsl:text></td>
-									</tr>
-									<tr>
-										<td id="passwordLabelCell"><xsl:text> </xsl:text></td>
-										<td id="passwordInputCell"><xsl:text> </xsl:text></td>
-									</tr>
-									<tr>
-										<td id="retypePasswordLabelCell"><xsl:text> </xsl:text></td>
-										<td id="retypePasswordInputCell"><xsl:text> </xsl:text></td>
-									</tr>
+									
+									<xsl:choose>
+										<xsl:when test="not(/page/pageResponse/error/@type = 'Incorrect Password')">
+											<tr>
+												<td id="oldPasswordLabelCell"><xsl:text> </xsl:text></td>
+												<td id="oldPasswordInputCell"><xsl:text> </xsl:text></td>
+											</tr>
+											<tr>
+												<td id="passwordLabelCell"><xsl:text> </xsl:text></td>
+												<td id="passwordInputCell"><xsl:text> </xsl:text></td>
+											</tr>
+											<tr>
+												<td id="retypePasswordLabelCell"><xsl:text> </xsl:text></td>
+												<td id="retypePasswordInputCell"><xsl:text> </xsl:text></td>
+											</tr>
+										</xsl:when>
+										<xsl:otherwise>
+											<tr>
+												<td id="oldPasswordLabelCell"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.old_password')"/></td>
+												<td id="oldPasswordInputCell"><input id="oldPassword" name="s1.oldPassword" type="password"/></td>
+											</tr>
+											<tr>
+												<td id="passwordLabelCell"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.new_password')"/></td>
+												<td id="passwordInputCell"><input id="passwordOne" name="s1.newPassword" type="password"/></td>
+											</tr>
+											<tr>
+												<td id="retypePasswordLabelCell"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.retype_password')"/></td>
+												<td id="retypePasswordInputCell"><input id="passwordTwo" type="password"/></td>
+											</tr>
+										</xsl:otherwise>
+									</xsl:choose>
 								</xsl:when>
 							</xsl:choose>						
 							<xsl:if test="/page/pageResponse/authenticationNode/service/@operation = 'EditUser'">
