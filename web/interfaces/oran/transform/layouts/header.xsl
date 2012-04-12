@@ -24,7 +24,19 @@
 	
 	<!-- Creates a header for the html page -->
 	<xsl:template name="create-html-header">
-		<base href="{/page/pageRequest/@baseURL}"/><xsl:comment>[if lte IE 6]&gt;&lt;/base&gt;&lt;![endif]</xsl:comment>
+		 <base>
+			 <xsl:attribute name="href">
+					 <xsl:choose>
+							 <xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'baseURL']">
+									 <xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'baseURL']"/>
+							 </xsl:when>
+							 <xsl:when test="/page/pageRequest/@baseURL">
+									 <xsl:value-of select="/page/pageRequest/@baseURL"/>
+							 </xsl:when>
+					 </xsl:choose>
+			 </xsl:attribute>
+	 </base>
+		<xsl:comment>[if lte IE 6]&gt;&lt;/base&gt;&lt;![endif]</xsl:comment>
 	
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
 		
