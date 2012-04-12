@@ -24,6 +24,16 @@ gs.functions.ajaxRequest = function()
 	}
 }
 
+gs.functions.hasClass = function(elem, classVal)
+{
+	if(!elem || !elem.getAttribute("class"))
+	{
+		return false;
+	}
+
+	return (elem.getAttribute("class").search(classVal) != -1)
+}
+
 gs.functions.getElementsByClassName = function(cl) 
 {
 	var nodes = new Array();
@@ -190,6 +200,156 @@ function startCheckLoop(pid, serverFunction, callbackFunction)
 		ajax.send();
 	}
 	ajaxFunction();
+}
+
+function inc(a, b)
+{
+	var carry = 0;
+	var num = 0;
+	var i = 0;
+	
+	while((carry || (i < a.length) || (i < b.length)) && (i < 100))
+	{
+		num = carry;
+		if(i < a.length){num += a[i];}
+		if(i < b.length){num += b[i];}
+		
+		if(num >= 256)
+		{
+			num -= 256;
+			carry = 1;
+		}
+		else
+		{
+			carry = 0;
+		}
+		
+		a[i] = num;
+		
+		i++;
+	}
+}
+
+function ifposDec(a, b)
+{
+	console.log("GOT " + a + " and " + b);
+	var carry = 0;
+	var num = 0;
+	var i = 0;
+	
+	if(b.length > a.length){console.log("RETURNING 0 (1)"); return 0;}
+	if(b.length == a.length)
+	{
+		i = a.length - 1;
+		while(i >= 0)
+		{
+			if(a[i] > b[i]){console.log("BREAKING"); break;}
+			if(a[i] < b[i]){console.log("RETURNING 0 (2)"); return 0;}
+			i--;
+		}
+	}
+	
+	i = 0;
+	while((i < a.length) || (i < b.length))
+	{
+		num = -carry;
+		if(i < a.length){num += a[i];}
+		if(i < b.length){num -= b[i];}
+		
+		if(num < 0)
+		{
+			num += 256;
+			carry = 1;
+		}
+		else
+		{
+			carry = 0;
+		}
+		
+		a[i] = num;
+		i++
+	}
+	console.log("NUM is " + num); 
+	
+	return 1;
+}
+
+function convertNum(a)
+{
+	var result = new Array();
+	var i;
+	var convert = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"];
+	
+	if(a.length == 0)
+	{
+		result.push("0");
+		return result;
+	}
+	
+	for(i = a.length - 1; i >= 0; i--)
+	{
+		console.log("i is " + i + " a[i] is " + a[i] + " a[i]/16 is " + Math.floor(a[i]/16) + " a[i]%16 is " + Math.floor(a[i]%16));
+		console.log("Adding " + convert[Math.floor(a[i]/16)] + " and " + convert[Math.floor(a[i]%16)]);
+		result.push(convert[Math.floor(a[i]/16)]);
+		result.push(convert[Math.floor(a[i]%16)]);
+	}
+	
+	var resultString = "";
+	for(var j = 0; j < result.length; j++)
+	{
+		resultString += result[j];
+	}
+	
+	return resultString;
+}
+
+gs.functions.hashString = function(str)
+{
+	var remainder = new Array();
+	var primePow = new Array();
+	var pow = 
+	[
+		255, 255, 255,
+		255, 255, 255,
+		255, 255, 255,
+		255, 255, 1
+	];
+	
+	for(var i = 0; i < 8; i++)
+	{
+		primePow.push(pow);
+		inc(pow, pow);
+	}
+	
+	for(var i = 0; i < str.length; i++)
+	{
+		var c = str.charAt(i);
+
+		if(remainder.length == 99)
+		{
+			return null;
+		}
+
+		for(var j = remainder.length; j > 0; j--)
+		{
+			remainder[i] = remainder[i-1];
+		}
+		remainder[0] = c;
+
+		for(var j = 7; j >= 0; j--)
+		{
+			ifposDec(remainder, primePow[j]);
+		}	
+	}
+	
+	var returnString = remainder.length + " AWAY TO CONVERT -> ";
+	for(var i = 0; i < remainder.length; i++)
+	{
+		returnString += remainder[i] + " ";
+	}
+	console.log(returnString);
+	
+	return convertNum(remainder);
 }
 
 function callMetadataServer(callingFunction, url, responseFunction)
