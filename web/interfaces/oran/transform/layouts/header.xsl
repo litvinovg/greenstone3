@@ -406,11 +406,9 @@
 	<!-- gslib:langfrag should get expanded in ../util.xsl -->
 	<xsl:template name="document-editor-language-fragments">
 	  <!--<gslib:langfrag name="dse"/>-->
-
+	  
 	  <script type="text/javascript">
-	  gs.text = new Array();
-	  gs.text.dse = new Array();
-	  <xsl:value-of disable-output-escaping="yes" select="util:getInterfaceStringsAsJavascript($interface_name, /page/@lang, 'dse', 'gs.text')"/>
+	    <xsl:value-of disable-output-escaping="yes" select="util:getInterfaceStringsAsJavascript($interface_name, /page/@lang, 'dse')"/>	    
 	  </script>
 	</xsl:template>
 	

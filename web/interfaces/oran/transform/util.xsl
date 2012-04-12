@@ -677,13 +677,10 @@ used on the document page
     </a>
   </xsl:template>
 
-  <!-- needs to be name=attrvalue else xsl:param -->
-  <!-- call function with the name prefix (e.g. dse) and the file -->
+  <!-- call function with the name prefix (e.g. dse) -->
   <xsl:template name="langfrag">
     <script type="text/javascript">      
-      gs.text = new Array();
-      gs.text.<xsl:value-of select="@name"/> = new Array();
-      <xsl:value-of disable-output-escaping="yes" select="util:getInterfaceStringsAsJavascript($interface_name, /page/@lang, @name, 'gs.text')"/>
+      <xsl:value-of disable-output-escaping="yes" select="util:getInterfaceStringsAsJavascript($interface_name, /page/@lang, @name)"/>
     </script>
   </xsl:template>
 

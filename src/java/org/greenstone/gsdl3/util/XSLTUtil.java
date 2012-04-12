@@ -512,20 +512,36 @@ public class XSLTUtil
 		return c.createRecaptchaHtml(null, null);
 	}
 
-    public static String getInterfaceStringsAsJavascript(String interface_name, String lang, String prefix, String prependToPrefix) {	
+    public static String getInterfaceStringsAsJavascript(String interface_name, String lang, String prefix) {	
+	String prependToPrefix = "gs.text";
+	return XSLTUtil.getInterfaceStringsAsJavascript(interface_name, lang, prefix, prependToPrefix);
+    }
+
+    // generates javascript: 2 arrays are declared and populated with strings that declare variables and assign their values
+    // to be strings loaded from the interface_name.properties file for the language.    
+    public static String getInterfaceStringsAsJavascript(String interface_name, String lang, String prefix, String prependToPrefix) {
+	// 1. Generating Javascript of the form:
+	// if(!gs.text) { gs.text = new Array(); }
+	// if(!gs.text.dse) { gs.text.dse = new Array(); }
 	StringBuffer outputStr = new StringBuffer();
+	outputStr.append("if(!gs.text) { ");
+	outputStr.append(prependToPrefix + " = new Array(); ");
+	outputStr.append("}\n");
+	outputStr.append("if(!gs.text." + prefix + ") { ");
+	outputStr.append(prependToPrefix + "." + prefix + " = new Array(); ");
+	outputStr.append("}\n");
 	
 	Dictionary dict = new Dictionary("interface_" + interface_name, lang);
 	Enumeration keys = dict.getKeys();	
 	if(keys == null) { // try default interface
-	    logger.error("****** Interface name: " + interface_name + " does not have any keys. Trying interface_default.");
+	    //logger.debug("****** Interface name: " + interface_name + " does not have any keys. Trying interface_default.");
 	    dict = new Dictionary("interface_default", lang);
 	    keys = dict.getKeys();
 	}
 	
-	// get all properties in the language-specific dictionary with the given key prefix
-	// Create a string of prependToPrefix.key= "value";\n
-
+	// Get all properties in the language-specific dictionary with the given key prefix
+	// Create Javascript strings of the form:
+	// prependToPrefix.key= "value";\n
 	while(keys.hasMoreElements()) {	    
 	    String key = (String)keys.nextElement();
 	    if(key.startsWith(prefix)) {
@@ -544,7 +560,8 @@ public class XSLTUtil
 	
     }
 
-
+    // Test from cmdline with:
+    // java -classpath /research/ak19/gs3-svn/web/WEB-INF/lib/gsdl3.jar:/research/ak19/gs3-svn/web/WEB-INF/lib/log4j-1.2.8.jar:/research/ak19/gs3-svn/web/WEB-INF/classes/ org.greenstone.gsdl3.util.XSLTUtil
     public static void main(String args[]) {
 	System.out.println("\n@@@@@\n" + XSLTUtil.getInterfaceStringsAsJavascript("default", "en", "dse", "gs.text") + "@@@@@\n");
     }
