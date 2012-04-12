@@ -1,42 +1,33 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-  <head>
-    <meta http-equiv="Content-Type"
-      content="text/html; charset=iso-8859-1">
-     <title>Greenstone Version 3</title>
-     <style type="text/css">
-        li {padding: 0.8em 0;}
-		body {
-			background: #fff url('interfaces/default/images/chalk.gif') scroll repeat-y left top;
-		}
-     </style> 
-  </head>  
-<body bgcolor="#ffffff" text="#000000">
-    
-<p style="text-align:center;">
-<img src="interfaces/default/images/gsdlhead.gif" 
-width="225" height="66" alt="Greenstone Digital Library Software">
-</p>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<title>Greenstone Version 3</title>
+		<style type="text/css">
+			li {padding: 0.8em 0;}
+			body {
+				background: #fff url('interfaces/default/images/chalk.gif') scroll repeat-y left top;
+			}
+		</style> 
+	</head>  
+	<body style="background: white; color: black;">
+	<div style="width: 1000px; margin: 0 auto;">
+		<h2 style="text-align:center; font-size:110%;font-family:sans-serif;">Welcome to your Greenstone3 installation!</h2>
+			
+		<ul>	
+			<li><a href="library">Run the main servlet for Greenstone 3.</a> This is an interface that demonstrates the wide variety of capabilities in Greenstone 3.</li>
+			<li><a href="testing">Run the 'Hello World' test servlet.</a> Use this link to check that your server can run the simplest of Java servlets.</li>
+			<li><a href="gs2-library">Run the Greenstone 2 backwards-compatible library servlet. (Deprecated)</a> View the demo collections that come with Greenstone, using the Greenstone 2 look and feel.</li>
+			<li><a href="gs3-library">Run the 'standard' servlet. (Deprecated)</a> View the same collections using the standard Greenstone 3 look and feel. </li>
+			<li><a href="gateway">Run the gateway servlet.</a> This uses the standard Greenstone 3 look and feel, and talks via SOAP to the site with the demo collections (localsite).
+				<ul>
+					<li>Note that SOAP needs to be installed, and a SOAP server needs to be running for localsite.</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
 
-<div style="margin-left: 90px;">
+	<p style="text-align:center; font-size: 75%;"><a href="http://www.greenstone.org/greenstone3-home">powered by greenstone3</a></p>
 
-<h2 style="font-size:110%;font-family:sans-serif;">Welcome to your Greenstone3 installation</h2>
-	
-<ul>	
-<li><a href="testing">Run the test servlet.</a>
-<li><a href="library">Run the default library servlet.</a> View the demo collections that come with Greenstone, using the Greenstone 2 look and feel.
-<li><a href="gs3library">Run the 'standard' servlet.</a> View the same collections using the standard Greenstone 3 look and feel 
-<li><a href="dev">Run the development servlet.</a> Try out the new skin system currently in development 
-<li><a href="gateway">Run the gateway servlet.</a> This uses the standard Greenstone 3 look and feel, and talks via SOAP to the site with the demo collections (localsite).
-<ul>
-<li>Note that SOAP needs to be installed, and a SOAP server needs to be running for localsite.
-</ul>
-</ul>
-
-</div>
-
-<p style="text-align:right; font-size: 75%;">powered by <a 
-href="http://www.greenstone.org/greenstone3-home">greenstone3</a></p>
-
-</body>
+	</body>
 </html>
