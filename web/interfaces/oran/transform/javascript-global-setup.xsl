@@ -16,11 +16,13 @@
 			gs.documentMetadata = new Array();
 			gs.imageURLs = new Array();
 			gs.variables = new Array();
+			gs.requestInformation = new Array();
 		</script>
 		<xsl:call-template name="populate-cgi-param-values"/>
 		<xsl:call-template name="populate-xslt-param-values"/>
 		<xsl:call-template name="populate-image-url-values"/>
 		<xsl:call-template name="populate-metadata-values"/>
+		<xsl:call-template name="populate-request-information-values"/>
 		<xsl:call-template name="include-global-javascript-functions"/>
 	</xsl:template>
 	
@@ -109,24 +111,19 @@
 		</script>
 	</xsl:template>
 	
+	<xsl:template name="populate-request-information-values">
+		<script type="text/javascript">
+			<xsl:text disable-output-escaping="yes">
+				gs.requestInformation.fullURL = "</xsl:text><xsl:value-of select="/page/pageRequest/@fullURL"/><xsl:text disable-output-escaping="yes">";
+			</xsl:text>
+		</script>
+	</xsl:template>
+	
 	<xsl:template name="include-global-javascript-functions">
 		<script type="text/javascript" src="interfaces/oran/js/javascript-global-functions.js"><xsl:text> </xsl:text></script>
 		<script type="text/javascript" src="interfaces/oran/js/GSMetadata.js"><xsl:text> </xsl:text></script>
 	</xsl:template>
 </xsl:stylesheet>
-
-	<!--
-	USEFUL FOR TESTING ASSOCIATIVE ARRAYS
-	function getKeys(obj)
-	{
-		var keys = [];
-		for(var key in obj)
-		{
-			keys.push(key);
-		}
-		return keys;
-	}
-	-->
 
 	<!-- CAN WE FIND SOME WAY TO MAKE THIS WORK?
 	<xsl:call-template name="populate-metadata-values">
