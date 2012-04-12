@@ -222,6 +222,30 @@ p {
 	position: relative;
 }
 
+#collectionLinks a div{
+	display: block;
+	float: left;
+	border: 1px solid #888;
+	margin: 0 20px 20px 0;
+	font-size: 150%;
+	color: #444;
+	text-decoration: none;
+	background: url(../images/collectionIconStripe.gif) scroll no-repeat 0 0;
+	padding: 20px;
+	min-width: 200px;
+}
+
+#collectionLinks a img{
+	display: block;
+	float: left;
+	border: 1px solid #888;
+	margin: 0 20px 20px 0;
+	font-size: 150%;
+	color: #444;
+	text-decoration: none;
+}
+
+/*
 .collectionLink {
 	display: block;
 	float: left;
@@ -233,9 +257,7 @@ p {
 	background: url(../images/collectionIconStripe.gif) scroll no-repeat 0 0;
 	padding: 20px;
 }
-collectionLinkImage {
-	float: left;
-}
+*/
 
 /* some text should not be rendered as it is just there for search engines */
 #collectionLinks a b {
@@ -730,6 +752,12 @@ table{
 #loginTable{
 	margin: auto;
 	width: 25%;
+}
+
+#map_canvas{
+	margin:0px auto;
+	width:900px; 
+	height:500px;
 }
 
 /*
