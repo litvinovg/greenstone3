@@ -367,7 +367,7 @@ public class LibraryServlet extends HttpServlet
 				String q = queryIter.next();
 				if (q.equals(GSParams.EXTERNAL_LINK_TYPE))
 				{
-				  el = queryMap.get(q)[0];
+					el = queryMap.get(q)[0];
 				}
 				else if (q.equals(GSParams.HREF))
 				{
@@ -389,16 +389,19 @@ public class LibraryServlet extends HttpServlet
 			if ((href != null) && (rl.equals("0")))
 			{// This is an external link, 
 
-			  if (el.equals("framed")) {
-			    //TODO **** how best to change to a=p&sa=html&c=collection&url=href
-			    // response.setContentType("text/xml");
-			    //response.sendRedirect("http://localhost:8383/greenstone3/gs3library?a=p&sa=html&c=external&url="+href);
-			  } else {
-			    // el = '' or direct
-			    //the web page is re-directed to the external URL (&el=&rl=0&href="http://...")
-				response.setContentType("text/xml");
-				response.sendRedirect(href);
-			  }
+				if (el.equals("framed"))
+				{
+					//TODO **** how best to change to a=p&sa=html&c=collection&url=href
+					// response.setContentType("text/xml");
+					//response.sendRedirect("http://localhost:8383/greenstone3/gs3library?a=p&sa=html&c=external&url="+href);
+				}
+				else
+				{
+					// el = '' or direct
+					//the web page is re-directed to the external URL (&el=&rl=0&href="http://...")
+					response.setContentType("text/xml");
+					response.sendRedirect(href);
+				}
 			}
 		}
 
@@ -700,9 +703,25 @@ public class LibraryServlet extends HttpServlet
 		}
 
 		String requestedURL = request.getRequestURL().toString();
-		String baseURL = requestedURL.substring(0, requestedURL.indexOf(this.getServletName()));
-		xml_request.setAttribute("baseURL", baseURL);
+		String baseURL = "";
+		if (requestedURL.indexOf(this.getServletName()) != -1)
+		{
+			baseURL = requestedURL.substring(0, requestedURL.indexOf(this.getServletName()));
+			xml_request.setAttribute("baseURL", baseURL);
+		}
+
+		String fullURL;
+		if (request.getQueryString() != null)
+		{
+			fullURL = requestedURL + "?" + request.getQueryString();
+		}
+		else
+		{
+			fullURL = requestedURL;
+		}
+
 		xml_request.setAttribute("remoteAddress", request.getRemoteAddr());
+		xml_request.setAttribute("fullURL", fullURL.replace("&", "&amp;"));
 
 		if (!runSecurityChecks(request, xml_request, userContext, out, baseURL, collection, document))
 		{
@@ -869,7 +888,14 @@ public class LibraryServlet extends HttpServlet
 
 					Element urlParam = this.doc.createElement(GSXML.PARAM_ELEM);
 					urlParam.setAttribute(GSXML.NAME_ATT, "redirectURL");
-					urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName() + "?" + request.getQueryString().replace("&", "&amp;"));
+					if (request.getQueryString() != null && request.getQueryString().length() > 0)
+					{
+						urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName() + "?" + request.getQueryString().replace("&", "&amp;"));
+					}
+					else
+					{
+						urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName());
+					}
 					paramList.appendChild(urlParam);
 
 					Node loginPageResponse = this.recept.process(loginPageMessage);
