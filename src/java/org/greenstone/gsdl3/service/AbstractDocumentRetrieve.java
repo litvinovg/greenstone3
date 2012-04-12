@@ -268,8 +268,6 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 			  }
 			 
 			}
-			  
-			System.err.println("getting meta for node"+node_id);
 
 			// may have modifiers .rt, .1.ss etc
 			if (idNeedsTranslating(node_id))
