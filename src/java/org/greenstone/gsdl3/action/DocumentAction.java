@@ -96,12 +96,14 @@ public class DocumentAction extends Action
 
 		String collection = (String) params.get(GSParams.COLLECTION);
 		String document_id = (String) params.get(GSParams.DOCUMENT);
-		if (document_id != null && document_id.equals("")) {
-		  document_id = null;
+		if (document_id != null && document_id.equals(""))
+		{
+			document_id = null;
 		}
 		String href = (String) params.get(GSParams.HREF);//for an external link : get the href URL if it is existing in the params list 
-		if (href != null && href.equals("")) {
-		  href = null;
+		if (href != null && href.equals(""))
+		{
+			href = null;
 		}
 		String rl = (String) params.get(GSParams.RELATIVE_LINK);//for an external link : get the rl value if it is existing in the params list
 		if (document_id == null && href == null)
@@ -109,13 +111,14 @@ public class DocumentAction extends Action
 			logger.error("no document specified!");
 			return result;
 		}
-		if (rl != null && rl.equals("0")) {
-		  // this is a true external link, we should have been directed to a different page or action
-		  logger.error("rl value was 0, shouldn't get here");
-		  return result;
+		if (rl != null && rl.equals("0"))
+		{
+			// this is a true external link, we should have been directed to a different page or action
+			logger.error("rl value was 0, shouldn't get here");
+			return result;
 		}
 		String document_type = (String) params.get(GSParams.DOCUMENT_TYPE);
-		if (document_type == null ||  document_type.equals(""))
+		if (document_type == null || document_type.equals(""))
 		{
 			document_type = "simple";
 		}
@@ -132,7 +135,7 @@ public class DocumentAction extends Action
 		if (sibling_num != null && !sibling_num.equals(""))
 		{
 			// we have to modify the doc name
-			doc_id_modifier =  "." + sibling_num + ".ss";
+			doc_id_modifier = "." + sibling_num + ".ss";
 		}
 
 		boolean expand_document = false;
@@ -155,7 +158,7 @@ public class DocumentAction extends Action
 				expand_contents = true;
 			}
 		}
-		
+
 		UserContext userContext = new UserContext(request);
 
 		//append site metadata
@@ -180,9 +183,9 @@ public class DocumentAction extends Action
 		basic_doc_list.appendChild(current_doc);
 		if (document_id != null)
 		{
-			current_doc.setAttribute(GSXML.NODE_ID_ATT, document_id+doc_id_modifier);
+			current_doc.setAttribute(GSXML.NODE_ID_ATT, document_id + doc_id_modifier);
 		}
-		else 
+		else
 		{
 			current_doc.setAttribute(GSXML.HREF_ID_ATT, href);
 			// do we need this??
@@ -323,10 +326,10 @@ public class DocumentAction extends Action
 				{
 					doc_node.setAttribute(GSXML.NODE_ID_ATT, document_id);
 				}
-				else 
+				else
 				{
 					doc_node.setAttribute(GSXML.HREF_ID_ATT, href);
-				
+
 				}
 				the_document.appendChild(doc_node);
 				has_dummy = true;
@@ -341,7 +344,7 @@ public class DocumentAction extends Action
 			{
 				doc_node.setAttribute(GSXML.NODE_ID_ATT, document_id);
 			}
-			else 
+			else
 			{
 				doc_node.setAttribute(GSXML.HREF_ID_ATT, href);
 			}
@@ -411,15 +414,15 @@ public class DocumentAction extends Action
 
 		Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
 		// the node we want is the root document node
-		if (document_id != null) 
+		if (document_id != null)
 		{
 			doc_node.setAttribute(GSXML.NODE_ID_ATT, document_id + ".rt");
 		}
-		else 
+		else
 		{
-		  doc_node.setAttribute(GSXML.HREF_ID_ATT, href);// + ".rt");
-		  // can we assume that href is always a top level doc??
-		  //doc_node.setAttribute(GSXML.ID_MOD_ATT, ".rt");
+			doc_node.setAttribute(GSXML.HREF_ID_ATT, href);// + ".rt");
+			// can we assume that href is always a top level doc??
+			//doc_node.setAttribute(GSXML.ID_MOD_ATT, ".rt");
 			//doc_node.setAttribute("externalURL", has_rl);
 		}
 		doc_list.appendChild(doc_node);
@@ -506,16 +509,17 @@ public class DocumentAction extends Action
 			if (dc_response_doc_content == null)
 			{
 				// no content to add
-			  if (dc_response_doc.getAttribute("external").equals("true")) {
-			    
-			    //if (dc_response_doc_external != null)
-			    //{
+				if (dc_response_doc.getAttribute("external").equals("true"))
+				{
+
+					//if (dc_response_doc_external != null)
+					//{
 					String href_id = dc_response_doc.getAttribute(GSXML.HREF_ID_ATT);
 
 					the_document.setAttribute("selectedNode", href_id);
 					the_document.setAttribute("external", href_id);
-			  }
-			  return result;
+				}
+				return result;
 			}
 			if (highlight_query_terms)
 			{
@@ -715,7 +719,6 @@ public class DocumentAction extends Action
 	 */
 	protected Element highlightQueryTerms(Element request, Element dc_response_doc_content)
 	{
-
 		// do the query again to get term info 
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		HashMap params = GSXML.extractParams(cgi_param_list, false);
