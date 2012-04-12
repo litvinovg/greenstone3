@@ -95,6 +95,32 @@ public class XSLTUtil
 		return (s1.compareTo(s2) >= 0);
 	}
 
+	public static boolean oidIsMatchOrParent(String first, String second)
+	{
+		if (first.equals(second))
+		{
+			return true;
+		}
+
+		String[] firstParts = first.split(".");
+		String[] secondParts = second.split(".");
+
+		if (firstParts.length >= secondParts.length)
+		{
+			return false;
+		}
+
+		for (int i = 0; i < firstParts.length; i++)
+		{
+			if (!firstParts[i].equals(secondParts[i]))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	/* some preprocessing functions */
 	public static String toLower(String orig)
 	{
@@ -119,7 +145,7 @@ public class XSLTUtil
 			return orig.getBytes();
 		}
 	}
-	
+
 	public static String replace(String orig, String match, String replacement)
 	{
 		return orig.replace(match, replacement);
@@ -459,11 +485,11 @@ public class XSLTUtil
 
 	public static boolean checkMetadataNotDuplicate(String name, String value)
 	{
-		if(_foundTableValues.containsKey(name))
+		if (_foundTableValues.containsKey(name))
 		{
-			for(String mapValue : _foundTableValues.get(name))
+			for (String mapValue : _foundTableValues.get(name))
 			{
-				if(mapValue.equals(value))
+				if (mapValue.equals(value))
 				{
 					return false;
 				}
@@ -471,15 +497,15 @@ public class XSLTUtil
 			_foundTableValues.get(name).add(value);
 			return true;
 		}
-		
+
 		ArrayList<String> newList = new ArrayList<String>();
 		newList.add(value);
-		
+
 		_foundTableValues.put(name, newList);
-		
+
 		return true;
 	}
-	
+
 	public static String reCAPTCHAimage(String publicKey, String privateKey)
 	{
 		ReCaptcha c = ReCaptchaFactory.newReCaptcha(publicKey, privateKey, false);
