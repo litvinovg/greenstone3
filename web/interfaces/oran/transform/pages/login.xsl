@@ -18,10 +18,12 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page">
-		<div id="gs_error" class="ui-state-error ui-corner-all">
-			<span class="ui-icon ui-icon-alert" style="float: left;"><xsl:text> </xsl:text></span><xsl:value-of select="/page/pageRequest/paramList/param[@name = 'loginMessage']/@value"/>
-		</div>
+		<xsl:if test="/page/pageRequest/paramList/param[@name = 'loginMessage']/@value">
+			<div id="gs_error" class="ui-state-error ui-corner-all">
+				<span class="ui-icon ui-icon-alert" style="float: left;"><xsl:text> </xsl:text></span><xsl:value-of select="/page/pageRequest/paramList/param[@name = 'loginMessage']/@value"/>
+			</div>
 		<br/>
+		</xsl:if>
 		<form method="post" action="{/page/pageRequest/paramList/param[@name = 'redirectURL']/@value}">
 			<table id="loginTable">
 				<tr><td>Username: </td><td><input type="text" name="username"/></td></tr>
