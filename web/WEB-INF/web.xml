@@ -85,12 +85,12 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
   
   
 	<servlet>
-		<servlet-name>dev</servlet-name>
+		<servlet-name>library</servlet-name>
 		<description>A new skin engine still in development based on the standard gsdl3 library program</description>
 		<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
 		<init-param>
 			<param-name>library_name</param-name>
-			<param-value>dev</param-value>
+			<param-value>library</param-value>
 		</init-param>
 		<init-param>
 			<param-name>site_name</param-name>
@@ -116,7 +116,7 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 		<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
 		<init-param>
 			<param-name>library_name</param-name>
-			<param-value>library</param-value>
+			<param-value>gs2-library</param-value>
 		</init-param>
 		<init-param>
 			<param-name>site_name</param-name>
@@ -198,7 +198,7 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 		<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
 		<init-param>
 			<param-name>library_name</param-name>
-			<param-value>gs3library</param-value>
+			<param-value>gs3-library</param-value>
 		</init-param>
 		<init-param>
 			<param-name>site_name</param-name>
@@ -324,13 +324,13 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 	</servlet-mapping>
   
 	<servlet-mapping>
-		<servlet-name>dev</servlet-name>
-		<url-pattern>/dev/*</url-pattern>
+		<servlet-name>library</servlet-name>
+		<url-pattern>/library/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
 		<servlet-name>gs2-library</servlet-name>
-		<url-pattern>/library</url-pattern>
+		<url-pattern>/gs2-library</url-pattern>
 	</servlet-mapping>
   
 	<servlet-mapping>
@@ -340,7 +340,7 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
   
 	<servlet-mapping>
 		<servlet-name>gs3-library</servlet-name>
-		<url-pattern>/gs3library</url-pattern>
+		<url-pattern>/gs3-library</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
