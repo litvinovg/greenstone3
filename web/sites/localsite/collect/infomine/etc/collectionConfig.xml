@@ -21,20 +21,18 @@
   <search>
     <format>
       <gsf:template match="documentNode">
-	<td valign='top'><gsf:link><gsf:icon/></gsf:link></td><td>
-	  <table><tr><td><a><xsl:attribute name='href'><gsf:metadata name="url"/></xsl:attribute><b><gsf:metadata name="title"/></b></a></td></tr>
-	    <tr><td><gsf:metadata name="ivia_description"/></td></tr>
-	    <tr><td><b><gsf:metadata name="url"/></b></td></tr>
-	    <tr><td>[<gsf:link>View Full Record</gsf:link>]</td></tr></table>
-	</td>
+		<td valign='top'><gsf:link><gsf:icon/></gsf:link></td><td>
+		  <table><tr><td><a><xsl:attribute name='href'><gsf:metadata name="url"/></xsl:attribute><b><gsf:metadata name="title"/></b></a></td></tr>
+			<tr><td><gsf:metadata name="ivia_description"/></td></tr>
+			<tr><td><b><gsf:metadata name="url"/></b></td></tr>
+			<tr><td>[<gsf:link>View Full Record</gsf:link>]</td></tr></table>
+		</td>
       </gsf:template>
     </format>
   </search>
   <display>
-  <format>
-  <gsf:template name="documentHeading">
-  <gsf:metadata name="title"/>
-</gsf:template>	
-</format>
-</display>
+	<format>
+		<gsf:option name="sideBar" value="false"/>
+	</format>
+  </display>
 </collectionConfig>
