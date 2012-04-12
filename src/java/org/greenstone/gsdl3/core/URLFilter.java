@@ -27,7 +27,7 @@ public class URLFilter implements Filter
 {
 	private FilterConfig _filterConfig = null;
 	private static Logger _logger = Logger.getLogger(org.greenstone.gsdl3.core.URLFilter.class.getName());
-	
+
 	//Restricted URLs
 	protected static final String SITECONFIG_URL = "sites/[^/]+/siteConfig.xml";
 
@@ -57,13 +57,13 @@ public class URLFilter implements Filter
 			GSHttpServletRequestWrapper gRequest = new GSHttpServletRequestWrapper(hRequest);
 
 			String url = hRequest.getRequestURI().toString();
-			
-			if(isURLRestricted(url))
+
+			if (isURLRestricted(url))
 			{
 				response.getWriter().println("Access to this page is forbidden.");
 				return;
 			}
-			
+
 			if (url.contains("/index/assoc/"))
 			{
 				String dir = null;
@@ -134,18 +134,17 @@ public class URLFilter implements Filter
 				doc.setAttribute(GSXML.NODE_ID_ATT, dir);
 
 				Element metaResponse = (Element) gsRouter.process(metaMessage);
-				GSXML.printXMLNode(metaResponse, true);
-				
+
 				NodeList metadataList = metaResponse.getElementsByTagName(GSXML.METADATA_ELEM);
-				if(metadataList.getLength() == 0)
+				if (metadataList.getLength() == 0)
 				{
 					_logger.error("Could not find the document related to this url");
 				}
 				else
 				{
-					Element metadata = (Element)metadataList.item(0);
+					Element metadata = (Element) metadataList.item(0);
 					String document = metadata.getTextContent();
-					
+
 					//Get the security info for this collection
 					Element securityMessage = gsDoc.createElement(GSXML.MESSAGE_ELEM);
 					Element securityRequest = GSXML.createBasicRequest(gsDoc, GSXML.REQUEST_TYPE_SECURITY, collection, new UserContext());
@@ -157,20 +156,20 @@ public class URLFilter implements Filter
 
 					Element securityResponse = (Element) GSXML.getChildByTagName(gsRouter.process(securityMessage), GSXML.RESPONSE_ELEM);
 					ArrayList<String> groups = GSXML.getGroupsFromSecurityResponse(securityResponse);
-					
+
 					if (!groups.contains(""))
 					{
 						boolean found = false;
 						for (String group : groups)
 						{
-							if (((HttpServletRequest)request).isUserInRole(group))
+							if (((HttpServletRequest) request).isUserInRole(group))
 							{
 								found = true;
 								break;
 							}
 						}
-						
-						if(!found)
+
+						if (!found)
 						{
 							return;
 						}
@@ -195,8 +194,8 @@ public class URLFilter implements Filter
 					{
 						gRequest.setParameter(GSParams.DOCUMENT, segments[i + 1]);
 
-						additionalParameters = new String[] { GSParams.ACTION, GSParams.DOCUMENT_TYPE, DocumentAction.EXPAND_DOCUMENT_ARG };
-						defaultParamValues = new String[] { "d", "hierarchy", "1" };
+						additionalParameters = new String[] { GSParams.ACTION, GSParams.DOCUMENT_TYPE };
+						defaultParamValues = new String[] { "d", "hierarchy" };
 					}
 					//PAGE
 					else if (segments[i].equals("page") && (i + 1) < segments.length)
@@ -212,7 +211,7 @@ public class URLFilter implements Filter
 						String pageName = segments[i + 1];
 
 						gRequest.setParameter("s1.authpage", pageName);
-						
+
 						additionalParameters = new String[] { GSParams.ACTION, GSParams.REQUEST_TYPE, GSParams.SUBACTION, GSParams.SERVICE };
 						defaultParamValues = new String[] { "g", "r", "authen", "Authentication" };
 					}
@@ -305,12 +304,12 @@ public class URLFilter implements Filter
 			System.err.println("The request was not an HttpServletRequest");
 		}
 	}
-	
+
 	private boolean isURLRestricted(String url)
 	{
-		for(String restrictedURL : _restrictedURLs)
+		for (String restrictedURL : _restrictedURLs)
 		{
-			if(url.matches(".*" + restrictedURL + ".*"))
+			if (url.matches(".*" + restrictedURL + ".*"))
 			{
 				return true;
 			}
@@ -340,25 +339,29 @@ public class URLFilter implements Filter
 
 		public String getParameter(String paramName)
 		{
-			if (_newParams.containsKey(paramName))
+			if (super.getParameter(paramName) != null)
 			{
-				return _newParams.get(paramName)[0];
+				return super.getParameter(paramName);
 			}
 			else
 			{
-				return super.getParameter(paramName);
+				if (_newParams.get(paramName) != null && _newParams.get(paramName)[0] != null)
+				{
+					return _newParams.get(paramName)[0];
+				}
+				return null;
 			}
 		}
 
 		public String[] getParameterValues(String paramName)
 		{
-			if (_newParams.containsKey(paramName))
+			if (super.getParameterValues(paramName) != null)
 			{
-				return _newParams.get(paramName);
+				return super.getParameterValues(paramName);
 			}
 			else
 			{
-				return super.getParameterValues(paramName);
+				return _newParams.get(paramName);
 			}
 		}
 
