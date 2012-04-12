@@ -6,7 +6,107 @@ var _onCells = new Array();
 * EXPANSION SCRIPTS *
 ********************/
 
-function toggleSection(sectionID)
+function getTextForSection(sectionID, callback)
+{
+	if(!callback)
+	{
+		console.log("Cannot get text as the callback function is not defined");
+	}
+
+	var template = "";
+	template += '<xsl:template match="/">';
+	template +=   '<text>';
+	template +=     '<xsl:apply-templates select="/page/pageResponse/document//documentNode[@nodeID = \'' + sectionID + '\']" mode="document"/>';
+	template +=   '</text>';
+	template += '</xsl:template>';
+
+	var ajax = gs.functions.ajaxRequest();
+	ajax.open("GET", gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + sectionID + "?p.s=TextQuery&ilt=" + template.replace(" ", "%20"), true);
+	ajax.onreadystatechange = function()
+	{
+		if(ajax.readyState == 4 && ajax.status == 200)
+		{
+			var response = ajax.responseText;
+			
+			if(response)
+			{
+				var textStart = response.indexOf(">", response.indexOf(">") + 1) + 1;
+				var textEnd = response.lastIndexOf("<");
+				
+				if(textStart == 0 || textEnd == -1 || textEnd <= textStart)
+				{
+					callback("");
+				}
+				
+				var text = response.substring(textStart, textEnd);
+				callback(text);
+			}
+			else
+			{
+				callback(null);
+			}
+		}
+		else if(ajax.readyState == 4)
+		{
+			callback(null);
+		}
+	}
+	ajax.send();
+}
+
+function getSubSectionsForSection(sectionID, callback)
+{
+	if(!callback)
+	{
+		console.log("Cannot get sub sections as the callback function is not defined");
+	}
+
+	var template = "";
+	template += '<xsl:template match="/">';
+	template +=   '<sections>';
+	template +=     '<xsl:for-each select="/page/pageResponse/document//documentNode[@nodeID = \'' + sectionID + '\']">';
+	template +=       '<xsl:call-template name="wrapDocumentNodes"/>';
+	template +=     '</xsl:for-each>';
+	template +=   '</sections>';
+	template += '</xsl:template>';
+
+	var ajax = gs.functions.ajaxRequest();
+	ajax.open("GET", gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + sectionID + "?ilt=" + template.replace(" ", "%20"), true);
+	ajax.onreadystatechange = function()
+	{
+		if(ajax.readyState == 4 && ajax.status == 200)
+		{
+			var response = ajax.responseText;
+			
+			if(response)
+			{
+				var sectionsStart = response.indexOf(">") + 1;
+				var sectionsEnd = response.lastIndexOf("<");
+				
+				if(sectionsStart == 0 || sectionsEnd == -1 || sectionsEnd <= sectionsStart)
+				{
+					callback("");
+				}
+				
+				var sections = response.substring(sectionsStart, sectionsEnd);
+				sections = sections.replace(/href=".*?#top"/g, "href=\"" + gs.requestInformation.fullURL + "#top\"");
+				
+				callback(sections);
+			}
+			else
+			{
+				callback(null);
+			}
+		}
+		else if(ajax.readyState == 4)
+		{
+			callback(null);
+		}
+	}
+	ajax.send();
+}
+
+function toggleSection(sectionID, callback)
 {
 	var docElem = document.getElementById("doc" + sectionID);
 	var tocElem = document.getElementById("toc" + sectionID);
@@ -16,9 +116,6 @@ function toggleSection(sectionID)
 	
 	if(docElem.style.display == "none")
 	{
-		docElem.style.display = "block";
-		docToggleElem.setAttribute("src", gs.imageURLs.collapse);
-		
 		if(tocToggleElem)
 		{
 			tocToggleElem.setAttribute("src", gs.imageURLs.collapse);
@@ -27,6 +124,61 @@ function toggleSection(sectionID)
 		if(tocElem)
 		{
 			tocElem.style.display = "block";
+		}
+		
+		if(gs.functions.hasClass(docElem, "noText"))
+		{
+			getTextForSection(sectionID, function(text)
+			{
+				if(text)
+				{	
+					getSubSectionsForSection(sectionID, function(sections)
+					{
+						if(sections)
+						{
+							var textElem = document.getElementById("doc" + sectionID);
+							textElem.innerHTML = text + sections;
+							
+							docElem.setAttribute("class", docElem.getAttribute("class").replace(/\bnoText\b/g, ""));
+							docElem.style.display = "block";
+							docToggleElem.setAttribute("src", gs.imageURLs.collapse);
+							
+							if(callback)
+							{
+								callback(true);
+							}
+						}
+						else
+						{
+							docToggleElem.setAttribute("src", gs.imageURLs.expand);
+							if(callback)
+							{
+								callback(false);
+							}
+						}
+					});
+				}
+				else
+				{
+					docToggleElem.setAttribute("src", gs.imageURLs.expand);
+					if(callback)
+					{
+						callback(false);
+					}
+				}
+			});
+		
+			docToggleElem.setAttribute("src", gs.imageURLs.loading);
+		}
+		else
+		{
+			docToggleElem.setAttribute("src", gs.imageURLs.collapse);
+			docElem.style.display = "block";
+			
+			if(callback)
+			{
+				callback(true);
+			}
 		}
 	}
 	else
@@ -45,7 +197,185 @@ function toggleSection(sectionID)
 		{
 			tocElem.style.display = "none";
 		}
+		
+		if(callback)
+		{
+			callback(true);
+		}
 	}
+}
+
+function scrollToTop()
+{
+	$('html, body').stop().animate({scrollTop: 0}, 1000);
+}
+
+function focusSection(sectionID, level)
+{
+	if(!level)
+	{
+		level = 0;
+	}
+
+	var parts = sectionID.split(".");
+	if(level >= parts.length)
+	{
+		var topVal = $(document.getElementById("doc" + sectionID)).offset().top - 50;
+		$('html, body').stop().animate({scrollTop: topVal}, 1000);
+		return;
+	}
+	
+	var idToExpand = "";
+	for(var i = 0; i < level + 1; i++)
+	{
+		if(i > 0)
+		{
+			idToExpand += ".";
+		}
+	
+		idToExpand += parts[i];
+	}
+	
+	if(!isExpanded(idToExpand))
+	{
+		toggleSection(idToExpand, function(success)
+		{
+			if(success)
+			{
+				focusSection(sectionID, level + 1);
+			}
+		});
+	}
+	else
+	{
+		focusSection(sectionID, level + 1);
+	}
+}
+
+function expandOrCollapseAll(expand)
+{
+	var divs = document.getElementsByTagName("DIV");
+	var startCounter = 0;
+	var endCounter = 0;
+	
+	for(var i = 0; i < divs.length; i++)
+	{
+		if(divs[i].getAttribute("id") && divs[i].getAttribute("id").search(/^doc/) != -1)
+		{
+			var id = divs[i].getAttribute("id").replace(/^doc(.*)/, "$1");
+			if(isExpanded(id) != expand)
+			{
+				//Don't collapse the top level
+				if(!expand && id.indexOf(".") == -1)
+				{
+					continue;
+				}
+				startCounter++;
+				
+				var toggleFunction = function(tid)
+				{
+					toggleSection(tid, function(success)
+					{
+						if(success)
+						{
+							endCounter++;
+						}
+						else
+						{
+							setTimeout(function(){toggleFunction(tid)}, 500);
+						}
+					});
+				}
+				toggleFunction(id);
+			}
+		}
+	}
+	
+	if(startCounter != 0)
+	{
+		var checkFunction = function()
+		{
+			if(startCounter == endCounter)
+			{
+				expandOrCollapseAll(expand);
+			}
+			else
+			{
+				setTimeout(checkFunction, 500);
+			}
+		}
+		setTimeout(checkFunction, 500);
+	}
+}
+
+function loadTopLevelPage(callbackFunction)
+{
+	var ajax = gs.functions.ajaxRequest();
+	
+	ajax.open("GET", gs.xsltParams.library_name + "?a=d&dt=hierarchy&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d.replace(/([\.]*)\..*/, "$1") + "&excerptid=gs-document", true);
+	ajax.onreadystatechange = function()
+	{
+		if(ajax.readyState == 4 && ajax.status == 200)
+		{
+			var response = ajax.responseText;
+			
+			if(response)
+			{
+				var targetElem = document.getElementById("gs-document");
+				var docStart = response.indexOf(">") + 1;
+				var docEnd = response.lastIndexOf("<");
+				var doc = response.substring(docStart, docEnd);
+				targetElem.innerHTML = doc;
+				
+				if(callbackFunction)
+				{
+					callbackFunction();
+				}
+			}
+		}
+		else if(ajax.readyState == 4)
+		{
+			var targetElem = document.getElementById("gs-document");
+			targetElem.innerHTML = targetElem.innerHTML + "<br/> <br/> FAILED TO LOAD PAGE";
+		}
+	};
+	ajax.send();
+}
+
+function retrieveFullTableOfContents()
+{
+	var ajax = gs.functions.ajaxRequest();
+	
+	ajax.open("GET", gs.xsltParams.library_name + "?a=d&ed=1&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&excerptid=tableOfContents", true);
+	ajax.onreadystatechange = function()
+	{
+		if(ajax.readyState == 4 && ajax.status == 200)
+		{
+			var newTOCElem = ajax.responseText;
+			var tocStart = newTOCElem.indexOf(">") + 1;
+			var tocEnd = newTOCElem.lastIndexOf("<");
+			
+			var newTOC = newTOCElem.substring(tocStart, tocEnd);
+			
+			//Add an "expand all" link
+			newTOC = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">Expand document</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">Collapse document</a></td></tr></table>" + newTOC;
+			
+			//Collapse the TOC
+			newTOC = newTOC.replace(/display:block/g, "display:none");
+			newTOC = newTOC.replace(/display:none/, "display:block");
+			newTOC = newTOC.replace(/images\/collapse/g, "images/expand");
+			
+			var tocElem = document.getElementById("tableOfContents");
+			tocElem.innerHTML = newTOC;
+		}
+		else if(ajax.readyState == 4)
+		{
+			var loading = document.getElementById("tocLoadingImage");
+			loading.parentNode.removeChild(loading);
+			console.log("Error Loading TOC");
+		}
+	}
+	ajax.send();
 }
 
 function isExpanded(sectionID)
