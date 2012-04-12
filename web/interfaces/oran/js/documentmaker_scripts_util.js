@@ -217,7 +217,7 @@ function save()
 		var changedElem = changes[i];
 
 		//Save metadata 
-		if(hasClass(changedElem, "metaTableCell")) 
+		if(gs.functions.hasClass(changedElem, "metaTableCell")) 
 		{
 			//Get document ID
 			var currentElem = changedElem;
@@ -242,13 +242,13 @@ function save()
 			addCollectionToBuild(collection);
 		}
 		//Save content
-		else if(hasClass(changedElem, "renderedText"))
+		else if(gs.functions.hasClass(changedElem, "renderedText"))
 		{
 			var section = changedElem.parentDiv.parentItem;
 			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + section.collection + '", "oid":"' + section.nodeID + '"}');
 			addCollectionToBuild(section.collection);
 		}
-		else if(hasClass(changedElem, "sectionText"))
+		else if(gs.functions.hasClass(changedElem, "sectionText"))
 		{
 			var id = changedElem.getAttribute("id");
 			var sectionID = id.substring(4);
@@ -398,7 +398,7 @@ function buildCollections(collections)
 				});
 			}
 		}
-		statusID = _statusBar.addStatus(gs.text.dse.activating + " " + collections[counter] + "...");
+		statusID = _statusBar.addStatus(gs.text.dse.building + " " + collections[counter] + "...");
 		ajax.send();
 	}
 	buildFunction();
@@ -812,16 +812,6 @@ function storeMetadata(node, listItem)
 		
 		currentNode = currentNode.nextSibling;
 	}
-}
-
-function hasClass(elem, classVal)
-{
-	if(!elem || !elem.getAttribute("class"))
-	{
-		return false;
-	}
-
-	return (elem.getAttribute("class").search(classVal) != -1)
 }
 
 function getNodeContent(node)
