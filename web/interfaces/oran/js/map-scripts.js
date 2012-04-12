@@ -33,6 +33,10 @@ function initializeMapScripts()
 			}
 			updateMap();
 		}
+		else
+		{
+			document.getElementById("map_canvas").style.display = "none";
+		}
 	}
 	
 	_docList.loopIndex = 0;
@@ -414,6 +418,8 @@ function getSubClassifier(sectionID)
 
 					createMarker(doc, false);
 				}
+				
+				document.getElementById("map_canvas").style.display = "block";
 			}
 			
 			updateMap();
