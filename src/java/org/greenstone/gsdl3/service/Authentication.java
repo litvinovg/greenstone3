@@ -532,7 +532,7 @@ public class Authentication extends ServiceRack
 				{
 					addUserInformationToNode(previousUsername, serviceNode);
 					serviceNode.setAttribute("operation", ACCOUNT_SETTINGS);
-					GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_INCORRECT_PASSWORD));
+					GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_INCORRECT_PASSWORD), "Incorrect Password");
 					return result;
 				}
 				
