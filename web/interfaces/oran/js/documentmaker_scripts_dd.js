@@ -187,7 +187,7 @@ YAHOO.extend(YAHOO.example.DDList, YAHOO.util.DDProxy, {
 			else
 			{
 				var needsUndo = false;
-				if(hasClass(last, "placeHolder"))
+				if(gs.functions.hasClass(last, "placeHolder"))
 				{
 					//Removed the dashed border that surrounds an empty section
 					if(last.parentNode)
@@ -248,12 +248,12 @@ YAHOO.extend(YAHOO.example.DDList, YAHOO.util.DDProxy, {
 		});
 		a.animate();
 
-		if(hasClass(srcEl.previousSibling, "placeHolder"))
+		if(gs.functions.hasClass(srcEl.previousSibling, "placeHolder"))
 		{
 			removeFromParent(srcEl.previousSibling);
 			new YAHOO.example.DDList(srcEl.parentNode.previousSibling);
 		}
-		if(hasClass(srcEl, "topLevel"))
+		if(gs.functions.hasClass(srcEl, "topLevel"))
 		{
 			srcEl.setAttribute("class", srcEl.getAttribute("class").replace(/topLevel/g, ""));
 		}
@@ -277,7 +277,7 @@ YAHOO.extend(YAHOO.example.DDList, YAHOO.util.DDProxy, {
 			if (!region.intersect(pt)) {
 				var destEl = Dom.get(id);
 				var destDD = DDM.getDDById(id);
-				if(hasClass(destEl, "topLevel") && hasClass(destEl, "dragList"))
+				if(gs.functions.hasClass(destEl, "topLevel") && gs.functions.hasClass(destEl, "dragList"))
 				{
 					destEl.appendChild(this.getEl());
 				}
@@ -310,7 +310,7 @@ YAHOO.extend(YAHOO.example.DDList, YAHOO.util.DDProxy, {
 		// We are only concerned with list items, we ignore the dragover
 		// notifications for the list.
 		if(destEl.nodeName.toLowerCase() == "li") {
-			if((hasClass(destEl, "dragItem") || hasClass(destEl, "placeHolder")) && !hasClass(destEl, "topLevel") && !hasClass(destEl, "newSection"))
+			if((gs.functions.hasClass(destEl, "dragItem") || gs.functions.hasClass(destEl, "placeHolder")) && !gs.functions.hasClass(destEl, "topLevel") && !gs.functions.hasClass(destEl, "newSection"))
 			{
 				var orig_p = srcEl.parentNode;
 				var p = destEl.parentNode;
