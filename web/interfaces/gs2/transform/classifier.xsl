@@ -69,7 +69,24 @@
       </xsl:apply-templates>
     </div>
   </xsl:template>
-  
+
+    <xsl:template match="classifierList">
+    <xsl:param name="collName"/>
+    <xsl:param name="serviceName"/>
+    <xsl:variable name="selected" select="/page/pageResponse/classifier/@name"/>
+    <ul id="classifierlist">
+      <xsl:for-each select="classifier">
+	<xsl:choose>
+	  <xsl:when test="@name=$selected">
+	    <li id="activeclassifier"><xsl:value-of select="displayItem[@name='name']"/></li>
+	  </xsl:when>
+	  <xsl:otherwise>
+	    <li><a href="{$library_name}?a=b&amp;rt=r&amp;s={$serviceName}&amp;c={$collName}&amp;cl={@name}"><xsl:value-of select="displayItem[@name='name']"/></a></li></xsl:otherwise></xsl:choose>
+	
+      </xsl:for-each>
+    </ul>
+  </xsl:template>
+
 
 </xsl:stylesheet>
 

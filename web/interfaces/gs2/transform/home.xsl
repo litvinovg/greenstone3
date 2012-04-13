@@ -40,7 +40,7 @@
   <!-- page specific style goes here -->
   <xsl:template name="pageStyle"/>
 
-  <xsl:template match="pageResponse">
+  <xsl:template match="page/pageResponse">
     <xsl:call-template name="pageBanner"/> 
     <xsl:apply-templates select="collectionList"/>   
     <xsl:apply-templates select="serviceList"/>

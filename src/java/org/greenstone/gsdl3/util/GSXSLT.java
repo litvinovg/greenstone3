@@ -37,23 +37,50 @@ public class GSXSLT
 	public static void mergeStylesheets(Document main_xsl, Element extra_xsl)
 	{
 		Element main = main_xsl.getDocumentElement();
-		NodeList children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "template");
+		NodeList children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "include");
+		for (int i = 0; i < children.getLength(); i++) {
+		    	Node node = children.item(i);
+			// remove any previous occurrences of xsl:include with the same href value
+			removeDuplicateElementsFrom(main, node, "xsl:include", "href");
+			main.appendChild(main_xsl.importNode(node, true));
+		}
+		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "output");
+		for (int i = 0; i < children.getLength(); i++) {
+		    	Node node = children.item(i);
+			// remove any previous occurrences of xsl:output with the same method value
+			removeDuplicateElementsFrom(main, node, "xsl:output", "method");			
+			main.appendChild(main_xsl.importNode(node, true));
+		}
+
+		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "template");		
+
 		for (int i = 0; i < children.getLength(); i++)
 		{
 			Node node = children.item(i);
-			String name = ((Element) node).getAttribute("name");
-			if (!name.equals(""))
-			{
-				Element old_template = GSXML.getNamedElement(main, "xsl:template", "name", name);
-				if (old_template != null)
-				{
-					main.removeChild(old_template);
-				}
-			}
-
+			// remove any previous occurrences of xsl:template with the same value for name
+			// or even the same value for match (should we use priorities for match?)
+			removeDuplicateElementsFrom(main, node, "xsl:template", "name");
+			removeDuplicateElementsFrom(main, node, "xsl:template", "match");
 			main.appendChild(main_xsl.importNode(node, true));
 		}
 	}
+
+    // In element main, tries to find if any previous occurrence of elements with template=templateName, 
+    // and whose named attribute (attributeName) has the same value as the same attribute in node.
+    // If this is the case, such a previous occurrence is removed it from element main
+    public static void removeDuplicateElementsFrom(Element main, Node node, String templateName, String attrName) {
+	String attr = ((Element) node).getAttribute(attrName);
+	if (!attr.equals(""))
+	    {
+		Element old_template = GSXML.getNamedElement(main, templateName, attrName, attr);
+		if (old_template != null)
+		    {
+			main.removeChild(old_template);
+		    }
+	    }
+    }
+
+
 
 	/**
 	 * takes any import or include nodes, and creates absolute path names for

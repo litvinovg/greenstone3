@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" 
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-  xmlns:gslib="http://www.greenstone.org/XSL/Library"
+  xmlns:gslib="http://www.greenstone.org/skinning"
   xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
-  xmlns:util="http://org.greenstone.gsdl3.util.XSLTUtil"
+  xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
   exclude-result-prefixes="util gslib gsf">
   
   <!-- some global parameters - these are set by whoever is invoking the transformation -->
