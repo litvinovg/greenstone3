@@ -37,6 +37,7 @@ public class GSXSLT
 	public static void mergeStylesheets(Document main_xsl, Element extra_xsl)
 	{
 		Element main = main_xsl.getDocumentElement();
+
 		NodeList children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "include");
 		for (int i = 0; i < children.getLength(); i++) {
 		    	Node node = children.item(i);
@@ -44,6 +45,15 @@ public class GSXSLT
 			removeDuplicateElementsFrom(main, node, "xsl:include", "href");
 			main.appendChild(main_xsl.importNode(node, true));
 		}
+
+		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "import");
+		for (int i = 0; i < children.getLength(); i++) {
+		    	Node node = children.item(i);
+			// remove any previous occurrences of xsl:output with the same method value
+			removeDuplicateElementsFrom(main, node, "xsl:import", "href");
+			main.appendChild(main_xsl.importNode(node, true));
+		}
+
 		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "output");
 		for (int i = 0; i < children.getLength(); i++) {
 		    	Node node = children.item(i);
@@ -52,8 +62,7 @@ public class GSXSLT
 			main.appendChild(main_xsl.importNode(node, true));
 		}
 
-		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "template");		
-
+		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "template");
 		for (int i = 0; i < children.getLength(); i++)
 		{
 			Node node = children.item(i);
