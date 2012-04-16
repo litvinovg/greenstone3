@@ -90,7 +90,7 @@
     <equals arg1="1.4" arg2="${ant.java.version}"/>
   </condition>
   <condition property="privileged.attribute" value="privileged='true'" else=""> 
-    <equals arg1="6" arg2="${tomcat.version.major}"/>
+    <equals arg1="7" arg2="${tomcat.version.major}"/>
   </condition>
 
   <property name="axis.zip.version" value="axis-bin-1_4.zip"/>
