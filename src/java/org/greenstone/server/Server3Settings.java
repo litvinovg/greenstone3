@@ -32,8 +32,8 @@ public class Server3Settings extends BaseServerSettings
     {
 	JLabel servlet_label = new JLabel(server.dictionary.get(BaseServer.Property.SERVER_SETTINGS+".URL"));
 
-	this.servletDefault = server.config_properties.getProperty(BaseServer.Property.DEFAULT_SERVLET).replaceAll("/","");
-	
+	this.servletDefault = server.config_properties.getProperty(BaseServer.Property.DEFAULT_SERVLET);
+
 	servlet_combobox = new JComboBox();
 	servlet_combobox.setMaximumRowCount(5);
 	servlet_combobox.setBackground(bg_color);
@@ -61,7 +61,7 @@ public class Server3Settings extends BaseServerSettings
 		url_mappings.put(name, pattern);
 	    }
 
-	    if (pattern.replaceAll("/","").equals(servletDefault)) {
+	    if (pattern.replaceAll("/\\*","").equals(servletDefault)) { // urlmapping maybe something like "/library/*", want "/library"
 		servlet_combobox.setSelectedItem(name);
 	    }
 	}
@@ -79,7 +79,11 @@ public class Server3Settings extends BaseServerSettings
     {
 	boolean hasChanged = false;
 	boolean requireRestart = false;
-	if (!servletDefault.equals((String)url_mappings.get(servlet_combobox.getSelectedItem()))) {
+	String urlMapping = (String)url_mappings.get(servlet_combobox.getSelectedItem());
+	if(urlMapping.endsWith("/*")) {	// urlmapping maybe something like "/library/*"
+	    urlMapping = urlMapping.substring(0, urlMapping.length()-2);
+	}
+	if (!servletDefault.equals(urlMapping)) { 
 	    hasChanged = true;
 	    requireRestart = true;
 	}
@@ -96,7 +100,11 @@ public class Server3Settings extends BaseServerSettings
 	newFileLines = scriptReadWrite.queryReplace(newFileLines, BaseServer.Property.KEEPPORT, newKeepPort);
 
 	String newServletDef = (String) servlet_combobox.getSelectedItem();
-	newFileLines = scriptReadWrite.queryReplace(newFileLines,BaseServer.Property.DEFAULT_SERVLET, (String) url_mappings.get(newServletDef));	
+	String servletDefName = (String) url_mappings.get(newServletDef);
+	if(servletDefName.endsWith("/*")) { // urlmapping maybe something like "/library/*"	    
+	  servletDefName = servletDefName.substring(0, servletDefName.length()-2);
+	}
+	newFileLines = scriptReadWrite.queryReplace(newFileLines,BaseServer.Property.DEFAULT_SERVLET, servletDefName);
     }
 
 }
