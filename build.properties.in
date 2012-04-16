@@ -28,7 +28,7 @@ server.auto.start=false
 # if set to true, won't try other ports if the specified port is not available
 server.keep.port=false
 # default servlet to start with
-server.default.servlet=/dev
+server.default.servlet=/library
 
 ##Browser setup
 browser.path=
