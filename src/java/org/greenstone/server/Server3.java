@@ -39,7 +39,7 @@ public class Server3 extends BaseServer
     }
     
     public String getBrowserURL() {
-	return GlobalProperties.getGSDL3WebAddress()+ config_properties.getProperty(BaseServer.Property.DEFAULT_SERVLET);
+	return GlobalProperties.getFullGSDL3WebAddress()+ config_properties.getProperty(BaseServer.Property.DEFAULT_SERVLET);
     }
 
     public void reload() {

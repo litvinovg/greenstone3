@@ -35,6 +35,7 @@ public class GlobalProperties
 	private static String properties_filename = "global.properties";
 	private static String gsdl3_home = null;
 	private static String gsdl3_web_address = null;
+        private static String full_gsdl3_web_address = null;
 
 	// Note, that if the servlet is reloadable, then it is reloaded each time the file is changed.
 	static
@@ -72,6 +73,11 @@ public class GlobalProperties
 	public static String getGSDL3WebAddress()
 	{
 		return gsdl3_web_address;
+	}
+
+        public static String getFullGSDL3WebAddress()
+	{
+		return full_gsdl3_web_address;
 	}
 
 	public static void reload()
@@ -155,7 +161,7 @@ public class GlobalProperties
 			}
 
 			//string it all together
-			//gsdl3_web_address = protocolSpecifier + hostSpecifier + portSpecifier + contextSpecifier;
+			full_gsdl3_web_address = protocolSpecifier + hostSpecifier + portSpecifier + contextSpecifier;
 			gsdl3_web_address = contextSpecifier;
 		}
 		catch (Exception e)
