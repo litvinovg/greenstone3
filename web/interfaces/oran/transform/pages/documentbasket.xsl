@@ -35,7 +35,7 @@
 				</a>
 			</xsl:for-each>
 			
-			<xsl:call-template name="document-editor-language-fragments"/>
+			<gslib:langfrag name="dse"/><!--<xsl:call-template name="document-editor-language-fragments"/>-->
 		</xsl:if>
 	</xsl:template>
 

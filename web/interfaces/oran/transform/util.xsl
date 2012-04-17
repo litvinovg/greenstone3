@@ -677,10 +677,19 @@ used on the document page
     </a>
   </xsl:template>
 
-  <!-- call function with the name prefix (e.g. dse) -->
+
+  <!-- This next template expands gslib:langfrag.
+       When debugging with o=skinandlibdoc, it's seen that <gslib:langfrag name='dse' /> gets expanded to:
+       <xsl:call-template name="langfrag">
+	 <xsl:with-param name="name">dse</xsl:with-param>
+       </xsl:call-template>
+       Before the param can be used in this template, need to retrieve it by name with <xsl:param/>
+       as explained in http://www.maconstateit.net/tutorials/XML/XML05/xml05-05.aspx
+       -->
   <xsl:template name="langfrag">
-    <script type="text/javascript">      
-      <xsl:value-of disable-output-escaping="yes" select="util:getInterfaceStringsAsJavascript($interface_name, /page/@lang, @name)"/>
+    <xsl:param name="name"/>
+    <script type="text/javascript">
+      <xsl:value-of disable-output-escaping="yes" select="util:getInterfaceStringsAsJavascript($interface_name, /page/@lang, $name)"/>
     </script>
   </xsl:template>
 

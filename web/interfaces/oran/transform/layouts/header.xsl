@@ -403,7 +403,9 @@
 		</xsl:if>
 	</xsl:template>
 
-	<!-- gslib:langfrag should get expanded in ../util.xsl -->
+	<!-- document-editor-language-fragments is no longer called from anywhere (document.xsl and documentbasket.xsl 
+	     use to call it), since all the xsl pages wishing to make use of doc-editor-lang-fragments now directly 
+	     call gslib:langfrag which is defined in ../util.xsl -->
 	<xsl:template name="document-editor-language-fragments">
 	  <!--<gslib:langfrag name="dse"/>-->
 	  
