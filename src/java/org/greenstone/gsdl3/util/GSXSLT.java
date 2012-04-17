@@ -38,28 +38,40 @@ public class GSXSLT
 	{
 		Element main = main_xsl.getDocumentElement();
 
-		NodeList children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "include");
+		NodeList children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "import");
 		for (int i = 0; i < children.getLength(); i++) {
 		    	Node node = children.item(i);
-			// remove any previous occurrences of xsl:include with the same href value
-			removeDuplicateElementsFrom(main, node, "xsl:include", "href");
-			main.appendChild(main_xsl.importNode(node, true));
+			// If the new xsl:import element is identical (in terms of href attr value) 
+			// to any in the merged document, don't copy it over
+			if(!isDuplicateElement(main, node, "xsl:import", "href")) {
+			    // Import statements should be the first children of an xsl:stylesheet element
+			    // If firstchild is null, then this xsl:import element will be inserted at the "end"
+			    // Although Node.insertBefore() will first remove identical nodes before inserting, we check
+			    // only the href attribute to see if they're "identical" to any pre-existing <xsl:import>
+			    main.insertBefore(main_xsl.importNode(node, true), main.getFirstChild());
+			}
 		}
-
-		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "import");
+		
+		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "include");
 		for (int i = 0; i < children.getLength(); i++) {
 		    	Node node = children.item(i);
-			// remove any previous occurrences of xsl:output with the same method value
-			removeDuplicateElementsFrom(main, node, "xsl:import", "href");
-			main.appendChild(main_xsl.importNode(node, true));
+			// If the new xsl:include element is identical (in terms of href attr value)
+			// to any in the merged document, don't copy it over
+			// Although Node.appendChild() will first remove identical nodes before appending, we check
+			// only the href attribute to see if they're "identical" to any pre-existing <xsl:include>
+			if(!isDuplicateElement(main, node, "xsl:include", "href")) {
+			    main.appendChild(main_xsl.importNode(node, true));
+			}
 		}
 
 		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "output");
 		for (int i = 0; i < children.getLength(); i++) {
 		    	Node node = children.item(i);
-			// remove any previous occurrences of xsl:output with the same method value
-			removeDuplicateElementsFrom(main, node, "xsl:output", "method");			
-			main.appendChild(main_xsl.importNode(node, true));
+			// If the new xsl:output element is identical (in terms of the value for the method attr) 
+			// to any in the merged document, don't copy it over
+			if(!isDuplicateElement(main, node, "xsl:output", "method")) {
+			    main.appendChild(main_xsl.importNode(node, true));
+			}
 		}
 
 		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "template");
@@ -74,9 +86,10 @@ public class GSXSLT
 		}
 	}
 
-    // In element main, tries to find if any previous occurrence of elements with template=templateName, 
+    // In element main, tries to find any previous occurrence of elements with xsl-template-name=templateName, 
     // and whose named attribute (attributeName) has the same value as the same attribute in node.
-    // If this is the case, such a previous occurrence is removed it from element main
+    // If this is the case, such a previous occurrence is removed from element main, since
+    // the new node will contain a more specific redefinition of this element.
     public static void removeDuplicateElementsFrom(Element main, Node node, String templateName, String attrName) {
 	String attr = ((Element) node).getAttribute(attrName);
 	if (!attr.equals(""))
@@ -89,7 +102,22 @@ public class GSXSLT
 	    }
     }
 
-
+    // Call this method on elements like xsl:include, xsl:import and xsl:output
+    // In element main, tries to find any previous occurrence of elements with xsl-element-name=xslName, 
+    // and whose named attribute (attributeName) has the same value as the same attribute in node.
+    // If this is the case, it returns true, since the element would a complete duplicate for our intents.
+    public static boolean isDuplicateElement(Element main, Node node, String xslName, String attrName) {
+	String attr = ((Element) node).getAttribute(attrName);
+	if (!attr.equals(""))
+	    {
+		Element old_element = GSXML.getNamedElement(main, xslName, attrName, attr);
+		if (old_element != null)
+		    {
+			return true;
+		    }
+	    }
+	return false;
+    }
 
 	/**
 	 * takes any import or include nodes, and creates absolute path names for
