@@ -1112,7 +1112,7 @@
        This target, which was recently called force-stop-tomcat for a while but is back to being 
        called stop-tomcat, now hides the Java exception output that appears whenever tomcat is already 
        stopped as happens when stop-tomcat is called consecutively. -->
-  <target name="stop-tomcat" description="Shutdown only Tomcat" depends="init" if="tomcat.islocal">
+  <target name="force-stop-tomcat" description="Shutdown only Tomcat" depends="init" if="tomcat.islocal">
     <exec executable="${catalina.home}/bin/shutdown.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
       <env key="CATALINA_HOME" value="${catalina.home}"/>
       <arg line=">/dev/null 2>&amp;1"/>
@@ -1121,21 +1121,44 @@
       <env key="CATALINA_HOME" value="${catalina.home}"/>
       <arg line=">nul 2>&amp;1"/>
     </exec>
+    <!--<antcall target="wait-until-tomcat-stopped"/>
+  </target>
+
+  <target name="wait-until-tomcat-stopped">-->
+    <echo>Waiting for the server to shutdown...</echo>
+    <waitfor maxwait="15" maxwaitunit="second" checkevery="1" checkeveryunit="second" timeoutproperty="tomcat.timedout">
+      <socket server="${tomcat.server}" port="${tomcat.port}"/>
+    </waitfor>
+
+    <if>
+      <bool>
+	<isset property="${tomcat.timedout}"/>
+      </bool>
+      <property name="tomcat.isrunning" value="true"/>
+      <echo>WARNING: Checked socket 15 times, but port ${tomcat.port} still busy. Going to try to continue anyway...</echo>
+      <else>
+	<echo>Tomcat is stopped.</echo>
+	<property name="tomcat.isrunning" value="false"/>
+      </else>
+    </if>
   </target>
 
   <!-- Can also try the "socket" condition in place of the "http" condition 
        And also use a <waitfor> in place of <condition>, such as:
        <waitfor maxwait="5" maxwaitunit="second" timeoutproperty="tomcat.isstopped"><http url="..."/></waitfor>
-       The http URL resolves to host:port/greenstone3 -->
+       The http URL resolves to host:port/greenstone3 
+       Condition uses <http/> rather than <socket/> for testing, since if the server was stopped, the socket 
+       might still be in use for some moments. We test the URL with the http condition since it's likelier to
+       fail sooner if the server has indeed been stopped. -->
   <target name="check-tomcat-running">
     <condition property="tomcat.isrunning">
       <http url="http://${tomcat.server}:${tomcat.port}${app.path}"/>
     </condition>
   </target>
 
-  <!--<target name="stop-tomcat" description="Shutdown only Tomcat if running" depends="check-tomcat-running" if="tomcat.isrunning">
+  <target name="stop-tomcat" description="Shutdown only Tomcat if running" depends="check-tomcat-running" if="tomcat.isrunning">
      <antcall target="force-stop-tomcat"/>
-  </target>-->
+  </target>
 
   <target name="restart-tomcat" description="Shutdown and restart only Tomcat" depends="init,stop-tomcat,start-tomcat"/>
 
