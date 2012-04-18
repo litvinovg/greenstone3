@@ -678,7 +678,7 @@ used on the document page
   </xsl:template>
 
 
-  <!-- This next template expands gslib:langfrag.
+  <!-- This next template expands gslib:langfrag (used by document.xsl and documentbasket.xsl).
        When debugging with o=skinandlibdoc, it's seen that <gslib:langfrag name='dse' /> gets expanded to:
        <xsl:call-template name="langfrag">
 	 <xsl:with-param name="name">dse</xsl:with-param>

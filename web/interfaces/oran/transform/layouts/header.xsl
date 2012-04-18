@@ -402,17 +402,6 @@
 			</td>
 		</xsl:if>
 	</xsl:template>
-
-	<!-- document-editor-language-fragments is no longer called from anywhere (document.xsl and documentbasket.xsl 
-	     use to call it), since all the xsl pages wishing to make use of doc-editor-lang-fragments now directly 
-	     call gslib:langfrag which is defined in ../util.xsl -->
-	<xsl:template name="document-editor-language-fragments">
-	  <!--<gslib:langfrag name="dse"/>-->
-	  
-	  <script type="text/javascript">
-	    <xsl:value-of disable-output-escaping="yes" select="util:getInterfaceStringsAsJavascript($interface_name, /page/@lang, 'dse')"/>	    
-	  </script>
-	</xsl:template>
 	
 	<xsl:template name="map-scripts">
 		<meta content="initial-scale=1.0, user-scalable=no" name="viewport"/>
