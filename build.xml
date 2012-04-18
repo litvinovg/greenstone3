@@ -1106,27 +1106,36 @@
   </target>
 
   <!-- windows: do we want to launch a webrowser?? -->
-  <!-- shouldn't this test whether anything is running first? -->
-  <target name="force-stop-tomcat" description="Shutdown only Tomcat" depends="init" if="tomcat.islocal">
+  <!-- shouldn't this test whether anything is running first? 
+       It's safer to always attempt to stop tomcat: that way we won't be dependent on the right time 
+       to check whether the server is stopped or still running before attempting to start again.
+       This target, which was recently called force-stop-tomcat for a while but is back to being 
+       called stop-tomcat, now hides the Java exception output that appears whenever tomcat is already 
+       stopped as happens when stop-tomcat is called consecutively. -->
+  <target name="stop-tomcat" description="Shutdown only Tomcat" depends="init" if="tomcat.islocal">
     <exec executable="${catalina.home}/bin/shutdown.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
       <env key="CATALINA_HOME" value="${catalina.home}"/>
+      <arg line=">/dev/null 2>&amp;1"/>
     </exec>
     <exec executable="${catalina.home}/bin/shutdown.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="false">
       <env key="CATALINA_HOME" value="${catalina.home}"/>
+      <arg line=">nul 2>&amp;1"/>
     </exec>
   </target>
 
-  <target name="check-tomcat-running"><!--if you update this target, may want to change similar elements in config-admin-->
-    <!--can also try the "socket" condition in place of the "http" condition-->
-    <condition property="tomcat.isrunning"><!--<waitfor maxwait="5" maxwaitunit="second" timeoutproperty="tomcat.isstopped">-->
-      <http url="http://${tomcat.server}:${tomcat.port}${app.path}"/> <!--host:port/greenstone3-->
-    </condition><!--</waitfor>-->
+  <!-- Can also try the "socket" condition in place of the "http" condition 
+       And also use a <waitfor> in place of <condition>, such as:
+       <waitfor maxwait="5" maxwaitunit="second" timeoutproperty="tomcat.isstopped"><http url="..."/></waitfor>
+       The http URL resolves to host:port/greenstone3 -->
+  <target name="check-tomcat-running">
+    <condition property="tomcat.isrunning">
+      <http url="http://${tomcat.server}:${tomcat.port}${app.path}"/>
+    </condition>
   </target>
 
-  <target name="stop-tomcat" description="Shutdown only Tomcat if running" depends="check-tomcat-running" if="tomcat.isrunning">
+  <!--<target name="stop-tomcat" description="Shutdown only Tomcat if running" depends="check-tomcat-running" if="tomcat.isrunning">
      <antcall target="force-stop-tomcat"/>
-  </target>
-
+  </target>-->
 
   <target name="restart-tomcat" description="Shutdown and restart only Tomcat" depends="init,stop-tomcat,start-tomcat"/>
 
@@ -1215,18 +1224,16 @@
 <!-- This target won't work with Eclipse because the SecureInputHandler used below conflicts with it. 
     See http://www.dcepler.net/post.cfm/hiding-password-input-in-ant 
     But you can do: echo mypassword | ant config-admin -->
-  <target name="update-userdb" description="Add or modify users">
-    <!-- stop tomcat if running, since derby db is embedded and only allows connections from one jvm instance at a time 
-      See http://db.apache.org/derby/papers/DerbyTut/embedded_intro.html -->
-    <!--<antcall target="check-tomcat-running"/>--><!--won't set the tomcat.isrunning property for use below-->
-    <condition property="tomcat.isrunning">
-      <http url="http://${tomcat.server}:${tomcat.port}${app.path}"/><!--can also try the "socket" condition in place of the "http" condition-->
-    </condition>
+  <target name="update-userdb" description="Add or modify users" depends="check-tomcat-running">
+
+    <!-- stop tomcat if running, since derby db is embedded and only allows connections from one jvm instance at a time
+	 See http://db.apache.org/derby/papers/DerbyTut/embedded_intro.html
+	 The ${tomcat.isrunning} property is set by the depends-target "check-tomcat-running" -->
     <if>
       <bool>
 	<istrue value="${tomcat.isrunning}"/>
       </bool>
-      <antcall target="force-stop-tomcat"/>
+      <antcall target="stop-tomcat"/>
     </if>
 
     <!--<echo>${admin.password}</echo>--> <!-- for testing -->
