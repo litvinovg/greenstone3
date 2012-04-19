@@ -52,7 +52,7 @@
   <xsl:template name="collectionNameLinked">
     <xsl:if test="/page/pageResponse/collection">
       <a>
-        <xsl:attribute name="href">./<xsl:value-of select="$library_name"/>?a=p&amp;sa=about&amp;c=<xsl:call-template name="collectionNameShort"/></xsl:attribute>
+        <xsl:attribute name="href">./<xsl:value-of select="$library_name"/>/collection/<xsl:call-template name="collectionNameShort"/>/page/about</xsl:attribute>
         <xsl:call-template name="collectionName"/>
       </a>
     </xsl:if>
@@ -189,7 +189,7 @@
   <xsl:template name="collectionLinkWithImage">
     <xsl:choose>
       <xsl:when test="displayItem[@name='icon']">
-        <a href="{$library_name}?a=p&amp;sa=about&amp;c={@name}">
+        <a href="{$library_name}/collection/{@name}/page/about">
           <img class="collectionLinkImage">
             <xsl:attribute name="alt"/>
             <xsl:attribute name="src">sites/localsite/collect/<xsl:value-of select="@name"/>/images/<xsl:value-of select="displayItem[@name='icon']"/></xsl:attribute>
@@ -203,7 +203,7 @@
         </a>
       </xsl:when>
       <xsl:otherwise>
-        <a href="{$library_name}?a=p&amp;sa=about&amp;c={@name}">
+        <a href="{$library_name}/collection/{@name}/page/about">
           <div class="collectionLink">
             <xsl:value-of select="displayItem[@name='name']"/>
           </div>
