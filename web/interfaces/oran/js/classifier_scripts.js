@@ -114,9 +114,8 @@ function httpRequest(sectionID)
 		
 		var sectionToggle = document.getElementById("toggle" + sectionID);
 		sectionToggle.setAttribute("src", gs.imageURLs.loading);
-
-		var url = document.URL;
-		url = url.replace(/(&|\?)cl=[a-z\.0-9]+/gi, "$1cl=" + sectionID + "&excerptid=div" + sectionID);
+		
+		var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/browse/" + sectionID.replace(/\./g, "/") + "?excerptid=div" + sectionID;
 
 		if(gs.cgiParams.berryBasket == "on")
 		{
