@@ -100,13 +100,11 @@
 	
 	<xsl:template name="queryPage">
 		<xsl:for-each select="pageResponse/service">
-			<form name="QueryForm" method="get" action="{$library_name}">
+			<form name="QueryForm" method="get" action="{$library_name}/collection/{$collName}/search/{@name}">
 				<div>
 					<input type="hidden" name="a" value="q"/>
 					<input type="hidden" name="sa"><xsl:attribute name="value"><xsl:value-of select="/page/pageRequest/@subaction"/></xsl:attribute></input>
 					<input type="hidden" name="rt" value="rd"/>
-					<input type="hidden" name="s" value="{@name}"/>
-					<input type="hidden" name="c" value="{$collName}"/>
 					<xsl:if test="not(paramList/param[@name='startPage'])">
 						<input type="hidden" name="startPage" value="1"/>
 					</xsl:if>
