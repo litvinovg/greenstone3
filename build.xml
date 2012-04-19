@@ -1120,27 +1120,7 @@
     <exec executable="${catalina.home}/bin/shutdown.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="false">
       <env key="CATALINA_HOME" value="${catalina.home}"/>
       <arg line=">nul 2>&amp;1"/>
-    </exec>
-    <!--<antcall target="wait-until-tomcat-stopped"/>
-  </target>
-
-  <target name="wait-until-tomcat-stopped">-->
-    <echo>Waiting for the server to shutdown...</echo>
-    <waitfor maxwait="15" maxwaitunit="second" checkevery="1" checkeveryunit="second" timeoutproperty="tomcat.timedout">
-      <socket server="${tomcat.server}" port="${tomcat.port}"/>
-    </waitfor>
-
-    <if>
-      <bool>
-	<isset property="${tomcat.timedout}"/>
-      </bool>
-      <property name="tomcat.isrunning" value="true"/>
-      <echo>WARNING: Checked socket 15 times, but port ${tomcat.port} still busy. Going to try to continue anyway...</echo>
-      <else>
-	<echo>Tomcat is stopped.</echo>
-	<property name="tomcat.isrunning" value="false"/>
-      </else>
-    </if>
+    </exec>    
   </target>
 
   <!-- Can also try the "socket" condition in place of the "http" condition 
@@ -1156,8 +1136,31 @@
     </condition>
   </target>
 
-  <target name="stop-tomcat" description="Shutdown only Tomcat if running"><!-- depends="check-tomcat-running" if="tomcat.isrunning">-->
+  <!-- stop-tomcat checks if the tomcat server is already running. If it appears to be running
+       (regardless of whether tomcat was just starting to shut down), this target calls force-stop-tomcat
+       to issue the shutdown command to tomcat. Then it waits for at most 15 seconds for the server to 
+       actually stop by checking the socket at which tomcat listens every second, printing a warning
+       at the end of the max wait time of 15 seconds if tomcat was still running. -->
+  <target name="stop-tomcat" description="Shutdown only Tomcat if running" depends="check-tomcat-running" if="tomcat.isrunning">
      <antcall target="force-stop-tomcat"/>
+
+     <property name="wait.numchecks" value="15"/>
+     <echo>Waiting for the server to shutdown... (${wait.numchecks} seconds max)</echo>
+     <waitfor maxwait="${wait.numchecks}" maxwaitunit="second" checkevery="1" checkeveryunit="second" timeoutproperty="tomcat.timedout">
+       <socket server="${tomcat.server}" port="${tomcat.port}"/>       
+     </waitfor>
+     
+     <if>
+       <bool>
+	 <isset property="${tomcat.timedout}"/>
+       </bool>
+       <property name="tomcat.isrunning" value="true"/>
+       <echo>WARNING: Checked the socket ${wait.numchecks} times, but port ${tomcat.port} is still busy.</echo>
+       <else>
+	 <echo>Tomcat is stopped.</echo>
+	 <property name="tomcat.isrunning" value="false"/>
+       </else>
+     </if>
   </target>
 
   <target name="restart-tomcat" description="Shutdown and restart only Tomcat" depends="init,stop-tomcat,start-tomcat"/>
