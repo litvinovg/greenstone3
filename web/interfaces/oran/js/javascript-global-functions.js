@@ -232,24 +232,25 @@ function inc(a, b)
 
 function ifposDec(a, b)
 {
-	console.log("GOT " + a + " and " + b);
 	var carry = 0;
 	var num = 0;
 	var i = 0;
 	
-	if(b.length > a.length){console.log("RETURNING 0 (1)"); return 0;}
+	if(b.length > a.length){return a;}
 	if(b.length == a.length)
 	{
 		i = a.length - 1;
 		while(i >= 0)
 		{
-			if(a[i] > b[i]){console.log("BREAKING"); break;}
-			if(a[i] < b[i]){console.log("RETURNING 0 (2)"); return 0;}
+			if(a[i] > b[i]){break;}
+			if(a[i] < b[i]){return a;}
 			i--;
 		}
 	}
 	
 	i = 0;
+	var len = 0;
+	var outString = "";
 	while((i < a.length) || (i < b.length))
 	{
 		num = -carry;
@@ -267,11 +268,18 @@ function ifposDec(a, b)
 		}
 		
 		a[i] = num;
+		outString += num + ","
 		i++
+		
+		if(num != 0){len = i}
 	}
-	console.log("NUM is " + num); 
+
+	if(len < a.length)
+	{
+		a = a.slice(0, len);
+	}
 	
-	return 1;
+	return a;
 }
 
 function convertNum(a)
@@ -288,8 +296,6 @@ function convertNum(a)
 	
 	for(i = a.length - 1; i >= 0; i--)
 	{
-		console.log("i is " + i + " a[i] is " + a[i] + " a[i]/16 is " + Math.floor(a[i]/16) + " a[i]%16 is " + Math.floor(a[i]%16));
-		console.log("Adding " + convert[Math.floor(a[i]/16)] + " and " + convert[Math.floor(a[i]%16)]);
 		result.push(convert[Math.floor(a[i]/16)]);
 		result.push(convert[Math.floor(a[i]%16)]);
 	}
@@ -317,13 +323,13 @@ gs.functions.hashString = function(str)
 	
 	for(var i = 0; i < 8; i++)
 	{
-		primePow.push(pow);
+		primePow.push(pow.slice()); //The javascript way to do an array copy (yuck!)
 		inc(pow, pow);
 	}
 	
 	for(var i = 0; i < str.length; i++)
 	{
-		var c = str.charAt(i);
+		var c = str.charCodeAt(i);
 
 		if(remainder.length == 99)
 		{
@@ -332,22 +338,15 @@ gs.functions.hashString = function(str)
 
 		for(var j = remainder.length; j > 0; j--)
 		{
-			remainder[i] = remainder[i-1];
+			remainder[j] = remainder[j-1];
 		}
 		remainder[0] = c;
 
 		for(var j = 7; j >= 0; j--)
 		{
-			ifposDec(remainder, primePow[j]);
+			remainder = ifposDec(remainder, primePow[j]);
 		}	
 	}
-	
-	var returnString = remainder.length + " AWAY TO CONVERT -> ";
-	for(var i = 0; i < remainder.length; i++)
-	{
-		returnString += remainder[i] + " ";
-	}
-	console.log(returnString);
 	
 	return convertNum(remainder);
 }
