@@ -706,7 +706,7 @@ table{
 .pageSliderCol {
 	width:75px;
 	height:100px;
-	margin: 3px;
+	padding: 2px;
 	text-align: center;
 	vertical-align: bottom;
 }
