@@ -24,18 +24,18 @@
 	
 	<!-- Creates a header for the html page -->
 	<xsl:template name="create-html-header">
-		 <base>
-			 <xsl:attribute name="href">
-					 <xsl:choose>
-							 <xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'baseURL']">
-									 <xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'baseURL']"/>
-							 </xsl:when>
-							 <xsl:when test="/page/pageRequest/@baseURL">
-									 <xsl:value-of select="/page/pageRequest/@baseURL"/>
-							 </xsl:when>
-					 </xsl:choose>
-			 </xsl:attribute>
-	 </base>
+		<base>
+			<xsl:attribute name="href">
+				<xsl:choose>
+					<xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'baseURL']">
+						<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'baseURL']"/>
+					</xsl:when>
+					<xsl:when test="/page/pageRequest/@baseURL">
+						<xsl:value-of select="/page/pageRequest/@baseURL"/>
+					</xsl:when>
+				</xsl:choose>
+			</xsl:attribute>
+		</base>
 		<xsl:comment>[if lte IE 6]&gt;&lt;/base&gt;&lt;![endif]</xsl:comment>
 	
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
@@ -133,10 +133,10 @@
 								<!-- Add the href element to the <a> tag -->
 								<xsl:choose>
 									<xsl:when test="@name">
-										<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=b&amp;rt=s&amp;s=ClassifierBrowse&amp;c=<xsl:value-of select="/page/pageResponse/collection[@name=$collNameChecked]/@name"/>&amp;cl=<xsl:value-of select="@name"/></xsl:attribute>
+										<xsl:attribute name="href"><xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="/page/pageResponse/collection[@name=$collNameChecked]/@name"/>/browse/<xsl:value-of select="@name"/></xsl:attribute>
 									</xsl:when>
 									<xsl:otherwise>
-										<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=b&amp;rt=d&amp;s=ClassifierBrowse&amp;c=<xsl:value-of select="/page/pageResponse/collection[@name=$collNameChecked]/@name"/></xsl:attribute>
+										<xsl:attribute name="href"><xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="/page/pageResponse/collection[@name=$collNameChecked]/@name"/>/browse/1</xsl:attribute>
 									</xsl:otherwise>
 								</xsl:choose>
 								
@@ -160,7 +160,7 @@
 		<ul id="bannerLinks">
 			<!-- preferences -->
 			<li class="ui-state-default ui-corner-all">
-				<a href="{$library_name}?a=p&amp;amp;sa=pref&amp;amp;c={$collNameChecked}">
+				<a href="{$library_name}/collection/{$collNameChecked}/page/pref">
 					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_tip')"/></xsl:attribute>
 					<ul>
 						<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/></span></li>
@@ -171,7 +171,7 @@
 
 			<!-- help -->
 			<li class="ui-state-default ui-corner-all">
-				<a href="{$library_name}?a=p&amp;amp;sa=help&amp;amp;c={$collNameChecked}">
+				<a href="{$library_name}/collection/{$collNameChecked}/page/help">
 					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_tip')"/></xsl:attribute>
 					<ul>
 						<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></span></li>
@@ -350,12 +350,20 @@
 		<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']">
 			<xsl:variable name="subaction" select="/page/pageRequest/@subaction"/>
 			<td id="quicksearcharea">
-				<form action="{$library_name}">
-					<input type="hidden" name="a" value="q"/>
-					<input type="hidden" name="sa" value="{$subaction}"/>
+				<form action="{$library_name}/collection/{$collNameChecked}/search/TextQuery">
 					<input type="hidden" name="rt" value="rd"/>
-					<input type="hidden" name="s" value="TextQuery"/>
-					<input type="hidden" name="c" value="{$collNameChecked}"/>
+					<input type="hidden" name="s1.level">
+						<xsl:attribute name="value">
+							<xsl:choose>
+								<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.level']">
+									<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.level']/@value"/>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:text>Sec</xsl:text>
+								</xsl:otherwise>
+							</xsl:choose>
+						</xsl:attribute>
+					</input>
 					<input type="hidden" name="startPage" value="1"/>
 					<!-- The query text box -->
 					<span class="querybox">
@@ -391,7 +399,7 @@
 							<li class="ui-state-default ui-corner-all">
 								<a>
 									<xsl:attribute name="href">
-										<xsl:value-of select="$library_name"/>?a=q&amp;rt=d&amp;c=<xsl:value-of select="$collNameChecked"/>&amp;s=<xsl:value-of select="@name"/>
+										<xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="$collNameChecked"/>/search/<xsl:value-of select="@name"/>
 									</xsl:attribute>
 									<xsl:value-of select="displayItem[@name='name']"/>
 								</a>
