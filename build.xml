@@ -1147,7 +1147,7 @@
      <property name="wait.numchecks" value="15"/>
      <echo>Waiting for the server to shutdown... (${wait.numchecks} seconds max)</echo>
      <waitfor maxwait="${wait.numchecks}" maxwaitunit="second" checkevery="1" checkeveryunit="second" timeoutproperty="tomcat.timedout">
-       <socket server="${tomcat.server}" port="${tomcat.port}"/>       
+       <not><socket server="${tomcat.server}" port="${tomcat.port}"/></not>
      </waitfor>
      
      <if>
