@@ -16,7 +16,12 @@ function getTextForSection(sectionID, callback)
 	var template = "";
 	template += '<xsl:template match="/">';
 	template +=   '<text>';
-	template +=     '<xsl:apply-templates select="/page/pageResponse/document//documentNode[@nodeID = \'' + sectionID + '\']" mode="document"/>';
+	template +=     '<xsl:for-each select="/page/pageResponse/document//documentNode[@nodeID = \'' + sectionID + '\']">';
+	template +=       '<xsl:call-template name="sectionImage"/>';
+	template +=       '<div id="text' + sectionID + '">';
+	template +=         '<xsl:apply-templates select="." mode="document"/>';
+	template +=       '</div>';
+	template +=     '</xsl:for-each>';
 	template +=   '</text>';
 	template += '</xsl:template>';
 
@@ -64,7 +69,7 @@ function getSubSectionsForSection(sectionID, callback)
 	var template = "";
 	template += '<xsl:template match="/">';
 	template +=   '<sections>';
-	template +=     '<xsl:for-each select="/page/pageResponse/document//documentNode[@nodeID = \'' + sectionID + '\']">';
+	template +=     '<xsl:for-each select="/page/pageResponse/document//documentNode[@nodeID = \'' + sectionID + '\']/documentNode">';
 	template +=       '<xsl:call-template name="wrapDocumentNodes"/>';
 	template +=     '</xsl:for-each>';
 	template +=   '</sections>';
@@ -80,7 +85,7 @@ function getSubSectionsForSection(sectionID, callback)
 			
 			if(response)
 			{
-				var sectionsStart = response.indexOf(">") + 1;
+				var sectionsStart = response.indexOf(">", response.indexOf(">") + 1) + 1;
 				var sectionsEnd = response.lastIndexOf("<");
 				
 				if(sectionsStart == 0 || sectionsEnd == -1 || sectionsEnd <= sectionsStart)
@@ -106,7 +111,7 @@ function getSubSectionsForSection(sectionID, callback)
 	ajax.send();
 }
 
-function toggleSection(sectionID, callback)
+function toggleSection(sectionID, callback, tocDisabled)
 {
 	var docElem = document.getElementById("doc" + sectionID);
 	var tocElem = document.getElementById("toc" + sectionID);
@@ -116,12 +121,12 @@ function toggleSection(sectionID, callback)
 	
 	if(docElem.style.display == "none")
 	{
-		if(tocToggleElem)
+		if(tocToggleElem && !tocDisabled)
 		{
 			tocToggleElem.setAttribute("src", gs.imageURLs.collapse);
 		}
 		
-		if(tocElem)
+		if(tocElem && !tocDisabled)
 		{
 			tocElem.style.display = "block";
 		}
@@ -146,6 +151,11 @@ function toggleSection(sectionID, callback)
 							if(callback)
 							{
 								callback(true);
+							}
+							
+							if(document.getElementById("viewSelection"))
+							{
+								changeView();
 							}
 						}
 						else
@@ -210,7 +220,7 @@ function scrollToTop()
 	$('html, body').stop().animate({scrollTop: 0}, 1000);
 }
 
-function focusSection(sectionID, level)
+function focusSection(sectionID, level, tocDisabled)
 {
 	if(!level)
 	{
@@ -242,13 +252,13 @@ function focusSection(sectionID, level)
 		{
 			if(success)
 			{
-				focusSection(sectionID, level + 1);
+				focusSection(sectionID, level + 1, tocDisabled);
 			}
-		});
+		}, tocDisabled);
 	}
 	else
 	{
-		focusSection(sectionID, level + 1);
+		focusSection(sectionID, level + 1, tocDisabled);
 	}
 }
 
@@ -304,7 +314,7 @@ function expandOrCollapseAll(expand)
 				setTimeout(checkFunction, 500);
 			}
 		}
-		setTimeout(checkFunction, 500);
+		checkFunction();
 	}
 }
 
@@ -312,7 +322,7 @@ function loadTopLevelPage(callbackFunction)
 {
 	var ajax = gs.functions.ajaxRequest();
 	
-	ajax.open("GET", gs.xsltParams.library_name + "?a=d&dt=hierarchy&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d.replace(/([\.]*)\..*/, "$1") + "&excerptid=gs-document", true);
+	ajax.open("GET", gs.xsltParams.library_name + "?a=d&dt=hierarchy&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d.replace(/([^.]*)\..*/, "$1") + "&excerptid=gs-document", true);
 	ajax.onreadystatechange = function()
 	{
 		if(ajax.readyState == 4 && ajax.status == 200)
@@ -367,6 +377,8 @@ function retrieveFullTableOfContents()
 			
 			var tocElem = document.getElementById("tableOfContents");
 			tocElem.innerHTML = newTOC;
+			
+			gs.variables.tocLoaded = true;
 		}
 		else if(ajax.readyState == 4)
 		{
@@ -527,14 +539,18 @@ function setTextVisible(visible)
 
 function retrieveTableOfContentsAndTitles()
 {
+	var ilt = "";
+	ilt += '<xsl:template match="/">';
+	ilt +=   '<xsl:apply-templates select="/page/pageResponse/document/documentNode" mode="TOC"/>';
+	ilt += '</xsl:template>';
+
 	var ajax = gs.functions.ajaxRequest();
-	
-	ajax.open("GET", gs.xsltParams.library_name + "?a=d&ed=1&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&excerptid=tableOfContents");
+	ajax.open("GET", gs.xsltParams.library_name + "?a=d&ed=1&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&ilt=" + ilt.replace(/ /g, "%20"), true);
 	ajax.onreadystatechange = function()
 	{
 		if(ajax.readyState == 4 && ajax.status == 200)
 		{
-			document.getElementById("contentsArea").innerHTML = document.getElementById("contentsArea").innerHTML + ajax.responseText;
+			document.getElementById("tableOfContents").innerHTML = ajax.responseText;
 			replaceLinksWithSlider();
 			var loading = document.getElementById("tocLoadingImage");
 			loading.parentNode.removeChild(loading);
@@ -589,37 +605,21 @@ function replaceLinksWithSlider()
 		var widget = new SliderWidget(links);
 		leafSections[i].parentNode.insertBefore(widget.getElem(), leafSections[i]);
 	}
-}
-
-function changePage(href)
-{
-	var ajax = new gs.functions.ajaxRequest();
-	ajax.open("GET", href + "&excerptid=gs-document");
-	ajax.onreadystatechange = function()
+	
+	//Disable all TOC toggles
+	var imgs = document.getElementsByTagName("IMG");
+	for(var j = 0; j < imgs.length; j++)
 	{
-		if(ajax.readyState == 4 && ajax.status == 200)
+		var currentImage = imgs[j];
+		if(currentImage.getAttribute("id") && currentImage.getAttribute("id").search(/^ttoggle/) != -1)
 		{
-			var contentElem = document.getElementById("gs-document");
-			contentElem.innerHTML = ajax.responseText;
-			
-			for(var i = 0; i < _onCells.length; i++)
-			{
-				cells[i].cell.style.border = "";
-			}
-			_onCells = new Array;
-			
-			if(_linkCellMap[href])
-			{
-				cells = _linkCellMap[href];
-				for(var i = 0; i < cells.length; i++)
-				{
-					cells[i].cell.style.border = "3px red solid";
-					_onCells.push(cells[i]);
-				}
-			}
+			currentImage.setAttribute("onclick", "");
+		}
+		else if(currentImage.getAttribute("id") && currentImage.getAttribute("id").search(/^dtoggle/) != -1)
+		{
+			currentImage.setAttribute("onclick", currentImage.getAttribute("onclick").replace(/\)/, ", null, true)"));
 		}
 	}
-	ajax.send();
 }
 
 function SliderWidget(_links)
@@ -729,8 +729,14 @@ function SliderWidget(_links)
 		var ajax = gs.functions.ajaxRequest();
 
 		var href = page.getAttribute("href");
+		var startHREF = href.indexOf("'") + 1;
+		var endHREF = href.indexOf("'", startHREF);
+		var nodeID = href.substring(startHREF, endHREF);
+		href = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + nodeID;
+		
 		var template = '';
 		template += '<xsl:template match="/">';
+		template +=   '<gsf:metadata name=\"Thumb\"/>';
 		template +=   '<html>';
 		template +=     '<img>';
 		template +=       '<xsl:attribute name="src">';
@@ -738,7 +744,7 @@ function SliderWidget(_links)
 		template +=         '<xsl:text>/index/assoc/</xsl:text>';
 		template +=         "<xsl:value-of disable-output-escaping=\"yes\" select=\"/page/pageResponse/document/metadataList/metadata[@name = 'assocfilepath']\"/>";
 		template +=         '<xsl:text>/</xsl:text>';
-		template +=         "<xsl:value-of disable-output-escaping=\"yes\" select=\"/page/pageResponse/document/documentNode/metadataList/metadata[@name = 'Thumb']\"/>";
+		template +=         "<xsl:value-of disable-output-escaping=\"yes\" select=\"/page/pageResponse/document//documentNode[@nodeID = '" + nodeID + "']/metadataList/metadata[@name = 'Thumb']\"/>";
 		template +=       '</xsl:attribute>';
 		template +=     '</img>';
 		template +=     '<p>';
@@ -746,7 +752,8 @@ function SliderWidget(_links)
 		template +=     '</p>';
 		template +=   '</html>';
 		template += '</xsl:template>';
-		ajax.open("GET", href + "&ilt=" + template.replace(" ", "%20"));
+
+		ajax.open("GET", href + "?ilt=" + template.replace(" ", "%20"));
 		ajax.onreadystatechange = function()
 		{
 			if(ajax.readyState == 4 && ajax.status == 200)
@@ -841,7 +848,7 @@ function SliderWidget(_links)
 		col.appendChild(link);
 		_links[i].link = link;
 		var href = _links[i].getAttribute("href");
-		link.setAttribute("href", "javascript:changePage(\"" + href + "\");");
+		link.setAttribute("href", href.replace(/\)/, ", 0, true)"));
 		
 		if(!_linkCellMap[href])
 		{
