@@ -14,7 +14,12 @@
 	<xsl:template name="pageTitle"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/></xsl:template>
 
 	<!-- set page breadcrumbs -->
-	<xsl:template name="breadcrumbs"><gslib:siteLink/><gslib:rightArrow/> <gslib:collectionNameLinked/><gslib:rightArrow/></xsl:template>
+	<xsl:template name="breadcrumbs">
+		<gslib:siteLink/><gslib:rightArrow/>
+		<xsl:if test="/page/pageResponse/collection">
+			<gslib:collectionNameLinked/><gslib:rightArrow/>
+		</xsl:if>
+	</xsl:template>
 
 	<!-- the page content -->
 	<xsl:template match="/page">
