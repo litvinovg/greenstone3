@@ -1156,7 +1156,7 @@
     </condition>
   </target>
 
-  <target name="stop-tomcat" description="Shutdown only Tomcat if running" depends="check-tomcat-running" if="tomcat.isrunning">
+  <target name="stop-tomcat" description="Shutdown only Tomcat if running"><!-- depends="check-tomcat-running" if="tomcat.isrunning">-->
      <antcall target="force-stop-tomcat"/>
   </target>
 
