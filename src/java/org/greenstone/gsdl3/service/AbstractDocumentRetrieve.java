@@ -71,7 +71,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	protected static final String INFO_SIB_POS = "siblingPosition";
 
 	// means the id is not a greenstone id and needs translating
-  //	protected static final String EXTID_PARAM = "ext";
+	//	protected static final String EXTID_PARAM = "ext";
 
 	protected Element config_info = null; // the xml from the config file
 
@@ -147,19 +147,19 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		{
 			macro_resolver.setSiteDetails(this.site_http_address, this.cluster_name, this.getLibraryName());
 			// set up the macro resolver
-			Element replacement_elem = (Element) GSXML.getChildByTagName(extra_info, GSXML.REPLACE_ELEM+GSXML.LIST_MODIFIER);
+			Element replacement_elem = (Element) GSXML.getChildByTagName(extra_info, GSXML.REPLACE_ELEM + GSXML.LIST_MODIFIER);
 			if (replacement_elem != null)
 			{
 				macro_resolver.addMacros(replacement_elem);
 			}
 			// look for any refs to global replace lists
-			NodeList replace_refs_elems = extra_info.getElementsByTagName(GSXML.REPLACE_ELEM+GSXML.LIST_MODIFIER+GSXML.REF_MODIFIER);
+			NodeList replace_refs_elems = extra_info.getElementsByTagName(GSXML.REPLACE_ELEM + GSXML.LIST_MODIFIER + GSXML.REF_MODIFIER);
 			for (int i = 0; i < replace_refs_elems.getLength(); i++)
 			{
 				String id = ((Element) replace_refs_elems.item(i)).getAttribute("id");
 				if (!id.equals(""))
 				{
-					Element replace_list = GSXML.getNamedElement(this.router.config_info, GSXML.REPLACE_ELEM+GSXML.LIST_MODIFIER, "id", id);
+					Element replace_list = GSXML.getNamedElement(this.router.config_info, GSXML.REPLACE_ELEM + GSXML.LIST_MODIFIER, "id", id);
 					if (replace_list != null)
 					{
 						macro_resolver.addMacros(replace_list);
@@ -221,7 +221,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 				}
 				metadata_names_list.add(metadata);
 			}
-			
+
 			param = (Element) param.getNextSibling();
 		}
 
@@ -259,45 +259,46 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 			Element request_node = (Element) request_nodes.item(i);
 			String node_id = request_node.getAttribute(GSXML.NODE_ID_ATT);
 			boolean is_href_id = false;
-			if (node_id.equals("")) {
-			  node_id = getGreenstoneIdFromHref(request_node);
-			  if(node_id == null) {
-			    // **** TODO, is this good enough???
-			    request_node.setAttribute("external_link", "true");
-			    continue;
-			  }
-			 
+			if (node_id.equals(""))
+			{
+				node_id = getGreenstoneIdFromHref(request_node);
+				if (node_id == null)
+				{
+					// **** TODO, is this good enough???
+					request_node.setAttribute("external_link", "true");
+					continue;
+				}
+
 			}
 
 			// may have modifiers .rt, .1.ss etc
 			if (idNeedsTranslating(node_id))
 			{
-			    node_id = translateId(node_id);
+				node_id = translateId(node_id);
 			}
-			
+
 			if (node_id == null)
 			{
 				continue;
 			}
 			try
-			  {
-			    Element metadata_list = getMetadataList(node_id, all_metadata, metadata_names_list);
-			    if(metadata_list != null)
-			      {
-				request_node.appendChild(metadata_list);
-			      }
-			  }
+			{
+				Element metadata_list = getMetadataList(node_id, all_metadata, metadata_names_list);
+				if (metadata_list != null)
+				{
+					request_node.appendChild(metadata_list);
+				}
+			}
 			catch (GSException e)
-			  {
-			    GSXML.addError(this.doc, result, e.getMessage(), e.getType());
-			    if (e.getType().equals(GSXML.ERROR_TYPE_SYSTEM))
-			      {
-				// there is no point trying any others
-				return result;
-			      }
-			  }
-		
-			
+			{
+				GSXML.addError(this.doc, result, e.getMessage(), e.getType());
+				if (e.getType().equals(GSXML.ERROR_TYPE_SYSTEM))
+				{
+					// there is no point trying any others
+					return result;
+				}
+			}
+
 		} // for each doc node
 
 		return result;
@@ -408,125 +409,126 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 
 			String doc_id = doc.getAttribute(GSXML.NODE_ID_ATT);
 			boolean is_href_id = false;
-			if (doc_id.equals("")) {
-			  doc_id = getGreenstoneIdFromHref(doc);
-			  if(doc_id == null) {
-			    // **** TODO, is this good enough???
-			    doc.setAttribute("external_link", "true");
-			    continue;
-			  }
-			  doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
+			if (doc_id.equals(""))
+			{
+				doc_id = getGreenstoneIdFromHref(doc);
+				if (doc_id == null)
+				{
+					// **** TODO, is this good enough???
+					doc.setAttribute("external_link", "true");
+					continue;
+				}
+				doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
 			}
 
 			if (idNeedsTranslating(doc_id))
-			  {
-			    doc_id = translateId(doc_id);
-			    doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
-			  }
+			{
+				doc_id = translateId(doc_id);
+				doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
+			}
 
 			if (doc_id == null)
-			  {
-			    continue;
-			  }
+			{
+				continue;
+			}
 
-				if (want_info)
+			if (want_info)
+			{
+				Element node_info_elem = this.doc.createElement("nodeStructureInfo");
+				doc.appendChild(node_info_elem);
+
+				for (int j = 0; j < info_types.size(); j++)
 				{
-					Element node_info_elem = this.doc.createElement("nodeStructureInfo");
-					doc.appendChild(node_info_elem);
-
-					for (int j = 0; j < info_types.size(); j++)
+					String info_type = (String) info_types.get(j);
+					String info_value = getStructureInfo(doc_id, info_type);
+					if (info_value != null)
 					{
-						String info_type = (String) info_types.get(j);
-						String info_value = getStructureInfo(doc_id, info_type);
-						if (info_value != null)
-						{
-							Element info_elem = this.doc.createElement("info");
-							info_elem.setAttribute(GSXML.NAME_ATT, info_type);
-							info_elem.setAttribute(GSXML.VALUE_ATT, info_value);
-							node_info_elem.appendChild(info_elem);
-						}
+						Element info_elem = this.doc.createElement("info");
+						info_elem.setAttribute(GSXML.NAME_ATT, info_type);
+						info_elem.setAttribute(GSXML.VALUE_ATT, info_value);
+						node_info_elem.appendChild(info_elem);
+					}
+				}
+			}
+
+			if (want_structure)
+			{
+				// all structure info goes into a nodeStructure elem
+				Element structure_elem = this.doc.createElement(GSXML.NODE_STRUCTURE_ELEM);
+				doc.appendChild(structure_elem);
+
+				if (want_entire_structure)
+				{
+					String root_id = getRootId(doc_id);
+					Element root_node = createDocNode(root_id); //, true, false);
+					addDescendants(root_node, root_id, true);
+					structure_elem.appendChild(root_node);
+					continue; // with the next document, we dont need to do any more here
+				}
+
+				// Add the requested structure information
+				Element base_node = createDocNode(doc_id); //, false, false);
+
+				//Ancestors: continually add parent nodes until the root is reached
+				Element top_node = base_node; // the top node so far
+				if (want_ancestors)
+				{
+					String current_id = doc_id;
+					while (true)
+					{
+						String parent_id = getParentId(current_id);
+						//Element parent = getParent(current_id);
+						if (parent_id == null)
+							break; // no parent
+						Element parent_node = createDocNode(parent_id);
+						parent_node.appendChild(top_node);
+						current_id = parent_id;//.getAttribute(GSXML.NODE_ID_ATT);
+						top_node = parent_node;
+					}
+				}
+				// Parent: get the parent of the selected node
+				else if (want_parent)
+				{
+					String parent_id = getParentId(doc_id);
+					if (parent_id != null)
+					{
+						Element parent_node = createDocNode(parent_id);
+						parent_node.appendChild(base_node);
+						top_node = parent_node;
 					}
 				}
 
-				if (want_structure)
+				// now the top node is the root of the structure
+				structure_elem.appendChild(top_node);
+
+				//Siblings: get the other descendants of the selected node's parent
+				if (want_siblings)
 				{
-					// all structure info goes into a nodeStructure elem
-					Element structure_elem = this.doc.createElement(GSXML.NODE_STRUCTURE_ELEM);
-					doc.appendChild(structure_elem);
-
-					if (want_entire_structure)
+					String parent_id = getParentId(doc_id);
+					if (parent_id != null)
 					{
-						String root_id = getRootId(doc_id);
-						Element root_node = createDocNode(root_id); //, true, false);
-						addDescendants(root_node, root_id, true);
-						structure_elem.appendChild(root_node);
-						continue; // with the next document, we dont need to do any more here
+						// if parent == current id, then we are at the top 
+						// and can't get siblings
+						Element parent_node = (Element) base_node.getParentNode(); // this may be the structure element if there has been no request for parents or ancestors
+
+						// add siblings, - returns a pointer to the new current node 
+						base_node = addSiblings(parent_node, parent_id, doc_id);
 					}
 
-					// Add the requested structure information
-					Element base_node = createDocNode(doc_id); //, false, false);
+				}
 
-					//Ancestors: continually add parent nodes until the root is reached
-					Element top_node = base_node; // the top node so far
-					if (want_ancestors)
-					{
-						String current_id = doc_id;
-						while (true)
-						{
-							String parent_id = getParentId(current_id);
-							//Element parent = getParent(current_id);
-							if (parent_id == null)
-								break; // no parent
-							Element parent_node = createDocNode(parent_id);
-							parent_node.appendChild(top_node);
-							current_id = parent_id;//.getAttribute(GSXML.NODE_ID_ATT);
-							top_node = parent_node;
-						}
-					}
-					// Parent: get the parent of the selected node
-					else if (want_parent)
-					{
-						String parent_id = getParentId(doc_id);
-						if (parent_id != null)
-						{
-							Element parent_node = createDocNode(parent_id);
-							parent_node.appendChild(base_node);
-							top_node = parent_node;
-						}
-					}
+				// Children: get the descendants, but only one level deep
+				if (want_children)
+				{
+					addDescendants(base_node, doc_id, false);
+				}
+				// Descendants: recursively get every descendant 
+				else if (want_descendants)
+				{
+					addDescendants(base_node, doc_id, true);
+				}
+			} // if want structure
 
-					// now the top node is the root of the structure
-					structure_elem.appendChild(top_node);
-
-					//Siblings: get the other descendants of the selected node's parent
-					if (want_siblings)
-					{
-						String parent_id = getParentId(doc_id);
-						if (parent_id != null)
-						{
-							// if parent == current id, then we are at the top 
-							// and can't get siblings
-							Element parent_node = (Element) base_node.getParentNode(); // this may be the structure element if there has been no request for parents or ancestors
-
-							// add siblings, - returns a pointer to the new current node 
-							base_node = addSiblings(parent_node, parent_id, doc_id);
-						}
-
-					}
-
-					// Children: get the descendants, but only one level deep
-					if (want_children)
-					{
-						addDescendants(base_node, doc_id, false);
-					}
-					// Descendants: recursively get every descendant 
-					else if (want_descendants)
-					{
-						addDescendants(base_node, doc_id, true);
-					}
-				} // if want structure
-
-				
 		} // for each doc
 		return result;
 	}
@@ -582,37 +584,39 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 			Element request_node = (Element) request_nodes.item(i);
 			String node_id = request_node.getAttribute(GSXML.NODE_ID_ATT);
 			boolean is_href_id = false;
-			if (node_id.equals("")) {
-			  node_id = getGreenstoneIdFromHref(request_node);
-			  if(node_id == null) {
-			    // **** TODO, is this good enough???
-			    request_node.setAttribute("external_link", "true");
-			    continue;
-			  }
-			 
+			if (node_id.equals(""))
+			{
+				node_id = getGreenstoneIdFromHref(request_node);
+				if (node_id == null)
+				{
+					// **** TODO, is this good enough???
+					request_node.setAttribute("external_link", "true");
+					continue;
+				}
+
 			}
 
 			// may have modifiers .rt, .1.ss etc
 			if (idNeedsTranslating(node_id))
 			{
-			    node_id = translateId(node_id);
+				node_id = translateId(node_id);
 			}
-			
+
 			if (node_id == null)
 			{
 				continue;
 			}
 			try
-			  {
-			    Element node_content = getNodeContent(node_id, lang);
-			    request_node.appendChild(node_content);
-			  }
+			{
+				Element node_content = getNodeContent(node_id, lang);
+				request_node.appendChild(node_content);
+			}
 			catch (GSException e)
-			  {
-			    GSXML.addError(this.doc, result, e.getMessage());
-			    return result;
-			    
-			  }
+			{
+				GSXML.addError(this.doc, result, e.getMessage());
+				return result;
+
+			}
 		} // for each node
 		return result;
 	} // processDocumentContentRetrieve
@@ -756,20 +760,23 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		return id;
 	}
 
-  protected String getGreenstoneIdFromHref(Element doc_node)
-  {
-    String node_id = doc_node.getAttribute(GSXML.HREF_ID_ATT);
-    node_id = translateExternalId(node_id);
-    if (node_id == null) {
-      return node_id;
-    }
-    // check for id modifiers
-    String id_mods = doc_node.getAttribute(GSXML.ID_MOD_ATT);
-    if (!id_mods.equals("")) {
-      node_id = node_id+id_mods;
-    }
-    return node_id;
-  }
+	protected String getGreenstoneIdFromHref(Element doc_node)
+	{
+		String node_id = doc_node.getAttribute(GSXML.HREF_ID_ATT);
+		node_id = translateExternalId(node_id);
+		if (node_id == null)
+		{
+			return node_id;
+		}
+		// check for id modifiers
+		String id_mods = doc_node.getAttribute(GSXML.ID_MOD_ATT);
+		if (!id_mods.equals(""))
+		{
+			node_id = node_id + id_mods;
+		}
+		return node_id;
+	}
+
 	/**
 	 * returns the document type of the doc that the specified node belongs to.
 	 * should be one of GSXML.DOC_TYPE_SIMPLE, GSXML.DOC_TYPE_PAGED,
