@@ -30,6 +30,7 @@ import javax.xml.transform.Transformer;
 import java.io.StringWriter;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.OutputKeys;
 
 import java.util.Map;
 import java.util.Set;
@@ -1233,20 +1234,35 @@ public class GSXML
 		}
 	}
 
-	public static void elementToLogAsString(Element e)
+    public static void elementToLogAsString(Element e, boolean indent)
+    {
+	String str = elementToString(e, indent);
+	System.err.println(str);
+	logger.error(str);
+    }
+
+    public static String elementToString(Element e, boolean indent)
 	{
-		try
-		{
-			TransformerFactory tf = TransformerFactory.newInstance();
-			Transformer trans = tf.newTransformer();
-			StringWriter sw = new StringWriter();
-			trans.transform(new DOMSource(e), new StreamResult(sw));
-			System.err.println(sw.toString());
+	    String str = "**********START*************\n";
+	    try {
+		TransformerFactory tf = TransformerFactory.newInstance();
+		Transformer trans = tf.newTransformer();
+		StringWriter sw = new StringWriter();
+		if(indent) {
+		    trans.setOutputProperty(OutputKeys.INDENT, "yes");
+		} else {
+		    trans.setOutputProperty(OutputKeys.INDENT, "no");
 		}
-		catch (Exception ex)
-		{
-			System.err.println("couldn't write " + e + " to log");
-		}
+		trans.transform(new DOMSource(e), new StreamResult(sw));
+		str += sw.toString();
+	    }
+	    catch (Exception ex) {
+		str += "Exception: couldn't write " + e + " to log";
+	    } 
+	    finally {
+		str += "\n***********************\n";
+		return str;
+	    }
 	}
 
 	public static ArrayList<String> getGroupsFromSecurityResponse(Element securityResponse)

@@ -41,6 +41,8 @@ import org.w3c.dom.NodeList;
 // other java classes
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Set;
@@ -115,7 +117,7 @@ public class XMLTransformer {
 	try {
 	    // Use the TransformerFactory to process the stylesheet Source and generate a Transformer.
 	    Transformer transformer = this.t_factory.newTransformer(new StreamSource(stylesheet));
-		transformer.setErrorListener(new TransformErrorListener());
+		transformer.setErrorListener(new TransformErrorListener(stylesheet));
 
 	    // Use the Transformer to transform an XML Source and send the output to a Result object.
 	    StringWriter output = new StringWriter();
@@ -141,7 +143,7 @@ public class XMLTransformer {
 	try {
 	    // Use the TransformerFactory to process the stylesheet Source and generate a Transformer.
 	    Transformer transformer = this.t_factory.newTransformer(new DOMSource(stylesheet));
-		transformer.setErrorListener(new TransformErrorListener());
+		transformer.setErrorListener(new TransformErrorListener(stylesheet));
 	    if (parameters != null) {
 		Set params = parameters.entrySet();
 		Iterator i = params.iterator();
@@ -181,7 +183,7 @@ public class XMLTransformer {
 			// Use the TransformerFactory to process the stylesheet Source and generate a Transformer.
 			Transformer transformer = this.t_factory.newTransformer(new DOMSource(stylesheet));
             logger.info("XMLTransformer transformer is " + transformer);
-			transformer.setErrorListener(new TransformErrorListener());
+			transformer.setErrorListener(new TransformErrorListener(stylesheet));
 			if (parameters != null) {
 				Set params = parameters.entrySet();
 				Iterator i = params.iterator();
@@ -213,7 +215,7 @@ public class XMLTransformer {
     public Node transform(File stylesheet, File source) {
 	try {
 	    Transformer transformer = this.t_factory.newTransformer(new StreamSource(stylesheet));
-		transformer.setErrorListener(new TransformErrorListener());
+		transformer.setErrorListener(new TransformErrorListener(stylesheet));
 	    DOMResult result = new DOMResult();
 	    transformer.transform(new StreamSource(source), result);
 	    return result.getNode().getFirstChild();
@@ -232,7 +234,7 @@ public class XMLTransformer {
     public Node transform(File stylesheet, File source, Document docDocType) {
     	try {
     	    Transformer transformer = this.t_factory.newTransformer(new StreamSource(stylesheet));
-			transformer.setErrorListener(new TransformErrorListener());
+			transformer.setErrorListener(new TransformErrorListener(stylesheet));
     	    DOMResult result = new DOMResult(docDocType);
     	    transformer.transform(new StreamSource(source), result);
     	    return result.getNode().getFirstChild();
@@ -319,44 +321,87 @@ public class XMLTransformer {
 	// to the tomcat console (System.err), and the error message is stored in the errorMessage variable so that it can
 	// be retrieved and be used to generate an xhtml error page.
 	static public class TransformErrorListener implements ErrorListener {
-		protected String errorMessage = null;
-	
-		//  Receive notification of a recoverable error.
-		public void error(TransformerException exception) {
-			handleError("Error:\n", exception);
+	    protected String errorMessage = null;
+	    protected String stylesheet = null;
+	    protected String file = null;
+	    
+	    public TransformErrorListener(String xslt) { 
+		this.stylesheet = xslt; 
+	    }
+
+	    public TransformErrorListener(Document xslt) { 
+		//this.stylesheet = GSXML.xmlNodeToString(xslt); 
+		this.stylesheet = GSXML.elementToString(xslt.getDocumentElement(), true);
+	    }
+
+	    public TransformErrorListener(File xslt) { 
+		stylesheet = "";		
+		file = xslt.getAbsolutePath();
+		String error = "Can't locate stylesheet file: " + xslt;
+
+		if(!xslt.exists()) {
+		    stylesheet = error;
+		    System.err.println("@@@@@@@ " + error);
+		    return;
 		}
-        //   Receive notification of a non-recoverable error.
-		public void fatalError(TransformerException exception) {
-			handleError("Fatal Error:\n", exception);
+		try {
+		    BufferedReader in = new BufferedReader(new FileReader(xslt));
+		    String line = "";
+		    while((line = in.readLine()) != null) {
+			stylesheet = stylesheet + line + "\n";
+		    }
+		    in.close();
+		    in = null;
+		} catch(Exception e) {
+		    stylesheet = error;
+		    System.err.println("Exception reading file: " + xslt.getAbsolutePath());
+		    e.printStackTrace();
 		}
-		// Receive notification of a warning.
-        public void warning(TransformerException exception) {
-			handleError("Warning:\n", exception);
-        }
+	    }
+
+	    //  Receive notification of a recoverable error.
+	    public void error(TransformerException exception) {
+		handleError("Error:\n", exception);
+	    }
+	    // Receive notification of a non-recoverable error.
+	    public void fatalError(TransformerException exception) {
+		handleError("Fatal Error:\n", exception);
+	    }
+	    // Receive notification of a warning.
+	    public void warning(TransformerException exception) {
+		handleError("Warning:\n", exception);
+	    }
 		
-		public String toString(TransformerException e) {
-			String location = e.getLocationAsString();
-			if(location == null) {
-				return e.getMessage();
-			}
-			return e.getMessage() + "\n" + location;
+	    public String toString(TransformerException e) {
+		String msg = "Exception encountered was:\n\t";
+		String location = e.getLocationAsString();
+		if(location != null) {		    
+		    msg = msg + "Location: " + location + "\n\t";
+		} 
+
+		return msg + "Message: " + e.getMessage();
+	    }
+	    
+	    // clears the errorPage variable after first call to this method
+	    public String getErrorMessage() {
+		String errMsg = this.errorMessage;
+		if(this.errorMessage != null) {
+		    this.errorMessage = null;
 		}
-		
-		// clears the errorPage variable after first call to this method
-		public String getErrorMessage() {
-			String errMsg = this.errorMessage;
-			if(this.errorMessage != null) {
-				this.errorMessage = null;
-			}
-			return errMsg;
+		return errMsg;
+	    }
+	    
+	    // sets the errorMessage member variable to the data stored in the exception
+	    // and writes the errorMessage to the logger and tomcat's System.err
+	    protected void handleError(String errorType, TransformerException exception) {
+		this.errorMessage = errorType + toString(exception); 
+		if(file != null) { 
+		    this.errorMessage = this.errorMessage + "\nfilename: " + file;
 		}
-		
-		// sets the errorMessage member variable to the data stored in the exception
-		// and writes the errorMessage to the logger and tomcat's System.err
-		protected void handleError(String errorType, TransformerException exception) {
-			this.errorMessage = errorType + toString(exception); 
-			System.err.println("\n****Error transforming xml:\n" + this.errorMessage + "\n****\n");
-			logger.error(this.errorMessage);
-		}
+		this.errorMessage += "\nException CAUSE:\n" + exception.getCause();
+		System.err.println("\n****Error transforming xml:\n" + this.errorMessage + "\n****\n");
+		System.err.println("Stylesheet was:\n" + this.stylesheet + "\n\n");
+		logger.error(this.errorMessage);
+	    }
 	}
 }

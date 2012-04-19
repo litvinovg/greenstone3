@@ -617,7 +617,7 @@ public class TransformingReceptionist extends Receptionist
 			//a valid  xsl style sheet document.
 
 			Transformer preProcessor = transformerFactory.newTransformer(new DOMSource(preprocessingXsl));
-			preProcessor.setErrorListener(new XMLTransformer.TransformErrorListener());
+			preProcessor.setErrorListener(new XMLTransformer.TransformErrorListener(preprocessingXsl));
 			DOMResult result = new DOMResult();
 			result.setNode(skinAndLibraryDoc);
 			preProcessor.transform(new DOMSource(skinAndLibraryXsl), result);
@@ -863,7 +863,7 @@ public class TransformingReceptionist extends Receptionist
 			Transformer transformer = tf.newTransformer();
 			transformer.transform(domSource, result);
 			content = writer.toString();
-			System.out.println("Change the & to &Amp; for proper debug dispay");
+			System.out.println("Change the & to &Amp; for proper debug display");
 			content = StringUtils.replace(content, "&", "&amp;");
 			writer.flush();
 		}
