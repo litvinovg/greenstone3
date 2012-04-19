@@ -757,6 +757,11 @@ public class Collection extends ServiceCluster
 		else if (type.equals(GSXML.REQUEST_TYPE_SECURITY))
 		{
 			String oid = request.getAttribute("oid");
+			if(oid.contains("."))
+			{
+				oid = oid.substring(0, oid.indexOf("."));
+			}
+			
 			ArrayList<String> groups = getPermittedGroups(oid);
 			
 			Element groupList = this.doc.createElement(GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
