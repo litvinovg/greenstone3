@@ -18,6 +18,8 @@
  */
 package org.greenstone.gsdl3.util;
 
+import org.greenstone.util.GlobalProperties;
+
 // XML classes
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -27,6 +29,7 @@ import javax.xml.transform.ErrorListener;
 
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.dom.DOMResult;
 
@@ -43,6 +46,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Set;
@@ -61,6 +65,7 @@ import org.apache.log4j.*;
  * @version $Revision$
  */
 public class XMLTransformer {
+    private static int debugFileCount = 0; // for unique filenames when debugging XML transformations with physical files
 
     static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.XMLTransformer.class.getName());
 	
@@ -117,12 +122,12 @@ public class XMLTransformer {
 	try {
 	    // Use the TransformerFactory to process the stylesheet Source and generate a Transformer.
 	    Transformer transformer = this.t_factory.newTransformer(new StreamSource(stylesheet));
-		transformer.setErrorListener(new TransformErrorListener(stylesheet));
 
 	    // Use the Transformer to transform an XML Source and send the output to a Result object.
 	    StringWriter output = new StringWriter();
-
-	    transformer.transform(new StreamSource(new StringReader(xml_in)), new StreamResult(output));
+	    StreamSource streamSource = new StreamSource(new StringReader(xml_in));
+	    transformer.setErrorListener(new TransformErrorListener(stylesheet, streamSource));
+	    transformer.transform(streamSource, new StreamResult(output));
 	    return output.toString();
 	} catch (TransformerConfigurationException e) {
 	    logger.error("couldn't create transformer object: "+e.getMessageAndLocation());
@@ -138,12 +143,12 @@ public class XMLTransformer {
 	return transformToString(stylesheet, source, null);
     }
     
+
     public String transformToString(Document stylesheet, Document source, HashMap parameters) {
 	
 	try {
 	    // Use the TransformerFactory to process the stylesheet Source and generate a Transformer.
 	    Transformer transformer = this.t_factory.newTransformer(new DOMSource(stylesheet));
-		transformer.setErrorListener(new TransformErrorListener(stylesheet));
 	    if (parameters != null) {
 		Set params = parameters.entrySet();
 		Iterator i = params.iterator();
@@ -157,8 +162,10 @@ public class XMLTransformer {
 	    
 	    // Use the Transformer to transform an XML Source and send the output to a Result object.
 	    StringWriter output = new StringWriter();
-	    
-	    transformer.transform(new DOMSource(source), new StreamResult(output));
+	    DOMSource domSource = new DOMSource(source);
+
+	    transformer.setErrorListener(new TransformErrorListener(stylesheet, domSource));
+	    transformer.transform(domSource, new StreamResult(output));
 	    return output.toString();
 	} catch (TransformerConfigurationException e) {
 		logger.error("couldn't create transformer object: "+e.getMessageAndLocation());
@@ -170,20 +177,33 @@ public class XMLTransformer {
 	}
     }
 
+    
+
+    /**
+     * Transform an XML document using a XSLT stylesheet, 
+     * but using a DOMResult whose node should be set to the Document donated by resultNode
+     */
+    public Node transform_withResultNode(Document stylesheet, Document source, Document resultNode) {
+    	return transform(stylesheet, source, null, null, resultNode);
+    }
+
     public Node transform(Document stylesheet, Document source) {
-    	return transform(stylesheet, source, null, null);
+    	return transform(stylesheet, source, null, null, null);
     }
     
     public Node transform(Document stylesheet, Document source, HashMap parameters) {
-    	return transform(stylesheet, source, parameters, null);
+    	return transform(stylesheet, source, parameters, null, null);
     }
 
     public Node transform(Document stylesheet, Document source, HashMap parameters, Document docDocType) {
+	return transform(stylesheet, source, parameters, docDocType, null);
+    }
+
+    protected Node transform(Document stylesheet, Document source, HashMap parameters, Document docDocType, Document resultNode) {
 		try {
 			// Use the TransformerFactory to process the stylesheet Source and generate a Transformer.
 			Transformer transformer = this.t_factory.newTransformer(new DOMSource(stylesheet));
             logger.info("XMLTransformer transformer is " + transformer);
-			transformer.setErrorListener(new TransformErrorListener(stylesheet));
 			if (parameters != null) {
 				Set params = parameters.entrySet();
 				Iterator i = params.iterator();
@@ -199,7 +219,12 @@ public class XMLTransformer {
 			// If we don't have a DocType then do the transformation with a DOMResult
 			// that does not contain any doctype (like we use to do before).
 			DOMResult result = docDocType == null ? new DOMResult() : new DOMResult(docDocType);
-			transformer.transform(new DOMSource(source), result);
+			if(resultNode != null) {
+			    result.setNode(resultNode);
+			}
+			DOMSource domSource = new DOMSource(source);
+			transformer.setErrorListener(new TransformErrorListener(stylesheet, domSource));
+			transformer.transform(domSource, result);
 			return result.getNode(); // pass the entire document
 		} 
 		catch (TransformerConfigurationException e) {
@@ -213,11 +238,23 @@ public class XMLTransformer {
     }
 
     public Node transform(File stylesheet, File source) {
+	return transform(stylesheet, source, null);
+    }
+
+    // debugAsFile is only to be set to true when either the stylesheet or source parameters 
+    // are not objects of type File. The debugAsFile variable is passed into the 
+    // TransformErrorListener. When set to true, the TransformErrorListener will itself create
+    // two files containing the stylesheet and source XML, and try to transform the new source
+    // file with the stylesheet file for debugging purposes.
+    protected Node transform(File stylesheet, File source, Document docDocType) {
 	try {
 	    Transformer transformer = this.t_factory.newTransformer(new StreamSource(stylesheet));
-		transformer.setErrorListener(new TransformErrorListener(stylesheet));
-	    DOMResult result = new DOMResult();
-	    transformer.transform(new StreamSource(source), result);
+	    DOMResult result = (docDocType == null) ? new DOMResult() : new DOMResult(docDocType);
+	    StreamSource streamSource = new StreamSource(source);
+
+	    transformer.setErrorListener(new TransformErrorListener(stylesheet, streamSource));
+
+	    transformer.transform(streamSource, result);
 	    return result.getNode().getFirstChild();
 	} catch (TransformerConfigurationException e) {
 			return transformError("XMLTransformer.transform(File, File)"
@@ -229,27 +266,8 @@ public class XMLTransformer {
 				+ "\ncouldn't transform the source for files\n" 
 				+ stylesheet + "\n" + source, e);
 	}	
- }
- 
-    public Node transform(File stylesheet, File source, Document docDocType) {
-    	try {
-    	    Transformer transformer = this.t_factory.newTransformer(new StreamSource(stylesheet));
-			transformer.setErrorListener(new TransformErrorListener(stylesheet));
-    	    DOMResult result = new DOMResult(docDocType);
-    	    transformer.transform(new StreamSource(source), result);
-    	    return result.getNode().getFirstChild();
-    	} catch (TransformerConfigurationException e) {
-			return transformError("XMLTransformer.transform(File, File, Doc)"
-				+ "\ncouldn't create transformer object for files\n" 
-				+ stylesheet + "\n" + source, e);
-		} 
-		catch (TransformerException e) {
-			return transformError("XMLTransformer.transform(File, File, Doc)"
-				+ "\ncouldn't transform the source for files\n" 
-				+ stylesheet + "\n" + source, e);
-		}	
     }
-    
+     
 	// Given a heading string on the sort of transformation error that occurred and the exception object itself, 
 	// this method prints the exception to the tomcat window (system.err) and the greenstone log and then returns
 	// an xhtml error page that is constructed from it.
@@ -316,47 +334,34 @@ public class XMLTransformer {
     	}
     }
     
-	// ErrorListener class that can be used to register a handler for any fatal errors, errors and warnings that may
-	// occur when transforming an xml file with an xslt stylesheet. The errors are printed both to the greenstone.log and 
-	// to the tomcat console (System.err), and the error message is stored in the errorMessage variable so that it can
-	// be retrieved and be used to generate an xhtml error page.
-	static public class TransformErrorListener implements ErrorListener {
+	// ErrorListener class that can be used to register a handler for any fatal errors, errors and warnings
+	// that may occur when transforming an xml file with an xslt stylesheet using the XMLTransformer. 
+        // The errors are printed both to the greenstone.log and to the tomcat console (System.err), and the
+	// error message is stored in the errorMessage variable so that it can be retrieved and be used to
+	// generate an xhtml error page.
+	public class TransformErrorListener implements ErrorListener {
 	    protected String errorMessage = null;
 	    protected String stylesheet = null;
-	    protected String file = null;
+	    protected Source source = null; // can be DOMSource or StreamSource
+	    protected boolean debugAsFile = true; // true if xslt or source are not real physical files
 	    
-	    public TransformErrorListener(String xslt) { 
+	    public TransformErrorListener(String xslt, Source source) { 
 		this.stylesheet = xslt; 
+		this.source = source;
+		XMLTransformer.debugFileCount++;
 	    }
 
-	    public TransformErrorListener(Document xslt) { 
-		//this.stylesheet = GSXML.xmlNodeToString(xslt); 
+	    public TransformErrorListener(Document xslt, Source source) { 		
 		this.stylesheet = GSXML.elementToString(xslt.getDocumentElement(), true);
+		this.source = source;
+		XMLTransformer.debugFileCount++;
 	    }
 
-	    public TransformErrorListener(File xslt) { 
-		stylesheet = "";		
-		file = xslt.getAbsolutePath();
-		String error = "Can't locate stylesheet file: " + xslt;
-
-		if(!xslt.exists()) {
-		    stylesheet = error;
-		    System.err.println("@@@@@@@ " + error);
-		    return;
-		}
-		try {
-		    BufferedReader in = new BufferedReader(new FileReader(xslt));
-		    String line = "";
-		    while((line = in.readLine()) != null) {
-			stylesheet = stylesheet + line + "\n";
-		    }
-		    in.close();
-		    in = null;
-		} catch(Exception e) {
-		    stylesheet = error;
-		    System.err.println("Exception reading file: " + xslt.getAbsolutePath());
-		    e.printStackTrace();
-		}
+	    public TransformErrorListener(File xslt, Source source) {
+		this.debugAsFile = false; // if this constructor is called, we're dealing with physical files for both xslt and source
+		this.source = source;
+		this.stylesheet = xslt.getAbsolutePath(); // not necessary to get the string from the file
+		           // all we were going to do with it *on error* was write it out to a file anyway		
 	    }
 
 	    //  Receive notification of a recoverable error.
@@ -382,7 +387,7 @@ public class XMLTransformer {
 		return msg + "Message: " + e.getMessage();
 	    }
 	    
-	    // clears the errorPage variable after first call to this method
+	    // clears the errorPage variable after the first call to this method
 	    public String getErrorMessage() {
 		String errMsg = this.errorMessage;
 		if(this.errorMessage != null) {
@@ -394,14 +399,95 @@ public class XMLTransformer {
 	    // sets the errorMessage member variable to the data stored in the exception
 	    // and writes the errorMessage to the logger and tomcat's System.err
 	    protected void handleError(String errorType, TransformerException exception) {
-		this.errorMessage = errorType + toString(exception); 
-		if(file != null) { 
-		    this.errorMessage = this.errorMessage + "\nfilename: " + file;
+
+		this.errorMessage = errorType + toString(exception);
+
+		// If either the stylesheet or the source to be transformed with it were not files,
+		// so that the transformation was performed in-memory, then the "location" information
+		// during the error handling (if any) wouldn't have been helpful.
+		// To allow proper debugging, we write both stylesheet and source out as physical files
+		// and perform the same transformation again, so that when a transformation error does 
+		// occur, the files are not in-memory but can be viewed, and any location information
+		// for the error given by the ErrorListener will be sensible (instead of the unhelpful
+		// "line#0 column#0 in file://somewhere/dummy.xsl").
+		// Note that if the stylesheet and the source it is to transform were both physical 
+		// files to start off with, we will not need to perform the same transformation again
+		// since the error reporting would have provided accurate locations for those.
+		if(debugAsFile) {
+		    
+		    performTransformWithPhysicalFiles(); // will give accurate line numbers
+		
+		    // No need to print out the current error message (seen in the Else statement below), 
+		    // as the recursive call to XMLTransformer.transform(File, File, false) in method
+		    // performTransformWithPhysicalFiles() will do this for us.
 		}
-		this.errorMessage += "\nException CAUSE:\n" + exception.getCause();
-		System.err.println("\n****Error transforming xml:\n" + this.errorMessage + "\n****\n");
-		System.err.println("Stylesheet was:\n" + this.stylesheet + "\n\n");
-		logger.error(this.errorMessage);
+		else { 
+		    // printing out the error message
+		    // since !debugAsFile, we are dealing with physical files, 
+		    // variable stylesheet would have stored the filename instead of contents
+		    this.errorMessage = this.errorMessage + "\nstylesheet filename: " + stylesheet;
+		    
+		    this.errorMessage += "\nException CAUSE:\n" + exception.getCause();
+		    System.err.println("\n****Error transforming xml:\n" + this.errorMessage + "\n****\n");
+		    //System.err.println("Stylesheet was:\n + this.stylesheet + "************END STYLESHEET***********\n\n");		    
+		    
+		    logger.error(this.errorMessage);
+		    
+		    // now print out the source to a file, and run the stylesheet on it using a transform()
+		    // then any error will be referring to one of these two input files.
+		}
+	    }
+
+	    // This method will redo the transformation that went wrong with *real* files: 
+	    // it writes out the stylesheet and source XML to files first, then performs the transformation
+	    // to get the actual line location of where things went wrong (instead of "line#0 column#0 in dummy.xsl")
+	    protected void performTransformWithPhysicalFiles() {
+		File webLogsTmpFolder = new File(GlobalProperties.getGSDL3Home() + File.separator + "logs" + File.separator + "tmp");
+		File styleFile = new File(webLogsTmpFolder + File.separator + "stylesheet" + XMLTransformer.debugFileCount + ".xml");
+		File sourceFile = new File(webLogsTmpFolder + File.separator + "source" + XMLTransformer.debugFileCount + ".xml");
+		
+		try {
+		    // write stylesheet to a file called stylesheet_systemID in tmp
+		    FileWriter styleSheetWriter = new FileWriter(styleFile);
+		    styleSheetWriter.write(stylesheet, 0, stylesheet.length());
+		    styleSheetWriter.flush();
+		    styleSheetWriter.close();
+		} catch(Exception e) {
+		    System.err.println("*** Exception when trying to write out stylesheet to " + styleFile.getAbsolutePath());
+		}		
+		
+		try {
+		    FileWriter srcWriter = new FileWriter(sourceFile);
+		    String contents = "";
+		    if(source instanceof DOMSource) {
+			DOMSource domSource = (DOMSource)source;
+			Document doc = (Document)domSource.getNode();
+			contents = GSXML.elementToString(doc.getDocumentElement(), true);
+			//contents = GSXML.xmlNodeToXMLString(domSource.getNode());
+		    } else if (source instanceof StreamSource) {
+			StreamSource streamSource = (StreamSource)source;
+			BufferedReader reader = new BufferedReader(streamSource.getReader());
+			String line = "";
+			while((line = reader.readLine()) != null) {
+			    contents = contents + line + "\n";
+			}			
+		    }
+		    srcWriter.write(contents, 0, contents.length());
+		    srcWriter.flush();
+		    srcWriter.close();	    
+		} catch(Exception e) {
+		    System.err.println("*** Exception when trying to write out stylesheet to " + sourceFile.getAbsolutePath());
+		}
+		
+		System.err.println("*****************************************");
+		System.err.println("Look for stylesheet in: " + styleFile.getAbsolutePath());
+		System.err.println("Look for source XML in: " + sourceFile.getAbsolutePath());
+		
+		// now perform the transform again, which will assign another TransformErrorListener
+		// but since debuggingAsFile is turned off, we won't recurse into this section of
+		// handling the error again
+		XMLTransformer.this.transform(styleFile, sourceFile); // calls the File, File version, so debugAsFile will be false		
+		
 	    }
 	}
 }

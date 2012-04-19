@@ -592,7 +592,8 @@ public class TransformingReceptionist extends Receptionist
 
 		Document skinAndLibraryXsl = null;
 		Document skinAndLibraryDoc = converter.newDOM();
-		try
+		
+		// Applying the preprocessing XSLT - in its own block {} to allow use of non-unique variable names
 		{
 
 			skinAndLibraryXsl = converter.newDOM();
@@ -614,28 +615,16 @@ public class TransformingReceptionist extends Receptionist
 			//pre-process the skin style sheet
 			//In other words, apply the preProcess.xsl to 'skinAndLibraryXsl' in order to
 			//expand all GS-Lib statements into complete XSL statements and also to create
-			//a valid  xsl style sheet document.
+			//a valid xsl style sheet document.
 
-			Transformer preProcessor = transformerFactory.newTransformer(new DOMSource(preprocessingXsl));
-			preProcessor.setErrorListener(new XMLTransformer.TransformErrorListener(preprocessingXsl));
-			DOMResult result = new DOMResult();
-			result.setNode(skinAndLibraryDoc);
-			preProcessor.transform(new DOMSource(skinAndLibraryXsl), result);
-			//System.out.println("GS-Lib statements are now expanded") ;		
-
+			XMLTransformer preProcessor = new XMLTransformer();
+			// Perform the transformation, by passing in:
+			// preprocess-stylesheet, source-xsl (skinAndLibraryXsl), and the node that should 
+			// be in the result (skinAndLibraryDoc)
+			preProcessor.transform_withResultNode(preprocessingXsl, skinAndLibraryXsl, skinAndLibraryDoc);
+			//System.out.println("GS-Lib statements are now expanded") ;
 		}
-		catch (TransformerException e)
-		{
-			e.printStackTrace();
-			System.out.println("TransformerException while preprocessing the skin xslt");
-			return XMLTransformer.constructErrorXHTMLPage(e.getMessage());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			System.out.println("Error while preprocessing the skin xslt");
-			return XMLTransformer.constructErrorXHTMLPage(e.getMessage());
-		}
+	
 
 		//The following code is to be uncommented if we need to append the extracted GSF statements
 		//after having extracted the GSLib elements. In case of a problem during postprocessing.

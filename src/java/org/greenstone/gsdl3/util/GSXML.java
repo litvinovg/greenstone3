@@ -1243,7 +1243,6 @@ public class GSXML
 
     public static String elementToString(Element e, boolean indent)
 	{
-	    String str = "**********START*************\n";
 	    try {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer trans = tf.newTransformer();
@@ -1260,7 +1259,6 @@ public class GSXML
 		str += "Exception: couldn't write " + e + " to log";
 	    } 
 	    finally {
-		str += "\n***********************\n";
 		return str;
 	    }
 	}
