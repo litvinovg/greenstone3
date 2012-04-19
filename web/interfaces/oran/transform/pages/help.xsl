@@ -14,12 +14,19 @@
 	<xsl:template name="pageTitle"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></xsl:template>
 
 	<!-- set page breadcrumbs -->
-	<xsl:template name="breadcrumbs"><gslib:siteLink/><gslib:rightArrow/> <gslib:collectionNameLinked/><gslib:rightArrow/></xsl:template>
+	<xsl:template name="breadcrumbs">
+		<gslib:siteLink/><gslib:rightArrow/>
+		<xsl:if test="/page/pageResponse/collection">
+			<gslib:collectionNameLinked/><gslib:rightArrow/>
+		</xsl:if>
+	</xsl:template>
 
 	<!-- the page content -->
 	<xsl:template match="page">
 		<xsl:call-template name="helpTopics"/>
-		<xsl:call-template name="findingInformationHelp"/>
+		<xsl:if test="/page/pageResponse/collection">
+			<xsl:call-template name="findingInformationHelp"/>
+		</xsl:if>
 		<xsl:call-template name="readingDocsHelp"/>
 		<xsl:call-template name="searchingHelp"/>
 		<xsl:call-template name="preferencesHelp"/>
