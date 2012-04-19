@@ -609,13 +609,15 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 			try
 			{
 				Element node_content = getNodeContent(node_id, lang);
-				request_node.appendChild(node_content);
+				if(node_content != null)
+				{
+					request_node.appendChild(node_content);
+				}
 			}
 			catch (GSException e)
 			{
 				GSXML.addError(this.doc, result, e.getMessage());
 				return result;
-
 			}
 		} // for each node
 		return result;
@@ -784,7 +786,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	 */
 	protected String getDocType(String node_id)
 	{
-		return GSXML.DOC_TYPE_SIMPLE;
+		return GSXML.DOC_TYPE_HIERARCHY;
 	}
 
 	/**
