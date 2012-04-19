@@ -72,21 +72,10 @@
 				<a>
 					<xslt:attribute name='href'>
 						<xslt:value-of select='$library_name'/>
-						
-						<!--
-						<xsl:text>?a=b&amp;rt=r&amp;s=</xsl:text>
-						<xslt:value-of select='/page/pageResponse/service/@name'/>
-						<xsl:text>&amp;c=</xsl:text>
+						<xsl:text>/collection/</xsl:text>
 						<xslt:value-of select='/page/pageResponse/collection/@name'/>
-						<xsl:text>&amp;cl=</xsl:text>
-						<xslt:value-of select='@nodeID'/>
-						<xslt:if test="classifierNode|documentNode">
-							<xsl:text>.pr</xsl:text>
-						</xslt:if>
-						<xslt:if test="parent::node()[@orientation='horizontal']">
-							<xsl:text>&amp;sib=1</xsl:text>
-						</xslt:if>
-						-->
+						<xsl:text>/browse/</xsl:text>
+						<xslt:value-of select='util:replace(@nodeID, ".", "/")'/>
 					</xslt:attribute>
 					<xsl:apply-templates/>
 				</a>
