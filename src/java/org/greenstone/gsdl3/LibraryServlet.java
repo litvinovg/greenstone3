@@ -890,11 +890,11 @@ public class LibraryServlet extends HttpServlet
 					urlParam.setAttribute(GSXML.NAME_ATT, "redirectURL");
 					if (request.getQueryString() != null && request.getQueryString().length() > 0)
 					{
-						urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName() + "?" + request.getQueryString().replace("&", "&amp;"));
+						urlParam.setAttribute(GSXML.VALUE_ATT, request.getRequestURL() + "?" + request.getQueryString().replace("&", "&amp;"));
 					}
 					else
 					{
-						urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName());
+						urlParam.setAttribute(GSXML.VALUE_ATT, request.getRequestURL().toString());
 					}
 					paramList.appendChild(urlParam);
 
