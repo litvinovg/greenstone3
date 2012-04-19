@@ -23,7 +23,7 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page">
-	
+
 		<!-- 
 		Add some javascript to the page that notices when a preference is changed 
 		so that, if the user tries to navigate away from the page without clicking
