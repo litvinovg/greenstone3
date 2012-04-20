@@ -159,15 +159,18 @@ function setGS3ENV() {
     echo "  - Setup GhostScript"
   fi
 
-  #wvWare
-  if test -d "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/wv"; then
-    if test "$GSDLOS" = "linux"; then
-      addtopath LD_LIBRARY_PATH "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/wv/lib"
-    elif test "$GSDLOS" = "darwin"; then
-      addtopath DYLD_LIBRARY_PATH "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/wv/lib"
-    fi
-    echo "  - Setup wvWare"
-  fi
+  #wvWare 
+  # wvWare's environment is now set up by bin/script/wvware.pl
+  # The wvware.pl script can be called from the cmdline to perform wvware tasks.
+  # GLI calls gsConvert.pl which calls wvware.pl to similarly perform wvware tasks.
+#  if test -d "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/wv"; then
+#    if test "$GSDLOS" = "linux"; then
+#      addtopath LD_LIBRARY_PATH "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/wv/lib"
+#    elif test "$GSDLOS" = "darwin"; then
+#      addtopath DYLD_LIBRARY_PATH "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/wv/lib"
+#    fi
+#    echo "  - Setup wvWare"
+#  fi
 
 }
 
