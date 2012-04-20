@@ -1243,6 +1243,7 @@ public class GSXML
 
     public static String elementToString(Element e, boolean indent)
 	{
+	    String str = "";
 	    try {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer trans = tf.newTransformer();
