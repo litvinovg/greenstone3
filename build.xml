@@ -770,6 +770,7 @@
   <target name="prepare-web" depends="init">
     <mkdir dir="${web.home}/applet"/>
     <mkdir dir="${web.home}/logs"/>
+    <mkdir dir="${web.home}/logs/tmp"/>
   </target>
   
   <!-- if we are using java 1.5+, we need the xalan.jar file in web/WEB-INF/lib,  but if we are using java 1.4, we can't have it there.
@@ -2295,6 +2296,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <!-- create empty directories -->
     <mkdir dir="${web.home}/applet"/>
     <mkdir dir="${web.home}/logs"/>
+    <mkdir dir="${web.home}/logs/tmp"/>
 
     <!-- os specific tidy-ups -->
     <!-- linux, mac -->
