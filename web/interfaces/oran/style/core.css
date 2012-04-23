@@ -760,6 +760,10 @@ table{
 	height:500px;
 }
 
+dl dt { font-weight:bold;
+      padding-top:10px; }
+dl dd { padding-bottom:10px}
+
 /*
 ul.childrenlist li {
 list-style-type:none;
