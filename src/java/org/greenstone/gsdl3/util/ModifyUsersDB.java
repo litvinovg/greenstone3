@@ -22,6 +22,8 @@ import java.sql.SQLException;
 import org.greenstone.gsdl3.service.Authentication;
 //import org.greenstone.admin.guiext.PropertiesStep;
 
+// To run this from the command-line, first make sure that the tomcat server is stopped, then run:
+// java -cp /full/path/to/GS3/web/WEB-INF/lib/gsdl3.jar:/full/path/to/GS3/web/WEB-INF/lib/derby.jar org.greenstone.gsdl3.util.usersDB2txt web/sites/localsite/etc/usersDB/
 public class ModifyUsersDB {
     
     public static void main(String[] args) throws SQLException {
