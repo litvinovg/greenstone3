@@ -157,6 +157,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				for (int i = 0; i < search_types.getLength(); i++)
 				{
 					Element t = (Element) search_types.item(i);
+
 					String type_name = t.getAttribute(GSXML.NAME_ATT);
 					if (type_name.equals(SEARCH_TYPE_PLAIN))
 					{
