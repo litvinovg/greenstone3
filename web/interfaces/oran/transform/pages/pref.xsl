@@ -215,22 +215,26 @@
 				
 				<!-- Theme Changer -->
 				<xsl:if test="/page/pageRequest/userInformation and util:contains(/page/pageRequest/userInformation/@groups, 'administrator')">
-					<script type="text/javascript">
-						<xsl:text disable-output-escaping="yes">
-							$(document).ready(function(){
-								$("#switcher").themeswitcher({
-									imgpath: "interfaces/" + gs.xsltParams.interface_name + "/style/images/",
-									additionalThemes: [
-										{title:"Greenstone Default", name:"custom-theme0", icon:"theme_90_greenstone.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/main/jquery-ui-1.8.16.custom.css"},
-										{title:"Greenstone Custom 1", name:"custom-theme1", icon:"theme_90_start_menu.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_1/jquery-ui-1.8.16.custom.css"},
-										{title:"Greenstone Custom 2", name:"custom-theme2", icon:"theme_90_mint_choco.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_2/jquery-ui-1.8.16.custom.css"},
-										{title:"Greenstone Custom 3", name:"custom-theme3", icon:"theme_90_trontastic.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_3/jquery-ui-1.8.16.custom.css"}
-									]
+					<div>
+						<div class="paramLabel"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.theme')"/></div>
+						<script type="text/javascript">
+							<xsl:text disable-output-escaping="yes">
+								$(document).ready(function(){
+									$("#switcher").themeswitcher({
+										imgpath: "interfaces/" + gs.xsltParams.interface_name + "/style/images/",
+										additionalThemes: [
+											{title:"Greenstone Default", name:"custom-theme0", icon:"theme_90_greenstone.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/main/jquery-ui-1.8.16.custom.css"},
+											{title:"Greenstone Custom 1", name:"custom-theme1", icon:"theme_90_start_menu.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_1/jquery-ui-1.8.16.custom.css"},
+											{title:"Greenstone Custom 2", name:"custom-theme2", icon:"theme_90_mint_choco.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_2/jquery-ui-1.8.16.custom.css"},
+											{title:"Greenstone Custom 3", name:"custom-theme3", icon:"theme_90_trontastic.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_3/jquery-ui-1.8.16.custom.css"}
+										]
+									});
 								});
-							});
-						</xsl:text>
-					</script>
-					<div id="switcher"><xsl:text> </xsl:text></div>
+							</xsl:text>
+						</script>
+						<div class="paramValue" id="switcher"><xsl:text> </xsl:text></div>
+					</div>
+					<br class="clear"/>
 				</xsl:if>
 
 				<!-- search preferences -->

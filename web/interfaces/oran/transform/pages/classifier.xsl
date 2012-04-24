@@ -172,7 +172,7 @@
 	</xsl:template>
 	
 	<xsl:template name="mapFeaturesMap">
-		<div id="map_canvas" style="margin:0px auto; width:450px; height:500px; float:right;"><xsl:text> </xsl:text></div>
+		<div id="map_canvas" class="map_canvas_half"><xsl:text> </xsl:text></div>
 	</xsl:template>
 </xsl:stylesheet>
 

@@ -90,12 +90,11 @@ function getSubSectionsForSection(sectionID, callback)
 				
 				if(sectionsStart == 0 || sectionsEnd == -1 || sectionsEnd <= sectionsStart)
 				{
-					callback("");
+					callback(" ");
+					return;
 				}
 				
 				var sections = response.substring(sectionsStart, sectionsEnd);
-				sections = sections.replace(/href=".*?#top"/g, "href=\"" + gs.requestInformation.fullURL + "#top\"");
-				
 				callback(sections);
 			}
 			else
@@ -137,12 +136,17 @@ function toggleSection(sectionID, callback, tocDisabled)
 			{
 				if(text)
 				{	
-					getSubSectionsForSection(sectionID, function(sections)
+					var nodeID = sectionID.replace(/\./g, "_");
+					if(text.search("wrap" + nodeID) != -1)
 					{
+						document.getElementById("zoomOptions").style.display = "table-row";
+					}
+					getSubSectionsForSection(sectionID, function(sections)
+					{					
 						if(sections)
 						{
 							var textElem = document.getElementById("doc" + sectionID);
-							textElem.innerHTML = text + sections;
+							$(textElem).html(text + sections);
 							
 							docElem.setAttribute("class", docElem.getAttribute("class").replace(/\bnoText\b/g, ""));
 							docElem.style.display = "block";
@@ -281,7 +285,7 @@ function expandOrCollapseAll(expand)
 					continue;
 				}
 				startCounter++;
-				
+
 				var toggleFunction = function(tid)
 				{
 					toggleSection(tid, function(success)

@@ -35,7 +35,7 @@ function initializeMapScripts()
 		}
 		else
 		{
-			document.getElementById("map_canvas").style.display = "none";
+			document.getElementById("map_canvas").style.visibility = "hidden";
 		}
 	}
 	
@@ -148,7 +148,7 @@ function performSearchForMarkers()
 	}
 	
 	var ajax = new gs.functions.ajaxRequest();
-	ajax.open("GET", _baseURL + "a=q&s=RawQuery&rt=rd&c=" + gs.cgiParams.c + "&s1.rawquery=" + query + "&excerptid=jsonNodes", true);
+	ajax.open("GET", gs.xsltParams.library_name + "?a=q&s=RawQuery&rt=rd&c=" + gs.cgiParams.c + "&s1.rawquery=" + query + "&excerptid=jsonNodes", true);
 	ajax.onreadystatechange = function()
 	{
 		if(ajax.readyState == 4 && ajax.status == 200)
@@ -322,7 +322,7 @@ function attachClickHandler(marker, nodeID)
 {
 	google.maps.event.addListener(marker, 'click', function()
 	{
-		document.location.href = _baseURL + "a=d&ed=1&c=" + gs.cgiParams.c + "&d=" + nodeID + "&dt=hierarchy&p.a=b&p.sa=&p.s=ClassifierBrowse";
+		document.location.href = gs.xsltParams.library_name + "?a=d&ed=1&c=" + gs.cgiParams.c + "&d=" + nodeID + "&dt=hierarchy&p.a=b&p.sa=&p.s=ClassifierBrowse";
 	});
 }
 
@@ -399,7 +399,7 @@ function createMarker(doc, mainMarker)
 function getSubClassifier(sectionID)
 {
 	var ajax = new gs.functions.ajaxRequest();
-	ajax.open("GET", _baseURL + "a=b&rt=s&s=ClassifierBrowse&c=" + gs.cgiParams.c + "&cl=" + sectionID + "&excerptid=jsonNodes", true);		
+	ajax.open("GET", gs.xsltParams.library_name + "?a=b&rt=s&s=ClassifierBrowse&c=" + gs.cgiParams.c + "&cl=" + sectionID + "&excerptid=jsonNodes", true);		
 	ajax.onreadystatechange = function()
 	{
 		if(ajax.readyState == 4 && ajax.status == 200)
@@ -419,7 +419,7 @@ function getSubClassifier(sectionID)
 					createMarker(doc, false);
 				}
 				
-				document.getElementById("map_canvas").style.display = "block";
+				document.getElementById("map_canvas").style.visibility = "visible";
 			}
 			
 			updateMap();
@@ -481,7 +481,7 @@ function performDistanceSearch(id, lat, lng, degrees)
 	</xsl:template>';
 	
 	var ajax = new gs.functions.ajaxRequest();
-	ajax.open("GET", _baseURL + "a=q&s=RawQuery&rt=rd&c=" + gs.cgiParams.c + "&s1.rawquery=" + query + "&excerptid=nearbyDocs&ilt=" + inlineTemplate.replace(/ /, "%20"), true);		
+	ajax.open("GET", gs.xsltParams.library_name + "?a=q&s=RawQuery&rt=rd&c=" + gs.cgiParams.c + "&s1.rawquery=" + query + "&excerptid=nearbyDocs&ilt=" + inlineTemplate.replace(/ /, "%20"), true);		
 	ajax.onreadystatechange = function()
 	{
 		if(ajax.readyState == 4 && ajax.status == 200)
@@ -649,8 +649,7 @@ function modifyFunctions()
 			var sectionToggle = document.getElementById("toggle" + sectionID);
 			sectionToggle.setAttribute("src", gs.imageURLs.loading);
 
-			var url = document.URL;
-			url = url.replace(/(&|\?)cl=[a-z\.0-9]+/gi, "$1cl=" + sectionID + "&excerptid=div" + sectionID);
+			var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/browse/" + sectionID.replace(/\./g, "/") + "?excerptid=div" + sectionID;
 
 			if(gs.cgiParams.berryBasket == "on")
 			{

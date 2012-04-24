@@ -190,6 +190,17 @@
 		<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
+			<script type="text/javascript">
+				<xsl:text disable-output-escaping="yes">
+					$(window).load(function()
+					{
+						if(gs.cgiParams.docEdit == "1")
+						{
+							readyPageForEditing();
+						}
+					});
+				</xsl:text>
+			</script>
 			<gsf:metadata name="all"/>
 		</xsl:if>
 
@@ -301,7 +312,26 @@
 						<a style="padding: 3px; text-decoration:none;" href="{$library_name}?a=g&amp;sa=documentbasket&amp;c=&amp;s=DisplayDocumentList&amp;rt=r&amp;p.c={/page/pageResponse/collection/@name}&amp;docToEdit={/page/pageResponse/document/documentNode/@nodeID}"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.edit_structure')"/></a>
 					</div>
 					<div style="margin:5px;" class="ui-state-default ui-corner-all">
-						<a id="editContentButton" style="padding: 3px; text-decoration:none;" href="javascript:readyPageForEditing();"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.edit_content')"/></a>
+						<a id="editContentButton" style="padding: 3px; text-decoration:none;">
+							<xsl:attribute name="href">
+								<xsl:value-of select="$library_name"/>
+								<xsl:text>/collection/</xsl:text>
+								<xsl:value-of select="$collName"/>
+								<xsl:text>/document/</xsl:text>
+								<xsl:value-of select="/page/pageResponse/document/documentNode/@nodeID"/>
+								<xsl:if test="not(/page/pageRequest/paramList/param[@name = 'docEdit']/@value = '1')">
+									<xsl:text>?ed=1&amp;docEdit=1</xsl:text>
+								</xsl:if>
+							</xsl:attribute>
+							<xsl:choose>
+								<xsl:when test="/page/pageRequest/paramList/param[@name = 'docEdit']/@value = '1'">
+									<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.hide_editor')"/>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.edit_content')"/>
+								</xsl:otherwise>
+							</xsl:choose>
+						</a>
 					</div>
 				</div>
 			</td>
@@ -319,16 +349,22 @@
 					<!-- show the berry basket if it's turned on -->
 					<gslib:berryBasket/>
 
-					<!-- the book's cover image -->
-					<div id="coverImage">
-						<xsl:attribute name="class">
-							<xsl:choose>
-								<xsl:when test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']) or /page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true'">visible</xsl:when>
-								<xsl:otherwise>hidden</xsl:otherwise>    
-							</xsl:choose>
-						</xsl:attribute>
-						<gslib:coverImage/><xsl:text> </xsl:text>
-					</div>
+					<!-- Need to be in the context of the top-level documentNode rather than the document for the gsf:metadata call to work -->
+					<xsl:for-each select="documentNode">
+						<xsl:variable name="hasCover"><gsf:metadata name="hascover"/></xsl:variable>
+						<xsl:if test="$hasCover = '1'">
+							<!-- the book's cover image -->
+							<div id="coverImage">
+								<xsl:attribute name="class">
+									<xsl:choose>
+										<xsl:when test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']) or /page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true'">visible</xsl:when>
+										<xsl:otherwise>hidden</xsl:otherwise>    
+									</xsl:choose>
+								</xsl:attribute>
+								<gslib:coverImage/><xsl:text> </xsl:text>
+							</div>
+						</xsl:if>
+					</xsl:for-each>
 
 					<!-- the contents (if enabled) -->
 					<xsl:choose>
@@ -438,13 +474,13 @@
 				</div>
 				<script type="text/javascript">
 					<xsl:text disable-output-escaping="yes">
-						$(window).load(function()
 						{
 							var nodeID = "</xsl:text><xsl:value-of select="@nodeID"/><xsl:text disable-output-escaping="yes">";
+							nodeID = nodeID.replace(/\./g, "_");
+
 							var bigHeight = </xsl:text><xsl:value-of select="$imageHeight"/><xsl:text disable-output-escaping="yes">;
 							var smallHeight = </xsl:text><xsl:value-of select="$screenImageHeight"/><xsl:text disable-output-escaping="yes">;
-							
-							nodeID = nodeID.replace(/\./g, "_");
+
 							var multiplier = bigHeight / smallHeight;
 
 							$("#wrap" + nodeID).anythingZoomer({
@@ -455,7 +491,7 @@
 								expansionSize:50,  
 								speedMultiplier:multiplier   
 							}); 
-						});
+						}
 					</xsl:text>
 				</script>
 			</xsl:when>
@@ -719,51 +755,57 @@
 				</xsl:if>
 			</td>
 		</tr>
-		<xsl:if test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 and count(//documentNode/metadataList/metadata[@name = 'Source']) > 0">
-			<tr>
-				<td style="width:40%;">
-					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoom')"/><input id="zoomToggle" type="checkbox"/>
+		<tr id="zoomOptions">
+			<xsl:attribute name="style">
+				<xsl:choose>
+					<xsl:when test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 and count(//documentNode/metadataList/metadata[@name = 'Source']) > 0">
+						<xsl:text>display: table-row;</xsl:text>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>display: none;</xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:attribute>
+			<td style="width:40%;">
+				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoom')"/><input id="zoomToggle" type="checkbox"/>
+				<script type="text/javascript">
+					<xsl:text disable-output-escaping="yes">
+						$("#zoomToggle").change(function()
+						{
+							_imageZoomEnabled = !_imageZoomEnabled;
+						});
+					</xsl:text>
+				</script>
+			</td>
+			<td style="width:60%;">
+				<div>
+					<div style="float:left; width:30%;"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoom_size')"/><xsl:text>:</xsl:text></div>
+					<div id="zoomSlider" style="float:right; width:65%; height:5px; margin-top:6px;"><xsl:text> </xsl:text></div>
 					<script type="text/javascript">
 						<xsl:text disable-output-escaping="yes">
-							$("#zoomToggle").change(function()
+							$("#zoomSlider").slider(
 							{
-								_imageZoomEnabled = !_imageZoomEnabled;
+								change: function(event, ui)
+								{
+									var sliderValue = ui.value;
+									var divs = document.getElementsByTagName("DIV");
+									for(var i = 0; i &lt; divs.length; i++)
+									{
+										if(divs[i].getAttribute("id") &amp;&amp; divs[i].getAttribute("id").search(/^mover.*/) != -1)
+										{
+											divs[i].style.height = 200 + (2 * sliderValue) + "px";
+											divs[i].style.width = 200 + (2 * sliderValue) + "px";
+										}
+									}
+								}
 							});
 						</xsl:text>
 					</script>
-				</td>
-				<td style="width:60%;">
-					<div>
-						<div style="float:left; width:30%;"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoom_size')"/><xsl:text>:</xsl:text></div>
-						<div id="zoomSlider" style="float:right; width:65%; height:5px; margin-top:6px;"><xsl:text> </xsl:text></div>
-						<script type="text/javascript">
-							<xsl:text disable-output-escaping="yes">
-								$("#zoomSlider").slider(
-								{
-									change: function(event, ui)
-									{
-										var sliderValue = ui.value;
-										var divs = document.getElementsByTagName("DIV");
-										for(var i = 0; i &lt; divs.length; i++)
-										{
-											if(divs[i].getAttribute("id") &amp;&amp; divs[i].getAttribute("id").search(/^mover.*/) != -1)
-											{
-												divs[i].style.height = 200 + (2 * sliderValue) + "px";
-												divs[i].style.width = 200 + (2 * sliderValue) + "px";
-											}
-										}
-									}
-								});
-							</xsl:text>
-						</script>
-						<style>
-							.ui-slider .ui-slider-handle{height:0.8em; width:1.0em;}
-						</style>
-						<div style="float:clear;"><xsl:text> </xsl:text></div>
-					</div>
-				</td>
-			</tr>
-		</xsl:if>
+					<style>.ui-slider .ui-slider-handle{height:0.8em; width:1.0em;}</style>
+					<div style="float:clear;"><xsl:text> </xsl:text></div>
+				</div>
+			</td>
+		</tr>
 		</table>	
 	</xsl:template>
 	
@@ -774,7 +816,7 @@
 	</xsl:template>
 	
 	<xsl:template name="mapFeatures">
-		<div id="map_canvas"><xsl:text> </xsl:text></div>
+		<div id="map_canvas" class="map_canvas_full"><xsl:text> </xsl:text></div>
 
 		<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
 			<div style="background:#BBFFBB; padding: 5px; margin:0px auto; width:890px;">
@@ -813,4 +855,3 @@
 		</div>
 	</xsl:template>
 </xsl:stylesheet>
-

@@ -666,10 +666,12 @@ div.QuickSearch {
 
 /* -------- SEARCH ------- */
 .paramLabel {
+	margin: 2px;
 	float: left;
 	min-width: 250px;
 }
 .paramValue {
+	margin: 2px;
 	float: left;
 }
 
@@ -754,9 +756,15 @@ table{
 	width: 25%;
 }
 
-#map_canvas{
+.map_canvas_full{
 	margin:0px auto;
 	width:900px; 
+	height:500px;
+}
+
+.map_canvas_half{
+	float: right;
+	width:450px; 
 	height:500px;
 }
 
