@@ -3,7 +3,7 @@
     <action name='p' class='PageAction'>
       <subaction name='home' xslt='pages/home.xsl'/>
       <subaction name='about' xslt='pages/about.xsl'/>
-      <subaction name='debuginfo' xslt='pages/debuginfo.xsl'/>
+      <subaction name='debug' xslt='pages/debuginfo.xsl'/>
       <subaction name='pref' xslt='pages/pref.xsl'/>
       <subaction name='help' xslt='pages/help.xsl'/>
       <subaction name='login' xslt='pages/login.xsl'/>
