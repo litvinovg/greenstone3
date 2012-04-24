@@ -42,6 +42,7 @@ public class XMLCollection
 	// display stuff
 	Element display_list = (Element)GSXML.getChildByTagName(coll_config_xml, GSXML.DISPLAY_TEXT_ELEM+GSXML.LIST_MODIFIER);
 	if (display_list != null) {
+	  resolveMacros(display_list);
 	    addDisplayItems(display_list);
 	}
 
@@ -53,6 +54,18 @@ public class XMLCollection
 		addPlugins(plugin_list);
 	}
 	
+	// are we a private collection??
+	if (this.metadata_list != null) {
+	  
+	  Element meta_elem = (Element) GSXML.getNamedElement(this.metadata_list, GSXML.METADATA_ELEM, GSXML.NAME_ATT, "public");
+	  if (meta_elem != null) {
+	    
+	    String value = GSXML.getValue(meta_elem).toLowerCase().trim();
+	    if (value.equals("false")) {
+	      is_public = false;
+	    }
+	  }
+	}
 	Element config_doc_list = (Element)GSXML.getChildByTagName(coll_config_xml, GSXML.DOCUMENT_ELEM+GSXML.LIST_MODIFIER);
 	if (config_doc_list != null) {
 	    document_list = (Element)this.doc.importNode(config_doc_list, true);
@@ -116,14 +129,8 @@ public class XMLCollection
 	    }
 	    return response;
 	}
-	
-	if (type.equals(GSXML.REQUEST_TYPE_SYSTEM)) {
-	    response = processSystemRequest(request);
-	} else { // unknown type
-	    logger.error("cant handle request of type "+ type);
+	return super.processMessage(request);
 	    
-	}
-	return response;
     }
-
+  
 }
