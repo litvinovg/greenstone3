@@ -284,9 +284,9 @@ public class Collection extends ServiceCluster
 		addMetadata(meta_list);
 
 		// check whether we are public or not
-		if (meta_list != null)
+		if (this.metadata_list != null)
 		{
-			Element meta_elem = (Element) GSXML.getNamedElement(metadata_list, GSXML.METADATA_ELEM, GSXML.NAME_ATT, "public");
+			Element meta_elem = (Element) GSXML.getNamedElement(this.metadata_list, GSXML.METADATA_ELEM, GSXML.NAME_ATT, "public");
 			if (meta_elem != null)
 			{
 				String value = GSXML.getValue(meta_elem).toLowerCase().trim();
