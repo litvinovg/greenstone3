@@ -104,7 +104,11 @@ public class SystemAction extends Action
 
 		Node response_message = this.mr.process(mr_request_message);
 
-		result.appendChild(GSXML.duplicateWithNewName(this.doc, (Element) GSXML.getChildByTagName(response_message, GSXML.RESPONSE_ELEM), GSXML.RESPONSE_ELEM, true));
+		Element response = GSXML.duplicateWithNewName(this.doc, (Element) GSXML.getChildByTagName(response_message, GSXML.RESPONSE_ELEM), GSXML.RESPONSE_ELEM, true);
+		addSiteMetadata(response, userContext);
+		addInterfaceOptions(response);
+
+		result.appendChild(response);
 		return result;
 
 	}
