@@ -8,8 +8,8 @@
   </metadataList>
   <displayItemList>
     <displayItem name='name' lang='en'>Sample XML Texts Collection</displayItem>
-    <displayItem name='icon' lang='en'>gberg.gif</displayItem>
-    <displayItem name='smallicon' lang='en'>gbergsm.gif</displayItem>
+    <!--<displayItem name='icon' lang='en'>gberg.gif</displayItem>
+    <displayItem name='smallicon' lang='en'>gbergsm.gif</displayItem>-->
     <displayItem name='description' lang='en'>
 &lt;p&gt;This collection is designed to demonstrate some of the flexibility of the Greenstone 3 architecture. Collections are not restricted to those built using the standard building process, but rather can be anything you want, as long as suitable services are provided.&lt;/p&gt; 
 &lt;p&gt; This collection contains 4 documents obtained from the &lt;a href="http://gutenberg.net/"&gt;Gutenberg project&lt;/a&gt;. Project Gutenberg documents are marked up in XML, and come with DTDs and CSS stylesheets. The collection has not been built using either Greenstone2 or Greenstone3 style building. Instead, simple java programs using the Lucene API have been created to do the indexing, and document retrieval is simply done from the original (actually slightly modified) XML documents. A description of the building process can be found in the &lt;a href="sites/localsite/collect/gberg/README"&gt;README&lt;/a&gt; file for this collection.&lt;/p&gt; 
