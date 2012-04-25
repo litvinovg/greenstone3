@@ -360,7 +360,7 @@ function retrieveFullTableOfContents()
 {
 	var ajax = gs.functions.ajaxRequest();
 	
-	ajax.open("GET", gs.xsltParams.library_name + "?a=d&ed=1&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&excerptid=tableOfContents", true);
+	ajax.open("GET", gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + gs.cgiParams.d + "?excerptid=tableOfContents&ed=1", true);
 	ajax.onreadystatechange = function()
 	{
 		if(ajax.readyState == 4 && ajax.status == 200)
