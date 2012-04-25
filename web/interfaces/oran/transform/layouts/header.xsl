@@ -376,7 +376,20 @@
 							</xsl:choose>
 						</xsl:attribute>
 					</input>
-					<input type="hidden" name="startPage" value="1"/>
+					<xsl:choose>
+						<xsl:when test="/page/pageResponse/service[@name = 'TextQuery']/paramList/param[@name = 'startPage']">
+							<input type="hidden" name="s1.startPage" value="1"/>
+						</xsl:when>
+						<xsl:otherwise>
+							<input type="hidden" name="startPage" value="1"/>
+						</xsl:otherwise>
+					</xsl:choose>
+					<xsl:if test="not(/page/pageRequest/paramList/param[@name = 's1.hitsPerPage'])">
+						<input type="hidden" name="s1.hitsPerPage" value="20"/>
+					</xsl:if>
+					<xsl:if test="not(/page/pageRequest/paramList/param[@name = 's1.maxDocs'])">
+						<input type="hidden" name="s1.maxDocs" value="100"/>
+					</xsl:if>
 					<!-- The query text box -->
 					<span class="querybox">
 						<xsl:variable name="qs">
