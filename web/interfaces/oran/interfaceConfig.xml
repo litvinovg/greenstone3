@@ -21,7 +21,7 @@
       <subaction name='text' xslt='gberg/document-content.xsl'/>
     </action>
     <action name='pr' class='ProcessAction' xslt='process.xsl'/>
-    <action name='s' class='SystemAction' xslt='system.xsl'/>
+    <action name='s' class='SystemAction' xslt='pages/system.xsl'/>
 
     <action name='f' class='FormatAction'/> <!-- xslt='formatString.xsl'/> -->
 
