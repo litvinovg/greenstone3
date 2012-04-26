@@ -25,7 +25,6 @@
   <search>
     <format>
       <gsf:template match="documentNode">
-	<xsl:param name="collName"/>
 	<xsl:param name="serviceName"/>
 	<td>
 	<b><a href="{$library_name}?a=xd&amp;sa=text&amp;c={$collName}&amp;d={@nodeID}&amp;p.a=q&amp;p.s={$serviceName}"><xsl:choose><xsl:when test="metadataList/metadata[@name='Title']"><gsf:metadata name="Title"/></xsl:when><xsl:otherwise>(section)</xsl:otherwise></xsl:choose></a></b> from <b><a href="{$library_name}?a=xd&amp;sa=toc&amp;c={$collName}&amp;d={@nodeID}.rt&amp;p.a=q&amp;p.s={$serviceName}"><gsf:metadata name="Title" select="root"/></a></b>
