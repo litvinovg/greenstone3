@@ -37,6 +37,10 @@ public class XMLDocumentAction extends Action
 		Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 		result.appendChild(page_response);
 
+		UserContext userContext = new UserContext(request);
+		addSiteMetadata(page_response, userContext);
+		addInterfaceOptions(page_response);
+
 		// extract the params from the cgi-request, and check that we have a coll specified
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		HashMap params = GSXML.extractParams(cgi_param_list, false);
@@ -51,7 +55,6 @@ public class XMLDocumentAction extends Action
 		{
 			return result;
 		}
-		UserContext userContext = new UserContext(request);
 
 		// subaction used to decide if we are returning content or structure
 		String document_mode = request.getAttribute(GSXML.SUBACTION_ATT);
