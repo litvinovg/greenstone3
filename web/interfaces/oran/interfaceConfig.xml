@@ -17,8 +17,8 @@
 
     <action name='a' class='AppletAction' xslt='applet.xsl'/>
     <action name='xd' class='XMLDocumentAction'>
-      <subaction name='toc' xslt='gberg/document-toc.xsl'/>
-      <subaction name='text' xslt='gberg/document-content.xsl'/>
+      <subaction name='toc' xslt='pages/document-toc.xsl'/>
+      <subaction name='text' xslt='pages/document-content.xsl'/>
     </action>
     <action name='pr' class='ProcessAction' xslt='process.xsl'/>
     <action name='s' class='SystemAction' xslt='pages/system.xsl'/>
