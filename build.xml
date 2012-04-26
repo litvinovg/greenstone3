@@ -830,7 +830,8 @@
   </target>
 
 
-  <target name="prepare-collections" depends="init">
+  <target name="prepare-collections" depends="init"
+    description="Unpack all the collections from their svn zipped versions">
     <property name="collect.dir" value="${web.home}/sites/localsite/collect"/>
     <property name="index.zip" value="index.zip"/>
 
@@ -883,11 +884,11 @@
 
   <target name="lucene-jdbm-demo-prepare" if="collect.dir">
     <property name="lucene-jdbm-demo.dir" value="${collect.dir}/lucene-jdbm-demo"/>
-    <available file="${lucene-jdbm-demo.dir}/index/${index.zip}" property="lucene-jdbm-demo.present"/>
+    <available file="${lucene-jdbm-demo.dir}/${index.zip}" property="lucene-jdbm-demo.present"/>
   </target>
 
   <target name="lucene-jdbm-demo-install" if="lucene-jdbm-demo.present" depends="lucene-jdbm-demo-prepare">
-    <unzip dest="${lucene-jdbm-demo.dir}/index" src="${lucene-jdbm-demo.dir}/index/${index.zip}"/>
+    <unzip dest="${lucene-jdbm-demo.dir}" src="${lucene-jdbm-demo.dir}/${index.zip}"/>
     <echo>collection lucene-jdbm-demo installed</echo>
   </target>
 
