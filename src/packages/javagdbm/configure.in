@@ -73,7 +73,7 @@ AC_CHECK_SIZEOF(long)
 AC_MSG_CHECKING([for the JDK])
 if test "z$JAVA_HOME" != z &&
    test -d $JAVA_HOME && 
-   test -d $JAVA_HOME/include
+   (test -d $JAVA_HOME/include || test -d $JAVA_HOME/../Headers)
 then
 	AC_SUBST(JAVA_HOME)
 	AC_MSG_RESULT([found in $JAVA_HOME])
