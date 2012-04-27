@@ -443,6 +443,9 @@ public class XMLTransformer {
 	    // to get the actual line location of where things went wrong (instead of "line#0 column#0 in dummy.xsl")
 	    protected void performTransformWithPhysicalFiles() {
 		File webLogsTmpFolder = new File(GlobalProperties.getGSDL3Home() + File.separator + "logs" + File.separator + "tmp");
+		if(!webLogsTmpFolder.exists()) {
+		    webLogsTmpFolder.mkdirs(); // create any necessary folders
+		}
 		File styleFile = new File(webLogsTmpFolder + File.separator + "stylesheet" + XMLTransformer.debugFileCount + ".xml");
 		File sourceFile = new File(webLogsTmpFolder + File.separator + "source" + XMLTransformer.debugFileCount + ".xml");
 		
