@@ -23,7 +23,6 @@ import java.util.Vector;
  */
 public class GS2PerlConstructor extends CollectionConstructor
 {
-
 	public static final int NEW = 0;
 	public static final int IMPORT = 1;
 	public static final int BUILD = 2;
@@ -119,7 +118,6 @@ public class GS2PerlConstructor extends CollectionConstructor
 			sendMessage(evt);
 			break;
 		}
-
 	}
 
 	protected void newCollection()
@@ -146,8 +144,18 @@ public class GS2PerlConstructor extends CollectionConstructor
 	protected void importCollection()
 	{
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "Collection construction: import collection."));
-		Vector command = new Vector();
-		command.add("import.pl");
+		Vector<String> command = new Vector<String>();
+		command.add(GlobalProperties.getProperty("perl.path", "perl"));
+		command.add("-S");
+		command.add(GlobalProperties.getGS2Build() + File.separator + "bin" + File.separator + "script" + File.separator + "import.pl");
+		if (this.manifest_file != null)
+		{
+			command.add("-keepold");
+			command.add("-manifest");
+			command.add(this.manifest_file);
+		}
+		command.add("-site");
+		command.add(this.site_name);
 		command.add("-collectdir");
 		command.add(GSFile.collectDir(this.site_home));
 		command.addAll(extractParameters(this.process_params));
@@ -165,7 +173,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 	protected void buildCollection()
 	{
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "Collection construction: build collection."));
-		Vector command = new Vector();
+		Vector<String> command = new Vector<String>();
 		command.add(GlobalProperties.getProperty("perl.path", "perl"));
 		command.add("-S");
 		command.add(GlobalProperties.getGS2Build() + File.separator + "bin" + File.separator + "script" + File.separator + "buildcol.pl");
