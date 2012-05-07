@@ -382,7 +382,7 @@ public class DocumentMaker extends ServiceRack
 			}.getType();
 			transactions = gson.fromJson(transactionString, type);
 		}
-		catch(Exception ex)
+		catch (Exception ex)
 		{
 			ex.printStackTrace();
 		}
@@ -403,16 +403,13 @@ public class DocumentMaker extends ServiceRack
 					String subOperation = (String) keyValueMap.get("subOperation");
 
 					_GSDM.documentMoveOrDuplicate(origOID, origCollection, newOID, newCollection, _GSDM.operationStringToInt(subOperation), operation.equals("move"), userContext);
+				}
+				else if (operation.equals("createDocument"))
+				{
+					String oid = (String) keyValueMap.get("oid");
+					String collection = (String) keyValueMap.get("collection");
 
-					if (_GSDM.getErrorStatus() == GSDocumentModel.NO_ERROR && origCollection != null && !collectionsToBuild.contains(origCollection))
-					{
-						collectionsToBuild.add(origCollection);
-					}
-
-					if (_GSDM.getErrorStatus() == GSDocumentModel.NO_ERROR && newCollection != null && !collectionsToBuild.contains(newCollection))
-					{
-						collectionsToBuild.add(newCollection);
-					}
+					_GSDM.documentCreate(oid, collection, userContext);
 				}
 				else if (operation.equals("create"))
 				{
@@ -422,11 +419,6 @@ public class DocumentMaker extends ServiceRack
 
 					//_GSDM.documentCreate(oid, collection, userContext); <--- Maybe go back to this
 					_GSDM.documentXMLSetSection(oid, collection, this.doc.createElement(GSXML.DOCXML_SECTION_ELEM), _GSDM.operationStringToInt(subOperation), userContext);
-
-					if (_GSDM.getErrorStatus() == GSDocumentModel.NO_ERROR && collection != null && !collectionsToBuild.contains(collection))
-					{
-						collectionsToBuild.add(collection);
-					}
 				}
 				else if (operation.equals("delete"))
 				{
@@ -434,18 +426,13 @@ public class DocumentMaker extends ServiceRack
 					String collection = (String) keyValueMap.get("collection");
 
 					_GSDM.documentDelete(oid, collection, userContext);
-
-					if (_GSDM.getErrorStatus() == GSDocumentModel.NO_ERROR && collection != null && !collectionsToBuild.contains(collection))
-					{
-						collectionsToBuild.add(collection);
-					}
 				}
 				else if (operation.equals("setText"))
 				{
 					String oid = (String) keyValueMap.get("oid");
 					String collection = (String) keyValueMap.get("collection");
 					String newContent = (String) keyValueMap.get("text");
-					
+
 					_GSDM.documentXMLSetText(oid, collection, newContent, userContext);
 				}
 
