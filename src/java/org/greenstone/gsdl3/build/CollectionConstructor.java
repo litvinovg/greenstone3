@@ -25,6 +25,8 @@ public abstract class CollectionConstructor extends Thread
 	protected EventListenerList listeners = null;
 	/** A flag used to determine if this process has been asked to cancel. */
 	protected boolean cancel = false;
+	/** Stores the name of the manifest file (if one is needed) */
+	protected String manifest_file = null;
 
 	public CollectionConstructor(String name)
 	{
@@ -66,6 +68,11 @@ public abstract class CollectionConstructor extends Thread
 	public void setProcessParams(Element params)
 	{
 		this.process_params = params;
+	}
+	
+	public void setManifestFile(String manifestFile)
+	{
+		this.manifest_file = manifestFile;
 	}
 
 	public boolean addListener(ConstructionListener listener)
