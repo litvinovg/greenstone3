@@ -20,6 +20,7 @@ package org.greenstone.gsdl3.service;
 
 import org.greenstone.gsdl3.util.*;
 import org.greenstone.gsdl3.build.*;
+import org.greenstone.util.GlobalProperties;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -32,8 +33,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.lang.Thread.State;
 import java.util.Locale;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.log4j.*;
 
@@ -55,6 +62,7 @@ public class GS2Construct extends ServiceRack
 	private static final String IMPORT_SERVICE = "ImportCollection";
 	private static final String BUILD_SERVICE = "BuildCollection";
 	private static final String ACTIVATE_SERVICE = "ActivateCollection";
+	private static final String BUILD_AND_ACTIVATE_SERVICE = "BuildAndActivateCollection";
 	private static final String DELETE_SERVICE = "DeleteCollection";
 	private static final String RELOAD_SERVICE = "ReloadCollection";
 
@@ -74,11 +82,11 @@ public class GS2Construct extends ServiceRack
 
 	// set of listeners for any construction commands
 	protected Map listeners = null;
+	protected HashMap<String, Boolean> collectionOperationMap = new HashMap<String, Boolean>(); 
 
 	public GS2Construct()
 	{
 		this.listeners = Collections.synchronizedMap(new HashMap());
-
 	}
 
 	/** returns a specific service description */
@@ -154,8 +162,94 @@ public class GS2Construct extends ServiceRack
 		return response;
 	}
 
+	protected Element processBuildAndActivateCollection(Element request)
+	{
+		waitUntilReady(request);
+		Element buildResponse = processBuildCollection(request);
+		if(buildResponse.getElementsByTagName(GSXML.ERROR_ELEM).getLength() > 0)
+		{
+			return buildResponse;
+		}
+		
+		Element statusElem = (Element) buildResponse.getElementsByTagName(GSXML.STATUS_ELEM).item(0);
+		String id = statusElem.getAttribute("pid");
+
+		GS2PerlListener currentListener = (GS2PerlListener) this.listeners.get(id);
+		int statusCode = currentListener.getStatus();
+		while (!GSStatus.isCompleted(statusCode))
+		{
+			// wait for the process, and keep checking the status code
+			// there is probably a better way to do this.
+			try
+			{
+				Thread.currentThread().sleep(100);
+			}
+			catch (Exception e)
+			{ // ignore
+			}
+			statusCode = currentListener.getStatus();
+		}
+
+		Element activateResponse = processActivateCollection(request);
+		signalReady(request);
+		return activateResponse;
+	}
+
 	protected Element processImportCollection(Element request)
 	{
+		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		HashMap params = GSXML.extractParams(param_list, false);
+
+		//If we have been requested to only build certain documents then we need to create a manifest file
+		String documentsParam = (String) params.get("documents");
+		if (documentsParam != null && !documentsParam.equals(""))
+		{
+			String s = File.separator;
+			String manifestFolderPath = this.site_home + s + "collect" + s + params.get(COL_PARAM) + s + "manifests";
+			String manifestFilePath = manifestFolderPath + File.separator + "tempManifest.xml";
+
+			File manifestFolderFile = new File(manifestFolderPath);
+			if (!manifestFolderFile.exists())
+			{
+				manifestFolderFile.mkdirs();
+			}
+
+			File manifestFile = new File(manifestFilePath);
+			if (!manifestFile.exists())
+			{
+				try
+				{
+					manifestFile.createNewFile();
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+					return null; //Probably should return an actual error
+				}
+			}
+			String[] docList = documentsParam.split(",");
+
+			try
+			{
+				BufferedWriter bw = new BufferedWriter(new FileWriter(manifestFile));
+				bw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+				bw.write("<Manifest>\n");
+				bw.write("  <Index>\n");
+				for (int j = 0; j < docList.length; j++)
+				{
+					bw.write("    <Filename>" + docList[j] + "</Filename>\n");
+				}
+				bw.write("  </Index>\n");
+				bw.write("</Manifest>\n");
+				bw.close();
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+				return null; //Probably should return an actual error
+			}
+		}
+
 		return runCommand(request, GS2PerlConstructor.IMPORT);
 	}
 
@@ -181,7 +275,7 @@ public class GS2Construct extends ServiceRack
 		{
 			return response;
 		}
-		
+
 		UserContext userContext = new UserContext(request);
 		systemRequest("delete", coll_name, null, userContext);
 
@@ -421,6 +515,11 @@ public class GS2Construct extends ServiceRack
 
 		e = this.doc.createElement(GSXML.SERVICE_ELEM);
 		e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
+		e.setAttribute(GSXML.NAME_ATT, BUILD_AND_ACTIVATE_SERVICE);
+		this.short_service_info.appendChild(e);
+
+		e = this.doc.createElement(GSXML.SERVICE_ELEM);
+		e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		e.setAttribute(GSXML.NAME_ATT, DELETE_SERVICE);
 		this.short_service_info.appendChild(e);
 
@@ -497,7 +596,7 @@ public class GS2Construct extends ServiceRack
 		{
 			coll_name = (String) params.get(COL_PARAM);
 		}
-		logger.info("Coll name = " + coll_name);
+
 		// makes a paramList of the relevant params
 		Element other_params = extractOtherParams(params, type);
 
@@ -511,12 +610,16 @@ public class GS2Construct extends ServiceRack
 			return response;
 		}
 
-		GS2PerlListener listener = new GS2PerlListener();
 		constructor.setSiteHome(this.site_home);
 		constructor.setCollectionName(coll_name);
 		constructor.setActionType(type);
 		constructor.setProcessParams(other_params);
+		if (type == GS2PerlConstructor.IMPORT)
+		{
+			constructor.setManifestFile(this.site_home + File.separator + "collect" + File.separator + params.get(COL_PARAM) + File.separator + "manifests" + File.separator + "tempManifest.xml");
+		}
 
+		GS2PerlListener listener = new GS2PerlListener();
 		constructor.addListener(listener);
 		constructor.start();
 
@@ -650,5 +753,49 @@ public class GS2Construct extends ServiceRack
 		// other ones dont have params yet
 		return null;
 	}
+	
+	protected void waitUntilReady(Element request)
+	{
+		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		HashMap params = GSXML.extractParams(param_list, false);
+		
+		String collection = (String)params.get(COL_PARAM);
 
+		if(checkCollectionIsNotBusy(collection))
+		{
+			return;
+		}
+
+		while(collectionOperationMap.get(collection) != null)
+		{
+			try
+			{
+				Thread.currentThread().sleep(1000);
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+	}
+	
+	protected void signalReady(Element request)
+	{
+		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		HashMap params = GSXML.extractParams(param_list, false);
+		
+		String collection = (String)params.get(COL_PARAM);
+
+		collectionOperationMap.remove(collection);
+	}
+	
+	protected synchronized boolean checkCollectionIsNotBusy(String collection)
+	{
+		if(collectionOperationMap.get(collection) == null)
+		{
+			collectionOperationMap.put(collection, true);
+			return true;
+		}
+		return false;
+	}
 }
