@@ -178,6 +178,11 @@ public class URLFilter implements Filter
 			}
 			else
 			{
+				int index;
+				if((index = url.indexOf(";jsessionid")) != -1)
+				{
+					url = url.substring(0, index);
+				}
 				String[] segments = url.split("/");
 				for (int i = 0; i < segments.length; i++)
 				{
