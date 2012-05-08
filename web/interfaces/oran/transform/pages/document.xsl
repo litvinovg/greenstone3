@@ -152,7 +152,7 @@
 						<xsl:if test="util:checkMetadataNotDuplicate(@name, .)">
 							<tr>
 								<td class="metaTableCellName"><xsl:value-of select="@name"/></td>
-								<td class="metaTableCell"><xsl:value-of select="."/></td>
+								<td class="metaTableCell"><xsl:value-of disable-output-escaping="yes" select="."/></td>
 							</tr>
 						</xsl:if>
 					</xsl:for-each>
