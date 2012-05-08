@@ -129,13 +129,15 @@ public class GSDocumentModel
 			_errorStatus = ERROR_COLLECTION_NOT_SPECIFIED;
 			return;
 		}
-
-		//If the document does not have an OID specified then generate one
+		
+		//If the collection is not specified then we cannot continue
 		if (oid == null || oid.equals(""))
 		{
-			oid = generateOID();
+			_errorStatus = ERROR_OID_NOT_SPECIFIED;
+			return;
 		}
-		else if (archiveCheckDocumentOrSectionExists(oid, collection, userContext))
+
+		if (archiveCheckDocumentOrSectionExists(oid, collection, userContext))
 		{
 			_errorStatus = ERROR_DESTINATION_DOCUMENT_OR_SECTION_ALREADY_EXISTS;
 			return;
@@ -672,11 +674,22 @@ public class GSDocumentModel
 		_errorStatus = NO_ERROR;
 		try
 		{
-			Document docXML = null;
-
-			String filePath = archiveGetDocumentFilePath(oid, collection, userContext);
-			File docFile = new File(filePath);
-			if (!docFile.exists() && !docFile.createNewFile())
+			String s = File.separator;
+			
+			String docFolderPath = _siteHome + s + "collect" + s + collection + s + "import" + s + oid;
+			File docFolder = new File(docFolderPath);
+			
+			if (!docFolder.exists())
+			{
+				if(!docFolder.mkdirs())
+				{
+					_errorStatus = ERROR_DOC_XML_COULD_NOT_BE_CREATED;
+					return;
+				}
+			}
+			
+			File docFile = new File(docFolderPath + s + "doc.xml");
+			if(!docFile.exists() && !docFile.createNewFile())
 			{
 				_errorStatus = ERROR_DOC_XML_COULD_NOT_BE_CREATED;
 				return;
@@ -686,9 +699,18 @@ public class GSDocumentModel
 			bw.write("<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>\n");
 			bw.write("<!DOCTYPE Archive SYSTEM \"http://greenstone.org/dtd/Archive/1.0/Archive.dtd\">\n");
 			bw.write("<Archive>\n");
+			bw.write("  <Section>\n");
+			bw.write("    <Description>\n");
+			bw.write("      <Metadata name=\"Identifier\">" + oid + "</Metadata>\n");
+			bw.write("      <Metadata name=\"dc.Title\">UNTITLED DOCUMENT</Metadata>\n");
+			bw.write("    </Description>\n");
+			bw.write("    <Content>\n");
+			bw.write("    </Content>\n");
+			bw.write("  </Section>\n");
 			bw.write("</Archive>\n");
 			bw.close();
 
+			Document docXML = null;
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			docXML = db.parse(docFile);
@@ -1828,11 +1850,6 @@ public class GSDocumentModel
 			return ERROR_SOURCE_DOCUMENT_OR_SECTION_DOES_NOT_EXIST;
 		}
 		return NO_ERROR;
-	}
-
-	protected static String generateOID()
-	{
-		return "temp";
 	}
 
 	public boolean copyDirectory(File src, File dest)
