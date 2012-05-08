@@ -90,7 +90,7 @@ function addDocumentStructureToPage(data)
 	
 	//Create the container list and add it to the Document Basket div
 	var containerUL = document.createElement("UL");
-	containerUL.setAttribute("class", "topLevel");
+	containerUL.setAttribute("class", "topLevelItem");
 	dbDiv.appendChild(containerUL);
 
 	//Get all of the headers in the page
@@ -146,7 +146,7 @@ function addDocumentStructureToPage(data)
 		var title = createSectionTitle(currentHeader.innerHTML);
 		newItem.sectionTitle = title;
 		newItem.appendChild(title);
-		newItem.setAttribute("class", depth == 0 ? "dragItem topLevel" : "dragItem");
+		newItem.setAttribute("class", depth == 0 ? "dragItem topLevelItem" : "dragItem");
 		newItem.textDiv = renderedDiv;
 		renderedDiv.parentItem = newItem;
 		
@@ -221,59 +221,107 @@ function createSectionTextDiv(text)
 
 function createNewDocumentArea()
 {
-	//Create the necessary elements
-	var topLevelUL = document.createElement("UL");
-	var topLevelLI = document.createElement("LI");
-	var contentUL = document.createElement("UL");
+	var createButton = document.getElementById("createNewDocumentButton");
+	createButton.disabled = true;
 	
-	//Append the top-level list item to the top-level list
-	topLevelUL.appendChild(topLevelLI);
-	topLevelUL.setAttribute("class", "topLevel");
+	var saveButton = document.getElementById("saveButton");
+	saveButton.disabled = true;
 	
-	//Set up the top-level item 
-	topLevelLI.setAttribute("class", "dragItem topLevel");
-	topLevelLI.childList = contentUL;
-	contentUL.parentItem = topLevelLI;
-	
-	//Add a textDiv to the top-level item
-	var textDiv = createSectionTextDiv(null);
-	topLevelLI.textDiv = textDiv;
-	topLevelUL.appendChild(textDiv);
-	
-	//Create a blank metadata table
-	//TODO: INSERT THIS!
-	
-	//Add a title to the top-level item
-	var title = createSectionTitle(gs.text.dse.untitled);
-	topLevelLI.appendChild(title);
-	topLevelLI.sectionTitle = title;
-	
-	createSectionMenu(topLevelLI);
-	setMouseOverAndOutFunctions(topLevelLI);
-	
-	//Set up the placeholder for the first section
-	contentUL.setAttribute("class", "dragList");
-	new YAHOO.util.DDTarget(contentUL);
-	
-	//Create a placeholder and add it to first section
-	var placeHolder = createPlaceholder(null, contentUL, false);
-	contentUL.appendChild(placeHolder);
-	
-	var dbDiv = document.getElementById("dbDiv");
-	
-	//Add elements to the page
-	if(dbDiv.firstChild)
+	var statusID = _statusBar.addStatus("Creating document...");
+
+	var newID = "HASH" + gs.functions.hashString("" + (new Date()).getTime());
+
+	var ajax = new gs.functions.ajaxRequest();
+	ajax.open("POST", gs.xsltParams.library_name, true);
+	ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	ajax.onreadystatechange = function()
 	{
-		dbDiv.insertBefore(topLevelUL, dbDiv.firstChild);
+		if(ajax.readyState == 4 && ajax.status == 200)
+		{
+			buildCollections([gs.cgiParams.p_c], [newID], function()
+			{
+				//Create the necessary elements
+				var topLevelUL = document.createElement("UL");
+				var topLevelLI = document.createElement("LI");
+				var contentUL = document.createElement("UL");
+				
+				//Append the top-level list item to the top-level list
+				topLevelUL.appendChild(topLevelLI);
+				topLevelUL.setAttribute("class", "topLevelItem");
+				
+				//Set up the top-level item 
+				topLevelLI.setAttribute("class", "dragItem topLevelItem");
+				topLevelLI.childList = contentUL;
+				topLevelLI.collection = gs.cgiParams.p_c;
+				topLevelLI.nodeID = newID;
+				contentUL.parentItem = topLevelLI;
+				
+				//Add a textDiv to the top-level item
+				var textDiv = createSectionTextDiv(null);
+				textDiv.parentItem = topLevelLI;
+				topLevelLI.textDiv = textDiv;
+				topLevelUL.appendChild(textDiv);
+				
+				//Create a blank metadata table
+				var metaTable = document.createElement("TABLE");
+				metaTable.setAttribute("id", "meta" + newID);
+				textDiv.insertBefore(metaTable, textDiv.firstChild);
+				var titleMetaRow = document.createElement("TR");
+				var titleMetaNameCell = document.createElement("TD");
+				titleMetaNameCell.innerHTML = "dc.Title";
+				titleMetaNameCell.setAttribute("class", "metaTableCellName");
+				var titleMetaValueCell = document.createElement("TD");
+				titleMetaValueCell.setAttribute("class", "metaTableCell editable");
+				titleMetaValueCell.innerHTML = "UNTITLED DOCUMENT";
+				titleMetaRow.appendChild(titleMetaNameCell);
+				titleMetaRow.appendChild(titleMetaValueCell);
+				metaTable.appendChild(titleMetaRow);
+				addFunctionalityToTable(metaTable);
+
+				//Add a title to the top-level item
+				var title = createSectionTitle(gs.text.dse.untitled);
+				topLevelLI.appendChild(title);
+				topLevelLI.sectionTitle = title;
+
+				createSectionMenu(topLevelLI);
+				setMouseOverAndOutFunctions(topLevelLI);
+
+				//Set up the placeholder for the first section
+				contentUL.setAttribute("class", "dragList");
+				new YAHOO.util.DDTarget(contentUL);
+
+				//Create a placeholder and add it to first section
+				var placeHolder = createPlaceholder(null, contentUL, false);
+				contentUL.appendChild(placeHolder);
+
+				//Add elements to the page
+				var dbDiv = document.getElementById("dbDiv");
+				if(dbDiv.firstChild)
+				{
+					dbDiv.insertBefore(topLevelUL, dbDiv.firstChild);
+				}
+				else
+				{
+					dbDiv.appendChild(topLevelUL);
+				}
+				insertAfter(contentUL, topLevelLI.textDiv);
+
+				//Correct any issues
+				updateFromTop();
+			});
+			createButton.disabled = false;
+			saveButton.disabled = false;
+			_statusBar.removeStatus(statusID);
+		}
+		else if (ajax.readyState == 4)
+		{
+			createButton.disabled = false;
+			saveButton.disabled = false;
+			_statusBar.removeStatus(statusID);
+		}
 	}
-	else
-	{
-		dbDiv.appendChild(topLevelUL);
-	}
-	insertAfter(contentUL, topLevelLI.textDiv);
-	
-	//Correct any issues
-	updateFromTop();
+	console.log('[{"operation":"createDocument", "oid":"' + newID + '", "collection":"' + gs.cgiParams.p_c + '"}]');
+	ajax.send('a=g&rt=r&s=DocumentExecuteTransaction&s1.transactions=[{"operation":"createDocument", "oid":"' + newID + '", "collection":"' + gs.cgiParams.p_c + '"}]');
 }
 
 function createPlaceholder(parent, parentList, mouseEvents)
@@ -639,7 +687,7 @@ function updateRecursive(parent, currentDocument, currentPosition, level)
 				pos = currentPosition + "." + posCount;
 			}
 			
-			if(!gs.functions.hasClass(current, "topLevel"))
+			if(!gs.functions.hasClass(current, "topLevelItem"))
 			{
 				current.nodeID = currentDocument + "." + pos;
 				current.position = pos;
