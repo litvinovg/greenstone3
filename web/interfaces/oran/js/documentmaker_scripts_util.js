@@ -229,14 +229,17 @@ function save()
 			var cells = row.getElementsByTagName("TD");
 			var nameCell = cells[0];
 			var name = nameCell.innerHTML;
+			var value = changedElem.innerHTML;
+			value = value.replace(/&nbsp;/g, " ");
+			value = escape(value);
 
 			if(changedElem.originalValue)
 			{
-				gs.functions.setArchivesMetadata(collection, gs.xsltParams.site_name, docID, name, null, changedElem.innerHTML, changedElem.originalValue, "override", function(){console.log("SAVED ARCHIVES");});
+				gs.functions.setArchivesMetadata(collection, gs.xsltParams.site_name, docID, name, null, value, changedElem.originalValue, "override", function(){console.log("SAVED ARCHIVES");});
 			}
 			else
 			{
-				gs.functions.setArchivesMetadata(collection, gs.xsltParams.site_name, docID, name, null, changedElem.innerHTML, null, "accumulate", function(){console.log("SAVED ARCHIVES");});
+				gs.functions.setArchivesMetadata(collection, gs.xsltParams.site_name, docID, name, null, value, null, "accumulate", function(){console.log("SAVED ARCHIVES");});
 			}
 			changedElem.originalValue = changedElem.innerHTML;
 			addCollectionToBuild(collection);
@@ -267,10 +270,10 @@ function save()
 		}
 	}
 	request += "]";
-	
+
 	var statusID;
 	var ajax = new gs.functions.ajaxRequest();
-	ajax.open("POST", _baseURL, true);
+	ajax.open("POST", gs.xsltParams.library_name, true);
 	ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	ajax.onreadystatechange = function()
 	{
@@ -308,7 +311,7 @@ function save()
 	}
 }
 
-function buildCollections(collections)
+function buildCollections(collections, documents, callback)
 {
 	var saveButton = document.getElementById("saveButton");
 	if(!collections || collections.length == 0)
@@ -318,13 +321,33 @@ function buildCollections(collections)
 		saveButton.disabled = false;
 		return;
 	}
+	
+	var docs = "";
+	var buildOperation = "";
+	if(documents)
+	{
+		buildOperation = "ImportCollection";
+		docs += "&s1.documents=";
+		for(var i = 0; i < documents.length; i++)
+		{
+			docs += documents[i];
+			if(i < documents.length - 1)
+			{			
+				docs += ",";
+			}
+		}
+	}
+	else
+	{
+		buildOperation = "BuildAndActivateCollection";
+	}
 
 	var counter = 0;
 	var statusID = 0;
 	var buildFunction = function()
 	{
 		var ajax = new gs.functions.ajaxRequest();
-		ajax.open("GET", _baseURL + "?a=g&rt=r&ro=1&s=BuildCollection&s1.collection=" + collections[counter]);
+		ajax.open("GET", _baseURL + "?a=g&rt=r&ro=1&s=" + buildOperation + "&s1.collection=" + collections[counter] + docs);
 		ajax.onreadystatechange = function()
 		{
 			if(ajax.readyState == 4 && ajax.status == 200)
@@ -346,8 +369,9 @@ function buildCollections(collections)
 				var status = xml.getElementsByTagName("status")[0];
 				var pid = status.getAttribute("pid");
 
-				startCheckLoop(pid, "BuildCollection", statusID, function()
+				startCheckLoop(pid, buildOperation, statusID, function()
 				{
+					/*
 					var localAjax = new gs.functions.ajaxRequest();
 					localAjax.open("GET", _baseURL + "?a=g&rt=r&ro=1&s=ActivateCollection&s1.collection=" + collections[counter], true);
 					localAjax.onreadystatechange = function()
@@ -374,9 +398,14 @@ function buildCollections(collections)
 								var localPID = localStatus.getAttribute("pid");
 								startCheckLoop(localPID, "ActivateCollection", statusID, function()
 								{
+								*/
 									if(counter == collections.length - 1)
 									{
 										removeCollectionsFromBuildList(collections);
+										if(callback)
+										{
+											callback();
+										}
 									}
 									else
 									{
@@ -389,12 +418,14 @@ function buildCollections(collections)
 									_statusBar.removeStatus(statusID);
 									saveButton.innerHTML = gs.text.dse.save_changes;
 									saveButton.disabled = false;
+								/*
 								});
 							}
 						}
 					}
 					_statusBar.changeStatus(statusID, gs.text.dse.activating + " " + collections[counter] + "...");
 					localAjax.send();
+					*/
 				});
 			}
 		}
@@ -753,6 +784,7 @@ function createTopMenuBar()
 	var newDocButton = document.createElement("BUTTON");
 	newDocButton.innerHTML = gs.text.dse.create_new_document;
 	newDocButton.setAttribute("onclick", "createNewDocumentArea();");
+	newDocButton.setAttribute("id", "createNewDocumentButton");
 	newDocCell.appendChild(newDocButton);
 
 	//The "Insert new section" LI
