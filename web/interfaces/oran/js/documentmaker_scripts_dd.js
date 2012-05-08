@@ -217,7 +217,7 @@ YAHOO.extend(YAHOO.example.DDList, YAHOO.util.DDProxy, {
 						needsUndo = true;
 					}
 				}
-				
+
 				//Save the undo operation if necessary
 				if(needsUndo)
 				{
@@ -253,9 +253,9 @@ YAHOO.extend(YAHOO.example.DDList, YAHOO.util.DDProxy, {
 			removeFromParent(srcEl.previousSibling);
 			new YAHOO.example.DDList(srcEl.parentNode.previousSibling);
 		}
-		if(gs.functions.hasClass(srcEl, "topLevel"))
+		if(gs.functions.hasClass(srcEl, "topLevelItem"))
 		{
-			srcEl.setAttribute("class", srcEl.getAttribute("class").replace(/topLevel/g, ""));
+			srcEl.setAttribute("class", srcEl.getAttribute("class").replace(/topLevelItem/g, ""));
 		}
 	},
 
@@ -277,7 +277,7 @@ YAHOO.extend(YAHOO.example.DDList, YAHOO.util.DDProxy, {
 			if (!region.intersect(pt)) {
 				var destEl = Dom.get(id);
 				var destDD = DDM.getDDById(id);
-				if(gs.functions.hasClass(destEl, "topLevel") && gs.functions.hasClass(destEl, "dragList"))
+				if(gs.functions.hasClass(destEl, "topLevelItem") && gs.functions.hasClass(destEl, "dragList"))
 				{
 					destEl.appendChild(this.getEl());
 				}
@@ -310,7 +310,7 @@ YAHOO.extend(YAHOO.example.DDList, YAHOO.util.DDProxy, {
 		// We are only concerned with list items, we ignore the dragover
 		// notifications for the list.
 		if(destEl.nodeName.toLowerCase() == "li") {
-			if((gs.functions.hasClass(destEl, "dragItem") || gs.functions.hasClass(destEl, "placeHolder")) && !gs.functions.hasClass(destEl, "topLevel") && !gs.functions.hasClass(destEl, "newSection"))
+			if((gs.functions.hasClass(destEl, "dragItem") || gs.functions.hasClass(destEl, "placeHolder")) && !gs.functions.hasClass(destEl, "topLevelItem") && !gs.functions.hasClass(destEl, "newSection"))
 			{
 				var orig_p = srcEl.parentNode;
 				var p = destEl.parentNode;
