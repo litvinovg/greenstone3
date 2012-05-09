@@ -129,7 +129,7 @@ public class GSDocumentModel
 			_errorStatus = ERROR_COLLECTION_NOT_SPECIFIED;
 			return;
 		}
-		
+
 		//If the collection is not specified then we cannot continue
 		if (oid == null || oid.equals(""))
 		{
@@ -152,25 +152,6 @@ public class GSDocumentModel
 
 		if (!section)
 		{
-			File newDir = new File(_siteHome + File.separatorChar + "collect" + File.separatorChar + collection + File.separatorChar + "archives" + File.separatorChar + oid);
-
-			if (!newDir.exists())
-			{
-				newDir.mkdir();
-			}
-
-			HashMap<String, ArrayList<String>> entries = new HashMap<String, ArrayList<String>>();
-			ArrayList<String> values = new ArrayList<String>();
-			values.add(oid + "/doc.xml");
-			entries.put("doc-file", values);
-
-			//Write the new entry to the archive database 
-			archiveWriteEntryToDatabase(oid, collection, entries, userContext);
-			if (_errorStatus != NO_ERROR)
-			{
-				return;
-			}
-
 			//Create a basic doc.xml file to go in the new folder
 			documentXMLCreateDocXML(oid, collection, userContext);
 		}
@@ -397,7 +378,7 @@ public class GSDocumentModel
 			{
 				return;
 			}
-			
+
 			if (move)
 			{
 				originalDocument = getDocXML(oid, collection, userContext);
@@ -675,21 +656,21 @@ public class GSDocumentModel
 		try
 		{
 			String s = File.separator;
-			
+
 			String docFolderPath = _siteHome + s + "collect" + s + collection + s + "import" + s + oid;
 			File docFolder = new File(docFolderPath);
-			
+
 			if (!docFolder.exists())
 			{
-				if(!docFolder.mkdirs())
+				if (!docFolder.mkdirs())
 				{
 					_errorStatus = ERROR_DOC_XML_COULD_NOT_BE_CREATED;
 					return;
 				}
 			}
-			
+
 			File docFile = new File(docFolderPath + s + "doc.xml");
-			if(!docFile.exists() && !docFile.createNewFile())
+			if (!docFile.exists() && !docFile.createNewFile())
 			{
 				_errorStatus = ERROR_DOC_XML_COULD_NOT_BE_CREATED;
 				return;
@@ -1261,7 +1242,7 @@ public class GSDocumentModel
 				sectionParent.removeChild(existingSection);
 			}
 		}
-		
+
 		//Write the new change back into the file
 		if (!writeXMLFile(docXML, oid, collection, userContext))
 		{
@@ -1622,6 +1603,7 @@ public class GSDocumentModel
 			_errorStatus = ERROR_COULD_NOT_OPEN_DATABASE;
 			return;
 		}
+
 		coll_db.setInfo(oid, info);
 		coll_db.closeDatabase();
 	}
@@ -2078,7 +2060,7 @@ public class GSDocumentModel
 			return OPERATION_REPLACE;
 		}
 	}
-	
+
 	public int getErrorStatus()
 	{
 		return _errorStatus;
