@@ -429,7 +429,7 @@ public class GS2Construct extends ServiceRack
 	 * send a configure request to the message router action name should be
 	 * "delete" or "reload" response will be put into the status element
 	 */
-	protected void systemRequest(String action_name, String coll_name, Element status, UserContext userContext)
+	protected void systemRequest(String operation, String coll_name, Element status, UserContext userContext)
 	{
 		// send the request to the MR
 		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
@@ -440,17 +440,17 @@ public class GS2Construct extends ServiceRack
 		command.setAttribute(GSXML.SYSTEM_MODULE_TYPE_ATT, GSXML.COLLECTION_ELEM);
 		command.setAttribute(GSXML.SYSTEM_MODULE_NAME_ATT, coll_name);
 
-		if (action_name.equals("delete"))
+		if (operation.equals("delete"))
 		{
 			command.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_DEACTIVATE);
 		}
-		else if (action_name.equals("reload"))
+		else if (operation.equals("reload"))
 		{
 			command.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_ACTIVATE);
 		}
 		else
 		{
-			logger.error("invalid action name passed to systemRequest:" + action_name);
+			logger.error("invalid action name passed to systemRequest:" + operation);
 			return;
 		}
 		request.appendChild(command);
@@ -462,14 +462,14 @@ public class GS2Construct extends ServiceRack
 		{
 			if (response == null)
 			{
-				t = this.doc.createTextNode(getTextString(action_name + ".configure_error", userContext.getLanguage(), args));
+				t = this.doc.createTextNode(getTextString(operation + ".configure_error", userContext.getLanguage(), args));
 				status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
 				status.appendChild(t);
 				return;
 			}
 
 			// if we got here, we have succeeded!
-			t = this.doc.createTextNode(getTextString(action_name + ".success", userContext.getLanguage(), args));
+			t = this.doc.createTextNode(getTextString(operation + ".success", userContext.getLanguage(), args));
 			status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.SUCCESS));
 			status.appendChild(t);
 		}
