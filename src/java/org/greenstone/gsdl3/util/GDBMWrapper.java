@@ -174,13 +174,16 @@ public class GDBMWrapper implements FlatDatabaseWrapper
 		{
 			return null;
 		}
-		String s_info;
+		String s_info = null;
 		try
 		{
 			try
 			{
 				// The key is UTF8: do db lookup using the UTF8 version of key
-				s_info = (String) db_.fetch(key.getBytes("UTF-8"));
+				if (db_.exists(key.getBytes("UTF-8")))
+				{
+					s_info = (String) db_.fetch(key.getBytes("UTF-8"));
+				}
 			}
 			catch (UnsupportedEncodingException e)
 			{
@@ -213,7 +216,7 @@ public class GDBMWrapper implements FlatDatabaseWrapper
 			logger.error("GDBM database is either null or not writable");
 			return false;
 		}
-		
+
 		try
 		{
 			db_.store(key, value);
@@ -237,7 +240,7 @@ public class GDBMWrapper implements FlatDatabaseWrapper
 			logger.error("GDBM database is null");
 			return false;
 		}
-		
+
 		try
 		{
 			db_.delete(key);
@@ -248,7 +251,7 @@ public class GDBMWrapper implements FlatDatabaseWrapper
 			logger.error("Error message is: " + ex.getMessage());
 			return false;
 		}
-		
+
 		return true;
 	}
 
