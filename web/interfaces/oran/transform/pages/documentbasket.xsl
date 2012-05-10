@@ -22,7 +22,7 @@
 	<xsl:template match="/page">
 		<!-- Make sure the user is allowed to use this functionality -->
 		<xsl:choose>
-			<xsl:when test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
+			<xsl:when test="util:getGlobalProperty('disable.collection.building') = 'false' and /page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 				<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
 				<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_dd.js"><xsl:text> </xsl:text></script>
 				<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
@@ -39,7 +39,16 @@
 				<gslib:langfrag name="dse"/><!--<xsl:call-template name="document-editor-language-fragments"/>-->
 			</xsl:when>
 			<xsl:otherwise>
-				<div><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'db.doc_basket')"/></div>
+				<div>
+					<xsl:choose>
+						<xsl:when test="util:getGlobalProperty('disable.collection.building') = 'true'">
+							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'db.no_collection_building')"/>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'db.access_denied')"/>
+						</xsl:otherwise>
+					</xsl:choose>
+				</div>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
