@@ -21,22 +21,27 @@
 	<!-- the page content -->
 	<xsl:template match="/page">
 		<!-- Make sure the user is allowed to use this functionality -->
-		<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
-			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
-			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_dd.js"><xsl:text> </xsl:text></script>
-			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
-			<script type="text/javascript">YAHOO.util.Event.onDOMReady(initDocumentMaker);</script>
+		<xsl:choose>
+			<xsl:when test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
+				<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
+				<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_dd.js"><xsl:text> </xsl:text></script>
+				<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
+				<script type="text/javascript">YAHOO.util.Event.onDOMReady(initDocumentMaker);</script>
 
-			<link src="interfaces/{$interface_name}/style/documentbasket.js"/>
-			<xsl:for-each select="//item">
-				<a class="dbdoc">
-					<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;dt=hierarchy&amp;d=<xsl:value-of select="@name"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;ed=1</xsl:attribute>
-					<xsl:value-of select="@title"/>
-				</a>
-			</xsl:for-each>
-			
-			<gslib:langfrag name="dse"/><!--<xsl:call-template name="document-editor-language-fragments"/>-->
-		</xsl:if>
+				<link src="interfaces/{$interface_name}/style/documentbasket.js"/>
+				<xsl:for-each select="//item">
+					<a class="dbdoc">
+						<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;dt=hierarchy&amp;d=<xsl:value-of select="@name"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/>&amp;ed=1</xsl:attribute>
+						<xsl:value-of select="@title"/>
+					</a>
+				</xsl:for-each>
+				
+				<gslib:langfrag name="dse"/><!--<xsl:call-template name="document-editor-language-fragments"/>-->
+			</xsl:when>
+			<xsl:otherwise>
+				<div><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'db.doc_basket')"/></div>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 
 </xsl:stylesheet>  
