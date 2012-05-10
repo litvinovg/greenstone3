@@ -232,6 +232,8 @@ public class GSXML
 	public static final String SYSTEM_TYPE_CONFIGURE = "configure";
 	public static final String SYSTEM_TYPE_ACTIVATE = "activate";
 	public static final String SYSTEM_TYPE_DEACTIVATE = "deactivate";
+	public static final String SYSTEM_TYPE_PING = "ping";
+	//public static final String SYSTEM_TYPE_ISPERSISTENT = "is-persistent";
 
 	public static final String SYSTEM_SUBSET_ATT = "subset";
 	public static final String SYSTEM_MODULE_TYPE_ATT = "moduleType";

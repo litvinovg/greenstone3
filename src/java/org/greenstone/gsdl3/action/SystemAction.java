@@ -73,6 +73,14 @@ public class SystemAction extends Action
 			String info = (String) params.get(GSParams.SYSTEM_SUBSET);
 			system.setAttribute(GSXML.SYSTEM_SUBSET_ATT, info);
 		}
+		else if (subaction.equals("ping")){
+			// No pinging on collections yet in GS3 as is there in GS2
+			// The ping subaction is at present just for activate.pl
+			system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_PING);
+		}
+		//else if (subaction.equals("is-persistent")){
+		//	system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_ISPERSISTENT);
+		//}
 		else
 		{
 			String name = (String) params.get(GSParams.SYSTEM_MODULE_NAME);

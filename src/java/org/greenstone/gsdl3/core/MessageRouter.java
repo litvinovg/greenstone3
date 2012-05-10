@@ -973,7 +973,15 @@ public class MessageRouter implements  ModuleInterface {
         // all the commands should be Elements
         Element elem = (Element)commands.item(i);
         String action = elem.getAttribute(GSXML.TYPE_ATT);
-        if (action.equals(GSXML.SYSTEM_TYPE_CONFIGURE)) {
+		if (action.equals(GSXML.SYSTEM_TYPE_PING)) {
+			Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM,  "Ping succeeded.");
+			response.appendChild(s);
+		}
+		//if (action.equals(GSXML.SYSTEM_TYPE_ISPERSISTENT)) {
+		//	Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM,  "Persistent: true.");
+		//	response.appendChild(s);
+		//}
+        else if (action.equals(GSXML.SYSTEM_TYPE_CONFIGURE)) {
           String subset = elem.getAttribute(GSXML.SYSTEM_SUBSET_ATT);
           if (subset.equals("")) {
             // need to reconfigure the MR
