@@ -1,70 +1,74 @@
 <siteConfig xmlns:gsf='http://www.greenstone.org/greenstone3/schema/ConfigFormat' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>
-  <siteList/>
-  <serviceRackList>
-    <!-- uncomment to provide the GATE tagging service -->
-    <!--<serviceRack name="GATEServices"/>-->
-    <!-- uncomment to provide the Authentication service -->
-    <serviceRack name='Authentication'/>
-    <serviceRack name="ArchiveIO"/>
-    <serviceRack name="DocumentMaker"/>
-    <serviceRack name="DocXMLUtil"/>
-	<serviceRack name="DocumentBasket"/>
-    <serviceRack name="BerryBasket"/>
-	  <serviceRack name="ServiceUtil"/>
-    <serviceRack name="CrossCollectionSearch">
-      <format>
-	<!-- this format is used for the search results -->
-	<gsf:template match="documentNode">
-	  <td><a><xsl:attribute name='href'>?a=d&amp;c=<xsl:value-of select='@collection'/>&amp;d=<xsl:value-of select='@nodeID'/><xsl:if test="@nodeType='leaf'">&amp;sib=1</xsl:if>&amp;dt=<xsl:value-of select='@docType'/>&amp;p.a=q&amp;&amp;p.s=TextQuery&amp;p.c=</xsl:attribute><gsf:icon/></a></td>
-	  <td>[<a href='?a=p&amp;amp;sa=about&amp;amp;c={@collection}'><xsl:value-of select='@collection'/></a>]</td>
-	  <td><gsf:metadata name='Title'/></td>
-	</gsf:template>
-      </format>
-    </serviceRack>
-  </serviceRackList>
-  <serviceClusterList/>
-  <!-- this is a global replace list for all collections. At this stage it only applies to greenstone 2 collections. It will attempt to resolve most of the common macros that appear in metadata. You can add more items here if you want them to apply to all collections. To turn this on/off for a particular collection, add <replaceListRef id='xx'/> into the collectionConfig for each set that you want to use -->
-  <replaceList  id="gs2-standard">
-    <replace macro="_iconpdf_" scope="metadata" text="&lt;img src='interfaces/default/images/ipdf.gif' border='0'/&gt;" resolve="false"/>
-    <replace macro="_icondoc_" scope="metadata" text="&lt;img src='interfaces/default/images/imsword.gif' border='0'/&gt;" resolve="false"/>
-    <replace macro="_iconps_" scope="metadata" text="&lt;img src='interfaces/default/images/ips.gif' border='0'/&gt;" resolve="false"/>
-     <replace macro="_iconrtf_" scope="metadata" text="&lt;img src='interfaces/default/images/irtf.gif' border='0'/&gt;" resolve="false"/>
-     <replace macro="_iconxls_" scope="metadata" text="&lt;img src='interfaces/default/images/iexcel.gif' border='0'/&gt;" resolve="false"/>
-     <replace macro="_iconppt_" scope="metadata" text="&lt;img src='interfaces/default/images/ippt.gif' border='0'/&gt;" resolve="false"/>
-     <replace macro="_icontext_" scope="metadata" text="&lt;img src='interfaces/default/images/itext.gif' border='0'/&gt;" resolve="false"/>
-     <replace macro="_iconblanktext_" scope="metadata" text="&lt;img src='interfaces/default/images/ibtext.gif' border='0'/&gt;" resolve="false"/>     
-     <replace macro="_iconmp3_" scope="metadata" text="&lt;img src='interfaces/default/images/imp3.gif' border='0'/&gt;" resolve="false"/>
-     <replace macro="_iconmidi_" scope="metadata" text="&lt;img src='interfaces/default/images/imidi.gif' border='0'/&gt;" resolve="false"/>
-     <replace macro="_iconworld_" scope="metadata" text="&lt;img src='interfaces/default/images/iworld.gif' border='0'/&gt;" resolve="false"/>
-     <replace macro="_iconunknown_" scope="metadata" text="&lt;img src='interfaces/default/images/iunknown.gif' border='0'/&gt;" resolve="false"/>
+	<siteList/>
+	<serviceRackList>
+		<!-- uncomment to provide the GATE tagging service -->	
+		<!--<serviceRack name="GATEServices"/>-->
+		<!-- uncomment to provide the Authentication service -->
+		<serviceRack name='Authentication'>
+			<!-- Go to https://www.google.com/recaptcha/admin/create and replace these keys when you deploy your site -->
+			<recaptcha name="public_key" value="6LckI88SAAAAACUYjj97WMcnz5HPjVp3lI-x-ue8"/>
+			<recaptcha name="private_key" value="6LckI88SAAAAAGnGy1PwuXYZzIMXZYoPxN51bWWG"/>
+		</serviceRack>
+		
+		<serviceRack name="ArchiveIO"/>
+		<serviceRack name="DocumentMaker"/>
+		<serviceRack name="DocXMLUtil"/>
+		<serviceRack name="DocumentBasket"/>
+		<serviceRack name="BerryBasket"/>
+		<serviceRack name="GS2Construct"/>
+		<serviceRack name="CrossCollectionSearch">
+			<format>
+				<!-- this format is used for the search results -->
+				<gsf:template match="documentNode">
+					<td><a><xsl:attribute name='href'>?a=d&amp;c=<xsl:value-of select='@collection'/>&amp;d=<xsl:value-of select='@nodeID'/><xsl:if test="@nodeType='leaf'">&amp;sib=1</xsl:if>&amp;dt=<xsl:value-of select='@docType'/>&amp;p.a=q&amp;&amp;p.s=TextQuery&amp;p.c=</xsl:attribute><gsf:icon/></a></td>
+					<td>[<a href='?a=p&amp;amp;sa=about&amp;amp;c={@collection}'><xsl:value-of select='@collection'/></a>]</td>
+					<td><gsf:metadata name='Title'/></td>
+				</gsf:template>
+			</format>
+		</serviceRack>
+	</serviceRackList>
+	<serviceClusterList/>
+	<!-- this is a global replace list for all collections. At this stage it only applies to greenstone 2 collections. It will attempt to resolve most of the common macros that appear in metadata. You can add more items here if you want them to apply to all collections. To turn this on/off for a particular collection, add <replaceListRef id='xx'/> into the collectionConfig for each set that you want to use -->
+	<replaceList  id="gs2-standard">
+		<replace macro="_iconpdf_" scope="metadata" text="&lt;img src='interfaces/default/images/ipdf.gif' border='0'/&gt;" resolve="false"/>
+		<replace macro="_icondoc_" scope="metadata" text="&lt;img src='interfaces/default/images/imsword.gif' border='0'/&gt;" resolve="false"/>
+		<replace macro="_iconps_" scope="metadata" text="&lt;img src='interfaces/default/images/ips.gif' border='0'/&gt;" resolve="false"/>
+		<replace macro="_iconrtf_" scope="metadata" text="&lt;img src='interfaces/default/images/irtf.gif' border='0'/&gt;" resolve="false"/>
+		<replace macro="_iconxls_" scope="metadata" text="&lt;img src='interfaces/default/images/iexcel.gif' border='0'/&gt;" resolve="false"/>
+		<replace macro="_iconppt_" scope="metadata" text="&lt;img src='interfaces/default/images/ippt.gif' border='0'/&gt;" resolve="false"/>
+		<replace macro="_icontext_" scope="metadata" text="&lt;img src='interfaces/default/images/itext.gif' border='0'/&gt;" resolve="false"/>
+		<replace macro="_iconblanktext_" scope="metadata" text="&lt;img src='interfaces/default/images/ibtext.gif' border='0'/&gt;" resolve="false"/>     
+		<replace macro="_iconmp3_" scope="metadata" text="&lt;img src='interfaces/default/images/imp3.gif' border='0'/&gt;" resolve="false"/>
+		<replace macro="_iconmidi_" scope="metadata" text="&lt;img src='interfaces/default/images/imidi.gif' border='0'/&gt;" resolve="false"/>
+		<replace macro="_iconworld_" scope="metadata" text="&lt;img src='interfaces/default/images/iworld.gif' border='0'/&gt;" resolve="false"/>
+		<replace macro="_iconunknown_" scope="metadata" text="&lt;img src='interfaces/default/images/iunknown.gif' border='0'/&gt;" resolve="false"/>
 
-    <replace macro="[archivedir]" scope="all" metadata="assocfilepath" resolve="false"/>
-    <replace macro="[assocfilepath]" scope="all" metadata="assocfilepath" resolve="false"/>
-    <replace macro="[srcurl]" scope="metadata" metadata="srcurl" resolve="false"/>
-    <replace macro="[SourceFile]" scope="metadata" metadata="SourceFile" resolve="false"/>
-    <!-- _httpsite_ and _clustername_ are macros that are defined in the java code -->
-    <replace macro="_httpcollection_" scope="metadata" text="_httpsite_/collect/_clustername_" resolve="true"/>
-    <replace macro="_httpprefix_" scope="metadata" text="_httpsite_" resolve="true"/>
-    <replace macro="_httpdocimg_" scope="text" text="_httpsite_/collect/_clustername_/index/assoc/[assocfilepath]/" resolve="true"/>
-    <replace macro="[collection]" scope="all" text="_clustername_" resolve="true"/>
-    <replace macro="_httpextlink_" scope="all" text="_libraryname_?el=&amp;a=d&amp;c=_clustername_&amp;d=" resolve="true"/>
-  </replaceList>
-  <replaceList  id="gs2-image"> 
-    <replace macro="[Image]" scope="metadata" metadata="Image" resolve="false"/> 
-	<replace macro="[Thumb]" scope="metadata" metadata="Thumb" resolve="false"/> 
- 	<replace macro="[ThumbWidth]" scope="metadata" metadata="ThumbWidth" resolve="false"/> 
-	<replace macro="[ThumbHeight]" scope="metadata" metadata="ThumbHeight" resolve="false"/> 
-	<replace macro="[Screen]" scope="metadata" metadata="Screen" resolve="false"/> 
-	<replace macro="[ScreenWidth]" scope="metadata" metadata="ScreenWidth" resolve="false"/> 
-	<replace macro="[ScreenHeight]" scope="metadata" metadata="ScreenHeight" resolve="false"/> 
-  </replaceList> 
+		<replace macro="[archivedir]" scope="all" metadata="assocfilepath" resolve="false"/>
+		<replace macro="[assocfilepath]" scope="all" metadata="assocfilepath" resolve="false"/>
+		<replace macro="[srcurl]" scope="metadata" metadata="srcurl" resolve="false"/>
+		<replace macro="[SourceFile]" scope="metadata" metadata="SourceFile" resolve="false"/>
+		<!-- _httpsite_ and _clustername_ are macros that are defined in the java code -->
+		<replace macro="_httpcollection_" scope="metadata" text="_httpsite_/collect/_clustername_" resolve="true"/>
+		<replace macro="_httpprefix_" scope="metadata" text="_httpsite_" resolve="true"/>
+		<replace macro="_httpdocimg_" scope="text" text="_httpsite_/collect/_clustername_/index/assoc/[assocfilepath]/" resolve="true"/>
+		<replace macro="[collection]" scope="all" text="_clustername_" resolve="true"/>
+		<replace macro="_httpextlink_" scope="all" text="_libraryname_?el=&amp;a=d&amp;c=_clustername_&amp;d=" resolve="true"/>
+	</replaceList>
+	<replaceList id="gs2-image"> 
+		<replace macro="[Image]" scope="metadata" metadata="Image" resolve="false"/> 
+		<replace macro="[Thumb]" scope="metadata" metadata="Thumb" resolve="false"/> 
+		<replace macro="[ThumbWidth]" scope="metadata" metadata="ThumbWidth" resolve="false"/> 
+		<replace macro="[ThumbHeight]" scope="metadata" metadata="ThumbHeight" resolve="false"/> 
+		<replace macro="[Screen]" scope="metadata" metadata="Screen" resolve="false"/> 
+		<replace macro="[ScreenWidth]" scope="metadata" metadata="ScreenWidth" resolve="false"/> 
+		<replace macro="[ScreenHeight]" scope="metadata" metadata="ScreenHeight" resolve="false"/> 
+	</replaceList> 
 	<metadataList xmlns:gsf="http://www.greenstone.org/greenstone3/schema/MetadataFormat" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-		<metadata name="siteURL">http://localhost:8080/greenstone3/</metadata>
+		<!--<metadata name="siteURL">http://localhost:8080/greenstone3/</metadata>-->
 		<metadata name="siteName" lang="en">My Greenstone Library</metadata>
 		<metadata name="siteName" lang="fr">Mon site de dévelopment</metadata> 
 		<metadata name="siteDescription" lang="en">This is just a random site for testing stuff...</metadata>
 		<metadata name="siteDescription" lang="fr">C'est juste un site pour tester des trucs...</metadata>
 		<metadata name="siteAdmin">admin@example.com</metadata>
 	</metadataList>
-
 </siteConfig>
