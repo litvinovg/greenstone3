@@ -137,17 +137,17 @@ function setGS3ENV() {
   fi
 
   #ImageMagick
-  if test -d "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/imagemagick" ; then
-    addtopath PATH "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/imagemagick/bin"
-    MAGICK_HOME="$GSDL3SRCHOME/gs2build/bin/$GSDLOS/imagemagick"
-    export MAGICK_HOME
-    if test "$GSDLOS" = "linux"; then
-      addtopath LD_LIBRARY_PATH "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/imagemagick/lib"
-    elif test "$GSDLOS" = "darwin"; then
-      addtopath DYLD_LIBRARY_PATH "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/imagemagick/lib"
-    fi
-    echo "  - Setup ImageMagick"
-  fi
+  #if test -d "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/imagemagick" ; then
+  #  addtopath PATH "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/imagemagick/bin"
+  #  MAGICK_HOME="$GSDL3SRCHOME/gs2build/bin/$GSDLOS/imagemagick"
+  #  export MAGICK_HOME
+  #  if test "$GSDLOS" = "linux"; then
+  #    addtopath LD_LIBRARY_PATH "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/imagemagick/lib"
+  #  elif test "$GSDLOS" = "darwin"; then
+  #    addtopath DYLD_LIBRARY_PATH "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/imagemagick/lib"
+  #  fi
+  #  echo "  - Setup ImageMagick"
+  #fi
 
   #Ghostscript
   if test -d "$GSDL3SRCHOME/gs2build/bin/$GSDLOS/ghostscript"; then
