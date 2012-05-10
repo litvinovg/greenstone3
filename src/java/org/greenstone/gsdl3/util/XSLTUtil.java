@@ -34,6 +34,7 @@ import org.apache.log4j.*;
 import org.w3c.dom.Node;
 
 import org.apache.commons.lang3.StringUtils;
+import org.greenstone.util.GlobalProperties;
 
 /**
  * a class to contain various static methods that are used by the xslt
@@ -47,6 +48,7 @@ public class XSLTUtil
 	/* some tests */
 	public static boolean equals(String s1, String s2)
 	{
+		System.err.println("COMPARING " + s1 + " AND " + s2 + " = " + s1.equals(s2));
 		return s1.equals(s2);
 	}
 
@@ -477,6 +479,12 @@ public class XSLTUtil
 		}
 		return escapeNewLines(escapeQuotes(str));
 	}
+	
+	public static String getGlobalProperty(String name)
+	{
+		System.err.println("AWAY TO RETURN " + GlobalProperties.getProperty(name));
+		return GlobalProperties.getProperty(name);
+	}
 
 	public static void clearMetadataStorage()
 	{
@@ -512,57 +520,63 @@ public class XSLTUtil
 		return c.createRecaptchaHtml(null, null);
 	}
 
-    public static String getInterfaceStringsAsJavascript(String interface_name, String lang, String prefix) {	
-	String prependToPrefix = "gs.text";
-	return XSLTUtil.getInterfaceStringsAsJavascript(interface_name, lang, prefix, prependToPrefix);
-    }
-
-    // generates javascript: 2 arrays are declared and populated with strings that declare variables and assign their values
-    // to be strings loaded from the interface_name.properties file for the language.    
-    public static String getInterfaceStringsAsJavascript(String interface_name, String lang, String prefix, String prependToPrefix) {
-	// 1. Generating Javascript of the form:
-	// if(!gs.text) { gs.text = new Array(); }
-	// if(!gs.text.dse) { gs.text.dse = new Array(); }
-	StringBuffer outputStr = new StringBuffer();
-	outputStr.append("if(!gs.text) { ");
-	outputStr.append(prependToPrefix + " = new Array(); ");
-	outputStr.append("}\n");
-	outputStr.append("if(!gs.text." + prefix + ") { ");
-	outputStr.append(prependToPrefix + "." + prefix + " = new Array(); ");
-	outputStr.append("}\n");
-	
-	Dictionary dict = new Dictionary("interface_" + interface_name, lang);
-	Enumeration keys = dict.getKeys();	
-	if(keys == null) { // try default interface
-	    //logger.debug("****** Interface name: " + interface_name + " does not have any keys. Trying interface_default.");
-	    dict = new Dictionary("interface_default", lang);
-	    keys = dict.getKeys();
+	public static String getInterfaceStringsAsJavascript(String interface_name, String lang, String prefix)
+	{
+		String prependToPrefix = "gs.text";
+		return XSLTUtil.getInterfaceStringsAsJavascript(interface_name, lang, prefix, prependToPrefix);
 	}
-	
-	// Get all properties in the language-specific dictionary with the given key prefix
-	// Create Javascript strings of the form:
-	// prependToPrefix.key= "value";\n
-	while(keys.hasMoreElements()) {	    
-	    String key = (String)keys.nextElement();
-	    if(key.startsWith(prefix)) {
-		String value = getInterfaceText(interface_name, lang, key);
 
-		outputStr.append(prependToPrefix);
-		outputStr.append(".");
-		outputStr.append(key);
-		outputStr.append("=\"");
-		outputStr.append(value);
-		outputStr.append("\";\n");
-	    }
-	}	
-	
-	return outputStr.toString();
-	
-    }
+	// generates javascript: 2 arrays are declared and populated with strings that declare variables and assign their values
+	// to be strings loaded from the interface_name.properties file for the language.    
+	public static String getInterfaceStringsAsJavascript(String interface_name, String lang, String prefix, String prependToPrefix)
+	{
+		// 1. Generating Javascript of the form:
+		// if(!gs.text) { gs.text = new Array(); }
+		// if(!gs.text.dse) { gs.text.dse = new Array(); }
+		StringBuffer outputStr = new StringBuffer();
+		outputStr.append("if(!gs.text) { ");
+		outputStr.append(prependToPrefix + " = new Array(); ");
+		outputStr.append("}\n");
+		outputStr.append("if(!gs.text." + prefix + ") { ");
+		outputStr.append(prependToPrefix + "." + prefix + " = new Array(); ");
+		outputStr.append("}\n");
 
-    // Test from cmdline with:
-    // java -classpath /research/ak19/gs3-svn/web/WEB-INF/lib/gsdl3.jar:/research/ak19/gs3-svn/web/WEB-INF/lib/log4j-1.2.8.jar:/research/ak19/gs3-svn/web/WEB-INF/classes/ org.greenstone.gsdl3.util.XSLTUtil
-    public static void main(String args[]) {
-	System.out.println("\n@@@@@\n" + XSLTUtil.getInterfaceStringsAsJavascript("default", "en", "dse", "gs.text") + "@@@@@\n");
-    }
+		Dictionary dict = new Dictionary("interface_" + interface_name, lang);
+		Enumeration keys = dict.getKeys();
+		if (keys == null)
+		{ // try default interface
+			//logger.debug("****** Interface name: " + interface_name + " does not have any keys. Trying interface_default.");
+			dict = new Dictionary("interface_default", lang);
+			keys = dict.getKeys();
+		}
+
+		// Get all properties in the language-specific dictionary with the given key prefix
+		// Create Javascript strings of the form:
+		// prependToPrefix.key= "value";\n
+		while (keys.hasMoreElements())
+		{
+			String key = (String) keys.nextElement();
+			if (key.startsWith(prefix))
+			{
+				String value = getInterfaceText(interface_name, lang, key);
+
+				outputStr.append(prependToPrefix);
+				outputStr.append(".");
+				outputStr.append(key);
+				outputStr.append("=\"");
+				outputStr.append(value);
+				outputStr.append("\";\n");
+			}
+		}
+
+		return outputStr.toString();
+
+	}
+
+	// Test from cmdline with:
+	// java -classpath /research/ak19/gs3-svn/web/WEB-INF/lib/gsdl3.jar:/research/ak19/gs3-svn/web/WEB-INF/lib/log4j-1.2.8.jar:/research/ak19/gs3-svn/web/WEB-INF/classes/ org.greenstone.gsdl3.util.XSLTUtil
+	public static void main(String args[])
+	{
+		System.out.println("\n@@@@@\n" + XSLTUtil.getInterfaceStringsAsJavascript("default", "en", "dse", "gs.text") + "@@@@@\n");
+	}
 }
