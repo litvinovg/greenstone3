@@ -911,6 +911,7 @@
     <filter token="tomcat.server" value="${tomcat.server}"/>
     <filter token="tomcat.port" value="${tomcat.port}"/>
     <filter token="perlpath" value="${escaped.perl.path}"/>
+	<filter token="disable.collection.building" value="${disable.collection.building}"/>
     <copy file="${basedir}/resources/java/global.properties.in" tofile="${web.classes}/global.properties" filtering="true" overwrite="true"/>
     <copy file="${basedir}/resources/java/log4j.properties.in" tofile="${web.classes}/log4j.properties" filtering="true" overwrite="true"/>
     <chmod file="${web.classes}/global.properties" perm="600"/>
@@ -1034,7 +1035,7 @@
   
   <target name="configure-tomcat" depends="init,configure-tomcat-local,configure-tomcat-external"/>
   
-  <target name="configure-tomcat-local" depends="init" if="tomcat.islocal">
+  <target name="configure-tomcat-local" depends="init,perl-for-building" if="tomcat.islocal">
     <!-- re-setup the server.xml file -->
     <copy file="${basedir}/resources/tomcat/server_tomcat${tomcat.version.major}.xml"
 		tofile="${packages.home}/tomcat/conf/server.xml" overwrite="true">
@@ -1050,6 +1051,13 @@
 	<filter token="privilegedattribute" value ="${privileged.attribute}"/>
       </filterset>
     </copy>
+	
+	<!-- set up the greenstone3 web.xml file -->
+	<copy file="${basedir}/resources/tomcat/web.xml" tofile="${packages.home}/tomcat/conf/web.xml" overwrite="true">
+		<filterset>
+			<filter token="perlpath" value="${perl.path}"/>
+		</filterset>
+	</copy>
   </target>
 
   <target name="configure-tomcat-external" depends="init" unless="tomcat.islocal">
@@ -1975,12 +1983,12 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
    <exec executable="svn" dir="web/WEB-INF/cgi">
       <arg value="export"/>
       <arg value="-r"/><arg value="${branch.revision}"/>
-      <arg value="${svn.root}/main/${branch.path}/greenstone2/cgi-bin/gliserver.pl"/>
+      <arg value="${svn.root}/main/${branch.path}/greenstone2/common-src/cgi-bin/gliserver.pl"/>
     </exec>
     <exec executable="svn" dir="web/WEB-INF/cgi">
       <arg value="export"/>
       <arg value="-r"/><arg value="${branch.revision}"/>
-      <arg value="${svn.root}/main/${branch.path}/greenstone2/cgi-bin/gsdlCGI.pm"/>
+      <arg value="${svn.root}/main/${branch.path}/greenstone2/common-src/cgi-bin/gsdlCGI.pm"/>
     </exec>
 
     </if>
