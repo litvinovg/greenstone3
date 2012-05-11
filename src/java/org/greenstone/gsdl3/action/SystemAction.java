@@ -73,9 +73,24 @@ public class SystemAction extends Action
 			String info = (String) params.get(GSParams.SYSTEM_SUBSET);
 			system.setAttribute(GSXML.SYSTEM_SUBSET_ATT, info);
 		}
-		else if (subaction.equals("ping")){
-			// No pinging on collections yet in GS3 as is there in GS2
-			// The ping subaction is at present just for activate.pl
+		else if (subaction.equals("ping")) { // can ping the server or a collection
+			String name = (String) params.get(GSParams.SYSTEM_MODULE_NAME);
+			
+			if(name != null && !name.equals("")) { 
+				// Pinging a collection (or module) with ?a=s&sa=ping&st=collection&sn=<colName>
+				// is a collection-level (servicecluster/module level) ping
+				
+				String type = (String) params.get(GSParams.SYSTEM_MODULE_TYPE);
+				if(type == null || type.equals("")) { 
+					type = "collection"; // if the st=collection was omitted, assume collection
+				}				
+				// ping action set to moduleType=Collection and moduleName=colName
+				system.setAttribute(GSXML.SYSTEM_MODULE_NAME_ATT, name);
+				system.setAttribute(GSXML.SYSTEM_MODULE_TYPE_ATT, type);
+				system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_PING);
+			} // else SYSTEM_MODULE_NAME given by the "sn" GSParam is null or empty 
+			  // meaning server-level ping: ?a=s&sa=ping
+			  
 			system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_PING);
 		}
 		//else if (subaction.equals("is-persistent")){

@@ -569,6 +569,15 @@ public class MessageRouter implements  ModuleInterface {
     return true;
   }
   
+  // testing whether a collection (or more generally, a module) is active
+  protected boolean pingModule(String name) {
+	// module (including collection) would have been added to module_map 
+	// if activated, and removed from map if deactivated.
+	// The this.collection_list Element would contain the collection too, 
+	// but the following check seems to be more generally useful
+	return this.module_map.containsKey(name);	
+  }
+  
   /** creates and configures a new collection
       if this is done for a reconfigure, the collection should be deactivated first.
       *
@@ -834,7 +843,7 @@ public class MessageRouter implements  ModuleInterface {
   protected boolean activateServiceRackByName(String module_name) {
     return false;
   }
-  
+    
   protected boolean deactivateModule(String type, String name) {
     
     logger.info("deactivating "+ type+"  module: "+name);
@@ -973,11 +982,26 @@ public class MessageRouter implements  ModuleInterface {
         // all the commands should be Elements
         Element elem = (Element)commands.item(i);
         String action = elem.getAttribute(GSXML.TYPE_ATT);
-		if (action.equals(GSXML.SYSTEM_TYPE_PING)) {
-			Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM,  "Ping succeeded.");
+		
+		if (action.equals(GSXML.SYSTEM_TYPE_PING)) { // ?a=s&sa=ping or ?a=s&sa=ping(&st=collection)&sn=colname
+						
+			String message = ""; // will be creating the same messages as in GS2's recept/pingaction.cpp
+			String module_name = elem.getAttribute(GSXML.SYSTEM_MODULE_NAME_ATT);
+			String module_type = elem.getAttribute(GSXML.SYSTEM_MODULE_TYPE_ATT);			
+			
+			if(module_name.equals("")) { // server-level ping				
+				message = "Ping succeeded.";
+			} else { // ping at collection level
+				if(pingModule(module_name)) {					
+					message = "Ping for " + module_name + " succeeded.";
+				} else {
+					message = "Ping for " + module_name + " did not succeed.";
+				}
+			}
+			Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, message);
 			response.appendChild(s);
 		}
-		//if (action.equals(GSXML.SYSTEM_TYPE_ISPERSISTENT)) {
+		//else if (action.equals(GSXML.SYSTEM_TYPE_ISPERSISTENT)) {
 		//	Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM,  "Persistent: true.");
 		//	response.appendChild(s);
 		//}
