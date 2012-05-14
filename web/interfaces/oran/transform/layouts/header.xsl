@@ -186,7 +186,6 @@
 					<xsl:when test="/page/pageRequest/userInformation/@username">
 						<a>
 							<xsl:attribute name="href">javascript:toggleUserMenu();</xsl:attribute>
-							<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'logout_tip')"/></xsl:attribute>
 							<script type="text/javascript">
 								<xsl:text disable-output-escaping="yes">
 									function toggleUserMenu()
