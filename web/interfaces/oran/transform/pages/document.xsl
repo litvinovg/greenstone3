@@ -458,7 +458,7 @@
 		<gsf:variable name="imageHeight"><gsf:metadata name="ImageHeight"/></gsf:variable>
 
 		<xsl:choose>
-			<xsl:when test="metadataList/metadata[@name = 'Screen'] and metadataList/metadata[@name = 'Source']">
+			<xsl:when test="metadataList/metadata[@name = 'Screen'] and metadataList/metadata[@name = 'Source'] and ($imageWidth div $screenImageWidth > 1.2)">
 				<div id="wrap{util:replace(@nodeID, '.', '_')}" class="zoomImage" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
 					<div id="small{util:replace(@nodeID, '.', '_')}" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
 						<gsf:image type="screen"/>
@@ -467,7 +467,7 @@
 						<div id="overlay{util:replace(@nodeID, '.', '_')}" style="width: 200px; height: 200px; position: absolute; top: 0; left: 0; z-index: 200;">
 							<xsl:text> </xsl:text>
 						</div>
-						<div id="large{util:replace(@nodeID, '.', '_')}" style="position: relative;">
+						<div id="large{util:replace(@nodeID, '.', '_')}" style="position: relative; width: {$imageWidth}px; height: {$imageHeight}px;">
 							<gsf:image type="source"/>
 						</div>
 					</div>
@@ -490,7 +490,9 @@
 								mover: "#mover" + nodeID,
 								expansionSize:50,  
 								speedMultiplier:multiplier   
-							}); 
+							});
+							
+							$("#zoomOptions").css("display", "table-row");
 						}
 					</xsl:text>
 				</script>
@@ -756,16 +758,8 @@
 			</td>
 		</tr>
 		<tr id="zoomOptions">
-			<xsl:attribute name="style">
-				<xsl:choose>
-					<xsl:when test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 and count(//documentNode/metadataList/metadata[@name = 'Source']) > 0">
-						<xsl:text>display: table-row;</xsl:text>
-					</xsl:when>
-					<xsl:otherwise>
-						<xsl:text>display: none;</xsl:text>
-					</xsl:otherwise>
-				</xsl:choose>
-			</xsl:attribute>
+			<!-- This is invisible unless it is made visible by Javascript controlling the image zooming -->
+			<xsl:attribute name="style">display: none;</xsl:attribute>
 			<td style="width:40%;">
 				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoom')"/><input id="zoomToggle" type="checkbox"/>
 				<script type="text/javascript">
