@@ -48,7 +48,6 @@ public class XSLTUtil
 	/* some tests */
 	public static boolean equals(String s1, String s2)
 	{
-		System.err.println("COMPARING " + s1 + " AND " + s2 + " = " + s1.equals(s2));
 		return s1.equals(s2);
 	}
 
@@ -482,7 +481,6 @@ public class XSLTUtil
 	
 	public static String getGlobalProperty(String name)
 	{
-		System.err.println("AWAY TO RETURN " + GlobalProperties.getProperty(name));
 		return GlobalProperties.getProperty(name);
 	}
 
