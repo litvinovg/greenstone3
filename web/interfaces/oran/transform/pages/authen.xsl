@@ -348,9 +348,9 @@
 									</xsl:if>
 								</td>
 							</tr>
-							<tr>
+							<!--<tr>
 								<td style="font-size:0.6em;"><a href="{$library_name}/admin/PerformResetPassword?s1.username={/page/pageResponse/authenticationNode/service/userNodeList/userNode/@username}"><br/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.reset_password')"/>...</a></td>
-							</tr>
+							</tr>-->
 						</table>
 					</form>
 				</xsl:when>
