@@ -174,7 +174,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 	{
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "Collection construction: build collection."));
 		Vector<String> command = new Vector<String>();
-		command.add(GlobalProperties.getProperty("perl.path", "perl"));
+		command.add(GlobalProperties.getProperty("perl.path", "perl") + "perl");
 		command.add("-S");
 		command.add(GlobalProperties.getGS2Build() + File.separator + "bin" + File.separator + "script" + File.separator + "buildcol.pl");
 		command.add("-site");
