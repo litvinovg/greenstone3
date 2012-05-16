@@ -20,9 +20,9 @@
 			<format>
 				<!-- this format is used for the search results -->
 				<gsf:template match="documentNode">
-					<td><a><xsl:attribute name='href'>?a=d&amp;c=<xsl:value-of select='@collection'/>&amp;d=<xsl:value-of select='@nodeID'/><xsl:if test="@nodeType='leaf'">&amp;sib=1</xsl:if>&amp;dt=<xsl:value-of select='@docType'/>&amp;p.a=q&amp;&amp;p.s=TextQuery&amp;p.c=</xsl:attribute><gsf:icon/></a></td>
-					<td>[<a href='?a=p&amp;amp;sa=about&amp;amp;c={@collection}'><xsl:value-of select='@collection'/></a>]</td>
+					<td><a><xsl:attribute name='href'><xsl:value-of select="$library_name"/>/collection/<xsl:value-of select='@collection'/>/document/<xsl:value-of select='@nodeID'/></xsl:attribute><gsf:icon/></a></td>
 					<td><gsf:metadata name='Title'/></td>
+					<td>[<a href='{$library_name}/collection/{@collection}/page/about'><xsl:value-of select='@collection'/></a>]</td>
 				</gsf:template>
 			</format>
 		</serviceRack>
