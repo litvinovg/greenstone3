@@ -1087,7 +1087,7 @@
       <env key="DYLD_LIBRARY_PATH" path="${env.DYLD_LIBRARY_PATH}:${lib.jni}:${gdbm.home}/lib"/> <!-- for mac os --> <!-- need gdbm here these days ??-->
       <env key="WNHOME" path="${wn.home}"/>
     </exec>
-    <exec executable="${catalina.home}/bin/startup.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="false">
+    <exec executable="${catalina.home}/bin/startup.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="true">
       <env key="GSDLOS" value="windows"/>
       <env key="GSDL3HOME" value="${basedir}"/>
       <env key="Path" path="${tomcat.path}"/>
