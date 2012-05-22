@@ -1,26 +1,15 @@
 package org.greenstone.gsdl3.action;
 
-import org.greenstone.gsdl3.core.ModuleInterface;
 import org.greenstone.gsdl3.util.*;
 
 // XML classes
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
-import org.w3c.dom.Document;
 
 // other java stuff
-import java.io.File;
 import java.util.*;
-import java.io.StringReader;
-import org.xml.sax.InputSource;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
-import java.io.*;
-import org.xml.sax.*;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
+import java.io.Serializable;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
