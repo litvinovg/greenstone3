@@ -347,7 +347,7 @@
 		</init-param>
 		<init-param>
 			<param-name>executable</param-name>
-			<param-value>@perlpath@</param-value>	
+			<param-value>@perlpath@perl</param-value>	
 		</init-param>
          <load-on-startup>5</load-on-startup>
     </servlet>
