@@ -156,7 +156,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 	}
 
 	/** returns a list of the child ids in order, null if no children */
-	protected ArrayList getChildrenIds(String node_id)
+	protected ArrayList<String> getChildrenIds(String node_id)
 	{
 		DBInfo info = this.coll_db.getInfo(node_id);
 		if (info == null)
@@ -169,7 +169,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 		{
 			return null;
 		}
-		ArrayList children = new ArrayList();
+		ArrayList<String> children = new ArrayList<String>();
 		StringTokenizer st = new StringTokenizer(contains, ";");
 		while (st.hasMoreTokens())
 		{
@@ -197,7 +197,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 	 * name="xxx">value</metadata></metadataList>
 	 */
 	// assumes only one value per metadata
-	protected Element getMetadataList(String node_id, boolean all_metadata, ArrayList metadata_names) throws GSException
+	protected Element getMetadataList(String node_id, boolean all_metadata, ArrayList<String> metadata_names) throws GSException
 	{
 		Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		DBInfo info = this.coll_db.getInfo(node_id);
@@ -209,16 +209,16 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 		if (all_metadata)
 		{
 			// return everything out of the database
-			Set keys = info.getKeys();
-			Iterator it = keys.iterator();
+			Set<String> keys = info.getKeys();
+			Iterator<String> it = keys.iterator();
 			while (it.hasNext())
 			{
-				String key = (String) it.next();
+				String key = it.next();
 				//String value = info.getInfo(key);
-				Vector values = info.getMultiInfo(key);
+				Vector<String> values = info.getMultiInfo(key);
 				for (int i = 0; i < values.size(); i++)
 				{
-					GSXML.addMetadata(this.doc, metadata_list, key, this.macro_resolver.resolve((String) values.elementAt(i), lang, MacroResolver.SCOPE_META, node_id));
+					GSXML.addMetadata(this.doc, metadata_list, key, this.macro_resolver.resolve(values.elementAt(i), lang, MacroResolver.SCOPE_META, node_id));
 				}
 			}
 
@@ -227,7 +227,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 		{
 			for (int i = 0; i < metadata_names.size(); i++)
 			{
-				String meta_name = (String) metadata_names.get(i);
+				String meta_name = metadata_names.get(i);
 				String value = getMetadata(node_id, info, meta_name, lang);
 				GSXML.addMetadata(this.doc, metadata_list, meta_name, value);
 			}
@@ -374,7 +374,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 		int pos = metadata.indexOf(GSConstants.META_RELATION_SEP);
 		if (pos == -1)
 		{
-			Vector values = info.getMultiInfo(metadata);
+			Vector<String> values = info.getMultiInfo(metadata);
 			if (values != null)
 			{
 				// just a plain meta entry eg dc.Title
@@ -390,7 +390,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 					{
 						result.append(separator);
 					}
-					result.append(this.macro_resolver.resolve((String) values.elementAt(i), lang, MacroResolver.SCOPE_META, node_id));
+					result.append(this.macro_resolver.resolve(values.elementAt(i), lang, MacroResolver.SCOPE_META, node_id));
 				}
 				return result.toString();
 			}
@@ -481,7 +481,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 		else
 		{
 			// we have multiple meta
-			Vector values = relation_info.getMultiInfo(metadata);
+			Vector<String> values = relation_info.getMultiInfo(metadata);
 			if (values != null)
 			{
 				boolean first = true;
@@ -495,7 +495,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 					{
 						result.append(separator);
 					}
-					result.append(this.macro_resolver.resolve((String) values.elementAt(i), lang, MacroResolver.SCOPE_META, relation_id));
+					result.append(this.macro_resolver.resolve(values.elementAt(i), lang, MacroResolver.SCOPE_META, relation_id));
 				}
 			}
 			logger.info(result);
@@ -521,13 +521,13 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 			}
 			else
 			{
-				Vector values = relation_info.getMultiInfo(metadata);
+				Vector<String> values = relation_info.getMultiInfo(metadata);
 				if (values != null)
 				{
 					for (int i = values.size() - 1; i >= 0; i--)
 					{
 						result.insert(0, separator);
-						result.insert(0, this.macro_resolver.resolve((String) values.elementAt(i), lang, MacroResolver.SCOPE_META, relation_id));
+						result.insert(0, this.macro_resolver.resolve(values.elementAt(i), lang, MacroResolver.SCOPE_META, relation_id));
 					}
 				}
 

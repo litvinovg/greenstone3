@@ -24,6 +24,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 
 import org.apache.log4j.*;
@@ -47,7 +48,7 @@ public class FormatAction extends Action {
     	UserContext userContext = new UserContext(request);
 	    // get the param list
     	Element cgi_param_list = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
-	    HashMap params = GSXML.extractParams(cgi_param_list, false);
+	    HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 
     	Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
 	
@@ -74,7 +75,7 @@ public class FormatAction extends Action {
     
         Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 
-        Iterator it = params.keySet().iterator();
+        Iterator<String> it = params.keySet().iterator();
 
         if(subaction.equals("saveDocument"))
         {

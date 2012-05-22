@@ -10,6 +10,7 @@ import org.w3c.dom.Element;
 
 import java.util.HashMap;
 import java.io.File;
+import java.io.Serializable;
 
 import org.apache.log4j.*;
 
@@ -31,7 +32,7 @@ public class AppletAction extends Action
 
 		// get the collection and service params
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(cgi_param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 
 		// request_type is display (d) or request (r)
 		String request_type = (String) params.get(GSParams.REQUEST_TYPE);

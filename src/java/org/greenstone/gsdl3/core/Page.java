@@ -1,6 +1,7 @@
 package org.greenstone.gsdl3.core;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashMap;
 
 import org.greenstone.util.GlobalProperties;
@@ -126,7 +127,7 @@ public class Page {
 		
 		Element cgi_param_list = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 		if (cgi_param_list != null) {
-			HashMap params = GSXML.extractParams(cgi_param_list, false);
+			HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 			collection = (String)params.get(GSParams.COLLECTION);
 			if (collection == null) collection = "";
 		}	

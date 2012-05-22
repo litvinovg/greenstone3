@@ -15,6 +15,7 @@ import java.util.Vector;
 import java.util.Map;
 import java.util.Iterator;
 import java.io.File;
+import java.io.Serializable;
 
 import org.apache.log4j.*;
 
@@ -61,7 +62,7 @@ public class NoCollQueryAction extends Action
 
 		// extract the params from the cgi-request, and check that we have a coll specified
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(cgi_param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 
 		String request_type = (String) params.get(GSParams.REQUEST_TYPE);
 		UserContext userContext = new UserContext(request);

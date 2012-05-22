@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.File;
 import java.io.BufferedReader;
+import java.io.Serializable;
 import java.net.Authenticator;
 
 import org.apache.log4j.*;
@@ -36,7 +37,7 @@ public class IViaSearch
     protected static final String IM_START_PAGE_PARAM = "start_page_no";
 
     protected String ivia_server_url = null;
-    protected ArrayList index_ids = null;
+    protected ArrayList<String> index_ids = null;
     public IViaSearch()
     {
     }
@@ -61,7 +62,7 @@ public class IViaSearch
 	does_paging = true;
 	does_multi_index_search = true;
 	this.default_index = ",kw,au,su,ti,de,fu,"; // all of them
-	index_ids = new ArrayList();
+	index_ids = new ArrayList<String>();
 	index_ids.add("kw");
 	index_ids.add("au");	
 	index_ids.add("su");	
@@ -87,7 +88,7 @@ public class IViaSearch
 	}
 
 	// Process the request parameters
-	HashMap params = GSXML.extractParams(param_list, false);
+	HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 	// Make sure a query has been specified
 	String query = (String) params.get(QUERY_PARAM);
@@ -194,7 +195,7 @@ public class IViaSearch
     /**
        An IVia server has a fixed list of fields to search (I think) so we can hard code them here rather than reading them in from a config file
     */
-    protected void getIndexData(ArrayList index_ids, ArrayList index_names,String lang){
+    protected void getIndexData(ArrayList<String> index_ids, ArrayList<String> index_names,String lang){
 	index_ids.addAll(this.index_ids);
 	index_names.add(getTextString("param."+INDEX_PARAM+".kw", lang)); 
 	index_names.add(getTextString("param."+INDEX_PARAM+".au", lang));

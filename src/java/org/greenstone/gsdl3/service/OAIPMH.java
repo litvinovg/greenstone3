@@ -226,9 +226,9 @@ public class OAIPMH extends ServiceRack {
      *  Exceptions: badArgument; cannotDisseminateFormat; idDoesNotExist
      */ 
     NodeList params = GSXML.getChildrenByTagName(req, OAIXML.PARAM);
-    HashMap param_map = OAIXML.getParamMap(params);    
+    HashMap<String, String> param_map = OAIXML.getParamMap(params);    
     
-    String prefix = (String)param_map.get(OAIXML.METADATA_PREFIX);
+    String prefix = param_map.get(OAIXML.METADATA_PREFIX);
     if (prefix == null || prefix.equals("")) {
       //Just a double-check
       logger.error("the value of metadataPrefix att is not present in the request.");
@@ -241,7 +241,7 @@ public class OAIPMH extends ServiceRack {
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
     }
     
-    String oid = (String)param_map.get(OAIXML.OID);
+    String oid = param_map.get(OAIXML.OID);
 
     //get a DBInfo object of the identifier; if this identifier is not present in the database,
     // null is returned.
@@ -251,7 +251,7 @@ public class OAIPMH extends ServiceRack {
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.ID_DOES_NOT_EXIST, ""));
     }
 
-    ArrayList keys = new ArrayList(info.getKeys());
+    ArrayList<String> keys = new ArrayList<String>(info.getKeys());
     String oailastmodified = "";
     if(keys.contains(OAIXML.OAI_LASTMODIFIED)) {
       oailastmodified = info.getInfo(OAIXML.OAI_LASTMODIFIED);
@@ -284,7 +284,7 @@ public class OAIPMH extends ServiceRack {
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
     }
     
-    HashMap param_map = OAIXML.getParamMap(params);  
+    HashMap<String, String> param_map = OAIXML.getParamMap(params);  
     
     String prefix = "";
     Date from_date = null;
@@ -295,7 +295,7 @@ public class OAIPMH extends ServiceRack {
       logger.error("A param element containing the metadataPrefix is not present.");
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
     }
-    prefix = (String)param_map.get(OAIXML.METADATA_PREFIX);
+    prefix = param_map.get(OAIXML.METADATA_PREFIX);
     if (prefix == null || prefix.equals("")) {
       //Just a double-check
       logger.error("the value of metadataPrefix att is not present in the request.");
@@ -303,11 +303,11 @@ public class OAIPMH extends ServiceRack {
     }
     
     if(param_map.containsKey(OAIXML.FROM)) {
-      String from = (String)param_map.get(OAIXML.FROM);
+      String from = param_map.get(OAIXML.FROM);
       from_date = OAIXML.getDate(from);
     }    
     if(param_map.containsKey(OAIXML.UNTIL)) {
-      String until = (String)param_map.get(OAIXML.UNTIL);
+      String until = param_map.get(OAIXML.UNTIL);
       until_date = OAIXML.getDate(until);
     }    
 
@@ -316,7 +316,7 @@ public class OAIPMH extends ServiceRack {
       logger.error("metadata prefix is not supported.");
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
     }
-    ArrayList oid_list = getChildrenIds(OAIXML.BROWSELIST);
+    ArrayList<String> oid_list = getChildrenIds(OAIXML.BROWSELIST);
     if (oid_list == null) {
       logger.error("No matched records found in collection: browselist is empty");
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.NO_RECORDS_MATCH, ""));
@@ -324,13 +324,13 @@ public class OAIPMH extends ServiceRack {
     // all validation is done
     Element list_identifiers = OAIXML.createElement(OAIXML.LIST_IDENTIFIERS);
     for(int i=0; i<oid_list.size(); i++) {
-      String oid = (String)oid_list.get(i);
+      String oid = oid_list.get(i);
       DBInfo info = this.coll_db.getInfo(oid);
       if (info == null) {
         logger.error("Database does not contains information about oid: " +oid);
         continue;
       }
-      ArrayList keys = new ArrayList(info.getKeys());
+      ArrayList<String> keys = new ArrayList<String>(info.getKeys());
       String oailastmodified = "";
       if(keys.contains(OAIXML.OAI_LASTMODIFIED)) {
         oailastmodified = info.getInfo(OAIXML.OAI_LASTMODIFIED);
@@ -369,7 +369,7 @@ public class OAIPMH extends ServiceRack {
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
     }
     
-    HashMap param_map = OAIXML.getParamMap(params);    
+    HashMap<String, String> param_map = OAIXML.getParamMap(params);    
 
     String prefix = "";
     Date from_date = null;
@@ -380,7 +380,7 @@ public class OAIPMH extends ServiceRack {
       logger.error("A param element containing the metadataPrefix is not present.");
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
     }
-    prefix = (String)param_map.get(OAIXML.METADATA_PREFIX);
+    prefix = param_map.get(OAIXML.METADATA_PREFIX);
     if (prefix == null || prefix.equals("")) {
       //Just a double-check
       logger.error("the value of metadataPrefix att is not present in the request.");
@@ -388,11 +388,11 @@ public class OAIPMH extends ServiceRack {
     }
     
     if(param_map.containsKey(OAIXML.FROM)) {
-      String from = (String)param_map.get(OAIXML.FROM);
+      String from = param_map.get(OAIXML.FROM);
       from_date = OAIXML.getDate(from);
     }    
     if(param_map.containsKey(OAIXML.UNTIL)) {
-      String until = (String)param_map.get(OAIXML.UNTIL);
+      String until = param_map.get(OAIXML.UNTIL);
       until_date = OAIXML.getDate(until);
     }    
     Element metadata_format = getMetadataFormatElement(prefix);
@@ -402,7 +402,7 @@ public class OAIPMH extends ServiceRack {
     }
     
     //get a list of identifiers (it contains a list of strings)
-    ArrayList oid_list = getChildrenIds(OAIXML.BROWSELIST);
+    ArrayList<String> oid_list = getChildrenIds(OAIXML.BROWSELIST);
     if (oid_list == null) {
       logger.error("No matched records found in collection: browselist is empty");
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.NO_RECORDS_MATCH, ""));
@@ -410,13 +410,13 @@ public class OAIPMH extends ServiceRack {
     // all validation is done
     Element list_records = OAIXML.createElement(OAIXML.LIST_RECORDS);
     for(int i=0; i<oid_list.size(); i++) {
-      String oid = (String)oid_list.get(i);
+      String oid = oid_list.get(i);
       DBInfo info = this.coll_db.getInfo(oid);
       if (info == null) {
         logger.error("Database does not contains information about oid: " +oid);
         continue;
       }
-      ArrayList keys = new ArrayList(info.getKeys());
+      ArrayList<String> keys = new ArrayList<String>(info.getKeys());
       String oailastmodified = "";
       if(keys.contains(OAIXML.OAI_LASTMODIFIED)) {
         oailastmodified = info.getInfo(OAIXML.OAI_LASTMODIFIED);
@@ -526,7 +526,7 @@ public class OAIPMH extends ServiceRack {
       logger.error("No OID is present in the request.");
       return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.ID_DOES_NOT_EXIST, ""));
     }
-    ArrayList oid_list = getChildrenIds(OAIXML.BROWSELIST);
+    ArrayList<String> oid_list = getChildrenIds(OAIXML.BROWSELIST);
     if (oid_list == null || oid_list.contains(oid) == false) {
       logger.error("OID: " + oid + " is not present in the database.");
       Element e= OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.ID_DOES_NOT_EXIST, ""));
@@ -590,7 +590,7 @@ public class OAIPMH extends ServiceRack {
   }
 
   /** returns a list of the child ids in order, null if no children */
-  protected ArrayList getChildrenIds(String node_id) {
+  protected ArrayList<String> getChildrenIds(String node_id) {
     DBInfo info = this.coll_db.getInfo(node_id);
     if (info == null) {
       return null;
@@ -600,7 +600,7 @@ public class OAIPMH extends ServiceRack {
     if (contains.equals("")) {
       return null;
     }
-    ArrayList children = new ArrayList();
+    ArrayList<String> children = new ArrayList<String>();
     StringTokenizer st = new StringTokenizer(contains, ";");
     while (st.hasMoreTokens()) {
       String child_id = st.nextToken().replaceAll("\"", node_id);
@@ -662,9 +662,9 @@ public class OAIPMH extends ServiceRack {
      */
   public String[] getMetadata(DBInfo info, String names) {
     String[] name_value = new String[2];
-    ArrayList keys = new ArrayList(info.getKeys());
+    ArrayList<String> keys = new ArrayList<String>(info.getKeys());
     for (int i=0; i<keys.size(); i++) {
-      String key = (String)keys.get(i);
+      String key = keys.get(i);
       String first_name = "";
       String second_name = "";
       int index = names.indexOf(",");
@@ -688,7 +688,7 @@ public class OAIPMH extends ServiceRack {
     if (metadata_names == null) {
       return null;
     }
-    HashMap map = new HashMap();
+    HashMap<String, String> map = new HashMap<String, String>();
     boolean empty_map = true;
     
     for(int i=0; i<metadata_names.length; i++) {

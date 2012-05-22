@@ -28,6 +28,7 @@ import org.apache.lucene.store.Directory;
 
 import org.greenstone.LuceneWrapper3.GS2Analyzer;
 import java.io.File;
+import java.io.Serializable;
 
 import org.apache.log4j.*;
 
@@ -42,11 +43,11 @@ public class LuceneSearch
 
     protected static final String INDEX_ELEM = "index";
 
-    protected ArrayList index_ids;
+    protected ArrayList<String> index_ids;
 
     public LuceneSearch()
     {
-	index_ids = new ArrayList();
+	index_ids = new ArrayList<String>();
     }
     
     public boolean configure(Element info, Element extra_info) {
@@ -76,7 +77,7 @@ public class LuceneSearch
 	return true;
     }
     
-    protected void getIndexData(ArrayList index_ids, ArrayList index_names, String lang) 
+    protected void getIndexData(ArrayList<String> index_ids, ArrayList<String> index_names, String lang) 
     {
 	// copying exercise for index_ids, 
 	for (int i=0; i<this.index_ids.size(); i++) {
@@ -132,7 +133,7 @@ public class LuceneSearch
     {
 
 	// Process the request parameters to make sure a query has been specified
-	HashMap params = GSXML.extractParams(param_list, false);
+	HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 	String query_string = (String) params.get(QUERY_PARAM);
 
 	if (query_string == null || query_string.equals("")) {
@@ -163,7 +164,7 @@ public class LuceneSearch
 	    return result;
 	}
 
-	HashMap params = GSXML.extractParams(param_list, false);
+	HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 	String query_string = (String) params.get(QUERY_PARAM);
 
 	// Get the index

@@ -53,9 +53,9 @@ import java.util.Vector;
 public class FilesDocumentStream 
   implements DocumentStream {
   /** the files we've found so far */
-  Vector files = new Vector();
+  Vector<String> files = new Vector<String>();
   /** the directories we've found so far */
-  Vector directories = new Vector();
+  Vector<String> directories = new Vector<String>();
 
   /**
    * Filename constructor
@@ -110,7 +110,7 @@ public class FilesDocumentStream
    */
   protected void expandIfNecessary() {
     while (directories.size() > 0) {
-      String dirname = (String) directories.elementAt(0);
+      String dirname = directories.elementAt(0);
       directories.removeElement(dirname);
       File dir = new File(dirname);
       if (!dir.exists()) throw new Error ("error in expand: expecting a directory " + dirname);
@@ -143,7 +143,7 @@ public class FilesDocumentStream
     
     if (!hasNextDocument()) throw new Error("Doesn't have another Document");
 
-    String filename = (String) files.elementAt(files.size() - 1);
+    String filename = files.elementAt(files.size() - 1);
     files.removeElementAt(files.size() - 1);
     File file = new File(filename);
     

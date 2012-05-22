@@ -59,7 +59,7 @@ public class PropertiesStep extends Step
     JTable[] _tables = null;
     OptionList[] _modifiedOptionLists = null;
     
-    HashMap _optionListTableMap = new HashMap();
+    HashMap<OptionList, PropertyTable> _optionListTableMap = new HashMap<OptionList, PropertyTable>();
 
     public PropertiesStep(Element propertiesStepElement, SequenceList parent)
     {
@@ -105,7 +105,7 @@ public class PropertiesStep extends Step
 
     public JTable getTableFromOptionList(OptionList list)
     {
-	return ((JTable)_optionListTableMap.get(list));
+	return _optionListTableMap.get(list);
     }
 
     public class PropertiesButtonListener implements ActionListener
@@ -564,7 +564,7 @@ public class PropertiesStep extends Step
         }
 
 
-        public Class getColumnClass(int c) {
+        public Class<? extends Object> getColumnClass(int c) {
             return getValueAt(0, c).getClass();
         }
 

@@ -29,11 +29,11 @@ import java.util.Set;
  */
 public class DBInfo
 {
-	protected HashMap info_map_;
+	protected HashMap<String, Vector<String>> info_map_;
 
 	public DBInfo()
 	{
-		info_map_ = new HashMap();
+		info_map_ = new HashMap<String, Vector<String>>();
 	}
 
 	// methods for keys that can have a single value
@@ -41,7 +41,7 @@ public class DBInfo
 	/** set the value for a key - replaces any existing value */
 	public void setInfo(String key, String value)
 	{
-		Vector v = new Vector();
+		Vector<String> v = new Vector<String>();
 		v.add(value);
 		info_map_.put(key, v);
 	}
@@ -52,7 +52,7 @@ public class DBInfo
 	 */
 	public String getInfo(String key)
 	{
-		Vector items = (Vector) info_map_.get(key);
+		Vector items = info_map_.get(key);
 		if (items == null)
 		{
 			return "";
@@ -65,10 +65,10 @@ public class DBInfo
 	/** add a value to a key - for keys that can have multiple values */
 	public void addInfo(String key, String value)
 	{
-		Vector v = (Vector) info_map_.get(key);
+		Vector<String> v = info_map_.get(key);
 		if (v == null)
 		{
-			v = new Vector();
+			v = new Vector<String>();
 		}
 		v.add(value);
 		info_map_.put(key, v);
@@ -79,13 +79,13 @@ public class DBInfo
 	 * 
 	 * @return Vector of Strings
 	 */
-	public Vector getMultiInfo(String key)
+	public Vector<String> getMultiInfo(String key)
 	{
-		return (Vector) info_map_.get(key);
+		return info_map_.get(key);
 	}
 
 	/** returns a list of all the keys in the info */
-	public Set getKeys()
+	public Set<String> getKeys()
 	{
 		return info_map_.keySet();
 	}

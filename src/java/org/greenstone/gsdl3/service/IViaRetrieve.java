@@ -204,7 +204,7 @@ public class IViaRetrieve
    	return node_id; 
     }
 
-    protected ArrayList getChildrenIds(String node_id){
+    protected ArrayList<String> getChildrenIds(String node_id){
 	return null; 
     }
     
@@ -214,7 +214,7 @@ public class IViaRetrieve
     
     protected Element getMetadataList (String doc_id,
 				       boolean all_metadata,
-				       ArrayList metadata_names) 
+				       ArrayList<String> metadata_names) 
 	throws GSException {
 	
 	Element meta_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
@@ -224,9 +224,9 @@ public class IViaRetrieve
 	boolean metadata_found = false;
 
 	for (int i=0; i<metadata_names.size();i++){
-	    if (isAcceptableMetadata((String)metadata_names.get(i))){
+	    if (isAcceptableMetadata(metadata_names.get(i))){
 		metadata_found = true;
-		field_list.append((String)metadata_names.get(i));
+		field_list.append(metadata_names.get(i));
 		field_list.append(",");
 	    }
 	}

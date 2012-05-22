@@ -29,11 +29,11 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
     public DBInfo getInfo(String id){
 	if(sqlState == null) return null;
         String dbInfoState = sqlState.getDBInfoStatement(id);
-        ArrayList result = executeQuery(dbInfoState);
+        ArrayList<HashMap<String, Object>> result = executeQuery(dbInfoState);
 	if (result.size() == 0) return null;
 	DBInfo info = new DBInfo();
 	for(int i=0;  i<result.size();i++){
-	    HashMap arow = (HashMap)result.get(i);
+	    HashMap arow = result.get(i);
 	    Iterator ite = arow.keySet().iterator();
 	    while(ite.hasNext()){
 		String key = (String)ite.next();
@@ -89,9 +89,9 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
     	return true;
     }
 
-    public synchronized ArrayList executeQuery(String query_statement){
+    public synchronized ArrayList<HashMap<String, Object>> executeQuery(String query_statement){
 	//the database hasn't been correct yet
-    	ArrayList results = new ArrayList();
+    	ArrayList<HashMap<String, Object>> results = new ArrayList<HashMap<String, Object>>();
 	ResultSet rs = null;
 	try{	
 	    //by passing the two arguments, the ResultSet returned from executeQuery is updatable
@@ -100,7 +100,7 @@ public class DerbyDBWrapper implements MetadataDBWrapper{
 	    ResultSetMetaData rsmd = rs.getMetaData();
 	    int numOfColumns = rsmd.getColumnCount();
 	    while(rs.next()){
-		HashMap arow = new HashMap();
+		HashMap<String, Object> arow = new HashMap<String, Object>();
 		for(int i = 1; i <= numOfColumns ; i++){
 		    arow.put(rsmd.getColumnName(i).toLowerCase(), rs.getObject(i));
 		}

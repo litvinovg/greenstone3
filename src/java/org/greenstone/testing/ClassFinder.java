@@ -18,7 +18,7 @@ import java.io.*;
  * a list of fully qualified class names from the class files in the directory tree.
  */
 public class ClassFinder {
-    final private Vector classNameList = new Vector ();
+    final private Vector<String> classNameList = new Vector<String> ();
     final private int startPackageName;
 
     /**
@@ -77,7 +77,7 @@ public class ClassFinder {
     /**
      * Return the found classes.
      */
-    public Iterator getClasses () {
+    public Iterator<String> getClasses () {
         return classNameList.iterator ();
     }
 }

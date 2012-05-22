@@ -123,7 +123,7 @@ public class GSXSLT
 	 * takes any import or include nodes, and creates absolute path names for
 	 * the files
 	 */
-	public static void absoluteIncludePaths(Document stylesheet, String gsdl3_home, String site_name, String collection, String interface_name, ArrayList base_interfaces)
+	public static void absoluteIncludePaths(Document stylesheet, String gsdl3_home, String site_name, String collection, String interface_name, ArrayList<String> base_interfaces)
 	{
 
 		Element base_node = stylesheet.getDocumentElement();
@@ -150,10 +150,10 @@ public class GSXSLT
 	 * select='metadataList/metadata[@name=yyy]> elements, and extracts the
 	 * metadata names into a Vector
 	 */
-	public static Vector extractWantedMetadata(Document stylesheet, String template_name)
+	public static Vector<String> extractWantedMetadata(Document stylesheet, String template_name)
 	{
 
-		Vector metadata = new Vector();
+		Vector<String> metadata = new Vector<String>();
 		Element base_node = stylesheet.getDocumentElement();
 		NodeList templates = base_node.getElementsByTagNameNS("*", "template");
 		for (int i = 0; i < templates.getLength(); i++)

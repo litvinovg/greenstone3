@@ -1,6 +1,7 @@
 package org.greenstone.gsdl3.sql;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,7 +22,7 @@ public interface MetadataDBWrapper{
     public boolean openAndCreateConnection(String databasepath);
 
      //return a list of rows
-    public ArrayList executeQuery(String query_statement);
+    public ArrayList<HashMap<String, Object>> executeQuery(String query_statement);
 
     public ResultSet queryResultSet(String query_statement);
 

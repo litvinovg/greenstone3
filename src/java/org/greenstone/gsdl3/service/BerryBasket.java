@@ -34,6 +34,7 @@ import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.UserContext;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Properties;
 import java.util.Date;
@@ -65,19 +66,19 @@ public class BerryBasket extends ServiceRack
 	protected static final String delimiter = "|";
 	protected static final int delay = 1800000;
 
-	protected Hashtable userMap = null;
-	protected Hashtable timerMap = null;
+	protected Hashtable<String, Hashtable<String, Hashtable<String, Item>>> userMap = null;
+	protected Hashtable<String, UserTimer> timerMap = null;
 	protected String username = "";
 	protected String password = "";
 
 	/** constructor */
 	public BerryBasket()
 	{
-		userMap = new Hashtable();
-		timerMap = new Hashtable();
+		userMap = new Hashtable<String, Hashtable<String, Hashtable<String, Item>>>();
+		timerMap = new Hashtable<String, UserTimer>();
 	}
 
-	private Hashtable updateDocMap(Element request)
+	private Hashtable<String, Hashtable<String, Item>> updateDocMap(Element request)
 	{
 
 		String id = request.getAttribute("uid");
@@ -86,17 +87,17 @@ public class BerryBasket extends ServiceRack
 		{
 			if (timerMap.containsKey(id))
 			{
-				UserTimer timer = (UserTimer) timerMap.get(id);
+				UserTimer timer = timerMap.get(id);
 				timer.restart();
 			}
-			return (Hashtable) userMap.get(id);
+			return userMap.get(id);
 		}
 		else
 		{
 			UserTimer timer = new UserTimer(delay, id);
 			timerMap.put(id, timer);
 			timer.start();
-			Hashtable newDocs = new Hashtable();
+			Hashtable<String, Hashtable<String, Item>> newDocs = new Hashtable<String, Hashtable<String, Item>>();
 			userMap.put(id, newDocs);
 			return newDocs;
 		}
@@ -209,7 +210,7 @@ public class BerryBasket extends ServiceRack
 
 	protected Element processAddItem(Element request)
 	{
-		Hashtable docsMap = updateDocMap(request);
+		Hashtable<String, Hashtable<String, Item>> docsMap = updateDocMap(request);
 
 		// Create a new (empty) result message
 		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
@@ -222,7 +223,7 @@ public class BerryBasket extends ServiceRack
 			return result; // Return the empty result
 		}
 
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		String item = (String) params.get("item");
 		String collection = "";
@@ -235,7 +236,7 @@ public class BerryBasket extends ServiceRack
 
 		if (docsMap.containsKey(collection))
 		{
-			Hashtable items = (Hashtable) docsMap.get(collection);
+			Hashtable<String, Item> items = docsMap.get(collection);
 			if (!items.containsKey(item))
 			{
 				Item newItem = generateItem(collection, item);
@@ -245,7 +246,7 @@ public class BerryBasket extends ServiceRack
 		}
 		else
 		{
-			Hashtable items = new Hashtable();
+			Hashtable<String, Item> items = new Hashtable<String, Item>();
 			Item newItem = generateItem(collection, item);
 			items.put(item, newItem);
 			docsMap.put(collection, items);
@@ -260,7 +261,7 @@ public class BerryBasket extends ServiceRack
 
 		Item item = new Item(collection, id);
 		String to = GSPath.appendLink(collection, "DocumentMetadataRetrieve");
-		ArrayList tmp = new ArrayList();
+		ArrayList<String> tmp = new ArrayList<String>();
 		tmp.add(id);
 		
 		UserContext userContext = new UserContext();
@@ -302,7 +303,7 @@ public class BerryBasket extends ServiceRack
 
 	protected Element processDeleteItems(Element request)
 	{
-		Hashtable docsMap = updateDocMap(request);
+		Hashtable<String, Hashtable<String, Item>> docsMap = updateDocMap(request);
 
 		// Create a new (empty) result message
 		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
@@ -316,7 +317,7 @@ public class BerryBasket extends ServiceRack
 			return result; // Return the empty result
 		}
 
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		String param = (String) params.get("items");
 
@@ -340,7 +341,7 @@ public class BerryBasket extends ServiceRack
 
 			if (docsMap.containsKey(collection))
 			{
-				Hashtable itemMap = (Hashtable) docsMap.get(collection);
+				Hashtable itemMap = docsMap.get(collection);
 				if (itemMap.containsKey(item))
 				{
 					itemMap.remove(item);
@@ -358,7 +359,7 @@ public class BerryBasket extends ServiceRack
 
 	protected Element processDeleteItem(Element request)
 	{
-		Hashtable docsMap = updateDocMap(request);
+		Hashtable<String, Hashtable<String, Item>> docsMap = updateDocMap(request);
 
 		// Create a new (empty) result message
 		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
@@ -372,7 +373,7 @@ public class BerryBasket extends ServiceRack
 			return result; // Return the empty result
 		}
 
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		String param = (String) params.get("item");
 
@@ -392,7 +393,7 @@ public class BerryBasket extends ServiceRack
 
 		if (docsMap.containsKey(collection))
 		{
-			Hashtable itemMap = (Hashtable) docsMap.get(collection);
+			Hashtable itemMap = docsMap.get(collection);
 			if (itemMap.containsKey(item))
 			{
 				itemMap.remove(item);
@@ -408,18 +409,18 @@ public class BerryBasket extends ServiceRack
 
 	protected Element processItemNum(Element request)
 	{
-		Hashtable docsMap = updateDocMap(request);
+		Hashtable<String, Hashtable<String, Item>> docsMap = updateDocMap(request);
 
 		// Create a new (empty) result message
 		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
 
 		int size = 0;
 		String ids = "";
-		Iterator keys = docsMap.keySet().iterator();
+		Iterator<String> keys = docsMap.keySet().iterator();
 
 		while (keys.hasNext())
 		{
-			Hashtable items = (Hashtable) docsMap.get((String) keys.next());
+			Hashtable items = docsMap.get(keys.next());
 			size += items.size();
 			Iterator values = items.values().iterator();
 			while (values.hasNext())
@@ -436,7 +437,7 @@ public class BerryBasket extends ServiceRack
 		return result;
 	}
 
-	private Element getDocumentMetadata(String to, UserContext userContext, Iterator ids)
+	private Element getDocumentMetadata(String to, UserContext userContext, Iterator<String> ids)
 	{
 
 		// Build a request to obtain some document metadata
@@ -445,7 +446,7 @@ public class BerryBasket extends ServiceRack
 		dm_message.appendChild(dm_request);
 
 		// Create a parameter list to specify the required metadata information
-		HashSet meta_names = new HashSet();
+		HashSet<String> meta_names = new HashSet<String>();
 		meta_names.add("Title"); // the default
 		meta_names.add("root_Title");
 		meta_names.add("Date");
@@ -453,10 +454,10 @@ public class BerryBasket extends ServiceRack
 		Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 
 		Element param = null;
-		Iterator i = meta_names.iterator();
+		Iterator<String> i = meta_names.iterator();
 		while (i.hasNext())
 		{
-			String name = (String) i.next();
+			String name = i.next();
 			param = this.doc.createElement(GSXML.PARAM_ELEM);
 			param_list.appendChild(param);
 			param.setAttribute(GSXML.NAME_ATT, "metadata");
@@ -475,7 +476,7 @@ public class BerryBasket extends ServiceRack
 			// Add the documentNode to the list
 			Element dm_doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
 			dm_doc_list.appendChild(dm_doc_node);
-			dm_doc_node.setAttribute(GSXML.NODE_ID_ATT, (String) ids.next());
+			dm_doc_node.setAttribute(GSXML.NODE_ID_ATT, ids.next());
 		}
 
 		return (Element) this.router.process(dm_message);
@@ -484,17 +485,17 @@ public class BerryBasket extends ServiceRack
 
 	protected Element processDisplayList(Element request)
 	{
-		Hashtable docsMap = updateDocMap(request);
+		Hashtable<String, Hashtable<String, Item>> docsMap = updateDocMap(request);
 
 		// Create a new (empty) result message
 		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
 
-		Iterator keys = docsMap.keySet().iterator();
+		Iterator<String> keys = docsMap.keySet().iterator();
 
 		while (keys.hasNext())
 		{
-			String collection = (String) keys.next();
-			Hashtable items = (Hashtable) docsMap.get(collection);
+			String collection = keys.next();
+			Hashtable items = docsMap.get(collection);
 			Iterator itemItr = items.values().iterator();
 
 			Element collectionNode = this.doc.createElement("berryList");
@@ -533,7 +534,7 @@ public class BerryBasket extends ServiceRack
 			return result; // Return the empty result
 		}
 
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		String to = (String) params.get("address");
 		String subject = (String) params.get("subject");

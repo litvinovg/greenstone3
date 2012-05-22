@@ -215,17 +215,17 @@ public class XMLTransformer
 		return transform(stylesheet, source, null, null, null);
 	}
 
-	public Node transform(Document stylesheet, Document source, HashMap parameters)
+	public Node transform(Document stylesheet, Document source, HashMap<String, Comparable> parameters)
 	{
 		return transform(stylesheet, source, parameters, null, null);
 	}
 
-	public Node transform(Document stylesheet, Document source, HashMap parameters, Document docDocType)
+	public Node transform(Document stylesheet, Document source, HashMap<String, Comparable> parameters, Document docDocType)
 	{
 		return transform(stylesheet, source, parameters, docDocType, null);
 	}
 
-	protected Node transform(Document stylesheet, Document source, HashMap parameters, Document docDocType, Document resultNode)
+	protected Node transform(Document stylesheet, Document source, HashMap<String, Comparable> parameters, Document docDocType, Document resultNode)
 	{
 		try
 		{

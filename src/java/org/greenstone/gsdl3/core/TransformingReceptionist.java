@@ -16,6 +16,7 @@ import org.w3c.dom.NamedNodeMap;
 // other java classes
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.FileReader;
@@ -52,7 +53,7 @@ public class TransformingReceptionist extends Receptionist
 	static final String preprocess_xsl_filename = GlobalProperties.getGSDL3Home() + File.separatorChar + "ui" + File.separatorChar + "xslt" + File.separatorChar + "preProcess.xsl";
 
 	/** the list of xslt to use for actions */
-	protected HashMap xslt_map = null;
+	protected HashMap<String, String> xslt_map = null;
 
 	/** a transformer class to transform xml using xslt */
 	protected XMLTransformer transformer = null;
@@ -63,7 +64,7 @@ public class TransformingReceptionist extends Receptionist
 	public TransformingReceptionist()
 	{
 		super();
-		this.xslt_map = new HashMap();
+		this.xslt_map = new HashMap<String, String>();
 		this.transformer = new XMLTransformer();
 		try
 		{
@@ -196,7 +197,7 @@ public class TransformingReceptionist extends Receptionist
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (cgi_param_list != null)
 		{
-			HashMap params = GSXML.extractParams(cgi_param_list, false);
+			HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 			if ((excerptID = (String) params.get(GSParams.EXCERPT_ID)) != null)
 			{
 				subdivide = true;
@@ -460,7 +461,7 @@ public class TransformingReceptionist extends Receptionist
 		if (cgi_param_list != null)
 		{
 			// Don't waste time getting all the parameters
-			HashMap params = GSXML.extractParams(cgi_param_list, false);
+			HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 			collection = (String) params.get(GSParams.COLLECTION);
 			if (collection == null)
 			{
@@ -882,12 +883,12 @@ public class TransformingReceptionist extends Receptionist
 		if (!subaction.equals(""))
 		{
 			String key = action + ":" + subaction;
-			name = (String) this.xslt_map.get(key);
+			name = this.xslt_map.get(key);
 		}
 		// try the action by itself
 		if (name == null)
 		{
-			name = (String) this.xslt_map.get(action);
+			name = this.xslt_map.get(action);
 		}
 		// now find the absolute path
 		ArrayList<File> stylesheets = GSFile.getStylesheetFiles(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, name);

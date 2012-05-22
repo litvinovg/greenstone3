@@ -100,7 +100,7 @@ public class Server2Settings extends BaseServerSettings
 	return returnValues;
     }
 
-    public void save(ScriptReadWrite scriptReadWrite, ArrayList newFileLines) 
+    public void save(ScriptReadWrite scriptReadWrite, ArrayList<String> newFileLines) 
     {
 	// write only 1 or 0 (and not true or false) for Server2
 	boolean auto_enter = autoEnter.isSelected();

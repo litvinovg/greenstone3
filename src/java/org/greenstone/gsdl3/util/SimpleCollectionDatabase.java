@@ -153,11 +153,11 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable
 	public boolean setInfo(String mainKey, DBInfo info)
 	{
 		StringBuilder valueToAdd = new StringBuilder();
-		Iterator i = info.getKeys().iterator();
+		Iterator<String> i = info.getKeys().iterator();
 		while (i.hasNext())
 		{
-			String currentKey = (String)i.next();
-			Vector currentValues = (Vector)info.getMultiInfo(currentKey);
+			String currentKey = i.next();
+			Vector<String> currentValues = (Vector<String>)info.getMultiInfo(currentKey);
 			
 			if(currentValues.size() == 0)
 			{

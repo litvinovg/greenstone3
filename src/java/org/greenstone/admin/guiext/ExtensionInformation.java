@@ -77,7 +77,7 @@ public class ExtensionInformation
     public void loadExternalJar(String filename){
 	//Load the dynamic jar loader
 	URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-	Class sysclass = URLClassLoader.class;
+	Class<URLClassLoader> sysclass = URLClassLoader.class;
 	final Class[] parameters = new Class[]{URL.class};
 	Method method = null;
 	try{

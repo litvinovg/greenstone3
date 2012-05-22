@@ -1,6 +1,7 @@
 package org.greenstone.gsdl3.service;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -78,7 +79,7 @@ public class ServiceUtil extends ServiceRack
 			return result;  // Return the empty result
 		}
 
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 		
 		String regex = (String)params.get("extregex");
 		if(regex == null)

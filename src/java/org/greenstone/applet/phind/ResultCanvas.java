@@ -75,7 +75,7 @@ public class ResultCanvas extends Canvas {
     int numberOfItems;
     int firstItemDisplayed;
     int itemSelected;
-    Vector items;
+    Vector<ResultItem> items;
     
     // the background image
     public static Image backgroundImage;
@@ -94,7 +94,7 @@ public class ResultCanvas extends Canvas {
 
 	lineSpacing = phind.fontSize + 2;
 
-	items = new Vector();
+	items = new Vector<ResultItem>();
 	numberOfItems = 0;
 	firstItemDisplayed = 0;
 	itemSelected = -1;
@@ -131,9 +131,9 @@ public class ResultCanvas extends Canvas {
 	// This is not efficient, but I don't care right now.
 	int index = 0;
 	while ((index < numberOfItems) &&
-	       ((item.sort < ((ResultItem) items.elementAt(index)).sort) ||
-		((item.sort == ((ResultItem) items.elementAt(index)).sort) &&
-		 (item.frequency <= ((ResultItem) items.elementAt(index)).frequency)))) {
+	       ((item.sort < items.elementAt(index).sort) ||
+		((item.sort == items.elementAt(index).sort) &&
+		 (item.frequency <= items.elementAt(index).frequency)))) {
 	    index++;
 	}
 	items.insertElementAt(item,index);
@@ -159,7 +159,7 @@ public class ResultCanvas extends Canvas {
 	boolean found = false;
 	int index = 0;
 	while (!found && (index < numberOfItems)) {
-	    if (((ResultItem) items.elementAt(index)).isMorePhrases()) {
+	    if (items.elementAt(index).isMorePhrases()) {
 		found = true;
 	    } else {
 		index++;
@@ -191,7 +191,7 @@ public class ResultCanvas extends Canvas {
 	boolean found = false;
 	int index = 0;
 	while (!found && (index < numberOfItems)) {
-	    if (((ResultItem) items.elementAt(index)).isMoreDocuments()) {
+	    if (items.elementAt(index).isMoreDocuments()) {
 		found = true;
 	    } else {
 		index++;
@@ -224,7 +224,7 @@ public class ResultCanvas extends Canvas {
 	boolean found = false;
 	int index = 0;
 	while (!found && (index < numberOfItems)) {
-	    if (((ResultItem) items.elementAt(index)).isMoreLinks()) {
+	    if (items.elementAt(index).isMoreLinks()) {
 		found = true;
 	    } else {
 		index++;
@@ -331,7 +331,7 @@ public class ResultCanvas extends Canvas {
 	     (i < numberOfItems) && (y + lineSpacing < canvasSize.height); i++) {
 
 	    // Get the resultItem to output
-	    result = (ResultItem) items.elementAt(i);
+	    result = items.elementAt(i);
 	    
 	    // Graphics settings for drawing this line
 	    y += lineSpacing;
@@ -435,7 +435,7 @@ public class ResultCanvas extends Canvas {
 	     (i < numberOfItems) && (y + lineSpacing < canvasSize.height); i++) {
 	    
 	    // Get the resultItem to output
-	    result = (ResultItem) items.elementAt(i);
+	    result = items.elementAt(i);
 	    docsText = result.docsText();
 	    freqText = result.freqText();
 	    
@@ -494,7 +494,7 @@ public class ResultCanvas extends Canvas {
 	// which Item is selected?
 	int rowSelected = event.getY() / lineSpacing;
 	itemSelected = rowSelected + firstItemDisplayed;
-	ResultItem item = (ResultItem) items.elementAt(itemSelected);
+	ResultItem item = items.elementAt(itemSelected);
 
 	if (itemSelected <= numberOfItems) {
 	    

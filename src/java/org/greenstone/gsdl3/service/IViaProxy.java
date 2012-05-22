@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.net.URL;
@@ -175,7 +176,7 @@ public class IViaProxy
 	}
 
 	// Process the request parameters
-	HashMap params = GSXML.extractParams(param_list, false);
+	HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 	// Make sure a query has been specified
 	String query = (String) params.get(QUERY_PARAM);

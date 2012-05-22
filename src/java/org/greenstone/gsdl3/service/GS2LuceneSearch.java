@@ -29,6 +29,7 @@ import org.w3c.dom.Document;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.File;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
     /** methods to handle actually doing the query */
 
     /** do any initialisation of the query object */
-    protected boolean setUpQueryer(HashMap params) {
+    protected boolean setUpQueryer(HashMap<String, Serializable> params) {
 	String indexdir = GSFile.collectionBaseDir(this.site_home, this.cluster_name) + File.separatorChar + "index"+File.separatorChar;
 	
 	String index = "didx";
@@ -172,7 +173,7 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
     }
 
     /** add in term info if available */
-    protected boolean addTermInfo(Element term_list, HashMap params,
+    protected boolean addTermInfo(Element term_list, HashMap<String, Serializable> params,
 				  Object query_result) {
 	String query_level = (String)params.get(LEVEL_PARAM); // the current query level
 	

@@ -31,6 +31,7 @@ import org.w3c.dom.Element;
 import org.apache.log4j.*;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -114,7 +115,7 @@ public class ArchiveRetrieve extends ServiceRack
 			GSXML.addError(this.doc, result, "DocumentFilePathRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;  
 		}
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 		
 		String oid = (String) params.get("oid");
 		String collection = (String) params.get("c");
@@ -151,7 +152,7 @@ public class ArchiveRetrieve extends ServiceRack
 			GSXML.addError(this.doc, result, "DocumentFilePathRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;  
 		}
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 		
 		String srcFile = (String) params.get("srcfile");
 		String collection = (String) params.get("c");
@@ -222,7 +223,7 @@ public class ArchiveRetrieve extends ServiceRack
 			GSXML.addError(this.doc, result, "AssociatedImportFilesRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;  
 		}
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 		
 		String oid = (String) params.get("oid");
 		String collection = (String) params.get("c");
@@ -268,14 +269,14 @@ public class ArchiveRetrieve extends ServiceRack
 		}
 		
 		String srcFile = info.getInfo("src-file");
-		Vector data = info.getMultiInfo("assoc-file");
+		Vector<String> data = info.getMultiInfo("assoc-file");
 		
 		Element metadataList = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		metadataList.appendChild(createMetadataElement("srcfile", srcFile));
 		
 		for (int i = 0; i < data.size(); i++)
 		{
-			metadataList.appendChild(createMetadataElement("assocfile", (String)data.get(i)));
+			metadataList.appendChild(createMetadataElement("assocfile", data.get(i)));
 		}
 		
 		result.appendChild(metadataList);

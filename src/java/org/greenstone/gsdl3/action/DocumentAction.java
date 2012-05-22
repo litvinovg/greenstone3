@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.io.File;
+import java.io.Serializable;
 
 import org.apache.log4j.*;
 
@@ -89,7 +90,7 @@ public class DocumentAction extends Action
 		// get the request - assume only one
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 		Element cgi_paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(cgi_paramList, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(cgi_paramList, false);
 
 		// just in case there are some that need to get passed to the services
 		HashMap service_params = (HashMap) params.get("s0");
@@ -359,7 +360,7 @@ public class DocumentAction extends Action
 		dm_message.appendChild(dm_request);
 		// Create a parameter list to specify the required metadata information
 
-		HashSet meta_names = new HashSet();
+		HashSet<String> meta_names = new HashSet<String>();
 		meta_names.add("Title"); // the default
 		if (format_elem != null)
 		{
@@ -721,7 +722,7 @@ public class DocumentAction extends Action
 	{
 		// do the query again to get term info 
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(cgi_param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 
 		HashMap previous_params = (HashMap) params.get("p");
 		if (previous_params == null)
@@ -766,7 +767,7 @@ public class DocumentAction extends Action
 		String metadata_path = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		Element metadata_list = (Element) GSXML.getNodeByPath(mr_query_response, metadata_path);
 
-		HashSet query_term_variants = new HashSet();
+		HashSet<String> query_term_variants = new HashSet<String>();
 		NodeList equivalent_terms_nodelist = query_term_list_element.getElementsByTagName("equivTermList");
 		if (equivalent_terms_nodelist == null || equivalent_terms_nodelist.getLength() == 0)
 		{
@@ -808,12 +809,12 @@ public class DocumentAction extends Action
 			}
 		}
 
-		ArrayList phrase_query_term_variants_hierarchy = new ArrayList();
+		ArrayList<ArrayList<HashSet<String>>> phrase_query_term_variants_hierarchy = new ArrayList<ArrayList<HashSet<String>>>();
 
 		Element query_element = GSXML.getNamedElement(metadata_list, GSXML.METADATA_ELEM, GSXML.NAME_ATT, "query");
 		String performed_query = GSXML.getNodeText(query_element) + " ";
 
-		ArrayList phrase_query_p_term_variants_list = new ArrayList();
+		ArrayList<HashSet<String>> phrase_query_p_term_variants_list = new ArrayList<HashSet<String>>();
 		int term_start = 0;
 		boolean in_term = false;
 		boolean in_phrase = false;
@@ -839,7 +840,7 @@ public class DocumentAction extends Action
 				if (term_element != null)
 				{
 
-					HashSet phrase_query_p_term_x_variants = new HashSet();
+					HashSet<String> phrase_query_p_term_x_variants = new HashSet<String>();
 
 					NodeList term_equivalent_terms_nodelist = term_element.getElementsByTagName("equivTermList");
 					if (term_equivalent_terms_nodelist == null || term_equivalent_terms_nodelist.getLength() == 0)
@@ -878,7 +879,7 @@ public class DocumentAction extends Action
 					if (in_phrase == false)
 					{
 						phrase_query_term_variants_hierarchy.add(phrase_query_p_term_variants_list);
-						phrase_query_p_term_variants_list = new ArrayList();
+						phrase_query_p_term_variants_list = new ArrayList<HashSet<String>>();
 					}
 				}
 			}
@@ -897,7 +898,7 @@ public class DocumentAction extends Action
 					phrase_query_term_variants_hierarchy.add(phrase_query_p_term_variants_list);
 				}
 
-				phrase_query_p_term_variants_list = new ArrayList();
+				phrase_query_p_term_variants_list = new ArrayList<HashSet<String>>();
 			}
 		}
 
@@ -907,14 +908,14 @@ public class DocumentAction extends Action
 	/**
 	 * Highlights query terms in a piece of text.
 	 */
-	private Element highlightQueryTermsInternal(String content, HashSet query_term_variants, ArrayList phrase_query_term_variants_hierarchy)
+	private Element highlightQueryTermsInternal(String content, HashSet<String> query_term_variants, ArrayList<ArrayList<HashSet<String>>> phrase_query_term_variants_hierarchy)
 	{
 		// Convert the content string to an array of characters for speed
 		char[] content_characters = new char[content.length()];
 		content.getChars(0, content.length(), content_characters, 0);
 
 		// Now skim through the content, identifying word matches
-		ArrayList word_matches = new ArrayList();
+		ArrayList<WordMatch> word_matches = new ArrayList<WordMatch>();
 		int word_start = 0;
 		boolean in_word = false;
 		boolean preceding_word_matched = false;
@@ -977,22 +978,22 @@ public class DocumentAction extends Action
 			}
 		}
 
-		ArrayList highlight_start_positions = new ArrayList();
-		ArrayList highlight_end_positions = new ArrayList();
+		ArrayList<Integer> highlight_start_positions = new ArrayList<Integer>();
+		ArrayList<Integer> highlight_end_positions = new ArrayList<Integer>();
 
 		// Deal with phrases now
-		ArrayList partial_phrase_matches = new ArrayList();
+		ArrayList<PartialPhraseMatch> partial_phrase_matches = new ArrayList<PartialPhraseMatch>();
 		for (int i = 0; i < word_matches.size(); i++)
 		{
-			WordMatch word_match = (WordMatch) word_matches.get(i);
+			WordMatch word_match = word_matches.get(i);
 
 			// See if any partial phrase matches are extended by this word
 			if (word_match.preceding_word_matched)
 			{
 				for (int j = partial_phrase_matches.size() - 1; j >= 0; j--)
 				{
-					PartialPhraseMatch partial_phrase_match = (PartialPhraseMatch) partial_phrase_matches.remove(j);
-					ArrayList phrase_query_p_term_variants_list = (ArrayList) phrase_query_term_variants_hierarchy.get(partial_phrase_match.query_phrase_number);
+					PartialPhraseMatch partial_phrase_match = partial_phrase_matches.remove(j);
+					ArrayList phrase_query_p_term_variants_list = phrase_query_term_variants_hierarchy.get(partial_phrase_match.query_phrase_number);
 					HashSet phrase_query_p_term_x_variants = (HashSet) phrase_query_p_term_variants_list.get(partial_phrase_match.num_words_matched);
 					if (phrase_query_p_term_x_variants.contains(word_match.word))
 					{
@@ -1005,11 +1006,11 @@ public class DocumentAction extends Action
 							if (!highlight_end_positions.isEmpty())
 							{
 								int last_highlight_index = highlight_end_positions.size() - 1;
-								int last_highlight_end = ((Integer) highlight_end_positions.get(last_highlight_index)).intValue();
+								int last_highlight_end = highlight_end_positions.get(last_highlight_index).intValue();
 								if (last_highlight_end > partial_phrase_match.start_position)
 								{
 									// There is an overlap, so remove the previous phrase match
-									int last_highlight_start = ((Integer) highlight_start_positions.remove(last_highlight_index)).intValue();
+									int last_highlight_start = highlight_start_positions.remove(last_highlight_index).intValue();
 									highlight_end_positions.remove(last_highlight_index);
 									partial_phrase_match.start_position = last_highlight_start;
 								}
@@ -1034,7 +1035,7 @@ public class DocumentAction extends Action
 			// See if this word is at the start of any of the phrases
 			for (int p = 0; p < phrase_query_term_variants_hierarchy.size(); p++)
 			{
-				ArrayList phrase_query_p_term_variants_list = (ArrayList) phrase_query_term_variants_hierarchy.get(p);
+				ArrayList phrase_query_p_term_variants_list = phrase_query_term_variants_hierarchy.get(p);
 				HashSet phrase_query_p_term_1_variants = (HashSet) phrase_query_p_term_variants_list.get(0);
 				if (phrase_query_p_term_1_variants.contains(word_match.word))
 				{
@@ -1059,8 +1060,8 @@ public class DocumentAction extends Action
 		int last_wrote = 0;
 		for (int i = 0; i < highlight_start_positions.size(); i++)
 		{
-			int highlight_start = ((Integer) highlight_start_positions.get(i)).intValue();
-			int highlight_end = ((Integer) highlight_end_positions.get(i)).intValue();
+			int highlight_start = highlight_start_positions.get(i).intValue();
+			int highlight_end = highlight_end_positions.get(i).intValue();
 
 			// Print anything before the highlight range
 			if (last_wrote < highlight_start)

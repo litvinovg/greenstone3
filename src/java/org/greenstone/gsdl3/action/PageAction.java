@@ -11,6 +11,7 @@ import org.w3c.dom.Element;
 
 import java.util.HashMap;
 import java.io.File;
+import java.io.Serializable;
 
 import org.apache.log4j.*;
 
@@ -129,7 +130,7 @@ public class PageAction extends Action
 		UserContext userContext = new UserContext(request);
 		// extract the params from the cgi-request, 
 		Element cgi_paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(cgi_paramList, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(cgi_paramList, false);
 
 		String coll_name = (String) params.get(GSParams.COLLECTION);
 		if (coll_name == null || coll_name.equals(""))
@@ -213,7 +214,7 @@ public class PageAction extends Action
 
 		// extract the params from the cgi-request, 
 		Element cgi_paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(cgi_paramList, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(cgi_paramList, false);
 
 		String coll_name = (String) params.get(GSParams.COLLECTION);
 		if (coll_name == null || coll_name.equals(""))

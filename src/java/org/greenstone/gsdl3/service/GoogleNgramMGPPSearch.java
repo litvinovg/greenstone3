@@ -63,7 +63,7 @@ public class GoogleNgramMGPPSearch
           //ArrayList docList_future = new ArrayList();	 
 	  //ArrayList docList_present = new ArrayList();
 	  
-	 ArrayList docList = new ArrayList();
+	 ArrayList<DocWrapper> docList = new ArrayList<DocWrapper>();
 
 	  for (int d = 0; d < docs.size(); d++) {
 	      String num = Long.toString((((MGPPDocInfo) docs.elementAt(d)).num_));
@@ -132,7 +132,7 @@ public class GoogleNgramMGPPSearch
 
 // 	    interval = 10;
 
-	      doc_nums[d] = ((DocWrapper)docList.get(d)).num;
+	      doc_nums[d] = docList.get(d).num;
 	    
 	  }
 

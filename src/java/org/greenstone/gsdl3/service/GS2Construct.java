@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.Serializable;
 import java.lang.Thread.State;
 import java.util.Locale;
 
@@ -81,12 +82,12 @@ public class GS2Construct extends ServiceRack
 	private String[] collection_list = null;
 
 	// set of listeners for any construction commands
-	protected Map listeners = null;
+	protected Map<String, GS2PerlListener> listeners = null;
 	protected HashMap<String, Boolean> collectionOperationMap = new HashMap<String, Boolean>(); 
 
 	public GS2Construct()
 	{
-		this.listeners = Collections.synchronizedMap(new HashMap());
+		this.listeners = Collections.synchronizedMap(new HashMap<String, GS2PerlListener>());
 	}
 
 	/** returns a specific service description */
@@ -174,7 +175,7 @@ public class GS2Construct extends ServiceRack
 		Element statusElem = (Element) buildResponse.getElementsByTagName(GSXML.STATUS_ELEM).item(0);
 		String id = statusElem.getAttribute("pid");
 
-		GS2PerlListener currentListener = (GS2PerlListener) this.listeners.get(id);
+		GS2PerlListener currentListener = this.listeners.get(id);
 		int statusCode = currentListener.getStatus();
 		while (!GSStatus.isCompleted(statusCode))
 		{
@@ -198,7 +199,7 @@ public class GS2Construct extends ServiceRack
 	protected Element processImportCollection(Element request)
 	{
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		//If we have been requested to only build certain documents then we need to create a manifest file
 		String documentsParam = (String) params.get("documents");
@@ -263,7 +264,7 @@ public class GS2Construct extends ServiceRack
 		// this activates the collection on disk. but now we need to tell
 		// the MR about it. but we have to wait until the process is finished.
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 		String coll_name = (String) params.get(COL_PARAM);
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 
@@ -287,7 +288,7 @@ public class GS2Construct extends ServiceRack
 			return response;
 		}
 		String id = status.getAttribute(GSXML.STATUS_PROCESS_ID_ATT);
-		GS2PerlListener listener = (GS2PerlListener) this.listeners.get(id);
+		GS2PerlListener listener = this.listeners.get(id);
 		if (listener == null)
 		{
 			logger.error("somethings gone wrong, couldn't find the listener");
@@ -341,7 +342,7 @@ public class GS2Construct extends ServiceRack
 		String request_type = request.getAttribute(GSXML.TYPE_ATT);
 
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		boolean get_status_only = false;
 		if (request_type.equals(GSXML.REQUEST_TYPE_STATUS))
@@ -399,7 +400,7 @@ public class GS2Construct extends ServiceRack
 		String request_type = request.getAttribute(GSXML.TYPE_ATT);
 
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		boolean get_status_only = false;
 		if (request_type.equals(GSXML.REQUEST_TYPE_STATUS))
@@ -550,7 +551,7 @@ public class GS2Construct extends ServiceRack
 		String request_type = request.getAttribute(GSXML.TYPE_ATT);
 
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		boolean get_status_only = false;
 		if (request_type.equals(GSXML.REQUEST_TYPE_STATUS))
@@ -563,7 +564,7 @@ public class GS2Construct extends ServiceRack
 		{
 			String id = (String) params.get(PROCESS_ID_PARAM);
 			status.setAttribute(GSXML.STATUS_PROCESS_ID_ATT, id);
-			GS2PerlListener listener = (GS2PerlListener) this.listeners.get(id);
+			GS2PerlListener listener = this.listeners.get(id);
 			if (listener == null)
 			{
 				Text t = this.doc.createTextNode(getTextString("general.process_id_error", lang));
@@ -724,7 +725,7 @@ public class GS2Construct extends ServiceRack
 	 * need to be passed to the constructor and puts them into a paramList
 	 * element
 	 */
-	protected Element extractOtherParams(HashMap params, int type)
+	protected Element extractOtherParams(HashMap<String, Serializable> params, int type)
 	{
 
 		Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -757,7 +758,7 @@ public class GS2Construct extends ServiceRack
 	protected void waitUntilReady(Element request)
 	{
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 		
 		String collection = (String)params.get(COL_PARAM);
 
@@ -782,7 +783,7 @@ public class GS2Construct extends ServiceRack
 	protected void signalReady(Element request)
 	{
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 		
 		String collection = (String)params.get(COL_PARAM);
 

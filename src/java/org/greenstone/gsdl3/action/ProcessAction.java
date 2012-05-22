@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
 import java.io.File;
+import java.io.Serializable;
 
 public class ProcessAction extends Action
 {
@@ -32,7 +33,7 @@ public class ProcessAction extends Action
 
 		// get the param list
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(cgi_param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 		String service_name = (String) params.get(GSParams.SERVICE);
 		String cluster_name = (String) params.get(GSParams.CLUSTER);
 		String response_only_p = (String) params.get(GSParams.RESPONSE_ONLY);

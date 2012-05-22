@@ -92,13 +92,13 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 		Element param = null;
 		if (name.equals(RANK_PARAM)) {
 			// get the fields
-			ArrayList fields = new ArrayList();
+			ArrayList<String> fields = new ArrayList<String>();
 			fields.add(RANK_PARAM_RANK_VALUE);
-			ArrayList field_names = new ArrayList();
+			ArrayList<String> field_names = new ArrayList<String>();
 			field_names.add(getTextString("param.sortBy.rank", lang)); 
 			getSortByIndexData(fields, field_names, lang);
 			
-			param = GSXML.createParameterDescription2(this.doc, name, getTextString("param."+name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, (String)fields.get(0), fields, field_names );
+			param = GSXML.createParameterDescription2(this.doc, name, getTextString("param."+name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, fields.get(0), fields, field_names );
 		}
 		if (param != null) {
 			param_list.appendChild(param);
@@ -107,7 +107,7 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 		}
 	}
 	
-	protected void getSortByIndexData(ArrayList index_ids, ArrayList index_names, String lang) {
+	protected void getSortByIndexData(ArrayList<String> index_ids, ArrayList<String> index_names, String lang) {
 		// the index info -
 		Element index_list = (Element)GSXML.getChildByTagName(this.config_info, INDEX_ELEM+GSXML.LIST_MODIFIER);
 		NodeList indexes = index_list.getElementsByTagName(INDEX_ELEM);

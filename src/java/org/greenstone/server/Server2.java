@@ -82,7 +82,7 @@ public class Server2 extends BaseServer
 				if(config_properties.getProperty(url) == null) {
 				    config_properties.setProperty(url, URL_PENDING);
 				    ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
-				    ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
+				    ArrayList<String> fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
 				    scriptReadWrite.replaceOrAddLine(fileLines, url, URL_PENDING, true);
 				    scriptReadWrite.writeOutFile(config_properties_file, fileLines);
 				}
@@ -159,7 +159,7 @@ public class Server2 extends BaseServer
 	   	inetAddress = InetAddress.getLocalHost();
 		String hosts = inetAddress.getHostName();
 		ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
-		ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
+		ArrayList<String> fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
 		scriptReadWrite.replaceOrAddLine(fileLines, "hosts", hosts, true);
 		scriptReadWrite.writeOutFile(config_properties_file, fileLines);
 	} catch(UnknownHostException e) {
@@ -174,7 +174,7 @@ public class Server2 extends BaseServer
 	    if(config_properties.getProperty(url) == null) {
 		config_properties.setProperty(url, URL_PENDING);
 		ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
-		ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
+		ArrayList<String> fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
 		scriptReadWrite.replaceOrAddLine(fileLines, url, URL_PENDING, true);
 		scriptReadWrite.writeOutFile(config_properties_file, fileLines);
 	    }
@@ -354,7 +354,7 @@ public class Server2 extends BaseServer
 		    
 		    // write this updated port to the config file, since the configure target uses the file to run
 		    ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
-		    ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
+		    ArrayList<String> fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
 		    scriptReadWrite.replaceOrAddLine(fileLines, "portnumber", port, false); // write the correct port
 		    scriptReadWrite.writeOutFile(config_properties_file, fileLines);
 		    
@@ -376,12 +376,12 @@ public class Server2 extends BaseServer
     // Custom GS2 action: remove the url property from the config file
     protected void preStop() {
 	ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
-	ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
+	ArrayList<String> fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
 
 	// Remove the url=... line, start searching from the end
 	boolean done = false;
 	for (int i = fileLines.size()-1; i >= 0 && !done; i--) {
-	    String line = ((String) fileLines.get(i)).trim();
+	    String line = fileLines.get(i).trim();
 	    if(line.startsWith(property_prefix+"url=")) {
 		fileLines.remove(i);
 		done = true;
@@ -436,7 +436,7 @@ public class Server2 extends BaseServer
 	String port = config_properties.getProperty("portnumber");
 
 	ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
-	ArrayList fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
+	ArrayList<String> fileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);
 	scriptReadWrite.replaceOrAddLine(fileLines, property_prefix+"url", libraryURL, true);
 	scriptReadWrite.replaceOrAddLine(fileLines, "portnumber", port, false); // write the correct port
 	scriptReadWrite.writeOutFile(config_properties_file, fileLines);

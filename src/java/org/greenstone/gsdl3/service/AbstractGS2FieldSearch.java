@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.io.File;
+import java.io.Serializable;
 
 import org.apache.log4j.*;
 
@@ -390,8 +391,8 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		Element param = null;
 		if (name.equals(LEVEL_PARAM))
 		{
-			ArrayList level_ids = new ArrayList();
-			ArrayList level_names = new ArrayList();
+			ArrayList<String> level_ids = new ArrayList<String>();
+			ArrayList<String> level_names = new ArrayList<String>();
 			getLevelData(level_ids, level_names, lang);
 			if (level_ids.size() > 1)
 			{
@@ -428,8 +429,8 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		}
 		else if (name.equals(FIELD_FIELD_PARAM))
 		{
-			ArrayList fields = new ArrayList();
-			ArrayList field_names = new ArrayList();
+			ArrayList<String> fields = new ArrayList<String>();
+			ArrayList<String> field_names = new ArrayList<String>();
 			getIndexData(fields, field_names, lang);
 			// the field list -  read from config file
 
@@ -437,7 +438,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			// org.greenstone.gsdl3.service.AbstractGS2FieldSearch.createParameter(AbstractGS2FieldSearch.java:362)
 			// Changed from:
 			// param = GSXML.createParameterDescription2(this.doc, name, getTextString("param."+name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, (String)fields.get(0), fields, field_names );
-			String default_value = (fields.size() > 0) ? (String) fields.get(0) : null;
+			String default_value = (fields.size() > 0) ? fields.get(0) : null;
 			// don't want to access element 0 if fields.size()==0, and
 			// GSXML.createParameterDescription2 checks for default_value==null condition
 			param = GSXML.createParameterDescription2(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, default_value, fields, field_names);
@@ -464,7 +465,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	}
 
 	// should cache some of this
-	protected void getLevelData(ArrayList level_ids, ArrayList level_names, String lang)
+	protected void getLevelData(ArrayList<String> level_ids, ArrayList<String> level_names, String lang)
 	{
 		Element level_list = (Element) GSXML.getChildByTagName(this.config_info, LEVEL_ELEM + GSXML.LIST_MODIFIER);
 		NodeList levels = level_list.getElementsByTagName(LEVEL_ELEM);
@@ -564,7 +565,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		}
 
 		// Process the request parameters
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		// Make sure a query has been specified
 		String query = (String) params.get(empty_query_test_param);
@@ -657,7 +658,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 
 	/** methods to handle actually doing the query */
 	/** do any initialisation of the query object */
-	abstract protected boolean setUpQueryer(HashMap params);
+	abstract protected boolean setUpQueryer(HashMap<String, Serializable> params);
 
 	/** do the query */
 	abstract protected Object runQuery(String query);
@@ -672,14 +673,14 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	abstract protected String[] getDocRanks(Object query_result);
 
 	/** add in term info if available */
-	abstract protected boolean addTermInfo(Element term_list, HashMap params, Object query_result);
+	abstract protected boolean addTermInfo(Element term_list, HashMap<String, Serializable> params, Object query_result);
 
 	/**
 	 * combines all the field params into a single query - for simple field
 	 * query
 	 */
 	/** We assume the combination (AND/OR) is done by the match param */
-	protected String parseFieldQueryParams(HashMap params)
+	protected String parseFieldQueryParams(HashMap<String, Serializable> params)
 	{
 
 		StringBuffer final_query = new StringBuffer(256);
@@ -706,7 +707,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	 * combines all the field params into a single query - for advanced field
 	 * query
 	 */
-	protected String parseAdvancedFieldQueryParams(HashMap params)
+	protected String parseAdvancedFieldQueryParams(HashMap<String, Serializable> params)
 	{
 
 		StringBuffer final_query = new StringBuffer(256);

@@ -9,6 +9,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -40,7 +41,7 @@ public class GeneralAction extends Action
 
 		// get the param list
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(cgi_param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 
 		if (params.get("configChangeName") != null && params.get("configChangeValue") != null)
 		{

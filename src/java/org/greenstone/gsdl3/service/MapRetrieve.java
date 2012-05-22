@@ -9,7 +9,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 // General Java classes
-import java.io.File;
 import java.io.*;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -35,8 +34,8 @@ public class MapRetrieve
 
     protected static final int DOCUMENT=1;
 
-    protected ArrayList index_name_list = null;
-    protected ArrayList index_display_list = null;
+    protected ArrayList<String> index_name_list = null;
+    protected ArrayList<String> index_display_list = null;
     protected String files_home_dir = null; 
     protected String temp_files_dir = null;
     //protected String temp_image_file = null;
@@ -44,7 +43,7 @@ public class MapRetrieve
     protected final String jpg_ext = ".jpg";
     protected String http_image_dir = null;
     protected String http_temp_image_dir = null;
-    private LinkedList namesInList = new LinkedList();
+    private LinkedList<String> namesInList = new LinkedList<String>();
 
     private DefaultMutableTreeNode tree;
 
@@ -90,8 +89,8 @@ public class MapRetrieve
 	this.http_image_dir = this.site_http_address + "/collect/"+this.cluster_name+"/index/assoc/maps/";
 	this.http_temp_image_dir = this.site_http_address + "/collect/"+this.cluster_name+"/temp/";
 
-	this.index_name_list = new ArrayList();
-	this.index_display_list = new ArrayList();
+	this.index_name_list = new ArrayList<String>();
+	this.index_display_list = new ArrayList<String>();
 	Element index_list = (Element)GSXML.getChildByTagName(this.config_info, GSXML.INDEX_ELEM+GSXML.LIST_MODIFIER);
 	Element display_index_list = (Element)GSXML.getChildByTagName(extra_info, "search");
 	if (index_list != null && display_index_list != null) {
@@ -199,7 +198,7 @@ public class MapRetrieve
 	}
 
 	// The metadata information required
-	Vector metadata_list = new Vector();
+	Vector<String> metadata_list = new Vector<String>();
 	boolean all_metadata = false;
 	// Process the request parameters
 	Element param = GSXML.getFirstElementChild(param_list);//(Element) param_list.getFirstChild();
@@ -291,7 +290,7 @@ public class MapRetrieve
 		
 		// create the navigation thumbnails.  This doesn't seem to work most of the time ???????
 		for (int m = 0; m < metadata_list.size(); m++) {
-		    String metadata = (String) metadata_list.get(m);
+		    String metadata = metadata_list.get(m);
 		    thumb = "";
 		    String value = "";
 		    if(node_id.indexOf('.') != -1) 
@@ -447,7 +446,7 @@ public class MapRetrieve
 
 		    //put the names in an array
 		    for(int ri=0; namesInList.size()>0; ri++){
-			returnNames[ri]=(String)namesInList.getFirst();
+			returnNames[ri]=namesInList.getFirst();
 			returnNames[ri] = returnNames[ri].substring(0,returnNames[ri].indexOf('`'));
 			namesInList.removeFirst();
 		    }
@@ -824,11 +823,11 @@ public class MapRetrieve
 	dropDownBox.append("',document.myForm.s1index.options[document.myForm.s1index.selectedIndex].value,'')\">\n");
 
 	for (int i=0; i<this.index_name_list.size(); i++) {
-	    String name = (String)this.index_name_list.get(i);
+	    String name = this.index_name_list.get(i);
 	    dropDownBox.append("<option value=\"");
 	    dropDownBox.append(name);
 	    dropDownBox.append("\">");
-	    String display = (String)this.index_display_list.get(i);
+	    String display = this.index_display_list.get(i);
 	    dropDownBox.append(display);
 	    dropDownBox.append("\n");
 	}

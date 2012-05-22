@@ -10,7 +10,7 @@ import org.apache.log4j.*;
 import java.util.HashMap;
 
 public class DatabaseFactory{
-    private static HashMap serverMap = new HashMap();
+    private static HashMap<String, SQLServer> serverMap = new HashMap<String, SQLServer>();
     private static Logger logger = Logger.getLogger(org.greenstone.gsdl3.sql.DatabaseFactory.class.getName());
 
 
@@ -28,7 +28,7 @@ public class DatabaseFactory{
 
     public static final SQLServer getDatabaseServer(String dbname){
 	dbname = properDBName(dbname);
-	if (serverMap.containsKey(dbname)) return (SQLServer) serverMap.get(dbname);
+	if (serverMap.containsKey(dbname)) return serverMap.get(dbname);
 	String fullName = "org.greenstone.gsdl3.sql." + dbname.toLowerCase()+ "." + dbname +"SQLServer";
 	try {
 	    SQLServer server = (SQLServer)Class.forName(fullName).newInstance();

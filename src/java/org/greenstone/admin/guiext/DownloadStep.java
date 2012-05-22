@@ -122,7 +122,7 @@ public class DownloadStep extends Step
 	    String fileStem = info.getFileStem();
 	    String defaultDownloadLocation = GAI.getGSDL3ExtensionHome() + System.getProperty("file.separator") + fileStem;
 
-	    ArrayList sourceElements = new ArrayList();
+	    ArrayList<Source> sourceElements = new ArrayList<Source>();
 	    sourceElements.add(_mainSource);
 
 	    if(_auxSources != null){
@@ -133,7 +133,7 @@ public class DownloadStep extends Step
 
 	    for(int i = 0; i < sourceElements.size(); i++){
 		
-		Source currentSource = (Source)sourceElements.get(i);
+		Source currentSource = sourceElements.get(i);
 		String destinationFolder = null;
 
 		if(currentSource.getMethod().equals("svn")){

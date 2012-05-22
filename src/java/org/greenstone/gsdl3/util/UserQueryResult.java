@@ -58,7 +58,7 @@ public class UserQueryResult
 		String result = "";
 		for (int i = 0; i < users.size(); i++)
 		{
-			result += ((UserTermInfo) users.elementAt(i)).toString() + ", ";
+			result += users.elementAt(i).toString() + ", ";
 		}
 
 		return result;

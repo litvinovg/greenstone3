@@ -6,7 +6,7 @@ import junit.framework.*;
  * Responsible for loading classes representing valid test cases.
  */
 public class TestCaseLoader {
-    final private Vector classList = new Vector ();
+    final private Vector<Class> classList = new Vector<Class> ();
     final private String requiredType;
     
     /** 
@@ -77,7 +77,7 @@ public class TestCaseLoader {
     /**
      * Obtain an iterator over the collection of test case classes loaded by <code>loadTestCases</code>
      */
-    public Iterator getClasses () {
+    public Iterator<Class> getClasses () {
         return classList.iterator ();
     }
 }

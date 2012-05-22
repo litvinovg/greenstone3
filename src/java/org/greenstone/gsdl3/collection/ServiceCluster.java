@@ -31,8 +31,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.io.*;
-import java.io.File;
-import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -75,12 +73,12 @@ public class ServiceCluster implements ModuleInterface
 	 * @see ServiceRack
 	 * 
 	 */
-	protected HashMap service_map = null;
+	protected HashMap<String, ServiceRack> service_map = null;
 	/**
 	 * maps pseudo service names to real service names - needed if we have two
 	 * services with the same name for one collection
 	 */
-	protected HashMap service_name_map = null;
+	protected HashMap<String, String> service_name_map = null;
 
 	/** XML converter for String to DOM and vice versa */
 	protected XMLConverter converter = null;
@@ -112,10 +110,10 @@ public class ServiceCluster implements ModuleInterface
 
 	public void cleanUp()
 	{
-		Iterator i = this.service_map.values().iterator();
+		Iterator<ServiceRack> i = this.service_map.values().iterator();
 		while (i.hasNext())
 		{
-			ServiceRack s = (ServiceRack) i.next();
+			ServiceRack s = i.next();
 			s.cleanUp();
 		}
 	}
@@ -133,8 +131,8 @@ public class ServiceCluster implements ModuleInterface
 
 	public ServiceCluster()
 	{
-		this.service_map = new HashMap();
-		this.service_name_map = new HashMap();
+		this.service_map = new HashMap<String, ServiceRack>();
+		this.service_name_map = new HashMap<String, String>();
 		this.converter = new XMLConverter();
 		this.doc = this.converter.newDOM();
 		this.description = this.doc.createElement(GSXML.CLUSTER_ELEM);
@@ -490,7 +488,7 @@ public class ServiceCluster implements ModuleInterface
 				String real_service = service;
 				if (this.service_name_map.containsKey(service))
 				{
-					real_service = (String) this.service_name_map.get(service);
+					real_service = this.service_name_map.get(service);
 					// need to change the to att in the request - give the real service name
 					to = request.getAttribute(GSXML.TO_ATT);
 					String old_to = to;
@@ -500,7 +498,7 @@ public class ServiceCluster implements ModuleInterface
 				// have to pass the request to the service
 				Element single_message = mess_doc.createElement(GSXML.MESSAGE_ELEM);
 				single_message.appendChild(request);
-				Node response_message = ((ModuleInterface) this.service_map.get(service)).process(single_message);
+				Node response_message = this.service_map.get(service).process(single_message);
 				if (response_message != null)
 				{
 					Element response = (Element) GSXML.getChildByTagName(response_message, GSXML.RESPONSE_ELEM);
@@ -883,7 +881,7 @@ public class ServiceCluster implements ModuleInterface
 
 	}
 
-	public HashMap getServiceMap()
+	public HashMap<String, ServiceRack> getServiceMap()
 	{
 		return service_map;
 	}

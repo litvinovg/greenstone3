@@ -30,7 +30,7 @@ public class Receptionist implements ModuleInterface
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.core.Receptionist.class.getName());
 
 	/** the set up variables */
-	protected HashMap config_params = null;
+	protected HashMap<String, Comparable> config_params = null;
 	/** container Document to create XML Nodes */
 	protected Document doc = null;
 
@@ -41,20 +41,20 @@ public class Receptionist implements ModuleInterface
 	protected ModuleInterface mr = null;
 
 	/** the list of actions */
-	protected HashMap action_map = null;
+	protected HashMap<String, Action> action_map = null;
 
 	/** the list of params */
 	protected GSParams params = null;
 	protected Element language_list = null;
 
 	/** the list of interfaces this is based on */
-	protected ArrayList base_interfaces = null;
+	protected ArrayList<String> base_interfaces = null;
 
 	public Receptionist()
 	{
 		this.converter = new XMLConverter();
 		this.doc = this.converter.newDOM();
-		this.action_map = new HashMap();
+		this.action_map = new HashMap<String, Action>();
 	}
 
 	public void cleanUp()
@@ -66,12 +66,12 @@ public class Receptionist implements ModuleInterface
 		this.params = params;
 	}
 
-	public void setConfigParams(HashMap params)
+	public void setConfigParams(HashMap<String, Comparable> params)
 	{
 		this.config_params = params;
 	}
 
-	public HashMap getConfigParams()
+	public HashMap<String, Comparable> getConfigParams()
 	{
 		return this.config_params;
 	}
@@ -210,7 +210,7 @@ public class Receptionist implements ModuleInterface
 		}
 
 		// find the  appropriate action	
-		Action a = (Action) this.action_map.get(action);
+		Action a = this.action_map.get(action);
 
 		String action_name = null;
 		if (a == null)
@@ -312,7 +312,7 @@ public class Receptionist implements ModuleInterface
 			// the interface name is valid, add it to the list
 			if (base_interfaces == null)
 			{
-				base_interfaces = new ArrayList();
+				base_interfaces = new ArrayList<String>();
 			}
 			base_interfaces.add(base_interface);
 			// now see if this has a base interface

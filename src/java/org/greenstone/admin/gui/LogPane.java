@@ -92,7 +92,7 @@ public class LogPane
     /*The pane which contains the controls for log files */
     private JPanel control_pane = null;
 
-    private ArrayList logFiles = new ArrayList();
+    private ArrayList<File> logFiles = new ArrayList<File>();
     private File currentlySelectedFile = null;
       
     /** The various sizes for the screen layout*/
@@ -386,14 +386,14 @@ public class LogPane
 		if (log_list.getSelectedIndex() == -1){
 		    //no selection
 		} else if (log_list.getSelectedIndex () == 0 ) {
-		    File log_file = (File)logFiles.get(0);
+		    File log_file = logFiles.get(0);
 		    currentlySelectedFile = log_file;
 		    String filename = log_file.getPath();
 		    updateLogsContent(filename);
 		    reload_button.setEnabled(true);
 		    clear_button.setEnabled(true);
 		} else if (log_list.getSelectedIndex () == 1) {
-		    File log_file = (File)logFiles.get(1);
+		    File log_file = logFiles.get(1);
 		    currentlySelectedFile = log_file;
 		    String filename = log_file.getPath();
 		    updateLogsContent(filename);

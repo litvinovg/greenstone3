@@ -291,8 +291,8 @@ public class CrossCollectionSearch extends ServiceRack
 		Element metadata_response = (Element) this.router.process(metadata_message);
 		logger.debug("metadata response = " + this.converter.getPrettyString(metadata_response));
 		NodeList coll_responses = metadata_response.getElementsByTagName(GSXML.RESPONSE_ELEM);
-		ArrayList valid_colls = new ArrayList();
-		ArrayList valid_coll_names = new ArrayList();
+		ArrayList<String> valid_colls = new ArrayList<String>();
+		ArrayList<String> valid_coll_names = new ArrayList<String>();
 		for (int i = 0; i < coll_responses.getLength(); i++)
 		{
 			Element response = (Element) coll_responses.item(i);
@@ -316,14 +316,14 @@ public class CrossCollectionSearch extends ServiceRack
 		}
 		// ids no all has the list without 'all' option.
 		this.coll_ids_list_no_all = new String[1];
-		this.coll_ids_list_no_all = (String[]) valid_colls.toArray(coll_ids_list_no_all);
+		this.coll_ids_list_no_all = valid_colls.toArray(coll_ids_list_no_all);
 
 		valid_colls.add(0, "all");
 		valid_coll_names.add(0, getTextString("param." + COLLECTION_PARAM + ".all", "en"));
 		this.coll_ids_list = new String[1];
 		this.coll_names_list = new String[1];
-		this.coll_ids_list = (String[]) valid_colls.toArray(coll_ids_list);
-		this.coll_names_list = (String[]) valid_coll_names.toArray(coll_names_list);
+		this.coll_ids_list = valid_colls.toArray(coll_ids_list);
+		this.coll_names_list = valid_coll_names.toArray(coll_names_list);
 		return true;
 	}
 
@@ -360,7 +360,7 @@ public class CrossCollectionSearch extends ServiceRack
 		new_param_list.appendChild(param);
 
 		// organise the nodes into collection lists
-		HashMap coll_map = new HashMap();
+		HashMap<String, Node> coll_map = new HashMap<String, Node>();
 
 		for (int i = 0; i < query_doc_list.getLength(); i++)
 		{

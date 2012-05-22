@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.io.File;
+import java.io.Serializable;
 
 import org.apache.log4j.*;
 
@@ -92,7 +93,7 @@ public class GS2MGPPSearch
     createParameter(RANK_PARAM, param_list, lang);
   }
   
-  protected boolean setUpQueryer(HashMap params) {
+  protected boolean setUpQueryer(HashMap<String, Serializable> params) {
     
     // set up the defaults that may be changed by query params
     mgpp_src.setQueryLevel(this.default_level);
@@ -188,7 +189,7 @@ public class GS2MGPPSearch
     return doc_ranks;
   }
   
-  protected boolean addTermInfo(Element term_list, HashMap params,
+  protected boolean addTermInfo(Element term_list, HashMap<String, Serializable> params,
     Object query_result) {
     
     String query_level = (String)params.get(LEVEL_PARAM); // the current query level

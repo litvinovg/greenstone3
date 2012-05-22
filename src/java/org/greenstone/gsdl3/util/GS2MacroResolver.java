@@ -25,6 +25,7 @@ import java.net.URLDecoder;
 
 // Apache Commons
 import org.apache.commons.lang3.*;
+import org.greenstone.gsdl3.util.MacroResolver.Macro;
 
 import java.util.Stack;
 
@@ -64,7 +65,7 @@ public class GS2MacroResolver
 	    this.lang = lang;
 	} 
 
-	Stack macros = new Stack();//ArrayList macros;
+	Stack<Macro> macros = new Stack<Macro>();//ArrayList macros;
 	if (scope.equals(SCOPE_TEXT)) {
 	    macros.addAll(text_macros);
 	} else {
@@ -73,7 +74,7 @@ public class GS2MacroResolver
 	//for (int i=0; i<macros.size(); i++) {
 	while(!macros.empty()) {
 	    String new_text = null;
-	    Macro m = (Macro)macros.pop();//.get(i);
+	    Macro m = macros.pop();//.get(i);
 	    switch (m.type) {
 	    case TYPE_DICT:
 		if (m.text==null || new_lang) {

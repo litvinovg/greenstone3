@@ -10,6 +10,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import java.io.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -89,7 +90,7 @@ public class LibraryServlet extends HttpServlet
 	 * reconfigured using the command a=s&sa=c or a=s&sa=c&c=xxx It is in the
 	 * form: sid -> (UserSessionCache object)
 	 */
-	protected Hashtable session_ids_table = new Hashtable();
+	protected Hashtable<String, UserSessionCache> session_ids_table = new Hashtable<String, UserSessionCache>();
 
 	/**
 	 * the maximum interval that the cached info remains in session_ids_table
@@ -155,7 +156,7 @@ public class LibraryServlet extends HttpServlet
 			this.default_lang = DEFAULT_LANG;
 		}
 
-		HashMap config_params = new HashMap();
+		HashMap<String, Comparable> config_params = new HashMap<String, Comparable>();
 
 		config_params.put(GSConstants.LIBRARY_NAME, library_name);
 		config_params.put(GSConstants.INTERFACE_NAME, interface_name);
@@ -309,9 +310,9 @@ public class LibraryServlet extends HttpServlet
 		 * coll_name to its parameters coll_name -> Hashtable (param_name ->
 		 * param_value)
 		 */
-		protected Hashtable coll_name_params_table = null;
+		protected Hashtable<String, Hashtable<String, String>> coll_name_params_table = null;
 
-		public UserSessionCache(String id, Hashtable table)
+		public UserSessionCache(String id, Hashtable<String, Hashtable<String, String>> table)
 		{
 			session_id = id;
 			coll_name_params_table = (table == null) ? new Hashtable() : table;
@@ -325,7 +326,7 @@ public class LibraryServlet extends HttpServlet
 			}
 		}
 
-		protected Hashtable getParamsTable()
+		protected Hashtable<String, Hashtable<String, String>> getParamsTable()
 		{
 			return coll_name_params_table;
 		}
@@ -516,16 +517,16 @@ public class LibraryServlet extends HttpServlet
 			}
 			if (clean_all)
 			{
-				session_ids_table = new Hashtable();
+				session_ids_table = new Hashtable<String, UserSessionCache>();
 				session.removeAttribute(GSXML.USER_SESSION_CACHE_ATT);
 			}
 			else
 			{
 				// just clean up info for clean_collection
-				ArrayList cache_list = new ArrayList(session_ids_table.values());
+				ArrayList<UserSessionCache> cache_list = new ArrayList<UserSessionCache>(session_ids_table.values());
 				for (int i = 0; i < cache_list.size(); i++)
 				{
-					UserSessionCache cache = (UserSessionCache) cache_list.get(i);
+					UserSessionCache cache = cache_list.get(i);
 					cache.cleanupCache(clean_collection);
 				}
 
@@ -554,32 +555,32 @@ public class LibraryServlet extends HttpServlet
 		}
 
 		UserSessionCache session_cache = null;
-		Hashtable param_table = null;
-		Hashtable table = null;
+		Hashtable<String, Hashtable<String, String>> param_table = null;
+		Hashtable<String, String> table = null;
 		String sid = session.getId();
 		if (should_cache == true && cache_key != null && !cache_key.equals(""))
 		{
 			if (session_ids_table.containsKey(sid))
 			{
-				session_cache = (UserSessionCache) session_ids_table.get(sid);
+				session_cache = session_ids_table.get(sid);
 				param_table = session_cache.getParamsTable();
 				logger.info("collections in table: " + tableToString(param_table));
 				if (param_table.containsKey(cache_key))
 				{
 					//logger.info("existing table: " + collection);
-					table = (Hashtable) param_table.get(cache_key);
+					table = param_table.get(cache_key);
 				}
 				else
 				{
-					table = new Hashtable();
+					table = new Hashtable<String, String>();
 					param_table.put(cache_key, table);
 					//logger.info("new table: " + collection);
 				}
 			}
 			else
 			{
-				param_table = new Hashtable();
-				table = new Hashtable();
+				param_table = new Hashtable<String, Hashtable<String, String>>();
+				table = new Hashtable<String, String>();
 				param_table.put(cache_key, table);
 				session_cache = new UserSessionCache(sid, param_table);
 				session_ids_table.put(sid, session_cache);
@@ -641,11 +642,11 @@ public class LibraryServlet extends HttpServlet
 			// do we need to do this? why not just put from table into param list
 			if (table != null)
 			{
-				Enumeration keys = table.keys();
+				Enumeration<String> keys = table.keys();
 				while (keys.hasMoreElements())
 				{
-					String name = (String) keys.nextElement();
-					session.setAttribute(name, (String) table.get(name));
+					String name = keys.nextElement();
+					session.setAttribute(name, table.get(name));
 				}
 			}
 
@@ -690,7 +691,7 @@ public class LibraryServlet extends HttpServlet
 
 				for (int j = 0; j < httpHeaders.size(); j++)
 				{
-					Map nameValueMap = (Map) httpHeaders.get(j);
+					Map nameValueMap = httpHeaders.get(j);
 					String name = (String) nameValueMap.get("name");
 					String value = (String) nameValueMap.get("value");
 
@@ -824,7 +825,7 @@ public class LibraryServlet extends HttpServlet
 			}
 			else
 			{
-				HashMap responseParams = GSXML.extractParams(responseParamList, true);
+				HashMap<String, Serializable> responseParams = GSXML.extractParams(responseParamList, true);
 				String groups = (String) responseParams.get(GSXML.GROUPS_ATT);
 
 				userInformation.setAttribute(GSXML.GROUPS_ATT, groups);
@@ -909,7 +910,7 @@ public class LibraryServlet extends HttpServlet
 	}
 
 	//a debugging method
-	private void displaySize(Hashtable table)
+	private void displaySize(Hashtable<String, UserSessionCache> table)
 	{
 		if (table == null)
 		{
@@ -922,22 +923,22 @@ public class LibraryServlet extends HttpServlet
 			return;
 		}
 		int num_cached_coll = 0;
-		ArrayList cache_list = new ArrayList(table.values());
+		ArrayList<UserSessionCache> cache_list = new ArrayList<UserSessionCache>(table.values());
 		for (int i = 0; i < cache_list.size(); i++)
 		{
-			num_cached_coll += ((UserSessionCache) cache_list.get(i)).tableSize();
+			num_cached_coll += cache_list.get(i).tableSize();
 		}
 		logger.info("Number of sessions : total number of cached collection info = " + table.size() + " : " + num_cached_coll);
 	}
 
 	/** merely a debugging method! */
-	private String tableToString(Hashtable table)
+	private String tableToString(Hashtable<String, Hashtable<String, String>> table)
 	{
 		String str = "";
-		Enumeration keys = table.keys();
+		Enumeration<String> keys = table.keys();
 		while (keys.hasMoreElements())
 		{
-			String name = (String) keys.nextElement();
+			String name = keys.nextElement();
 			str += name + ", ";
 		}
 		return str;

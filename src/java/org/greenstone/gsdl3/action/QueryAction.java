@@ -15,6 +15,7 @@ import java.util.Vector;
 import java.util.Map;
 import java.util.Iterator;
 import java.io.File;
+import java.io.Serializable;
 
 import org.apache.log4j.*;
 
@@ -55,7 +56,7 @@ public class QueryAction extends Action
 
 		// extract the params from the cgi-request, and check that we have a coll specified
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(cgi_param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 
 		String request_type = (String) params.get(GSParams.REQUEST_TYPE);
 		String service_name = (String) params.get(GSParams.SERVICE);
@@ -188,7 +189,7 @@ public class QueryAction extends Action
 		}
 
 		// get the metadata elements needed from the format statement if any
-		HashSet metadata_names = new HashSet();
+		HashSet<String> metadata_names = new HashSet<String>();
 		metadata_names.add("Title");
 		// add in the format info to the stylesheet if there is any
 		Element format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.FORMAT_ELEM);
@@ -245,7 +246,7 @@ public class QueryAction extends Action
 	}
 
 	/** this filters out some of the doc results for result paging */
-	protected Element filterDocList(HashMap params, HashMap service_params, Element orig_doc_list)
+	protected Element filterDocList(HashMap<String, Serializable> params, HashMap service_params, Element orig_doc_list)
 	{
 
 		// check the hits_per_page param - is it a service param??

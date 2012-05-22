@@ -1680,7 +1680,7 @@ public class GSDocumentModel
 		}
 
 		String srcFile = info.getInfo("src-file");
-		Vector data = info.getMultiInfo("assoc-file");
+		Vector<String> data = info.getMultiInfo("assoc-file");
 
 		ArrayList<String> assocFiles = new ArrayList<String>();
 		assocFiles.add(srcFile);

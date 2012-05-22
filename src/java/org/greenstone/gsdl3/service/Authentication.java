@@ -17,6 +17,7 @@ import java.security.MessageDigest;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 import java.io.File;
+import java.io.Serializable;
 
 import net.tanesha.recaptcha.ReCaptchaImpl;
 import net.tanesha.recaptcha.ReCaptchaResponse;
@@ -229,7 +230,7 @@ public class Authentication extends ServiceRack
 			return result;
 		}
 
-		HashMap params = GSXML.extractParams(paramList, true);
+		HashMap<String, Serializable> params = GSXML.extractParams(paramList, true);
 
 		String username = (String) params.get("username");
 
@@ -307,7 +308,7 @@ public class Authentication extends ServiceRack
 			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUEST_HAS_NO_PARAM_LIST));
 			return result; // Return the empty result
 		}
-		HashMap paramMap = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> paramMap = GSXML.extractParams(param_list, false);
 		String op = (String) paramMap.get("authpage");
 		serviceNode.setAttribute("operation", op);
 

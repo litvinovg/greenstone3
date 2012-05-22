@@ -78,7 +78,7 @@ public class ExtPane extends JPanel  {
       
     protected DefaultMutableTreeNode top = new DefaultMutableTreeNode("Extension List");
     
-    protected HashMap extensionInformation = null;
+    protected HashMap<String, ArrayList> extensionInformation = null;
       
     protected JPanel extensionContentHeaderPane = null;
     
@@ -96,7 +96,7 @@ public class ExtPane extends JPanel  {
     public String fileSeparator = File.separator;
     
     protected Element extFileRootElement = null;
-    protected HashMap extensions = null;
+    protected HashMap<String, ExtensionInformation> extensions = null;
     protected HashMap extClasses = null;
     protected Properties dependencies = new Properties();
     protected JPanel extPanel = new JPanel();
@@ -118,7 +118,7 @@ public class ExtPane extends JPanel  {
 	button_pane = new JPanel();
 	current_description_pane = new JPanel();
 	extensionContentHeaderPane = new JPanel();
-	extensionInformation = new HashMap();
+	extensionInformation = new HashMap<String, ArrayList>();
 
 	// Extension_Pane
 	main_ext_pane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -136,7 +136,7 @@ public class ExtPane extends JPanel  {
     {
 	Element[] extensionElements = ExtXMLHelper.getMultipleChildElements(extFileRootElement, ExtXMLHelper.EXTENSION, true);
 	if(extensionElements != null){
-	    extensions = new HashMap();
+	    extensions = new HashMap<String, ExtensionInformation>();
 
 	    for(int i = 0; i < extensionElements.length; i++){
 		ExtensionInformation ei = new ExtensionInformation(extensionElements[i], extFileRootElement.getAttribute("baseURL"));
@@ -152,14 +152,14 @@ public class ExtPane extends JPanel  {
     public void display() {
          	
 	load_Admin_UI();
-	HashMap projectNameMap = getProjectList();
-    	Set s = projectNameMap.keySet();
-    	Iterator it = s.iterator();
+	HashMap<String, ArrayList<String>> projectNameMap = getProjectList();
+    	Set<String> s = projectNameMap.keySet();
+    	Iterator<String> it = s.iterator();
     	int i = 0;
     	
 	while(it.hasNext()){
-	    String projectNameGroup = (String)it.next(); 
-	    ArrayList alist = (ArrayList)projectNameMap.get(projectNameGroup);
+	    String projectNameGroup = it.next(); 
+	    ArrayList alist = projectNameMap.get(projectNameGroup);
 	    DefaultMutableTreeNode projecti = new DefaultMutableTreeNode (projectNameGroup);
 	    
 	    for (int j = 0; j< alist.size(); j++){
@@ -242,9 +242,9 @@ public class ExtPane extends JPanel  {
     	}
     }
     
-    protected HashMap getProjectList(){
+    protected HashMap<String, ArrayList<String>> getProjectList(){
     	
-	HashMap projectGroupMap = new HashMap();
+	HashMap<String, ArrayList<String>> projectGroupMap = new HashMap<String, ArrayList<String>>();
 	Element rootNode = extFileRootElement;
 	NodeList projectList =  rootNode.getElementsByTagName(ExtXMLHelper.EXTENSION);
 
@@ -258,12 +258,12 @@ public class ExtPane extends JPanel  {
 	    String group = groupList.item(0).getChildNodes().item(0).getNodeValue();
 
 	    if(projectGroupMap.containsKey(group)){
-		ArrayList alist = (ArrayList)projectGroupMap.get(group);
+		ArrayList<String> alist = projectGroupMap.get(group);
 		alist.add(name);
 		projectGroupMap.put(group, alist);
 	    }
 	    else{
-		ArrayList alist = new ArrayList();
+		ArrayList<String> alist = new ArrayList<String>();
 		alist.add(name);
 		projectGroupMap.put(group, alist);
 	    }
@@ -285,7 +285,7 @@ public class ExtPane extends JPanel  {
 		return;
 	    }
 
-	    ExtensionInformation info = (ExtensionInformation)extensions.get(option);
+	    ExtensionInformation info = extensions.get(option);
 
 	    if(info != null){
 		extPanel.removeAll();
@@ -487,7 +487,7 @@ public class ExtPane extends JPanel  {
     	String option = extensionTreeList.getLastSelectedPathComponent().toString();
     	JPanel buttonPane = new JPanel();
 
-	ExtensionInformation extension = (ExtensionInformation)extensions.get(projectName);
+	ExtensionInformation extension = extensions.get(projectName);
 
 	String gsdl3ExtHome = GAI.getGSDL3ExtensionHome();
 

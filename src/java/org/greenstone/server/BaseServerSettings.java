@@ -201,7 +201,7 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 	boolean[] returnValues = { false, false }; // hasChanged, requireRestart
 	return returnValues;
     }
-    protected void save(ScriptReadWrite scriptReadWrite, ArrayList newFileLines) {}
+    protected void save(ScriptReadWrite scriptReadWrite, ArrayList<String> newFileLines) {}
     protected abstract JPanel createServletPanel();
 
 
@@ -277,8 +277,8 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
              
 
 	    if (has_changed) {
-		ArrayList oldFileLines = null;
-		ArrayList newFileLines = null;
+		ArrayList<String> oldFileLines = null;
+		ArrayList<String> newFileLines = null;
 		
 		ScriptReadWrite scriptReadWrite = new ScriptReadWrite();
 		oldFileLines = scriptReadWrite.readInFile(BaseServer.config_properties_file);

@@ -22,7 +22,7 @@ abstract public class Action
 {
 
 	/** the system set up variables */
-	protected HashMap config_params = null;
+	protected HashMap<String, Comparable> config_params = null;
 	/** container Document to create XML Nodes */
 	protected Document doc = null;
 	/** a converter class to parse XML and create Docs */
@@ -42,7 +42,7 @@ abstract public class Action
 	}
 
 	/** the config variables must be set before configure is called */
-	public void setConfigParams(HashMap params)
+	public void setConfigParams(HashMap<String, Comparable> params)
 	{
 		this.config_params = params;
 	}
@@ -91,13 +91,13 @@ abstract public class Action
 		return true;
 	}
 
-	protected void getRequiredMetadataNames(Element format, HashSet meta_names)
+	protected void getRequiredMetadataNames(Element format, HashSet<String> meta_names)
 	{
 		extractMetadataNames(format, meta_names);
 		addLinkMetadataNames(format, meta_names);
 	}
 
-	protected void extractMetadataNames(Element format, HashSet meta_names)
+	protected void extractMetadataNames(Element format, HashSet<String> meta_names)
 	{
 		//NodeList nodes = format.getElementsByTagNameNS("metadata", "http://www.greenstone.org/configformat");
 		NodeList metadata_nodes = format.getElementsByTagName("gsf:metadata");
@@ -132,7 +132,7 @@ abstract public class Action
 		}
 	}
 
-	protected void addLinkMetadataNames(Element format, HashSet meta_names)
+	protected void addLinkMetadataNames(Element format, HashSet<String> meta_names)
 	{
 		// The XSL tranform for
 		//   gsf:link type="source" 
@@ -186,15 +186,15 @@ abstract public class Action
 		}
 	}
 
-	protected Element createMetadataParamList(HashSet metadata_names)
+	protected Element createMetadataParamList(HashSet<String> metadata_names)
 	{
 		Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 
 		Element param = null;
-		Iterator i = metadata_names.iterator();
+		Iterator<String> i = metadata_names.iterator();
 		while (i.hasNext())
 		{
-			String name = (String) i.next();
+			String name = i.next();
 			param = this.doc.createElement(GSXML.PARAM_ELEM);
 			param_list.appendChild(param);
 			param.setAttribute(GSXML.NAME_ATT, "metadata");

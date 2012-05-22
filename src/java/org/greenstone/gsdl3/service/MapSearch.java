@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.FileInputStream;
+import java.io.Serializable;
 import java.lang.ClassNotFoundException;
 
 import org.apache.log4j.*;
@@ -139,7 +140,7 @@ public class MapSearch
 	return true;
     }
 
-    protected void getIndexData(ArrayList index_ids, ArrayList index_names, String lang) 
+    protected void getIndexData(ArrayList<String> index_ids, ArrayList<String> index_names, String lang) 
     {
 	// for now, we just have one dummy index
 	index_ids.add("idx");
@@ -173,7 +174,7 @@ public class MapSearch
 	}
 
 	// Process the request parameters
-	HashMap params = GSXML.extractParams(param_list, false);
+	HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 	// Make sure a query has been specified
 	String searchTerm = (String) params.get(QUERY_PARAM);
@@ -240,7 +241,7 @@ public class MapSearch
 	int nameArraySize;
 	String nameData;
 	double xco, yco;
-	LinkedList mapList = new LinkedList();
+	LinkedList<Object> mapList = new LinkedList<Object>();
 	LinkedList placeList = new LinkedList();
 	String readString = "";
 
@@ -303,7 +304,7 @@ public class MapSearch
 	    mapList.addFirst(mapListArray[mla]);
 
 	//for each map, create a list of the query matches on that map
-	LinkedList tempList = new LinkedList();
+	LinkedList<Object> tempList = new LinkedList<Object>();
 	String mapNumber = "";
 	String currentMap[] = {"",""};
 	int mapFreq = 0;

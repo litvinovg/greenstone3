@@ -15,6 +15,7 @@ import org.w3c.dom.NamedNodeMap;
 
 // General Java classes
 import java.io.File;
+import java.io.Serializable;
 import java.util.Vector;
 import java.util.HashMap;
 
@@ -45,7 +46,7 @@ public class XMLRetrieve extends ServiceRack {
 	logger.info("configuring XMLRetrieve...");
 	// look for the parameters
 	Element param_list = (Element)GSXML.getChildByTagName(info, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
-	HashMap params;
+	HashMap<String, Serializable> params;
 	String services_to_provide = "";
 	if (param_list != null) {
 	    params = GSXML.extractParams(param_list, false);
@@ -241,7 +242,7 @@ public class XMLRetrieve extends ServiceRack {
 	    return result;
 	}
 	
-	Vector meta_name_list = new Vector();
+	Vector<String> meta_name_list = new Vector<String>();
 	boolean all_metadata = false;
 	// Process the request parameters
 	Element param = GSXML.getFirstElementChild(param_list);//(Element) param_list.getFirstChild();
@@ -344,7 +345,7 @@ public class XMLRetrieve extends ServiceRack {
 	
     }
 
-    protected Element getMetadata(String node_id, boolean all, Vector meta_name_list) {
+    protected Element getMetadata(String node_id, boolean all, Vector<String> meta_name_list) {
 
 	// our default strategy here is to only return Title and root:Title
 	// ignore all others 
@@ -372,7 +373,7 @@ public class XMLRetrieve extends ServiceRack {
 	} else {
 	    // have to process metadata one by one
 	    for (int i=0; i<meta_name_list.size(); i++) {
-		String meta_name = (String) meta_name_list.elementAt(i);
+		String meta_name = meta_name_list.elementAt(i);
 		String actual_meta_name = meta_name;
 		if (meta_name.startsWith("root_")) {
 		    actual_meta_name = meta_name.substring(5);

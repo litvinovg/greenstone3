@@ -104,8 +104,8 @@ public abstract class AbstractTextSearch
 	else if (name.equals(INDEX_SUBCOLLECTION_PARAM)){
 	    Element index_sub_list = (Element)GSXML.getChildByTagName(this.config_info, INDEX_SUBCOLLECTION_ELEM+GSXML.LIST_MODIFIER);
 	    if (index_sub_list == null) return true; // processed, just not a very interesting result
-	    ArrayList index_sub_ids = new ArrayList();
-	    ArrayList index_sub_names = new ArrayList();
+	    ArrayList<String> index_sub_ids = new ArrayList<String>();
+	    ArrayList<String> index_sub_names = new ArrayList<String>();
 	    getIndexSubcollectionData(index_sub_ids, index_sub_names, lang);
 	    String param_type = GSXML.PARAM_TYPE_ENUM_SINGLE;
 	    if (does_multi_index_search) {
@@ -121,8 +121,8 @@ public abstract class AbstractTextSearch
 	else if(name.equals(INDEX_LANGUAGE_PARAM)){
 	    Element index_lang_list = (Element)GSXML.getChildByTagName(this.config_info, INDEX_LANGUAGE_ELEM+GSXML.LIST_MODIFIER);
             if (index_lang_list == null) return true; // processed, just not a very interesting result
-	    ArrayList index_lang_ids = new ArrayList();
-	    ArrayList index_lang_names = new ArrayList();
+	    ArrayList<String> index_lang_ids = new ArrayList<String>();
+	    ArrayList<String> index_lang_names = new ArrayList<String>();
 	    getIndexLanguageData(index_lang_ids, index_lang_names, lang);
 	    String param_type = GSXML.PARAM_TYPE_ENUM_SINGLE;
 	    if (does_multi_index_search) {
@@ -149,12 +149,12 @@ public abstract class AbstractTextSearch
     /** get the details about the indexexSubcollections available
      * might be implemented by subclass
      */
-    protected void getIndexSubcollectionData(ArrayList index_ids, ArrayList index_names, String lang){}
+    protected void getIndexSubcollectionData(ArrayList<String> index_ids, ArrayList<String> index_names, String lang){}
     
     /** get the details about the indexes available
      * might be implemented by subclass
      */
-    protected void getIndexLanguageData(ArrayList index_ids, ArrayList index_names, String lang){}
+    protected void getIndexLanguageData(ArrayList<String> index_ids, ArrayList<String> index_names, String lang){}
   
 
 }

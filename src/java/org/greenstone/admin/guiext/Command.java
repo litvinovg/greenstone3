@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
 
 public class Command implements Runnable
 {
-    HashMap _osCommands = new HashMap();
+    HashMap<String, String> _osCommands = new HashMap<String, String>();
     CommandStep _parent = null;
 
     public Command(Element commandElement, CommandStep parent) 
@@ -132,19 +132,19 @@ public class Command implements Runnable
     {
 	String currentos = System.getProperty("os.name");
 
-	String command = (String)_osCommands.get(currentos);
+	String command = _osCommands.get(currentos);
 	if(command != null){
 	    return command;
 	}
 	
 	if(currentos.contains("Windows")){
-	    command = (String)_osCommands.get("Windows");
+	    command = _osCommands.get("Windows");
 	    
 	    if(command != null){
 		return command;
 	    }   
 	}
-	return (String)_osCommands.get("default");
+	return _osCommands.get("default");
     }
 
     public class PrinterThread extends Thread

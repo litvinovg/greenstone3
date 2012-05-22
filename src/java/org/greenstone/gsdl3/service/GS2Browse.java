@@ -157,13 +157,13 @@ public class GS2Browse
 	return OID.getTop(node_id);
     }
     /** returns a list of the child ids in order, null if no children */
-    protected ArrayList getChildrenIds(String node_id) {
+    protected ArrayList<String> getChildrenIds(String node_id) {
 	DBInfo info = this.coll_db.getInfo(node_id);
 	if (info == null) {
 	    return null;
 	}
 
-	ArrayList children = new ArrayList();
+	ArrayList<String> children = new ArrayList<String>();
 	
 	String contains = info.getInfo("contains");
 	StringTokenizer st = new StringTokenizer(contains, ";");
@@ -189,10 +189,10 @@ public class GS2Browse
 	    return "";
 	}
 
-	Set keys = info.getKeys();
-	Iterator it = keys.iterator();
+	Set<String> keys = info.getKeys();
+	Iterator<String> it = keys.iterator();
 	while(it.hasNext()) {
-	    String key_in = (String)it.next();
+	    String key_in = it.next();
 	    String value = info.getInfo(key);
 	    if (key_in.equals(key)){
 		return value;
@@ -211,7 +211,7 @@ public class GS2Browse
      */
     // assumes only one value per metadata
     protected Element getMetadataList(String node_id, boolean all_metadata, 
-				      ArrayList metadata_names) {
+				      ArrayList<String> metadata_names) {
 	String lang = "en";
 	Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
 	DBInfo info = this.coll_db.getInfo(node_id);
@@ -220,17 +220,17 @@ public class GS2Browse
 	}
 	if (all_metadata) {
 	    // return everything out of the database
-	    Set keys = info.getKeys();
-	    Iterator it = keys.iterator();
+	    Set<String> keys = info.getKeys();
+	    Iterator<String> it = keys.iterator();
 	    while(it.hasNext()) {
-		String key = (String)it.next();
+		String key = it.next();
 		String value = info.getInfo(key);
 		GSXML.addMetadata(this.doc, metadata_list, key, this.macro_resolver.resolve(value, lang, GS2MacroResolver.SCOPE_META, node_id));
 	    }
 	    
 	} else {
 	    for (int i=0; i<metadata_names.size(); i++) {
-		String meta_name = (String) metadata_names.get(i);
+		String meta_name = metadata_names.get(i);
 		String value = (String)info.getInfo(meta_name);
 		GSXML.addMetadata(this.doc, metadata_list, meta_name, value);
 	    }

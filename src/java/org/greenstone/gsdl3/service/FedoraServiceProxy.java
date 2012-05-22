@@ -80,7 +80,7 @@ public class FedoraServiceProxy
 	this.converter = new XMLConverter();
 	this.doc = this.converter.newDOM();
 	this.short_service_info = this.doc.createElement(GSXML.SERVICE_ELEM+GSXML.LIST_MODIFIER);
-	this.format_info_map = new HashMap();
+	this.format_info_map = new HashMap<String, Node>();
 
     }
     
@@ -406,7 +406,7 @@ public class FedoraServiceProxy
 
 	NodeList paramNodes = request.getElementsByTagName(GSXML.PARAM_ELEM);
 	if(paramNodes.getLength() > 0) {
-	    HashMap params = new HashMap(paramNodes.getLength());
+	    HashMap<String, String> params = new HashMap<String, String>(paramNodes.getLength());
 	    for(int i = 0; i < paramNodes.getLength(); i++) {
 		Element param = (Element)paramNodes.item(i);
 		params.put(param.getAttribute(GSXML.NAME_ATT), param.getAttribute(GSXML.VALUE_ATT));

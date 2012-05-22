@@ -197,16 +197,16 @@ public class CoverageMetadataRetrieve
 
     DBInfo collection_info = this.coll_db.getInfo("collection");
     
-    Set keys = collection_info.getKeys();
+    Set<String> keys = collection_info.getKeys();
 
-    Vector valid_keys = new Vector();
+    Vector<String> valid_keys = new Vector<String>();
 
     // Iterate over keys and add valid ones to the valid_keys vector
     String current_key = null;
-    Iterator iter = keys.iterator();
+    Iterator<String> iter = keys.iterator();
 
     while (iter.hasNext()) {
-        current_key = (String) iter.next();
+        current_key = iter.next();
         if(current_key.matches("^metadatalist-([a-zA-Z][^-])*$"))
         {
             logger.error("********** ADDING " + current_key + " TO VALID KEYS LIST **********\n");
@@ -231,7 +231,7 @@ public class CoverageMetadataRetrieve
     iter = valid_keys.iterator();
 
     while (iter.hasNext()) {
-        current_key = (String) iter.next();
+        current_key = iter.next();
 
         // Create metadataSet using the current key and add to metadataSetList
         metadataSet = this.doc.createElement("metadataSet");
@@ -243,10 +243,10 @@ public class CoverageMetadataRetrieve
         metadataSetList.appendChild(metadataSet);
 
         // Create a metadata element for each value and add to metadataSet
-        Vector sub_info = collection_info.getMultiInfo(current_key);
-        Iterator iter2 = sub_info.iterator();
+        Vector<String> sub_info = collection_info.getMultiInfo(current_key);
+        Iterator<String> iter2 = sub_info.iterator();
         while (iter2.hasNext()) {
-            value = (String) iter2.next();     
+            value = iter2.next();     
             metadata = this.doc.createElement("metadata");
             metadata.setAttribute(GSXML.NAME_ATT, value);
             metadataSet.appendChild(metadata);

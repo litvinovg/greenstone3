@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 import java.io.File;
+import java.io.Serializable;
 
 import org.apache.log4j.*;
 
@@ -46,7 +47,7 @@ public class GS2BrowseAction extends Action
 
 		// extract the params from the cgi-request, and check that we have a coll specified
 		Element cgi_paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(cgi_paramList, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(cgi_paramList, false);
 
 		String service_name = (String) params.get(GSParams.SERVICE);
 		String collection = (String) params.get(GSParams.COLLECTION);
@@ -106,8 +107,8 @@ public class GS2BrowseAction extends Action
 
 		// the id of the classifier is the top id of the selected node
 		String top_id = OID.getTop(classifier_node);
-		HashSet doc_meta_names = new HashSet();
-		HashSet class_meta_names = new HashSet();
+		HashSet<String> doc_meta_names = new HashSet<String>();
+		HashSet<String> class_meta_names = new HashSet<String>();
 		// add in the defaults
 		doc_meta_names.add("Title");
 		class_meta_names.add("Title");
@@ -357,7 +358,7 @@ public class GS2BrowseAction extends Action
 		return page_response;
 	}
 
-	protected void extractMetadataNames(Element new_format, HashSet doc_meta_names, HashSet class_meta_names)
+	protected void extractMetadataNames(Element new_format, HashSet<String> doc_meta_names, HashSet<String> class_meta_names)
 	{
 
 		NodeList templates = new_format.getElementsByTagName("gsf:template");

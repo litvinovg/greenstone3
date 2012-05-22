@@ -26,7 +26,7 @@ import org.greenstone.admin.LoggedMessageArea;
 
 public class CommandStep extends Step
 {
-    protected ArrayList _commandsAndCallbacks = new ArrayList();
+    protected ArrayList<Runnable> _commandsAndCallbacks = new ArrayList<Runnable>();
     protected LoggedMessageArea _messageArea = new LoggedMessageArea(this.getClass());
     protected int _threadCount = -1;
 
@@ -84,7 +84,7 @@ public class CommandStep extends Step
 	    _button.setText("Running...");
 
 	    _threadCount = 0;
-	    Thread newThread = new Thread((Runnable)_commandsAndCallbacks.get(0));
+	    Thread newThread = new Thread(_commandsAndCallbacks.get(0));
 	    newThread.start();
 	}
     }
@@ -105,7 +105,7 @@ public class CommandStep extends Step
 	_threadCount++;
 
 	if(_threadCount < _commandsAndCallbacks.size()){
-	    Thread newThread = new Thread((Runnable)_commandsAndCallbacks.get(_threadCount));
+	    Thread newThread = new Thread(_commandsAndCallbacks.get(_threadCount));
 	    newThread.start();
 	}
 	else{

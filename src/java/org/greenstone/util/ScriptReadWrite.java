@@ -14,9 +14,9 @@ public class ScriptReadWrite {
     public ScriptReadWrite() {
     }
 
-    public ArrayList readInFile(File file) {
+    public ArrayList<String> readInFile(File file) {
 	try {
-	    ArrayList fileLines = new ArrayList();
+	    ArrayList<String> fileLines = new ArrayList<String>();
 	    String oneLine = null;
 	    BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 	    while ((oneLine = bufferedReader.readLine()) != null) {
@@ -30,7 +30,7 @@ public class ScriptReadWrite {
 	}
     }
 
-    public void writeOutFile(File file, ArrayList fileLines_in) {
+    public void writeOutFile(File file, ArrayList<String> fileLines_in) {
 	try {
 	    PrintWriter printWriter = new PrintWriter(new BufferedWriter(new FileWriter(file)));
 	    for (int i = 0; i < fileLines_in.size(); i++) {
@@ -43,7 +43,7 @@ public class ScriptReadWrite {
 	}
     }
 
-    public ArrayList queryReplace(ArrayList fileLines_ex, String param,
+    public ArrayList<String> queryReplace(ArrayList<String> fileLines_ex, String param,
 				  String newValue) {
 	// only replace existing, don't append if param does not exist
 	return replaceOrAddLine(fileLines_ex, param, newValue, false); 
@@ -51,7 +51,7 @@ public class ScriptReadWrite {
     
     // if the parameter exists, then a replace is performed, else the parameter-value
     // is appended
-    public ArrayList replaceOrAddLine(ArrayList fileLines_ex, String param, String newValue, 
+    public ArrayList<String> replaceOrAddLine(ArrayList<String> fileLines_ex, String param, String newValue, 
 				      boolean replaceElseAdd) 
     {	
 	String oneLine = null;
@@ -62,7 +62,7 @@ public class ScriptReadWrite {
 	// int param_length = param.length();
 
 	for (int i = 0; i < fileLines_ex.size(); i++) {
-	    oneLine = ((String) fileLines_ex.get(i)).trim();
+	    oneLine = fileLines_ex.get(i).trim();
 	    // oneLine_length = oneLine.length();
 	    StringTokenizer st = new StringTokenizer(oneLine, "=");
 	    if (st.hasMoreTokens()) {

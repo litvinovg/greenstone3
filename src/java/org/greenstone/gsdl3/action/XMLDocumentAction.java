@@ -16,6 +16,7 @@ import java.util.Vector;
 import java.util.Map;
 import java.util.Iterator;
 import java.io.File;
+import java.io.Serializable;
 
 /** action class for retrieving parts of XML documents */
 public class XMLDocumentAction extends Action
@@ -43,7 +44,7 @@ public class XMLDocumentAction extends Action
 
 		// extract the params from the cgi-request, and check that we have a coll specified
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		HashMap params = GSXML.extractParams(cgi_param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 
 		String collection = (String) params.get(GSParams.COLLECTION);
 		if (collection == null || collection.equals(""))

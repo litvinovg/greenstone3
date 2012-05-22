@@ -91,7 +91,7 @@ public abstract class ServiceRack implements ModuleInterface
 	/**
 	 * XML element for stylesheet requests - map of service name to format elem
 	 */
-	protected HashMap format_info_map = null;
+	protected HashMap<String, Node> format_info_map = null;
 
 	/**
 	 * A class loader that knows about the collection resources directory can
@@ -150,7 +150,7 @@ public abstract class ServiceRack implements ModuleInterface
 		this.converter = new XMLConverter();
 		this.doc = this.converter.newDOM();
 		this.short_service_info = this.doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
-		this.format_info_map = new HashMap();
+		this.format_info_map = new HashMap<String, Node>();
 	}
 
 	/**

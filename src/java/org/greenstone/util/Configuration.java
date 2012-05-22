@@ -41,7 +41,7 @@ import java.util.StringTokenizer;
 // loosely copied from Gatherer Configuration
 public class Configuration {
     
-    static private Hashtable hash = null;
+    static private Hashtable<String, String> hash = null;
 
     /** The first of three patterns used during tokenization, this pattern handles a comma separated list. */
     static final private String TOKENIZER_PATTERN1 = " ,\n\t";
@@ -52,7 +52,7 @@ public class Configuration {
 
     public Configuration() {
 	
-	hash = new Hashtable();
+	hash = new Hashtable<String, String>();
 	
 	
 	// load up all the initial stuff
@@ -75,20 +75,20 @@ public class Configuration {
 
     /** Retrieve whether the named property is set or not */
     static public boolean get(String property) {
-	String value = (String)hash.get(property);
+	String value = hash.get(property);
 	return (value != null && value.equalsIgnoreCase("true"));
     }
     
     /** Retrieve the value of the named property as a String */
     static public String getString(String property) {
-	return (String)hash.get(property);
+	return hash.get(property);
     }
 
     /** Retrieve the value of the named property as a Locale. */
     static public Locale getLocale(String property) {
 	Locale result = Locale.getDefault();
 	try {
-	    String raw = (String) hash.get(property);
+	    String raw = hash.get(property);
 	    if (raw==null) {
 		return result;
 	    }
@@ -112,7 +112,7 @@ public class Configuration {
     /** Retrieve the value of the named property as a Color. */
     static public Color getColor(String property) {
 	Color result = Color.white; // Default
-	String raw = (String)hash.get(property);
+	String raw = hash.get(property);
 	if (raw == null || raw.equals("")) {
 	    return result;
 	}

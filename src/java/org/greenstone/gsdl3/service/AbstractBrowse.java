@@ -339,7 +339,7 @@ public abstract class AbstractBrowse
 	boolean want_structure = false;
 	boolean want_info = false;
 
-	ArrayList info_types=new ArrayList();
+	ArrayList<String> info_types=new ArrayList<String>();
 	// The document structure information desired
 	boolean want_ancestors = false;
 	boolean want_parent = false;
@@ -415,7 +415,7 @@ public abstract class AbstractBrowse
 		node.appendChild(node_info_elem);
 		
 		for (int j=0; j<info_types.size(); j++) {
-		    String info_type = (String)info_types.get(j);
+		    String info_type = info_types.get(j);
 		    String info_value = getStructureInfo(node_id, info_type);
 		    if (info_value != null) {
 			Element info_elem = this.doc.createElement("info");
@@ -510,7 +510,7 @@ public abstract class AbstractBrowse
 	}
 
 	// The metadata information required
-	ArrayList metadata_names_list = new ArrayList();
+	ArrayList<String> metadata_names_list = new ArrayList<String>();
 	boolean all_metadata = false;
 	// Process the request parameters
 	Element param = GSXML.getFirstElementChild(param_list);//(Element) param_list.getFirstChild();
@@ -618,10 +618,10 @@ public abstract class AbstractBrowse
     protected void addDescendants(Element node, String node_id, 
 				  boolean recursive)
     {
-	ArrayList child_ids = getChildrenIds(node_id);
+	ArrayList<String> child_ids = getChildrenIds(node_id);
 	if (child_ids==null) return;
 	for (int i=0; i< child_ids.size(); i++) {
-	    String child_id = (String)child_ids.get(i);
+	    String child_id = child_ids.get(i);
 	    Element child_elem;
 	    if (isDocumentId(child_id)) {
 		child_elem = createDocNode(child_id);
@@ -674,7 +674,7 @@ public abstract class AbstractBrowse
     }
 
     /** returns the list of sibling ids, including the specified node_id */
-    protected ArrayList getSiblingIds(String node_id) {
+    protected ArrayList<String> getSiblingIds(String node_id) {
 	String parent_id = getParentId(node_id);
 	if (parent_id == null) {
 	    return null;
@@ -697,7 +697,7 @@ public abstract class AbstractBrowse
     /** returns the id of the root node of the document containing node node_id. . may be the same as node_id */
     abstract protected String getRootId(String node_id);
     /** returns a list of the child ids in order, null if no children */
-    abstract protected ArrayList getChildrenIds(String node_id);
+    abstract protected ArrayList<String> getChildrenIds(String node_id);
     /** returns the node id of the parent node, null if no parent */
     abstract protected String getParentId(String node_id);
  
@@ -714,7 +714,7 @@ public abstract class AbstractBrowse
      */
     abstract protected Element getMetadataList(String node_id,
 					       boolean all_metadata,
-					       ArrayList metadata_names);
+					       ArrayList<String> metadata_names);
 
     /** get the particular metadata (identified by the metadata name) for the classifier node node_id
      * 

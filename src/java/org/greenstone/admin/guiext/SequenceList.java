@@ -15,7 +15,7 @@ import java.io.FileOutputStream;
 
 public class SequenceList
 {
-    protected ArrayList _steps = new ArrayList();
+    protected ArrayList<Step> _steps = new ArrayList<Step>();
     protected ExtensionInformation _parent = null;
     protected Properties _dependencies = null;
 
@@ -76,7 +76,7 @@ public class SequenceList
 
     public Step[] getSteps()
     {
-	return (Step[])(_steps.toArray(new Step[0]));
+	return (_steps.toArray(new Step[0]));
     }
 
     public JButton[] getButtons()
@@ -88,7 +88,7 @@ public class SequenceList
 	
 	JButton[] buttons = new JButton[_steps.size()];
 	for(int i = 0; i < _steps.size(); i++){
-	    buttons[i] = ((Step)_steps.get(i)).getButton();
+	    buttons[i] = _steps.get(i).getButton();
 	}
 	
 	return buttons;
@@ -151,17 +151,17 @@ public class SequenceList
     private void rollbackToRecursive(String id)
     {
 	Step rollbackStep = null;
-	ArrayList dependsSteps = new ArrayList();
+	ArrayList<String> dependsSteps = new ArrayList<String>();
 	for(int i = 0; i < _steps.size(); i++){
-	    if(((Step)(_steps.get(i))).getId().equals(id)){
-		rollbackStep = (Step)_steps.get(i);
+	    if((_steps.get(i)).getId().equals(id)){
+		rollbackStep = _steps.get(i);
 	    }
 	    
-	    String[] depends = ((Step)_steps.get(i)).getDependsOn().split(",");
+	    String[] depends = _steps.get(i).getDependsOn().split(",");
 
 	    for(int j = 0; j < depends.length; j++){
 		if(depends[j].equals(id)){
-		    dependsSteps.add(((Step)_steps.get(i)).getId());
+		    dependsSteps.add(_steps.get(i).getId());
 		}
 	    }
 	}
@@ -169,14 +169,14 @@ public class SequenceList
 	_dependencies.setProperty(_parent.getFileStem() + "." + id, "false");
 
 	for(int i = 0; i < dependsSteps.size(); i++){
-	    rollbackToRecursive((String)dependsSteps.get(i));
+	    rollbackToRecursive(dependsSteps.get(i));
 	}
     }
 
     public void clearPropertySteps()
     {
 	for(int i = 0; i < _steps.size(); i++){
-	    Step currentStep = (Step)_steps.get(i);
+	    Step currentStep = _steps.get(i);
 	    if(currentStep instanceof PropertiesStep){
 		((PropertiesStep)currentStep).setPropertiesToDefaults();
 	    }
@@ -210,7 +210,7 @@ public class SequenceList
 	}
 	
 	for(int i = 0; i < _steps.size(); i++){
-	    Step currentStep = (Step)_steps.get(i);
+	    Step currentStep = _steps.get(i);
 	    JButton currentButton = currentStep.getButton();
 
 	    //If this step button depends on another button then disabled it

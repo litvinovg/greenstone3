@@ -29,6 +29,7 @@ import org.w3c.dom.Text;
 import java.util.Vector;
 import java.util.HashMap;
 import java.io.File;
+import java.io.Serializable;
 
 import org.apache.log4j.*;
 
@@ -132,7 +133,7 @@ public class PhindPhraseBrowse
   protected Element processPhindApplet(Element request) {
     
     Element param_elem = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
-    HashMap params = GSXML.extractParams(param_elem, false);
+    HashMap<String, Serializable> params = GSXML.extractParams(param_elem, false);
     
     long first_e = Long.parseLong((String)params.get("pfe"));
     long last_e = Long.parseLong((String)params.get("ple"));

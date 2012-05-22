@@ -27,6 +27,8 @@ import org.w3c.dom.Text;
 
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.Transformer;
+
+import java.io.Serializable;
 import java.io.StringWriter;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.dom.DOMSource;
@@ -298,7 +300,7 @@ public class GSXML
 		return ids;
 	}
 
-	public static HashMap extractParams(Element xml, boolean deep)
+	public static HashMap<String, Serializable> extractParams(Element xml, boolean deep)
 	{
 		return extractParams(xml, deep, null);
 	}
@@ -307,7 +309,7 @@ public class GSXML
 	 * takes a paramList element, and gets a HashMap of name-value pairs if
 	 * deep=true, extracts embedded params, otherwise just top level params
 	 */
-	public static HashMap extractParams(Element xml, boolean deep, String toFind)
+	public static HashMap<String, Serializable> extractParams(Element xml, boolean deep, String toFind)
 	{
 
 		if (!xml.getNodeName().equals(PARAM_ELEM + LIST_MODIFIER))
@@ -325,7 +327,7 @@ public class GSXML
 		{ // just get the top  level ones
 			params = xml.getChildNodes();
 		}
-		HashMap param_map = new HashMap();
+		HashMap<String, Serializable> param_map = new HashMap<String, Serializable>();
 		for (int i = 0; i < params.getLength(); i++)
 		{
 			if (params.item(i).getNodeName().equals(PARAM_ELEM))
@@ -353,10 +355,10 @@ public class GSXML
 
 					String namespace = name.substring(0, pos);
 					name = name.substring(pos + 1);
-					HashMap map = (HashMap) param_map.get(namespace);
+					HashMap<String, String> map = (HashMap<String, String>) param_map.get(namespace);
 					if (map == null)
 					{
-						map = new HashMap();
+						map = new HashMap<String, String>();
 						param_map.put(namespace, map);
 					}
 					map.put(name, value);
@@ -668,10 +670,10 @@ public class GSXML
 		return n;
 	}
 
-	public static HashMap getChildrenMap(Node n)
+	public static HashMap<String, Node> getChildrenMap(Node n)
 	{
 
-		HashMap map = new HashMap();
+		HashMap<String, Node> map = new HashMap<String, Node>();
 		Node child = n.getFirstChild();
 		while (child != null)
 		{
@@ -855,7 +857,7 @@ public class GSXML
 		return p;
 	}
 
-	public static Element createParameterDescription2(Document owner, String id, String display_name, String type, String default_value, ArrayList option_ids, ArrayList option_names)
+	public static Element createParameterDescription2(Document owner, String id, String display_name, String type, String default_value, ArrayList<String> option_ids, ArrayList<String> option_names)
 	{
 
 		Element p = owner.createElement(PARAM_ELEM);
@@ -871,8 +873,8 @@ public class GSXML
 			for (int i = 0; i < option_ids.size(); i++)
 			{
 				Element e = owner.createElement(PARAM_OPTION_ELEM);
-				e.setAttribute(NAME_ATT, (String) option_ids.get(i));
-				e.appendChild(createDisplayTextElement(owner, GSXML.DISPLAY_TEXT_NAME, (String) option_names.get(i)));
+				e.setAttribute(NAME_ATT, option_ids.get(i));
+				e.appendChild(createDisplayTextElement(owner, GSXML.DISPLAY_TEXT_NAME, option_names.get(i)));
 				p.appendChild(e);
 			}
 		}

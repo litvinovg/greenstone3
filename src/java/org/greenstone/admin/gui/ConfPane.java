@@ -80,7 +80,7 @@ public class ConfPane extends JPanel implements ActionListener
 	protected JSplitPane main_conf_pane = null;
 
 	protected JPanel main_contentPane = null;
-	public Hashtable conf_table;
+	public Hashtable<Object, Object> conf_table;
 
 	/** The panel that contains a Conf_list */
 	private JPanel confList_pane = null;
@@ -157,7 +157,7 @@ public class ConfPane extends JPanel implements ActionListener
 	private Object[][] conf_setting;
 
 	//An array to store all the details in the build.properties file
-	private ArrayList conf_array;
+	private ArrayList<String> conf_array;
 
 	//Site configuration
 	// TODO!! there are more than one site and interface - need to extend this
@@ -171,7 +171,7 @@ public class ConfPane extends JPanel implements ActionListener
 	//Constructor
 	public ConfPane()
 	{
-		conf_table = new Hashtable();
+		conf_table = new Hashtable<Object, Object>();
 		// create all the control button panes
 		inner_control_pane = new JPanel();
 		inner_button_pane = new JPanel();
@@ -651,7 +651,7 @@ public class ConfPane extends JPanel implements ActionListener
 	public void saveProjectConf(File file)
 	{
 		String new_string;
-		Enumeration keys = conf_table.keys();
+		Enumeration<Object> keys = conf_table.keys();
 		String key;
 		String value;
 		String filename = file.getPath();
@@ -661,7 +661,7 @@ public class ConfPane extends JPanel implements ActionListener
 			value = (String) conf_table.get(key);
 			for (int j = 0; j < conf_array.size(); j++)
 			{
-				if (((String) conf_array.get(j)).startsWith(key.toLowerCase()))
+				if (conf_array.get(j).startsWith(key.toLowerCase()))
 				{
 					new_string = key + "=" + value;
 					conf_array.set(j, new_string.toLowerCase());
@@ -718,7 +718,7 @@ public class ConfPane extends JPanel implements ActionListener
 		 * conf_setting[i][1]:Para and conf_setting[i][2]:Value conf_array[]
 		 * store all the details from the build.properties
 		 */
-		conf_array = new ArrayList();
+		conf_array = new ArrayList<String>();
 		conf_setting = new Object[rowLength][colLength];
 		try
 		{

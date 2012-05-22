@@ -74,11 +74,11 @@ public class GSParams
 	public static final String EXTERNAL_LINK_TYPE_DIRECT = "direct";
 	public static final String EXTERNAL_LINK_TYPE_FRAMED = "frame";
 
-	protected HashMap param_map = null;
+	protected HashMap<String, Param> param_map = null;
 
 	public GSParams()
 	{
-		this.param_map = new HashMap(30);
+		this.param_map = new HashMap<String, Param>(30);
 
 		// add in all the standard params
 		addParameter(ACTION, false);
@@ -134,7 +134,7 @@ public class GSParams
 
 	public boolean setParamDefault(String name, String default_value)
 	{
-		Param p = (Param) this.param_map.get(name);
+		Param p = this.param_map.get(name);
 		if (p == null)
 			return false;
 		p.default_value = default_value;
@@ -146,7 +146,7 @@ public class GSParams
 		// p. is used to store previous settings
 		if (name.startsWith("p."))
 			return false;
-		Param p = (Param) this.param_map.get(name);
+		Param p = this.param_map.get(name);
 		if (p == null)
 			return true; // if things are not in here, always save.
 		return p.save;

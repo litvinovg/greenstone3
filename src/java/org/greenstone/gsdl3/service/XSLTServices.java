@@ -215,7 +215,7 @@ public class XSLTServices
       (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 
     // extract the only parameter we care about
-    HashMap params = GSXML.extractParams(param_list, false);
+    HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
     String query = (String)params.get(QUERY_PARAM);
     
     if (query == null || query.equals(""))

@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
 import java.io.File;
+import java.io.Serializable;
 
 import org.apache.log4j.*;
 
@@ -91,7 +92,7 @@ extends AbstractGS2TextSearch {
         }
         
         // Process the request parameters
-        HashMap params = GSXML.extractParams (param_list, false);
+        HashMap<String, Serializable> params = GSXML.extractParams (param_list, false);
         
         // Make sure a query has been specified
         String query = (String) params.get (QUERY_PARAM);
@@ -212,7 +213,7 @@ extends AbstractGS2TextSearch {
     }
     
     // should probably use a list rather than map
-    protected boolean setStandardQueryParams(HashMap params)
+    protected boolean setStandardQueryParams(HashMap<String, Serializable> params)
     {
 	// set the default settings that gs uses
 	this.mg_src.setReturnTerms(true);

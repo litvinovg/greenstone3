@@ -21,6 +21,7 @@ package org.greenstone.gsdl3.util;
 import org.greenstone.util.GlobalProperties;
 
 import org.w3c.dom.*;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -560,9 +561,9 @@ public class OAIXML {
       
       return oai;
     }
-    public static HashMap getChildrenMapByTagName(Node n, String tag_name) {
+    public static HashMap<String, Node> getChildrenMapByTagName(Node n, String tag_name) {
 	
-	HashMap map= new HashMap();
+	HashMap<String, Node> map= new HashMap<String, Node>();
 	Node child = n.getFirstChild();
 	while (child!=null) {
 	    String name = child.getNodeName();
@@ -621,8 +622,8 @@ public class OAIXML {
         child = child.getNextSibling();
       }
     }
-    public static HashMap getParamMap(NodeList params) {
-      HashMap map = new HashMap();
+    public static HashMap<String, String> getParamMap(NodeList params) {
+      HashMap<String, String> map = new HashMap<String, String>();
       for(int i=0; i<params.getLength(); i++) {
         Element param = (Element)params.item(i);
         String param_name = param.getAttribute(OAIXML.NAME);

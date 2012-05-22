@@ -320,10 +320,10 @@ public class OAIReceptionist implements ModuleInterface {
   /** if the param_map contains strings other than those in valid_strs, return false;
    *  otherwise true.
    */
-  private boolean isValidParam(HashMap param_map, HashSet valid_strs) {
-    ArrayList param_list = new ArrayList(param_map.keySet());
+  private boolean isValidParam(HashMap<String, String> param_map, HashSet<String> valid_strs) {
+    ArrayList<String> param_list = new ArrayList<String>(param_map.keySet());
     for(int i=0; i<param_list.size(); i++) {
-      if (valid_strs.contains((String)param_list.get(i)) == false) {
+      if (valid_strs.contains(param_list.get(i)) == false) {
         return false;
       }
     }
@@ -332,7 +332,7 @@ public class OAIReceptionist implements ModuleInterface {
   private Element doListIdentifiers(Element msg) {
     // option: from, until, set, metadataPrefix, resumptionToken
     // exceptions: badArgument, badResumptionToken, cannotDisseminateFormat, noRecordMatch, and noSetHierarchy
-    HashSet valid_strs = new HashSet();
+    HashSet<String> valid_strs = new HashSet<String>();
     valid_strs.add(OAIXML.FROM);
     valid_strs.add(OAIXML.UNTIL);
     valid_strs.add(OAIXML.SET);
@@ -346,13 +346,13 @@ public class OAIReceptionist implements ModuleInterface {
     String coll_name = "";
     String token = "";
     
-    HashMap param_map = OAIXML.getParamMap(params);    
+    HashMap<String, String> param_map = OAIXML.getParamMap(params);    
     if (!isValidParam(param_map, valid_strs)) {
 	logger.error("One of the params is invalid");
 	return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
     } 
     // param keys are valid, but if there are any date params, check they're of the right format
-    String from = (String)param_map.get(OAIXML.FROM);
+    String from = param_map.get(OAIXML.FROM);
     if(from != null) {	
 	Date from_date = OAIXML.getDate(from);
 	if(from_date == null) {
@@ -360,7 +360,7 @@ public class OAIReceptionist implements ModuleInterface {
 	    return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
 	}
     }
-    String until = (String)param_map.get(OAIXML.UNTIL);
+    String until = param_map.get(OAIXML.UNTIL);
     if(until != null) {	
 	Date until_date = OAIXML.getDate(until);
 	if(until_date == null) {
@@ -388,7 +388,7 @@ public class OAIReceptionist implements ModuleInterface {
     boolean request_set = param_map.containsKey(OAIXML.SET);
     if(request_set == true) {
       boolean set_supported = false;
-      String set_spec_str = (String)param_map.get(OAIXML.SET);
+      String set_spec_str = param_map.get(OAIXML.SET);
       // get the collection name
       //if setSpec is supported by this repository, it must be in the form: site_name:coll_name
       String[] strs = splitSetSpec(set_spec_str);
@@ -408,7 +408,7 @@ public class OAIReceptionist implements ModuleInterface {
     //Is there a resumptionToken included which is requesting an incomplete list?
     if(param_map.containsKey(OAIXML.RESUMPTION_TOKEN)) {
         // validate resumptionToken
-      token = (String)param_map.get(OAIXML.RESUMPTION_TOKEN);
+      token = param_map.get(OAIXML.RESUMPTION_TOKEN);
       logger.info("has resumptionToken" + token);
       if(OAIXML.containsToken(token) == false) {
         return getMessage(OAIXML.createErrorElement(OAIXML.BAD_RESUMPTION_TOKEN, ""));
@@ -423,7 +423,7 @@ public class OAIReceptionist implements ModuleInterface {
     }    
     
     //Now that we got a prefix, check and see if it's supported by this repository
-    String prefix_value = (String)param_map.get(OAIXML.METADATA_PREFIX);
+    String prefix_value = param_map.get(OAIXML.METADATA_PREFIX);
     if (containsMetadataPrefix(prefix_value) == false) {
       logger.error("requested prefix is not found in OAIConfig.xml");
       return getMessage(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
@@ -433,7 +433,7 @@ public class OAIReceptionist implements ModuleInterface {
     Element result = null;
     String verb = req.getAttribute(OAIXML.TO); 
     NodeList param_list = req.getElementsByTagName(OAIXML.PARAM);
-    ArrayList retain_param_list = new ArrayList();
+    ArrayList<Element> retain_param_list = new ArrayList<Element>();
     for (int j=0; j<param_list.getLength(); j++) {
       Element e = OAIXML.duplicateElement(msg.getOwnerDocument(), (Element)param_list.item(j), true);
       retain_param_list.add(e);
@@ -448,7 +448,7 @@ public class OAIReceptionist implements ModuleInterface {
           req = msg.getOwnerDocument().createElement(GSXML.REQUEST_ELEM);
           msg.appendChild(req);
           for (int j=0; j<retain_param_list.size(); j++) {
-            req.appendChild((Element)retain_param_list.get(j));
+            req.appendChild(retain_param_list.get(j));
           }
         }
         String full_name = ((Element)oai_coll.item(i)).getAttribute(OAIXML.NAME);
@@ -537,7 +537,7 @@ public class OAIReceptionist implements ModuleInterface {
     logger.info("");
     // option: from, until, set, metadataPrefix, and resumptionToken
     // exceptions: badArgument, badResumptionToken, cannotDisseminateFormat, noRecordMatch, and noSetHierarchy
-    HashSet valid_strs = new HashSet();
+    HashSet<String> valid_strs = new HashSet<String>();
     valid_strs.add(OAIXML.FROM);
     valid_strs.add(OAIXML.UNTIL);
     valid_strs.add(OAIXML.SET);
@@ -557,13 +557,13 @@ public class OAIReceptionist implements ModuleInterface {
       return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
     }
     
-    HashMap param_map = OAIXML.getParamMap(params);    
+    HashMap<String, String> param_map = OAIXML.getParamMap(params);    
     if (!isValidParam(param_map, valid_strs)) {
 	logger.error("One of the params is invalid");
 	return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
     }
     // param keys are valid, but if there are any date params, check they're of the right format
-    String from = (String)param_map.get(OAIXML.FROM);
+    String from = param_map.get(OAIXML.FROM);
     if(from != null) {	
 	Date from_date = OAIXML.getDate(from);
 	if(from_date == null) {
@@ -571,7 +571,7 @@ public class OAIReceptionist implements ModuleInterface {
 	    return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
 	}
     }
-    String until = (String)param_map.get(OAIXML.UNTIL);
+    String until = param_map.get(OAIXML.UNTIL);
     Date until_date = null;
     if(until != null) {	
 	until_date = OAIXML.getDate(until);
@@ -600,7 +600,7 @@ public class OAIReceptionist implements ModuleInterface {
     boolean request_set = param_map.containsKey(OAIXML.SET);
     if(request_set == true) {
       boolean set_supported = false;
-      String set_spec_str = (String)param_map.get(OAIXML.SET);
+      String set_spec_str = param_map.get(OAIXML.SET);
       // get the collection name
       //if setSpec is supported by this repository, it must be in the form: site_name:coll_name
       String[] strs = splitSetSpec(set_spec_str);
@@ -629,7 +629,7 @@ public class OAIReceptionist implements ModuleInterface {
       //    and issue the subsequent part of that complete list according to the token.
       //    store a new token if necessary.
         //}      
-      token = (String)param_map.get(OAIXML.RESUMPTION_TOKEN);
+      token = param_map.get(OAIXML.RESUMPTION_TOKEN);
       logger.info("has resumptionToken: " + token);
       if(OAIXML.containsToken(token) == false) {
         return getMessage(OAIXML.createErrorElement(OAIXML.BAD_RESUMPTION_TOKEN, ""));
@@ -670,7 +670,7 @@ public class OAIReceptionist implements ModuleInterface {
     }
     
     //Now that we got a prefix, check and see if it's supported by this repository
-    String prefix_value = (String)param_map.get(OAIXML.METADATA_PREFIX);
+    String prefix_value = param_map.get(OAIXML.METADATA_PREFIX);
     if (containsMetadataPrefix(prefix_value) == false) {
 	logger.error("requested prefix is not found in OAIConfig.xml");
 	return getMessage(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
@@ -681,7 +681,7 @@ public class OAIReceptionist implements ModuleInterface {
     Element result = null;
     String verb = req.getAttribute(OAIXML.TO); 
     NodeList param_list = req.getElementsByTagName(OAIXML.PARAM);
-    ArrayList retain_param_list = new ArrayList();
+    ArrayList<Element> retain_param_list = new ArrayList<Element>();
     for (int j=0; j<param_list.getLength(); j++) {
       Element e = OAIXML.duplicateElement(msg.getOwnerDocument(), (Element)param_list.item(j), true);
       retain_param_list.add(e);
@@ -697,7 +697,7 @@ public class OAIReceptionist implements ModuleInterface {
           req = msg.getOwnerDocument().createElement(GSXML.REQUEST_ELEM);
           msg.appendChild(req);
           for (int j=0; j<retain_param_list.size(); j++) {
-            req.appendChild((Element)retain_param_list.get(j));
+            req.appendChild(retain_param_list.get(j));
           }
         }
         String full_name = ((Element)oai_coll.item(i)).getAttribute(OAIXML.NAME);
@@ -746,7 +746,7 @@ public class OAIReceptionist implements ModuleInterface {
       //append required number of records (may be a complete or incomplete list)
       getRecords(list_records, record_list, 0, resume_after);
       //An incomplete list is sent; append a resumptionToken element
-      Element token_elem = createResumptionTokenElement(num_records, 0, resume_after, true, (String)param_map.get(OAIXML.METADATA_PREFIX));
+      Element token_elem = createResumptionTokenElement(num_records, 0, resume_after, true, param_map.get(OAIXML.METADATA_PREFIX));
       //store this token
       OAIXML.addToken(token_elem);
        
@@ -767,14 +767,14 @@ public class OAIReceptionist implements ModuleInterface {
         //append required records to list_records (list is complete)
         getRecords(list_records, record_list, cursor, num_records);
         //An incomplete list is sent; append a resumptionToken element
-	token_elem = createResumptionTokenElement(num_records, cursor, -1, false, (String)param_map.get(OAIXML.METADATA_PREFIX));
+	token_elem = createResumptionTokenElement(num_records, cursor, -1, false, param_map.get(OAIXML.METADATA_PREFIX));
 	list_records.appendChild(token_elem);
 
       } else {
         //No, we are not.
         //append required records to list_records (list is incomplete)
         getRecords(list_records, record_list, cursor, cursor + resume_after);
-        token_elem = createResumptionTokenElement(num_records, cursor, cursor + resume_after, true, (String)param_map.get(OAIXML.METADATA_PREFIX));
+        token_elem = createResumptionTokenElement(num_records, cursor, cursor + resume_after, true, param_map.get(OAIXML.METADATA_PREFIX));
         //store this token
         OAIXML.addToken(token_elem);
         list_records.appendChild(token_elem);
@@ -1012,13 +1012,13 @@ public class OAIReceptionist implements ModuleInterface {
      */ 
     Element get_record = OAIXML.createElement(OAIXML.GET_RECORD);
 
-    HashSet valid_strs = new HashSet();
+    HashSet<String> valid_strs = new HashSet<String>();
     valid_strs.add(OAIXML.IDENTIFIER);
     valid_strs.add(OAIXML.METADATA_PREFIX);
 
     Element req = (Element)GSXML.getChildByTagName(msg, GSXML.REQUEST_ELEM);
     NodeList params = GSXML.getChildrenByTagName(req, OAIXML.PARAM);
-    HashMap param_map = OAIXML.getParamMap(params);    
+    HashMap<String, String> param_map = OAIXML.getParamMap(params);    
     
     if(!isValidParam(param_map, valid_strs) ||
         params.getLength() == 0 ||
@@ -1028,8 +1028,8 @@ public class OAIReceptionist implements ModuleInterface {
       return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
     }
     
-    String prefix = (String)param_map.get(OAIXML.METADATA_PREFIX);
-    String identifier = (String)param_map.get(OAIXML.IDENTIFIER);
+    String prefix = param_map.get(OAIXML.METADATA_PREFIX);
+    String identifier = param_map.get(OAIXML.IDENTIFIER);
     
     // verify the metadata prefix
     if (containsMetadataPrefix(prefix) == false) {

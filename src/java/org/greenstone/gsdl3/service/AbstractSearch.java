@@ -287,8 +287,8 @@ public abstract class AbstractSearch extends ServiceRack
 		else if (name.equals(INDEX_PARAM))
 		{
 			// should we make these class fields?
-			ArrayList index_ids = new ArrayList();
-			ArrayList index_names = new ArrayList();
+			ArrayList<String> index_ids = new ArrayList<String>();
+			ArrayList<String> index_names = new ArrayList<String>();
 			getIndexData(index_ids, index_names, lang);
 			String param_type = GSXML.PARAM_TYPE_ENUM_SINGLE;
 			if (does_multi_index_search)
@@ -388,6 +388,6 @@ public abstract class AbstractSearch extends ServiceRack
 	 * get the details about the indexes available must be implemented by
 	 * subclass there must be at least one index
 	 */
-	abstract protected void getIndexData(ArrayList index_ids, ArrayList index_names, String lang);
+	abstract protected void getIndexData(ArrayList<String> index_ids, ArrayList<String> index_names, String lang);
 
 }

@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 import java.io.File;
+import java.io.Serializable;
 
 import org.apache.log4j.*;
 
@@ -46,7 +47,7 @@ public class BrowseAction extends Action {
 
 	// extract the params from the cgi-request, and check that we have a coll specified
 	Element cgi_paramList = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
-	HashMap params = GSXML.extractParams(cgi_paramList, false);
+	HashMap<String, Serializable> params = GSXML.extractParams(cgi_paramList, false);
 
 	String service_name = (String)params.get(GSParams.SERVICE);
 	String collection = (String)params.get(GSParams.COLLECTION);
@@ -111,7 +112,7 @@ public class BrowseAction extends Action {
 	// the id of the classifier is the top id of the selected node
 	String top_id = OID.getTop(classifier_node);
 	
-	HashSet metadata_names = new HashSet();
+	HashSet<String> metadata_names = new HashSet<String>();
 
 	// add the format info into the response
 	Element format_elem = (Element)GSXML.getChildByTagName(format_response, GSXML.FORMAT_ELEM);

@@ -35,6 +35,7 @@ import org.w3c.dom.NodeList;
 import org.apache.log4j.*;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
@@ -117,7 +118,7 @@ public class ArchiveIO extends ServiceRack
 			GSXML.addError(this.doc, result, ARCHIVE_GET_DOCUMENT_FILE_PATH + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		String oid = (String) params.get(GSXML.NODE_ID_ATT);
 		String collection = (String) params.get(GSXML.COLLECTION_ATT);
@@ -147,7 +148,7 @@ public class ArchiveIO extends ServiceRack
 			GSXML.addError(this.doc, result, ARCHIVE_GET_SOURCE_FILE_OID + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		String srcFile = (String) params.get("sourcefile"); //TODO: Replace with a constant
 		String collection = (String) params.get(GSXML.COLLECTION_ATT);
@@ -181,7 +182,7 @@ public class ArchiveIO extends ServiceRack
 			GSXML.addError(this.doc, result, ARCHIVE_CHECK_DOCUMENT_OR_SECTION_EXISTS + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		String oid = (String) params.get(GSXML.NODE_ID_ATT);
 		String collection = (String) params.get(GSXML.COLLECTION_ATT);
@@ -316,7 +317,7 @@ public class ArchiveIO extends ServiceRack
 			GSXML.addError(this.doc, result, ARCHIVE_GET_ASSOCIATED_IMPORT_FILES + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
 		String oid = (String) params.get(GSXML.NODE_ID_ATT);
 		String collection = (String) params.get(GSXML.COLLECTION_ATT);
@@ -332,7 +333,7 @@ public class ArchiveIO extends ServiceRack
 
 		for (int i = 1; i < assocFiles.size(); i++)
 		{
-			metadataList.appendChild(GSXML.createMetadataElement(this.doc, "assocfile", (String) assocFiles.get(i)));
+			metadataList.appendChild(GSXML.createMetadataElement(this.doc, "assocfile", assocFiles.get(i)));
 		}
 
 		result.appendChild(metadataList);

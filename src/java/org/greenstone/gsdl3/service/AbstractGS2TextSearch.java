@@ -226,7 +226,7 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 		return true;
 	}
 
-	protected void getIndexData(ArrayList index_ids, ArrayList index_names, String lang)
+	protected void getIndexData(ArrayList<String> index_ids, ArrayList<String> index_names, String lang)
 	{
 		// the index info -
 		Element index_list = (Element) GSXML.getChildByTagName(this.config_info, INDEX_ELEM + GSXML.LIST_MODIFIER);
@@ -255,7 +255,7 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 		}
 	}
 
-	protected void getIndexSubcollectionData(ArrayList index_sub_ids, ArrayList index_sub_names, String lang)
+	protected void getIndexSubcollectionData(ArrayList<String> index_sub_ids, ArrayList<String> index_sub_names, String lang)
 	{
 		// the index info -
 		Element index_sub_list = (Element) GSXML.getChildByTagName(this.config_info, INDEX_SUBCOLLECTION_ELEM + GSXML.LIST_MODIFIER);
@@ -284,7 +284,7 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 		}
 	}
 
-	protected void getIndexLanguageData(ArrayList index_lang_ids, ArrayList index_lang_names, String lang)
+	protected void getIndexLanguageData(ArrayList<String> index_lang_ids, ArrayList<String> index_lang_names, String lang)
 	{
 		// the index info -
 		Element index_lang_list = (Element) GSXML.getChildByTagName(this.config_info, INDEX_LANGUAGE_ELEM + GSXML.LIST_MODIFIER);

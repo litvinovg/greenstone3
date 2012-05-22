@@ -83,7 +83,7 @@ public class SetServerPane
 
     ServerSettingTableModel server_setting_table_model = null;
     private boolean setting_confirm = false;
-    private ArrayList conf_array;
+    private ArrayList<String> conf_array;
     private boolean success = false;
     private boolean file_saved = true;
     
@@ -250,7 +250,7 @@ public class SetServerPane
 	    //System.err.println("What is the value here:" + server_setting_table_model.getValueAt(i,0).toString());
 	    if (!server_setting_table_model.getValueAt(i,1).toString().matches("^\\s*$")){
 		for (int j=0; j < conf_array.size(); j++){
-		    if (((String)conf_array.get(j)).startsWith(server_setting_table_model.getValueAt(i,0).toString().toLowerCase())){
+		    if (conf_array.get(j).startsWith(server_setting_table_model.getValueAt(i,0).toString().toLowerCase())){
 			//System.err.println("What is the value in conf_array:" + conf_array.get(j));
 			new_string = server_setting_table_model.getValueAt(i,0).toString()+"="+server_setting_table_model.getValueAt(i,1).toString();
 			conf_array.set(j, new_string.toLowerCase());
@@ -264,7 +264,7 @@ public class SetServerPane
 	String filename = build_properties_file.getPath();
 	String fileLine;
 	/*conf_array[] store all the details from the build.properties*/
-	conf_array = new ArrayList();
+	conf_array = new ArrayList<String>();
 	try {
 	    BufferedReader conf_in = new BufferedReader(new FileReader(filename));
 	    while ((fileLine = conf_in.readLine()) != null) {

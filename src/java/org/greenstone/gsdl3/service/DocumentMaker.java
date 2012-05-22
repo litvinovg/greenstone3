@@ -24,6 +24,7 @@ package org.greenstone.gsdl3.service;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -369,7 +370,7 @@ public class DocumentMaker extends ServiceRack
 			return result;
 		}
 
-		HashMap params = GSXML.extractParams(param_list, false);
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 		String transactionString = (String) params.get("transactions");
 		transactionString = transactionString.replace("%26", "&");
 
@@ -392,7 +393,7 @@ public class DocumentMaker extends ServiceRack
 		{
 			for (int j = 0; j < transactions.size(); j++)
 			{
-				Map keyValueMap = (Map) transactions.get(j);
+				Map keyValueMap = transactions.get(j);
 				String operation = (String) keyValueMap.get("operation");
 				if (operation.equals("move") || operation.equals("duplicate"))
 				{

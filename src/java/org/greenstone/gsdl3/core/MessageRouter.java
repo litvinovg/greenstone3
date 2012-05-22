@@ -83,7 +83,7 @@ public class MessageRouter implements  ModuleInterface {
   protected String library_name = null;
 
   /** map of names to Module objects */
-  protected HashMap module_map=null;
+  protected HashMap<String, ModuleInterface> module_map=null;
   
   /** container Document to create XML Nodes */
   protected Document doc=null;
@@ -192,7 +192,7 @@ public class MessageRouter implements  ModuleInterface {
       }
     }
     
-    this.module_map = new HashMap();
+    this.module_map = new HashMap<String, ModuleInterface>();
     
     // This stuff may be done at a reconfigure also
     return configureLocalSite();
@@ -290,7 +290,7 @@ public class MessageRouter implements  ModuleInterface {
           
           if (this.module_map.containsKey(obj)) {
             copied_request.setAttribute(GSXML.TO_ATT, this_mod);
-            result = ((ModuleInterface)this.module_map.get(obj)).process(mess);
+            result = this.module_map.get(obj).process(mess);
             if (result !=null ) {
               // append the contents of the message to the mainResult - there will only be one response at this stage
               Node res = GSXML.getChildByTagName(result, GSXML.RESPONSE_ELEM);
@@ -325,7 +325,7 @@ public class MessageRouter implements  ModuleInterface {
   public Element getPrivateCollectionList() {
 	return private_collection_list;
   }
-  public HashMap getModuleMap() {
+  public HashMap<String, ModuleInterface> getModuleMap() {
     return module_map;
   }
   // ********************************************************************
@@ -336,9 +336,9 @@ public class MessageRouter implements  ModuleInterface {
       removes them . */
   protected void cleanUpModuleMapEntire() {
     if (this.module_map != null) {
-      Iterator i = this.module_map.values().iterator();
+      Iterator<ModuleInterface> i = this.module_map.values().iterator();
       while (i.hasNext()) {
-        ((ModuleInterface)i.next()).cleanUp();
+        i.next().cleanUp();
         i.remove();
       }
     }
@@ -363,7 +363,7 @@ public class MessageRouter implements  ModuleInterface {
       } else {
         if (name.equals(potential_site_name)) {// there was no site
           list.removeChild(item);
-          ModuleInterface m = (ModuleInterface)this.module_map.remove(name);
+          ModuleInterface m = this.module_map.remove(name);
           m.cleanUp(); // clean up any open files/connections etc 
           m=null;
         }
@@ -850,7 +850,7 @@ public class MessageRouter implements  ModuleInterface {
     if (this.module_map.containsKey(name)) {
       
       logger.info("found the module");
-      ModuleInterface m = (ModuleInterface)this.module_map.remove(name);
+      ModuleInterface m = this.module_map.remove(name);
       // also remove the xml bit from description list
       if (type.equals(GSXML.COLLECTION_ELEM)) {
         if (((Collection)m).isPublic()) { 

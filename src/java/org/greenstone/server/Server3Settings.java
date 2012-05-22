@@ -21,7 +21,7 @@ public class Server3Settings extends BaseServerSettings
 {
     protected String servletDefault = null;
     protected JComboBox servlet_combobox;
-    protected HashMap url_mappings = null;
+    protected HashMap<String, String> url_mappings = null;
 
     public Server3Settings(BaseServer server) 
     {
@@ -48,7 +48,7 @@ public class Server3Settings extends BaseServerSettings
 
 	NodeList servlet_mappings = web_config.getElementsByTagName("servlet-mapping");
 	// make a little map class
-	url_mappings = new HashMap();
+	url_mappings = new HashMap<String, String>();
 	for (int i = 0; i < servlet_mappings.getLength(); i++) {
 	    Element map = (Element) servlet_mappings.item(i);
 	    Element servlet_name_elem = (Element) GSXML.getChildByTagName(map, "servlet-name");
@@ -79,7 +79,7 @@ public class Server3Settings extends BaseServerSettings
     {
 	boolean hasChanged = false;
 	boolean requireRestart = false;
-	String urlMapping = (String)url_mappings.get(servlet_combobox.getSelectedItem());
+	String urlMapping = url_mappings.get(servlet_combobox.getSelectedItem());
 	if(urlMapping.endsWith("/*")) {	// urlmapping maybe something like "/library/*"
 	    urlMapping = urlMapping.substring(0, urlMapping.length()-2);
 	}
@@ -91,7 +91,7 @@ public class Server3Settings extends BaseServerSettings
 	return returnValues;
     }
 
-    public void save(ScriptReadWrite scriptReadWrite, ArrayList newFileLines) 
+    public void save(ScriptReadWrite scriptReadWrite, ArrayList<String> newFileLines) 
     {
 	String newAutoEnter = (new Boolean(autoEnter.isSelected())).toString();
 	newFileLines = scriptReadWrite.queryReplace(newFileLines, BaseServer.Property.AUTOSTART, newAutoEnter);
@@ -100,7 +100,7 @@ public class Server3Settings extends BaseServerSettings
 	newFileLines = scriptReadWrite.queryReplace(newFileLines, BaseServer.Property.KEEPPORT, newKeepPort);
 
 	String newServletDef = (String) servlet_combobox.getSelectedItem();
-	String servletDefName = (String) url_mappings.get(newServletDef);
+	String servletDefName = url_mappings.get(newServletDef);
 	if(servletDefName.endsWith("/*")) { // urlmapping maybe something like "/library/*"	    
 	  servletDefName = servletDefName.substring(0, servletDefName.length()-2);
 	}

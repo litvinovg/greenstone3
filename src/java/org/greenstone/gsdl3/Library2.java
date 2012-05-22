@@ -46,7 +46,7 @@ final public class Library2
 	protected XMLConverter converter = null;
 	protected Document doc = null;
 
-	protected HashMap saved_args = null;
+	protected HashMap<String, String> saved_args = null;
 	protected GSParams params = null;
 	protected DefaultReceptionist recept = null;
 
@@ -54,7 +54,7 @@ final public class Library2
 	{
 		this.converter = new XMLConverter();
 		this.doc = converter.newDOM();
-		this.saved_args = new HashMap();
+		this.saved_args = new HashMap<String, String>();
 		this.params = new GSParams();
 		this.recept = new DefaultReceptionist();
 	}
@@ -62,7 +62,7 @@ final public class Library2
 	public void configure(String site_name, String interface_name)
 	{
 
-		HashMap config_params = new HashMap();
+		HashMap<String, Comparable> config_params = new HashMap<String, Comparable>();
 		//config_params.put(GSConstants.GSDL3_HOME, gsdl_home);
 		config_params.put(GSConstants.SITE_NAME, site_name);
 		config_params.put(GSConstants.INTERFACE_NAME, interface_name);
@@ -139,7 +139,7 @@ final public class Library2
 		// the defaults
 		String action = "p";
 		String subaction = "home";
-		String lang = (String) saved_args.get(GSParams.LANGUAGE);
+		String lang = saved_args.get(GSParams.LANGUAGE);
 		if (lang == null)
 		{
 			lang = "en";
@@ -192,16 +192,16 @@ final public class Library2
 		xml_request.setAttribute(GSXML.LANG_ATT, lang);
 
 		// put in all the params from the session cache
-		Set params = saved_args.keySet();
-		Iterator i = params.iterator();
+		Set<String> params = saved_args.keySet();
+		Iterator<String> i = params.iterator();
 		while (i.hasNext())
 		{
-			String name = (String) i.next();
+			String name = i.next();
 			if (name.equals(GSParams.LANGUAGE))
 				continue;
 			Element param = this.doc.createElement(GSXML.PARAM_ELEM);
 			param.setAttribute(GSXML.NAME_ATT, name);
-			param.setAttribute(GSXML.VALUE_ATT, GSXML.xmlSafe((String) saved_args.get(name)));
+			param.setAttribute(GSXML.VALUE_ATT, GSXML.xmlSafe(saved_args.get(name)));
 			xml_param_list.appendChild(param);
 		}
 

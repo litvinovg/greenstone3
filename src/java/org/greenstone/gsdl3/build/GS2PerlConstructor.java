@@ -123,7 +123,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 	protected void newCollection()
 	{
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "Collection construction: new collection."));
-		Vector command = new Vector();
+		Vector<String> command = new Vector<String>();
 		command.add("gs2_mkcol.pl");
 		command.add("-site");
 		command.add(this.site_home);
@@ -132,7 +132,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 		command.addAll(extractParameters(this.process_params));
 		command.add(this.collection_name);
 		String[] command_str = {};
-		command_str = (String[]) command.toArray(command_str);
+		command_str = command.toArray(command_str);
 		if (runPerlCommand(command_str))
 		{
 			// success!! - need to send the final completed message
@@ -161,7 +161,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 		command.addAll(extractParameters(this.process_params));
 		command.add(this.collection_name);
 		String[] command_str = {};
-		command_str = (String[]) command.toArray(command_str);
+		command_str = command.toArray(command_str);
 
 		if (runPerlCommand(command_str))
 		{
@@ -185,7 +185,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 		command.add(this.collection_name);
 
 		String[] command_str = {};
-		command_str = (String[]) command.toArray(command_str);
+		command_str = command.toArray(command_str);
 
 		if (runPerlCommand(command_str))
 		{
@@ -230,10 +230,10 @@ public class GS2PerlConstructor extends CollectionConstructor
 	}
 
 	/** extracts all the args from the xml and returns them in a Vector */
-	protected Vector extractParameters(Element param_list)
+	protected Vector<String> extractParameters(Element param_list)
 	{
 
-		Vector args = new Vector();
+		Vector<String> args = new Vector<String>();
 		if (param_list == null)
 		{
 			return args; // return an empty vector

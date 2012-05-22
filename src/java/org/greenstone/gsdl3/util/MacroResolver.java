@@ -34,14 +34,14 @@ abstract public class MacroResolver {
     public static final int TYPE_META = 1;
     public static final int TYPE_DICT = 2;
     
-    protected ArrayList text_macros = null;
-    protected ArrayList metadata_macros = null;
+    protected ArrayList<Macro> text_macros = null;
+    protected ArrayList<Macro> metadata_macros = null;
 
     String lang = null;
 
     public MacroResolver() {
-    	this.text_macros = new ArrayList();
-	this.metadata_macros = new ArrayList();
+    	this.text_macros = new ArrayList<Macro>();
+	this.metadata_macros = new ArrayList<Macro>();
     }
 
     

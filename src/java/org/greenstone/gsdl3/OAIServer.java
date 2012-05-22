@@ -70,9 +70,9 @@ public class OAIServer extends HttpServlet {
   protected Document doc=null;
   
   /** A HashSet which contains all the legal verbs. */
-  protected HashSet verb_set = null;
+  protected HashSet<String> verb_set = null;
   /** A HashSet which contains all the legal oai keys in the key/value argument pair. */
-  protected HashSet param_set = null;
+  protected HashSet<String> param_set = null;
   /** The name of the site with which we will finally be dealing, whether it is a local site or a remote site through a communicator.*/
   protected String site = "";
   
@@ -208,7 +208,7 @@ public class OAIServer extends HttpServlet {
     }
   }
   private void initVerbs() {
-    verb_set = new HashSet();
+    verb_set = new HashSet<String>();
     verb_set.add(OAIXML.GET_RECORD);
     verb_set.add(OAIXML.LIST_RECORDS);
     verb_set.add(OAIXML.LIST_IDENTIFIERS);
@@ -218,7 +218,7 @@ public class OAIServer extends HttpServlet {
   }
   
   private void initParams() {
-    param_set = new HashSet();
+    param_set = new HashSet<String>();
     param_set.add(OAIXML.METADATA_PREFIX);
     param_set.add(OAIXML.FROM);
     param_set.add(OAIXML.UNTIL);

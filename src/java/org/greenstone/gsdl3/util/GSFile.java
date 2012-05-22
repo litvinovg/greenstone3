@@ -242,7 +242,7 @@ public class GSFile
 	 * 
 	 * this is not so good because sites may be on a different computer
 	 */
-	static public String stylesheetFile(String gsdl3_home, String site_name, String collection, String interface_name, ArrayList base_interfaces, String filename)
+	static public String stylesheetFile(String gsdl3_home, String site_name, String collection, String interface_name, ArrayList<String> base_interfaces, String filename)
 	{
 
 		String site_home = siteHome(gsdl3_home, site_name);
@@ -280,7 +280,7 @@ public class GSFile
 		}
 		for (int i = 0; i < base_interfaces.size(); i++)
 		{
-			interface_home = interfaceHome(gsdl3_home, (String) base_interfaces.get(i));
+			interface_home = interfaceHome(gsdl3_home, base_interfaces.get(i));
 			stylesheet = new File(interface_home + File.separatorChar + "transform" + File.separatorChar + filename);
 			if (stylesheet.exists())
 			{
@@ -292,7 +292,7 @@ public class GSFile
 		return null;
 	}
 
-	static public ArrayList<File> getStylesheetFiles(String gsdl3_home, String site_name, String collection, String interface_name, ArrayList base_interfaces, String filename)
+	static public ArrayList<File> getStylesheetFiles(String gsdl3_home, String site_name, String collection, String interface_name, ArrayList<String> base_interfaces, String filename)
 	{
 		ArrayList<File> stylesheets = new ArrayList<File>();
 		String site_home = siteHome(gsdl3_home, site_name);
@@ -327,7 +327,7 @@ public class GSFile
 		{
 			for (int i = 0; i < base_interfaces.size(); i++)
 			{
-				interface_home = interfaceHome(gsdl3_home, (String) base_interfaces.get(i));
+				interface_home = interfaceHome(gsdl3_home, base_interfaces.get(i));
 				stylesheet = new File(interface_home + File.separatorChar + "transform" + File.separatorChar + filename);
 				if (stylesheet.exists())
 				{
