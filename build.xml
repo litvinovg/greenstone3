@@ -588,8 +588,11 @@
               <arg value="perl" />
             </exec>
 
-            <stringutil string="${full.perl.path}" property="perl.path">
-                <replace regex="\/[^\/]*$" replacement="" />
+            <stringutil string="${full.perl.path}" property="partial.perl.path">
+                <replace regex="\/[^\/]*$" replacement="/" />
+            </stringutil>
+			<stringutil string="${partial.perl.path}" property="perl.path">
+                <replace regex="\\[^\\]*$" replacement="\\" />
             </stringutil>
             <if><bool><istrue value="${current.os.isunix}"/></bool>
 
