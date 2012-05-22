@@ -326,7 +326,17 @@ function loadTopLevelPage(callbackFunction)
 {
 	var ajax = gs.functions.ajaxRequest();
 	
-	ajax.open("GET", gs.xsltParams.library_name + "?a=d&dt=hierarchy&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d.replace(/([^.]*)\..*/, "$1") + "&excerptid=gs-document", true);
+	var url = gs.xsltParams.library_name + "?a=d&dt=hierarchy&c=" + gs.cgiParams.c + "&excerptid=gs-document";
+	if(gs.cgiParams.d && gs.cgiParams.d.length > 0)
+	{
+		url += "&d=" + gs.cgiParams.d.replace(/([^.]*)\..*/, "$1");
+	}
+	else if(gs.cgiParams.href && gs.cgiParams.href.length > 0)
+	{
+		url += "&d=&lb=1&rl=1&href=" + gs.cgiParams.href;
+	}
+	
+	ajax.open("GET", url, true);
 	ajax.onreadystatechange = function()
 	{
 		if(ajax.readyState == 4 && ajax.status == 200)
@@ -360,7 +370,17 @@ function retrieveFullTableOfContents()
 {
 	var ajax = gs.functions.ajaxRequest();
 	
-	ajax.open("GET", gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + gs.cgiParams.d + "?excerptid=tableOfContents&ed=1", true);
+	var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "?excerptid=tableOfContents&ed=1";
+	if(gs.cgiParams.d && gs.cgiParams.d.length > 0)
+	{
+		url += "&a=d&d=" + gs.cgiParams.d;
+	}
+	else if(gs.cgiParams.href && gs.cgiParams.href.length > 0)
+	{
+		url += "&a=d&d=&lb=1&rl=1&href=" + gs.cgiParams.href;
+	}
+	
+	ajax.open("GET", url, true);
 	ajax.onreadystatechange = function()
 	{
 		if(ajax.readyState == 4 && ajax.status == 200)
@@ -371,7 +391,7 @@ function retrieveFullTableOfContents()
 			
 			var newTOC = newTOCElem.substring(tocStart, tocEnd);
 			
-			//Add an "expand all" link
+			//Add the "Expand document"/"Collapse document" links
 			newTOC = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">Expand document</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">Collapse document</a></td></tr></table>" + newTOC;
 			
 			//Collapse the TOC
