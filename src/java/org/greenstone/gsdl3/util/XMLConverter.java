@@ -34,6 +34,8 @@ import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.dom.*; // for new Documents
 
 // other java classes
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -163,6 +165,37 @@ public class XMLConverter
 		return null;
 	}
 
+	/** returns a DOM Document */
+	public Document getDOM(String in, String encoding)
+	{
+		try
+		{
+			InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(in.getBytes(encoding)), encoding);
+			InputSource xml_source = new InputSource(reader);
+
+			DOMParser parser = new DOMParser();
+			parser.setFeature("http://xml.org/sax/features/validation", false);
+			parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
+			if(resolver != null)
+			{
+				parser.setEntityResolver(this.resolver);
+			}
+			parser.setErrorHandler(new ParseErrorHandler());
+			parser.parse(xml_source);
+			
+			Document doc = parser.getDocument();
+
+			return doc;
+
+		}
+		catch (Exception e)
+		{
+			logger.error(e.getMessage());
+		}
+		return null;
+	}
+	
 	/** returns a DOM Document */
 	public Document getDOM(File in)
 	{
