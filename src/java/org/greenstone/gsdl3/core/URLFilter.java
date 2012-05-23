@@ -47,7 +47,7 @@ public class URLFilter implements Filter
 	protected static final String METADATA_RETRIEVAL_SERVICE = "DocumentMetadataRetrieve";
 	protected static final String ASSOCIATED_FILE_PATH = "/index/assoc/";
 	protected static final String COLLECTION_FILE_PATH = "/collect/";
-	
+
 	protected static final String SYSTEM_SUBACTION_CONFIGURE = "configure";
 	protected static final String SYSTEM_SUBACTION_RECONFIGURE = "reconfigure";
 	protected static final String SYSTEM_SUBACTION_ACTIVATE = "activate";
@@ -242,18 +242,18 @@ public class URLFilter implements Filter
 						{
 							sa = "d";
 						}
-						
+
 						if (sa.equals("c") && (i + 2) < segments.length)
 						{
 							gRequest.setParameter(GSParams.SYSTEM_CLUSTER, segments[i + 2]);
 						}
-						
+
 						if (sa.equals("a") && (i + 2) < segments.length)
 						{
 							gRequest.setParameter(GSParams.SYSTEM_MODULE_TYPE, "collection");
 							gRequest.setParameter(GSParams.SYSTEM_MODULE_NAME, segments[i + 2]);
 						}
-						
+
 						if (sa.equals("d") && (i + 2) < segments.length)
 						{
 							gRequest.setParameter(GSParams.SYSTEM_CLUSTER, segments[i + 2]);
