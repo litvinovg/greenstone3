@@ -122,11 +122,13 @@ sub main {
     my $buildoutput = new IO::File(">$buildoutfile");
     my $buildwriter = new XML::Writer(OUTPUT => $buildoutput, NEWLINES => 1);
     
+    $buildwriter->xmlDecl("UTF-8");
     $buildwriter->startTag('buildConfig', 'xmlns:gsf'=>"http://www.greenstone.org/greenstone3/schema/ConfigFormat");
     
     my $colloutput = new IO::File(">$colloutfile");
     my $collwriter = new XML::Writer(OUTPUT => $colloutput, NEWLINES => 1);
     
+    $collwriter->xmlDecl("UTF-8");
     $collwriter->startTag('CollectionConfig', 'xmlns:gsf'=>"http://www.greenstone.org/greenstone3/schema/ConfigFormat", 'xmlns:xsl'=>'http://www.w3.org/1999/XSL/Transform');
     
     #output the collection metadata to the collectionConfig file
