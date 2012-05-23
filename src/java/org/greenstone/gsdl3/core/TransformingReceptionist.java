@@ -61,6 +61,8 @@ public class TransformingReceptionist extends Receptionist
 	protected TransformerFactory transformerFactory = null;
 	protected DOMParser parser = null;
 
+	boolean _debug = false;
+
 	public TransformingReceptionist()
 	{
 		super();
@@ -435,7 +437,7 @@ public class TransformingReceptionist extends Receptionist
 			intname.setAttribute("name", "interface_name");
 			Text intnametext = theXML.createTextNode((String) config_params.get(GSConstants.INTERFACE_NAME));
 			intname.appendChild(intnametext);
-			
+
 			Element siteName = theXML.createElement("param");
 			siteName.setAttribute("name", "site_name");
 			Text siteNameText = theXML.createTextNode((String) config_params.get(GSConstants.SITE_NAME));
@@ -501,6 +503,11 @@ public class TransformingReceptionist extends Receptionist
 			String configStylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, "config_format.xsl");
 			Document configStylesheet_doc = this.converter.getDOM(new File(configStylesheet_file));
 
+			if (_debug)
+			{
+				GSXSLT.modifyConfigFormatForDebug(configStylesheet_doc, GSFile.collectionConfigFile(GSFile.collectDir(GSFile.siteHome(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME)) + File.separator + collection)));
+			}
+
 			if (configStylesheet_doc != null)
 			{
 				Document format_doc = this.converter.newDOM();
@@ -526,7 +533,14 @@ public class TransformingReceptionist extends Receptionist
 				}
 
 				// add extracted GSF statements in to the main stylesheet
-				GSXSLT.mergeStylesheets(style_doc, new_format);
+				if (_debug)
+				{
+					GSXSLT.mergeStylesheetsDebug(style_doc, new_format, true, true, "OTHER1", GSFile.collectionConfigFile(GSFile.collectDir(GSFile.siteHome(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME)) + File.separator + collection)));
+				}
+				else
+				{
+					GSXSLT.mergeStylesheets(style_doc, new_format, true);
+				}
 				//System.out.println("added extracted GSF statements into the main stylesheet") ;
 
 				// add extracted GSF statements in to the debug test stylesheet
@@ -535,7 +549,7 @@ public class TransformingReceptionist extends Receptionist
 			else
 			{
 				logger.error(" couldn't parse the config_format stylesheet, adding the format info as is");
-				GSXSLT.mergeStylesheets(style_doc, format_elem);
+				GSXSLT.mergeStylesheets(style_doc, format_elem, true);
 				//GSXSLT.mergeStylesheets(oldStyle_doc, format_elem);
 			}
 			logger.debug("the converted stylesheet is:");
@@ -593,7 +607,7 @@ public class TransformingReceptionist extends Receptionist
 
 		Document skinAndLibraryXsl = null;
 		Document skinAndLibraryDoc = converter.newDOM();
-		
+
 		// Applying the preprocessing XSLT - in its own block {} to allow use of non-unique variable names
 		{
 
@@ -625,7 +639,6 @@ public class TransformingReceptionist extends Receptionist
 			preProcessor.transform_withResultNode(preprocessingXsl, skinAndLibraryXsl, skinAndLibraryDoc);
 			//System.out.println("GS-Lib statements are now expanded") ;
 		}
-	
 
 		//The following code is to be uncommented if we need to append the extracted GSF statements
 		//after having extracted the GSLib elements. In case of a problem during postprocessing.
@@ -762,8 +775,16 @@ public class TransformingReceptionist extends Receptionist
 		{
 			try
 			{
-				Document inlineTemplateDoc = this.converter.getDOM("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:java=\"http://xml.apache.org/xslt/java\" xmlns:util=\"xalan://org.greenstone.gsdl3.util.XSLTUtil\" xmlns:gsf=\"http://www.greenstone.org/greenstone3/schema/ConfigFormat\">" + inlineTemplate + "</xsl:stylesheet>");
-				GSXSLT.mergeStylesheets(skinAndLibraryDoc, inlineTemplateDoc.getDocumentElement());
+				Document inlineTemplateDoc = this.converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:java=\"http://xml.apache.org/xslt/java\" xmlns:util=\"xalan://org.greenstone.gsdl3.util.XSLTUtil\" xmlns:gsf=\"http://www.greenstone.org/greenstone3/schema/ConfigFormat\">" + inlineTemplate + "</xsl:stylesheet>", "UTF-8");
+
+				if (_debug)
+				{
+					GSXSLT.mergeStylesheetsDebug(skinAndLibraryDoc, inlineTemplateDoc.getDocumentElement(), true, true, "OTHER2", "INLINE");
+				}
+				else
+				{
+					GSXSLT.mergeStylesheets(skinAndLibraryDoc, inlineTemplateDoc.getDocumentElement(), true);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -779,6 +800,11 @@ public class TransformingReceptionist extends Receptionist
 		if (output.equals("xmlfinal"))
 		{
 			return doc;
+		}
+
+		if(_debug)
+		{
+			GSXML.addDebugSpanTags(skinAndLibraryDoc);
 		}
 
 		return this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype); // The default
@@ -833,10 +859,18 @@ public class TransformingReceptionist extends Receptionist
 
 		if (configStylesheet_doc != null)
 		{
-			Document format_doc = this.converter.newDOM();
+			Document format_doc = XMLConverter.newDOM();
 			format_doc.appendChild(format_doc.importNode(skinAndLibraryDoc.getDocumentElement().cloneNode(true), true));
 			Node result = this.transformer.transform(configStylesheet_doc, format_doc, config_params);
-			GSXSLT.mergeStylesheets(skinAndLibraryDoc, ((Document) result).getDocumentElement());
+
+			if (_debug)
+			{
+				GSXSLT.mergeStylesheetsDebug(skinAndLibraryDoc, ((Document) result).getDocumentElement(), true, true, "OTHER3", GSFile.collectionConfigFile(GSFile.collectDir(GSFile.siteHome(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME)) + File.separator + collection)));
+			}
+			else
+			{
+				GSXSLT.mergeStylesheets(skinAndLibraryDoc, ((Document) result).getDocumentElement(), true);
+			}
 		}
 	}
 
@@ -914,7 +948,19 @@ public class TransformingReceptionist extends Receptionist
 				return null;
 			}
 
-			GSXSLT.mergeStylesheets(finalDoc, currentDoc.getDocumentElement());
+			if (_debug)
+			{
+				GSXSLT.mergeStylesheetsDebug(finalDoc, currentDoc.getDocumentElement(), true, true, stylesheets.get(stylesheets.size() - 1).getAbsolutePath(), stylesheets.get(i).getAbsolutePath());
+			}
+			else
+			{
+				GSXSLT.mergeStylesheets(finalDoc, currentDoc.getDocumentElement(), true);
+			}
+		}
+
+		if (_debug)
+		{
+			GSXSLT.inlineImportAndIncludeFiles(finalDoc, null, 0);
 		}
 
 		return finalDoc;
