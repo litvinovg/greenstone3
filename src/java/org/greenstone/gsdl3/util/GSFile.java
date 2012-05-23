@@ -235,7 +235,7 @@ public class GSFile
 	}
 
 	/**
-	 * returns the absolute path to a stylesheet stylesheets are looked for in
+	 * returns the absolute path to a stylesheet. Stylesheets are looked for in
 	 * the following places, in the following order: current collection, current
 	 * site, current interface, base interfaces returns null if the file cannot
 	 * be found
