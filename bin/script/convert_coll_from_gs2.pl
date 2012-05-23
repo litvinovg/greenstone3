@@ -120,7 +120,7 @@ sub main {
     }
 
     my $buildoutput = new IO::File(">$buildoutfile");
-    binmode($colloutput,":utf8");
+    binmode($buildoutput,":utf8");
     my $buildwriter = new XML::Writer(OUTPUT => $buildoutput, NEWLINES => 1);
     
     $buildwriter->xmlDecl("UTF-8");
