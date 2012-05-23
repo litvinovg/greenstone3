@@ -583,7 +583,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		{
 			Element request_node = (Element) request_nodes.item(i);
 			String node_id = request_node.getAttribute(GSXML.NODE_ID_ATT);
-			boolean is_href_id = false;
+			
 			if (node_id.equals(""))
 			{
 				node_id = getGreenstoneIdFromHref(request_node);
@@ -593,7 +593,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 					request_node.setAttribute("external_link", "true");
 					continue;
 				}
-
+				request_node.setAttribute(GSXML.NODE_ID_ATT, node_id);
 			}
 
 			// may have modifiers .rt, .1.ss etc
@@ -609,7 +609,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 			try
 			{
 				Element node_content = getNodeContent(node_id, lang);
-				if(node_content != null)
+				if (node_content != null)
 				{
 					request_node.appendChild(node_content);
 				}
