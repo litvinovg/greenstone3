@@ -19,7 +19,7 @@ function getTextForSection(sectionID, callback)
 	template +=     '<xsl:for-each select="/page/pageResponse/document//documentNode[@nodeID = \'' + sectionID + '\']">';
 	template +=       '<xsl:call-template name="sectionImage"/>';
 	template +=       '<div id="text' + sectionID + '">';
-	template +=         '<xsl:apply-templates select="." mode="document"/>';
+	template +=         '<xsl:call-template name="documentNodeContent"/>';
 	template +=       '</div>';
 	template +=     '</xsl:for-each>';
 	template +=   '</text>';
@@ -333,7 +333,7 @@ function loadTopLevelPage(callbackFunction)
 	}
 	else if(gs.cgiParams.href && gs.cgiParams.href.length > 0)
 	{
-		url += "&d=&lb=1&rl=1&href=" + gs.cgiParams.href;
+		url += "&d=&alb=1&rl=1&href=" + gs.cgiParams.href;
 	}
 	
 	ajax.open("GET", url, true);
@@ -377,7 +377,7 @@ function retrieveFullTableOfContents()
 	}
 	else if(gs.cgiParams.href && gs.cgiParams.href.length > 0)
 	{
-		url += "&a=d&d=&lb=1&rl=1&href=" + gs.cgiParams.href;
+		url += "&a=d&d=&alb=1&rl=1&href=" + gs.cgiParams.href;
 	}
 	
 	ajax.open("GET", url, true);
@@ -565,7 +565,9 @@ function retrieveTableOfContentsAndTitles()
 {
 	var ilt = "";
 	ilt += '<xsl:template match="/">';
-	ilt +=   '<xsl:apply-templates select="/page/pageResponse/document/documentNode" mode="TOC"/>';
+	ilt +=   '<xsl:for-each select="/page/pageResponse/document/documentNode">';
+	ilt +=     '<xsl:call-template name="documentNodeTOC"/>';
+	ilt +=   '</xsl:for-each>';
 	ilt += '</xsl:template>';
 
 	var ajax = gs.functions.ajaxRequest();
