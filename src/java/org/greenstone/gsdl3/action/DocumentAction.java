@@ -121,7 +121,7 @@ public class DocumentAction extends Action
 		String document_type = (String) params.get(GSParams.DOCUMENT_TYPE);
 		if (document_type == null || document_type.equals(""))
 		{
-			document_type = "simple";
+			document_type = "hierarchy";
 		}
 		//whether to retrieve siblings or not
 		boolean get_siblings = false;
@@ -473,7 +473,7 @@ public class DocumentAction extends Action
 		{
 			dc_request.appendChild(basic_doc_list);
 		}
-		logger.debug("request = " + converter.getString(dc_message));
+		logger.debug("request = " + XMLConverter.getString(dc_message));
 		Element dc_response_message = (Element) this.mr.process(dc_message);
 		if (processErrorElements(dc_response_message, page_response))
 		{
@@ -481,7 +481,7 @@ public class DocumentAction extends Action
 		}
 
 		Element dc_response_doc_list = (Element) GSXML.getNodeByPath(dc_response_message, path);
-
+		
 		if (expand_document)
 		{
 			// Merge the content with the structure information
@@ -506,7 +506,7 @@ public class DocumentAction extends Action
 			Element dc_response_doc = (Element) GSXML.getChildByTagName(dc_response_doc_list, GSXML.DOC_NODE_ELEM);
 			Element dc_response_doc_content = (Element) GSXML.getChildByTagName(dc_response_doc, GSXML.NODE_CONTENT_ELEM);
 			//Element dc_response_doc_external = (Element) GSXML.getChildByTagName(dc_response_doc, "external");
-
+			
 			if (dc_response_doc_content == null)
 			{
 				// no content to add
