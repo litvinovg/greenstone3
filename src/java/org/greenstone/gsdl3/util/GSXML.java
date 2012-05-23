@@ -1102,38 +1102,38 @@ public class GSXML
 	public static String xmlNodeToString(Node e)
 	{
 		StringBuffer sb = new StringBuffer("");
-		xmlNodeToString(sb, e, 0, true);
+		xmlNodeToString(sb, e, true, "\t", 0);
 		return sb.toString();
 	}
 
-	public static String xmlNodeToString(Node e, boolean printText)
+	public static void xmlNodeToString(StringBuffer sb, Node e, boolean indent, String indentString, int depth)
 	{
-		StringBuffer sb = new StringBuffer("");
-		xmlNodeToString(sb, e, 0, printText);
-		return sb.toString();
-	}
-
-	private static void xmlNodeToString(StringBuffer sb, Node e, int depth, boolean printText)
-	{
-		if (e == null)
+		if (e.getNodeType() == Node.TEXT_NODE)
 		{
+			if (e.getNodeValue() != "")
+			{
+				String text = e.getNodeValue();
+				text = text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("^[\\n\\r\\t\\s]*", "").replaceAll("[\\n\\r\\t\\s]*$", "");
+				sb.append(text);
+			}
 			return;
 		}
 
-		for (int i = 0; i < depth; i++)
-			sb.append(' ');
-
-		if (e.getNodeType() == Node.TEXT_NODE)
+		if (e.getNodeType() == Node.COMMENT_NODE)
 		{
-			if (printText)
+			if (e.getNodeValue() != "")
 			{
-				sb.append(e.getNodeValue());
-			}
-			else
-			{
-				sb.append("text");
+				sb.append("<!--" + e.getNodeValue() + "-->");
 			}
 			return;
+		}
+
+		if (indent)
+		{
+			for (int i = 0; i < depth; i++)
+			{
+				sb.append(indentString);
+			}
 		}
 
 		sb.append('<');
@@ -1147,32 +1147,68 @@ public class GSXML
 				sb.append(' ');
 				sb.append(attr.getNodeName());
 				sb.append("=\"");
-				sb.append(attr.getNodeValue());
+				sb.append(attr.getNodeValue().replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
 				sb.append('"');
 			}
 		}
-
 		NodeList children = e.getChildNodes();
 
+		boolean hasElements = false;
+		boolean indentSwapped = false;
+		for (int i = 0; i < children.getLength(); i++)
+		{
+			if (children.item(i).getNodeType() == Node.ELEMENT_NODE)
+			{
+				hasElements = true;
+			}
+			if (children.item(i).getNodeType() == Node.TEXT_NODE && indent)
+			{
+				if (children.item(i).getNodeValue().trim().length() > 0)
+				{
+					indentSwapped = true;
+					indent = false;
+				}
+			}
+		}
+
 		if (children == null || children.getLength() == 0)
-			sb.append("/>\n");
+		{
+			sb.append("/>");
+
+			if (indent)
+			{
+				sb.append("\n");
+			}
+		}
 		else
 		{
-
-			sb.append(">\n");
+			sb.append(">");
+			if (hasElements && indent)
+			{
+				sb.append("\n");
+			}
 
 			int len = children.getLength();
 			for (int i = 0; i < len; i++)
 			{
-				xmlNodeToString(sb, children.item(i), depth + 1, printText);
+				xmlNodeToString(sb, children.item(i), indent, indentString, depth + 1);
 			}
 
-			for (int i = 0; i < depth; i++)
-				sb.append(' ');
+			if (indent)
+			{
+				for (int i = 0; i < depth; i++)
+				{
+					sb.append(indentString);
+				}
+			}
 
-			sb.append("</" + e.getNodeName() + ">\n");
+			sb.append("</" + e.getNodeName() + ">");
+
+			if ((hasElements && indent) || indentSwapped)
+			{
+				sb.append("\n");
+			}
 		}
-
 	}
 
 	public static void printXMLNode(Node e, int depth, boolean printText)
@@ -1238,34 +1274,40 @@ public class GSXML
 		}
 	}
 
-    public static void elementToLogAsString(Element e, boolean indent)
-    {
-	String str = elementToString(e, indent);
-	System.err.println(str);
-	logger.error(str);
-    }
-
-    public static String elementToString(Element e, boolean indent)
+	public static void elementToLogAsString(Element e, boolean indent)
 	{
-	    String str = "";
-	    try {
-		TransformerFactory tf = TransformerFactory.newInstance();
-		Transformer trans = tf.newTransformer();
-		StringWriter sw = new StringWriter();
-		if(indent) {
-		    trans.setOutputProperty(OutputKeys.INDENT, "yes");
-		} else {
-		    trans.setOutputProperty(OutputKeys.INDENT, "no");
+		String str = elementToString(e, indent);
+		System.err.println(str);
+		logger.error(str);
+	}
+
+	public static String elementToString(Element e, boolean indent)
+	{
+		String str = "";
+		try
+		{
+			TransformerFactory tf = TransformerFactory.newInstance();
+			Transformer trans = tf.newTransformer();
+			StringWriter sw = new StringWriter();
+			if (indent)
+			{
+				trans.setOutputProperty(OutputKeys.INDENT, "yes");
+			}
+			else
+			{
+				trans.setOutputProperty(OutputKeys.INDENT, "no");
+			}
+			trans.transform(new DOMSource(e), new StreamResult(sw));
+			str += sw.toString();
 		}
-		trans.transform(new DOMSource(e), new StreamResult(sw));
-		str += sw.toString();
-	    }
-	    catch (Exception ex) {
-		str += "Exception: couldn't write " + e + " to log";
-	    } 
-	    finally {
-		return str;
-	    }
+		catch (Exception ex)
+		{
+			str += "Exception: couldn't write " + e + " to log";
+		}
+		finally
+		{
+			return str;
+		}
 	}
 
 	public static ArrayList<String> getGroupsFromSecurityResponse(Element securityResponse)
@@ -1287,5 +1329,49 @@ public class GSXML
 		}
 
 		return groups;
+	}
+
+	public static NodeList getHTMLStructureElements(Document doc)
+	{
+		MyNodeList elems = new MyNodeList();
+
+		String[] structureTagNames = new String[] { "html", "div", "td", "li" };
+
+		for (String tagName : structureTagNames)
+		{
+			NodeList htmlElems = doc.getElementsByTagName(tagName);
+			elems.addNodeList(htmlElems);
+		}
+
+		return elems;
+	}
+
+	public static void addDebugSpanTags(Document doc)
+	{
+		NodeList allElements = doc.getElementsByTagName("*");
+
+		for (int i = 0; i < allElements.getLength(); i++)
+		{
+			Element current = (Element) allElements.item(i);
+			String debugString = null;
+			if ((debugString = (String) current.getUserData("GSDEBUGFILENAME")) != null)
+			{
+				System.err.println("DEBUGSTRING = " + debugString);
+
+				Element xmlSpan = doc.createElement("span");
+				xmlSpan.setAttribute("style", "display:none;");
+				xmlSpan.setAttribute("class", "debugSpan");
+				xmlSpan.appendChild(doc.createTextNode("\"filename\":\"" + debugString + "\", \"xml\":\"" + GSXML.xmlNodeToString((Element) current.getUserData("GSDEBUGXML")) + "\""));
+
+				if (current.hasChildNodes())
+				{
+					current.insertBefore(xmlSpan, current.getFirstChild());
+				}
+				else
+				{
+					current.appendChild(xmlSpan);
+				}
+			}
+		}
 	}
 }
