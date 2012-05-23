@@ -25,22 +25,37 @@ import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 
-public class MyNodeList implements NodeList {
-    private ArrayList<Node> node_list = null;
-    
-    public MyNodeList() {
-	node_list = new ArrayList<Node>();
-    }
-    public int getLength() {
-	return node_list.size();
-    }
-    
-    public Node item(int i) {
-	if (i<0 || i >= node_list.size()) return null;
-	return node_list.get(i);
-    }
-    
-    public void addNode(Node n) {
-	node_list.add(n);
-    }
+public class MyNodeList implements NodeList
+{
+	private ArrayList<Node> _nodeList = null;
+
+	public MyNodeList()
+	{
+		_nodeList = new ArrayList<Node>();
+	}
+
+	public int getLength()
+	{
+		return _nodeList.size();
+	}
+
+	public Node item(int i)
+	{
+		if (i < 0 || i >= _nodeList.size())
+			return null;
+		return _nodeList.get(i);
+	}
+
+	public void addNode(Node n)
+	{
+		_nodeList.add(n);
+	}
+
+	public void addNodeList(NodeList nl)
+	{
+		for(int i = 0; i < nl.getLength(); i++)
+		{
+			_nodeList.add(nl.item(i));
+		}
+	}
 }
