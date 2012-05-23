@@ -304,11 +304,11 @@ public class Collection extends ServiceCluster
 	{
 		Element securityBlock = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.SECURITY_ELEM);
 
-		if(securityBlock == null)
+		if (securityBlock == null)
 		{
 			return;
 		}
-		
+
 		String scope = securityBlock.getAttribute(GSXML.SCOPE_ATT);
 		String defaultAccess = securityBlock.getAttribute(GSXML.DEFAULT_ACCESS_ATT);
 
@@ -594,13 +594,11 @@ public class Collection extends ServiceCluster
 
 			if (subaction.equals("saveDocument"))
 			{
-				int k;
 				Element format_element = (Element) GSXML.getChildByTagName(request, GSXML.FORMAT_STRING_ELEM);
 				//String format_string = GSXML.getNodeText(format_element);
 				// Get display tag
 				Element display_format = (Element) format_element.getFirstChild();
 
-				String format_string = GSXML.xmlNodeToString(display_format, false);
 				String collection_config = directory + "collectionConfig.xml";
 				Document config = this.converter.getDOM(new File(collection_config), "UTF-8");
 
@@ -757,17 +755,17 @@ public class Collection extends ServiceCluster
 		else if (type.equals(GSXML.REQUEST_TYPE_SECURITY))
 		{
 			String oid = request.getAttribute("oid");
-			if(oid.contains("."))
+			if (oid.contains("."))
 			{
 				oid = oid.substring(0, oid.indexOf("."));
 			}
-			
+
 			ArrayList<String> groups = getPermittedGroups(oid);
-			
+
 			Element groupList = this.doc.createElement(GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
 			response.appendChild(groupList);
-			
-			for(String groupName : groups)
+
+			for (String groupName : groups)
 			{
 				Element group = this.doc.createElement(GSXML.GROUP_ELEM);
 				groupList.appendChild(group);
@@ -785,7 +783,7 @@ public class Collection extends ServiceCluster
 	protected ArrayList<String> getPermittedGroups(String oid)
 	{
 		ArrayList<String> groups = new ArrayList<String>();
-		
+
 		if (_securityScopeCollection)
 		{
 			if (_publicAccess)
@@ -805,7 +803,7 @@ public class Collection extends ServiceCluster
 		}
 		else
 		{
-			if(oid != null && !oid.equals(""))
+			if (oid != null && !oid.equals(""))
 			{
 				boolean inSet = false;
 				for (HashMap<String, ArrayList<String>> exception : _securityExceptions)
@@ -822,8 +820,8 @@ public class Collection extends ServiceCluster
 						}
 					}
 				}
-				
-				if(!inSet && _publicAccess)
+
+				if (!inSet && _publicAccess)
 				{
 					groups.add("");
 				}
@@ -863,7 +861,7 @@ public class Collection extends ServiceCluster
 			if (!fieldName.equals("oid"))
 			{
 				fieldValue = getFieldValue(oid, fieldName);
-				if(fieldValue == null)
+				if (fieldValue == null)
 				{
 					return false;
 				}
@@ -875,15 +873,15 @@ public class Collection extends ServiceCluster
 
 			String matchValue = GSXML.getNodeText(currentMatchStatement);
 			if (type.equals("match"))
-			{ 
-				if(matchValue.equals(fieldValue))
+			{
+				if (matchValue.equals(fieldValue))
 				{
 					return true;
 				}
 			}
 			else if (type.equals("regex"))
 			{
-				if(fieldValue.matches(matchValue))
+				if (fieldValue.matches(matchValue))
 				{
 					return true;
 				}
@@ -905,30 +903,30 @@ public class Collection extends ServiceCluster
 
 		Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		metadataRequest.appendChild(paramList);
-		
+
 		Element param = this.doc.createElement(GSXML.PARAM_ELEM);
 		paramList.appendChild(param);
-		
+
 		param.setAttribute(GSXML.NAME_ATT, "metadata");
 		param.setAttribute(GSXML.VALUE_ATT, fieldName);
-		
+
 		Element docList = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		metadataRequest.appendChild(docList);
-		
+
 		Element doc = this.doc.createElement(GSXML.DOC_NODE_ELEM);
 		docList.appendChild(doc);
-		
+
 		doc.setAttribute(GSXML.NODE_ID_ATT, oid);
-		
+
 		Element response = (Element) this.router.process(metadataMessage);
 		NodeList metadataElems = response.getElementsByTagName(GSXML.METADATA_ELEM);
-		
-		if(metadataElems.getLength() > 0)
+
+		if (metadataElems.getLength() > 0)
 		{
 			Element metadata = (Element) metadataElems.item(0);
 			return GSXML.getNodeText(metadata);
 		}
-		
+
 		return null;
 	}
 }
