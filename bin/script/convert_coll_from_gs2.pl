@@ -120,12 +120,14 @@ sub main {
     }
 
     my $buildoutput = new IO::File(">$buildoutfile");
+    binmode($colloutput,":utf8");
     my $buildwriter = new XML::Writer(OUTPUT => $buildoutput, NEWLINES => 1);
     
     $buildwriter->xmlDecl("UTF-8");
     $buildwriter->startTag('buildConfig', 'xmlns:gsf'=>"http://www.greenstone.org/greenstone3/schema/ConfigFormat");
     
     my $colloutput = new IO::File(">$colloutfile");
+    binmode($colloutput,":utf8");
     my $collwriter = new XML::Writer(OUTPUT => $colloutput, NEWLINES => 1);
     
     $collwriter->xmlDecl("UTF-8");
@@ -199,7 +201,7 @@ sub main {
 	    }	
 	}
     } else {
-	print STDERR "$maptype not defined";
+	print STDERR "$maptype not defined\n";
     }
     # we use the shortname for default index
     if (defined $collectcfg->{'defaultindex'}) {
