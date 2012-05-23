@@ -61,6 +61,7 @@ public class GSParams
 	public static final String DISPLAY_METADATA = "dmd";
 	public static final String FILE_LOCATION = "fl";
 	public static final String DOC_EDIT = "docEdit";
+	public static final String AJAX_LOAD_BYPASS = "alb";
 
 	//Administration
 	public static final String PASSWORD = "password";
@@ -102,6 +103,7 @@ public class GSParams
 		addParameter(SYSTEM_MODULE_TYPE, false);
 		addParameter(INLINE_TEMPLATE, false);
 		addParameter(DISPLAY_METADATA, false);
+		addParameter(AJAX_LOAD_BYPASS, false);
 		addParameter(DOC_EDIT, false);
 		addParameter(PASSWORD, false);
 		addParameter(S_PASSWORD, false);
