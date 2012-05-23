@@ -478,7 +478,7 @@ public class XSLTUtil
 		}
 		return escapeNewLines(escapeQuotes(str));
 	}
-	
+
 	public static String getGlobalProperty(String name)
 	{
 		return GlobalProperties.getProperty(name);
@@ -568,7 +568,11 @@ public class XSLTUtil
 		}
 
 		return outputStr.toString();
-
+	}
+	
+	public static String xmlNodeToString(Node node)
+	{
+		return GSXML.xmlNodeToString(node);
 	}
 
 	// Test from cmdline with:
