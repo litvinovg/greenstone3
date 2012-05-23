@@ -167,11 +167,11 @@ public class GS2Construct extends ServiceRack
 	{
 		waitUntilReady(request);
 		Element buildResponse = processBuildCollection(request);
-		if(buildResponse.getElementsByTagName(GSXML.ERROR_ELEM).getLength() > 0)
+		if (buildResponse.getElementsByTagName(GSXML.ERROR_ELEM).getLength() > 0)
 		{
 			return buildResponse;
 		}
-		
+
 		Element statusElem = (Element) buildResponse.getElementsByTagName(GSXML.STATUS_ELEM).item(0);
 		String id = statusElem.getAttribute("pid");
 
@@ -754,7 +754,7 @@ public class GS2Construct extends ServiceRack
 		// other ones dont have params yet
 		return null;
 	}
-	
+
 	protected void waitUntilReady(Element request)
 	{
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -762,24 +762,24 @@ public class GS2Construct extends ServiceRack
 		
 		String collection = (String)params.get(COL_PARAM);
 
-		if(checkCollectionIsNotBusy(collection))
+		if (checkCollectionIsNotBusy(collection))
 		{
 			return;
 		}
 
-		while(collectionOperationMap.get(collection) != null)
+		while (collectionOperationMap.get(collection) != null)
 		{
 			try
 			{
 				Thread.currentThread().sleep(1000);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				ex.printStackTrace();
 			}
 		}
 	}
-	
+
 	protected void signalReady(Element request)
 	{
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -789,10 +789,10 @@ public class GS2Construct extends ServiceRack
 
 		collectionOperationMap.remove(collection);
 	}
-	
+
 	protected synchronized boolean checkCollectionIsNotBusy(String collection)
 	{
-		if(collectionOperationMap.get(collection) == null)
+		if (collectionOperationMap.get(collection) == null)
 		{
 			collectionOperationMap.put(collection, true);
 			return true;
