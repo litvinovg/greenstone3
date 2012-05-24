@@ -51,6 +51,7 @@
 		<replace macro="_httpcollection_" scope="metadata" text="_httpsite_/collect/_clustername_" resolve="true"/>
 		<replace macro="_httpprefix_" scope="metadata" text="_httpsite_" resolve="true"/>
 		<replace macro="_httpdocimg_" scope="text" text="_httpsite_/collect/_clustername_/index/assoc/[assocfilepath]/" resolve="true"/>
+		<replace macro="_httpsamepagelink_" scope="text" text="_libraryname_/collection/_clustername_/document/[DocOID]" resolve="true"/>
 		<replace macro="[collection]" scope="all" text="_clustername_" resolve="true"/>
 		<replace macro="_httpextlink_" scope="all" text="_libraryname_?el=&amp;a=d&amp;c=_clustername_&amp;d=" resolve="true"/>
 	</replaceList>
