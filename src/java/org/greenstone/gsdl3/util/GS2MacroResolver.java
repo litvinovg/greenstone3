@@ -74,11 +74,26 @@ public class GS2MacroResolver extends MacroResolver
 		if (scope.equals(SCOPE_TEXT))
 		{
 			macros.addAll(text_macros);
+
+			//Two helpful runtime macros
+			Macro docIDMacro = new Macro();
+			docIDMacro.macro = "[DocOID]";
+			docIDMacro.text = doc_oid;
+			docIDMacro.type = TYPE_TEXT;
+
+			Macro docTopIDMacro = new Macro();
+			docTopIDMacro.macro = "[DocTopOID]";
+			docTopIDMacro.text = OID.getTop(doc_oid);
+			docTopIDMacro.type = TYPE_TEXT;
+
+			macros.add(docIDMacro);
+			macros.add(docTopIDMacro);
 		}
 		else
 		{
 			macros.addAll(metadata_macros);
 		}
+
 		//for (int i=0; i<macros.size(); i++) {
 		while (!macros.empty())
 		{
@@ -179,12 +194,10 @@ public class GS2MacroResolver extends MacroResolver
 						}
 						text = StringUtils.replace(text, m.macro, new_text);
 					}
-
 				}
 
 				break;
 			} // switch
-
 		}
 		return text;
 
