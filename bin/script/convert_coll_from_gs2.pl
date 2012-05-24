@@ -329,7 +329,9 @@ sub main {
     $collwriter->endTag('search');
 
     # import plugins
-  
+    # if ImagePlugin is added, then need to add in a replaceListRef element for gs2-image
+    my $contains_image_plugin = 0; 
+
     my $plugins = $collectcfg->{'plugin'};
     
     if (defined $plugins){
@@ -337,6 +339,9 @@ sub main {
 	$collwriter->startTag('pluginList');
 	foreach my $pl (@$plugins) {
 	    my ($pluginname) = @$pl[0];
+	    if ($pluginname =~ m/^(ImagePlugin|ImagePlug|PagedImagePlugin)$/) {
+		$contains_image_plugin = 1;
+	    }
 	    $collwriter->startTag('plugin','name'=>$pluginname);
 
 	    for (my $i=1; $i<scalar(@$pl); $i++) {
@@ -650,6 +655,7 @@ sub main {
     # we add in the default replace list just in case we have macros in the 
     # collection
     $collwriter->emptyTag('replaceListRef', 'id'=>'gs2-standard');
+    $collwriter->emptyTag('replaceListRef', 'id'=>'gs2-image') if  $contains_image_plugin;
     $collwriter->endTag('CollectionConfig');
     $collwriter->end();
     $buildwriter->end();
