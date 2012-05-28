@@ -278,7 +278,12 @@ public class GSXML
 	public static final String USERNAME_ATT = "username";
 	public static final String GROUPS_ATT = "groups";
 	public static final String BASE_URL = "baseURL";
-
+	
+	public static final String CHILD_TYPE_ATT = "childType";
+	public static final String CLASSIFIER_STYLE_ATT = "classifierStyle";
+	public static final String HLIST = "HList";
+	public static final String VLIST = "VList";
+	
 	/**
 	 * takes a list of elements, and returns an array of strings of the values
 	 * of attribute att_name
