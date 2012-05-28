@@ -69,7 +69,7 @@
 	<xsl:template match="classifierNode" mode="process-all-children">
 		<xsl:param name="collName"/>
 		<xsl:param name="serviceName"/>
-			<xsl:call-template name="processNodeChildren">
+		<xsl:call-template name="processNodeChildren">
 			<xsl:with-param name='collName' select='$collName'/>
 			<xsl:with-param name='serviceName' select='$serviceName'/>
 		</xsl:call-template>
@@ -79,50 +79,73 @@
 	<xsl:template name="processNodeChildren">
 		<xsl:param name="collName"/>
 		<xsl:param name="serviceName"/>
-		<xsl:for-each select='classifierNode|documentNode'>
-			<tr>
-				<xsl:choose>
-					<xsl:when test="name()='documentNode'">
-						<td>
-							<table id="div{@nodeID}"><tr>
-								<xsl:call-template name="documentNodeWrapper">
-									<xsl:with-param name='collName' select='$collName'/>
-									<xsl:with-param name='serviceName' select='$serviceName'/>
-								</xsl:call-template>
-							</tr></table>
-						</td>
-					</xsl:when>
-					<xsl:otherwise>
-						<td>
-							<table id="title{@nodeID}"><tr>
-								<xsl:if test="not(/page/pageResponse/format[@type='browse']/gsf:option[@name='turnstyleClassifiers']) or /page/pageResponse/format[@type='browse']/gsf:option[@name='turnstyleClassifiers']/@value='true'">
-									<td class="headerTD">
-										<img id="toggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
-											<xsl:attribute name="src">
-												<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
-											</xsl:attribute>
-										</img>
-									</td>
+		<xsl:choose>
+			<xsl:when test="@childType = 'VList'">
+				<xsl:for-each select='classifierNode|documentNode'>
+					<tr>
+						<xsl:choose>
+							<xsl:when test="name()='documentNode'">
+								<td>
+									<table id="div{@nodeID}"><tr>
+										<xsl:call-template name="documentNodeWrapper">
+											<xsl:with-param name='collName' select='$collName'/>
+											<xsl:with-param name='serviceName' select='$serviceName'/>
+										</xsl:call-template>
+									</tr></table>
+								</td>
+							</xsl:when>
+							<xsl:when test="name()='classifierNode' and @childType = 'VList'">
+								<td>
+									<table id="title{@nodeID}"><tr>
+										<xsl:if test="not(/page/pageResponse/format[@type='browse']/gsf:option[@name='turnstyleClassifiers']) or /page/pageResponse/format[@type='browse']/gsf:option[@name='turnstyleClassifiers']/@value='true'">
+											<td class="headerTD">
+												<img id="toggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
+													<xsl:attribute name="src">
+														<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
+													</xsl:attribute>
+												</img>
+											</td>
+										</xsl:if>
+										<xsl:apply-templates select='.'>
+											<xsl:with-param name='collName' select='$collName'/>
+											<xsl:with-param name='serviceName' select='$serviceName'/>
+										</xsl:apply-templates>
+									</tr></table>
+								</td>
+								<xsl:if test="child::classifierNode or child::documentNode">
+									<!--recurse into the children-->
+									<tr><td><table class="childrenlist" id="div{@nodeID}">
+										<xsl:apply-templates select='.' mode='process-all-children'>
+											<xsl:with-param name='collName' select='$collName'/>
+											<xsl:with-param name='serviceName' select='$serviceName'/>
+										</xsl:apply-templates>
+									</table></td></tr>
 								</xsl:if>
-								<xsl:apply-templates select='.'>
-									<xsl:with-param name='collName' select='$collName'/>
-									<xsl:with-param name='serviceName' select='$serviceName'/>
-								</xsl:apply-templates>
-							</tr></table>
+							</xsl:when>
+							<xsl:otherwise>Unknown classifier style specified</xsl:otherwise>
+						</xsl:choose>
+					</tr>
+				</xsl:for-each>
+			</xsl:when>
+			<xsl:when test="@childType = 'HList'">
+				<table><tr>
+					<xsl:for-each select='classifierNode'>
+						<td>
+							<xsl:apply-templates select='.'>
+								<xsl:with-param name='collName' select='$collName'/>
+								<xsl:with-param name='serviceName' select='$serviceName'/>
+							</xsl:apply-templates>
 						</td>
-						<xsl:if test="child::classifierNode or child::documentNode">
-							<!--recurse into the children-->
-							<tr><td><table class="childrenlist" id="div{@nodeID}">
-								<xsl:apply-templates select='.' mode='process-all-children'>
-									<xsl:with-param name='collName' select='$collName'/>
-									<xsl:with-param name='serviceName' select='$serviceName'/>
-								</xsl:apply-templates>
-							</table></td></tr>
-						</xsl:if>
-					</xsl:otherwise>
-				</xsl:choose>
-			</tr>
-		</xsl:for-each>
+					</xsl:for-each>
+				</tr></table>
+				<xsl:for-each select='classifierNode'>
+					<xsl:call-template name="processNodeChildren">
+						<xsl:with-param name='collName' select='$collName'/>
+						<xsl:with-param name='serviceName' select='$serviceName'/>
+					</xsl:call-template>
+				</xsl:for-each>
+			</xsl:when>
+		</xsl:choose>
 	</xsl:template>
 
 	<xsl:template name="bookshelfimg">
