@@ -119,6 +119,16 @@ public class GS2Browse extends AbstractBrowse
 		return OID.translateOID(this.coll_db, node_id); //return this.coll_db.translateOID(node_id);
 	}
 
+	protected String getChildType(String node_id)
+	{
+		DBInfo info = this.coll_db.getInfo(node_id);
+		if (info == null)
+		{
+			return null;
+		}
+		return info.getInfo("childtype");
+	}
+
 	/**
 	 * returns the document type of the doc that the specified node belongs to.
 	 * should be one of GSXML.DOC_TYPE_SIMPLE, GSXML.DOC_TYPE_PAGED,
