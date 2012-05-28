@@ -55,7 +55,6 @@ public class GS2BrowseAction extends Action
 		{
 			logger.error("classifierBrowse, need to specify a collection!");
 			return page_response;
-
 		}
 
 		UserContext userContext = new UserContext(request);
@@ -139,18 +138,6 @@ public class GS2BrowseAction extends Action
 		// find out if this classifier is horizontal at top
 		Element class_list = (Element) GSXML.getChildByTagName(service_description, GSXML.CLASSIFIER_ELEM + GSXML.LIST_MODIFIER);
 		Element this_classifier = GSXML.getNamedElement(class_list, GSXML.CLASSIFIER_ELEM, GSXML.NAME_ATT, top_id);
-		boolean horizontal_at_top = false;
-		if (!this_classifier.getAttribute("horizontalAtTop").equals(""))
-		{
-			horizontal_at_top = true;
-		}
-		if (top_id.equals(classifier_node) && horizontal_at_top)
-		{
-			// we have asked for a top node - if the first list is horizontal, we will select the first element of that list
-			// this is a hack. also it craps out if the classifier really isn't horizontalAtTop. - 
-			classifier_node = classifier_node + ".1";
-
-		}
 
 		// get the browse structure for the selected node
 		Element classify_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
@@ -177,15 +164,9 @@ public class GS2BrowseAction extends Action
 		classifier_list.appendChild(classifier);
 		classify_request.appendChild(classifier_list);
 
-		if (horizontal_at_top && !classifier_node.equals(top_id))
-		{
-			// also put the top id in, to get the persistant horizontal info
-			classifier = this.doc.createElement(GSXML.CLASS_NODE_ELEM);
-			classifier.setAttribute(GSXML.NODE_ID_ATT, top_id);
-			classifier_list.appendChild(classifier);
-		}
 		// process the request
 		Element classify_response = (Element) this.mr.process(classify_message);
+
 		String path = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
 		Element class_node_list = (Element) GSXML.getNodeByPath(classify_response, path);
 
@@ -199,43 +180,102 @@ public class GS2BrowseAction extends Action
 			return page_response;
 		}
 
-		Element page_classifier = null;
-		if (horizontal_at_top && !classifier_node.equals(top_id))
+		//If the user is viewing a horizontal classifier then we need to get extra information
+		if (cl_structure.getAttribute(GSXML.CHILD_TYPE_ATT).equals(GSXML.HLIST))
 		{
-			// get the info for the top node
-			Element top_node = GSXML.getNamedElement(class_node_list, GSXML.CLASS_NODE_ELEM, GSXML.NODE_ID_ATT, top_id);
-			if (top_node != null)
+			//If we have a horizontal classifier and we have had the top-level node requested (e.g. CL1, CL2 etc.)
+			//then we want to get the children of the first classifier node (e.g. the children of CL2.1) 
+			if (OID.isTop(classifier_node))
 			{
-				path = GSPath.appendLink(GSXML.NODE_STRUCTURE_ELEM, GSXML.CLASS_NODE_ELEM);
-				Element top_structure = (Element) GSXML.getNodeByPath(top_node, path);
-				// add this as the classifier elem
-				page_classifier = GSXML.duplicateWithNewName(this.doc, top_structure, GSXML.CLASSIFIER_ELEM, true);
-				page_response.appendChild(page_classifier);
-				// now replace the child with the structure from the other request
-				Element new_classifier = (Element) GSXML.getChildByTagName(cl_structure, GSXML.CLASS_NODE_ELEM);
-				String replace_name = new_classifier.getAttribute(GSXML.NODE_ID_ATT);
+				boolean firstChildIsClassifierNode = false;
+				NodeList classifierChildrenNodes = GSXML.getChildrenByTagName(cl_structure, GSXML.CLASS_NODE_ELEM);
+				for (int i = 0; i < classifierChildrenNodes.getLength(); i++)
+				{
+					Element currentChild = (Element) classifierChildrenNodes.item(i);
+					if (currentChild.getAttribute(GSXML.NODE_ID_ATT).endsWith(".1"))
+					{
+						firstChildIsClassifierNode = true;
+					}
+				}
 
-				// find the appropriate child
-				Element old_classifier = GSXML.getNamedElement(page_classifier, GSXML.CLASS_NODE_ELEM, GSXML.NODE_ID_ATT, replace_name);
-				page_classifier.replaceChild(this.doc.importNode(new_classifier, true), old_classifier);
-				page_classifier.setAttribute(GSXML.NAME_ATT, top_id);
+				if (firstChildIsClassifierNode)
+				{
+					Element childStructure = getClassifierStructureFromID(classifier_node + ".1", request, collection, service_name);
+
+					Element replacementElem = null;
+					NodeList childClassifierNodes = childStructure.getElementsByTagName(GSXML.CLASS_NODE_ELEM);
+					for (int i = 0; i < childClassifierNodes.getLength(); i++)
+					{
+						Element currentElem = (Element) childClassifierNodes.item(i);
+						if (currentElem.getAttribute(GSXML.NODE_ID_ATT).equals(classifier_node + ".1"))
+						{
+							replacementElem = currentElem;
+							break;
+						}
+					}
+
+					NodeList nodesToSearch = cl_structure.getElementsByTagName(GSXML.CLASS_NODE_ELEM);
+					for (int i = 0; i < nodesToSearch.getLength(); i++)
+					{
+						Element currentElem = (Element) nodesToSearch.item(i);
+						if (currentElem.getAttribute(GSXML.NODE_ID_ATT).equals(classifier_node + ".1"))
+						{
+							Element parent = (Element) currentElem.getParentNode();
+							parent.insertBefore(replacementElem, currentElem);
+							parent.removeChild(currentElem);
+							break;
+						}
+					}
+				}
 			}
+			//If we have a horizontal classifier and we have NOT had the top-level node requested then we need to 
+			//make sure we get the full list of top-level children to display (e.g. if the user has requested
+			//CL2.1.1 we also need to make sure we have CL2.2, CL2.3, CL2.4 etc.)
 			else
 			{
-				// add the single classifier node as the page classifier 
-				page_classifier = GSXML.duplicateWithNewName(this.doc, cl_structure, GSXML.CLASSIFIER_ELEM, true);
-				page_response.appendChild(page_classifier);
-				page_classifier.setAttribute(GSXML.NAME_ATT, top_id);
-			}
+				Element childStructure = getClassifierStructureFromID(OID.getTop(classifier_node), request, collection, service_name);
 
+				String[] idParts = classifier_node.split("\\.");
+				String idToSearchFor = idParts[0] + "." + idParts[1];
+
+				Element replacementElem = null;
+				NodeList childClassifierNodes = cl_structure.getElementsByTagName(GSXML.CLASS_NODE_ELEM);
+				for (int i = 0; i < childClassifierNodes.getLength(); i++)
+				{
+					Element currentElem = (Element) childClassifierNodes.item(i);
+					if (currentElem.getAttribute(GSXML.NODE_ID_ATT).equals(idToSearchFor))
+					{
+						replacementElem = currentElem;
+						break;
+					}
+				}
+
+				if (replacementElem != null)
+				{
+					NodeList nodesToSearch = childStructure.getElementsByTagName(GSXML.CLASS_NODE_ELEM);
+					for (int i = 0; i < nodesToSearch.getLength(); i++)
+					{
+						Element currentElem = (Element) nodesToSearch.item(i);
+						if (currentElem.getAttribute(GSXML.NODE_ID_ATT).equals(idToSearchFor))
+						{
+							Element parent = (Element) currentElem.getParentNode();
+							parent.insertBefore(replacementElem, currentElem);
+							parent.removeChild(currentElem);
+							break;
+						}
+					}
+
+					cl_structure = childStructure;
+				}
+			}
 		}
-		else
-		{
-			// add the single classifier node as the page classifier 
-			page_classifier = GSXML.duplicateWithNewName(this.doc, cl_structure, GSXML.CLASSIFIER_ELEM, true);
-			page_response.appendChild(page_classifier);
-			page_classifier.setAttribute(GSXML.NAME_ATT, top_id);
-		}
+
+		Element page_classifier = null;
+		// add the single classifier node as the page classifier 
+		page_classifier = GSXML.duplicateWithNewName(this.doc, cl_structure, GSXML.CLASSIFIER_ELEM, true);
+		page_response.appendChild(page_classifier);
+		page_classifier.setAttribute(GSXML.NAME_ATT, top_id);
+
 		// get the metadata for each classifier node, 
 		// then for each document node
 
@@ -356,6 +396,45 @@ public class GS2BrowseAction extends Action
 
 		logger.debug("(GS2BrowseAction) Page:\n" + this.converter.getPrettyString(page_response));
 		return page_response;
+	}
+
+	private Element getClassifierStructureFromID(String id, Element request, String collection, String service_name)
+	{
+		UserContext userContext = new UserContext(request);
+		String to = GSPath.appendLink(collection, service_name);
+
+		Element firstClassifierNodeChildrenMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element firstClassifierNodeChildrenRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		firstClassifierNodeChildrenMessage.appendChild(firstClassifierNodeChildrenRequest);
+
+		Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		firstClassifierNodeChildrenRequest.appendChild(paramList);
+
+		Element ancestorParam = this.doc.createElement(GSXML.PARAM_ELEM);
+		paramList.appendChild(ancestorParam);
+		ancestorParam.setAttribute(GSXML.NAME_ATT, "structure");
+		ancestorParam.setAttribute(GSXML.VALUE_ATT, "ancestors");
+
+		Element childrenParam = this.doc.createElement(GSXML.PARAM_ELEM);
+		paramList.appendChild(childrenParam);
+		childrenParam.setAttribute(GSXML.NAME_ATT, "structure");
+		childrenParam.setAttribute(GSXML.VALUE_ATT, "children");
+
+		Element classifierToGetList = this.doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element classifierToGet = this.doc.createElement(GSXML.CLASS_NODE_ELEM);
+		classifierToGet.setAttribute(GSXML.NODE_ID_ATT, id);
+		classifierToGetList.appendChild(classifierToGet);
+		firstClassifierNodeChildrenRequest.appendChild(classifierToGetList);
+
+		Element firstClassifierNodeChildrenResponse = (Element) this.mr.process(firstClassifierNodeChildrenMessage);
+
+		String nsPath = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element topClassifierNode = (Element) GSXML.getNodeByPath(firstClassifierNodeChildrenResponse, nsPath);
+		nsPath = GSPath.appendLink(GSXML.CLASS_NODE_ELEM, GSXML.NODE_STRUCTURE_ELEM);
+		nsPath = GSPath.appendLink(nsPath, GSXML.CLASS_NODE_ELEM);
+		Element childStructure = (Element) GSXML.getNodeByPath(topClassifierNode, nsPath);
+
+		return childStructure;
 	}
 
 	protected void extractMetadataNames(Element new_format, HashSet<String> doc_meta_names, HashSet<String> class_meta_names)
