@@ -99,14 +99,6 @@
 	<xsl:template match="classifierNode"><!-- priority="3"-->
 
 		<table id="title{@nodeID}"><tbody><tr>
-			<!-- Expand/collapse button -->
-			<!--<td class="headerTD">
-				<img id="toggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
-					<xsl:attribute name="src">
-						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
-					</xsl:attribute>
-				</img>
-			</td>-->
 			<!-- Bookshelf icon -->
 			<td>
 				<img>
