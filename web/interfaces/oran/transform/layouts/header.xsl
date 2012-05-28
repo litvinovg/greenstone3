@@ -58,7 +58,7 @@
 		
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/direct-edit.js"><xsl:text> </xsl:text></script>
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/zoomer.js"><xsl:text> </xsl:text></script>
-		
+
 		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
 			<xsl:call-template name="map-scripts"/>
 		</xsl:if>
@@ -116,7 +116,7 @@
 						<li>
 							<xsl:choose>
 								<!-- If this tab is selected then colour it differently -->
-								<xsl:when test="@name = /page/pageRequest/paramList/param[@name = 'cl' and /page/pageRequest/@action = 'b']/@value">
+								<xsl:when test="util:contains(/page/pageRequest/paramList/param[@name = 'cl' and /page/pageRequest/@action = 'b']/@value, @name)">
 									<xsl:attribute name='class'>ui-state-default ui-corner-top ui-tabs-selected ui-state-active</xsl:attribute>
 								</xsl:when>
 								<xsl:otherwise>
@@ -354,7 +354,6 @@
 			</h2>
 		</td>
 	</xsl:template>
-	
 	
 	<!-- ***** QUICK SEARCH AREA ***** -->
 	<xsl:template name="quick-search-area">
