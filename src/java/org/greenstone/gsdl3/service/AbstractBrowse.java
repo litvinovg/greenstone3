@@ -27,6 +27,7 @@ import org.greenstone.gsdl3.util.OID;
 // XML classes
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 // General Java classes
@@ -449,7 +450,6 @@ public abstract class AbstractBrowse extends ServiceRack
 
 			if (want_info)
 			{
-
 				Element node_info_elem = this.doc.createElement("nodeStructureInfo");
 				node.appendChild(node_info_elem);
 
@@ -537,6 +537,27 @@ public abstract class AbstractBrowse extends ServiceRack
 				{
 					addDescendants(base_node, node_id, true);
 				}
+
+				NodeList classifierElements = result.getElementsByTagName(GSXML.CLASS_NODE_ELEM);
+				for (int j = 0; j < classifierElements.getLength(); j++)
+				{
+					Element current = (Element) classifierElements.item(j);
+					Node parentNode = current.getParentNode();
+
+					if (parentNode == null)
+					{
+						continue;
+					}
+
+					Element parent = (Element) parentNode;
+					String childType = parent.getAttribute(GSXML.CHILD_TYPE_ATT);
+					if (childType == null || childType.length() == 0)
+					{
+						continue;
+					}
+
+					current.setAttribute(GSXML.CLASSIFIER_STYLE_ATT, childType);
+				}
 			} // if want structure
 		} // for each doc
 		return result;
@@ -623,6 +644,7 @@ public abstract class AbstractBrowse extends ServiceRack
 	{
 		Element node = this.doc.createElement(GSXML.CLASS_NODE_ELEM);
 		node.setAttribute(GSXML.NODE_ID_ATT, node_id);
+		node.setAttribute(GSXML.CHILD_TYPE_ATT, getChildType(node_id));
 		return node;
 	}
 
@@ -757,6 +779,9 @@ public abstract class AbstractBrowse extends ServiceRack
 
 	/** if id ends in .fc, .pc etc, then translate it to the correct id */
 	abstract protected String translateId(String node_id);
+
+	/** Gets the type of list a classifier is (e.g. VList or HList) */
+	abstract protected String getChildType(String node_id);
 
 	/**
 	 * returns the document type of the doc that the specified node belongs to.
