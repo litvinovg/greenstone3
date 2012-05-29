@@ -50,7 +50,7 @@ public class TransformingReceptionist extends Receptionist
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.core.TransformingReceptionist.class.getName());
 
 	/** The preprocess.xsl file is in a fixed location */
-	static final String preprocess_xsl_filename = GlobalProperties.getGSDL3Home() + File.separatorChar + "ui" + File.separatorChar + "xslt" + File.separatorChar + "preProcess.xsl";
+  static final String preprocess_xsl_filename = GlobalProperties.getGSDL3Home() + File.separatorChar + "interfaces" + File.separatorChar + "core" + File.separatorChar + "transform" + File.separatorChar + "preProcess.xsl";
 
 	/** the list of xslt to use for actions */
 	protected HashMap<String, String> xslt_map = null;
