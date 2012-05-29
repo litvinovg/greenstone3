@@ -380,7 +380,7 @@ function getNodeContent(node) {
 	
 	   gsurl = $($(data).find("metadata[name=siteURL]")[0]).text();
 	
-	   $.get(gsurl + '/interfaces/default/transform/document_text.xsl', function(text) {
+	   $.get(gsurl + '/interfaces/basic/transform/document_text.xsl', function(text) {
 	   
 	   var output = '';
 	   var result = '';
