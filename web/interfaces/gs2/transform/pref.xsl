@@ -128,14 +128,14 @@
     <xsl:param name="simplestatus"/>
     <xsl:param name="formstatus"/>
     <xsl:param name="advancedstatus"/>
-    
+
     <!-- extract service parameters, avoid hard coding params in this xslt --> 
     <!-- mode specific options -->
     <xsl:call-template name="text-search-prefs"><xsl:with-param name="display"><xsl:if test="$mode='text'">y</xsl:if><xsl:if test="$mode='advanced' or $mode='form'">n</xsl:if></xsl:with-param></xsl:call-template>
     <!-- simple form search mode doesn't have any specific options -->
     <!-- <xsl:if test="$mode='form'"><xsl:apply-templates select="/page/pageResponse//service[@name='FieldQuery']"/></xsl:if> -->    
     <xsl:call-template name="advanced-search-prefs"><xsl:with-param name="display"><xsl:if test="$mode='advanced'">y</xsl:if><xsl:if test="$mode='text' or $mode='form'">n</xsl:if></xsl:with-param></xsl:call-template>
-    
+
     <!-- search type specific options -->
     <xsl:apply-templates select="/page/pageResponse//service[@name='TextQuery']">
       <xsl:with-param name="display"><xsl:if test="$mode='text' or $mode='form'">y</xsl:if><xsl:if test="$mode='advanced'">n</xsl:if></xsl:with-param>
@@ -214,19 +214,21 @@
   
   <xsl:template match="service">
     <xsl:param name="display">n</xsl:param>
-    <xsl:param name="prefix"/>    
-    <xsl:apply-templates select="paramList/param[not(@type='invisible')]"><xsl:with-param name="display" select="$display"/><xsl:with-param name="prefix" select="$prefix"/></xsl:apply-templates>
+    <xsl:param name="prefix"/>  
+    <for-each select="paramList/param[not(@type='invisible')]">
+        <xsl:call-template name="displayParam"><xsl:with-param name="display" select="$display"/><xsl:with-param name="prefix" select="$prefix"/></xsl:call-template>
+    </for-each>
   </xsl:template>
   
-  <xsl:template match="param"> 
+  <xsl:template name="displayParam">
     <xsl:param name="ns">s1.</xsl:param>
     <xsl:param name="display">n</xsl:param>
     <xsl:param name="prefix"/>
-    
-    <xsl:if test="not(@name='matchMode') and not(@name='level') and not(@name='index') and not(@name='sortBy') and not(@name='indexSubcollection') and not(@name='indexLanguage') and (@type='boolean' or @type='enum_single')"><xsl:apply-templates select="." mode="radio"><xsl:with-param name="display" select="$display"/><xsl:with-param name="prefix" select="$prefix"/><xsl:with-param name="paramIdx" select="position()"/></xsl:apply-templates></xsl:if>    
+
+    <xsl:if test="not(@name='matchMode') and not(@name='level') and not(@name='index') and not(@name='sortBy') and not(@name='indexSubcollection') and not(@name='indexLanguage') and (@type='boolean' or @type='enum_single')"><xsl:call-template name="displayRadioParam"><xsl:with-param name="display" select="$display"/><xsl:with-param name="prefix" select="$prefix"/><xsl:with-param name="paramIdx" select="position()"/></xsl:call-template></xsl:if>    
   </xsl:template>
   
-  <xsl:template match="param" mode="radio"> 
+  <xsl:template name="displayRadioParam">
     <xsl:param name="ns">s1.</xsl:param>
     <xsl:param name="display">n</xsl:param>
     <xsl:param name="prefix"/>
