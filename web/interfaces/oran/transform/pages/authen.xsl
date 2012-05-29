@@ -419,15 +419,15 @@
 													var groupSelector = document.getElementById("groupSelector");
 													var options = groupSelector.getElementsByTagName("OPTION");
 													var selectedGroup = options[groupSelector.selectedIndex].innerHTML;
-													var currentValue = groupsInput.getAttribute("value");
+													var currentValue = groupsInput.value;
 													
 													if(currentValue &amp;&amp; currentValue.search(/\w/) != -1)
 													{
-														groupsInput.setAttribute("value", currentValue + "," + selectedGroup);
+														groupsInput.value = currentValue + "," + selectedGroup;
 													}
 													else
 													{
-														groupsInput.setAttribute("value", selectedGroup);
+														groupsInput.value = selectedGroup;
 													}
 													return false;
 												}
