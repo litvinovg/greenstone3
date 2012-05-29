@@ -187,7 +187,7 @@
     </language>
   </languageList>
   <optionList>
-    <option name="cssTheme" value="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/themes/sunny/jquery-ui.css"/>
+    <option name="cssTheme" value="interfaces/default/style/themes/main/jquery-ui-1.8.16.custom.css"/>
     <option name="highlightQueryTerms" value="true"/>
     <option name="berryBaskets" value="true"/>
 	<option name="documentBasket" value="true"/>
