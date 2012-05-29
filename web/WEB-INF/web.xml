@@ -86,7 +86,7 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
   
 	<servlet>
 		<servlet-name>library</servlet-name>
-		<description>A new skin engine still in development based on the standard gsdl3 library program</description>
+		<description>The standard gsdl3 library program</description>
 		<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
 		<init-param>
 			<param-name>library_name</param-name>
@@ -98,7 +98,7 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 		</init-param>
 		<init-param>
 			<param-name>interface_name</param-name>
-			<param-value>oran</param-value>
+			<param-value>default</param-value>
 		</init-param>
 		<init-param>
 			<param-name>receptionist_class</param-name>
@@ -172,7 +172,7 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 
 	<servlet>
 		<servlet-name>gateway</servlet-name>
-		<description>gsdl3 library based on gateway site and default interface. It uses SOAP to talk to localsite</description>
+		<description>gsdl3 library based on gateway site and basic interface. It uses SOAP to talk to localsite</description>
 		<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
 		<init-param>
 			<param-name>library_name</param-name>
@@ -184,7 +184,7 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 		</init-param>
 		<init-param>
 			<param-name>interface_name</param-name>
-			<param-value>default</param-value>
+			<param-value>basic</param-value>
 		</init-param>
 		<init-param>
 			<param-name>default_lang</param-name>
