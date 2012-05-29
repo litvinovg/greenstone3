@@ -49,7 +49,7 @@
   <xsl:template name="pageBanner">
     <div id="banner">
       <div class="collectimage">
-	<img src="interfaces/default/images/gsdlhead.gif"><xsl:attribute name="alt"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/></xsl:attribute>
+	<img src="interfaces/basic/images/gsdlhead.gif"><xsl:attribute name="alt"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/></xsl:attribute>
 	</img>
       </div>
     </div>

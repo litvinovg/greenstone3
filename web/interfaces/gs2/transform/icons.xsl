@@ -58,7 +58,7 @@
     <xsl:param name="alt"/>
     <xsl:param name="title"/>
     <img  border="0" width="28" height="23"
-      src="interfaces/default/images/openbook.gif"
+      src="interfaces/basic/images/openbook.gif"
       alt="{$alt}" title="{$title}"/>
   </xsl:template>
 
@@ -66,7 +66,7 @@
     <xsl:param name="alt"/>
     <xsl:param name="title"/>
     <img border="0" width="18" height="11"
-      src="interfaces/default/images/book.gif"
+      src="interfaces/basic/images/book.gif"
       alt="{$alt}" title="{$title}"/>
   </xsl:template>
 
@@ -74,7 +74,7 @@
     <xsl:param name="alt"/>
     <xsl:param name="title"/>
     <img border="0" width="23" height="15"
-      src="interfaces/default/images/openfldr.gif"
+      src="interfaces/basic/images/openfldr.gif"
       alt="{$alt}" title="{$title}"/>
   </xsl:template>
 
@@ -82,7 +82,7 @@
     <xsl:param name="alt"/>
     <xsl:param name="title"/>
     <img  border="0" width="23" height="15"
-      src="interfaces/default/images/clsdfldr.gif"
+      src="interfaces/basic/images/clsdfldr.gif"
       alt="{$alt}" title="{$title}"/>
   </xsl:template>
 
@@ -90,7 +90,7 @@
     <xsl:param name="alt"/>
     <xsl:param name="title"/>
     <img  border="0" width="16" height="21"
-      src="interfaces/default/images/itext.gif"
+      src="interfaces/basic/images/itext.gif"
       alt="{$alt}" title="{$title}"/>
   </xsl:template>
 
@@ -98,7 +98,7 @@
     <xsl:param name="alt"/>
     <xsl:param name="title"/>
     <img  border="0" width="20" height="16"
-      src="interfaces/default/images/bshelf.gif"  
+      src="interfaces/basic/images/bshelf.gif"  
       alt="{$alt}" title="{$title}"/>
   </xsl:template>
 
@@ -106,7 +106,7 @@
     <xsl:param name="alt">PDF</xsl:param>
     <xsl:param name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'texticonpdf')"/></xsl:param>
     <img border="0" width='26' height='26' 
-      src='interfaces/default/images/ipdf.gif' 
+      src='interfaces/basic/images/ipdf.gif' 
       alt='{$alt}' title='{$title}'/>
   </xsl:template>
   
@@ -114,7 +114,7 @@
     <xsl:param name="alt">Word</xsl:param>
     <xsl:param name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'texticonmsword')"/></xsl:param>
     <img border="0" width='26' height='26' 
-      src='interfaces/default/images/imsword.gif' 
+      src='interfaces/basic/images/imsword.gif' 
       alt='{$alt}' title='{$title}'/>
   </xsl:template>
 

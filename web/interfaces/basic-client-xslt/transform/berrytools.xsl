@@ -26,24 +26,24 @@
     <xsl:choose>
       <xsl:when test="$selectedNode = $rootNode">
 	<p id="documentberries">    
-	  <img class='pick'  id="{$collName}:{$rootNode}" src="interfaces/default/images/berry3.png" alt="in basket" width="15" height="15" border="0"/><span id="{$collName}:{$rootNode}:root" class="documentberry">the whole document</span></p>       
+	  <img class='pick'  id="{$collName}:{$rootNode}" src="interfaces/basic/images/berry3.png" alt="in basket" width="15" height="15" border="0"/><span id="{$collName}:{$rootNode}:root" class="documentberry">the whole document</span></p>       
       </xsl:when>
       <xsl:otherwise>
 	<p id="documentberries">    
-	  <img class='pick'  id="{$collName}:{$rootNode}" src="interfaces/default/images/berry3.png" alt="in basket" width="15" height="15" border="0"/><span id="{$collName}:{$rootNode}:root" class="documentberry">the whole document</span><img class='pick'  id="{$collName}:{$selectedNode}" src="interfaces/default/images/berry3.png" alt="in basket" width="15" height="15" border="0"/><span id="{$collName}:{$selectedNode}:section" class="documentberry">the current section</span></p>
+	  <img class='pick'  id="{$collName}:{$rootNode}" src="interfaces/basic/images/berry3.png" alt="in basket" width="15" height="15" border="0"/><span id="{$collName}:{$rootNode}:root" class="documentberry">the whole document</span><img class='pick'  id="{$collName}:{$selectedNode}" src="interfaces/basic/images/berry3.png" alt="in basket" width="15" height="15" border="0"/><span id="{$collName}:{$selectedNode}:section" class="documentberry">the current section</span></p>
       </xsl:otherwise> 
     </xsl:choose>
   </xsl:template>
 
   
   <xsl:template name="loadLibrary">
-    <script type="text/javascript" src="interfaces/default/js/YAHOO.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/default/js/event.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/default/js/connection.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/default/js/dom.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/default/js/dragdrop.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/default/js/ygDDPlayer.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/default/js/ygDDOnTop.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/YAHOO.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/event.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/connection.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/dom.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/dragdrop.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/ygDDPlayer.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/ygDDOnTop.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
     
   </xsl:template>
   
@@ -55,7 +55,7 @@
   <!-- should be called for a documentNode -->
   <xsl:template name="addBerry">
     <xsl:param name="collName"/>
-    <td valign="top"><img class='pick' id="{$collName}:{@nodeID}" src="interfaces/default/images/berry3.png" alt="in basket" width="15" height="15" border="0"/></td>
+    <td valign="top"><img class='pick' id="{$collName}:{@nodeID}" src="interfaces/basic/images/berry3.png" alt="in basket" width="15" height="15" border="0"/></td>
   </xsl:template>
   
   <xsl:template name="basketCheckout">
@@ -169,7 +169,7 @@
       for (var i =0;i &lt; berryList.length &amp;amp;&amp;amp; i &lt;12 ; i++ ){
                var berries = YAHOO.util.Dom.get('berries');
                var img = document.createElement('img');
-               img.src = 'interfaces/default/images/berry3.png';
+               img.src = 'interfaces/basic/images/berry3.png';
                img.height = 15;
                img.width = 15;
                img.border = 0;              
@@ -246,7 +246,7 @@
         oldBg = berryBasket.style.background; 
         berryBasket.style.height = height;
         berryBasket.style.width = width;
-        berryBasket.style.background ='url("interfaces/default/images/kete2.png") 0 0 repeat';
+        berryBasket.style.background ='url("interfaces/basic/images/kete2.png") 0 0 repeat';
         berryBasket.style.cursor = "default";         
         berryBasket.className = "show";
         div.appendChild(list); 	
@@ -324,7 +324,7 @@
                         
                      for (var i =0; i &lt; berryList.length; i++ ){
                              var img = document.createElement('img');
-                              img.src = 'interfaces/default/images/berry3.png';
+                              img.src = 'interfaces/basic/images/berry3.png';
                               img.height = 15;
                               img.width = 15;
                               img.border = 0;              
@@ -395,7 +395,7 @@
   </xsl:template>
 
   <xsl:template name="berryStyleSheet">
-    <link rel="stylesheet" href="interfaces/default/style/berry.css" type="text/css"/>  
+    <link rel="stylesheet" href="interfaces/basic/style/berry.css" type="text/css"/>  
   </xsl:template>
   
 </xsl:stylesheet>

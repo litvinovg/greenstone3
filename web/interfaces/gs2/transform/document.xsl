@@ -135,7 +135,7 @@
     <xsl:variable name="request-params" select="/page/pageRequest/paramList"/>
     <xsl:if test='$request-params/param[@name="dt"]/@value != "simple" and $disp = "y"'>  
       <a><xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="$collName"/>&amp;d=<xsl:value-of select="@selectedNode"/><xsl:choose><xsl:when test="$direction='back'">.pp</xsl:when><xsl:otherwise>.np</xsl:otherwise></xsl:choose>&amp;sib=1&amp;p.s=<xsl:value-of select='$request-params/param[@name="p.s"]/@value'/>&amp;p.sa=<xsl:value-of select='$request-params/param[@name="p.sa"]/@value'/>&amp;p.a=<xsl:value-of select='$request-params/param[@name="p.a"]/@value'/></xsl:attribute><xsl:choose>
-	  <xsl:when test="$direction='back'"><img class="lessarrow{$pageDir}" src="interfaces/default/images/less.gif" /></xsl:when><xsl:otherwise><img class="morearrow{$pageDir}" src="interfaces/default/images/more.gif"  /></xsl:otherwise></xsl:choose></a>
+	  <xsl:when test="$direction='back'"><img class="lessarrow{$pageDir}" src="interfaces/basic/images/less.gif" /></xsl:when><xsl:otherwise><img class="morearrow{$pageDir}" src="interfaces/basic/images/more.gif"  /></xsl:otherwise></xsl:choose></a>
     </xsl:if>
   </xsl:template>
   
@@ -446,7 +446,7 @@
 	      <b><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.pages', $children)"/></b>
 	    </center></td>
 	  <td align="right">
-	    <a href="{$library_name}?a=d&amp;c={$collName}&amp;d={@selectedNode}.fc&amp;p.s={$p.s}&amp;p.sa={$p.sa}&amp;p.a={$p.a}&amp;p.c={$p.c}"><img src="interfaces/default/images/more.gif" border="0" align="absbottom" /></a>
+	    <a href="{$library_name}?a=d&amp;c={$collName}&amp;d={@selectedNode}.fc&amp;p.s={$p.s}&amp;p.sa={$p.sa}&amp;p.a={$p.a}&amp;p.c={$p.c}"><img src="interfaces/basic/images/more.gif" border="0" align="absbottom" /></a>
 	  </td>
 	</tr>
       </xsl:when>
@@ -455,7 +455,7 @@
 	<tr valign="top">
 	  <td align="left">
 	    <xsl:if test=" not ( $pos = 1 )">
-	      <a href="{$library_name}?a=d&amp;c={$collName}&amp;d={@selectedNode}.ps&amp;p.s={$p.s}&amp;p.sa={$p.sa}&amp;p.a={$p.a}&amp;p.c={$p.c}"><img src="interfaces/default/images/less.gif" border="0" align="absbottom" /></a>
+	      <a href="{$library_name}?a=d&amp;c={$collName}&amp;d={@selectedNode}.ps&amp;p.s={$p.s}&amp;p.sa={$p.sa}&amp;p.a={$p.a}&amp;p.c={$p.c}"><img src="interfaces/basic/images/less.gif" border="0" align="absbottom" /></a>
 	    </xsl:if>
 	  </td>
 	  <td align="center"><center>
@@ -463,7 +463,7 @@
 	    </center></td>
 	  <td align="right">
 	    <xsl:if test=" not($pos = $length)">
-	      <a href="{$library_name}?a=d&amp;c={$collName}&amp;d={@selectedNode}.ns&amp;p.s={$p.s}&amp;p.sa={$p.sa}&amp;p.a={$p.a}&amp;p.c={$p.c}"><img src="interfaces/default/images/more.gif" border="0" align="absbottom" /></a>
+	      <a href="{$library_name}?a=d&amp;c={$collName}&amp;d={@selectedNode}.ns&amp;p.s={$p.s}&amp;p.sa={$p.sa}&amp;p.a={$p.a}&amp;p.c={$p.c}"><img src="interfaces/basic/images/more.gif" border="0" align="absbottom" /></a>
 	    </xsl:if>
 	  </td>
 	</tr>

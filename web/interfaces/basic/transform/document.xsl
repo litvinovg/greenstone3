@@ -587,7 +587,7 @@
             </td>
             <td align="right">
               <a href="{$library_name}?a=d&amp;c={$collName}&amp;d={@selectedNode}.fc">
-                <img src="interfaces/default/images/more.gif" border="0" align="absbottom"/>
+                <img src="interfaces/basic/images/more.gif" border="0" align="absbottom"/>
               </a>
             </td>
           </tr>
@@ -598,7 +598,7 @@
             <td align="left">
               <xsl:if test=" not ( $pos = 1 )">
                 <a href="{$library_name}?a=d&amp;c={$collName}&amp;d={@selectedNode}.ps">
-                  <img src="interfaces/default/images/less.gif" border="0" align="absbottom"/>
+                  <img src="interfaces/basic/images/less.gif" border="0" align="absbottom"/>
                 </a>
               </xsl:if>
             </td>
@@ -612,7 +612,7 @@
             <td align="right">
               <xsl:if test=" not($pos = $length)">
                 <a href="{$library_name}?a=d&amp;c={$collName}&amp;d={@selectedNode}.ns">
-                  <img src="interfaces/default/images/more.gif" border="0" align="absbottom"/>
+                  <img src="interfaces/basic/images/more.gif" border="0" align="absbottom"/>
                 </a>
               </xsl:if>
             </td>
@@ -719,10 +719,10 @@
         <xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="$collName"/>&amp;d=<xsl:value-of select="@selectedNode"/><xsl:choose><xsl:when test="$direction='back'">.pp</xsl:when><xsl:otherwise>.np</xsl:otherwise></xsl:choose>&amp;sib=1&amp;p.s=<xsl:value-of select="$request-params/param[@name=&quot;p.s&quot;]/@value"/>&amp;p.sa=<xsl:value-of select="$request-params/param[@name=&quot;p.sa&quot;]/@value"/>&amp;p.a=<xsl:value-of select="$request-params/param[@name=&quot;p.a&quot;]/@value"/></xsl:attribute>
         <xsl:choose>
           <xsl:when test="$direction='back'">
-            <img class="lessarrow" src="interfaces/default/images/less.gif"/>
+            <img class="lessarrow" src="interfaces/basic/images/less.gif"/>
           </xsl:when>
           <xsl:otherwise>
-            <img class="morearrow" src="interfaces/default/images/more.gif"/>
+            <img class="morearrow" src="interfaces/basic/images/more.gif"/>
           </xsl:otherwise>
         </xsl:choose>
       </a>

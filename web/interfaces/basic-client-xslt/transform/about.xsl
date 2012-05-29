@@ -16,7 +16,7 @@
 	<title>
 	  <gslib:aboutCollectionPageTitle/>
 	</title>
-	<link rel="stylesheet" href="interfaces/default/style/core.css" type="text/css"/>
+	<link rel="stylesheet" href="interfaces/basic/style/core.css" type="text/css"/>
       </head>
       
       <body><gslib:textDirectionAttribute/>

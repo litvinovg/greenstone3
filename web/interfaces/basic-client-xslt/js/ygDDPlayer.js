@@ -68,7 +68,7 @@ ygDDPlayer.prototype.startDrag = function(x, y) {
 	}	
        
          var img = document.createElement('img');
-              img.src = 'interfaces/default/images/berry3.png';
+              img.src = 'interfaces/basic/images/berry3.png';
               img.height = 15;
               img.width = 15;
              img.border = 0;              
@@ -209,7 +209,7 @@ ygDDPlayer.prototype.onDragDrop = function(e, id) {
                         
                      for (var i =0; i < player.berryList.length; i++ ){
                              var img = document.createElement('img');
-                              img.src = 'interfaces/default/images/berry3.png';
+                              img.src = 'interfaces/basic/images/berry3.png';
                               img.height = 15;
                               img.width = 15;
                               img.border = 0;              
@@ -302,7 +302,7 @@ ygDDPlayer.prototype.onDragDrop = function(e, id) {
                      }
                    var trashbin =  YAHOO.util.Dom.get('trashbin');
                    if ( trashbin !=null){
-                         trashbin.style.background = 'url("interfaces/default/images/trash-full.png") 0 0 no-repeat';
+                         trashbin.style.background = 'url("interfaces/basic/images/trash-full.png") 0 0 no-repeat';
                   }
               }                                       
          

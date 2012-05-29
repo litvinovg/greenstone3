@@ -1,4 +1,4 @@
-<interfaceConfig baseInterface="default">
+<interfaceConfig baseInterface="basic">
   <actionList>
     <action name='p' class='PageAction'>
       <subaction name='home' xslt='home.xsl'/>

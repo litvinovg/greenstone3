@@ -49,14 +49,14 @@
   	<xsl:param name="title"/>
     <xsl:param name="alt"/>
     <img  border="0" width="28" height="23"
-      src="interfaces/default/images/openbook.gif"
+      src="interfaces/basic/images/openbook.gif"
       alt="{$alt}" class="getTextFor null this.title.{$title}" />
   </xsl:template>
 
   <xsl:template name="closedbookimg">
     <xsl:param name="alt"/>
     <img border="0" width="18" height="11"
-      src="interfaces/default/images/book.gif"
+      src="interfaces/basic/images/book.gif"
       alt="{$alt}" class="getTextFor null this.title.open_book" />
   </xsl:template>
 
@@ -64,7 +64,7 @@
   	<xsl:param name="title"/>
     <xsl:param name="alt"/>
     <img border="0" width="23" height="15"
-      src="interfaces/default/images/openfldr.gif"
+      src="interfaces/basic/images/openfldr.gif"
       alt="{$alt}" class="getTextFor null this.title.{$title}" />
   </xsl:template>
 
@@ -72,14 +72,14 @@
   	<xsl:param name="title"/>
     <xsl:param name="alt"/>
     <img  border="0" width="23" height="15"
-      src="interfaces/default/images/clsdfldr.gif"
+      src="interfaces/basic/images/clsdfldr.gif"
       alt="{$alt}" class="getTextFor null this.title.{$title}" />
   </xsl:template>
 
   <xsl:template name="textpageimg">
     <xsl:param name="alt"/>
     <img  border="0" width="16" height="21"
-      src="interfaces/default/images/itext.gif"
+      src="interfaces/basic/images/itext.gif"
       alt="{$alt}" class="getTextFor null this.title.view_document,parent.class.text:'clientDocView'" />
     <span><xsl:value-of select="$alt" /></span>
   </xsl:template>
@@ -88,21 +88,21 @@
     <xsl:param name="alt"/>
     <xsl:param name="title"/>
     <img  border="0" width="20" height="16"
-      src="interfaces/default/images/bshelf.gif"  
+      src="interfaces/basic/images/bshelf.gif"  
       alt="{$alt}" title="{$title}"/>
   </xsl:template>
 
   <xsl:template name="iconpdf">
     <xsl:param name="alt">PDF</xsl:param>
     <img border="0" width='26' height='26' 
-      src='interfaces/default/images/ipdf.gif' 
+      src='interfaces/basic/images/ipdf.gif' 
       alt='{$alt}' class="getTextFor null this.title.texticonpdf" />
   </xsl:template>
   
   <xsl:template name="icondoc">
     <xsl:param name="alt">Word</xsl:param>
     <img border="0" width='26' height='26' 
-      src='interfaces/default/images/imsword.gif' 
+      src='interfaces/basic/images/imsword.gif' 
       alt='{$alt}' class="getTextFor null this.title.texticonmsword" />
   </xsl:template>
 

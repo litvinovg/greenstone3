@@ -59,13 +59,13 @@
 	
 	<div>   
 	  <div>
-	    <xsl:if test="$here &gt; 1"><a href="{$library_name}?a=q&amp;sa={$sa}&amp;c={$collName}&amp;s={$service}&amp;rt=rd&amp;{$page-param}={$prev}"><img src="interfaces/default/images/less.gif" width='30' height='16' border='0' align='top'/><span class="getTextFor query.matches"></span><xsl:text> </xsl:text><xsl:value-of select="number(($prev - 1)*$hpp + 1)"/> - <xsl:value-of select="number(($prev * $hpp))"/></a></xsl:if>
+	    <xsl:if test="$here &gt; 1"><a href="{$library_name}?a=q&amp;sa={$sa}&amp;c={$collName}&amp;s={$service}&amp;rt=rd&amp;{$page-param}={$prev}"><img src="interfaces/basic/images/less.gif" width='30' height='16' border='0' align='top'/><span class="getTextFor query.matches"></span><xsl:text> </xsl:text><xsl:value-of select="number(($prev - 1)*$hpp + 1)"/> - <xsl:value-of select="number(($prev * $hpp))"/></a></xsl:if>
 	    
 	    
 	    <xsl:if test="(($here * $hpp) + 1)  &lt; $td">
 	      <xsl:variable name='m' select="number($next * $hpp)"/>
 	      <xsl:variable name='mm'><xsl:choose><xsl:when test="$m &lt; $td"><xsl:value-of select='$m'/></xsl:when><xsl:otherwise><xsl:value-of select='$td'/></xsl:otherwise></xsl:choose></xsl:variable>
-	      <a href="{$library_name}?a=q&amp;sa={$sa}&amp;c={$collName}&amp;s={$service}&amp;rt=rd&amp;{$page-param}={$next}"><span class="getTextFor query.matches"></span><xsl:text> </xsl:text><xsl:value-of select="number(($next - 1)*$hpp + 1)"/> - <xsl:value-of select="$mm"/><img src="interfaces/default/images/more.gif" width='30' height='16' border='0' align='top'/></a></xsl:if></div>
+	      <a href="{$library_name}?a=q&amp;sa={$sa}&amp;c={$collName}&amp;s={$service}&amp;rt=rd&amp;{$page-param}={$next}"><span class="getTextFor query.matches"></span><xsl:text> </xsl:text><xsl:value-of select="number(($next - 1)*$hpp + 1)"/> - <xsl:value-of select="$mm"/><img src="interfaces/basic/images/more.gif" width='30' height='16' border='0' align='top'/></a></xsl:if></div>
 	</div>
       </xsl:if>
     </div>

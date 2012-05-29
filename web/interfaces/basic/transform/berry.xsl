@@ -116,7 +116,7 @@
 
             if (target.id.toLowerCase() == 'urlcheck' &amp;&amp; urlonly){
                var urlcheck = YAHOO.util.Dom.get('urlcheck');
-               urlcheck.src = 'interfaces/default/images/check3.gif';              
+               urlcheck.src = 'interfaces/basic/images/check3.gif';              
                var parea  =YAHOO.util.Dom.get('pretextarea');       
                urlonly = false;
                populateUrlsAndMetadata(parea);
@@ -126,7 +126,7 @@
 
             if (target.id.toLowerCase() == 'urlcheck' &amp;&amp; !urlonly ){ 
                 var urlcheck = YAHOO.util.Dom.get('urlcheck');
-                urlcheck.src = 'interfaces/default/images/check4.gif';                       
+                urlcheck.src = 'interfaces/basic/images/check4.gif';                       
                 var parea  =YAHOO.util.Dom.get('pretextarea');
                 populateUrls(parea);        
                 urlonly = true;
@@ -172,10 +172,10 @@
              var fullview =  YAHOO.util.Dom.get('fullview');
 
               if (previousView != null){
-                 previousView.style.backgroundImage =  'url("interfaces/default/images/bg_on.png")'; 
+                 previousView.style.backgroundImage =  'url("interfaces/basic/images/bg_on.png")'; 
               } 
               previousView = fullview;
-              previousView.style.backgroundImage =  'url("interfaces/default/images/bg_green.png")';
+              previousView.style.backgroundImage =  'url("interfaces/basic/images/bg_green.png")';
 
                while (content.hasChildNodes()) {
 		 content.removeChild(content.firstChild);
@@ -249,12 +249,12 @@
              var textview =  YAHOO.util.Dom.get('textview');
 
               if (previousView != null &amp;&amp; textview !=null){
-                 previousView.style.backgroundImage =  'url("interfaces/default/images/bg_on.png")'; 
+                 previousView.style.backgroundImage =  'url("interfaces/basic/images/bg_on.png")'; 
               } 
 
              if (textview !=null){
                previousView = textview;
-               previousView.style.backgroundImage =  'url("interfaces/default/images/bg_green.png")';
+               previousView.style.backgroundImage =  'url("interfaces/basic/images/bg_green.png")';
              }
 
                while (content.hasChildNodes()) {
@@ -326,12 +326,12 @@
              var email =  YAHOO.util.Dom.get('email');
 
               if (previousView != null &amp;&amp; email !=null ){
-                 previousView.style.backgroundImage =  'url("interfaces/default/images/bg_on.png")'; 
+                 previousView.style.backgroundImage =  'url("interfaces/basic/images/bg_on.png")'; 
               } 
               
               if (email != null){
                 previousView = email;
-               previousView.style.backgroundImage =  'url("interfaces/default/images/bg_green.png")';
+               previousView.style.backgroundImage =  'url("interfaces/basic/images/bg_green.png")';
              }
                while (content.hasChildNodes()) {
 		 content.removeChild(content.firstChild);
@@ -396,7 +396,7 @@
          
          
              var img =  document.createElement('img');
-             img.src = 'interfaces/default/images/check3.gif';
+             img.src = 'interfaces/basic/images/check3.gif';
              img.id = 'urlcheck'; 
              div.appendChild(img);
        
@@ -507,8 +507,8 @@
   </xsl:template>
 
   <xsl:template name="styleSheet">
-    <link rel="stylesheet" href="interfaces/default/style/core.css" type="text/css"/>  
-    <link rel="stylesheet" href="interfaces/default/style/berry.css" type="text/css"/>  
+    <link rel="stylesheet" href="interfaces/basic/style/core.css" type="text/css"/>  
+    <link rel="stylesheet" href="interfaces/basic/style/berry.css" type="text/css"/>  
   </xsl:template>
   
   <xsl:template name="showMailBox">
