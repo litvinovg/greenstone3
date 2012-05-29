@@ -193,12 +193,12 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 	</servlet>
   
 	<servlet>
-		<servlet-name>gs3-library</servlet-name>
-		<description>standard gsdl3 library program: uses localsite and the default interface</description>
+		<servlet-name>basic-library</servlet-name>
+		<description>basic gsdl3 library program: uses localsite and the basic interface</description>
 		<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
 		<init-param>
 			<param-name>library_name</param-name>
-			<param-value>gs3-library</param-value>
+			<param-value>basic-library</param-value>
 		</init-param>
 		<init-param>
 			<param-name>site_name</param-name>
@@ -206,7 +206,7 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 		</init-param>
 		<init-param>
 			<param-name>interface_name</param-name>
-			<param-value>default</param-value>
+			<param-value>basic</param-value>
 		</init-param>
 		<init-param>
 			<param-name>default_lang</param-name>
@@ -339,8 +339,8 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 	</servlet-mapping>
   
 	<servlet-mapping>
-		<servlet-name>gs3-library</servlet-name>
-		<url-pattern>/gs3-library</url-pattern>
+		<servlet-name>basic-library</servlet-name>
+		<url-pattern>/basic-library</url-pattern>
 	</servlet-mapping>
 
 	<servlet-mapping>
