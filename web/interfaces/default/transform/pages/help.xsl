@@ -73,12 +73,12 @@
 		
 		<table>
 			<tr>
-				<td colspan="2"><img src="interfaces/oran/images/bookshelf.png"/></td>
+				<td colspan="2"><img src="interfaces/default/images/bookshelf.png"/></td>
 				<td><xsl:value-of disable-output-escaping="yes" select="util:getInterfaceText($interface_name, /page/@lang, 'help.openbookshelf')"/></td>
 			</tr>
 			<tr>
-				<td><img src="interfaces/oran/images/previous.png"/></td>
-				<td><img src="interfaces/oran/images/next.png"/></td>
+				<td><img src="interfaces/default/images/previous.png"/></td>
+				<td><img src="interfaces/default/images/next.png"/></td>
 				<td><xsl:value-of disable-output-escaping="yes" select="util:getInterfaceText($interface_name, /page/@lang, 'help.sectionarrows')"/></td>
 			</tr>
 		</table>

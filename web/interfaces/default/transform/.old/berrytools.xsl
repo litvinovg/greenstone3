@@ -39,13 +39,13 @@
   
   <!-- done
   <xsl:template name="loadLibrary">
-    <script type="text/javascript" src="interfaces/default/js/YAHOO.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/default/js/event.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/default/js/connection.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/default/js/dom.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/default/js/dragdrop.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/default/js/ygDDPlayer.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
-    <script type="text/javascript" src="interfaces/default/js/ygDDOnTop.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/YAHOO.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/event.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/connection.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/dom.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/dragdrop.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/ygDDPlayer.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
+    <script type="text/javascript" src="interfaces/basic/js/ygDDOnTop.js"><xsl:text disable-output-escaping="yes"> </xsl:text></script>
    </xsl:template>
 	-->
   
@@ -64,7 +64,7 @@
   
   <!-- done
   <xsl:template name="berryStyleSheet">
-    <link rel="stylesheet" href="interfaces/default/style/berry.css" type="text/css"/>  
+    <link rel="stylesheet" href="interfaces/basic/style/berry.css" type="text/css"/>  
   </xsl:template>
   -->
   

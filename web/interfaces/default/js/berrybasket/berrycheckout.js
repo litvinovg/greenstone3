@@ -142,7 +142,7 @@ function showFullView(){
 		var img = document.createElement('img');
 		var text ="";
 		
-		img.setAttribute("src", "interfaces/oran/images/berry.png");
+		img.setAttribute("src", "interfaces/default/images/berry.png");
 		img.setAttribute("id", doc['collection']+":"+ doc['name']);
 		img.setAttribute("height", "15px");
 		img.setAttribute("width", "15px");

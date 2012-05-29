@@ -112,7 +112,7 @@ function updateBerryImages(){
 	
 	for (var i =0;i < berryList.length && i<12 ; i++ ){
 		var img = document.createElement('img');
-		img.src = 'interfaces/oran/images/berry.png';
+		img.src = 'interfaces/default/images/berry.png';
 		berries.appendChild(img);
 	}
 
@@ -330,7 +330,7 @@ function addBerry(el){
 
 				for (var i =0; i < berryList.length; i++ ){
 					var img = document.createElement('img');
-					img.src = 'interfaces/oran/images/berry.png';
+					img.src = 'interfaces/default/images/berry.png';
 					berries.appendChild(img);
 				}
 

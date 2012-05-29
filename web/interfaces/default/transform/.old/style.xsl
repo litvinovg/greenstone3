@@ -14,7 +14,7 @@
 
   <!-- global style info goes here  -->
   <xsl:template name="globalStyle">
-    <link rel="stylesheet" href="interfaces/default/style/core.css" type="text/css"/>
+    <link rel="stylesheet" href="interfaces/basic/style/core.css" type="text/css"/>
   </xsl:template>
 
   <xsl:template name="response">

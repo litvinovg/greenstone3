@@ -68,7 +68,7 @@ ygDDPlayer.prototype.startDrag = function(x, y) {
 	}	
 	
 	var img = document.createElement('img');
-	img.src = 'interfaces/oran/images/berry.png';
+	img.src = 'interfaces/default/images/berry.png';
 	dragEl.appendChild(img);
 	
 	var added = true;
@@ -207,7 +207,7 @@ ygDDPlayer.prototype.onDragDrop = function(e, id) {
 				
 				for (var i =0; i < player.berryList.length; i++ ){
 					var img = document.createElement('img');
-					img.src = 'interfaces/oran/images/berry.png';
+					img.src = 'interfaces/default/images/berry.png';
 					berries.appendChild(img);
 				}
 

@@ -22,17 +22,17 @@
         <!-- Sam2's div code -->
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"><xsl:text> </xsl:text></script>
-        <!--<script type="text/javascript" src="interfaces/oran/js/jquery-1.4.2.js"><xsl:text> </xsl:text></script>-->
+        <!--<script type="text/javascript" src="interfaces/default/js/jquery-1.4.2.js"><xsl:text> </xsl:text></script>-->
         <!-- XML parsing doesn't seem to work properly jquery so jquery.xml.js is a fix for this -->
-        <script type="text/javascript" src="interfaces/oran/js/jquery.xml.js"><xsl:text> </xsl:text></script>
-        <script type="text/javascript" src="interfaces/oran/js/jquery-ui-1.8.15/ui/jquery-ui-1.8.15.custom.js"><xsl:text> </xsl:text></script>
-        <script type="text/javascript" src="interfaces/oran/js/jquery.selectboxes.js"><xsl:text> </xsl:text></script>
-        <script type="text/javascript" src="interfaces/oran/js/innerxhtml.js"><xsl:text> </xsl:text></script>
-        <!--<script type="text/javascript" src="interfaces/oran/js/gui_div.js"><xsl:text> </xsl:text></script>-->
-        <script type="text/javascript" src="interfaces/oran/js/format_browse.js"><xsl:text> </xsl:text></script>
-        <script type="text/javascript" src="interfaces/oran/js/format_document.js"><xsl:text> </xsl:text></script>
-        <script type="text/javascript" src="interfaces/oran/js/format_util.js"><xsl:text> </xsl:text></script>
-        <script type="text/javascript" src="interfaces/oran/js/format_jquery_prototypes.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/default/js/jquery.xml.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/default/js/jquery-ui-1.8.15/ui/jquery-ui-1.8.15.custom.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/default/js/jquery.selectboxes.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/default/js/innerxhtml.js"><xsl:text> </xsl:text></script>
+        <!--<script type="text/javascript" src="interfaces/default/js/gui_div.js"><xsl:text> </xsl:text></script>-->
+        <script type="text/javascript" src="interfaces/default/js/format_browse.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/default/js/format_document.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/default/js/format_util.js"><xsl:text> </xsl:text></script>
+        <script type="text/javascript" src="interfaces/default/js/format_jquery_prototypes.js"><xsl:text> </xsl:text></script>
        
         <xsl:call-template name="xml-to-gui-templates">
             <xsl:with-param name="node-set" select="test"/>

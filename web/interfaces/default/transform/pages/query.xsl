@@ -262,7 +262,7 @@
 			<td id="prevArrowTD">
 				<xsl:if test="$currentPage != 1">
 					<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/@subaction}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage - 1}">
-						<img src="interfaces/oran/images/previous.png"/>
+						<img src="interfaces/default/images/previous.png"/>
 					</a>
 				</xsl:if>
 			</td>
@@ -331,7 +331,7 @@
 			<td id="nextArrowTD">
 				<xsl:if test="($currentPage * $docsPerPage + 1) &lt; $docMax">
 					<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/paramList/param[@name = 'sa']/@value}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage + 1}">
-						<img src="interfaces/oran/images/next.png"/>
+						<img src="interfaces/default/images/next.png"/>
 					</a>
 				</xsl:if>
 			</td>

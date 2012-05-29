@@ -120,8 +120,8 @@
 	</xsl:template>
 	
 	<xsl:template name="include-global-javascript-functions">
-		<script type="text/javascript" src="interfaces/oran/js/javascript-global-functions.js"><xsl:text> </xsl:text></script>
-		<script type="text/javascript" src="interfaces/oran/js/GSMetadata.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript" src="interfaces/default/js/javascript-global-functions.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript" src="interfaces/default/js/GSMetadata.js"><xsl:text> </xsl:text></script>
 	</xsl:template>
 </xsl:stylesheet>
 

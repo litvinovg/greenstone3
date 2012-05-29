@@ -513,7 +513,7 @@
 		<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
 			<div style="background:#BBFFBB; padding: 5px; margin:0px auto; width:890px;">
 				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.maps.nearby_docs')"/>
-				<img id="nearbyDocumentsToggle" src="interfaces/oran/images/expand.png">
+				<img id="nearbyDocumentsToggle" src="interfaces/default/images/expand.png">
 					<xsl:attribute name="onclick">
 						<xsl:text>performDistanceSearch('</xsl:text>
 						<xsl:value-of select="@nodeID"/>

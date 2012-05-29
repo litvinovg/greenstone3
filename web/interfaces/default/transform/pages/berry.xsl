@@ -19,7 +19,7 @@
 	<!-- the page content -->
 	<xsl:template match="/page">
 		<xsl:variable name="clusterName"><xsl:value-of select="/page/pageRequest/paramList/param[@name='c']/@value"/></xsl:variable>
-		<script type="text/javascript" src="interfaces/oran/js/berrybasket/berrycheckout.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript" src="interfaces/default/js/berrybasket/berrycheckout.js"><xsl:text> </xsl:text></script>
 		<script type="text/javascript">
 			<xsl:text disable-output-escaping="yes">
 				var doc;

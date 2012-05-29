@@ -21,7 +21,7 @@
 				<!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
 				<title><xsl:call-template name="pageTitle"/><xsl:text> </xsl:text></title>
 
-				<link rel="stylesheet" href="interfaces/oran/style/core.css" type="text/css"/>
+				<link rel="stylesheet" href="interfaces/default/style/core.css" type="text/css"/>
 
 				<!-- todo: add berry basket stylesheets and javascript -->
 			</head>

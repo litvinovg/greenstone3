@@ -507,8 +507,8 @@
   </xsl:template>
 
   <xsl:template name="styleSheet">
-    <link rel="stylesheet" href="interfaces/default/style/core.css" type="text/css"/>  
-    <link rel="stylesheet" href="interfaces/default/style/berry.css" type="text/css"/>  
+    <link rel="stylesheet" href="interfaces/basic/style/core.css" type="text/css"/>  
+    <link rel="stylesheet" href="interfaces/basic/style/berry.css" type="text/css"/>  
   </xsl:template>
   
   <xsl:template name="showMailBox">
