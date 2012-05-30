@@ -1,40 +1,39 @@
 package org.greenstone.gsdl3.core;
 
-import org.greenstone.util.GlobalProperties;
-import org.greenstone.gsdl3.util.*;
-import org.greenstone.gsdl3.action.*;
-// XML classes
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Comment;
-import org.w3c.dom.Text;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.InputSource;
-import org.w3c.dom.NamedNodeMap;
-
-// other java classes
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.Serializable;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.FileReader;
-import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Enumeration;
 
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
-import org.apache.log4j.*;
-import org.apache.tools.zip.ExtraFieldUtils;
-import org.apache.xerces.dom.*;
-import org.apache.xerces.parsers.DOMParser;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.apache.xerces.parsers.DOMParser;
+import org.greenstone.gsdl3.action.Action;
+import org.greenstone.gsdl3.util.GSConstants;
+import org.greenstone.gsdl3.util.GSFile;
+import org.greenstone.gsdl3.util.GSParams;
+import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.GSXSLT;
+import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
+import org.greenstone.gsdl3.util.XMLTransformer;
+import org.greenstone.util.GlobalProperties;
+import org.w3c.dom.Comment;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+import org.xml.sax.InputSource;
 
 /**
  * A receptionist that uses xslt to transform the page_data before returning it.
@@ -50,7 +49,7 @@ public class TransformingReceptionist extends Receptionist
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.core.TransformingReceptionist.class.getName());
 
 	/** The preprocess.xsl file is in a fixed location */
-  static final String preprocess_xsl_filename = GlobalProperties.getGSDL3Home() + File.separatorChar + "interfaces" + File.separatorChar + "core" + File.separatorChar + "transform" + File.separatorChar + "preProcess.xsl";
+	static final String preprocess_xsl_filename = GlobalProperties.getGSDL3Home() + File.separatorChar + "interfaces" + File.separatorChar + "core" + File.separatorChar + "transform" + File.separatorChar + "preProcess.xsl";
 
 	/** the list of xslt to use for actions */
 	protected HashMap<String, String> xslt_map = null;
@@ -491,6 +490,7 @@ public class TransformingReceptionist extends Receptionist
 		doc.appendChild(doc.importNode(page, true));
 		Element page_response = (Element) GSXML.getChildByTagName(page, GSXML.PAGE_RESPONSE_ELEM);
 		Element format_elem = (Element) GSXML.getChildByTagName(page_response, GSXML.FORMAT_ELEM);
+
 		if (output.equals("formatelem"))
 		{
 			return format_elem;
@@ -802,12 +802,12 @@ public class TransformingReceptionist extends Receptionist
 			return doc;
 		}
 
-		if(_debug)
+		if (_debug)
 		{
 			GSXML.addDebugSpanTags(skinAndLibraryDoc);
 		}
 
-		return this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype); // The default
+		return this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype);
 
 		// The line below will do the transformation like we use to do before having Skin++ implemented,
 		// it will not contain any GS-Lib statements expanded, and the result will not contain any doctype.
