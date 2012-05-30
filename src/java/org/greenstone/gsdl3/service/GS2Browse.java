@@ -19,25 +19,19 @@
 package org.greenstone.gsdl3.service;
 
 // Greenstone classes
-import org.greenstone.gsdl3.util.OID;
-import org.greenstone.gsdl3.util.GSXML;
-import org.greenstone.gsdl3.util.GSFile;
-import org.greenstone.gsdl3.util.MacroResolver;
-import org.greenstone.gsdl3.util.GS2MacroResolver;
-import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
-import org.greenstone.gsdl3.util.DBInfo;
-// XML classes
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-// General Java classes
 import java.util.ArrayList;
-import java.util.StringTokenizer;
-import java.util.Set;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.StringTokenizer;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.util.DBInfo;
+import org.greenstone.gsdl3.util.GS2MacroResolver;
+import org.greenstone.gsdl3.util.GSFile;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.OID;
+import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
+import org.w3c.dom.Element;
 
 /**
  * Greenstone 2 collection classifier service

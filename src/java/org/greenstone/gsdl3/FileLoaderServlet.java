@@ -1,13 +1,19 @@
 package org.greenstone.gsdl3;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -47,7 +53,7 @@ public class FileLoaderServlet extends LibraryServlet
 						{
 							storageLocation = current.getString();
 						}
-						
+
 						if (current.getFieldName().equals("ajaxUpload") && current.getString().equals("true"))
 						{
 							ajaxUpload = true;
@@ -64,12 +70,12 @@ public class FileLoaderServlet extends LibraryServlet
 						current.write(file);
 
 						uploadedFile = file;
-						
-						if(!json.toString().equals("["))
+
+						if (!json.toString().equals("["))
 						{
 							json.append(",");
 						}
-						
+
 						json.append("{");
 						json.append("\"name\":\"" + file.getName() + "\",");
 						json.append("\"size\":\"" + file.length() + "\",");
@@ -81,14 +87,14 @@ public class FileLoaderServlet extends LibraryServlet
 					}
 				}
 				json.append("]");
-				
-				if(ajaxUpload)
+
+				if (ajaxUpload)
 				{
 					response.setContentType("application/json");
 					PrintWriter writer = response.getWriter();
 					writer.write(json.toString());
 					writer.flush();
-					
+
 					return;
 				}
 
@@ -140,22 +146,22 @@ public class FileLoaderServlet extends LibraryServlet
 		{
 			Map<String, String[]> queryMap = request.getParameterMap();
 			Iterator<String> queryIter = queryMap.keySet().iterator();
-			
-			while(queryIter.hasNext())
+
+			while (queryIter.hasNext())
 			{
 				String q = queryIter.next();
 				if (q.equals("downloadFile"))
 				{
 					String fileLocation = queryMap.get(q)[0];
 					File fileToGet = new File(GlobalProperties.getGSDL3Home() + File.separator + fileLocation);
-	
+
 					if (fileToGet.exists())
 					{
 						response.setContentType("application/octet-stream");
-						response.addHeader("Content-Disposition","attachment;filename=" + fileToGet.getName());
+						response.addHeader("Content-Disposition", "attachment;filename=" + fileToGet.getName());
 						FileInputStream fis = new FileInputStream(fileToGet);
 						ServletOutputStream sos = response.getOutputStream();
-	
+
 						byte[] buffer = new byte[4096];
 						int len;
 						while ((len = fis.read(buffer)) != -1)
@@ -165,7 +171,7 @@ public class FileLoaderServlet extends LibraryServlet
 						sos.flush();
 						fis.close();
 						sos.close();
-						
+
 						return;
 					}
 				}

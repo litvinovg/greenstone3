@@ -44,7 +44,7 @@ public class Server3 extends BaseServer
 
 	public void reload()
 	{
-		GlobalProperties.reload(); // properties file may have changed, so reload it
+		GlobalProperties.loadGlobalProperties(null); // properties file may have changed, so reload it
 	}
 
 	public static void main(String[] args)

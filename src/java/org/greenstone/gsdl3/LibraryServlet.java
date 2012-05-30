@@ -1,34 +1,47 @@
 package org.greenstone.gsdl3;
 
-import org.greenstone.gsdl3.comms.*;
-import org.greenstone.gsdl3.core.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.action.PageAction;
+import org.greenstone.gsdl3.comms.Communicator;
+import org.greenstone.gsdl3.comms.SOAPCommunicator;
+import org.greenstone.gsdl3.core.DefaultReceptionist;
+import org.greenstone.gsdl3.core.MessageRouter;
+import org.greenstone.gsdl3.core.Receptionist;
 import org.greenstone.gsdl3.service.Authentication;
-import org.greenstone.gsdl3.util.*;
-import org.greenstone.gsdl3.action.PageAction; // used to get the default action
+import org.greenstone.gsdl3.util.GSConstants;
+import org.greenstone.gsdl3.util.GSParams;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import java.io.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import java.util.Enumeration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.lang.reflect.Type;
-import java.util.Hashtable;
-import org.apache.log4j.*;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
-// Apache Commons
-import org.apache.commons.lang3.*;
 
 /**
  * a servlet to serve the greenstone library - we are using servlets instead of
@@ -44,9 +57,8 @@ import org.apache.commons.lang3.*;
  * 
  * @see Receptionist
  */
-public class LibraryServlet extends HttpServlet
+public class LibraryServlet extends BaseGreenstoneServlet
 {
-
 	/** the receptionist to send messages to */
 	protected Receptionist recept = null;
 
@@ -109,7 +121,6 @@ public class LibraryServlet extends HttpServlet
 		//System.setProperty("java.util.prefs.PreferencesFactory", "org.greenstone.gsdl3.util.DisabledPreferencesFactory");
 
 		String library_name = config.getInitParameter(GSConstants.LIBRARY_NAME);
-		String gsdl3_home = config.getInitParameter(GSConstants.GSDL3_HOME);
 		String interface_name = config.getInitParameter(GSConstants.INTERFACE_NAME);
 
 		String allowXslt = (String) config.getInitParameter(GSConstants.ALLOW_CLIENT_SIDE_XSLT);

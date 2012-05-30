@@ -31,19 +31,11 @@ public class GlobalProperties
 {
 
 	static Logger logger = Logger.getLogger(org.greenstone.util.GlobalProperties.class.getName());
-	private static Properties properties = null;
+	private static Properties properties = new Properties();
 	private static String properties_filename = "global.properties";
 	private static String gsdl3_home = null;
 	private static String gsdl3_web_address = null;
-        private static String full_gsdl3_web_address = null;
-
-	// Note, that if the servlet is reloadable, then it is reloaded each time the file is changed.
-	static
-	{
-		//load in the properties
-		properties = new Properties();
-		reload();
-	}
+	private static String full_gsdl3_web_address = null;
 
 	/** get the value of the property 'key'. returns null if not found */
 	public static String getProperty(String key)
@@ -75,16 +67,15 @@ public class GlobalProperties
 		return gsdl3_web_address;
 	}
 
-        public static String getFullGSDL3WebAddress()
+	public static String getFullGSDL3WebAddress()
 	{
 		return full_gsdl3_web_address;
 	}
 
-	public static void reload()
+	public static void loadGlobalProperties(String optionalGS3Home)
 	{
 		try
 		{
-
 			InputStream in = Class.forName("org.greenstone.util.GlobalProperties").getClassLoader().getResourceAsStream(properties_filename);
 			if (in != null)
 			{
@@ -96,7 +87,13 @@ public class GlobalProperties
 			{
 				logger.error("couldn't load global properties!");
 			}
+
 			gsdl3_home = properties.getProperty("gsdl3.home");
+			if ((gsdl3_home == null || gsdl3_home.length() > 0) && optionalGS3Home != null && optionalGS3Home.length() > 0)
+			{
+				gsdl3_home = optionalGS3Home;
+			}
+
 			// make sure the path separators are correct
 			File gs3_file = new File(gsdl3_home);
 			gsdl3_home = gs3_file.getPath();
