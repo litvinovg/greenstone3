@@ -79,7 +79,7 @@
 										<xsl:otherwise>hidden</xsl:otherwise>
 									</xsl:choose>
 								</xsl:attribute>
-								<xsl:for-each select="documentNode"><!--xxx<xsl:apply-templates select="documentNode" mode="TOC"/>-->
+								<xsl:for-each select="documentNode">
 									<xsl:call-template name="documentNodeTOC"/>
 								</xsl:for-each>
 							</div>
@@ -91,7 +91,7 @@
 	</xsl:template>
 	
 	<!-- This template is used to display the table of contents -->
-	<xsl:template name="documentNodeTOC"><!--xxx<xsl:template match="documentNode" mode="TOC">-->
+	<xsl:template name="documentNodeTOC">
 
 		<!-- check if this is the currently selected table of contents item -->
 		<xsl:variable name="isCurrent" select="nodeContent"/>
@@ -163,7 +163,7 @@
 							<xsl:value-of select="util:hashToSectionId(@nodeID)"/>
 							<xsl:text> </xsl:text>
 						</xsl:if>
-						<xsl:call-template name="sectionTitle"/><!--xxx<xsl:apply-templates select="." mode="sectionTitle"/>-->
+						<xsl:call-template name="sectionTitle"/>
 					</a>
 				</td>
 			</tr></table>
@@ -181,7 +181,7 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</xsl:attribute>
-					<xsl:for-each select="documentNode"><!--xxx<xsl:apply-templates select="documentNode" mode="TOC"/>-->
+					<xsl:for-each select="documentNode">
 						<xsl:call-template name="documentNodeTOC"/>
 					</xsl:for-each>
 				</li>
@@ -234,20 +234,10 @@
 					<img>
 						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'highlight_image')"/></xsl:attribute>
 					</img>
-					<input id="highlightOption" type="checkbox" class="optionCheckBox">
-						<xsl:choose>
-							<xsl:when test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'on'">
-								<xsl:attribute name="onclick">
-									<xsl:text>removeHighlight();</xsl:text>
-								</xsl:attribute>
-								<xsl:attribute name="checked">true</xsl:attribute>
-							</xsl:when>
-							<xsl:otherwise>
-								<xsl:attribute name="onclick">
-									<xsl:text>addHighlight();</xsl:text>
-								</xsl:attribute>
-							</xsl:otherwise>
-						</xsl:choose>
+					<input id="highlightOption" type="checkbox" class="optionCheckBox" onclick="swapHighlight();">
+						<xsl:if test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'on'">
+							<xsl:attribute name="checked">true</xsl:attribute>
+						</xsl:if>
 					</input>
 				</td>
 			</xsl:if>

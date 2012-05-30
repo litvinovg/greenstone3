@@ -25,8 +25,23 @@ function getTextForSection(sectionID, callback)
 	template +=   '</text>';
 	template += '</xsl:template>';
 
+	var hlCheckBox = document.getElementById("highlightOption");
+	
+	var hl = "";
+	if(hlCheckBox)
+	{
+		if(hlCheckBox.checked)
+		{
+			hl = "on";
+		}
+		else
+		{
+			hl = "off";
+		}
+	}
+	
 	var ajax = gs.functions.ajaxRequest();
-	ajax.open("GET", gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + sectionID + "?p.s=TextQuery&ilt=" + template.replace(" ", "%20"), true);
+	ajax.open("GET", gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + sectionID + "?hl=" + hl + "&p.s=TextQuery&ilt=" + template.replace(" ", "%20"), true);
 	ajax.onreadystatechange = function()
 	{
 		if(ajax.readyState == 4 && ajax.status == 200)
@@ -910,36 +925,32 @@ function SliderWidget(_links)
 /***********************
 * HIGHLIGHTING SCRIPTS *
 ***********************/
-function addHighlight()
+function swapHighlight()
 {
+	var hlCheckbox = document.getElementById("highlightOption");
+	
+	var from;
+	var to;
+	if(hlCheckbox.checked)
+	{
+		from = "noTermHighlight";
+		to = "termHighlight";
+	}
+	else
+	{
+		from = "termHighlight";
+		to = "noTermHighlight";
+	}
+	
 	var spans = document.getElementsByTagName("span");
 	for(var i = 0; i < spans.length; i++)
 	{
 		var currentSpan = spans[i];
-		if(currentSpan.getAttribute("class") == "noTermHighlight")
+		if(currentSpan.getAttribute("class") == from)
 		{
-			currentSpan.setAttribute("class", "termHighlight");
+			currentSpan.setAttribute("class", to);
 		}
 	}
-	
-	var option = document.getElementById("highlightOption");
-	option.setAttribute("onclick", "removeHighlight();");
-}
-
-function removeHighlight()
-{
-	var spans = document.getElementsByTagName("span");
-	for(var i = 0; i < spans.length; i++)
-	{
-		var currentSpan = spans[i];
-		if(currentSpan.getAttribute("class") == "termHighlight")
-		{
-			currentSpan.setAttribute("class", "noTermHighlight");
-		}
-	}
-	
-	var option = document.getElementById("highlightOption");
-	option.setAttribute("onclick", "addHighlight();");
 }
 
 /**************************

@@ -89,10 +89,10 @@
 				<!-- Get the title from the title sectionTitle template -->
 				<xsl:choose>
 					<xsl:when test="not(/page/pageRequest/paramList/param[@name = 'dmd']) or /page/pageRequest/paramList/param[@name = 'dmd']/@value = 'false'">
-						<xsl:call-template name="sectionTitleFormat"/><!--<xsl:apply-templates select="." mode="sectionTitleFormat"/>-->
+						<xsl:call-template name="sectionTitleFormat"/>
 					</xsl:when>
 					<xsl:otherwise>
-						<xsl:call-template name="sectionTitle"/><!--<xsl:apply-templates select="." mode="sectionTitle"/>-->
+						<xsl:call-template name="sectionTitle"/>
 					</xsl:otherwise>
 				</xsl:choose>
 			</td>
@@ -176,7 +176,7 @@
 					</xsl:choose>
 				</xsl:attribute>
 				<!-- Get the section content from the document template -->
-				<xsl:call-template name="documentNodeContent"/><!--xxx<xsl:apply-templates select="." mode="document"/>-->
+				<xsl:call-template name="documentNodeContent"/>
 			</div>
 			<xsl:if test="documentNode">
 				<xsl:for-each select="documentNode">
@@ -241,7 +241,7 @@
 				</xsl:call-template>
 			</xsl:when>
 			<xsl:when test="$bookswitch = 'flashxml'">
-				<xsl:call-template name="documentNodeFlashXML"/><!--xxx<xsl:apply-templates mode="flashxml"/>-->
+				<xsl:call-template name="documentNodeFlashXML"/>
 			</xsl:when>
 			<xsl:when test="$bookswitch = 'on'">
 				<div id="bookdiv" style="display:inline;"><xsl:text> </xsl:text></div>
@@ -337,13 +337,13 @@
 				</div>
 			</td>
 		</tr></table>
-		<gslib:langfrag name="dse"/><!--<xsl:call-template name="document-editor-language-fragments"/>-->
+		<gslib:langfrag name="dse"/>
 	</xsl:template>
 	
 	<!-- Highlight annotations if requested -->
-	<xsl:template match="annotation">
+	<xsl:template name="displayAnnotation">
 		<xsl:choose>
-			<xsl:when test="/page/pageRequest/paramList/param[@name='hl' and @value='on']">
+			<xsl:when test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'on'">
 				<span class="termHighlight"><xsl:value-of select="."/></span>
 			</xsl:when>
 			<xsl:otherwise>
@@ -352,7 +352,7 @@
 		</xsl:choose>
 	</xsl:template>
 	
-	<xsl:template name="sectionTitleFormat"><!--xxx<xsl:template match="documentNode" mode="sectionTitleFormat">-->
+	<xsl:template name="sectionTitleFormat">
 		<p>
 			<xsl:attribute name="class"><xsl:value-of select="util:hashToDepthClass(@nodeID)"/> sectionHeader</xsl:attribute>
 			
@@ -363,13 +363,13 @@
 				</span>
 			</xsl:if>
 			<!-- Display the title for the section regardless of whether automatic section numbering is turned on -->
-			<span><xsl:call-template name="sectionTitle"/><!--xxx<xsl:apply-templates select="." mode="sectionTitle"/>--></span>
+			<span><xsl:call-template name="sectionTitle"/></span>
 		</p>
 	</xsl:template>
 	
 		
 	<!-- The default template for displaying section titles -->
-	<xsl:template name="sectionTitle"><!--xxx<xsl:template match="documentNode" mode="sectionTitle">-->
+	<xsl:template name="sectionTitle">
 		<xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Title']"/>
 	</xsl:template>
 	
@@ -438,7 +438,7 @@
 	</xsl:template>
 	
 	<!-- The default template for displaying the document content -->
-	<xsl:template name="documentNodeContent"><!--xxx<xsl:template match="documentNode" mode="document">-->
+	<xsl:template name="documentNodeContent">
 		<!-- Hides the "This document has no text." message -->
 		<xsl:variable name="noText"><gsf:metadata name="NoText"/></xsl:variable>
 
@@ -451,10 +451,14 @@
 							<xsl:value-of select="." disable-output-escaping="yes"/>
 						</xsl:if>
 					</xsl:when>
+					<xsl:when test="name() = 'annotation'">
+						<xsl:call-template name="displayAnnotation"/>
+					</xsl:when>
+					<xsl:when test="name() = 'nodeContent'">
+						<xsl:call-template name="documentNodeContent"/>
+					</xsl:when>
 					<xsl:otherwise>
-						<xsl:for-each select="nodeContent"><!--xxx<xsl:apply-templates select="."/>-->
-							<xsl:call-template name="documentNodeContent"/>
-						</xsl:for-each>
+						<xsl:apply-templates/>
 					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:for-each>
@@ -462,7 +466,7 @@
 	</xsl:template>
 	
 	<!-- Used to produce a version of the page in a format that can be read by the realistic books plugin -->
-	<xsl:template name="documentNodeFlashXML"><!--xxx<xsl:template match="documentNode" mode="flashxml">-->
+	<xsl:template name="documentNodeFlashXML">
 		<xsl:text disable-output-escaping="yes">
 			&lt;Section&gt;
 			&lt;Description&gt;
@@ -477,7 +481,7 @@
 		<xsl:value-of select="normalize-space(nodeContent)" disable-output-escaping="yes"/>
 				
 		<xsl:for-each select="documentNode">
-			<xsl:call-template name="documentNodeFlashXML"/><!--<xsl:apply-templates select="documentNode" mode="flashxml"/>-->
+			<xsl:call-template name="documentNodeFlashXML"/>
 		</xsl:for-each>
 				
 		<xsl:text disable-output-escaping="yes">
