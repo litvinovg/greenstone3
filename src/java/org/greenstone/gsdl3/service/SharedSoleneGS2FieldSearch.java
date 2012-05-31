@@ -134,7 +134,8 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 	}
 
     protected String addFieldInfo(String query, String field) {
-	if (field.equals("") || field.equals("ZZ")) {
+      // currently, allfields (ZZ) is stored as a extra field for Lucene
+      if (field.equals("")) { // || field.equals("ZZ")) {
 	    return query;
 	}
 	return field+":("+query+")";
