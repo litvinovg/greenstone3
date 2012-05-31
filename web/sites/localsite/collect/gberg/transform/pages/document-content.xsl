@@ -55,8 +55,9 @@
       <xsl:apply-templates/>
     </title1>
   </xsl:template>  
-    
-  <xsl:template match="*">
+
+  <!-- catch any tags that we haven't already looked for, but only in the nodeContent. assign a low priority as the specificity of the path would give this a high system priority -->
+  <xsl:template match="/page/pageResponse/documentNode/nodeContent//*" priority="-1"> 
     <xsl:copy-of select="."/>
   </xsl:template>
 
