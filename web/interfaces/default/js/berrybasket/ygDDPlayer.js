@@ -123,8 +123,8 @@ ygDDPlayer.prototype.resetTargets = function() {
 };
 
 var request_type = "GET";
-var addurlPath ="?a=pr&rt=r&ro=1&s=AddItem&c=&s1.id=2&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=";
-var delurlPath ="?a=pr&rt=r&ro=1&s=DeleteItem&c=&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=";
+var addurlPath = gs.xsltParams.library_name + "?a=pr&rt=r&ro=1&s=AddItem&c=&s1.id=2&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=";
+var delurlPath = gs.xsltParams.library_name + "?a=pr&rt=r&ro=1&s=DeleteItem&c=&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=";
 var postdata = null;
 
 ygDDPlayer.prototype.onDragDrop = function(e, id) {

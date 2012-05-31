@@ -19,7 +19,7 @@ var checkout = function(){
 	if ( document.getElementById('berrybasket') == null ) return;
 	
 	var request_type = "GET";
-	var url = "?a=pr&rt=r&ro=1&s=ItemNum&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&c=";
+	var url = gs.xsltParams.library_name + "?a=pr&rt=r&ro=1&s=ItemNum&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&c=";
 
 	var responseSuccess = function(o){
 		
@@ -243,7 +243,7 @@ function showBasket() {
 	}
 	
 	fullView.appendChild(document.createTextNode('Full View »'));
-	fullView.setAttribute("href","?a=g&sa=berry&c=&s=DisplayList&rt=r&p.c=" + collectionName);
+	fullView.setAttribute("href",gs.xsltParams.library_name + "?a=g&sa=berry&c=&s=DisplayList&rt=r&p.c=" + collectionName);
 	fullView.setAttribute("id","berryFullViewLink");
 
 	//toggle expand/collapse links
@@ -291,7 +291,7 @@ function hideBasket() {
 
 
 function addBerry(el){
-	var addurl = "?a=pr&rt=r&ro=1&s=AddItem&c=&s1.id=2&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=" + el.id;
+	var addurl = gs.xsltParams.library_name + "?a=pr&rt=r&ro=1&s=AddItem&c=&s1.id=2&o=XML&hhf=[{\"name\":\"Cache-Control\", \"value\":\"no-cache\"}]&s1.item=" + el.id;
 
 	var addSuccess = function(o){
 		var result = o.responseXML;

@@ -41,6 +41,10 @@
 			<xsl:with-param name="collName" select="$collName"/>
 			<xsl:with-param name="serviceName" select="$serviceName"/>
 		</xsl:apply-templates>
+		<!-- The berry (optional) -->
+		<td>
+			<xsl:call-template name="documentBerryForClassifierOrSearchPage"/>
+		</td>
 		<xsl:call-template name="documentNodePost"/>
 	</xsl:template>
 
@@ -49,11 +53,6 @@
 		<xsl:param name="collName"/>
 		<xsl:param name="serviceName"/>
 		<a href="{$library_name}?a=d&amp;c={$collName}&amp;d={@nodeID}&amp;dt={@docType}&amp;p.a=b&amp;p.s={$serviceName}"><xsl:apply-templates select="." mode="displayNodeIcon"/></a><xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
-		
-		<!-- The berry (optional) -->
-		<td>
-			<xsl:call-template name="documentBerryForClassifierOrSearchPage"/>
-		</td>
 	</xsl:template>
   
   
