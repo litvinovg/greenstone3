@@ -411,28 +411,37 @@ public class Authentication extends ServiceRack
 
 			newPassword = hashPassword(newPassword);
 
-			if (_recaptchaPrivateKey != null)
+			if (_recaptchaPrivateKey != null && _recaptchaPrivateKey.length() > 0)
 			{
 				ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
 				reCaptcha.setPrivateKey(_recaptchaPrivateKey);
 
-				String challenge = (String) paramMap.get("recaptcha_challenge_field");
-				String uResponse = (String) paramMap.get("recaptcha_response_field");
-
-				if (challenge == null || uResponse == null)
+				try
 				{
-					serviceNode.setAttribute("operation", REGISTER);
-					GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_MISSING));
-					return result;
+					//If this line throws an exception then we'll assume the user has problems with their firewall
+					reCaptcha.checkAnswer(request.getAttribute("remoteAddress"), "", "");
+
+					String challenge = (String) paramMap.get("recaptcha_challenge_field");
+					String uResponse = (String) paramMap.get("recaptcha_response_field");
+
+					if (challenge == null || uResponse == null)
+					{
+						serviceNode.setAttribute("operation", REGISTER);
+						GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_MISSING));
+						return result;
+					}
+
+					ReCaptchaResponse reCaptchaResponse = reCaptcha.checkAnswer(request.getAttribute("remoteAddress"), challenge, uResponse);
+
+					if (!reCaptchaResponse.isValid())
+					{
+						serviceNode.setAttribute("operation", REGISTER);
+						GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_DOES_NOT_MATCH));
+						return result;
+					}
 				}
-
-				ReCaptchaResponse reCaptchaResponse = reCaptcha.checkAnswer(request.getAttribute("remoteAddress"), challenge, uResponse);
-
-				if (!reCaptchaResponse.isValid())
+				catch (Exception ex)
 				{
-					serviceNode.setAttribute("operation", REGISTER);
-					GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_DOES_NOT_MATCH));
-					return result;
 				}
 			}
 
@@ -636,15 +645,18 @@ public class Authentication extends ServiceRack
 		}
 		else if (op.equals(REGISTER))
 		{
-			try
+			if (_recaptchaPrivateKey != null && _recaptchaPrivateKey.length() > 0)
 			{
-				ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
-				reCaptcha.setPrivateKey(_recaptchaPrivateKey);
-				reCaptcha.checkAnswer(request.getAttribute("remoteAddress"), "", "");
-			}
-			catch(Exception ex)
-			{
-				return result;
+				try
+				{
+					ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
+					reCaptcha.setPrivateKey(_recaptchaPrivateKey);
+					reCaptcha.checkAnswer(request.getAttribute("remoteAddress"), "", "");
+				}
+				catch (Exception ex)
+				{
+					return result;
+				}
 			}
 
 			if (_recaptchaPublicKey != null && _recaptchaPrivateKey != null)
