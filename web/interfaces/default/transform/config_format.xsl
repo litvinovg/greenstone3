@@ -121,6 +121,14 @@
 		</xsl:choose>
 	</xsl:template>
 
+	<xsl:template match="gsf:displayText">
+	  <xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/collection/displayItem[@name='{@name}']"/>
+	</xsl:template>
+
+	<xsl:template match="gsf:interfaceText">
+	  <xslt:value-of disable-output-escaping="yes" select="util:getInterfaceText($interface_name, /page/@lang, '{@name}')"/>
+	</xsl:template>
+
 	<!-- if this gsf:metadata is a child of a document node then we want to get the metadata for that node -->
 	<xsl:template match="gsf:metadata">
 		<xslt:if test="not(@hidden = 'true')">		
