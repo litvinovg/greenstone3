@@ -49,7 +49,7 @@ import org.apache.log4j.*;
  * A Services class for building collections provides a wrapper around the old
  * perl scripts
  * 
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @version $Revision$
  */
 public class GS2Construct extends ServiceRack

@@ -23,7 +23,7 @@ package org.greenstone.gsdl3.util;
  *
  * modifies and examines message address paths and names
  *
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @version $Revision$
  *
  */

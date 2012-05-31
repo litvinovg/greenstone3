@@ -56,7 +56,7 @@ import org.apache.commons.lang3.StringUtils;
  * objects talking to other MessageRouters etc.
  *
  *
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @version $Revision$
  * @see ModuleInterface
  * @see Collection

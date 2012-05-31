@@ -41,7 +41,7 @@ import org.apache.log4j.*;
 /*
  * The Client side of a SOAP Connection
  *
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @version $Revision$
  * @see <a href="http://www.w3.org/TR/SOAP/">Simple Object Access Protocol (SOAP) 1.1 </a>
  */

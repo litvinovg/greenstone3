@@ -48,7 +48,7 @@ import org.apache.commons.lang3.*;
  * Represents a collection in Greenstone. A collection is an extension of a
  * ServiceCluster - it has local data that the services use.
  * 
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @see ModuleInterface
  */
 public class Collection extends ServiceCluster

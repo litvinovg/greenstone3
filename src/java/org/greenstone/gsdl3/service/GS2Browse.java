@@ -36,7 +36,7 @@ import org.w3c.dom.Element;
 /**
  * Greenstone 2 collection classifier service
  * 
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @author <a href="mailto:mdewsnip@cs.waikato.ac.nz">Michael Dewsnip</a>
  */
 

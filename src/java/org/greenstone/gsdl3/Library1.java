@@ -26,7 +26,7 @@ import java.io.InputStreamReader;
 /** sample command line interface to gsdl3 site
  *
  * enter XML queries at the prompt
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @version $Revision$
  */
 final public class Library1 {

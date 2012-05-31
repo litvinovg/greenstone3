@@ -36,7 +36,7 @@ import java.util.Iterator;
 /**
  * A program to take cgi args from the command line and return html
  * 
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @version $Revision$
  */
 

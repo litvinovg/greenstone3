@@ -62,7 +62,7 @@ import org.apache.log4j.*;
  * 
  * transforms xml using xslt
  * 
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @version $Revision$
  */
 public class XMLTransformer

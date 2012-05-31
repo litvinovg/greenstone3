@@ -31,7 +31,7 @@ import java.io.File;
 /**
  * The server side of a SOAP connection
  *
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @see <a href="http://www.w3.org/TR/SOAP/">Simple Object Access Protocol (SOAP) 1.1 </a>
  */
 

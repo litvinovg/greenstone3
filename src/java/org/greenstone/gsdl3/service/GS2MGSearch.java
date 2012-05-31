@@ -41,7 +41,7 @@ import org.apache.log4j.*;
 
 /**
  *
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @author <a href="mailto:mdewsnip@cs.waikato.ac.nz">Michael Dewsnip</a>
  */
 

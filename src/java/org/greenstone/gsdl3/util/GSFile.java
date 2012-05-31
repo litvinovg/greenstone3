@@ -39,7 +39,7 @@ import org.apache.log4j.*;
  * 
  * all file paths are created here also has file utility methods
  * 
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @version $Revision$
  * @see File
  */

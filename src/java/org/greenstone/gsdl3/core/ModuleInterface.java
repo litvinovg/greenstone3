@@ -29,7 +29,7 @@ import org.w3c.dom.Node;
  * the more efficient process method uses DOM Nodes instead 
  * of Strings - this avoids parsing the XML at each module
  *
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @version $Revision$
  */
 public interface ModuleInterface {

@@ -36,7 +36,7 @@ import org.apache.log4j.*;
 /**
  * PhindServices - the phind phrase browsing service
  *
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @version $Revision$
  */
 public class PhindPhraseBrowse

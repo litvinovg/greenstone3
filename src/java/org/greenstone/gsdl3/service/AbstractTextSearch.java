@@ -35,7 +35,6 @@ import org.apache.log4j.*;
 
 /** Partially implements a generic search service
  *
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
  */
 
 public abstract class AbstractTextSearch

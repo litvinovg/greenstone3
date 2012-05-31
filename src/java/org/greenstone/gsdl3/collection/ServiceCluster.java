@@ -39,7 +39,7 @@ import org.apache.log4j.*;
 /* ServiceCluster - a groups of services that are related in some way
  * Implements ModuleInterface. Contains a list of services provided by the cluster, along with metadata about the cluster itself.
  * a collection is a special type of cluster
- *  @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ *  @author Katherine Don
  *  @version $Revision$
  *  @see ModuleInterface
  */

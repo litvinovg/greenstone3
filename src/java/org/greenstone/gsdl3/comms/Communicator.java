@@ -29,7 +29,7 @@ import org.w3c.dom.Node;
  *
  * can be used by a MessageRouter - in this case set localSiteName
  * can be used by any other module - in this case it has no local site - dont set localsiteName. the setting of localSiteName affects the handling of teh to and from fields in the message. 
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @version $Revision$
  */
 abstract public class Communicator

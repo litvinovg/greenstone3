@@ -52,7 +52,7 @@ import org.apache.log4j.*;
  *
  * Document ids are formed by encoding the document using standard URLEncoding
  *
- * @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
+ * @author Katherine Don
  * @author <a href="mailto:s.yeates@cs.waikato.ac.nz">Stuart Yeates</a>
  * @version $Revision$
  * @see ServiceRack
