@@ -1,26 +1,25 @@
 package org.greenstone.gsdl3.service;
 
-import org.greenstone.gsdl3.util.GSXML;
-import org.greenstone.gsdl3.util.DerbyWrapper;
-import org.greenstone.gsdl3.util.UserQueryResult;
-import org.greenstone.gsdl3.util.UserTermInfo;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
+import java.io.File;
+import java.io.Serializable;
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.Vector;
-import java.security.MessageDigest;
-import java.sql.SQLException;
 import java.util.regex.Pattern;
-import java.io.File;
-import java.io.Serializable;
 
 import net.tanesha.recaptcha.ReCaptchaImpl;
 import net.tanesha.recaptcha.ReCaptchaResponse;
+
+import org.greenstone.gsdl3.util.DerbyWrapper;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserQueryResult;
+import org.greenstone.gsdl3.util.UserTermInfo;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class Authentication extends ServiceRack
 {
@@ -359,7 +358,7 @@ public class Authentication extends ServiceRack
 			String newStatus = (String) paramMap.get("status");
 			String newComment = (String) paramMap.get("comment");
 			String newEmail = (String) paramMap.get("email");
-			
+
 			//Check the given user name
 			int error;
 			if ((error = checkUsername(newUsername)) != NO_ERROR)
@@ -394,7 +393,7 @@ public class Authentication extends ServiceRack
 			String newUsername = (String) paramMap.get("username");
 			String newPassword = (String) paramMap.get("password");
 			String newEmail = (String) paramMap.get("email");
-			
+
 			//Check the given user name
 			int error;
 			if ((error = checkUsername(newUsername)) != NO_ERROR)
@@ -409,26 +408,26 @@ public class Authentication extends ServiceRack
 				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
 				return result;
 			}
-			
+
 			newPassword = hashPassword(newPassword);
 
-			if(_recaptchaPrivateKey != null)
+			if (_recaptchaPrivateKey != null)
 			{
 				ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
 				reCaptcha.setPrivateKey(_recaptchaPrivateKey);
-	
+
 				String challenge = (String) paramMap.get("recaptcha_challenge_field");
 				String uResponse = (String) paramMap.get("recaptcha_response_field");
-	
+
 				if (challenge == null || uResponse == null)
 				{
 					serviceNode.setAttribute("operation", REGISTER);
 					GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_MISSING));
 					return result;
 				}
-	
+
 				ReCaptchaResponse reCaptchaResponse = reCaptcha.checkAnswer(request.getAttribute("remoteAddress"), challenge, uResponse);
-	
+
 				if (!reCaptchaResponse.isValid())
 				{
 					serviceNode.setAttribute("operation", REGISTER);
@@ -474,10 +473,10 @@ public class Authentication extends ServiceRack
 					GSXML.addError(this.doc, result, _errorMessageMap.get(error));
 					return result;
 				}
-				
+
 				newPassword = hashPassword(newPassword);
 			}
-			
+
 			error = removeUser(previousUsername);
 			if (error != NO_ERROR)
 			{
@@ -536,7 +535,7 @@ public class Authentication extends ServiceRack
 					GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_INCORRECT_PASSWORD), "Incorrect Password");
 					return result;
 				}
-				
+
 				//Check the given password
 				int error;
 				if ((error = checkPassword(newPassword)) != NO_ERROR)
@@ -544,14 +543,14 @@ public class Authentication extends ServiceRack
 					GSXML.addError(this.doc, result, _errorMessageMap.get(error));
 					return result;
 				}
-				
+
 				newPassword = hashPassword(newPassword);
 			}
 			else
 			{
 				newPassword = prevPassword;
 			}
-			
+
 			//Check the given user name
 			int error;
 			if ((error = checkUsername(newUsername)) != NO_ERROR)
@@ -559,7 +558,7 @@ public class Authentication extends ServiceRack
 				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
 				return result;
 			}
-			
+
 			String prevGroups = retrieveDataForUser(previousUsername, "groups");
 			String prevStatus = retrieveDataForUser(previousUsername, "status");
 			String prevComment = retrieveDataForUser(previousUsername, "comment");
@@ -637,7 +636,18 @@ public class Authentication extends ServiceRack
 		}
 		else if (op.equals(REGISTER))
 		{
-			if(_recaptchaPublicKey != null && _recaptchaPrivateKey != null)
+			try
+			{
+				ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
+				reCaptcha.setPrivateKey(_recaptchaPrivateKey);
+				reCaptcha.checkAnswer(request.getAttribute("remoteAddress"), "", "");
+			}
+			catch(Exception ex)
+			{
+				return result;
+			}
+
+			if (_recaptchaPublicKey != null && _recaptchaPrivateKey != null)
 			{
 				Element recaptchaElem = this.doc.createElement("recaptcha");
 				recaptchaElem.setAttribute("publicKey", _recaptchaPublicKey);
@@ -659,15 +669,15 @@ public class Authentication extends ServiceRack
 
 		return result;
 	}
-	
+
 	public int checkUsernameAndPassword(String username, String password)
 	{
 		int uResult = checkUsername(username);
 		int pResult = checkPassword(password);
-		
+
 		return (uResult != NO_ERROR ? uResult : (pResult != NO_ERROR ? pResult : NO_ERROR));
 	}
-	
+
 	public int checkUsername(String username)
 	{
 		//Check the given user name
@@ -677,7 +687,7 @@ public class Authentication extends ServiceRack
 		}
 		return NO_ERROR;
 	}
-	
+
 	public int checkPassword(String password)
 	{
 		//Check the given password
@@ -705,20 +715,21 @@ public class Authentication extends ServiceRack
 		return hashedPassword;
 	}
 
-
-    
-    // This method can also be used for printing out the password in hex (in case
-    // the password used the UTF-8 Charset), or the hex values in any unicode string.
-    // From http://stackoverflow.com/questions/923863/converting-a-string-to-hexadecimal-in-java
-    public static String toHex(String arg) {
-	try {
-	    return String.format("%x", new BigInteger(arg.getBytes("US-ASCII"))); // set to same charset as used by hashPassword
-	} catch (Exception e) { // UnsupportedEncodingException
-	    e.printStackTrace();
-	} 
-	return "Unable to print";
-    }
-
+	// This method can also be used for printing out the password in hex (in case
+	// the password used the UTF-8 Charset), or the hex values in any unicode string.
+	// From http://stackoverflow.com/questions/923863/converting-a-string-to-hexadecimal-in-java
+	public static String toHex(String arg)
+	{
+		try
+		{
+			return String.format("%x", new BigInteger(arg.getBytes("US-ASCII"))); // set to same charset as used by hashPassword
+		}
+		catch (Exception e)
+		{ // UnsupportedEncodingException
+			e.printStackTrace();
+		}
+		return "Unable to print";
+	}
 
 	private void checkAdminUserExists()
 	{
