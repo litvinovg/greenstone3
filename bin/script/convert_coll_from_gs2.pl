@@ -154,18 +154,18 @@ sub main {
 	
 	$collwriter->startTag('displayItemList');
 	foreach my $entry ( keys %$collectionmeta) {
-	    if (defined $name_map{$entry}) {
-		my $name= $name_map{$entry};
-		foreach my $lang (keys %{$collectionmeta->{$entry}}) {
-		    my $value = $collectionmeta->{$entry}->{$lang};
-		    if ($entry =~ /^icon/) {
-			$value = format_icon_value($value);
-		    } else {
-			$value = tidy_up_display_item($value);
-		    }
-		    &output_display($collwriter, $name, $lang, $value);
-		}
-	    }
+	     # some metadata names need to be specially mapped to other names
+	     # most of them however, can retain their original names
+	     my $name = (defined $name_map{$entry}) ? $name_map{$entry} : $entry;
+	     foreach my $lang (keys %{$collectionmeta->{$entry}}) {
+		 my $value = $collectionmeta->{$entry}->{$lang};
+		 if ($entry =~ /^icon/) {
+		     $value = format_icon_value($value);
+		 } else {
+		     $value = tidy_up_display_item($value);
+		 }
+		 &output_display($collwriter, $name, $lang, $value);
+	     }
 	}
 	$collwriter->endTag('displayItemList');
     } 
