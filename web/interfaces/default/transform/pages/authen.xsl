@@ -77,6 +77,7 @@
 							<td><xsl:text> </xsl:text></td>
 						</tr>
 						<xsl:for-each select="/page/pageResponse/authenticationNode/service/userNodeList/userNode">
+	      
 							<tr class="ui-widget-content">
 								<td><xsl:value-of select="@username"/></td>
 								<td>
@@ -94,18 +95,20 @@
 								<td><xsl:value-of select="@email"/></td>
 								<td><a href="{$library_name}/admin/EditUser?s1.username={@username}"><button><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.edit')"/></button></a></td>
 								<td>
-									<form method="GET" action="{$library_name}/admin/PerformDeleteUser">
+								<xsl:variable name="user-pos">username<xsl:number value="position()"/></xsl:variable>
+		                                                <xsl:variable name="message-pos">confirmMessage<xsl:number value="position()"/></xsl:variable> 
+		  <form method="GET" action="{$library_name}/admin/PerformDeleteUser">
 										<input type="hidden" name="s1.username" value="{@username}"/>
 										<input id="delUser{@username}" type="submit" value="{util:getInterfaceText($interface_name, /page/@lang, 'authen.delete')}"/>
 										<script type="text/javascript">
 											<xsl:text disable-output-escaping="yes">
 											{
-												var username = "</xsl:text><xsl:value-of select="@username"/><xsl:text disable-output-escaping="yes">";
-												var confirmMessage = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.delete_warning')"/><xsl:text disable-output-escaping="yes">";
-												var button = $("#delUser" + username);
+												var </xsl:text><xsl:value-of select="$user-pos"/><xsl:text disable-output-escaping="yes"> = "</xsl:text><xsl:value-of select="@username"/><xsl:text disable-output-escaping="yes">";
+												var </xsl:text><xsl:value-of select="$message-pos"/><xsl:text disable-output-escaping="yes"> = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.delete_warning')"/><xsl:text disable-output-escaping="yes">" + </xsl:text><xsl:value-of select="$user-pos"/><xsl:text disable-output-escaping="yes"> + "?";
+												var button = $("#delUser" + </xsl:text><xsl:value-of select="$user-pos"/><xsl:text disable-output-escaping="yes">);
 												button.click(function()
 												{
-													if(confirm(confirmMessage + username + "?"))
+													if(confirm(</xsl:text><xsl:value-of select="$message-pos"/><xsl:text disable-output-escaping="yes">))
 													{
 														return true;
 													}
