@@ -418,7 +418,9 @@ public class Authentication extends ServiceRack
 
 				try
 				{
-					//If this line throws an exception then we'll assume the user has problems with their firewall
+					//If this line throws an exception then we'll assume the user has a firewall that is too restrictive
+					//(or that they're not connected to the Internet) to allow access to google services.
+					//In this situation we won't use the recaptcha test.
 					reCaptcha.checkAnswer(request.getAttribute("remoteAddress"), "", "");
 
 					String challenge = (String) paramMap.get("recaptcha_challenge_field");
