@@ -40,6 +40,7 @@ public class GSParams
 	public static final String DOCUMENT = "d";
 	public static final String DOCUMENT_TYPE = "dt";
 	public static final String START_PAGE = "startPage";
+	public static final String S_START_PAGE = "s1.startPage";
 	public static final String HREF = "href"; // url. might be an external url, or a relative one that needs translating
 	public static final String RELATIVE_LINK = "rl"; // whether the href url is relative to the collection or not.
 	public static final String EXTERNAL_LINK_TYPE = "el"; // for an external link, go direct to the page or frame it in the collection
@@ -90,7 +91,8 @@ public class GSParams
 		addParameter(LANGUAGE, true);
 		addParameter(DOCUMENT, true);
 		addParameter(DOCUMENT_TYPE, true);
-		addParameter(START_PAGE, true);
+		addParameter(START_PAGE, false);
+		addParameter(S_START_PAGE, false);
 		// should the following two just be in doc action??
 		addParameter(HREF, false);
 		addParameter(RELATIVE_LINK, false);
