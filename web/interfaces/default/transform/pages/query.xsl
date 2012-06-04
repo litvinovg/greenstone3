@@ -19,14 +19,8 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page">
-		<xsl:choose>
-			<xsl:when test="not(pageResponse/documentNodeList)">
-				<xsl:call-template name="queryPage"/>
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:call-template name="resultsPage"/>
-			</xsl:otherwise>
-		</xsl:choose>
+		<xsl:call-template name="queryPage"/>
+		<xsl:call-template name="resultsPage"/>
 	</xsl:template>
 	
 	<xsl:template name="resultsPage">
@@ -135,9 +129,6 @@
 					<input type="hidden" name="a" value="q"/>
 					<input type="hidden" name="sa"><xsl:attribute name="value"><xsl:value-of select="/page/pageRequest/@subaction"/></xsl:attribute></input>
 					<input type="hidden" name="rt" value="rd"/>
-					<!--<xsl:if test="not(paramList/param[@name='s1.startPage'])">
-						<input type="hidden" name="s1.startPage" value="1"/>
-					</xsl:if>-->
 					<xsl:choose>
 						<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.maxDocs']">
 							<input type="hidden" name="s1.maxDocs">
@@ -185,11 +176,8 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</xsl:for-each>
-
 					<br/>
-
 					<input type="submit"><xsl:attribute name="value"><xsl:value-of select="displayItem[@name='submit']"/></xsl:attribute></input>
-
 				</div>
 			</form>
 		</xsl:for-each>
@@ -199,11 +187,11 @@
 		<!-- Current page -->
 		<xsl:variable name="currentPage">
 			<xsl:choose>
-				<xsl:when test="/page/pageRequest/paramList/param[@name='startPage']/@value">
-					<xsl:value-of select="/page/pageRequest/paramList/param[@name='startPage']/@value" />
-				</xsl:when>
 				<xsl:when test="/page/pageRequest/paramList/param[@name='s1.startPage']/@value">
 					<xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.startPage']/@value" />
+				</xsl:when>
+				<xsl:when test="/page/pageRequest/paramList/param[@name='startPage']/@value">
+					<xsl:value-of select="/page/pageRequest/paramList/param[@name='startPage']/@value" />
 				</xsl:when>
 				<xsl:otherwise>1</xsl:otherwise>
 			</xsl:choose>
@@ -211,7 +199,7 @@
 		
 		<xsl:variable name="usesS1">
 			<xsl:choose>
-				<xsl:when test="/page/pageRequest/paramList/param[@name='s1.startPage']">true</xsl:when>
+				<xsl:when test="/page/pageResponse/service/paramList/param[@name='startPage']">true</xsl:when>
 				<xsl:otherwise>false</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
