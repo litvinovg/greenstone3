@@ -301,7 +301,7 @@ public class MessageRouter implements ModuleInterface
 				// be passed to multiple modules  - they will be in a comma 
 				// separated list in the 'to' attribute
 				String[] modules = StringUtils.split(path, ",");
-				
+
 				for (String this_mod : modules)
 				{
 					// why can't we do this outside the loop??
@@ -317,7 +317,7 @@ public class MessageRouter implements ModuleInterface
 					{
 						copied_request.setAttribute(GSXML.TO_ATT, this_mod);
 						result = this.module_map.get(obj).process(mess);
-						
+
 						if (result != null)
 						{
 							// append the contents of the message to the mainResult - there will only be one response at this stage
