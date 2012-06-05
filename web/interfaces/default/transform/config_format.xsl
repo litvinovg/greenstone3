@@ -121,11 +121,42 @@
 		</xsl:choose>
 	</xsl:template>
 
+	<!-- A GLI user can use a gsf:displayText element in GS3's Format Features to retrieve
+	  a string defined in either collectionConfig.xml or else the interface dictionaries. 
+	  If the requested string occurs in neither, the request string itself will be output. -->
 	<xsl:template match="gsf:displayText">
+	  <xslt:variable name="displaytext">
+	    <xsl:call-template name="gsf:displayItem"/>
+	  </xslt:variable>
+
+	  <xslt:choose>
+	    <xslt:when test="$displaytext != ''">
+	      <xslt:value-of disable-output-escaping="yes" select="$displaytext"/>	      
+	    </xslt:when>
+	    <xslt:otherwise>
+	      <xslt:variable name="interfacetxt">
+		<xsl:call-template name="gsf:interfaceText"/>
+	      </xslt:variable>
+
+	      <xslt:choose>
+		<xslt:when test="$interfacetxt != ''">
+		  <xslt:value-of disable-output-escaping="yes" select="$interfacetxt"/>
+		</xslt:when>
+		<xslt:otherwise>
+		  <xslt:value-of disable-output-escaping="yes" select="'{@name}'"/>
+		</xslt:otherwise>
+	      </xslt:choose>
+	    </xslt:otherwise>
+	  </xslt:choose>
+	</xsl:template>
+
+	<!-- With gsf:displayItem, a user can request a displayItem from collectionConfig.xml -->
+	<xsl:template match="gsf:displayItem" name="gsf:displayItem">
 	  <xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/collection/displayItem[@name='{@name}']"/>
 	</xsl:template>
 
-	<xsl:template match="gsf:interfaceText">
+	<!-- With gsf:interfaceText, a user can request a string from the interface dictionaries in the current lang -->
+	<xsl:template match="gsf:interfaceText" name="gsf:interfaceText">
 	  <xslt:value-of disable-output-escaping="yes" select="util:getInterfaceText($interface_name, /page/@lang, '{@name}')"/>
 	</xsl:template>
 
