@@ -18,31 +18,29 @@
  */
 package org.greenstone.gsdl3.collection;
 
-import org.greenstone.gsdl3.util.*;
-import org.greenstone.gsdl3.core.*;
-import org.greenstone.gsdl3.service.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-// java XML classes we're using
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.core.ModuleInterface;
+import org.greenstone.gsdl3.util.GSFile;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.OAIXML;
+import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLTransformer;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.io.*;
-import java.util.*;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.xml.sax.*;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-
-import org.apache.log4j.*;
-
-// Apache Commons
-import org.apache.commons.lang3.*;
 
 /**
  * Represents a collection in Greenstone. A collection is an extension of a
