@@ -234,7 +234,6 @@ public class Receptionist implements ModuleInterface
 				return null;
 			}
 		}
-
 		// transform the request in some way -- does nothing!
 		preProcessRequest(request);
 		// set up the page
@@ -248,7 +247,6 @@ public class Receptionist implements ModuleInterface
 		// get the page data from the action
 
 		Node action_response = a.process(message);
-
 		boolean response_only = false;
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list != null)
@@ -287,9 +285,7 @@ public class Receptionist implements ModuleInterface
 		//logger.error(this.converter.getString(resulting_page));
 		//    logger.info("receptionist returned response");
 		//    logger.info(this.converter.getString(resulting_page));
-
 		return resulting_page;
-
 	}
 
 	protected boolean setUpBaseInterface(String base_interface)
