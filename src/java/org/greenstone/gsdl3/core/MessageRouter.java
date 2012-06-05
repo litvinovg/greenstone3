@@ -18,33 +18,30 @@
  */
 package org.greenstone.gsdl3.core;
 
-import org.greenstone.util.GlobalProperties;
-import org.greenstone.gsdl3.util.*;
-import org.greenstone.gsdl3.service.*;
-import org.greenstone.gsdl3.comms.*;
-import org.greenstone.gsdl3.collection.*;
-
-// XML classes
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.InputSource;
-import javax.xml.parsers.*;
-
-// other java classes
 import java.io.File;
-import java.io.Reader;
-import java.io.StringReader;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Properties;
-
-import org.apache.log4j.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.collection.Collection;
+import org.greenstone.gsdl3.collection.ServiceCluster;
+import org.greenstone.gsdl3.comms.Communicator;
+import org.greenstone.gsdl3.comms.SOAPCommunicator;
+import org.greenstone.gsdl3.service.ServiceRack;
+import org.greenstone.gsdl3.util.GSFile;
+import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.OAIXML;
+import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
+import org.greenstone.util.GlobalProperties;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * The hub of a Greenstone system.
@@ -304,15 +301,14 @@ public class MessageRouter implements ModuleInterface
 				// be passed to multiple modules  - they will be in a comma 
 				// separated list in the 'to' attribute
 				String[] modules = StringUtils.split(path, ",");
-
-				for (int j = 0; j < modules.length; j++)
+				
+				for (String this_mod : modules)
 				{
 					// why can't we do this outside the loop??
 					Element mess = this.doc.createElement(GSXML.MESSAGE_ELEM);
 					Element copied_request = (Element) this.doc.importNode(req, true);
 					mess.appendChild(copied_request);
 
-					String this_mod = modules[j];
 					// find the module to pass it on to
 					// need to put the request into a message element
 					String obj = GSPath.getFirstLink(this_mod);
@@ -321,6 +317,7 @@ public class MessageRouter implements ModuleInterface
 					{
 						copied_request.setAttribute(GSXML.TO_ATT, this_mod);
 						result = this.module_map.get(obj).process(mess);
+						
 						if (result != null)
 						{
 							// append the contents of the message to the mainResult - there will only be one response at this stage
@@ -328,7 +325,6 @@ public class MessageRouter implements ModuleInterface
 							if (res != null)
 							{
 								mainResult.appendChild(this.doc.importNode(res, true));
-
 							}
 						}
 						else
@@ -339,7 +335,6 @@ public class MessageRouter implements ModuleInterface
 							mainResult.appendChild(response);
 							logger.error("MessageRouter Error: request had null result!");
 						}
-
 					}
 					else
 					{
