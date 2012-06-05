@@ -20,26 +20,28 @@
 // cluster? groups?
 package org.greenstone.gsdl3.collection;
 
-import org.greenstone.gsdl3.util.*;
-import org.greenstone.gsdl3.core.*;
-import org.greenstone.gsdl3.service.*;
-
-// java XML classes we're using
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import java.io.*;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.core.MessageRouter;
+import org.greenstone.gsdl3.core.ModuleInterface;
+import org.greenstone.gsdl3.service.ServiceRack;
+import org.greenstone.gsdl3.util.GSFile;
+import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /* ServiceCluster - a groups of services that are related in some way
  * Implements ModuleInterface. Contains a list of services provided by the cluster, along with metadata about the cluster itself.
  * a collection is a special type of cluster
- *  @author Katherine Don
+ *  @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
  *  @version $Revision$
  *  @see ModuleInterface
  */
@@ -356,7 +358,6 @@ public class ServiceCluster implements ModuleInterface
 			{
 				// try for a default service in standard package
 				s = (ServiceRack) Class.forName("org.greenstone.gsdl3.service." + servicetype).newInstance();
-
 			}
 			catch (Exception e)
 			{
@@ -386,7 +387,6 @@ public class ServiceCluster implements ModuleInterface
 			// pass the xml node to the service for configuration
 			if (s.configure(n, extra_info))
 			{
-
 				// find out the supported service types for this service module
 				Node types = s.process(message);
 				NodeList typenodes = ((Element) types).getElementsByTagName(GSXML.SERVICE_ELEM);
@@ -394,6 +394,7 @@ public class ServiceCluster implements ModuleInterface
 				for (int j = 0; j < typenodes.getLength(); j++)
 				{
 					String service = ((Element) typenodes.item(j)).getAttribute(GSXML.NAME_ATT);
+
 					if (service_map.get(service) != null)
 					{
 						char extra = '0';
@@ -443,7 +444,6 @@ public class ServiceCluster implements ModuleInterface
 	 */
 	public Node process(Node message_node)
 	{
-
 		Element message = this.converter.nodeToElement(message_node);
 
 		NodeList requests = message.getElementsByTagName(GSXML.REQUEST_ELEM);
@@ -498,6 +498,7 @@ public class ServiceCluster implements ModuleInterface
 				// have to pass the request to the service
 				Element single_message = mess_doc.createElement(GSXML.MESSAGE_ELEM);
 				single_message.appendChild(request);
+
 				Node response_message = this.service_map.get(service).process(single_message);
 				if (response_message != null)
 				{
@@ -535,7 +536,6 @@ public class ServiceCluster implements ModuleInterface
 	 */
 	protected Element processMessage(Element request)
 	{
-
 		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
 		String type = request.getAttribute(GSXML.TYPE_ATT);
@@ -546,7 +546,7 @@ public class ServiceCluster implements ModuleInterface
 		{
 			// create the collection element
 			Element description = (Element) this.description.cloneNode(false);
-			// set collection type : mg or mgpp
+			// set collection type : mg, mgpp, lucene or solr
 			description.setAttribute(GSXML.TYPE_ATT, col_type);
 			description.setAttribute(GSXML.DB_TYPE_ATT, db_type);
 
