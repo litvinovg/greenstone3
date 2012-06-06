@@ -1,44 +1,27 @@
 package org.greenstone.gsdl3.service;
 
 // Greenstone classes
-import org.greenstone.gsdl3.util.*;
-
-// XML classes
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-
-import java.util.HashMap;
-import java.util.ArrayList;
-
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.*; //Document;
-import org.apache.lucene.search.Searcher;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.queryParser.QueryParser;
-//import org.apache.lucene.search.Hits;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.Directory;
-
-import org.greenstone.LuceneWrapper3.GS2Analyzer;
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-import org.apache.log4j.*;
-
-/**
- *
- */
+import org.apache.log4j.Logger;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.greenstone.gsdl3.util.GSFile;
+import org.greenstone.gsdl3.util.GSXML;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class LuceneSearch extends AbstractTextSearch
 {
-
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.LuceneSearch.class.getName());
 
 	protected static final String INDEX_ELEM = "index";
@@ -114,7 +97,6 @@ public class LuceneSearch extends AbstractTextSearch
 
 	protected void initResultElement(Element result, Element doc_node_list, Element metadata_list)
 	{
-
 		// Create a new (empty) result message
 		result.setAttribute(GSXML.FROM_ATT, QUERY_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
@@ -138,7 +120,6 @@ public class LuceneSearch extends AbstractTextSearch
 
 	protected boolean hasQueryString(Element param_list, Element metadata_list)
 	{
-
 		// Process the request parameters to make sure a query has been specified
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 		String query_string = (String) params.get(QUERY_PARAM);
@@ -156,7 +137,6 @@ public class LuceneSearch extends AbstractTextSearch
 	/** Process a text query - implemented by concrete subclasses */
 	protected Element processTextQuery(Element request)
 	{
-
 		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
 		Element doc_node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
@@ -188,8 +168,7 @@ public class LuceneSearch extends AbstractTextSearch
 			String index_dir = GSFile.collectionIndexDir(this.site_home, this.cluster_name);
 			index_dir += File.separator + index;
 			Directory index_dir_dir = FSDirectory.open(new File(index_dir));
-			Searcher searcher = new IndexSearcher(index_dir_dir);
-			Analyzer analyzer = new GS2Analyzer();
+			IndexSearcher searcher = new IndexSearcher(index_dir_dir);
 
 			Term term = new Term("content", query_string);
 
@@ -199,7 +178,7 @@ public class LuceneSearch extends AbstractTextSearch
 
 			GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", "" + hits.scoreDocs.length);
 
-			IndexReader reader = ((IndexSearcher) searcher).getIndexReader();
+			IndexReader reader = searcher.getIndexReader();
 
 			for (int i = 0; i < hits.scoreDocs.length; i++)
 			{
@@ -218,5 +197,4 @@ public class LuceneSearch extends AbstractTextSearch
 
 		return result;
 	}
-
 }
