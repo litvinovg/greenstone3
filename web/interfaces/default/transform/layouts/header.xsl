@@ -52,8 +52,8 @@
 		<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
 		<link rel="shortcut icon" href="favicon.ico"/> 
 		
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"><xsl:text> </xsl:text></script>
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery.min.js"><xsl:text> </xsl:text></script>
+		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery-ui.min.js"><xsl:text> </xsl:text></script>
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery.themeswitcher.min.js"><xsl:text> </xsl:text></script>
 		
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/direct-edit.js"><xsl:text> </xsl:text></script>
