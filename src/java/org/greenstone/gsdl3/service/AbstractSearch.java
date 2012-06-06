@@ -19,21 +19,15 @@
 package org.greenstone.gsdl3.service;
 
 // Greenstone classes
-import org.greenstone.gsdl3.util.GSXML;
-import org.greenstone.gsdl3.util.GSPath;
-import org.greenstone.gsdl3.util.AbstractSimpleDocument;
-import org.greenstone.gsdl3.util.SimpleDocument;
+import java.util.ArrayList;
 
-// XML classes
-import org.w3c.dom.Document;
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.util.AbstractSimpleDocument;
+import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.SimpleDocument;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-// java classes
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.apache.log4j.*;
 
 /**
  * Partially implements a generic search service
