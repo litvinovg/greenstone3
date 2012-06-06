@@ -59,6 +59,10 @@ public class Receptionist implements ModuleInterface
 
 	public void cleanUp()
 	{
+		if (this.mr != null)
+		{
+			this.mr.cleanUp();
+		}
 	}
 
 	public void setParams(GSParams params)
