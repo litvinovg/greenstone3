@@ -359,7 +359,11 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		{
 			return (coll_name_params_table == null) ? 0 : coll_name_params_table.size();
 		}
-
+	}
+	
+	public void destroy()
+	{
+		recept.cleanUp();
 	}
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
