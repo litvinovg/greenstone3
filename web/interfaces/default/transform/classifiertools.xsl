@@ -161,7 +161,7 @@
 	
 	<xsl:template name="mapFeatures">
 		<td style="padding-left:5px; padding-right:5px;" valign="top">
-			<a href="javascript:focusDocument('{@nodeID}');"><img src="sites/localsite/collect/tipple-paradise-gardens/images/map_marker.png"/></a>
+			<a href="javascript:focusDocument('{@nodeID}');"><img src="sites/{$site_name}/collect/tipple-paradise-gardens/images/map_marker.png"/></a>
 		</td>
 	</xsl:template>
 </xsl:stylesheet>
