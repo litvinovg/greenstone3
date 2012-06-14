@@ -445,11 +445,11 @@ public class GS2BrowseAction extends Action
 		{
 			Element template = (Element) templates.item(i);
 			String match = template.getAttribute("match");
-			if (match.equals("documentNode"))
+			if (match.startsWith("documentNode"))
 			{
 				getRequiredMetadataNames(template, doc_meta_names);
 			}
-			else if (match.equals("classifierNode"))
+			else if (match.startsWith("classifierNode")) // not match.equals, as we want to match nodes like: classifierNode[@classifierStyle = 'VList']
 			{
 				getRequiredMetadataNames(template, class_meta_names);
 			}
