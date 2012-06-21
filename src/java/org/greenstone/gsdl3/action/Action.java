@@ -105,13 +105,13 @@ abstract public class Action
 		{
 			Element elem = (Element) metadata_nodes.item(i);
 			StringBuffer metadata = new StringBuffer();
-			String all = elem.getAttribute("multiple");
+			String pos = elem.getAttribute("pos");
 			String name = elem.getAttribute("name");
 			String select = elem.getAttribute("select");
 			String sep = elem.getAttribute("separator");
-			if (all.equals("true"))
+			if (!pos.equals(""))
 			{
-				metadata.append("all");
+			    metadata.append("pos"+pos); // first, last or indexing number
 				metadata.append(GSConstants.META_RELATION_SEP);
 			}
 			if (!select.equals(""))

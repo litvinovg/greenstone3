@@ -182,6 +182,24 @@
 	</xsl:template>
 
 	<xsl:template match="gsf:metadata" mode="get-metadata-name">
+		<xsl:if test="@pos">
+			<xsl:text>pos</xsl:text>
+			<xsl:value-of select='@pos'/>
+			<xsl:text>_</xsl:text>
+		</xsl:if>
+		<xsl:if test='@select'>
+			<xsl:value-of select='@select'/>
+			<xsl:text>_</xsl:text>
+		</xsl:if>
+		<xsl:if test="@separator">
+		  	<xsl:text>*</xsl:text>
+			<xsl:value-of select='@separator'/>
+			<xsl:text>*_</xsl:text>
+		</xsl:if>
+		<xsl:value-of select="@name"/>
+	</xsl:template>
+
+	<xsl:template match="gsf:metadata-old" mode="get-metadata-name">
 		<xsl:if test="@multiple='true'">
 			<xsl:text>all_</xsl:text>
 		</xsl:if>
@@ -190,14 +208,14 @@
 			<xsl:text>_</xsl:text>
 		</xsl:if>
 		<xsl:if test="@separator">
-			<xsl:text>*</xsl:text>
+		  	<xsl:text>*</xsl:text>
 			<xsl:value-of select='@separator'/>
 			<xsl:text>*_</xsl:text>
 		</xsl:if>
 		<xsl:value-of select="@name"/>
 	</xsl:template>
   
-	<xsl:template match="gsf:metadata-old">
+	<xsl:template match="gsf:metadata-older">
 		<xslt:value-of disable-output-escaping="yes">
 			<xsl:attribute name="select">
 				<xsl:text>(.//metadataList)[last()]/metadata[@name="</xsl:text>

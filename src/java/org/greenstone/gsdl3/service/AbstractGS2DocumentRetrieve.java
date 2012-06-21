@@ -368,11 +368,11 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 
 	protected String getMetadata(String node_id, DBInfo info, String metadata, String lang)
 	{
-		boolean multiple = false;
+		String pos = "";
 		String relation = "";
 		String separator = ", ";
-		int pos = metadata.indexOf(GSConstants.META_RELATION_SEP);
-		if (pos == -1)
+		int index = metadata.indexOf(GSConstants.META_RELATION_SEP);
+		if (index == -1)
 		{
 			Vector<String> values = info.getMultiInfo(metadata);
 			if (values != null)
@@ -401,37 +401,42 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 			}
 		}
 
-		String temp = metadata.substring(0, pos);
-		metadata = metadata.substring(pos + 1);
-		// check for all on the front
-		if (temp.equals("all"))
+		String temp = metadata.substring(0, index);		
+		metadata = metadata.substring(index + 1);
+		// check for pos on the front, indicating which piece of meta the user wants
+		// pos can be "first", "last" or the position value of the requested piece of metadata 
+		if (temp.startsWith(GSConstants.META_POS))
 		{
-			multiple = true;
-			pos = metadata.indexOf(GSConstants.META_RELATION_SEP);
-			if (pos == -1)
+			temp = temp.substring(GSConstants.META_POS.length());
+			pos = temp;
+			
+			index = metadata.indexOf(GSConstants.META_RELATION_SEP);
+			if (index == -1)
 			{
 				temp = "";
 			}
 			else
 			{
-				temp = metadata.substring(0, pos);
-				metadata = metadata.substring(pos + 1);
+				temp = metadata.substring(0, index);
+				metadata = metadata.substring(index + 1);
 			}
 		}
 
 		// now check for relational info
-		if (temp.equals("parent") || temp.equals("root") || temp.equals("ancestors"))
+		if (temp.equals("parent") || temp.equals("root") || temp.equals("ancestors")
+		     || temp.equals("siblings") || temp.equals("children") || temp.equals("descendants"))
 		{ // "current" "siblings" "children" "descendants"
+			// gets all siblings by default
 			relation = temp;
-			pos = metadata.indexOf(GSConstants.META_RELATION_SEP);
-			if (pos == -1)
+			index = metadata.indexOf(GSConstants.META_RELATION_SEP);
+			if (index == -1)
 			{
 				temp = "";
 			}
 			else
 			{
-				temp = metadata.substring(0, pos);
-				metadata = metadata.substring(pos + 1);
+				temp = metadata.substring(0, index);
+				metadata = metadata.substring(index + 1);
 			}
 		}
 
@@ -473,15 +478,29 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 		}
 
 		StringBuffer result = new StringBuffer();
+		
+		Vector<String> values = relation_info.getMultiInfo(metadata);
 
-		if (!multiple)
+		if (!pos.equals("")) // if a particular position was specified, so not multiple values for the metadata
 		{
-			result.append(this.macro_resolver.resolve(relation_info.getInfo(metadata), lang, MacroResolver.SCOPE_META, relation_id));
+			String meta = "";
+			if (values != null) {
+				if(pos.equals(GSConstants.META_FIRST)) {				
+					meta = values.firstElement();
+				} else if(pos.equals(GSConstants.META_LAST)) {
+					meta = values.lastElement();
+				} else {
+					int position = Integer.parseInt(pos);
+					if(position < values.size()) {			
+						meta = values.elementAt(position);
+					}
+				}				
+			} // else ""
+						
+			result.append(this.macro_resolver.resolve(meta, lang, MacroResolver.SCOPE_META, relation_id));			
 		}
 		else
 		{
-			// we have multiple meta
-			Vector<String> values = relation_info.getMultiInfo(metadata);
 			if (values != null)
 			{
 				boolean first = true;
@@ -514,14 +533,29 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 			relation_info = this.coll_db.getInfo(relation_id);
 			if (relation_info == null)
 				return result.toString();
-			if (!multiple)
+			
+			values = relation_info.getMultiInfo(metadata);
+			if (!pos.equals("")) // if a particular position was specified, so not multiple values for the metadata
 			{
+				String meta = "";
+				if (values != null) {
+					if(pos.equals(GSConstants.META_FIRST)) {
+						meta = values.firstElement();
+					} else if(pos.equals(GSConstants.META_LAST)) {
+						meta = values.lastElement();
+					} else {
+						int position = Integer.parseInt(pos);
+						if(position < values.size()) {			
+							meta = values.elementAt(position);
+						}
+					}				
+				} // else ""
+				
 				result.insert(0, separator);
-				result.insert(0, this.macro_resolver.resolve(relation_info.getInfo(metadata), lang, MacroResolver.SCOPE_META, relation_id));
+				result.insert(0, this.macro_resolver.resolve(meta, lang, MacroResolver.SCOPE_META, relation_id));							
 			}
 			else
 			{
-				Vector<String> values = relation_info.getMultiInfo(metadata);
 				if (values != null)
 				{
 					for (int i = values.size() - 1; i >= 0; i--)

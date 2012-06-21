@@ -31,4 +31,7 @@ public class GSConstants {
 
     public static final String META_RELATION_SEP = "_";
     public static final String META_SEPARATOR_SEP = "*";
+    public static final String META_FIRST = "first";
+    public static final String META_LAST = "last";
+    public static final String META_POS = "pos";
 }
