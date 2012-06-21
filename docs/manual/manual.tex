@@ -784,7 +784,7 @@ Table~\ref{tab:gsf-format} shows the set of \gst{'gsf'} (Greenstone Format) elem
 \gst{<gsf:icon type='source'/>} & An appropriate icon for the original file e.g. Word, PDF icon\\
 \hline
 \gst{<gsf:metadata name='Title'/>} & The value of a metadata element for the current document or section, in this case, Title\\
-\gst{<gsf:metadata name='Title' select='select-type' [separator='y' multiple='true']/>} & A more extended selection of metadata values. The select field can be one of those shown in Table~\ref{tab:gsf-select-types}. There are two optional attributes: separator gives a String that will be used to separate the fields, default is ``, ``, and if multiple is set to true, looks for multiple values at each section.\\
+\gst{<gsf:metadata name='Title' select='select-type' [separator='y' pos='first|last|n']/>} & A more extended selection of metadata values. The select field can be one of those shown in Table~\ref{tab:gsf-select-types}. There are two optional attributes: separator gives a String that will be used to separate the fields, default is ``, ``, and pos can be set to return either the first, last or nth value for that metadata at each section.\\
 \gst{<gsf:metadata name='Date' format='formatDate'/>} & The value of a metadata element for the current document, formatted in some way. Current formatting options available are formatDate: turns '20040201' into '01 February 2004', and formatLanguage: turns 'en' into 'English', both in a language dependent manner. \\
 \hline
 \gst{<gsf:choose-metadata>
@@ -792,7 +792,7 @@ Table~\ref{tab:gsf-format} shows the set of \gst{'gsf'} (Greenstone Format) elem
   <gsf:metadata name='metaB'/>
   <gsf:metadata name='metaC'/>
 </gsf:choose-metadata>}
- & A choice of metadata. Will select the first existing one. the metadata elements can have the select, separator and multiple attributes like normal.\\
+ & A choice of metadata. Will select the first existing one. the metadata elements can have the select, separator and pos attributes like normal.\\
 \hline
 \gst{<gsf:switch preprocess=
 'preprocess-type'>
@@ -807,8 +807,8 @@ test-value='yyy'>...</gsf:when>
 \end{tabular}}
 \end{table}
 
-The \gst{<gsf:metadata>} elements are used to output metadata values. The simplest case is \gst{<gsf:metadata name='Title'/>}---this outputs the Title metadata for the current document or section. Namespaces are important here: if the Title metadata is in the Dublin Core (dc) namespace, then the element should look like \gst{<gsf:metadata name='dc.Title'/>}. There are three other attributes for this element. The attribute \gst{multiple} is used when there may be more than one value for the selected metadata. 
-For instance, one document may fall into several classification categories, and therefore may have multiple Subject metadata values. Adding \gst{multiple='true'} to the \gst{<gsf:metadata>} element will retrieve all values, not just the first one. Multiple values are separated by commas by default. The \gst{separator} attribute is used to change the separating string. For example, adding \gst{separator=':~'} to the element will separate all values by a colon and a space.
+The \gst{<gsf:metadata>} elements are used to output metadata values. The simplest case is \gst{<gsf:metadata name='Title'/>}---this outputs all the Title metadata values for the current document or section. Namespaces are important here: if the Title metadata is in the Dublin Core (dc) namespace, then the element should look like \gst{<gsf:metadata name='dc.Title'/>}. There are three other attributes for this element. By default, more than one value for the selected metadata is returned, where multiple exist. The attribute \gst{pos} is used when a particular value for the selected metadata is requested (which can be the first, last or nth value). 
+For instance, one document may fall into several classification categories, and therefore may have multiple Subject metadata values. When all are returned, the multiple values are separated by commas by default. The \gst{separator} attribute is used to change the separating string. For example, adding \gst{separator=':~'} to the element will separate all values by a colon and a space. Instead of retrieving all values for a piece of metadata, adding \gst{pos='first'} to the \gst{<gsf:metadata>} element will retrieve the first value.
 
 Sometimes you may want to display metadata values for sections other than the current one. For example, in the mgppdemo collection, in a search list we display the Titles of all the enclosing sections, followed by the Title of the current section, all separated by semi-colons. The display ends up looking something like:
 \emph{Farming snails 2; Starting out; Selecting your snails}
@@ -2342,7 +2342,8 @@ The following table shows the \gsii\  format elements, and their equivalents in 
 \gst{[parent(Top):Title]} & \gst{<gsf:metadata name='Title' select='root' />}\\
 \gst{[parent(All': '):Title]} & \gst{<gsf:metadata name='Title' select='ancestors'}\\ 
 & \gst{  separator=': ' />}\\
-\gst{[sibling(All': '):Title]} & \gst{<gsf:metadata name='Title' multiple='true'} \\
+\gst{[sibling:dc.Title]} & \gst{<gsf:metadata name='dc.Title' pos='first'} \\
+\gst{[sibling(All': '):Title]} & \gst{<gsf:metadata name='Title'} \\
 & \gst{  separator=': ' />}\\
 \gst{\{Or\}\{[dc.Title],}  & \gst{<gsf:choose-metadata>}\\
 \gst{  [dls.Title], [Title]\}}& \gst{  <gsf:metadata name='dc.Title'/>}\\
