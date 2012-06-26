@@ -37,7 +37,8 @@
 
 					<!-- the contents (if enabled) -->
 					<xsl:choose>
-						<xsl:when test="/page/pageResponse/document/documentNode/@docType = 'paged'">
+	      <xsl:when test="/page/pageResponse/document/@docType = 'simple'"></xsl:when>
+						<xsl:when test="/page/pageResponse/document/@docType = 'paged'">
 							<gsf:image type="Thumb"/>
 							<!-- Table of contents will be dynamically retrieved when viewing a paged document -->
 							<script type="text/javascript">
@@ -242,7 +243,7 @@
 				</td>
 			</xsl:if>
 			<td style="vertical-align:top; text-align:right;">
-				<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
+				<xsl:if test="not(/page/pageResponse/document/@docType='simple') and (not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true')">
 					<span class="tableOfContentsTitle"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.table_of_contents')"/></span>
 
 					<a id="sidebarMinimizeButton" href="javascript:minimizeSidebar();" style="float: right; font-size:0.6em;">
