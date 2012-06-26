@@ -176,7 +176,7 @@
 					</xsl:choose>
 				</xsl:attribute>
 				<!-- Get the section content from the document template -->
-				<xsl:call-template name="documentNodeContent"/>
+				<xsl:call-template name="documentNodeText"/>
 			</div>
 			<xsl:if test="documentNode">
 				<xsl:for-each select="documentNode">
@@ -255,7 +255,27 @@
 					</xsl:text>
 				</script>
 			</xsl:when>
-			<xsl:otherwise>
+      <xsl:when test="@docType='simple'">
+		    <xsl:call-template name="documentHeading"/><br/>
+		    <xsl:call-template name="documentContent"/>
+</xsl:when>			
+<xsl:otherwise> <!-- display the standard greenstone document -->
+<xsl:call-template name="documentContent"/>
+</xsl:otherwise>
+</xsl:choose>
+</xsl:template>
+	<xsl:template name="documentContent">
+	  <xsl:choose>
+	    <xsl:when test="@docType='simple'">
+	      <xsl:call-template name="documentNodeText"/>
+	    </xsl:when>
+	    <xsl:otherwise> 
+	      <xsl:call-template name="wrappedDocument"/>
+	    </xsl:otherwise>
+	  </xsl:choose>
+	</xsl:template>
+
+	<xsl:template name="wrappedDocument">
 				<xsl:choose>
 					<xsl:when test="/page/pageRequest/paramList/param[@name = 'alb']/@value = '1' or (string-length(/page/pageRequest/paramList/param[@name = 'd']/@value) > 0 and (/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or not(util:contains(/page/pageResponse/document/@selectedNode, '.'))))">
 						<div id="gs-document">
@@ -264,6 +284,7 @@
 								<xsl:for-each select="documentNode">
 									<xsl:call-template name="wrapDocumentNodes"/>
 								</xsl:for-each>
+
 							</div>
 						</div>
 					</xsl:when>
@@ -297,8 +318,6 @@
 							</xsl:text>
 						</script>
 					</xsl:otherwise>
-				</xsl:choose>
-			</xsl:otherwise>
 		</xsl:choose>
 		
 		<div class="clear"><xsl:text> </xsl:text></div>
@@ -436,35 +455,35 @@
 			</xsl:when>
 		</xsl:choose>
 	</xsl:template>
-	
-	<!-- The default template for displaying the document content -->
-	<xsl:template name="documentNodeContent">
+	<xsl:template name="documentHeading">
+	  <b><gsf:metadata name="Title"/></b><br/>
+	</xsl:template>
+	<!-- The default template for displaying the document node text -->
+  <!-- equivalent to gsf:text -->
+	<xsl:template name="documentNodeText">
 		<!-- Hides the "This document has no text." message -->
 		<xsl:variable name="noText"><gsf:metadata name="NoText"/></xsl:variable>
+						<xsl:if test="not($noText = '1')">
 
 		<!-- Section text -->
 		<xsl:for-each select="nodeContent">
 			<xsl:for-each select="node()">
 				<xsl:choose>
 					<xsl:when test="not(name())">
-						<xsl:if test="not($noText = '1')">
 							<xsl:value-of select="." disable-output-escaping="yes"/>
-						</xsl:if>
+					
 					</xsl:when>
 					<xsl:when test="name() = 'annotation'">
 						<xsl:call-template name="displayAnnotation"/>
-					</xsl:when>
-					<xsl:when test="name() = 'nodeContent'">
-						<xsl:call-template name="documentNodeContent"/>
 					</xsl:when>
 					<xsl:otherwise>
 						<xsl:apply-templates/>
 					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:for-each>
-		</xsl:for-each><xsl:text> </xsl:text>
+		</xsl:for-each>	</xsl:if><xsl:text> </xsl:text>
 	</xsl:template>
-	
+
 	<!-- Used to produce a version of the page in a format that can be read by the realistic books plugin -->
 	<xsl:template name="documentNodeFlashXML">
 		<xsl:text disable-output-escaping="yes">
