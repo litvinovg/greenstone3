@@ -215,8 +215,10 @@ public class URLFilter implements Filter
 					{
 						gRequest.setParameter(GSParams.DOCUMENT, segments[i + 1]);
 
-						additionalParameters = new String[] { GSParams.ACTION, GSParams.DOCUMENT_TYPE };
-						defaultParamValues = new String[] { "d", "hierarchy" };
+						additionalParameters = new String[] { GSParams.ACTION};
+						defaultParamValues = new String[] { "d"};
+						//additionalParameters = new String[] { GSParams.ACTION, GSParams.DOCUMENT_TYPE };
+						//defaultParamValues = new String[] { "d", "hierarchy" };
 					}
 					//PAGE
 					else if (segments[i].equals(PAGE_PATH) && (i + 1) < segments.length)
