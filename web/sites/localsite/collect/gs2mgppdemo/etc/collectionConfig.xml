@@ -6,6 +6,7 @@
         <metadata lang="en" name="public">true</metadata>
     </metadataList>
     <displayItemList>
+    <displayItem lang="en" name="shortDescription">Demonstration collection containing a few books from the Humanitarian and Development Libraries. Uses MGPP and GDBM.</displayItem>
         <displayItem assigned="true" lang="en" name="description">This is a demonstration collection for the Greenstone3 digital library software. It contains a small subset (11 books) of the Humanitarian and Development Libraries. It is the Greenstone 3 equivalent of the Greenstone 2 demo collection, built with MGPP.</displayItem>
 		<!--
 		<displayItem assigned="true" lang="en" name="smallicon">gs2mgppdemo_sm.gif</displayItem>
