@@ -69,6 +69,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	protected static final String INFO_NUM_SIBS = "numSiblings";
 	protected static final String INFO_NUM_CHILDREN = "numChildren";
 	protected static final String INFO_SIB_POS = "siblingPosition";
+	protected static final String INFO_DOC_TYPE = "documentType";
 
 	// means the id is not a greenstone id and needs translating
 	//	protected static final String EXTID_PARAM = "ext";

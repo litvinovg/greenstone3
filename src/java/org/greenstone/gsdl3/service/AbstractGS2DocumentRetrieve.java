@@ -290,11 +290,12 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 
 			return "-1";
 		}
-		else
+		if (info_type.equals(INFO_DOC_TYPE))
+	
 		{
-			return null;
+		  return getDocType(doc_id);
 		}
-
+		return null;
 	}
 
 	protected int getNumChildren(String node_id)
