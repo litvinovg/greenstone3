@@ -703,6 +703,21 @@ public class GSXML
 		}
 		return node_list;
 	}
+  public static NodeList getChildrenByTagNameNS(Node n, String namespace, String local_name)
+	{
+		MyNodeList node_list = new MyNodeList();
+		Node child = n.getFirstChild();
+		while (child != null)
+		{
+		  System.err.println("node name="+child.getNodeName()+", ns="+child.getNamespaceURI());
+		  if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI().equals(namespace) && child.getLocalName() != null && child.getLocalName().equals(local_name))
+			{
+				node_list.addNode(child);
+			}
+			child = child.getNextSibling();
+		}
+		return node_list;
+	}
 
 	/** Duplicates an element, but gives it a new name */
 	public static Element duplicateWithNewName(Document owner, Element element, String element_name, boolean with_attributes)
@@ -904,6 +919,66 @@ public class GSXML
 		return null;
 	}
 
+  public static Element getNamedElementNS(Element parent, String namespace_uri, String node_local_name, String attribute_name, String attribute_value)
+  {
+		NodeList children = parent.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++)
+		{
+			Node child = children.item(i);
+			if (child.getNodeType() == Node.ELEMENT_NODE &&child.getNamespaceURI().equals(namespace_uri) && child.getLocalName().equals(node_local_name))
+			{
+				if (((Element) child).getAttribute(attribute_name).equals(attribute_value))
+					return (Element) child;
+			}
+		}
+		// not found
+		return null;
+
+
+  }
+
+	// In element main, tries to find any previous occurrence of elements with xsl-template-name=templateName, 
+	// and whose named attribute (attributeName) has the same value as the same attribute in node.
+	// If this is the case, such a previous occurrence is removed from element main, since
+	// the new node will contain a more specific redefinition of this element.
+  public static void removeNamedElementNS(Element parent, String namespace_uri, String node_local_name, String attribute_name, String attribute_value)
+  {
+    System.err.println("removeNmaedElement "+namespace_uri+node_local_name +attribute_name+attribute_value);
+    if (attribute_value.equals("")) {
+		  // it has no identifying attribute, so we can't find any matches
+		  return;
+		}
+		
+		Element old_elem = GSXML.getNamedElementNS(parent, namespace_uri, node_local_name, attribute_name, attribute_value);
+		if (old_elem != null)
+		  {
+		    System.err.println("removing "+old_elem.getNodeName());
+		    parent.removeChild(old_elem);
+		  }
+		
+  }
+  
+  public static void removeNamedElementsNS(Element parent, String namespace, String node_local_name, String attribute_name, String attribute_value)
+  {
+		if (attribute_value.equals("")) {
+		  // it has no identifying attribute, so we can't find any matches
+		  return;
+		}
+
+		NodeList children = parent.getChildNodes();
+  for (int i = children.getLength()-1; i >= 0; i--)
+		{
+			Node child = children.item(i);
+			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI().equals(namespace) && child.getLocalName() != null && child.getLocalName().equals(node_local_name))
+			{
+				if (((Element) child).getAttribute(attribute_name).equals(attribute_value))
+				  parent.removeChild(child);
+			}
+		}
+  }
+
+
+
 	/**
 	 * returns a NodeList of elements:
 	 * ancestor/node_name[@attribute_name='attribute_value']
@@ -928,6 +1003,17 @@ public class GSXML
 		}
 		return node_list;
 	}
+
+  public static Element getLastElementByTagNameNS(Element main, String namespace, String node_name) {
+
+    NodeList nodes = main.getElementsByTagNameNS(namespace, node_name);
+    int len = nodes.getLength();
+    if (len==0) {
+      return null;
+    }
+    return (Element)nodes.item(len-1);
+  }
+
 
 	public static int SORT_TYPE_STRING = 0;
 	public static int SORT_TYPE_INT = 1;
