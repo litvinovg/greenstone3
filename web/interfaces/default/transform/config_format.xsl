@@ -244,7 +244,7 @@
 	</xsl:template>
   
 	<xsl:template match="gsf:text">
-		<xslt:apply-templates select="nodeContent"/>
+    <xslt:call-template name="documentNodeText"/>
 	</xsl:template>
   
 	<xsl:template match="gsf:choose-metadata">
