@@ -806,7 +806,9 @@ public class TransformingReceptionist extends Receptionist
 		{
 			GSXML.addDebugSpanTags(skinAndLibraryDoc);
 		}
-
+		if (output.equals("skinandlibdocfinal")) {
+		  return converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
+		}
 		return this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype);
 
 		// The line below will do the transformation like we use to do before having Skin++ implemented,
@@ -862,14 +864,17 @@ public class TransformingReceptionist extends Receptionist
 			Document format_doc = XMLConverter.newDOM();
 			format_doc.appendChild(format_doc.importNode(skinAndLibraryDoc.getDocumentElement().cloneNode(true), true));
 			Node result = this.transformer.transform(configStylesheet_doc, format_doc, config_params);
-
 			if (_debug)
 			{
 				GSXSLT.mergeStylesheetsDebug(skinAndLibraryDoc, ((Document) result).getDocumentElement(), true, true, "OTHER3", GSFile.collectionConfigFile(GSFile.collectDir(GSFile.siteHome(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME)) + File.separator + collection)));
 			}
 			else
 			{
-				GSXSLT.mergeStylesheets(skinAndLibraryDoc, ((Document) result).getDocumentElement(), true);
+			  //GSXSLT.mergeStylesheets(skinAndLibraryDoc, ((Document) result).getDocumentElement(), true);
+			  // we just want the result of the transform to be in skinAndLibraryDoc
+			  Element old_doc = skinAndLibraryDoc.getDocumentElement();
+			  skinAndLibraryDoc.removeChild(old_doc);
+			  skinAndLibraryDoc.appendChild(skinAndLibraryDoc.importNode(((Document) result).getDocumentElement(), true));
 			}
 		}
 	}
