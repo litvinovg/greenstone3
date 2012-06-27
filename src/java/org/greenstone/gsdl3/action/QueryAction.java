@@ -50,7 +50,6 @@ public class QueryAction extends Action
 	 */
 	protected Element basicQuery(Element request)
 	{
-
 		// the result
 		Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 
@@ -85,7 +84,7 @@ public class QueryAction extends Action
 			// process the message
 			Element mr_info_response = (Element) this.mr.process(mr_info_message);
 			// the response
-			
+
 			Element service_response = (Element) GSXML.getChildByTagName(mr_info_response, GSXML.RESPONSE_ELEM);
 
 			Element service_description = (Element) this.doc.importNode(GSXML.getChildByTagName(service_response, GSXML.SERVICE_ELEM), true);
@@ -162,6 +161,16 @@ public class QueryAction extends Action
 			page_response.appendChild(this.doc.importNode(query_term_info_list, true));
 		}
 
+		Element facet_list = (Element) GSXML.getChildByTagName(query_response, GSXML.FACET_ELEM + GSXML.LIST_MODIFIER);
+		if (facet_list == null)
+		{
+			logger.error("No query term information.\n");
+		}
+		else
+		{ // add it into the page response
+			page_response.appendChild(this.doc.importNode(facet_list, true));
+		}
+
 		// check that there are some documents - for now check the list, but later should use a numdocs metadata elem	
 		Element document_list = (Element) GSXML.getChildByTagName(query_response, GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		// documentList not present if no docs found
@@ -226,6 +235,7 @@ public class QueryAction extends Action
 		mr_metadata_request.appendChild(filtered_doc_list);
 
 		Element mr_metadata_response = (Element) this.mr.process(mr_metadata_message);
+		
 		// check for errors
 		processErrorElements(mr_metadata_response, page_response);
 
