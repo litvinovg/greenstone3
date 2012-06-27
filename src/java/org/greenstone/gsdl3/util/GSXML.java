@@ -709,7 +709,6 @@ public class GSXML
 		Node child = n.getFirstChild();
 		while (child != null)
 		{
-		  System.err.println("node name="+child.getNodeName()+", ns="+child.getNamespaceURI());
 		  if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI().equals(namespace) && child.getLocalName() != null && child.getLocalName().equals(local_name))
 			{
 				node_list.addNode(child);
@@ -943,7 +942,6 @@ public class GSXML
 	// the new node will contain a more specific redefinition of this element.
   public static void removeNamedElementNS(Element parent, String namespace_uri, String node_local_name, String attribute_name, String attribute_value)
   {
-    System.err.println("removeNmaedElement "+namespace_uri+node_local_name +attribute_name+attribute_value);
     if (attribute_value.equals("")) {
 		  // it has no identifying attribute, so we can't find any matches
 		  return;
@@ -952,7 +950,6 @@ public class GSXML
 		Element old_elem = GSXML.getNamedElementNS(parent, namespace_uri, node_local_name, attribute_name, attribute_value);
 		if (old_elem != null)
 		  {
-		    System.err.println("removing "+old_elem.getNodeName());
 		    parent.removeChild(old_elem);
 		  }
 		

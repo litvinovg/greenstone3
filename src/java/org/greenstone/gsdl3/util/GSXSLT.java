@@ -144,7 +144,6 @@ public class GSXSLT
 		for (int i = 0; i < children.getLength(); i++)
 		{
 		  Element node = (Element) children.item(i);
-			System.err.println("node name="+node.getNodeName()+", local name="+node.getLocalName()+", uri="+node.getNamespaceURI());
 			// remove any previous occurrences of xsl:template with the same value for name or match 
 			  String template_match = node.getAttribute("match");
 			  String template_name = node.getAttribute("name");
