@@ -47,7 +47,12 @@
     <xsl:value-of select="/page/pageRequest/paramList/param[@name='berrybasket']/@value"/>
   </xsl:variable>
   <xsl:variable name="bookswitch">
+    <xsl:choose>
+      <xsl:when test="/page/pageRequest/paramList/param[@name='book']">
     <xsl:value-of select="/page/pageRequest/paramList/param[@name='book']/@value"/>
+	</xsl:when>
+	<xsl:otherwise>off</xsl:otherwise>
+    </xsl:choose>
   </xsl:variable>
   <xsl:template name="pageTitle">
     <xsl:variable name="docID" select="/page/pageResponse/document/@selectedNode"/>
