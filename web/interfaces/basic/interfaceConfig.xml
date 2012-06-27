@@ -24,6 +24,10 @@
       <subaction name="berry" xslt='berry.xsl'/>
     </action>
   </actionList>
+  <optionList>
+    <option name="highlightQueryTerms" value="true"/>
+    <option name="berryBaskets" value="true"/>
+  </optionList>
   <languageList>
     <language name="en">
       <displayItem name='name'>English</displayItem>
@@ -179,8 +183,4 @@
       <displayItem name='name'>繁體中文 (Traditional Chinese)</displayItem>
     </language>
   </languageList>
-  <optionList>
-    <option name="highlightQueryTerms" value="true"/>
-    <option name="berryBaskets" value="true"/>
-  </optionList>
 </interfaceConfig>
