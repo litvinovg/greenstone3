@@ -339,7 +339,6 @@ public class DerbyWrapper
 		}
 		else
 		{
-			System.out.println("couldn't find the user");
 			return null;
 		}
 	}
