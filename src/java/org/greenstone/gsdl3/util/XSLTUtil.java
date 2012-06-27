@@ -18,23 +18,21 @@
  */
 package org.greenstone.gsdl3.util;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.MissingResourceException;
-import java.io.File;
-import java.text.SimpleDateFormat;
 
 import net.tanesha.recaptcha.ReCaptcha;
 import net.tanesha.recaptcha.ReCaptchaFactory;
 
-import org.apache.log4j.*;
-import org.w3c.dom.Node;
-
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.greenstone.util.GlobalProperties;
+import org.w3c.dom.Node;
 
 /**
  * a class to contain various static methods that are used by the xslt
@@ -569,7 +567,7 @@ public class XSLTUtil
 
 		return outputStr.toString();
 	}
-	
+
 	public static String xmlNodeToString(Node node)
 	{
 		return GSXML.xmlNodeToString(node);
