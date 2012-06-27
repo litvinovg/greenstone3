@@ -255,69 +255,68 @@
 					</xsl:text>
 				</script>
 			</xsl:when>
-      <xsl:when test="@docType='simple'">
-		    <xsl:call-template name="documentHeading"/><br/>
-		    <xsl:call-template name="documentContent"/>
-</xsl:when>			
-<xsl:otherwise> <!-- display the standard greenstone document -->
-<xsl:call-template name="documentContent"/>
-</xsl:otherwise>
-</xsl:choose>
-</xsl:template>
+			<xsl:when test="@docType='simple'">
+				<xsl:call-template name="documentHeading"/><br/>
+				<xsl:call-template name="documentContent"/>
+			</xsl:when>			
+			<xsl:otherwise> <!-- display the standard greenstone document -->
+				<xsl:call-template name="documentContent"/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
 	<xsl:template name="documentContent">
-	  <xsl:choose>
-	    <xsl:when test="@docType='simple'">
-	      <xsl:call-template name="documentNodeText"/>
-	    </xsl:when>
-	    <xsl:otherwise> 
-	      <xsl:call-template name="wrappedDocument"/>
-	    </xsl:otherwise>
-	  </xsl:choose>
+		<xsl:choose>
+			<xsl:when test="@docType='simple'">
+				<xsl:call-template name="documentNodeText"/>
+			</xsl:when>
+			<xsl:otherwise> 
+				<xsl:call-template name="wrappedDocument"/>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 
 	<xsl:template name="wrappedDocument">
-				<xsl:choose>
-					<xsl:when test="/page/pageRequest/paramList/param[@name = 'alb']/@value = '1' or (string-length(/page/pageRequest/paramList/param[@name = 'd']/@value) > 0 and (/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or not(util:contains(/page/pageResponse/document/@selectedNode, '.'))))">
-						<div id="gs-document">
-							<xsl:call-template name="documentPre"/>
-							<div id="gs-document-text" class="documenttext" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
-								<xsl:for-each select="documentNode">
-									<xsl:call-template name="wrapDocumentNodes"/>
-								</xsl:for-each>
-
-							</div>
-						</div>
-					</xsl:when>
-					<xsl:otherwise>
-						<div id="gs-document">							
-							<div id="tocLoadingImage" style="text-align:center;">
-								<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.loading')"/><xsl:text>...</xsl:text>
-							</div>
-						</div>
-						<script type="text/javascript">
-							<xsl:text disable-output-escaping="yes">
-								$(window).load(function()
+		<xsl:choose>
+			<xsl:when test="/page/pageRequest/paramList/param[@name = 'alb']/@value = '1' or (string-length(/page/pageRequest/paramList/param[@name = 'd']/@value) > 0 and (/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or not(util:contains(/page/pageResponse/document/@selectedNode, '.'))))">
+				<div id="gs-document">
+					<xsl:call-template name="documentPre"/>
+					<div id="gs-document-text" class="documenttext" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
+						<xsl:for-each select="documentNode">
+							<xsl:call-template name="wrapDocumentNodes"/>
+						</xsl:for-each>
+					</div>
+				</div>
+			</xsl:when>
+			<xsl:otherwise>
+				<div id="gs-document">							
+					<div id="tocLoadingImage" style="text-align:center;">
+						<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.loading')"/><xsl:text>...</xsl:text>
+					</div>
+				</div>
+				<script type="text/javascript">
+					<xsl:text disable-output-escaping="yes">
+						$(window).load(function()
+						{
+							loadTopLevelPage(function()
+							{
+								//Don't focus the section until the table of contents is loaded
+								var tocCheck = function()
 								{
-									loadTopLevelPage(function()
+									if(gs.variables.tocLoaded)
 									{
-										//Don't focus the section until the table of contents is loaded
-										var tocCheck = function()
-										{
-											if(gs.variables.tocLoaded)
-											{
-												focusSection("</xsl:text><xsl:value-of select="/page/pageResponse/document/@selectedNode"/><xsl:text disable-output-escaping="yes">");
-											}
-											else
-											{
-												setTimeout(tocCheck, 500);
-											}
-										}
-										tocCheck();
-									});
-								});
-							</xsl:text>
-						</script>
-					</xsl:otherwise>
+										focusSection("</xsl:text><xsl:value-of select="/page/pageResponse/document/@selectedNode"/><xsl:text disable-output-escaping="yes">");
+									}
+									else
+									{
+										setTimeout(tocCheck, 500);
+									}
+								}
+								tocCheck();
+							});
+						});
+					</xsl:text>
+				</script>
+			</xsl:otherwise>
 		</xsl:choose>
 		
 		<div class="clear"><xsl:text> </xsl:text></div>
@@ -455,33 +454,34 @@
 			</xsl:when>
 		</xsl:choose>
 	</xsl:template>
+	
 	<xsl:template name="documentHeading">
-	  <b><gsf:metadata name="Title"/></b><br/>
+		<b><gsf:metadata name="Title"/></b><br/>
 	</xsl:template>
+	
 	<!-- The default template for displaying the document node text -->
-  <!-- equivalent to gsf:text -->
+	<!-- equivalent to gsf:text -->
 	<xsl:template name="documentNodeText">
 		<!-- Hides the "This document has no text." message -->
 		<xsl:variable name="noText"><gsf:metadata name="NoText"/></xsl:variable>
-						<xsl:if test="not($noText = '1')">
-
-		<!-- Section text -->
-		<xsl:for-each select="nodeContent">
-			<xsl:for-each select="node()">
-				<xsl:choose>
-					<xsl:when test="not(name())">
+		<xsl:if test="not($noText = '1')">
+			<!-- Section text -->
+			<xsl:for-each select="nodeContent">
+				<xsl:for-each select="node()">
+					<xsl:choose>
+						<xsl:when test="not(name())">
 							<xsl:value-of select="." disable-output-escaping="yes"/>
-					
-					</xsl:when>
-					<xsl:when test="name() = 'annotation'">
-						<xsl:call-template name="displayAnnotation"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<xsl:apply-templates/>
-					</xsl:otherwise>
-				</xsl:choose>
+						</xsl:when>
+						<xsl:when test="name() = 'annotation'">
+							<xsl:call-template name="displayAnnotation"/>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:apply-templates/>
+						</xsl:otherwise>
+					</xsl:choose>
+				</xsl:for-each>
 			</xsl:for-each>
-		</xsl:for-each>	</xsl:if><xsl:text> </xsl:text>
+		</xsl:if><xsl:text> </xsl:text>
 	</xsl:template>
 
 	<!-- Used to produce a version of the page in a format that can be read by the realistic books plugin -->
@@ -537,7 +537,7 @@
 			<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
 				<div style="background:#BBFFBB; padding: 5px; margin:0px auto; width:890px;">
 					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.maps.nearby_docs')"/>
-					<img id="nearbyDocumentsToggle" src="interfaces/oran/images/expand.png">
+					<img id="nearbyDocumentsToggle" style="margin-left:5px;" src="interfaces/{$interface_name}/images/expand.png">
 						<xsl:attribute name="onclick">
 							<xsl:text>performDistanceSearch('</xsl:text>
 							<xsl:value-of select="@nodeID"/>
