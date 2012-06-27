@@ -69,6 +69,10 @@ public class GSParams
 	public static final String S_PASSWORD = "s1.password";
 	public static final String S_NEW_PASSWORD = "s1.newPassword";
 	public static final String S_OLD_PASSWORD = "s1.oldPassword";
+	
+	//Facets
+	public static final String S_FACETS = "s1.facets";
+	public static final String S_FACETS_QUERIES = "s1.facetQueries";
 
 	// some standard arg values
 	public static final String SYSTEM_ACTION = "s";
@@ -111,6 +115,9 @@ public class GSParams
 		addParameter(S_PASSWORD, false);
 		addParameter(S_NEW_PASSWORD, false);
 		addParameter(S_OLD_PASSWORD, false);
+		
+		addParameter(S_FACETS, false);
+		addParameter(S_FACETS_QUERIES, false);
 
 		addParameter(COLLECTION_TYPE, true);
 		addParameter(EXTERNAL_LINK_TYPE, false);
