@@ -77,6 +77,8 @@ public class GSXML
 	public static final String FORMAT_ELEM = "format"; // config files use format - should we use this instead of stylesheet??
 	public static final String TERM_ELEM = "term";
 	public static final String STOPWORD_ELEM = "stopword";
+	public static final String FACET_ELEM = "facet";
+	public static final String COUNT_ELEM = "count";
 	public static final String SYSTEM_ELEM = "system";
 	public static final String FORMAT_STRING_ELEM = "formatString";
 
@@ -153,6 +155,7 @@ public class GSXML
 	public static final String ERROR_TYPE_ATT = "type";
 	public static final String COLLECT_TYPE_ATT = "ct";
 	public static final String HIDDEN_ATT = "hidden";
+	public static final String FACET_ATT = "facet";
 
 	// document stuff
 	public static final String DOC_TYPE_ATT = "docType";
@@ -192,6 +195,7 @@ public class GSXML
 	public static final String PARAM_TYPE_MULTI = "multi";
 	public static final String PARAM_TYPE_FILE = "file";
 	public static final String PARAM_TYPE_INVISIBLE = "invisible";
+	public static final String PARAM_TYPE_CHECKBOX_LIST = "checkbox_list";
 	// stuff for text strings
 	public static final String DISPLAY_TEXT_ELEM = "displayItem";
 	// the following are used for the name attributes
@@ -279,6 +283,7 @@ public class GSXML
 	public static final String GROUPS_ATT = "groups";
 	public static final String BASE_URL = "baseURL";
 	
+	//for classifiers
 	public static final String CHILD_TYPE_ATT = "childType";
 	public static final String CLASSIFIER_STYLE_ATT = "classifierStyle";
 	public static final String HLIST = "HList";
