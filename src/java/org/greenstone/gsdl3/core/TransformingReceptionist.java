@@ -806,8 +806,9 @@ public class TransformingReceptionist extends Receptionist
 		{
 			GSXML.addDebugSpanTags(skinAndLibraryDoc);
 		}
-		if (output.equals("skinandlibdocfinal")) {
-		  return converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
+		if (output.equals("skinandlibdocfinal"))
+		{
+			return converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
 		}
 		return this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype);
 
@@ -870,11 +871,11 @@ public class TransformingReceptionist extends Receptionist
 			}
 			else
 			{
-			  //GSXSLT.mergeStylesheets(skinAndLibraryDoc, ((Document) result).getDocumentElement(), true);
-			  // we just want the result of the transform to be in skinAndLibraryDoc
-			  Element old_doc = skinAndLibraryDoc.getDocumentElement();
-			  skinAndLibraryDoc.removeChild(old_doc);
-			  skinAndLibraryDoc.appendChild(skinAndLibraryDoc.importNode(((Document) result).getDocumentElement(), true));
+				GSXSLT.mergeStylesheets(skinAndLibraryDoc, ((Document) result).getDocumentElement(), true);
+				// we just want the result of the transform to be in skinAndLibraryDoc
+				Element old_doc = skinAndLibraryDoc.getDocumentElement();
+				skinAndLibraryDoc.removeChild(old_doc);
+				skinAndLibraryDoc.appendChild(skinAndLibraryDoc.importNode(((Document) result).getDocumentElement(), true));
 			}
 		}
 	}
