@@ -18,31 +18,17 @@
 package org.greenstone.gsdl3.service;
 
 // Greenstone classes
-import org.greenstone.gsdl3.util.OID;
-import org.greenstone.gsdl3.util.DBInfo;
+import java.util.ArrayList;
+
+import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.SimpleDocumentDatabase;
-import org.greenstone.gsdl3.util.GSFile;
-
-// XML classes
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-// java
-import java.util.Vector;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Iterator;
-import java.io.File;
-
-import org.apache.log4j.*;
-
 public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 {
-
 	protected static final String EQUIV_TERM_ELEM = "equivTerm";
 
 	protected static final String STEM_ATT = "stem";
