@@ -1,20 +1,18 @@
 package org.greenstone.gsdl3.action;
 
-import org.greenstone.gsdl3.core.ModuleInterface;
-import org.greenstone.gsdl3.util.*;
-// XML classes
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Vector;
-import java.io.File;
-import java.io.Serializable;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.util.GSParams;
+import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.OID;
+import org.greenstone.gsdl3.util.UserContext;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /** action for GS2 style classifier browsing */
 public class GS2BrowseAction extends Action
@@ -439,7 +437,6 @@ public class GS2BrowseAction extends Action
 
 	protected void extractMetadataNames(Element new_format, HashSet<String> doc_meta_names, HashSet<String> class_meta_names)
 	{
-
 		NodeList templates = new_format.getElementsByTagName("gsf:template");
 		for (int i = 0; i < templates.getLength(); i++)
 		{
