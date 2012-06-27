@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.Serializable;
 
 import org.apache.log4j.*;
+import org.apache.solr.client.solrj.response.FacetField;
 
 abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 {
@@ -185,7 +186,6 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				// need to remove the TextQuery service
 				Element tq_service = GSXML.getNamedElement(short_service_info, GSXML.SERVICE_ELEM, GSXML.NAME_ATT, QUERY_SERVICE);
 				short_service_info.removeChild(tq_service);
-
 			}
 
 			Document owner = info.getOwnerDocument();
@@ -304,6 +304,13 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				{
 					createParameter(INDEX_LANGUAGE_PARAM, param_list, lang);
 				}
+				
+				if (does_paging)
+				{
+					createParameter(HITS_PER_PAGE_PARAM, param_list, lang);
+					createParameter(START_PAGE_PARAM, param_list, lang);
+				}
+				
 				// create a multi param for the fields etc
 				// text box, field
 				Element multiparam = null;
@@ -355,6 +362,11 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				if (this.does_accent)
 				{
 					createParameter(FIELD_ACCENT_PARAM, multiparam, lang);
+				}
+				if (does_paging)
+				{
+					createParameter(HITS_PER_PAGE_PARAM, param_list, lang);
+					createParameter(START_PAGE_PARAM, param_list, lang);
 				}
 				createParameter(FIELD_FIELD_PARAM, multiparam, lang);
 
@@ -651,6 +663,34 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		Element term_list = this.doc.createElement(GSXML.TERM_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(term_list);
 		addTermInfo(term_list, params, query_result);
+
+		if (query_result instanceof SolrQueryResult)
+		{
+			Element facet_list = this.doc.createElement(GSXML.FACET_ELEM + GSXML.LIST_MODIFIER);
+			result.appendChild(facet_list);
+
+			if(((SolrQueryResult) query_result).getFacetResults() != null)
+			{
+				for (FacetField facet : ((SolrQueryResult) query_result).getFacetResults())
+				{
+					Element facet_elem = this.doc.createElement(GSXML.FACET_ELEM);
+					facet_elem.setAttribute(GSXML.NAME_ATT, facet.getName());
+	
+					for (FacetField.Count count : facet.getValues())
+					{
+						if (count.getCount() > 0)
+						{
+							Element count_elem = this.doc.createElement(GSXML.COUNT_ELEM);
+							count_elem.setAttribute(GSXML.NAME_ATT, count.getName());
+							count_elem.setTextContent("" + count.getCount());
+	
+							facet_elem.appendChild(count_elem);
+						}
+					}
+					facet_list.appendChild(facet_elem);
+				}
+			}
+		}
 
 		return result;
 
