@@ -79,7 +79,7 @@
 		<xsl:param name="collName"/>
 		<xsl:param name="serviceName"/>
 		<xsl:choose>
-			<xsl:when test="@childType = 'VList'">
+			<xsl:when test="@childType = 'VList' or @childType = 'DateList'">
 				<xsl:for-each select='classifierNode|documentNode'>
 					<tr>
 						<xsl:choose>
@@ -129,7 +129,7 @@
 			<xsl:when test="@childType = 'HList'">
 				<table><tr>
 					<xsl:for-each select='classifierNode'>
-						<td>
+						<td class="horizontalClassifierNode">
 							<xsl:apply-templates select='.'>
 								<xsl:with-param name='collName' select='$collName'/>
 								<xsl:with-param name='serviceName' select='$serviceName'/>
@@ -161,7 +161,7 @@
 	
 	<xsl:template name="mapFeatures">
 		<td style="padding-left:5px; padding-right:5px;" valign="top">
-			<a href="javascript:focusDocument('{@nodeID}');"><img src="sites/{$site_name}/collect/tipple-paradise-gardens/images/map_marker.png"/></a>
+			<a href="javascript:focusDocument('{@nodeID}');"><img src="interfaces/{$interface_name}/images/map_marker.png"/></a>
 		</td>
 	</xsl:template>
 </xsl:stylesheet>
