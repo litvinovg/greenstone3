@@ -909,12 +909,15 @@
                 <replace regex="\\" replacement="\\\\" />
     </stringutil>
 	
+    <filter token="gsdlhome" value="${gs2build.home}"/>
+    <filter token="gsdl3srchome" value="${basedir}"/>
     <filter token="gsdl3home" value="${src.gsdl3.home.unix}"/>
     <filter token="gsdl3version" value="${app.version}"/>
     <filter token="tomcat.server" value="${tomcat.server}"/>
     <filter token="tomcat.port" value="${tomcat.port}"/>
     <filter token="perlpath" value="${escaped.perl.path}"/>
 	<filter token="disable.collection.building" value="${disable.collection.building}"/>
+    <copy file="${basedir}/web/WEB-INF/cgi/gsdl3site.cfg.in" tofile="${basedir}/web/WEB-INF/cgi/gsdl3site.cfg" filtering="true" overwrite="true"/>
     <copy file="${basedir}/resources/java/global.properties.in" tofile="${web.classes}/global.properties" filtering="true" overwrite="true"/>
     <copy file="${basedir}/resources/java/log4j.properties.in" tofile="${web.classes}/log4j.properties" filtering="true" overwrite="true"/>
     <chmod file="${web.classes}/global.properties" perm="600"/>
