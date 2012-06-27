@@ -23,6 +23,12 @@ import org.w3c.dom.NodeList;
 
 public class Authentication extends ServiceRack
 {
+	//Some useful constants
+	protected static final int USERNAME_MIN_LENGTH = 2;
+	protected static final int USERNAME_MAX_LENGTH = 30;
+	protected static final int PASSWORD_MIN_LENGTH = 3;
+	protected static final int PASSWORD_MAX_LENGTH = 64;
+	
 	//Error codes
 	protected static final int NO_ERROR = 0;
 	protected static final int ERROR_REQUEST_HAS_NO_PARAM_LIST = -1;
@@ -33,14 +39,17 @@ public class Authentication extends ServiceRack
 	protected static final int ERROR_REQUESTED_USER_NOT_FOUND = -6;
 	protected static final int ERROR_SQL_EXCEPTION = -7;
 	protected static final int ERROR_INVALID_USERNAME = -8;
-	protected static final int ERROR_INVALID_PASSWORD = -9;
-	protected static final int ERROR_INCORRECT_PASSWORD = -10;
-	protected static final int ERROR_USER_ALREADY_EXISTS = -11;
-	protected static final int ERROR_ADDING_USER = -12;
-	protected static final int ERROR_REMOVING_USER = -13;
-	protected static final int ERROR_CAPTCHA_DOES_NOT_MATCH = -14;
-	protected static final int ERROR_CAPTCHA_MISSING = -15;
-	protected static final int ERROR_NOT_AUTHORISED = -16;
+	protected static final int ERROR_PASSWORD_NOT_ENTERED = -9;
+	protected static final int ERROR_PASSWORD_TOO_SHORT = -10;
+	protected static final int ERROR_PASSWORD_TOO_LONG = -11;
+	protected static final int ERROR_PASSWORD_USES_ILLEGAL_CHARACTERS = -12;
+	protected static final int ERROR_INCORRECT_PASSWORD = -13;
+	protected static final int ERROR_USER_ALREADY_EXISTS = -14;
+	protected static final int ERROR_ADDING_USER = -15;
+	protected static final int ERROR_REMOVING_USER = -16;
+	protected static final int ERROR_CAPTCHA_DOES_NOT_MATCH = -17;
+	protected static final int ERROR_CAPTCHA_MISSING = -18;
+	protected static final int ERROR_NOT_AUTHORISED = -19;
 
 	protected static final HashMap<Integer, String> _errorMessageMap;
 	static
@@ -55,7 +64,10 @@ public class Authentication extends ServiceRack
 		errorMessageMap.put(ERROR_REQUESTED_USER_NOT_FOUND, "The requested user was not found in the database.");
 		errorMessageMap.put(ERROR_SQL_EXCEPTION, "There was an SQL exception while accessing the database.");
 		errorMessageMap.put(ERROR_INVALID_USERNAME, "The username specified was invalid.");
-		errorMessageMap.put(ERROR_INVALID_PASSWORD, "The password specified was invalid.");
+		errorMessageMap.put(ERROR_PASSWORD_NOT_ENTERED, "No password was entered.");
+		errorMessageMap.put(ERROR_PASSWORD_TOO_SHORT, "The password you entered was too short (minimum of 3 characters).");
+		errorMessageMap.put(ERROR_PASSWORD_TOO_LONG, "The password you entered was too long (maximum of 64 characters).");
+		errorMessageMap.put(ERROR_PASSWORD_USES_ILLEGAL_CHARACTERS, "The password you entered contains illegal characters.");
 		errorMessageMap.put(ERROR_INCORRECT_PASSWORD, "The password specified was incorrect.");
 		errorMessageMap.put(ERROR_USER_ALREADY_EXISTS, "This user already exists and therefore cannot be added.");
 		errorMessageMap.put(ERROR_ADDING_USER, "There was an error adding this user to the database.");
@@ -462,7 +474,7 @@ public class Authentication extends ServiceRack
 			String newGroups = (String) paramMap.get("groups");
 			String newStatus = (String) paramMap.get("status");
 			String newComment = (String) paramMap.get("comment");
-			String newEmail = (String) paramMap.get("email");
+			String newEmail = (String) paramMap.get("newEmail");
 
 			//Check the given user name
 			int error;
@@ -695,7 +707,7 @@ public class Authentication extends ServiceRack
 	public int checkUsername(String username)
 	{
 		//Check the given user name
-		if ((username == null) || (username.length() < 2) || (username.length() > 30) || (!(Pattern.matches("[a-zA-Z0-9//_//.]+", username))))
+		if ((username == null) || (username.length() < USERNAME_MIN_LENGTH) || (username.length() > USERNAME_MAX_LENGTH) || (!(Pattern.matches("[a-zA-Z0-9//_//.]+", username))))
 		{
 			return ERROR_INVALID_USERNAME;
 		}
@@ -705,9 +717,21 @@ public class Authentication extends ServiceRack
 	public int checkPassword(String password)
 	{
 		//Check the given password
-		if ((password == null) || (password.length() < 3) || (password.length() > 8) || (!(Pattern.matches("[\\p{ASCII}]+", password))))
+		if (password == null)
 		{
-			return ERROR_INVALID_PASSWORD;
+			return ERROR_PASSWORD_NOT_ENTERED;
+		}
+		else if (password.length() < PASSWORD_MIN_LENGTH)
+		{
+			return ERROR_PASSWORD_TOO_SHORT;
+		}
+		else if (password.length() > PASSWORD_MAX_LENGTH)
+		{
+			return ERROR_PASSWORD_TOO_LONG;
+		}
+		else if (!(Pattern.matches("[\\p{ASCII}]+", password)))
+		{
+			return ERROR_PASSWORD_USES_ILLEGAL_CHARACTERS;
 		}
 		return NO_ERROR;
 	}
