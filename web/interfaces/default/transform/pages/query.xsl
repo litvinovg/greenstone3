@@ -31,18 +31,69 @@
 	</xsl:template>
 	
 	<xsl:template name="displayResults">
-		<table id="results">
-			<xsl:for-each select="pageResponse/documentNodeList/documentNode">
-				<tr class="document">
-					<xsl:apply-templates select="."/>
-					<xsl:call-template name="documentNodePost"/>
-				</tr>
-			</xsl:for-each>
-			<br/>
-		</table>
-		
-		<!-- Previous/Next buttons-->
-		<xsl:call-template name="prevNextButtons"/>
+		<xsl:if test="/page/pageResponse/facetList/facet">
+			<script type="text/javascript" src="interfaces/{$interface_name}/js/facet-scripts.js"><xsl:text> </xsl:text></script>
+			<div id="facetSelector">
+				<xsl:for-each select="/page/pageResponse/facetList/facet">
+					<xsl:if test="count(count) > 0">
+						<ul class="facetTable ui-widget-content" indexName="{@name}">
+							<xsl:variable name="serviceName"><xsl:value-of select="/page/pageRequest/paramList/param[@name = 's']/@value"/></xsl:variable>
+							<xsl:variable name="indexShortName"><xsl:value-of select="@name"/></xsl:variable>
+							<xsl:variable name="countSize">
+								<xsl:choose>
+									<xsl:when test="/page/pageResponse/format[@type='search']/gsf:option[@name='facetTableRows']">
+										<xsl:value-of select="/page/pageResponse/format[@type='search']/gsf:option[@name='facetTableRows']/@value"/>
+									</xsl:when>
+									<xsl:otherwise>8</xsl:otherwise>
+								</xsl:choose>
+							</xsl:variable>
+							
+							<li class="ui-widget-header" style="text-transform:capitalize; text-align:center;">
+								<xsl:choose>
+									<xsl:when test="/page/pageResponse/collection/serviceList/service[@name = $serviceName]/paramList/param[@name = 'index']">
+										<xsl:value-of select="/page/pageResponse/collection/serviceList/service[@name = $serviceName]/paramList/param[@name = 'index']/option[@name = $indexShortName]/displayItem"/>
+									</xsl:when>
+									<xsl:when test="/page/pageResponse/collection/serviceList/service[@name = $serviceName]/paramList/param[@name = 'complexField']/param[@name = 'fqf']">
+										<xsl:value-of select="/page/pageResponse/collection/serviceList/service[@name = $serviceName]/paramList/param[@name = 'complexField']/param[@name = 'fqf']/option[@name = $indexShortName]/displayItem"/>
+									</xsl:when>
+								</xsl:choose>
+							</li>
+							<xsl:for-each select="count">
+								<li>
+									<xsl:attribute name="style">
+										<xsl:if test="position() > $countSize">display:none;<xsl:value-of select="$indexShortName"/></xsl:if>
+									</xsl:attribute>
+									<input type="checkbox" onclick="performRefinedSearch();"/><span><xsl:value-of select="@name"/></span>(<xsl:value-of select="."/>)
+								</li>
+							</xsl:for-each>
+							<xsl:if test="count(count) > $countSize">
+								<li class="expandCollapseFacetList{$indexShortName}"><a class="expandCollapseFacetListLink{$indexShortName}" href="javascript:expandFacetList('{$indexShortName}', {$countSize});">See more...</a></li>
+							</xsl:if>
+						</ul>
+					</xsl:if>
+				</xsl:for-each>
+			</div>
+		</xsl:if>
+		<div id="resultsArea">
+			<xsl:attribute name="class">
+				<xsl:if test="/page/pageResponse/facetList/facet">facetedResults</xsl:if>
+			</xsl:attribute>
+			<table id="resultsTable">
+				<xsl:for-each select="pageResponse/documentNodeList/documentNode">
+					<tr class="document">
+						<xsl:apply-templates select="."/>
+						<xsl:call-template name="documentNodePost"/>
+					</tr>
+				</xsl:for-each>
+				<br/>
+			</table>
+			
+			<!-- Previous/Next buttons-->
+			<xsl:call-template name="prevNextButtons"/>
+		</div>
+		<xsl:if test="/page/pageResponse/facetList/facet">
+			<div style="clear:both;"><xsl:text> </xsl:text></div>
+		</xsl:if>
 	</xsl:template>
 	
 	<xsl:template name="displayTermInfo">
@@ -446,6 +497,15 @@
 			</xsl:apply-templates>
 		</table>
 
+	</xsl:template>
+	
+	<xsl:template match="param[@type = 'checkbox_list']">
+		<xsl:param name="ns">s1.</xsl:param>
+		<ul class="checkboxList">
+			<xsl:for-each select="option">
+				<li><input type="checkbox" name="{$ns}{../@name}" value="{@name}"/><xsl:value-of select="displayItem"/></li>
+			</xsl:for-each>
+		</ul>
 	</xsl:template>
 
 	<xsl:template match="param[@type='multi']" mode="contents">

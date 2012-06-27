@@ -3,7 +3,7 @@ html {
 	margin-bottom: 1px;
 }
 body {
-	font-family: sans-serif;
+	font-family: "Segoe UI", Candara, "Bitstream Vera Sans", "DejaVu Sans", "Bitstream Vera Sans", "Trebuchet MS", Verdana, "Verdana Ref", sans-serif;
 	margin: 0;
 	background-color: #eae4d9;
 }
@@ -72,6 +72,10 @@ p {
 
 .classifierContainer {
 	padding-left:1.5em;
+}
+
+.horizontalClassifierNode {
+	padding:0px 0px 10px 10px;
 }
 
 .icon{
@@ -429,34 +433,34 @@ body.dAction #gs_banner h2 {
 #nav li:hover a, #nav li.current a { background-position: 0 0; cursor:default; }
 
 /* style the search and classifier results */
-#results {
+#resultsTable {
 	line-height: 160%;
 	margin: 0;
 	padding: 0;
 	/* border: 1px solid #f00; */
 }
 
-#results ul {
+#resultsTable ul {
 	margin: 0 0 0 20px;
 	padding: 0;
 }
 
-#results li {
+#resultsTable li {
 	list-style: none;
 	margin: 0 0 .2em 0;
 	/* border: 1px solid #00f; */
 }
 
-#results li a {
+#resultsTable li a {
 	padding: 3px 3px 3px 3px;
 	background-repeat: no-repeat;
 	background-position: 0 .1em;
 }
 
 
-#results .document a { /*background-image: url('../images/book.png'); */}
-#results .document a:visited { background-image: url('../images/book-visited.png'); color: #999; }
-#results .shelf>a { background-image: url('../images/bookshelf.png'); }
+#resultsTable .document a { /*background-image: url('../images/book.png'); */}
+#resultsTable .document a:visited { background-image: url('../images/book-visited.png'); color: #999; }
+#resultsTable .shelf>a { background-image: url('../images/bookshelf.png'); }
 
 /* corners of the banner */
 /*
@@ -772,6 +776,33 @@ table{
 dl dt { font-weight:bold;
       padding-top:10px; }
 dl dd { padding-bottom:10px}
+
+#facetSelector{
+	padding: 0px;
+	width:30%; 
+	float:right;
+}
+
+.facetTable{
+	list-style:none; 
+	margin: 0px 0px 20px; 
+	padding: 0px; 
+	overflow:auto; 
+}
+
+.facetTable li{
+	margin-bottom:5px;
+}
+
+.checkboxList{
+	list-style:none; 
+	padding-left:0px;
+}
+
+.facetedResults{
+	float:left;
+	width:65%;
+}
 
 /*
 ul.childrenlist li {
