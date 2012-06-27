@@ -20,7 +20,6 @@ package org.greenstone.gsdl3.service;
 
 // Greenstone classes
 import java.io.File;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -54,7 +53,7 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 	/** methods to handle actually doing the query */
 
 	/** do any initialisation of the query object */
-	protected boolean setUpQueryer(HashMap<String, Serializable> params)
+	protected boolean setUpQueryer(HashMap params)
 	{
 		String indexdir = GSFile.collectionBaseDir(this.site_home, this.cluster_name) + File.separatorChar + "index" + File.separatorChar;
 
@@ -172,7 +171,6 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 	protected long numDocsMatched(Object query_result)
 	{
 		return ((LuceneQueryResult) query_result).getTotalDocs();
-
 	}
 
 	/** get the list of doc ids */
@@ -201,7 +199,7 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 	}
 
 	/** add in term info if available */
-	protected boolean addTermInfo(Element term_list, HashMap<String, Serializable> params, Object query_result)
+	protected boolean addTermInfo(Element term_list, HashMap params, Object query_result)
 	{
 		String query_level = (String) params.get(LEVEL_PARAM); // the current query level
 
