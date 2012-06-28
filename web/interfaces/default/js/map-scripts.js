@@ -299,23 +299,26 @@ function loopThroughMarkers()
 		return;
 	}
 
-	if(_docList.loopIndex >= visibleMarkers.length)
-	{
-		_docList.loopIndex = 0;
-	}
-
 	clearAllInfoBoxes();
-
-	var doc = visibleMarkers[_docList.loopIndex];
-	var elem = document.getElementById("div" + doc.nodeID);
-	if(elem)
+	
+	var elem = null;
+	while(!elem)
 	{
-		elem.style.background = "#BBFFBB";
-		setTimeout(function(){elem.style.background = "";}, 2000);
+		if(_docList.loopIndex >= visibleMarkers.length)
+		{
+			_docList.loopIndex = 0;
+		}
+
+		var doc = visibleMarkers[_docList.loopIndex];
+		var elem = document.getElementById("div" + doc.nodeID);
+		if(elem)
+		{
+			elem.style.background = "#BBFFBB";
+			setTimeout(function(){elem.style.background = "";}, 2000);
+		}
+		_docList.loopIndex++;
 	}
 	doc.marker.markerInfo.open(_map, doc.marker);
-	
-	_docList.loopIndex++;
 }
 
 function attachClickHandler(marker, nodeID)
