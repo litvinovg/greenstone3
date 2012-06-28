@@ -364,7 +364,7 @@
 			<xsl:variable name="subaction" select="/page/pageRequest/@subaction"/>
 			<td id="quicksearcharea">
 				<form action="{$library_name}/collection/{$collNameChecked}/search/TextQuery">
-					<input type="hidden" name="rt" value="rd"/>
+					<input type="hidden" name="rt" value="r"/>
 					<input type="hidden" name="s1.level">
 						<xsl:attribute name="value">
 							<xsl:choose>
