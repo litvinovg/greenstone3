@@ -583,11 +583,11 @@ public class TransformingReceptionist extends Receptionist
 		Document libraryXsl = null;
 		try
 		{
-			libraryXsl = getDoc(this.getLibraryXSLFilename());
+			libraryXsl = getDoc(this.getGSLibXSLFilename());
 			String errMsg = ((XMLConverter.ParseErrorHandler) parser.getErrorHandler()).getErrorMessage();
 			if (errMsg != null)
 			{
-				return XMLTransformer.constructErrorXHTMLPage("Error loading xslt file: " + this.getLibraryXSLFilename() + "\n" + errMsg);
+				return XMLTransformer.constructErrorXHTMLPage("Error loading xslt file: " + this.getGSLibXSLFilename() + "\n" + errMsg);
 			}
 		}
 		catch (java.io.FileNotFoundException e)
@@ -597,8 +597,8 @@ public class TransformingReceptionist extends Receptionist
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			System.out.println("error loading library xslt");
-			return XMLTransformer.constructErrorXHTMLPage("error loading library xslt\n" + e.getMessage());
+			System.out.println("error loading gslib xslt");
+			return XMLTransformer.constructErrorXHTMLPage("error loading gslib xslt\n" + e.getMessage());
 		}
 
 		//   Combine the skin file and library variables/templates into one document. 
@@ -972,10 +972,10 @@ public class TransformingReceptionist extends Receptionist
 		return finalDoc;
 	}
 
-	// returns the library.xsl path of the library file that is applicable for the current interface
-	protected String getLibraryXSLFilename()
+	// returns the path to the gslib.xsl file that is applicable for the current interface
+	protected String getGSLibXSLFilename()
 	{
-		return GSFile.xmlTransformDir(GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.INTERFACE_NAME))) + File.separatorChar + "library.xsl";
+		return GSFile.xmlTransformDir(GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.INTERFACE_NAME))) + File.separatorChar + "gslib.xsl";
 	}
 
 	// Call this when a FileNotFoundException could be thrown when loading an xsl (xml) file.
