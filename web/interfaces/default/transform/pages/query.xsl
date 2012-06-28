@@ -4,6 +4,7 @@
 	xmlns:java="http://xml.apache.org/xslt/java"
 	xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
 	xmlns:gslib="http://www.greenstone.org/skinning"
+	xmlns:gsvar="http://www.greenstone.org/skinning-var"
 	xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
 	extension-element-prefixes="java util"
 	exclude-result-prefixes="java util gsf">
@@ -29,6 +30,9 @@
 		<xsl:call-template name="displayResults"/>
 		<xsl:call-template name="resultsPagePost"/>
 	</xsl:template>
+
+        <!-- optional cgi-params for links to document pages -->
+	<xsl:variable name="opt-doc-link-args">p.s=<gsvar:this-service/></xsl:variable>
 	
 	<xsl:template name="displayResults">
 		<xsl:if test="/page/pageResponse/facetList/facet">

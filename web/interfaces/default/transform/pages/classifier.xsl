@@ -18,6 +18,8 @@
 	<!-- set page breadcrumbs -->
 	<xsl:template name="breadcrumbs"><gslib:siteLink/><gslib:rightArrow/><gslib:collectionNameLinked/><gslib:rightArrow/></xsl:template>
 
+ <!-- optional cgi-params for links to document pages -->
+  <xsl:variable name="opt-doc-link-args"></xsl:variable>
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse">
 		<xsl:call-template name="classifierPre"/>
