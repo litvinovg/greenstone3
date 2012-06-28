@@ -6,10 +6,6 @@
 	exclude-result-prefixes="util xalan gslib gsf xslt">
 
 
-<xsl:output
-	method="html" 
-	doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" 
-	doctype-system="http://www.w3.org/TR/html4/loose.dtd"/>
 
 	
 <!--Load the Greenstone Utility file that contains all the code needed to expand all GSLib elements-->
