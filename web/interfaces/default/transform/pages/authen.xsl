@@ -77,7 +77,6 @@
 							<td><xsl:text> </xsl:text></td>
 						</tr>
 						<xsl:for-each select="/page/pageResponse/authenticationNode/service/userNodeList/userNode">
-	      
 							<tr class="ui-widget-content">
 								<td><xsl:value-of select="@username"/></td>
 								<td>
@@ -95,9 +94,9 @@
 								<td><xsl:value-of select="@email"/></td>
 								<td><a href="{$library_name}/admin/EditUser?s1.username={@username}"><button><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.edit')"/></button></a></td>
 								<td>
-								<xsl:variable name="user-pos">username<xsl:number value="position()"/></xsl:variable>
-		                                                <xsl:variable name="message-pos">confirmMessage<xsl:number value="position()"/></xsl:variable> 
-		  <form method="GET" action="{$library_name}/admin/PerformDeleteUser">
+									<xsl:variable name="user-pos">username<xsl:number value="position()"/></xsl:variable>
+									<xsl:variable name="message-pos">confirmMessage<xsl:number value="position()"/></xsl:variable> 
+									<form method="GET" action="{$library_name}/admin/PerformDeleteUser">
 										<input type="hidden" name="s1.username" value="{@username}"/>
 										<input id="delUser{@username}" type="submit" value="{util:getInterfaceText($interface_name, /page/@lang, 'authen.delete')}"/>
 										<script type="text/javascript">
@@ -362,6 +361,7 @@
 				<!-- ADD USER / REGISTER PAGE -->
 				<!-- ************************ -->
 				<xsl:when test="/page/pageResponse/authenticationNode/service/@operation = 'AddUser' or /page/pageResponse/authenticationNode/service/@operation = 'Register'">
+					<div id="errorArea"><xsl:text> </xsl:text></div>
 					<form method="POST">
 						<xsl:attribute name="action">
 							<xsl:choose>
@@ -454,7 +454,7 @@
 							</xsl:if>
 							<xsl:if test="/page/pageResponse/authenticationNode/service/@operation = 'Register' and /page/pageResponse/recaptcha/@privateKey and /page/pageResponse/recaptcha/@publicKey">
 								<tr>
-									<td colspan="2">
+									<td colspan="2" id="recaptchaArea">
 										<xsl:value-of disable-output-escaping="yes" select="util:reCAPTCHAimage(/page/pageResponse/recaptcha/@publicKey, /page/pageResponse/recaptcha/@privateKey)"/>
 									</td>
 									<script type="text/javascript">
@@ -464,7 +464,19 @@
 												$("#recaptcha_challenge_field").attr("name", "s1.recaptcha_challenge_field");
 												$("#recaptcha_response_field").attr("name", "s1.recaptcha_response_field");
 											}
-											$(window).load(changeParams());
+											$(window).load(changeParams);
+											
+											function checkreCaptchaError()
+											{
+												var html = $("#recaptchaArea").html();
+												if(html.search(/Invalid referer/g) != -1)
+												{
+													$("#recaptchaArea").html("");
+													$("#errorArea").html("The reCAPTCHA key used in the siteconfig.xml file for this site is invalid for this domain name. Please contact your collection administrator.");
+													$("#errorArea").attr("class", "ui-state-error ui-corner-all");
+												}
+											}
+											$(window).load(checkreCaptchaError);
 										</xsl:text>
 									</script>
 								</tr>
