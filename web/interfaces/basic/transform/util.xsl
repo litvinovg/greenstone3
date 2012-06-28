@@ -4,8 +4,13 @@
   xmlns:gslib="http://www.greenstone.org/skinning"
   xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
   xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
-  exclude-result-prefixes="util gslib gsf">
+  exclude-result-prefixes="util xalan gslib xslt gsf gs3">
   
+  <xsl:output
+    method="html" 
+    doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" 
+    doctype-system="http://www.w3.org/TR/html4/loose.dtd"/>
+
   <!-- some global parameters - these are set by whoever is invoking the transformation -->
   <xsl:param name="interface_name"/>
   <xsl:param name="library_name"/>
