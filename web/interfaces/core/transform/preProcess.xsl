@@ -3,6 +3,7 @@
 <xsl:stylesheet version="1.0" 
   xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
   xmlns:gslib="http://www.greenstone.org/skinning"
+	xmlns:gsvar="http://www.greenstone.org/skinning-var"
   xmlns:java="http://xml.apache.org/xslt/java"
   xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
   xmlns:xalan="http://xml.apache.org/xalan"
@@ -59,7 +60,11 @@
     <xsl:for-each select="*|text()">
       <xsl:choose>
 	
-	
+	<xsl:when test="namespace-uri(.)=namespace::gsvar">
+	  <xsl:element name="xsl:value-of">
+		<xsl:attribute name="select">$<xsl:value-of select="local-name()" /></xsl:attribute>
+	      </xsl:element>
+</xsl:when>
 	<!-- if node has gslib prefix, expand it into appropriate copy-of or call-template element -->
 	<xsl:when test="namespace-uri(.)=namespace::gslib">
 	  
