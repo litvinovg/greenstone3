@@ -100,9 +100,13 @@
 						<xslt:value-of select='/page/pageResponse/collection/@name'/>
 						<xsl:text>/document/</xsl:text>
 						<xslt:value-of select='@nodeID'/>
-						<xslt:if test="$bookswitch = 'on' or $bookswitch = 'flashxml'">
+	    <xslt:choose>
+						<xslt:when test="$bookswitch = 'on' or $bookswitch = 'flashxml'">
 							<xsl:text>?book=on</xsl:text>
-						</xslt:if>
+						</xslt:when>
+	      <xslt:otherwise>
+<xslt:if test="$opt-doc-link-args">?<xslt:value-of select="$opt-doc-link-args"/></xslt:if></xslt:otherwise>
+</xslt:choose>
 					</xslt:attribute>
 					<xsl:apply-templates/>
 				</a>
