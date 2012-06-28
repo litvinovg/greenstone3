@@ -20,6 +20,7 @@ package org.greenstone.gsdl3.service;
 // Greenstone classes
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.util.FacetWrapper;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.mgpp.MGPPDocInfo;
@@ -335,4 +337,8 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 		return temp.toString();
 	}
 
+	protected ArrayList<FacetWrapper> getFacets(Object query_result)
+	{
+		return null;
+	}
 }

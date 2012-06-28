@@ -20,6 +20,7 @@ package org.greenstone.gsdl3.service;
 
 // Greenstone classes
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,6 +30,7 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 import org.greenstone.LuceneWrapper3.GS2LuceneQuery;
 import org.greenstone.LuceneWrapper3.LuceneQueryResult;
+import org.greenstone.gsdl3.util.FacetWrapper;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
 import org.w3c.dom.Element;
@@ -227,5 +229,10 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 		}
 
 		return true;
+	}
+	
+	protected ArrayList<FacetWrapper> getFacets(Object query_result)
+	{
+		return null;
 	}
 }

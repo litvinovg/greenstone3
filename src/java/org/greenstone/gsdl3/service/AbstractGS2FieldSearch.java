@@ -304,13 +304,13 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				{
 					createParameter(INDEX_LANGUAGE_PARAM, param_list, lang);
 				}
-				
+
 				if (does_paging)
 				{
 					createParameter(HITS_PER_PAGE_PARAM, param_list, lang);
 					createParameter(START_PAGE_PARAM, param_list, lang);
 				}
-				
+
 				// create a multi param for the fields etc
 				// text box, field
 				Element multiparam = null;
@@ -664,30 +664,34 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		result.appendChild(term_list);
 		addTermInfo(term_list, params, query_result);
 
-		if (query_result instanceof SolrQueryResult)
+		if(does_faceting)
 		{
-			Element facet_list = this.doc.createElement(GSXML.FACET_ELEM + GSXML.LIST_MODIFIER);
-			result.appendChild(facet_list);
-
-			if(((SolrQueryResult) query_result).getFacetResults() != null)
+			ArrayList<FacetWrapper> facets = getFacets(query_result);
+			if(facets != null)
 			{
-				for (FacetField facet : ((SolrQueryResult) query_result).getFacetResults())
+				Element facet_list = this.doc.createElement(GSXML.FACET_ELEM + GSXML.LIST_MODIFIER);
+				result.appendChild(facet_list);
+
+				for(FacetWrapper currentFacet : facets)
 				{
 					Element facet_elem = this.doc.createElement(GSXML.FACET_ELEM);
-					facet_elem.setAttribute(GSXML.NAME_ATT, facet.getName());
-	
-					for (FacetField.Count count : facet.getValues())
+					facet_elem.setAttribute(GSXML.NAME_ATT, currentFacet.getName());
+					facet_list.appendChild(facet_elem);
+					
+					HashMap<String, Long> countMap = currentFacet.getCounts();
+					
+					for(String countName : countMap.keySet())
 					{
-						if (count.getCount() > 0)
+						long countValue = countMap.get(countName);
+						if(countValue > 0)
 						{
 							Element count_elem = this.doc.createElement(GSXML.COUNT_ELEM);
-							count_elem.setAttribute(GSXML.NAME_ATT, count.getName());
-							count_elem.setTextContent("" + count.getCount());
-	
+							count_elem.setAttribute(GSXML.NAME_ATT, countName);
+							count_elem.setTextContent("" + countValue);
+
 							facet_elem.appendChild(count_elem);
 						}
 					}
-					facet_list.appendChild(facet_elem);
 				}
 			}
 		}
@@ -711,6 +715,9 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 
 	/** get the list of doc ranks */
 	abstract protected String[] getDocRanks(Object query_result);
+	
+	/** get the list of facets */
+	abstract protected ArrayList<FacetWrapper> getFacets(Object query_result);
 
 	/** add in term info if available */
 	abstract protected boolean addTermInfo(Element term_list, HashMap<String, Serializable> params, Object query_result);
