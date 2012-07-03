@@ -18,25 +18,16 @@
 package org.greenstone.gsdl3.service;
 
 // Greenstone classes
-import org.greenstone.gsdl3.util.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-// XML classes
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.util.FacetWrapper;
+import org.greenstone.gsdl3.util.GSXML;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-// java classes
-import java.util.Iterator;
-import java.util.Set;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Vector;
-import java.io.File;
-import java.io.Serializable;
-
-import org.apache.log4j.*;
-import org.apache.solr.client.solrj.response.FacetField;
 
 abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 {
