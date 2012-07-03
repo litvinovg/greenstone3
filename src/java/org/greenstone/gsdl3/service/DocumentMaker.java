@@ -388,7 +388,6 @@ public class DocumentMaker extends ServiceRack
 			ex.printStackTrace();
 		}
 
-		ArrayList<String> collectionsToBuild = new ArrayList<String>();
 		if (transactions != null && transactions.size() > 0)
 		{
 			for (int j = 0; j < transactions.size(); j++)
