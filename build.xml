@@ -2252,27 +2252,19 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="flax-resources"/></exec> 
     <exec executable="svn"><arg value="checkout"/><arg value="${flax.checkout.path}/lib"/> 
       <arg value="flax-lib"/></exec> 
-    <antcall target="flax-copy-files" />
+    <antcall target="flax-copy-del-files" />
   </target>
   
-  <target name="flax-copy-files" description="copy some flax files into the appropriate greenstone3 directories">
-    <echo>copying flax files ...</echo>
+  <target name="flax-copy-del-files" description="copy some flax files into the appropriate greenstone3 directories and delete some unwanted greenstone stuff">
     <copy file="${web.home}/WEB-INF/classes/flax/web.xml" todir="${web.home}/WEB-INF" overwrite="true" />
-    <!-- A configuration file containing web service binding information for the axis engine -->
-    <copy file="${web.home}/WEB-INF/classes/flax/server-config.wsdd" todir="${web.home}/WEB-INF" overwrite="true" />
-    <!-- A static web service wsdl file which is queried by soap client. The reason this file is used (instead of the dynamically generated version) is in case any redirects are used in the Apache configuration (e.g., flax.nzdl.org:80 redirects to harakeke:8080) 
-    <copy file="${basedir}/flax-resources/FlaxWebService.wsdl" tofile="${web.home}/FlaxWebService.wsdl" overwrite="true"/>-->
     <copy todir="${web.home}/WEB-INF/lib">
-    	<fileset dir="${basedir}/flax-lib">
-            <include name="*.jar"/>
-    	</fileset>	
+		    <fileset dir="${basedir}/flax-lib">
+		       <include name="*.jar"/>
+		    </fileset>	
     </copy>
+    <delete dir="${web.home}/sites/gateway"/>
+    <delete dir="${web.home}/sites/localsite"/>
   </target>
-<!--  <target name="configure-flax-wsdl" description="Configure flax webservice with tomcat server/port">
-    <copy file="${basedir}/flax-resources/FlaxWebService.wsdl" tofile="${web.home}/FlaxWebService.wsdl" overwrite="true"/>
-    <rsr file="${web.home}/FlaxWebService.wsdl" pattern="@flaxpublicserver@:@flaxpublicport@" replacement="${tomcat.server}:${tomcat.port}"/>
-    <echo>FLAX server for Moodle module is configured to: http://${tomcat.server}:${tomcat.port}.</echo>
-  </target>-->
 
   <target name="update-flax" description="update flax from repository">
     <echo>updating flax ...</echo>
@@ -2295,6 +2287,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 	<antcall target="compile-core" />
   </target>
 
+  <!-- ========================End of FLAX Targets ========================= -->
 
   <target name="compile-javadocs">
     <javadoc packagenames="org.greenstone.*"
