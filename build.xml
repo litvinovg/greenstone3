@@ -2262,8 +2262,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 		       <include name="*.jar"/>
 		    </fileset>	
     </copy>
-    <delete dir="${web.home}/sites/gateway"/>
-    <delete dir="${web.home}/sites/localsite"/>
+    <!--<delete dir="${web.home}/sites/gateway"/>
+    <delete dir="${web.home}/sites/localsite"/>-->
   </target>
 
   <target name="update-flax" description="update flax from repository">
@@ -2390,4 +2390,3 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
     
 </project>
-
