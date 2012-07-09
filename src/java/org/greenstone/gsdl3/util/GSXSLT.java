@@ -43,9 +43,10 @@ public class GSXSLT
 	 * takes a stylesheet Document, and adds in any child nodes from extra_xsl
 	 * named templates overwrite any existing one, while match templates are
 	 * just added to the end of the stylesheet
-
-	 * elements are added in following order, and added to preserve original order with imported ones coming after existing ones
-	 * import, include, output, variable, template
+	 * 
+	 * elements are added in following order, and added to preserve original
+	 * order with imported ones coming after existing ones import, include,
+	 * output, variable, template
 	 */
 	public static void mergeStylesheetsDebug(Document main_xsl, Element extra_xsl, boolean overwrite, boolean debug, String firstDocFileName, String secondDocFileName)
 	{
@@ -57,18 +58,21 @@ public class GSXSLT
 
 		Element main = main_xsl.getDocumentElement();
 		Node insertion_point = null;
-		  Element last_import = GSXML.getLastElementByTagNameNS(main, "http://www.w3.org/1999/XSL/Transform", "import");
-		  if (last_import != null) {
-		    insertion_point = last_import.getNextSibling();
-		  } else {
-		    insertion_point = main.getFirstChild();
-		  }
-		
+		Element last_import = GSXML.getLastElementByTagNameNS(main, "http://www.w3.org/1999/XSL/Transform", "import");
+		if (last_import != null)
+		{
+			insertion_point = last_import.getNextSibling();
+		}
+		else
+		{
+			insertion_point = main.getFirstChild();
+		}
+
 		// imports
 		NodeList children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "import");
 		for (int i = 0; i < children.getLength(); i++)
 		{
-		  Element node = (Element) children.item(i);
+			Element node = (Element) children.item(i);
 			// If the new xsl:import element is identical (in terms of href attr value) 
 			// to any in the merged document, don't copy it over
 			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "import", "href", node.getAttribute("href")) == null)
@@ -78,47 +82,49 @@ public class GSXSLT
 				// Although Node.insertBefore() will first remove identical nodes before inserting, we check
 				// only the href attribute to see if they're "identical" to any pre-existing <xsl:import>
 				//main.insertBefore(main_xsl.importNode(node, true), main.getFirstChild());
-			  main.insertBefore(main_xsl.importNode(node, true), insertion_point);
-			  
+				main.insertBefore(main_xsl.importNode(node, true), insertion_point);
+
 			}
 		}
-	
-		  // do we have a new insertion point??
-		   Element last_include = GSXML.getLastElementByTagNameNS(main, "http://www.w3.org/1999/XSL/Transform", "include");
-		   if (last_include != null) {				
-		     insertion_point = last_include.getNextSibling();
-		   }
-	
+
+		// do we have a new insertion point??
+		Element last_include = GSXML.getLastElementByTagNameNS(main, "http://www.w3.org/1999/XSL/Transform", "include");
+		if (last_include != null)
+		{
+			insertion_point = last_include.getNextSibling();
+		}
+
 		// includes
 		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "include");
 		for (int i = 0; i < children.getLength(); i++)
 		{
-		  Element node = (Element)children.item(i);
+			Element node = (Element) children.item(i);
 			// If the new xsl:include element is identical (in terms of href attr value)
 			// to any in the merged document, don't copy it over
 			// Although Node.appendChild() will first remove identical nodes before appending, we check
 			// only the href attribute to see if they're "identical" to any pre-existing <xsl:include>
-			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "include", "href", node.getAttribute("href"))==null)
+			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "include", "href", node.getAttribute("href")) == null)
 			{
-			  //main.appendChild(main_xsl.importNode(node, true));
-			  main.insertBefore(main_xsl.importNode(node, true), insertion_point);
+				//main.appendChild(main_xsl.importNode(node, true));
+				main.insertBefore(main_xsl.importNode(node, true), insertion_point);
 			}
 		} // for each include
-		
-		  // do we have a new insertion point??
-		   Element last_output = GSXML.getLastElementByTagNameNS(main, "http://www.w3.org/1999/XSL/Transform", "output");
-		   if (last_output != null) {				
-		     insertion_point = last_output.getNextSibling();
-		   }
+
+		// do we have a new insertion point??
+		Element last_output = GSXML.getLastElementByTagNameNS(main, "http://www.w3.org/1999/XSL/Transform", "output");
+		if (last_output != null)
+		{
+			insertion_point = last_output.getNextSibling();
+		}
 
 		// outputs
 		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "output");
 		for (int i = 0; i < children.getLength(); i++)
 		{
-		  Element node = (Element)children.item(i);
+			Element node = (Element) children.item(i);
 			// If the new xsl:output element is identical (in terms of the value for the method attr) 
 			// to any in the merged document, don't copy it over
-			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "output", "method", node.getAttribute("method"))==null)
+			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "output", "method", node.getAttribute("method")) == null)
 			{
 				main.insertBefore(main_xsl.importNode(node, true), insertion_point);
 			}
@@ -129,10 +135,10 @@ public class GSXSLT
 		children = GSXML.getChildrenByTagNameNS(extra_xsl, "http://www.w3.org/1999/XSL/Transform", "variable");
 		for (int i = 0; i < children.getLength(); i++)
 		{
-		  Element node = (Element)children.item(i);
+			Element node = (Element) children.item(i);
 			// If the new xsl:import element is identical (in terms of href attr value) 
 			// to any in the merged document, don't copy it over
-			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform","variable", "name", node.getAttribute("name"))==null)
+			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "variable", "name", node.getAttribute("name")) == null)
 			{
 				main.appendChild(main_xsl.importNode(node, true));
 			}
@@ -143,35 +149,37 @@ public class GSXSLT
 		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "template");
 		for (int i = 0; i < children.getLength(); i++)
 		{
-		  Element node = (Element) children.item(i);
+			Element node = (Element) children.item(i);
 			// remove any previous occurrences of xsl:template with the same value for name or match 
-			  String template_match = node.getAttribute("match");
-			  String template_name = node.getAttribute("name");
+			String template_match = node.getAttribute("match");
+			String template_name = node.getAttribute("name");
 
 			if (overwrite)
 			{
-			  // if we have a name attribute, remove any other similarly named template
-			  if (!template_name.equals("")) {
-			    GSXML.removeNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "template", "name", template_name);
-			  }
-			  // if we have a match attribute, remove other templates that match - 
-			  if (!template_match.equals("")) {
-			    GSXML.removeNamedElementsNS(main, "http://www.w3.org/1999/XSL/Transform", "template", "match", template_match);
-			  }
-			  // now add our good template in
-			  main.appendChild(main_xsl.importNode(node, true));
-			}
-			else 
-			  {
-			// if overwrite is false, then we only add in templates if they don't match something else.
-			// In this case (eg from expanding imported stylesheets)
-			// there can't be any duplicate named templates, so just look for matches
-			    // we already have the one with highest import precedence (from the top most level) so don't add any more in
-			    if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform","template", "match", template_match) == null)
-			{
+				// if we have a name attribute, remove any other similarly named template
+				if (!template_name.equals(""))
+				{
+					GSXML.removeNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "template", "name", template_name);
+				}
+				// if we have a match attribute, remove other templates that match - 
+				if (!template_match.equals(""))
+				{
+					GSXML.removeNamedElementsNS(main, "http://www.w3.org/1999/XSL/Transform", "template", "match", template_match);
+				}
+				// now add our good template in
 				main.appendChild(main_xsl.importNode(node, true));
 			}
-			  }
+			else
+			{
+				// if overwrite is false, then we only add in templates if they don't match something else.
+				// In this case (eg from expanding imported stylesheets)
+				// there can't be any duplicate named templates, so just look for matches
+				// we already have the one with highest import precedence (from the top most level) so don't add any more in
+				if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "template", "match", template_match) == null)
+				{
+					main.appendChild(main_xsl.importNode(node, true));
+				}
+			}
 		}
 
 		if (debug)
@@ -311,9 +319,6 @@ public class GSXSLT
 			}
 		}
 	}
-
-
-
 
 	/**
 	 * takes any import or include nodes, and creates absolute path names for
