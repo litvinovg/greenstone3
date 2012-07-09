@@ -91,7 +91,6 @@ public class TransformingReceptionist extends Receptionist
 		{
 			e.printStackTrace();
 		}
-
 	}
 
 	/** configures the receptionist - overwrite this to set up the xslt map */
@@ -558,7 +557,6 @@ public class TransformingReceptionist extends Receptionist
 
 		//for debug purposes only
 		Document oldStyle_doc = style_doc;
-
 		Document preprocessingXsl;
 		try
 		{
@@ -640,63 +638,11 @@ public class TransformingReceptionist extends Receptionist
 			//System.out.println("GS-Lib statements are now expanded") ;
 		}
 
-		//The following code is to be uncommented if we need to append the extracted GSF statements
-		//after having extracted the GSLib elements. In case of a problem during postprocessing.
-		/*
-		 * // put the page into a document - this is necessary for xslt to get
-		 * // the paths right if you have paths relative to the document root //
-		 * eg /page. Document doc = this.converter.newDOM();
-		 * doc.appendChild(doc.importNode(page, true)); Element page_response =
-		 * (Element)GSXML.getChildByTagName(page, GSXML.PAGE_RESPONSE_ELEM);
-		 * Element format_elem = (Element)GSXML.getChildByTagName(page_response,
-		 * GSXML.FORMAT_ELEM); if (output.equals("formatelem")) { return
-		 * format_elem; } if (format_elem != null) {
-		 * //page_response.removeChild(format_elem);
-		 * logger.debug("format elem="+
-		 * this.converter.getPrettyString(format_elem)); // need to transform
-		 * the format info String configStylesheet_file =
-		 * GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(),
-		 * (String)this.config_params.get(GSConstants.SITE_NAME), collection,
-		 * (String)this.config_params.get(GSConstants.INTERFACE_NAME),
-		 * base_interfaces, "config_format.xsl"); Document configStylesheet_doc
-		 * = this.converter.getDOM(new File(configStylesheet_file)); if
-		 * (configStylesheet_doc != null) { Document format_doc =
-		 * this.converter.newDOM();
-		 * format_doc.appendChild(format_doc.importNode(format_elem, true));
-		 * Node result = this.transformer.transform(configStylesheet_doc,
-		 * format_doc);
-		 * 
-		 * // Since we started creating documents with DocTypes, we can end up
-		 * with // Document objects here. But we will be working with an Element
-		 * instead, // so we grab the DocumentElement() of the Document object
-		 * in such a case. Element new_format; if(result.getNodeType() ==
-		 * Node.DOCUMENT_NODE) { new_format =
-		 * ((Document)result).getDocumentElement(); } else { new_format =
-		 * (Element)result; }
-		 * logger.debug("new format elem="+this.converter.getPrettyString
-		 * (new_format)); if (output.equals("newformat")) { return new_format; }
-		 * 
-		 * // add extracted GSF statements in to the main stylesheet
-		 * GSXSLT.mergeStylesheets(skinAndLibraryDoc, new_format);
-		 * //System.out.println
-		 * ("added extracted GSF statements into the main stylesheet") ;
-		 * 
-		 * // add extracted GSF statements in to the debug test stylesheet
-		 * //GSXSLT.mergeStylesheets(oldStyle_doc, new_format); } else {
-		 * logger.error(
-		 * " couldn't parse the config_format stylesheet, adding the format info as is"
-		 * ); GSXSLT.mergeStylesheets(skinAndLibraryDoc, format_elem); //
-		 * GSXSLT.mergeStylesheets(oldStyle_doc, format_elem); }
-		 * logger.debug("the converted stylesheet is:");
-		 * logger.debug(this.converter
-		 * .getPrettyString(skinAndLibraryDoc.getDocumentElement())); }
-		 */
-
 		// there is a thing called a URIResolver which you can set for a
 		// transformer or transformer factory. may be able to use this
 		// instead of this absoluteIncludepaths hack
 
-		GSXSLT.absoluteIncludePaths(skinAndLibraryDoc, GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces);
+		//GSXSLT.absoluteIncludePaths(skinAndLibraryDoc, GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces);
 
 		//Same but for the debug version when we want the do the transformation like we use to do
 		//without any gslib elements.
@@ -792,9 +738,12 @@ public class TransformingReceptionist extends Receptionist
 			}
 		}
 
-		if (skinAndLibraryDoc.getElementsByTagName("gsf:metadata").getLength() > 0)
+		GSXSLT.inlineImportAndIncludeFiles(skinAndLibraryDoc, null);
+		skinAndLibraryDoc = (Document) secondConfigFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request));
+
+		if (_debug)
 		{
-			secondConfigFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request));
+			GSXML.addDebugSpanTags(skinAndLibraryDoc);
 		}
 
 		if (output.equals("xmlfinal"))
@@ -802,14 +751,11 @@ public class TransformingReceptionist extends Receptionist
 			return doc;
 		}
 
-		if (_debug)
-		{
-			GSXML.addDebugSpanTags(skinAndLibraryDoc);
-		}
 		if (output.equals("skinandlibdocfinal"))
 		{
 			return converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
 		}
+
 		return this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype);
 
 		// The line below will do the transformation like we use to do before having Skin++ implemented,
@@ -819,7 +765,7 @@ public class TransformingReceptionist extends Receptionist
 		//return null; // For now - change later
 	}
 
-	protected void secondConfigFormatPass(String collection, Document skinAndLibraryDoc, Document doc, UserContext userContext)
+	protected Node secondConfigFormatPass(String collection, Document skinAndLibraryDoc, Document doc, UserContext userContext)
 	{
 		String to = GSPath.appendLink(collection, "DocumentMetadataRetrieve"); // Hard-wired?
 		Element metaMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
@@ -862,22 +808,9 @@ public class TransformingReceptionist extends Receptionist
 
 		if (configStylesheet_doc != null)
 		{
-			Document format_doc = XMLConverter.newDOM();
-			format_doc.appendChild(format_doc.importNode(skinAndLibraryDoc.getDocumentElement().cloneNode(true), true));
-			Node result = this.transformer.transform(configStylesheet_doc, format_doc, config_params);
-			if (_debug)
-			{
-				GSXSLT.mergeStylesheetsDebug(skinAndLibraryDoc, ((Document) result).getDocumentElement(), true, true, "OTHER3", GSFile.collectionConfigFile(GSFile.collectDir(GSFile.siteHome(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME)) + File.separator + collection)));
-			}
-			else
-			{
-				GSXSLT.mergeStylesheets(skinAndLibraryDoc, ((Document) result).getDocumentElement(), true);
-				// we just want the result of the transform to be in skinAndLibraryDoc
-				Element old_doc = skinAndLibraryDoc.getDocumentElement();
-				skinAndLibraryDoc.removeChild(old_doc);
-				skinAndLibraryDoc.appendChild(skinAndLibraryDoc.importNode(((Document) result).getDocumentElement(), true));
-			}
+			return this.transformer.transform(configStylesheet_doc, skinAndLibraryDoc, config_params);
 		}
+		return skinAndLibraryDoc;
 	}
 
 	// method to convert Document to a proper XML string for debug purposes only
@@ -932,7 +865,6 @@ public class TransformingReceptionist extends Receptionist
 		}
 		// now find the absolute path
 		ArrayList<File> stylesheets = GSFile.getStylesheetFiles(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, name);
-
 		if (stylesheets.size() == 0)
 		{
 			logger.error(" Can't find stylesheet for " + name);
@@ -962,11 +894,6 @@ public class TransformingReceptionist extends Receptionist
 			{
 				GSXSLT.mergeStylesheets(finalDoc, currentDoc.getDocumentElement(), true);
 			}
-		}
-
-		if (_debug)
-		{
-			GSXSLT.inlineImportAndIncludeFiles(finalDoc, null, 0);
 		}
 
 		return finalDoc;
