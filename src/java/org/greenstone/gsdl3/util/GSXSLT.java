@@ -18,16 +18,13 @@
  */
 package org.greenstone.gsdl3.util;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Vector;
 
 import org.greenstone.util.GlobalProperties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -83,7 +80,6 @@ public class GSXSLT
 				// only the href attribute to see if they're "identical" to any pre-existing <xsl:import>
 				//main.insertBefore(main_xsl.importNode(node, true), main.getFirstChild());
 				main.insertBefore(main_xsl.importNode(node, true), insertion_point);
-
 			}
 		}
 
@@ -110,22 +106,16 @@ public class GSXSLT
 			}
 		} // for each include
 
-		// do we have a new insertion point??
-		Element last_output = GSXML.getLastElementByTagNameNS(main, "http://www.w3.org/1999/XSL/Transform", "output");
-		if (last_output != null)
+		if (main.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "output").getLength() == 0)
 		{
-			insertion_point = last_output.getNextSibling();
-		}
-
-		// outputs
-		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "output");
-		for (int i = 0; i < children.getLength(); i++)
-		{
-			Element node = (Element) children.item(i);
-			// If the new xsl:output element is identical (in terms of the value for the method attr) 
-			// to any in the merged document, don't copy it over
-			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "output", "method", node.getAttribute("method")) == null)
+			// outputs
+			children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "output");
+			for (int i = 0; i < children.getLength(); i++)
 			{
+				Element node = (Element) children.item(i);
+				// If the new xsl:output element is identical (in terms of the value for the method attr) 
+				// to any in the merged document, don't copy it over
+
 				main.insertBefore(main_xsl.importNode(node, true), insertion_point);
 			}
 		}
@@ -139,6 +129,20 @@ public class GSXSLT
 			// If the new xsl:import element is identical (in terms of href attr value) 
 			// to any in the merged document, don't copy it over
 			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "variable", "name", node.getAttribute("name")) == null)
+			{
+				main.appendChild(main_xsl.importNode(node, true));
+			}
+		}
+
+		// params - only top level ones!!
+		// append to end of document
+		children = GSXML.getChildrenByTagNameNS(extra_xsl, "http://www.w3.org/1999/XSL/Transform", "param");
+		for (int i = 0; i < children.getLength(); i++)
+		{
+			Element node = (Element) children.item(i);
+			// If the new xsl:import element is identical (in terms of href attr value) 
+			// to any in the merged document, don't copy it over
+			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "param", "name", node.getAttribute("name")) == null)
 			{
 				main.appendChild(main_xsl.importNode(node, true));
 			}
@@ -179,6 +183,11 @@ public class GSXSLT
 				{
 					main.appendChild(main_xsl.importNode(node, true));
 				}
+
+				if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "template", "name", template_name) == null)
+				{
+					main.appendChild(main_xsl.importNode(node, true));
+				}
 			}
 		}
 
@@ -216,43 +225,30 @@ public class GSXSLT
 		}
 	}
 
-	public static void inlineImportAndIncludeFiles(Document doc, String pathExtra, int depth)
+	public static void inlineImportAndIncludeFiles(Document doc, String pathExtra)
 	{
-		inlineImportAndIncludeFilesDebug(doc, pathExtra, depth, false, null);
+		inlineImportAndIncludeFilesDebug(doc, pathExtra, false, null);
 	}
 
-	public static void inlineImportAndIncludeFilesDebug(Document doc, String pathExtra, int depth, boolean debug, String docFileName)
+	public static void inlineImportAndIncludeFilesDebug(Document doc, String pathExtra, boolean debug, String docFileName)
 	{
 		XMLConverter converter = new XMLConverter();
 
-		String path = pathExtra;
-		if (path == null)
-		{
-			path = "";
-		}
+		String path = (pathExtra == null) ? "" : pathExtra;
 
 		NodeList importList = doc.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "import");
 		NodeList includeList = doc.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "include");
-
-		if (importList.getLength() == 0)
-		{
-			importList = doc.getElementsByTagName("xsl:import");
-		}
-		if (includeList.getLength() == 0)
-		{
-			includeList = doc.getElementsByTagName("xsl:include");
-		}
 
 		for (int i = 0; i < importList.getLength() + includeList.getLength(); i++)
 		{
 			Element current = (Element) ((i < importList.getLength()) ? importList.item(i) : includeList.item(i - importList.getLength()));
 			String href = current.getAttribute("href");
-
-			String filePath = GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), "oran") + File.separator + "transform" + File.separator + path.replace("/", File.separator) + href.replace("/", File.separator);
+			String filePath = GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), "default") + File.separator + "transform" + File.separator + path.replace("/", File.separator) + href.replace("/", File.separator);
+			System.err.println("ADDING IN " + filePath);
 
 			try
 			{
-				Document inlineDoc = converter.getDOM(new File(filePath));
+				Document inlineDoc = converter.getDOM(new File(filePath), "UTF-8");
 
 				String newPath = path;
 				int lastSepIndex = href.lastIndexOf("/");
@@ -262,7 +258,8 @@ public class GSXSLT
 				}
 
 				//Do this recursively
-				inlineImportAndIncludeFilesDebug(inlineDoc, newPath, depth + 1, debug, filePath);
+				inlineImportAndIncludeFilesDebug(inlineDoc, newPath, debug, filePath);
+
 				GSXSLT.mergeStylesheetsDebug(doc, inlineDoc.getDocumentElement(), false, debug, docFileName, filePath);
 			}
 			catch (Exception ex)
