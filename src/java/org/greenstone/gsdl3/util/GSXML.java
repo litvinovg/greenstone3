@@ -18,32 +18,28 @@
  */
 package org.greenstone.gsdl3.util;
 
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Document;
-import org.w3c.dom.Text;
-
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.Transformer;
-
 import java.io.Serializable;
 import java.io.StringWriter;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.OutputKeys;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashMap;
 import java.util.Vector;
-import java.util.Iterator;
-import java.util.ArrayList;
 
-//import java.util.Locale;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
 /** various functions for extracting info out of GS XML */
 public class GSXML
@@ -282,13 +278,13 @@ public class GSXML
 	public static final String USERNAME_ATT = "username";
 	public static final String GROUPS_ATT = "groups";
 	public static final String BASE_URL = "baseURL";
-	
+
 	//for classifiers
 	public static final String CHILD_TYPE_ATT = "childType";
 	public static final String CLASSIFIER_STYLE_ATT = "classifierStyle";
 	public static final String HLIST = "HList";
 	public static final String VLIST = "VList";
-	
+
 	/**
 	 * takes a list of elements, and returns an array of strings of the values
 	 * of attribute att_name
@@ -708,13 +704,14 @@ public class GSXML
 		}
 		return node_list;
 	}
-  public static NodeList getChildrenByTagNameNS(Node n, String namespace, String local_name)
+
+	public static NodeList getChildrenByTagNameNS(Node n, String namespace, String local_name)
 	{
 		MyNodeList node_list = new MyNodeList();
 		Node child = n.getFirstChild();
 		while (child != null)
 		{
-		  if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI().equals(namespace) && child.getLocalName() != null && child.getLocalName().equals(local_name))
+			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI().equals(namespace) && child.getLocalName() != null && child.getLocalName().equals(local_name))
 			{
 				node_list.addNode(child);
 			}
@@ -923,13 +920,13 @@ public class GSXML
 		return null;
 	}
 
-  public static Element getNamedElementNS(Element parent, String namespace_uri, String node_local_name, String attribute_name, String attribute_value)
-  {
+	public static Element getNamedElementNS(Element parent, String namespace_uri, String node_local_name, String attribute_name, String attribute_value)
+	{
 		NodeList children = parent.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++)
 		{
 			Node child = children.item(i);
-			if (child.getNodeType() == Node.ELEMENT_NODE &&child.getNamespaceURI().equals(namespace_uri) && child.getLocalName().equals(node_local_name))
+			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI().equals(namespace_uri) && child.getLocalName().equals(node_local_name))
 			{
 				if (((Element) child).getAttribute(attribute_name).equals(attribute_value))
 					return (Element) child;
@@ -938,48 +935,47 @@ public class GSXML
 		// not found
 		return null;
 
-
-  }
+	}
 
 	// In element main, tries to find any previous occurrence of elements with xsl-template-name=templateName, 
 	// and whose named attribute (attributeName) has the same value as the same attribute in node.
 	// If this is the case, such a previous occurrence is removed from element main, since
 	// the new node will contain a more specific redefinition of this element.
-  public static void removeNamedElementNS(Element parent, String namespace_uri, String node_local_name, String attribute_name, String attribute_value)
-  {
-    if (attribute_value.equals("")) {
-		  // it has no identifying attribute, so we can't find any matches
-		  return;
+	public static void removeNamedElementNS(Element parent, String namespace_uri, String node_local_name, String attribute_name, String attribute_value)
+	{
+		if (attribute_value.equals(""))
+		{
+			// it has no identifying attribute, so we can't find any matches
+			return;
 		}
-		
+
 		Element old_elem = GSXML.getNamedElementNS(parent, namespace_uri, node_local_name, attribute_name, attribute_value);
 		if (old_elem != null)
-		  {
-		    parent.removeChild(old_elem);
-		  }
-		
-  }
-  
-  public static void removeNamedElementsNS(Element parent, String namespace, String node_local_name, String attribute_name, String attribute_value)
-  {
-		if (attribute_value.equals("")) {
-		  // it has no identifying attribute, so we can't find any matches
-		  return;
+		{
+			parent.removeChild(old_elem);
+		}
+
+	}
+
+	public static void removeNamedElementsNS(Element parent, String namespace, String node_local_name, String attribute_name, String attribute_value)
+	{
+		if (attribute_value.equals(""))
+		{
+			// it has no identifying attribute, so we can't find any matches
+			return;
 		}
 
 		NodeList children = parent.getChildNodes();
-  for (int i = children.getLength()-1; i >= 0; i--)
+		for (int i = children.getLength() - 1; i >= 0; i--)
 		{
 			Node child = children.item(i);
 			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI().equals(namespace) && child.getLocalName() != null && child.getLocalName().equals(node_local_name))
 			{
 				if (((Element) child).getAttribute(attribute_name).equals(attribute_value))
-				  parent.removeChild(child);
+					parent.removeChild(child);
 			}
 		}
-  }
-
-
+	}
 
 	/**
 	 * returns a NodeList of elements:
@@ -1006,16 +1002,17 @@ public class GSXML
 		return node_list;
 	}
 
-  public static Element getLastElementByTagNameNS(Element main, String namespace, String node_name) {
+	public static Element getLastElementByTagNameNS(Element main, String namespace, String node_name)
+	{
 
-    NodeList nodes = main.getElementsByTagNameNS(namespace, node_name);
-    int len = nodes.getLength();
-    if (len==0) {
-      return null;
-    }
-    return (Element)nodes.item(len-1);
-  }
-
+		NodeList nodes = main.getElementsByTagNameNS(namespace, node_name);
+		int len = nodes.getLength();
+		if (len == 0)
+		{
+			return null;
+		}
+		return (Element) nodes.item(len - 1);
+	}
 
 	public static int SORT_TYPE_STRING = 0;
 	public static int SORT_TYPE_INT = 1;
