@@ -13,25 +13,14 @@
 		<xsl:param name="serviceName"/>
 		<div id="classifiers">
 			<xsl:variable name="cl_name"><xsl:value-of select="@name"/></xsl:variable>
-			<xsl:apply-templates select="." mode="default">
-				<xsl:with-param name="collName" select="$collName"/>
-				<xsl:with-param name="serviceName" select="$serviceName"/>
-			</xsl:apply-templates>
+			<table id="classifiernodelist">
+				<xsl:call-template name="processNodeChildren">
+					<xsl:with-param name='collName' select='$collName'/>
+					<xsl:with-param name='serviceName' select='$serviceName'/>
+				</xsl:call-template>
+			</table>
 		</div>
 	</xsl:template>
-
-
-	<xsl:template match="classifier" mode="default"> <!-- the default -->
-		<xsl:param name="collName"/>
-		<xsl:param name="serviceName"/>
-		<table id="classifiernodelist">
-			<xsl:call-template name="processNodeChildren">
-				<xsl:with-param name='collName' select='$collName'/>
-				<xsl:with-param name='serviceName' select='$serviceName'/>
-			</xsl:call-template>
-		</table>
-	</xsl:template>
-
   
 	<!-- this is a wrapper node, which the interface can use to add stuff into the query results that isn't part of and doesn't depend on the documentNode template which may come from the collection -->
 	<xsl:template name="documentNodeWrapper">
