@@ -160,13 +160,11 @@ p {
 	margin-top:-10px;
 	padding: 20px 20px 10px;
 	min-height: 300px;
-	/* background-color: #ff0; */
 }
 
 #gs_footer {
 	position: relative;
 	display: block;
-	/*background: transparent url('../images/gsdlhead.gif') scroll no-repeat left top;*/
 	margin: -1px auto;
 	text-align: center;
 	vertical-align: middle;
@@ -192,12 +190,31 @@ p {
 	background:yellow;
 }
 
-.viewOptions {
-	width: 100%;
+#viewAndZoomOptions {
+	margin-bottom:10px;
+	border:0px;
 }
 
-.viewOptions td {
+#viewOptions {
+	margin: 0px;
+	padding: 0px;
+}
+
+#viewOptions li {
+	list-style:none;
+	display: inline;
 	padding: 5px;
+}
+
+#zoomOptions {
+	margin: 0px;
+	padding: 0px;
+}
+
+#zoomOptions li {
+	margin:5px;
+	list-style:none;
+	display: inline-block;
 }
 
 .tableOfContentsTitle{
@@ -210,16 +227,14 @@ p {
 }
 
 #rightSidebar {
-	border: 1px solid #cdc;
 	width: 30%;
 	min-width:180px;
 	float:right;
 	margin: 0 0 10px 20px;
-	background-color: #FFFFFF;
 }
 
 #contentsArea {
-	padding:10px;
+	padding:0px 10px;
 }
 
 #collectionLinks {
@@ -622,9 +637,19 @@ div.QuickSearch {
 
 #coverImage {
 	text-align: center;
+	margin: 20px;
 }
 
 /* ----- TABLE OF CONTENTS ------ */
+.tocTable {
+	width: 100%;
+	background: white !important;
+}
+
+.tableOfContentsContainer {
+	padding:1px;
+}
+
 #tableOfContents {
 	margin: 0;
 	padding: 0;
@@ -635,12 +660,11 @@ div.QuickSearch {
 	list-style: none;
 	margin: 0;
 	padding: 2px;
-	background-color: #fff;
 }
 
-#tableOfContents li a {
-	color: #444;
-}
+#tableOfContents a {text-decoration: underline; color: #444 !important;}
+#tableOfContents a:visited{text-decoration: underline; color: #444 !important;}
+#tableOfContents a:link{text-decoration: underline; color: #444 !important;}
 
 #tableOfContents li.current {
 	background-color: #090;
