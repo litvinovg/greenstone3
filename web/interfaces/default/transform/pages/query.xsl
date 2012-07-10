@@ -126,47 +126,51 @@
 			</xsl:for-each>
 			<br /><br />
 		
-			<xsl:for-each select="/page/pageResponse/termList/term">
+			<xsl:for-each select="/page/pageResponse/termList/term | /page/pageResponse/termList/term/equivTermList/term">
 				<xsl:choose>
 					<!-- If there is only one or two search terms then show the expanded information -->
 					<xsl:when test="count(/page/pageResponse/termList/term) &lt; 3">
 						<span style="font-style:italic;"><xsl:value-of select="@name"/></span>
 						<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.occurs')"/><xsl:text> </xsl:text>
-						<xsl:value-of select="@freq"/>
 						<xsl:choose>
 							<xsl:when test="@freq = 1">
+								<xsl:value-of select="@freq"/>
 								<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.time')"/>
 							</xsl:when>
+							<xsl:when test="@freq &lt; 0"></xsl:when>
 							<xsl:otherwise>
+								<xsl:value-of select="@freq"/>
 								<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.time_plural')"/>
 							</xsl:otherwise>
 						</xsl:choose>
-						<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.in')"/><xsl:text> </xsl:text>
-						<xsl:value-of select="@numDocsMatch"/>
-						<xsl:choose>
-							<xsl:when test="@numDocsMatch = 1">
-								<xsl:text> </xsl:text>
-								<xsl:choose>
-									<xsl:when test="$level = 'Doc'">
-										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document')"/>
-									</xsl:when>
-									<xsl:otherwise>
-										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.section')"/>
-									</xsl:otherwise>
-								</xsl:choose>
-							</xsl:when>
-							<xsl:otherwise>
-								<xsl:text> </xsl:text>
-								<xsl:choose>
-									<xsl:when test="$level = 'Doc'">
-										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document_plural')"/>
-									</xsl:when>
-									<xsl:otherwise>
-										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.section_plural')"/>
-									</xsl:otherwise>
-								</xsl:choose>
-							</xsl:otherwise>
-						</xsl:choose>
+						<xsl:if test="@numDocsMatch">
+							<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.in')"/><xsl:text> </xsl:text>
+							<xsl:value-of select="@numDocsMatch"/>
+							<xsl:choose>
+								<xsl:when test="@numDocsMatch = 1">
+									<xsl:text> </xsl:text>
+									<xsl:choose>
+										<xsl:when test="$level = 'Doc'">
+											<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document')"/>
+										</xsl:when>
+										<xsl:otherwise>
+											<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.section')"/>
+										</xsl:otherwise>
+									</xsl:choose>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:text> </xsl:text>
+									<xsl:choose>
+										<xsl:when test="$level = 'Doc'">
+											<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document_plural')"/>
+										</xsl:when>
+										<xsl:otherwise>
+											<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.section_plural')"/>
+										</xsl:otherwise>
+									</xsl:choose>
+								</xsl:otherwise>
+							</xsl:choose>
+						</xsl:if>
 						<br />
 					</xsl:when>
 					<xsl:otherwise>
