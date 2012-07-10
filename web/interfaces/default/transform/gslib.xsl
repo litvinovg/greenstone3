@@ -13,11 +13,12 @@
 	doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" 
 	doctype-system="http://www.w3.org/TR/html4/loose.dtd"/>
 
+	<xsl:include href="xml-to-string.xsl"/>
+	
   <!-- some global parameters - these are set by whoever is invoking the transformation -->
   <xsl:param name="interface_name"/>
   <xsl:param name="library_name"/>
   <xsl:param name="site_name"/>
-  <xsl:include href="xml-to-string.xsl"/>
   <!-- every pages ....................................................................... -->
 
   <xsl:template name="siteName">
@@ -289,7 +290,7 @@
   <xsl:param name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
   <xsl:param name="pageType"/>
   <xsl:variable name="this-element" select="/page/pageResponse/collection|/page/pageResponse/serviceCluster"/>
-  <xsl:variable name="this-service" select="/page/pageResponse/service/@name"/>
+  <xsl:variable name="this-service" select="/page/pageRequest/paramList/param[@name = 's']/@value"/>
   
   <xsl:template name="aboutCollectionPageTitle">
     <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
@@ -676,12 +677,12 @@ used on the document page
   <xsl:template name="previousNextButtons">
     <!-- prev -->
     <a>
-      <xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@selectedNode"/>.pp&amp;sib=1&amp;p.s=<xsl:value-of select="/page/pageRequest/paramList/param[@name=&quot;p.s&quot;]/@value"/>&amp;p.sa=<xsl:value-of select="/page/pageRequest/paramList/param[@name=&quot;p.sa&quot;]/@value"/>&amp;p.a=<xsl:value-of select="/page/pageRequest/paramList/param[@name=&quot;p.a&quot;]/@value"/></xsl:attribute>
+      <xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@selectedNode"/>.pp&amp;sib=1&amp;p.s=<xsl:value-of select="/page/pageRequest/paramList/param[@name='p.s']/@value"/>&amp;p.sa=<xsl:value-of select="/page/pageRequest/paramList/param[@name='p.sa']/@value"/>&amp;p.a=<xsl:value-of select="/page/pageRequest/paramList/param[@name='p.a']/@value"/></xsl:attribute>
       <img class="lessarrow" src="interfaces/{$interface_name}/images/previous.png"/>
     </a>
     <!-- next -->
     <a>
-      <xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@selectedNode"/>.np&amp;sib=1&amp;p.s=<xsl:value-of select="/page/pageRequest/paramList/param[@name=&quot;p.s&quot;]/@value"/>&amp;p.sa=<xsl:value-of select="/page/pageRequest/paramList/param[@name=&quot;p.sa&quot;]/@value"/>&amp;p.a=<xsl:value-of select="/page/pageRequest/paramList/param[@name=&quot;p.a&quot;]/@value"/></xsl:attribute>
+      <xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@selectedNode"/>.np&amp;sib=1&amp;p.s=<xsl:value-of select="/page/pageRequest/paramList/param[@name='p.s']/@value"/>&amp;p.sa=<xsl:value-of select="/page/pageRequest/paramList/param[@name='p.sa']/@value"/>&amp;p.a=<xsl:value-of select="/page/pageRequest/paramList/param[@name='p.a']/@value"/></xsl:attribute>
       <img class="morearrow" src="interfaces/{$interface_name}/images/next.png"/>
     </a>
   </xsl:template>
