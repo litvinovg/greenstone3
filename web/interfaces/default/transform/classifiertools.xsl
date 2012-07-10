@@ -89,7 +89,14 @@
 											<td class="headerTD">
 												<img id="toggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
 													<xsl:attribute name="src">
-														<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
+														<xsl:choose>
+															<xsl:when test="classifierNode or documentNode">
+																<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
+															</xsl:when>
+															<xsl:otherwise>
+																<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'expand_image')"/>
+															</xsl:otherwise>
+														</xsl:choose>
 													</xsl:attribute>
 												</img>
 											</td>
