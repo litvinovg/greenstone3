@@ -450,15 +450,9 @@ function isParentOf(parent, child)
 
 function minimizeSidebar()
 {
-	var coverImage = document.getElementById("coverImage");
 	var toc = document.getElementById("contentsArea");
 	var maxLink = document.getElementById("sidebarMaximizeButton");
 	var minLink = document.getElementById("sidebarMinimizeButton");
-	
-	if(coverImage)
-	{
-		coverImage.style.display = "none";
-	}
 	
 	if(toc)
 	{
