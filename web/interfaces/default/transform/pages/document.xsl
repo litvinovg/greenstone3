@@ -54,7 +54,7 @@
 			</xsl:when>
 			<!-- if this is the regular version of the page -->
 			<xsl:otherwise>
-				<xsl:apply-imports/>
+				<xsl:call-template name="mainTemplate"/>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>

@@ -27,8 +27,12 @@
     <!-- <xsl:output method="xml" version="1.0" encoding="UTF-8" doctype-public="-//W3C//DTD XHTML 1.1//EN" doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd" indent="yes" omit-xml-declaration="yes"/> -->
 	<xsl:output method="html" omit-xml-declaration="yes"/> 
 
-	<!-- the main layout is defined here -->
 	<xsl:template match="/">
+		<xsl:call-template name="mainTemplate"/>
+	</xsl:template>
+	
+	<!-- the main layout is defined here -->
+	<xsl:template name="mainTemplate">
 
 		<html>
 
