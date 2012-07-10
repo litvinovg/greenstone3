@@ -162,15 +162,8 @@ public class GSXSLT
 			if (overwrite)
 			{
 				// if we have a name attribute, remove any other similarly named template
-				if (!template_name.equals(""))
-				{
-					GSXML.removeNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "template", "name", template_name);
-				}
-				// if we have a match attribute, remove other templates that match - 
-				if (!template_match.equals(""))
-				{
-					GSXML.removeNamedElementsNS(main, "http://www.w3.org/1999/XSL/Transform", "template", "match", template_match);
-				}
+				GSXML.removeElementsWithAttributesNS(main, "http://www.w3.org/1999/XSL/Transform", "template", new String[]{"name", "match", "mode"}, new String[]{template_name, template_match, template_mode});
+
 				// now add our good template in
 				main.appendChild(main_xsl.importNode(node, true));
 			}
@@ -180,12 +173,7 @@ public class GSXSLT
 				// In this case (eg from expanding imported stylesheets)
 				// there can't be any duplicate named templates, so just look for matches
 				// we already have the one with highest import precedence (from the top most level) so don't add any more in
-				if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "template", "match", template_match) == null)
-				{
-					main.appendChild(main_xsl.importNode(node, true));
-				}
-
-				if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "template", "name", template_name) == null)
+				if (GSXML.getElementsWithAttributesNS(main, "http://www.w3.org/1999/XSL/Transform", "template", new String[]{"name", "match", "mode"}, new String[]{template_name, template_match, template_mode}).getLength() == 0)
 				{
 					main.appendChild(main_xsl.importNode(node, true));
 				}

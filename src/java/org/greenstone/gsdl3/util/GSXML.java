@@ -934,7 +934,65 @@ public class GSXML
 		}
 		// not found
 		return null;
+	}
 
+	public static NodeList getNamedElementsNS(Element parent, String namespace_uri, String node_local_name, String attribute_name, String attribute_value)
+	{
+		MyNodeList result = new MyNodeList();
+		NodeList children = parent.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++)
+		{
+			Node child = children.item(i);
+			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI().equals(namespace_uri) && child.getLocalName().equals(node_local_name))
+			{
+				if (((Element) child).getAttribute(attribute_name).equals(attribute_value))
+					result.addNode(child);
+			}
+		}
+		return result;
+	}
+
+	public static NodeList getElementsWithAttributesNS(Element parent, String namespace_uri, String node_local_name, String[] attribute_names, String[] attribute_values)
+	{
+		if (attribute_names.length == 0 || attribute_names.length != attribute_values.length)
+		{
+			return new MyNodeList();
+		}
+
+		MyNodeList result = new MyNodeList();
+
+		NodeList matchingNodes = GSXML.getNamedElementsNS(parent, namespace_uri, node_local_name, attribute_names[0], attribute_values[0]);
+		for (int i = 0; i < matchingNodes.getLength(); i++)
+		{
+			Element current = (Element) matchingNodes.item(i);
+			boolean nodeMatches = true;
+			for (int j = 1; j < attribute_names.length; j++)
+			{
+				String currentName = attribute_names[j];
+				String currentValue = attribute_values[j];
+				if (!current.getAttribute(currentName).equals(currentValue))
+				{
+					nodeMatches = false;
+					break;
+				}
+			}
+
+			if (nodeMatches)
+			{
+				result.addNode(current);
+			}
+		}
+
+		return result;
+	}
+
+	public static void removeElementsWithAttributesNS(Element parent, String namespace_uri, String node_local_name, String[] attribute_names, String[] attribute_values)
+	{
+		NodeList matchingNodes = GSXML.getElementsWithAttributesNS(parent, namespace_uri, node_local_name, attribute_names, attribute_values);
+		for (int i = 0; i < matchingNodes.getLength(); i++)
+		{
+			parent.removeChild(matchingNodes.item(i));
+		}
 	}
 
 	// In element main, tries to find any previous occurrence of elements with xsl-template-name=templateName, 
@@ -954,7 +1012,6 @@ public class GSXML
 		{
 			parent.removeChild(old_elem);
 		}
-
 	}
 
 	public static void removeNamedElementsNS(Element parent, String namespace, String node_local_name, String attribute_name, String attribute_value)
