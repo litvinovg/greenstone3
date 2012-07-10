@@ -166,7 +166,8 @@
 
 	<!-- if this gsf:metadata is a child of a document node then we want to get the metadata for that node -->
 	<xsl:template match="gsf:metadata">
-		<xslt:if test="not(@hidden = 'true')">		
+		<xslt:variable name="langAtt"><xsl:value-of select="@lang"/></xslt:variable>
+		<xslt:if test="not(@hidden = 'true')">
 			<xslt:value-of disable-output-escaping="yes">
 				<xsl:attribute name="select">
 					<xsl:if test="@format">
@@ -174,9 +175,20 @@
 						<xsl:value-of select="@format"/>
 						<xsl:text>(</xsl:text>
 					</xsl:if>
-					<xsl:text>(.//metadataList)[last()]/metadata[@name='</xsl:text>
+					<xsl:choose>
+						<xsl:when test="@type = 'collection'">
+							<xsl:text>/page/pageResponse/collection/metadataList/metadata[@name='</xsl:text>
+						</xsl:when>
+						<xsl:otherwise>
+							<xsl:text>(.//metadataList)[last()]/metadata[@name='</xsl:text>
+						</xsl:otherwise>
+					</xsl:choose>
 					<xsl:apply-templates select="." mode="get-metadata-name"/>
-					<xsl:text>']</xsl:text>
+					<xsl:text>'</xsl:text>
+					<xsl:if test="@lang">
+						<xsl:text> and @lang=$langAtt</xsl:text>
+					</xsl:if>
+					<xsl:text>]</xsl:text>
 					<xsl:if test="@format">
 						<xsl:text>, /page/@lang )</xsl:text>
 					</xsl:if>
