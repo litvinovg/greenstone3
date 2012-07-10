@@ -18,11 +18,11 @@
  */
 package org.greenstone.util;
 
-import java.util.Properties;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Properties;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
 
 /**
  * holds some global properties for the application. Read from a properties file
@@ -79,7 +79,7 @@ public class GlobalProperties
 			InputStream in = Class.forName("org.greenstone.util.GlobalProperties").getClassLoader().getResourceAsStream(properties_filename);
 			if (in != null)
 			{
-			        logger.debug("loading global properties");
+				logger.debug("loading global properties");
 				properties.load(in);
 				in.close();
 			}
@@ -96,9 +96,10 @@ public class GlobalProperties
 
 			// make sure the path separators are correct
 			// gsdl3_home may be null, eg when we are loading properties from Server3
-			if (gsdl3_home != null) {
-			  File gs3_file = new File(gsdl3_home);
-			  gsdl3_home = gs3_file.getPath();
+			if (gsdl3_home != null)
+			{
+				File gs3_file = new File(gsdl3_home);
+				gsdl3_home = gs3_file.getPath();
 			}
 			//build the gsdl3 web address, in a way resilient to errors and ommisions in global.properties, simplifying where possible
 			//aiming for a string with no trailing slash, eg "http://localhost:8080/greenstone3" or "http://www.mygreenstonelibrary.com"
