@@ -88,7 +88,6 @@
 				  <xsl:apply-templates/>
 				</a>
 			</xsl:when>
-			
 			<xsl:otherwise> <!-- a document link -->
 				<xslt:variable name="bookswitch">
 					<xslt:value-of select="/page/pageRequest/paramList/param[@name='book']/@value"/>
@@ -100,13 +99,14 @@
 						<xslt:value-of select='/page/pageResponse/collection/@name'/>
 						<xsl:text>/document/</xsl:text>
 						<xslt:value-of select='@nodeID'/>
-	    <xslt:choose>
-						<xslt:when test="$bookswitch = 'on' or $bookswitch = 'flashxml'">
-							<xsl:text>?book=on</xsl:text>
-						</xslt:when>
-	      <xslt:otherwise>
-<xslt:if test="$opt-doc-link-args">?<xslt:value-of select="$opt-doc-link-args"/></xslt:if></xslt:otherwise>
-</xslt:choose>
+						<xslt:choose>
+							<xslt:when test="$bookswitch = 'on' or $bookswitch = 'flashxml'">
+								<xsl:text>?book=on</xsl:text>
+							</xslt:when>
+							<xslt:otherwise>
+								<xslt:if test="$opt-doc-link-args">?<xslt:value-of select="$opt-doc-link-args"/></xslt:if>
+							</xslt:otherwise>
+						</xslt:choose>
 					</xslt:attribute>
 					<xsl:apply-templates/>
 				</a>
