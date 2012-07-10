@@ -157,6 +157,7 @@ public class GSXSLT
 			// remove any previous occurrences of xsl:template with the same value for name or match 
 			String template_match = node.getAttribute("match");
 			String template_name = node.getAttribute("name");
+			String template_mode = node.getAttribute("mode");
 
 			if (overwrite)
 			{
@@ -244,7 +245,6 @@ public class GSXSLT
 			Element current = (Element) ((i < importList.getLength()) ? importList.item(i) : includeList.item(i - importList.getLength()));
 			String href = current.getAttribute("href");
 			String filePath = GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), "default") + File.separator + "transform" + File.separator + path.replace("/", File.separator) + href.replace("/", File.separator);
-			System.err.println("ADDING IN " + filePath);
 
 			try
 			{
