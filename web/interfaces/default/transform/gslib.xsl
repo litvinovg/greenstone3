@@ -287,6 +287,7 @@
   <!-- about page - collection home ....................................................................... -->
   <xsl:variable name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
   <xsl:variable name="httpPath" select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']"/>
+  <xsl:variable name="siteName" select="$site_name"/>
   <xsl:param name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
   <xsl:param name="pageType"/>
   <xsl:variable name="this-element" select="/page/pageResponse/collection|/page/pageResponse/serviceCluster"/>
