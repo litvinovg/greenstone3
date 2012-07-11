@@ -108,7 +108,7 @@
 	<!-- ***** BROWSING TABS ***** -->
 	<xsl:template name="browsing-tabs">
 		<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service">
-			<ul id="nav">
+			<ul id="gs-nav">
 				<!-- If this collection has a ClassifierBrowse service then add a tab for each classifier-->
 				<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='browse' and @name='ClassifierBrowse']">
 					<!-- Loop through each classifier -->

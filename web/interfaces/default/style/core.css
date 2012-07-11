@@ -417,19 +417,19 @@ body.dAction #gs_banner h2 {
 }
 
 /* css to make the tabs work */
-#nav {
+#gs-nav {
 	list-style: none outside none;
 	padding: 0px;
 	margin: 9px 0 0 20px;
 	font-size: 14px;
 }
 
-#nav ul {
+#gs-nav ul {
 	margin:0px;
 	padding:0px;
 }
 
-#nav li {
+#gs-nav li {
 	display: inline;
 	margin-right: 5px;
 	padding: 3px 5px 4px 7px;
@@ -438,14 +438,14 @@ body.dAction #gs_banner h2 {
 	border-bottom: none;
 }
 
-#nav a{
+#gs-nav a{
 	margin:0px;
 	font-weight: bold;
 	text-decoration: none;
 }
 
-#nav li:hover, #nav li.current { background-position: 100% 0; }
-#nav li:hover a, #nav li.current a { background-position: 0 0; cursor:default; }
+#gs-nav li:hover, #gs-nav li.current { background-position: 100% 0; }
+#gs-nav li:hover a, #gs-nav li.current a { background-position: 0 0; cursor:default; }
 
 /* style the search and classifier results */
 #resultsTable {
