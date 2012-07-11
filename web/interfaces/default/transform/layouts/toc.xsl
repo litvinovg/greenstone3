@@ -12,7 +12,10 @@
 		<div id="rightSidebar">
 			<xsl:call-template name="displayCoverImage"/>
 			<xsl:call-template name="viewOptions"/>
-			<xsl:call-template name="displayTOC"/>
+
+			<xsl:if test="@docType != 'simple'">
+				<xsl:call-template name="displayTOC"/>
+			</xsl:if>
 		</div>
 	</xsl:template>
 	
