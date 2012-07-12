@@ -202,13 +202,13 @@ p {
 
 #viewOptions li {
 	list-style:none;
-	display: inline;
 	padding: 5px;
 }
 
 #zoomOptions {
 	margin: 0px;
 	padding: 0px;
+	width: 100%;
 }
 
 #zoomOptions li {

@@ -176,20 +176,12 @@
 				
 				<!-- The section name, links to the section in the document -->
 				<td>				
-					<a id="toclink{@nodeID}">
-						<xsl:choose>
-							<xsl:when test="/page/pageResponse/document/@docType = 'paged'">
-								<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=d&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/>&amp;d=<xsl:value-of select="@nodeID"/>&amp;dt=<xsl:value-of select="@docType"/>&amp;p.a=b&amp;p.s=<xsl:value-of select="/page/pageResponse/service/@name"/></xsl:attribute>
-							</xsl:when>
-							<xsl:otherwise>
-								<xsl:attribute name="href">javascript:focusSection('<xsl:value-of select="@nodeID"/>');</xsl:attribute>
-							</xsl:otherwise>
-						</xsl:choose>
+					<a id="toclink{@nodeID}" href="javascript:focusSection('{@nodeID}');">
 						<xsl:if test="util:hashToSectionId(@nodeID)">
 							<xsl:value-of select="util:hashToSectionId(@nodeID)"/>
 							<xsl:text> </xsl:text>
 						</xsl:if>
-						<xsl:call-template name="sectionTitle"/>
+						<xsl:call-template name="sectionHeader"/>
 					</a>
 				</td>
 			</tr></table>
@@ -220,29 +212,36 @@
 		<div id="viewAndZoomOptions" class="ui-state-default ui-corner-all">
 			<ul id="viewOptions">
 				<!-- Paged-image options -->
-				<xsl:if test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageResponse/document/documentNode/@docType = 'paged'">
-					<li>
-						<select id="viewSelection" onchange="changeView();">
-							<xsl:choose>
-								<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
-									<option>Default view</option>
-									<option selected="true">Image view</option>
-									<option>Text view</option>
-								</xsl:when>
-								<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'text'">
-									<option>Default view</option>
-									<option>Image view</option>
-									<option selected="true">Text view</option>
-								</xsl:when>
-								<xsl:otherwise>
-									<option selected="true">Default view</option>
-									<option>Image view</option>
-									<option>Text view</option>
-								</xsl:otherwise>
-							</xsl:choose>
-						</select>
-					</li>
-				</xsl:if>
+				<li id="pagedImageOptions">
+					<xsl:attribute name="style">
+						<xsl:choose>
+							<xsl:when test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageResponse/document/documentNode/@docType = 'paged'">
+							</xsl:when>
+							<xsl:otherwise>
+								display:none;
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:attribute>
+					<select id="viewSelection" onchange="changeView();">
+						<xsl:choose>
+							<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
+								<option>Default view</option>
+								<option selected="true">Image view</option>
+								<option>Text view</option>
+							</xsl:when>
+							<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'text'">
+								<option>Default view</option>
+								<option>Image view</option>
+								<option selected="true">Text view</option>
+							</xsl:when>
+							<xsl:otherwise>
+								<option selected="true">Default view</option>
+								<option>Image view</option>
+								<option>Text view</option>
+							</xsl:otherwise>
+						</xsl:choose>
+					</select>
+				</li>
 			
 				<!-- Realistic books link -->
 				<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
@@ -268,7 +267,7 @@
 							</xsl:if>
 						</input>
 					</li>
-				</xsl:if>
+				</xsl:if><xsl:text> </xsl:text>
 			</ul>
 			<ul id="zoomOptions">
 				<!-- This is invisible unless it is made visible by Javascript controlling the image zooming -->

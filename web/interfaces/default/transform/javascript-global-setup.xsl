@@ -91,6 +91,8 @@
 				<xsl:text disable-output-escaping="yes">lang = "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 				addMetadataToList(name, value, gs.documentMetadata, lang);
 			</xsl:for-each>
+			
+			<xsl:text disable-output-escaping="yes">addMetadataToList("docType", "</xsl:text><xsl:value-of select="/page/pageResponse/document/@docType"/><xsl:text disable-output-escaping="yes">", gs.documentMetadata, "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">");</xsl:text>
 		</script>
 	</xsl:template>
 	

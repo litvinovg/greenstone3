@@ -59,13 +59,18 @@
 		</xsl:choose>
 	</xsl:template>
 	
+	<xsl:template name="sectionHeader">
+		<xsl:call-template name="sectionTitle"/>
+	</xsl:template>
+	
 	<!-- Used to make sure that regardless what the collection designer uses for the title and content we can wrap it properly -->
 	<!-- If editing, be aware that the Document Basket looks for specific classes that this template bakes in (key points marked with ***) -->
 	<xsl:template name="wrapDocumentNodes">
 		<a name="{@nodeID}"><xsl:text> </xsl:text></a>
+		
 		<!-- Section header -->
 		<table class="sectionHeader"><tr>
-		
+
 			<!-- Expand/collapse button -->
 			<xsl:if test="not(/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='sectionExpandCollapse']/@value) or /page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='sectionExpandCollapse']/@value = 'true'">
 				<td class="headerTD">
@@ -83,18 +88,21 @@
 					</img>
 				</td>
 			</xsl:if>
-			
+					
 			<!-- Title -->
 			<td id="header{@nodeID}" class="headerTD sectionTitle"><!-- *** -->
-				<!-- Get the title from the title sectionTitle template -->
-				<xsl:choose>
-					<xsl:when test="not(/page/pageRequest/paramList/param[@name = 'dmd']) or /page/pageRequest/paramList/param[@name = 'dmd']/@value = 'false'">
-						<xsl:call-template name="sectionTitleFormat"/>
-					</xsl:when>
-					<xsl:otherwise>
-						<xsl:call-template name="sectionTitle"/>
-					</xsl:otherwise>
-				</xsl:choose>
+				<p>
+					<xsl:attribute name="class"><xsl:value-of select="util:hashToDepthClass(@nodeID)"/> sectionHeader</xsl:attribute>
+
+					<xsl:if test="util:hashToSectionId(@nodeID)">
+						<span class="sectionNumberSpan">
+							<xsl:value-of select="util:hashToSectionId(@nodeID)"/>
+							<xsl:text> </xsl:text>
+						</span>
+					</xsl:if>
+					<!-- Display the title for the section regardless of whether automatic section numbering is turned on -->
+					<span><xsl:call-template name="sectionHeader"/></span>
+				</p>
 			</td>
 			
 			<!-- "back to top" link -->
@@ -106,7 +114,7 @@
 				</td>
 			</xsl:if>
 		</tr></table>
-		
+
 		<div id="doc{@nodeID}"><!-- *** -->
 			<xsl:choose>
 				<xsl:when test="/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or /page/pageResponse/document/@selectedNode = @nodeID">
@@ -160,9 +168,7 @@
 				</table>
 			</xsl:if>
 			
-			<xsl:for-each select=".">
-				<xsl:call-template name="sectionImage"/>
-			</xsl:for-each>
+			<xsl:call-template name="sectionImage"/>
 			
 			<div id="text{@nodeID}" class="sectionText"><!-- *** -->
 				<xsl:attribute name="style">
@@ -277,7 +283,8 @@
 
 	<xsl:template name="wrappedDocument">
 		<xsl:choose>
-			<xsl:when test="/page/pageRequest/paramList/param[@name = 'alb']/@value = '1' or (string-length(/page/pageRequest/paramList/param[@name = 'd']/@value) > 0 and (/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or not(util:contains(/page/pageResponse/document/@selectedNode, '.'))))">
+			<!-- NOTE: alb = ajax load bypass -->
+			<xsl:when test="/page/pageResponse/document/@docType = 'hierarchy' and (/page/pageRequest/paramList/param[@name = 'alb']/@value = '1' or (string-length(/page/pageRequest/paramList/param[@name = 'd']/@value) > 0 and (/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or not(util:contains(/page/pageResponse/document/@selectedNode, '.')))))">
 				<div id="gs-document">
 					<xsl:call-template name="documentPre"/>
 					<div id="gs-document-text" class="documenttext" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
@@ -286,6 +293,22 @@
 						</xsl:for-each>
 					</div>
 				</div>
+			</xsl:when>
+			<xsl:when test="/page/pageResponse/document/@docType = 'paged'">
+				<div id="gs-document">							
+					<div id="tocLoadingImage" style="text-align:center;">
+						<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.loading')"/><xsl:text>...</xsl:text>
+					</div>
+				</div>
+				<script type="text/javascript">
+					<xsl:text disable-output-escaping="yes">
+						$(window).load(function()
+						{
+							var url = gs.xsltParams.library_name + "?a=d&amp;c=" + gs.cgiParams.c + "&amp;excerptid=gs-document&amp;dt=hierarchy&amp;d=" + gs.cgiParams.d.replace(/([^.]*)\..*/, "$1");
+							loadTopLevelPage(null, url);
+						});
+					</xsl:text>
+				</script>
 			</xsl:when>
 			<xsl:otherwise>
 				<div id="gs-document">							
@@ -369,22 +392,6 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-	
-	<xsl:template name="sectionTitleFormat">
-		<p>
-			<xsl:attribute name="class"><xsl:value-of select="util:hashToDepthClass(@nodeID)"/> sectionHeader</xsl:attribute>
-			
-			<xsl:if test="util:hashToSectionId(@nodeID)">
-				<span class="sectionNumberSpan">
-					<xsl:value-of select="util:hashToSectionId(@nodeID)"/>
-					<xsl:text> </xsl:text>
-				</span>
-			</xsl:if>
-			<!-- Display the title for the section regardless of whether automatic section numbering is turned on -->
-			<span><xsl:call-template name="sectionTitle"/></span>
-		</p>
-	</xsl:template>
-	
 		
 	<!-- The default template for displaying section titles -->
 	<xsl:template name="sectionTitle">
@@ -399,43 +406,45 @@
 
 		<xsl:choose>
 			<xsl:when test="metadataList/metadata[@name = 'Screen'] and metadataList/metadata[@name = 'Source'] and ($imageWidth div $screenImageWidth > 1.2)">
-				<div id="wrap{util:replace(@nodeID, '.', '_')}" class="zoomImage" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
-					<div id="small{util:replace(@nodeID, '.', '_')}" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
-						<gsf:image type="screen"/>
-					</div>
-					<div id="mover{util:replace(@nodeID, '.', '_')}" style="border: 1px solid green; position: absolute; top: 0; left: 0; width: 198px; height: 198px; overflow: hidden; z-index: 100; background: white; display: none;">
-						<div id="overlay{util:replace(@nodeID, '.', '_')}" style="width: 200px; height: 200px; position: absolute; top: 0; left: 0; z-index: 200;">
-							<xsl:text> </xsl:text>
+				<div id="image{@nodeID}">
+					<div id="wrap{util:replace(@nodeID, '.', '_')}" class="zoomImage" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
+						<div id="small{util:replace(@nodeID, '.', '_')}" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
+							<gsf:image type="screen"/>
 						</div>
-						<div id="large{util:replace(@nodeID, '.', '_')}" style="position: relative; width: {$imageWidth}px; height: {$imageHeight}px;">
-							<gsf:image type="source"/>
+						<div id="mover{util:replace(@nodeID, '.', '_')}" style="border: 1px solid green; position: absolute; top: 0; left: 0; width: 198px; height: 198px; overflow: hidden; z-index: 100; background: white; display: none;">
+							<div id="overlay{util:replace(@nodeID, '.', '_')}" style="width: 200px; height: 200px; position: absolute; top: 0; left: 0; z-index: 200;">
+								<xsl:text> </xsl:text>
+							</div>
+							<div id="large{util:replace(@nodeID, '.', '_')}" style="position: relative; width: {$imageWidth}px; height: {$imageHeight}px;">
+								<gsf:image type="source"/>
+							</div>
 						</div>
 					</div>
+					<script type="text/javascript">
+						<xsl:text disable-output-escaping="yes">
+							{
+								var nodeID = "</xsl:text><xsl:value-of select="@nodeID"/><xsl:text disable-output-escaping="yes">";
+								nodeID = nodeID.replace(/\./g, "_");
+
+								var bigHeight = </xsl:text><xsl:value-of select="$imageHeight"/><xsl:text disable-output-escaping="yes">;
+								var smallHeight = </xsl:text><xsl:value-of select="$screenImageHeight"/><xsl:text disable-output-escaping="yes">;
+
+								var multiplier = bigHeight / smallHeight;
+
+								$("#wrap" + nodeID).anythingZoomer({
+									smallArea: "#small" + nodeID,
+									largeArea: "#large" + nodeID,
+									zoomPort: "#overlay" + nodeID,
+									mover: "#mover" + nodeID,
+									expansionSize:50,  
+									speedMultiplier:multiplier   
+								});
+								
+								$("#zoomOptions").css("display", null);
+							}
+						</xsl:text>
+					</script>
 				</div>
-				<script type="text/javascript">
-					<xsl:text disable-output-escaping="yes">
-						{
-							var nodeID = "</xsl:text><xsl:value-of select="@nodeID"/><xsl:text disable-output-escaping="yes">";
-							nodeID = nodeID.replace(/\./g, "_");
-
-							var bigHeight = </xsl:text><xsl:value-of select="$imageHeight"/><xsl:text disable-output-escaping="yes">;
-							var smallHeight = </xsl:text><xsl:value-of select="$screenImageHeight"/><xsl:text disable-output-escaping="yes">;
-
-							var multiplier = bigHeight / smallHeight;
-
-							$("#wrap" + nodeID).anythingZoomer({
-								smallArea: "#small" + nodeID,
-								largeArea: "#large" + nodeID,
-								zoomPort: "#overlay" + nodeID,
-								mover: "#mover" + nodeID,
-								expansionSize:50,  
-								speedMultiplier:multiplier   
-							});
-							
-							$("#zoomOptions").css("display", "table-row");
-						}
-					</xsl:text>
-				</script>
 			</xsl:when>
 			<xsl:when test="metadataList/metadata[@name = 'Screen']">
 				<div id="image{@nodeID}">

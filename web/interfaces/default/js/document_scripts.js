@@ -91,7 +91,13 @@ function getSubSectionsForSection(sectionID, callback)
 	template += '</xsl:template>';
 
 	var ajax = gs.functions.ajaxRequest();
-	ajax.open("GET", gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + sectionID + "?ilt=" + template.replace(" ", "%20"), true);
+	var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + sectionID + "?ilt=" + template.replace(" ", "%20");
+
+	if(gs.documentMetadata.docType == "paged")
+	{
+		url += "&dt=hierarchy";
+	}
+	ajax.open("GET", url, true);
 	ajax.onreadystatechange = function()
 	{
 		if(ajax.readyState == 4 && ajax.status == 200)
@@ -154,7 +160,8 @@ function toggleSection(sectionID, callback, tocDisabled)
 					var nodeID = sectionID.replace(/\./g, "_");
 					if(text.search("wrap" + nodeID) != -1)
 					{
-						document.getElementById("zoomOptions").style.display = "table-row";
+						document.getElementById("zoomOptions").style.display = null;
+						document.getElementById("pagedImageOptions").style.display = null;
 					}
 					getSubSectionsForSection(sectionID, function(sections)
 					{					
@@ -337,11 +344,11 @@ function expandOrCollapseAll(expand)
 	}
 }
 
-function loadTopLevelPage(callbackFunction)
+function loadTopLevelPage(callbackFunction, customURL)
 {
 	var ajax = gs.functions.ajaxRequest();
 	
-	var url = gs.xsltParams.library_name + "?a=d&dt=hierarchy&c=" + gs.cgiParams.c + "&excerptid=gs-document";
+	var url = gs.xsltParams.library_name + "?a=d&c=" + gs.cgiParams.c + "&excerptid=gs-document";
 	if(gs.cgiParams.d && gs.cgiParams.d.length > 0)
 	{
 		url += "&d=" + gs.cgiParams.d.replace(/([^.]*)\..*/, "$1");
@@ -350,8 +357,15 @@ function loadTopLevelPage(callbackFunction)
 	{
 		url += "&d=&alb=1&rl=1&href=" + gs.cgiParams.href;
 	}
-	
-	ajax.open("GET", url, true);
+
+	if(customURL != null)
+	{
+		ajax.open("GET", customURL, true);
+	}
+	else
+	{
+		ajax.open("GET", url, true);
+	}
 	ajax.onreadystatechange = function()
 	{
 		if(ajax.readyState == 4 && ajax.status == 200)
@@ -364,6 +378,7 @@ function loadTopLevelPage(callbackFunction)
 				var docStart = response.indexOf(">") + 1;
 				var docEnd = response.lastIndexOf("<");
 				var doc = response.substring(docStart, docEnd);
+
 				targetElem.innerHTML = doc;
 				
 				if(callbackFunction)

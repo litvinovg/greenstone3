@@ -31,12 +31,6 @@
 	  <subaction name="documentbasket" xslt="pages/documentbasket.xsl"/>
     </action>
   </actionList>
-  <optionList>
-    <option name="cssTheme" value="interfaces/default/style/themes/main/jquery-ui-1.8.16.custom.css"/>
-    <option name="highlightQueryTerms" value="true"/>
-    <option name="berryBaskets" value="true"/>
-	<option name="documentBasket" value="true"/>
-  </optionList>
   <languageList>
     <language name="en">
       <displayItem name="name">English</displayItem>
@@ -192,4 +186,10 @@
       <displayItem name="name">繁體中文 (Traditional Chinese)</displayItem>
     </language>
   </languageList>
+  <optionList>
+    <option name="cssTheme" value="interfaces/default/style/themes/main/jquery-ui-1.8.16.custom.css"/>
+    <option name="highlightQueryTerms" value="true"/>
+    <option name="berryBaskets" value="true"/>
+	<option name="documentBasket" value="true"/>
+  </optionList>
 </interfaceConfig>
