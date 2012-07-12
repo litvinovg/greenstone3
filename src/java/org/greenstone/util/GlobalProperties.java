@@ -89,7 +89,7 @@ public class GlobalProperties
 			}
 
 			gsdl3_home = properties.getProperty("gsdl3.home");
-			if ((gsdl3_home == null || gsdl3_home.length() > 0) && optionalGS3Home != null && optionalGS3Home.length() > 0)
+			if ((gsdl3_home == null || gsdl3_home.length() == 0) && optionalGS3Home != null && optionalGS3Home.length() > 0)
 			{
 				gsdl3_home = optionalGS3Home;
 			}
