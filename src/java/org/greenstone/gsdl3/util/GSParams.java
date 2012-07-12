@@ -94,7 +94,7 @@ public class GSParams
 		addParameter(CLUSTER, false); // we don't want to save cluster/collection 
 		addParameter(LANGUAGE, true);
 		addParameter(DOCUMENT, true);
-		addParameter(DOCUMENT_TYPE, true);
+		addParameter(DOCUMENT_TYPE, false);
 		addParameter(START_PAGE, false);
 		addParameter(S_START_PAGE, false);
 		// should the following two just be in doc action??
