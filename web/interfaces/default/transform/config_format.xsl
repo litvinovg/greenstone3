@@ -124,6 +124,12 @@
 			</xsl:when>
 		</xsl:choose>
 	</xsl:template>
+	
+	<!-- gsf:cgiparam example, as used by the Enhanced PDF tutorial: 
+		<a><xsl:attribute name="href"><gsf:metadata name="httpPath" type="collection"/>/index/assoc/<gsf:metadata name="archivedir"/>/<gsf:metadata name="srclinkFile"/>#search=&amp;quot;<gsf:cgi-param name="query"/>&amp;quot;</xsl:attribute>src doc link with query highlighting</a> -->
+	<xsl:template match="gsf:cgi-param">
+		<xslt:value-of disable-output-escaping="yes" select="/page/pageRequest/paramList/param[@name='s1.{@name}']/@value"/>		
+	</xsl:template>
 
 	<!-- A GLI user can use a gsf:displayText element in GS3's Format Features to retrieve
 	  a string defined in either collectionConfig.xml or else the interface dictionaries. 
