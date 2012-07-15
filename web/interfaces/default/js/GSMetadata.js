@@ -7,7 +7,8 @@ function GSMetadata(collection, site, documentID, name, indexPosition, archivesP
 	var _value = value;
 	var _indexPosition = indexPosition;
 	var _archivesPosition = archivesPosition;
-	
+
+
 	//The setImport, setArchives and setIndex parameters are optional flags that specify the places you want the metadata to be set
 	this.setMetadata = function(newValue, setImport, setArchives, setIndex)
 	{
@@ -83,4 +84,10 @@ function GSMetadata(collection, site, documentID, name, indexPosition, archivesP
 			}
 		}
 	}
+
+        this.getValue = function()
+        {
+            return _value;
+	}
+	
 }
