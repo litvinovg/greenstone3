@@ -273,7 +273,12 @@
 	<xsl:template name="documentContent">
 		<xsl:choose>
 			<xsl:when test="@docType='simple'">
-				<xsl:call-template name="documentNodeText"/>
+			  <div id="gs-document">							
+			    <div id="gs-document-text">
+			      <xsl:call-template name="documentNodeText"/>
+			    </div>
+			  </div>
+
 			</xsl:when>
 			<xsl:otherwise> 
 				<xsl:call-template name="wrappedDocument"/>
