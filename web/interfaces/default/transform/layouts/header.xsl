@@ -300,7 +300,7 @@
 			<!-- debuginfo (doesn't use class="ui-state-error" since the text is not legible due to inherited text-colour) -->
 			<xsl:if test="/page/pageRequest/paramList/param[(@name='debug') and (@value='on' or @value='true' or @value='1')]">
 			  <li class="ui-state-default ui-corner-all">
-			    <a href="{$library_name}/collection/{$collNameChecked}/page/debuginfo">
+			    <a href="{$library_name}/collection/{$collNameChecked}/page/debug">
 			      <xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo_tip')"/></xsl:attribute>
 			      <ul>
 				<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo_b')"/></span></li>
