@@ -1,12 +1,16 @@
 package org.greenstone.server;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.Properties;
 
-import org.greenstone.util.RunAnt;
+import org.apache.log4j.PropertyConfigurator;
 
 import org.greenstone.server.BaseServer;
 import org.greenstone.server.BaseProperty;
 import org.greenstone.util.GlobalProperties;
+import org.greenstone.util.RunAnt;
 
 public class Server3 extends BaseServer
 {
@@ -42,10 +46,14 @@ public class Server3 extends BaseServer
 		return GlobalProperties.getFullGSDL3WebAddress() + config_properties.getProperty(BaseServer.Property.DEFAULT_SERVLET);
 	}
 
+	public String fallbackGSDL3Home() 
+	{ 
+		return gsdl_home + File.separator + "web"; //System.getenv("GSDL3SRCHOME") + File.separator + "web"; 
+	} 
+
 	public void reload()
 	{
-	    String fallback_gsdl3_home = System.getenv("GSDL3SRCHOME") + File.separator + "web";
-	    GlobalProperties.loadGlobalProperties(fallback_gsdl3_home); // properties file may have changed, so reload it
+		GlobalProperties.loadGlobalProperties(fallbackGSDL3Home()); // properties file may have changed, so reload it
 	}
 
 	public static void main(String[] args)
@@ -67,4 +75,53 @@ public class Server3 extends BaseServer
 		String lang = (args.length == 2) ? args[1] : "en";
 		new Server3(gsdl3_src_home, lang);
 	}
+
+    // Prepare the log4j.properties for GS3
+    protected void initLogger() {
+
+	String gsdl3_home = GlobalProperties.getGSDL3Home(); // may not be initialised at this stage	
+	if(gsdl3_home == null) { // use gsdl_home/web
+	    gsdl3_home = fallbackGSDL3Home();
+	}
+	String propsFolder = gsdl3_home + File.separator + "WEB-INF" + File.separator + "classes" + File.separator;
+	File propsFile = new File(propsFolder+"log4j.properties");
+
+	// create it from the template file GS3/resources/java/log4j.properties.in
+	if(!propsFile.exists()) {
+	    try {
+		// need to set gsdl3.home property's value to be gsdl_home/web,
+		// so that the location  of the log files gets resolved correctly
+		
+		// load the template log4j.properties.in file into logProps
+		FileInputStream infile = new FileInputStream(new File(gsdl_home+File.separator+"resources"+File.separator+"java"+File.separator+"log4j.properties.in"));
+		if(infile != null) {
+		    Properties logProps = new Properties();
+		    logProps.load(infile);
+		    infile.close();
+
+		    // set gsdl3.home to web home
+		    logProps.setProperty("gsdl3.home", gsdl3_home);
+		    
+		    // write the customised properties out to a custom log4j.properties file
+		    FileOutputStream outfile = new FileOutputStream(propsFile);
+		    if(outfile != null) {
+			logProps.store(outfile, "Customised log4j.properties file");
+			outfile.close();
+		    } else {
+			System.err.println("Could not store properties file " + propsFile + " for Server3.");
+		    }
+		}
+	    } catch(Exception e) {
+		System.err.println("Exception occurred when custom-configuring the logger for Server3.\n" + e);
+		e.printStackTrace();
+	    }
+	}
+
+	// now configure the logger with the custom log4j.properties file
+	if(propsFile.exists()) {
+	    PropertyConfigurator.configure(propsFile.getAbsolutePath());
+	} else {
+	    System.err.println("Could not create properties file " + propsFile + " for Server3.");
+	}
+    }
 }

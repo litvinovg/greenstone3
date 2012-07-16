@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.*;
+import org.apache.log4j.PropertyConfigurator;
 
 import org.greenstone.util.PortFinder;
 import org.greenstone.util.ScriptReadWrite;
