@@ -73,7 +73,8 @@ public class DocumentAction extends Action
 		{
 			provide_annotations = true;
 		}
-		return true;	}
+		return true;
+	}
 
 	public Node process(Node message_node)
 	{
@@ -120,8 +121,8 @@ public class DocumentAction extends Action
 		String document_type = (String) params.get(GSParams.DOCUMENT_TYPE);
 		if (document_type != null && document_type.equals(""))
 		{
-		  //document_type = "hierarchy";
-		  document_type = null; // we'll get it later if not already specified
+			//document_type = "hierarchy";
+			document_type = null; // we'll get it later if not already specified
 		}
 		//whether to retrieve siblings or not
 		boolean get_siblings = false;
@@ -190,18 +191,21 @@ public class DocumentAction extends Action
 			current_doc.setAttribute(GSXML.ID_MOD_ATT, doc_id_modifier);
 		}
 
-		if (document_type == null) {
-		  logger.error("getting document type");
-		  document_type = getDocumentType(basic_doc_list, collection, userContext, page_response);
-		  logger.error("new doc type = "+document_type);
+		if (document_type == null)
+		{
+			logger.error("getting document type");
+			document_type = getDocumentType(basic_doc_list, collection, userContext, page_response);
+			logger.error("new doc type = " + document_type);
 		}
-		if (document_type != null) {
-		  // set the doctype from the cgi arg or from the server as an attribute
-		  the_document.setAttribute(GSXML.DOC_TYPE_ATT, document_type);
+		if (document_type != null)
+		{
+			// set the doctype from the cgi arg or from the server as an attribute
+			the_document.setAttribute(GSXML.DOC_TYPE_ATT, document_type);
 		}
-		else {
-		  logger.error("doctype is null!!!***********");
-	}
+		else
+		{
+			logger.error("doctype is null!!!***********");
+		}
 
 		// Create a parameter list to specify the required structure information
 		Element ds_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -491,7 +495,7 @@ public class DocumentAction extends Action
 		}
 
 		Element dc_response_doc_list = (Element) GSXML.getNodeByPath(dc_response_message, path);
-		
+
 		if (expand_document)
 		{
 			// Merge the content with the structure information
@@ -516,7 +520,7 @@ public class DocumentAction extends Action
 			Element dc_response_doc = (Element) GSXML.getChildByTagName(dc_response_doc_list, GSXML.DOC_NODE_ELEM);
 			Element dc_response_doc_content = (Element) GSXML.getChildByTagName(dc_response_doc, GSXML.NODE_CONTENT_ELEM);
 			//Element dc_response_doc_external = (Element) GSXML.getChildByTagName(dc_response_doc, "external");
-			
+
 			if (dc_response_doc_content == null)
 			{
 				// no content to add
@@ -719,45 +723,43 @@ public class DocumentAction extends Action
 
 	}
 
-  protected String getDocumentType(Element basic_doc_list, String collection, UserContext userContext, Element page_response) 
-  {
-    
-    Element ds_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-    String to = GSPath.appendLink(collection, "DocumentStructureRetrieve");// Hard-wired?
-    Element ds_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
-    ds_message.appendChild(ds_request);
+	protected String getDocumentType(Element basic_doc_list, String collection, UserContext userContext, Element page_response)
+	{
+		Element ds_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		String to = GSPath.appendLink(collection, "DocumentStructureRetrieve");// Hard-wired?
+		Element ds_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		ds_message.appendChild(ds_request);
 
-    // Create a parameter list to specify the required structure information
-    Element ds_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-    Element ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
-    ds_param_list.appendChild(ds_param);
-    ds_param.setAttribute(GSXML.NAME_ATT, "info");
-    ds_param.setAttribute(GSXML.VALUE_ATT, "documentType");
-    
-    ds_request.appendChild(ds_param_list);
-    
-    // add the node list we created earlier
-    ds_request.appendChild(basic_doc_list);
-    
-    logger.error("doctype request = "+this.converter.getPrettyString(ds_request));
-    // Process the document structure retrieve message
-    Element ds_response_message = (Element) this.mr.process(ds_message);
-    logger.error("doctype response = "+this.converter.getPrettyString(ds_response_message));
-    if (processErrorElements(ds_response_message, page_response))
-      {
-	return null;
-      }
+		// Create a parameter list to specify the required structure information
+		Element ds_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+		ds_param_list.appendChild(ds_param);
+		ds_param.setAttribute(GSXML.NAME_ATT, "info");
+		ds_param.setAttribute(GSXML.VALUE_ATT, "documentType");
 
-    String[] links = { GSXML.RESPONSE_ELEM, GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.DOC_NODE_ELEM, "nodeStructureInfo"};
-    String path = GSPath.createPath(links);
-    Element info_elem = (Element) GSXML.getNodeByPath(ds_response_message, path);
-      Element doctype_elem = GSXML.getNamedElement(info_elem, "info", "name", "documentType");
-    if (doctype_elem != null) {
-      String doc_type = doctype_elem.getAttribute("value");
-      return doc_type;
-    }
-    return null;
-  }
+		ds_request.appendChild(ds_param_list);
+
+		// add the node list we created earlier
+		ds_request.appendChild(basic_doc_list);
+
+		// Process the document structure retrieve message
+		Element ds_response_message = (Element) this.mr.process(ds_message);
+		if (processErrorElements(ds_response_message, page_response))
+		{
+			return null;
+		}
+
+		String[] links = { GSXML.RESPONSE_ELEM, GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.DOC_NODE_ELEM, "nodeStructureInfo" };
+		String path = GSPath.createPath(links);
+		Element info_elem = (Element) GSXML.getNodeByPath(ds_response_message, path);
+		Element doctype_elem = GSXML.getNamedElement(info_elem, "info", "name", "documentType");
+		if (doctype_elem != null)
+		{
+			String doc_type = doctype_elem.getAttribute("value");
+			return doc_type;
+		}
+		return null;
+	}
 
 	/**
 	 * this involves a bit of a hack to get the equivalent query terms - has to
