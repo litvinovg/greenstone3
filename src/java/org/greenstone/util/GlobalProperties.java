@@ -94,6 +94,12 @@ public class GlobalProperties
 				gsdl3_home = optionalGS3Home;
 			}
 
+			// if gsdl3_home is still null, fall back to default: gsdl3srchome/web
+			if (gsdl3_home == null) { 
+			    gsdl3_home = System.getenv("GSDL3SRCHOME") + File.separator + "web";
+			    logger.warn("** Note: falling back to using GSDL3SRCHOME to set gsdl3.home to: " + gsdl3_home);
+			}
+
 			// make sure the path separators are correct
 			// gsdl3_home may be null, eg when we are loading properties from Server3
 			if (gsdl3_home != null)

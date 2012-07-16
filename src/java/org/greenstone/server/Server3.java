@@ -13,7 +13,7 @@ public class Server3 extends BaseServer
 
 	public Server3(String gsdl3_src_home, String lang)
 	{
-		super(gsdl3_src_home, lang, gsdl3_src_home + File.separatorChar + "build.properties", "logs");
+		super(gsdl3_src_home, lang, gsdl3_src_home + File.separatorChar + "build.properties", "web"+File.separator+"logs");
 
 		Property = new Server3Property();
 
@@ -44,7 +44,8 @@ public class Server3 extends BaseServer
 
 	public void reload()
 	{
-		GlobalProperties.loadGlobalProperties(null); // properties file may have changed, so reload it
+	    String fallback_gsdl3_home = System.getenv("GSDL3SRCHOME") + File.separator + "web";
+	    GlobalProperties.loadGlobalProperties(fallback_gsdl3_home); // properties file may have changed, so reload it
 	}
 
 	public static void main(String[] args)

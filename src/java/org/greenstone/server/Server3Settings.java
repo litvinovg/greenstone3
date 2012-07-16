@@ -38,7 +38,7 @@ public class Server3Settings extends BaseServerSettings
 	servlet_combobox.setMaximumRowCount(5);
 	servlet_combobox.setBackground(bg_color);
 
-	File web_xml = new File(GlobalProperties.getProperty(BaseServer.Property.GSDL_HOME) + File.separator + "WEB-INF" + File.separator + "web.xml");
+	File web_xml = new File(GlobalProperties.getGSDL3Home() + File.separator + "WEB-INF" + File.separator + "web.xml");
 	XMLConverter converter = new XMLConverter();
 	Document web_config = converter.getDOM(web_xml);
 	if (web_config == null) {
