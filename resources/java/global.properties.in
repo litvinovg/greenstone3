@@ -2,7 +2,9 @@
 ##   <gsdlhome>/resources/java/global.properties.in
 
 ## greenstone home
-#If you want to specifiy the gsdl3.home manually then uncomment this line
+#If you want to specify the gsdl3.home manually then uncomment this line
+#in resources/java/global.properties.in, not global.properties since
+#the latter is repeatedly re-generated from global.properties.in
 #gsdl3.home=@gsdl3home@
 gsdl3.version=@gsdl3version@
 
