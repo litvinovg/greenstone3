@@ -127,6 +127,10 @@ public class SimpleDocumentDatabase extends AbstractSimpleDocument
 	if (childtype.equals("Paged")) {
 	    return GSXML.DOC_TYPE_PAGED;
 	}
+		if (childtype.equals("PagedHierarchy"))
+		  {
+		    return GSXML.DOC_TYPE_PAGED_HIERARCHY;
+		  }
 	return GSXML.DOC_TYPE_HIERARCHY;
 
     }
