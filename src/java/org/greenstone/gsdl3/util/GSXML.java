@@ -172,6 +172,7 @@ public class GSXML
 	public static final String DOC_TYPE_SIMPLE = "simple";
 	public static final String DOC_TYPE_PAGED = "paged";
 	public static final String DOC_TYPE_HIERARCHY = "hierarchy";
+	public static final String DOC_TYPE_PAGED_HIERARCHY = "pagedhierarchy";
 
 	public static final String SESSION_EXPIRATION = "session_expiration";
 	public static final String USER_SESSION_CACHE_ATT = "user_session_cache";
