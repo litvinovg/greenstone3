@@ -36,8 +36,6 @@ import org.w3c.dom.Element;
 /**
  * Greenstone 2 collection classifier service
  * 
- * @author Katherine Don
- * @author <a href="mailto:mdewsnip@cs.waikato.ac.nz">Michael Dewsnip</a>
  */
 
 public class GS2Browse extends AbstractBrowse
@@ -167,6 +165,10 @@ public class GS2Browse extends AbstractBrowse
 		{
 			return GSXML.DOC_TYPE_PAGED;
 		}
+		if (childtype.equals("PagedHierarchy"))
+		  {
+		    return GSXML.DOC_TYPE_PAGED_HIERARCHY;
+		  }
 		return GSXML.DOC_TYPE_HIERARCHY;
 
 	}
