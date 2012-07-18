@@ -253,7 +253,7 @@ public class DocumentAction extends Action
 			}
 
 		}
-		else if (document_type.equals(GSXML.DOC_TYPE_HIERARCHY))
+		else if (document_type.equals(GSXML.DOC_TYPE_HIERARCHY) ||document_type.equals(GSXML.DOC_TYPE_PAGED_HIERARCHY) )
 		{
 			get_structure = true;
 			if (expand_contents)
