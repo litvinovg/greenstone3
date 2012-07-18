@@ -62,7 +62,7 @@
 
 						<!-- the contents (if enabled) -->
 						<xsl:choose>
-							<xsl:when test="/page/pageResponse/document/@docType = 'paged'">
+							<xsl:when test="/page/pageResponse/document/@docType = 'paged' or /page/pageResponse/document/@docType = 'pagedhierarchy'">
 								<gsf:image type="Thumb"/>
 								<!-- Table of contents will be dynamically retrieved when viewing a paged document -->
 								<script type="text/javascript">
@@ -215,7 +215,7 @@
 				<li id="pagedImageOptions">
 					<xsl:attribute name="style">
 						<xsl:choose>
-							<xsl:when test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageResponse/document/documentNode/@docType = 'paged'">
+							<xsl:when test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageResponse/document/documentNode/@docType = 'paged' or /page/pageResponse/document/documentNode/@docType = 'pagedhierarchy'">
 							</xsl:when>
 							<xsl:otherwise>
 								display:none;

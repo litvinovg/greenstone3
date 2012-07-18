@@ -299,7 +299,7 @@
 					</div>
 				</div>
 			</xsl:when>
-			<xsl:when test="/page/pageResponse/document/@docType = 'paged'">
+			<xsl:when test="/page/pageResponse/document/@docType = 'paged' or /page/pageResponse/document/@docType = 'pagedhierarchy'">
 				<div id="gs-document">							
 					<div id="tocLoadingImage" style="text-align:center;">
 						<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.loading')"/><xsl:text>...</xsl:text>
