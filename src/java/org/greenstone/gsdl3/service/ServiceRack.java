@@ -19,28 +19,21 @@
 package org.greenstone.gsdl3.service;
 
 // greenstone classes
-import org.greenstone.gsdl3.util.*;
-import org.greenstone.gsdl3.core.*;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 
-// xml classes
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.core.MessageRouter;
+import org.greenstone.gsdl3.core.ModuleInterface;
+import org.greenstone.gsdl3.util.CollectionClassLoader;
+import org.greenstone.gsdl3.util.Dictionary;
+import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import javax.xml.parsers.*;
-import org.apache.xpath.XPathAPI;
-
-// general java classes
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.File;
-import java.util.HashMap;
-import java.util.ResourceBundle;
-import java.util.Locale;
-import java.lang.reflect.Method;
-
-import org.apache.log4j.*;
 
 /**
  * ServiceRack - abstract base class for services
@@ -93,6 +86,8 @@ public abstract class ServiceRack implements ModuleInterface
 	 */
 	protected HashMap<String, Node> format_info_map = null;
 
+	protected Element _globalFormat = null;
+
 	/**
 	 * A class loader that knows about the collection resources directory can
 	 * put properties files, dtds etc in here
@@ -113,6 +108,11 @@ public abstract class ServiceRack implements ModuleInterface
 
 	public void cleanUp()
 	{
+	}
+
+	public void setGlobalFormat(Element globalFormat)
+	{
+		_globalFormat = globalFormat;
 	}
 
 	/** sets the site home */
@@ -209,7 +209,6 @@ public abstract class ServiceRack implements ModuleInterface
 	 */
 	public Node process(Node message_node)
 	{
-
 		Element message = this.converter.nodeToElement(message_node);
 
 		NodeList requests = message.getElementsByTagName(GSXML.REQUEST_ELEM);
@@ -394,7 +393,12 @@ public abstract class ServiceRack implements ModuleInterface
 		// describe a particular service	
 		if (this.format_info_map.containsKey(to))
 		{
-			response.appendChild(getServiceFormat(to));
+			response.appendChild(response.getOwnerDocument().importNode(getServiceFormat(to), true));
+			if (_globalFormat != null)
+			{
+				response.appendChild(response.getOwnerDocument().importNode(GSXML.duplicateWithNewName(response.getOwnerDocument(), _globalFormat, GSXML.GLOBAL_FORMAT_ELEM, false), true));
+			}
+			System.err.println("RESPONSE = " + GSXML.xmlNodeToString(response));
 			response.setAttribute(GSXML.FROM_ATT, to);
 			return response;
 		}
