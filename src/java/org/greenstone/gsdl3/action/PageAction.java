@@ -27,8 +27,18 @@ public class PageAction extends Action
 	public Node process(Node message_node)
 	{
 		Element message = this.converter.nodeToElement(message_node);
-
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
+		Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		String collection = "";
+		if(paramList != null)
+		{
+			HashMap<String, Serializable> params = GSXML.extractParams(paramList, false);
+			if (params != null && params.get(GSParams.COLLECTION) != null)
+			{
+				collection = (String) params.get(GSParams.COLLECTION);
+			}
+		}
+
 		// the page name is the subaction
 		String page_name = request.getAttribute(GSXML.SUBACTION_ATT);
 		if (page_name.equals(""))
@@ -57,6 +67,18 @@ public class PageAction extends Action
 
 			logger.error("unknown page specified!");
 			response = unknownPage(request);
+		}
+
+		Element formatMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element formatRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, collection, new UserContext(request));
+		formatMessage.appendChild(formatRequest);
+		Element formatResponseMessage = (Element) this.mr.process(formatMessage);
+		Element formatResponse = (Element) GSXML.getChildByTagName(formatResponseMessage, GSXML.RESPONSE_ELEM);
+
+		Element globalFormat = (Element) GSXML.getChildByTagName(formatResponse, GSXML.FORMAT_ELEM);
+		if (globalFormat != null)
+		{
+			response.appendChild(globalFormat);
 		}
 
 		result.appendChild(this.doc.importNode(response, true));
