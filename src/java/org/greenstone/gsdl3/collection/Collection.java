@@ -768,6 +768,13 @@ public class Collection extends ServiceCluster
 				group.setAttribute(GSXML.NAME_ATT, groupName);
 			}
 		}
+		else if (type.equals(GSXML.REQUEST_TYPE_FORMAT))
+		{
+			if(_globalFormat != null)
+			{
+				response.appendChild(response.getOwnerDocument().importNode(_globalFormat, true));
+			}
+		}
 		else
 		{ // unknown type
 			return super.processMessage(request);
