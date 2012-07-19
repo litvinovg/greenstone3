@@ -219,12 +219,12 @@ public class GSXSLT
 		}
 	}
 
-  public static void inlineImportAndIncludeFiles(Document doc, String pathExtra, String interface_name)
+  public static void inlineImportAndIncludeFiles(Document doc, String pathExtra, String site, String collection, String interface_name, ArrayList<String> base_interfaces)
 	{
-	  inlineImportAndIncludeFilesDebug(doc, pathExtra, false, null, interface_name);
+	  inlineImportAndIncludeFilesDebug(doc, pathExtra, false, null, site, collection, interface_name, base_interfaces);
 	}
 
-  public static void inlineImportAndIncludeFilesDebug(Document doc, String pathExtra, boolean debug, String docFileName, String interface_name)
+  public static void inlineImportAndIncludeFilesDebug(Document doc, String pathExtra, boolean debug, String docFileName, String site, String collection, String interface_name, ArrayList<String> base_interfaces)
 	{
 		XMLConverter converter = new XMLConverter();
 
@@ -237,13 +237,13 @@ public class GSXSLT
 		{
 			Element current = (Element) ((i < importList.getLength()) ? importList.item(i) : includeList.item(i - importList.getLength()));
 			String href = current.getAttribute("href");
-			String filePath = GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), interface_name) + File.separator + "transform" + File.separator + path.replace("/", File.separator) + href.replace("/", File.separator);
+			//String filePath = GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), interface_name) + File.separator + "transform" + File.separator + path.replace("/", File.separator) + href.replace("/", File.separator);
 			//String filePath = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), site_name, collection, interface_name, base_interfaces, 
 
 			try
 			{
-				Document inlineDoc = converter.getDOM(new File(filePath), "UTF-8");
-
+			  //Document inlineDoc = converter.getDOM(new File(filePath), "UTF-8");
+			  Document inlineDoc = mergedXSLTDocumentCascade(path+href, site, collection, interface_name, base_interfaces, debug);
 				String newPath = path;
 				int lastSepIndex = href.lastIndexOf("/");
 				if (lastSepIndex != -1)
@@ -252,9 +252,9 @@ public class GSXSLT
 				}
 
 				//Do this recursively
-				inlineImportAndIncludeFilesDebug(inlineDoc, newPath, debug, filePath, interface_name);
+				inlineImportAndIncludeFilesDebug(inlineDoc, newPath, debug, "merged "+href/*filePath*/, site, collection, interface_name, base_interfaces);
 
-				GSXSLT.mergeStylesheetsDebug(doc, inlineDoc.getDocumentElement(), false, debug, docFileName, filePath);
+				GSXSLT.mergeStylesheetsDebug(doc, inlineDoc.getDocumentElement(), false, debug, docFileName, /*filePath*/"merged "+href);
 			}
 			catch (Exception ex)
 			{

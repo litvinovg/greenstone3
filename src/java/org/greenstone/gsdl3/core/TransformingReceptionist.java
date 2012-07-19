@@ -738,7 +738,7 @@ public class TransformingReceptionist extends Receptionist
 			}
 		}
 
-		GSXSLT.inlineImportAndIncludeFiles(skinAndLibraryDoc, null, (String) this.config_params.get(GSConstants.INTERFACE_NAME));
+		GSXSLT.inlineImportAndIncludeFiles(skinAndLibraryDoc, null, (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces);
 		skinAndLibraryDoc = (Document) secondConfigFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request));
 
 		if (_debug)
