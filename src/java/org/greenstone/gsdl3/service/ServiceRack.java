@@ -212,7 +212,6 @@ public abstract class ServiceRack implements ModuleInterface
 		Element message = this.converter.nodeToElement(message_node);
 
 		NodeList requests = message.getElementsByTagName(GSXML.REQUEST_ELEM);
-		Document mess_doc = message.getOwnerDocument();
 		Element mainResult = this.doc.createElement(GSXML.MESSAGE_ELEM);
 		if (requests.getLength() == 0)
 		{
@@ -238,7 +237,6 @@ public abstract class ServiceRack implements ModuleInterface
 			{
 				Element response = processFormat(request);
 				mainResult.appendChild(this.doc.importNode(response, true));
-
 			}
 			else
 			{
@@ -398,10 +396,10 @@ public abstract class ServiceRack implements ModuleInterface
 			{
 				response.appendChild(response.getOwnerDocument().importNode(GSXML.duplicateWithNewName(response.getOwnerDocument(), _globalFormat, GSXML.GLOBAL_FORMAT_ELEM, false), true));
 			}
-			System.err.println("RESPONSE = " + GSXML.xmlNodeToString(response));
 			response.setAttribute(GSXML.FROM_ATT, to);
 			return response;
 		}
+
 		// else no format info
 		logger.error("ServiceRack describe request: no format info for " + to + ".");
 		return response;
