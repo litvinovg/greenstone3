@@ -19,33 +19,27 @@
 package org.greenstone.gsdl3.service;
 
 // greenstone classes
-import org.greenstone.gsdl3.util.*;
-import org.greenstone.gsdl3.core.*;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Properties;
 
-// for fedora
-import org.greenstone.gs3client.dlservices.*;
-import org.greenstone.fedora.services.FedoraGS3Exception.CancelledException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
-// xml classes
+import org.apache.log4j.Logger;
+import org.greenstone.gs3client.dlservices.DigitalLibraryServicesAPIA;
+import org.greenstone.gs3client.dlservices.FedoraServicesAPIA;
+import org.greenstone.gsdl3.core.MessageRouter;
+import org.greenstone.gsdl3.util.Dictionary;
+import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.OID;
+import org.greenstone.gsdl3.util.XMLConverter;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-import javax.xml.parsers.*;
-import org.apache.xpath.XPathAPI;
-
-// general java classes
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.lang.reflect.Method;
-
-import org.apache.log4j.*;
 
 /**
  * FedoraServiceProxy - communicates with the FedoraGS3 interface.
@@ -82,8 +76,6 @@ public class FedoraServiceProxy extends ServiceRack implements OID.OIDTranslatab
 		this.converter = new XMLConverter();
 		this.doc = this.converter.newDOM();
 		this.short_service_info = this.doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
-		this.format_info_map = new HashMap<String, Node>();
-
 	}
 
 	/*
@@ -710,12 +702,6 @@ public class FedoraServiceProxy extends ServiceRack implements OID.OIDTranslatab
 		Element e = (Element) response.getElementsByTagName(GSXML.SERVICE_ELEM).item(0);
 		e = (Element) this.doc.importNode(e, true);
 		return e;
-	}
-
-	protected Element getServiceFormat(String service)
-	{
-		Element format = (Element) ((Element) this.format_info_map.get(service)).cloneNode(true);
-		return format;
 	}
 
 	/** overloaded version for no args case */
