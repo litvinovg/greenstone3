@@ -738,7 +738,7 @@ public class TransformingReceptionist extends Receptionist
 			}
 		}
 
-		GSXSLT.inlineImportAndIncludeFiles(skinAndLibraryDoc, null);
+		GSXSLT.inlineImportAndIncludeFiles(skinAndLibraryDoc, null, (String) this.config_params.get(GSConstants.INTERFACE_NAME));
 		skinAndLibraryDoc = (Document) secondConfigFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request));
 
 		if (_debug)
@@ -863,41 +863,45 @@ public class TransformingReceptionist extends Receptionist
 		{
 			name = this.xslt_map.get(action);
 		}
-		// now find the absolute path
-		ArrayList<File> stylesheets = GSFile.getStylesheetFiles(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, name);
-		if (stylesheets.size() == 0)
-		{
-			logger.error(" Can't find stylesheet for " + name);
-			return null;
-		}
-		logger.debug("Stylesheet: " + name);
 
-		Document finalDoc = this.converter.getDOM(stylesheets.get(stylesheets.size() - 1), "UTF-8");
-		if (finalDoc == null)
-		{
-			return null;
-		}
-
-		for (int i = stylesheets.size() - 2; i >= 0; i--)
-		{
-			Document currentDoc = this.converter.getDOM(stylesheets.get(i), "UTF-8");
-			if (currentDoc == null)
-			{
-				return null;
-			}
-
-			if (_debug)
-			{
-				GSXSLT.mergeStylesheetsDebug(finalDoc, currentDoc.getDocumentElement(), true, true, stylesheets.get(stylesheets.size() - 1).getAbsolutePath(), stylesheets.get(i).getAbsolutePath());
-			}
-			else
-			{
-				GSXSLT.mergeStylesheets(finalDoc, currentDoc.getDocumentElement(), true);
-			}
-		}
-
+		Document finalDoc = GSXSLT.mergedXSLTDocumentCascade(name, (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, _debug);
 		return finalDoc;
 	}
+	// 	// now find the absolute path
+	// 	ArrayList<File> stylesheets = GSFile.getStylesheetFiles(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, name);
+	// 	if (stylesheets.size() == 0)
+	// 	{
+	// 		logger.error(" Can't find stylesheet for " + name);
+	// 		return null;
+	// 	}
+	// 	logger.debug("Stylesheet: " + name);
+
+	// 	Document finalDoc = this.converter.getDOM(stylesheets.get(stylesheets.size() - 1), "UTF-8");
+	// 	if (finalDoc == null)
+	// 	{
+	// 		return null;
+	// 	}
+
+	// 	for (int i = stylesheets.size() - 2; i >= 0; i--)
+	// 	{
+	// 		Document currentDoc = this.converter.getDOM(stylesheets.get(i), "UTF-8");
+	// 		if (currentDoc == null)
+	// 		{
+	// 			return null;
+	// 		}
+
+	// 		if (_debug)
+	// 		{
+	// 			GSXSLT.mergeStylesheetsDebug(finalDoc, currentDoc.getDocumentElement(), true, true, stylesheets.get(stylesheets.size() - 1).getAbsolutePath(), stylesheets.get(i).getAbsolutePath());
+	// 		}
+	// 		else
+	// 		{
+	// 			GSXSLT.mergeStylesheets(finalDoc, currentDoc.getDocumentElement(), true);
+	// 		}
+	// 	}
+
+	// 	return finalDoc;
+	// }
 
 	// returns the path to the gslib.xsl file that is applicable for the current interface
 	protected String getGSLibXSLFilename()

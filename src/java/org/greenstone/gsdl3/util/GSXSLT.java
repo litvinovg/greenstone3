@@ -28,9 +28,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import org.apache.log4j.*;
+
 /** various functions for manipulating Greenstone xslt */
 public class GSXSLT
 {
+
+	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.GSXSLT.class.getName());
+
 	public static void mergeStylesheets(Document main_xsl, Element extra_xsl, boolean overwrite)
 	{
 		mergeStylesheetsDebug(main_xsl, extra_xsl, overwrite, false, null, null);
@@ -214,12 +219,12 @@ public class GSXSLT
 		}
 	}
 
-	public static void inlineImportAndIncludeFiles(Document doc, String pathExtra)
+  public static void inlineImportAndIncludeFiles(Document doc, String pathExtra, String interface_name)
 	{
-		inlineImportAndIncludeFilesDebug(doc, pathExtra, false, null);
+	  inlineImportAndIncludeFilesDebug(doc, pathExtra, false, null, interface_name);
 	}
 
-	public static void inlineImportAndIncludeFilesDebug(Document doc, String pathExtra, boolean debug, String docFileName)
+  public static void inlineImportAndIncludeFilesDebug(Document doc, String pathExtra, boolean debug, String docFileName, String interface_name)
 	{
 		XMLConverter converter = new XMLConverter();
 
@@ -232,7 +237,8 @@ public class GSXSLT
 		{
 			Element current = (Element) ((i < importList.getLength()) ? importList.item(i) : includeList.item(i - importList.getLength()));
 			String href = current.getAttribute("href");
-			String filePath = GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), "default") + File.separator + "transform" + File.separator + path.replace("/", File.separator) + href.replace("/", File.separator);
+			String filePath = GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), interface_name) + File.separator + "transform" + File.separator + path.replace("/", File.separator) + href.replace("/", File.separator);
+			//String filePath = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), site_name, collection, interface_name, base_interfaces, 
 
 			try
 			{
@@ -246,7 +252,7 @@ public class GSXSLT
 				}
 
 				//Do this recursively
-				inlineImportAndIncludeFilesDebug(inlineDoc, newPath, debug, filePath);
+				inlineImportAndIncludeFilesDebug(inlineDoc, newPath, debug, filePath, interface_name);
 
 				GSXSLT.mergeStylesheetsDebug(doc, inlineDoc.getDocumentElement(), false, debug, docFileName, filePath);
 			}
@@ -268,6 +274,46 @@ public class GSXSLT
 			includeElem.getParentNode().removeChild(includeElem);
 		}
 	}
+
+		public static Document mergedXSLTDocumentCascade(String xslt_filename, String site, String collection, String this_interface, ArrayList<String> base_interfaces, boolean debug) {
+		  XMLConverter converter = new XMLConverter();
+		  // find the list of stylesheets with this name
+		  ArrayList<File> stylesheets = GSFile.getStylesheetFiles(GlobalProperties.getGSDL3Home(), site, collection, this_interface, base_interfaces, xslt_filename);
+		if (stylesheets.size() == 0)
+		{
+			logger.error(" Can't find stylesheet for " + xslt_filename);
+			return null;
+		}
+		logger.debug("Stylesheet: " + xslt_filename);
+
+		Document finalDoc = converter.getDOM(stylesheets.get(stylesheets.size() - 1), "UTF-8");
+		if (finalDoc == null)
+		{
+			return null;
+		}
+
+		for (int i = stylesheets.size() - 2; i >= 0; i--)
+		{
+			Document currentDoc = converter.getDOM(stylesheets.get(i), "UTF-8");
+			if (currentDoc == null)
+			{
+				return null;
+			}
+
+			if (debug)
+			{
+				GSXSLT.mergeStylesheetsDebug(finalDoc, currentDoc.getDocumentElement(), true, true, stylesheets.get(stylesheets.size() - 1).getAbsolutePath(), stylesheets.get(i).getAbsolutePath());
+			}
+			else
+			{
+				GSXSLT.mergeStylesheets(finalDoc, currentDoc.getDocumentElement(), true);
+			}
+		}
+
+		return finalDoc;
+	}
+
+
 
 	public static void modifyConfigFormatForDebug(Document doc, String fileName)
 	{
