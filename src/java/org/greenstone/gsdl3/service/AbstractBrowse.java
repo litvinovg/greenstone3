@@ -19,21 +19,17 @@
 package org.greenstone.gsdl3.service;
 
 // Greenstone classes
-import org.greenstone.gsdl3.util.GSXML;
+import java.util.ArrayList;
+
+import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.MacroResolver;
 import org.greenstone.gsdl3.util.OID;
-
-// XML classes
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-// General Java classes
-import java.util.ArrayList;
-
-import org.apache.log4j.*;
 
 /**
  * Partially implements a generic classifier service
@@ -94,7 +90,6 @@ public abstract class AbstractBrowse extends ServiceRack
 			{
 				macro_resolver.addMacros(replacement_elem);
 			}
-
 		}
 
 		// check that there are classifiers specified
@@ -138,6 +133,7 @@ public abstract class AbstractBrowse extends ServiceRack
 		for (int i = 0; i < classifiers.getLength(); i++)
 		{
 			Element cl = (Element) classifiers.item(i);
+
 			Element new_cl = (Element) this.doc.importNode(cl, false); // just import this node, not the children
 
 			// get the format info out, and put inside a classifier element
@@ -145,7 +141,6 @@ public abstract class AbstractBrowse extends ServiceRack
 			Element format = (Element) GSXML.getChildByTagName(cl, GSXML.FORMAT_ELEM);
 			if (format != null)
 			{
-
 				//copy all the children
 				NodeList elems = format.getChildNodes();
 				for (int j = 0; j < elems.getLength(); j++)
@@ -269,7 +264,6 @@ public abstract class AbstractBrowse extends ServiceRack
 	 */
 	static boolean extractExtraClassifierInfo(Element info, Element extra_info)
 	{
-
 		if (extra_info == null)
 		{
 			return false;
@@ -318,16 +312,11 @@ public abstract class AbstractBrowse extends ServiceRack
 				{
 					Element e = (Element) display_names.item(j);
 					cl.appendChild(owner.importNode(e, true));
-
 				}
 			}
 
 			// get the format element if any 
 			Element format = (Element) GSXML.getChildByTagName(node_extra, GSXML.FORMAT_ELEM);
-			if (format == null)
-			{ // try a generic one that applies to all classifiers
-				format = (Element) GSXML.getChildByTagName(extra_info, GSXML.FORMAT_ELEM);
-			}
 			if (format != null)
 			{ // append to index info
 				cl.appendChild(owner.importNode(format, true));
