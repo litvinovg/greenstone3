@@ -71,6 +71,7 @@ public class GSXML
 	public static final String DEFAULT_ELEM = "default";
 	public static final String STYLESHEET_ELEM = "format";//"stylesheet"; // any additional stylesheet stuff is carried in the message inside this elem
 	public static final String FORMAT_ELEM = "format"; // config files use format - should we use this instead of stylesheet??
+	public static final String GLOBAL_FORMAT_ELEM = "globalFormat";
 	public static final String TERM_ELEM = "term";
 	public static final String STOPWORD_ELEM = "stopword";
 	public static final String FACET_ELEM = "facet";
@@ -712,7 +713,7 @@ public class GSXML
 		Node child = n.getFirstChild();
 		while (child != null)
 		{
-			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI().equals(namespace) && child.getLocalName() != null && child.getLocalName().equals(local_name))
+			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI() != null && child.getNamespaceURI().equals(namespace) && child.getLocalName() != null && child.getLocalName().equals(local_name))
 			{
 				node_list.addNode(child);
 			}
@@ -1062,7 +1063,6 @@ public class GSXML
 
 	public static Element getLastElementByTagNameNS(Element main, String namespace, String node_name)
 	{
-
 		NodeList nodes = main.getElementsByTagNameNS(namespace, node_name);
 		int len = nodes.getLength();
 		if (len == 0)
