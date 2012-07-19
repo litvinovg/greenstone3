@@ -680,8 +680,13 @@ public class DocumentAction extends Action
 		Element format_elem = (Element) GSXML.getChildByTagName(format_resp, GSXML.FORMAT_ELEM);
 		if (format_elem != null)
 		{
-			logger.debug("doc action found a format statement");
-			// set teh format type
+			Element global_format_elem = (Element) GSXML.getChildByTagName(format_resp, GSXML.GLOBAL_FORMAT_ELEM);
+			if(global_format_elem != null)
+			{
+				GSXSLT.mergeFormatElements(format_elem, global_format_elem, false);
+			}
+
+			// set the format type
 			format_elem.setAttribute(GSXML.TYPE_ATT, "display");
 			page_response.appendChild(this.doc.importNode(format_elem, true));
 		}
