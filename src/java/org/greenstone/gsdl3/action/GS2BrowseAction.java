@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.OID;
 import org.greenstone.gsdl3.util.UserContext;
 import org.w3c.dom.Element;
@@ -40,7 +41,6 @@ public class GS2BrowseAction extends Action
 
 	protected Element classifierBrowse(Element request)
 	{
-
 		Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
 
 		// extract the params from the cgi-request, and check that we have a coll specified
@@ -114,7 +114,6 @@ public class GS2BrowseAction extends Action
 		Element format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.FORMAT_ELEM);
 		if (format_elem != null)
 		{
-
 			// find the one for the classifier we are in
 			Element this_format = GSXML.getNamedElement(format_elem, GSXML.CLASSIFIER_ELEM, GSXML.NAME_ATT, top_id);
 			if (this_format == null)
@@ -124,6 +123,14 @@ public class GS2BrowseAction extends Action
 
 			if (this_format != null)
 			{
+				Element global_format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.GLOBAL_FORMAT_ELEM);
+				if(global_format_elem != null)
+				{
+					System.err.println("MERGING " + GSXML.xmlNodeToString(this_format) + "\n\nAND\n\n" + GSXML.xmlNodeToString(global_format_elem));
+					GSXSLT.mergeFormatElements(this_format, global_format_elem, false);
+					System.err.println("RESULT = " + GSXML.xmlNodeToString(this_format));
+				}
+
 				Element new_format = GSXML.duplicateWithNewName(this.doc, this_format, GSXML.FORMAT_ELEM, false);
 				extractMetadataNames(new_format, doc_meta_names, class_meta_names);
 				// set the format type

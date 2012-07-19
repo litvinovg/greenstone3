@@ -8,12 +8,14 @@ import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.OID;
 import org.greenstone.gsdl3.util.UserContext;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-OTE: this class not used at present!!!!!
+
+//NOTE: this class not used at present!!!!!
 /** action for classifier browsing */
 public class BrowseAction extends Action
 {
@@ -129,6 +131,11 @@ public class BrowseAction extends Action
 			}
 			if (this_format != null)
 			{
+				Element global_format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.GLOBAL_FORMAT_ELEM);
+				if(global_format_elem != null)
+				{
+					GSXSLT.mergeFormatElements(this_format, global_format_elem, false);
+				}
 				Element new_format = GSXML.duplicateWithNewName(this.doc, this_format, GSXML.FORMAT_ELEM, false);
 				// set teh format type
 				new_format.setAttribute(GSXML.TYPE_ATT, "browse");

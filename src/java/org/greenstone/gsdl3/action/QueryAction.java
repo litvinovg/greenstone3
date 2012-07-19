@@ -1,23 +1,18 @@
 package org.greenstone.gsdl3.action;
 
-import org.greenstone.gsdl3.core.ModuleInterface;
-import org.greenstone.gsdl3.util.*;
-// XML classes
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Vector;
-import java.util.Map;
-import java.util.Iterator;
-import java.io.File;
-import java.io.Serializable;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.util.GSParams;
+import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.GSXSLT;
+import org.greenstone.gsdl3.util.UserContext;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /** action class for queries */
 public class QueryAction extends Action
@@ -204,6 +199,11 @@ public class QueryAction extends Action
 		Element format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.FORMAT_ELEM);
 		if (format_elem != null)
 		{
+			Element global_format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.GLOBAL_FORMAT_ELEM);
+			if (global_format_elem != null)
+			{
+				GSXSLT.mergeFormatElements(format_elem, global_format_elem, false);
+			}
 			// set the format type
 			format_elem.setAttribute(GSXML.TYPE_ATT, "search");
 			// for now just add to the response
@@ -235,7 +235,7 @@ public class QueryAction extends Action
 		mr_metadata_request.appendChild(filtered_doc_list);
 
 		Element mr_metadata_response = (Element) this.mr.process(mr_metadata_message);
-		
+
 		// check for errors
 		processErrorElements(mr_metadata_response, page_response);
 
