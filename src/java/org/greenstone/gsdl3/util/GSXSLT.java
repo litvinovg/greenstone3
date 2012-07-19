@@ -162,7 +162,7 @@ public class GSXSLT
 			if (overwrite)
 			{
 				// if we have a name attribute, remove any other similarly named template
-				GSXML.removeElementsWithAttributesNS(main, "http://www.w3.org/1999/XSL/Transform", "template", new String[]{"name", "match", "mode"}, new String[]{template_name, template_match, template_mode});
+				GSXML.removeElementsWithAttributesNS(main, "http://www.w3.org/1999/XSL/Transform", "template", new String[] { "name", "match", "mode" }, new String[] { template_name, template_match, template_mode });
 
 				// now add our good template in
 				main.appendChild(main_xsl.importNode(node, true));
@@ -173,7 +173,7 @@ public class GSXSLT
 				// In this case (eg from expanding imported stylesheets)
 				// there can't be any duplicate named templates, so just look for matches
 				// we already have the one with highest import precedence (from the top most level) so don't add any more in
-				if (GSXML.getElementsWithAttributesNS(main, "http://www.w3.org/1999/XSL/Transform", "template", new String[]{"name", "match", "mode"}, new String[]{template_name, template_match, template_mode}).getLength() == 0)
+				if (GSXML.getElementsWithAttributesNS(main, "http://www.w3.org/1999/XSL/Transform", "template", new String[] { "name", "match", "mode" }, new String[] { template_name, template_match, template_mode }).getLength() == 0)
 				{
 					main.appendChild(main_xsl.importNode(node, true));
 				}
@@ -370,4 +370,73 @@ public class GSXSLT
 		return metadata;
 	}
 
+	public static void mergeFormatElements(Element mainFormat, Element secondaryFormat, boolean overwrite)
+	{
+		NodeList xslChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.w3.org/1999/XSL/Transform", "variable");
+		NodeList gsfChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "variable");
+		for (int i = 0; i < xslChildren.getLength() + gsfChildren.getLength(); i++)
+		{
+			Element node = (Element) ((i < xslChildren.getLength()) ? xslChildren.item(i) : gsfChildren.item(i - xslChildren.getLength()));
+			if (GSXML.getNamedElementNS(mainFormat, "http://www.w3.org/1999/XSL/Transform", "variable", "name", node.getAttribute("name")) == null && GSXML.getNamedElementNS(mainFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "variable", "name", node.getAttribute("name")) == null)
+			{
+				mainFormat.appendChild(node);
+			}
+		}
+
+		xslChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.w3.org/1999/XSL/Transform", "param");
+		gsfChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "param");
+		for (int i = 0; i < xslChildren.getLength() + gsfChildren.getLength(); i++)
+		{
+			Element node = (Element) ((i < xslChildren.getLength()) ? xslChildren.item(i) : gsfChildren.item(i - xslChildren.getLength()));
+			if (GSXML.getNamedElementNS(mainFormat, "http://www.w3.org/1999/XSL/Transform", "param", "name", node.getAttribute("name")) == null && GSXML.getNamedElementNS(mainFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "param", "name", node.getAttribute("name")) == null)
+			{
+				mainFormat.appendChild(node);
+			}
+		}
+
+		xslChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.w3.org/1999/XSL/Transform", "template");
+		gsfChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "template");
+		for (int i = 0; i < xslChildren.getLength() + gsfChildren.getLength(); i++)
+		{
+			Element node = (Element) ((i < xslChildren.getLength()) ? xslChildren.item(i) : gsfChildren.item(i - xslChildren.getLength()));
+			// remove any previous occurrences of xsl:template with the same value for name or match 
+			String template_match = node.getAttribute("match");
+			String template_name = node.getAttribute("name");
+			String template_mode = node.getAttribute("mode");
+
+			String[] attributeNames = new String[] { "name", "match", "mode" };
+			String[] attributeValues = new String[] { template_name, template_match, template_mode };
+
+			if (overwrite)
+			{
+				// if we have a name attribute, remove any other similarly named template
+				GSXML.removeElementsWithAttributesNS(mainFormat, "http://www.w3.org/1999/XSL/Transform", "template", attributeNames, attributeValues);
+				GSXML.removeElementsWithAttributesNS(mainFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "template", attributeNames, attributeValues);
+
+				// now add our good template in
+				mainFormat.appendChild(node);
+			}
+			else
+			{
+				// if overwrite is false, then we only add in templates if they don't match something else.
+				// In this case (eg from expanding imported stylesheets)
+				// there can't be any duplicate named templates, so just look for matches
+				// we already have the one with highest import precedence (from the top most level) so don't add any more in
+				if (GSXML.getElementsWithAttributesNS(mainFormat, "http://www.w3.org/1999/XSL/Transform", "template", attributeNames, attributeValues).getLength() == 0 && GSXML.getElementsWithAttributesNS(mainFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "template", attributeNames, attributeValues).getLength() == 0)
+				{
+					mainFormat.appendChild(node);
+				}
+			}
+		}
+
+		gsfChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "option");
+		for (int i = 0; i < gsfChildren.getLength(); i++)
+		{
+			Element node = (Element) gsfChildren.item(i);
+			if (GSXML.getNamedElementNS(mainFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "option", "name", node.getAttribute("name")) == null)
+			{
+				mainFormat.appendChild(node);
+			}
+		}
+	}
 }
