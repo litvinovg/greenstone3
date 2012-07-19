@@ -100,6 +100,8 @@ public class ServiceCluster implements ModuleInterface
 	/** list of plugin */
 	protected Element plugin_item_list = null;
 
+	protected Element _globalFormat = null;
+
 	public void setSiteHome(String home)
 	{
 		this.site_home = home;
@@ -378,6 +380,11 @@ public class ServiceCluster implements ModuleInterface
 			{
 				logger.error("Couldn't get an instance of class " + servicetype + ", or org.greenstone.gsdl3.service." + servicetype);
 				continue;
+			}
+
+			if (_globalFormat != null)
+			{
+				s.setGlobalFormat(_globalFormat);
 			}
 
 			s.setSiteHome(this.site_home);
