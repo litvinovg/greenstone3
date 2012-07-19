@@ -126,9 +126,7 @@ public class GS2BrowseAction extends Action
 				Element global_format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.GLOBAL_FORMAT_ELEM);
 				if(global_format_elem != null)
 				{
-					System.err.println("MERGING " + GSXML.xmlNodeToString(this_format) + "\n\nAND\n\n" + GSXML.xmlNodeToString(global_format_elem));
 					GSXSLT.mergeFormatElements(this_format, global_format_elem, false);
-					System.err.println("RESULT = " + GSXML.xmlNodeToString(this_format));
 				}
 
 				Element new_format = GSXML.duplicateWithNewName(this.doc, this_format, GSXML.FORMAT_ELEM, false);
