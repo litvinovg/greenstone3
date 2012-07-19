@@ -72,7 +72,6 @@ public class Collection extends ServiceCluster
 	protected boolean _securityScopeCollection = true;
 
 	protected HashMap<String, ArrayList<Element>> _documentSets = new HashMap<String, ArrayList<Element>>();
-
 	protected ArrayList<HashMap<String, ArrayList<String>>> _securityExceptions = new ArrayList<HashMap<String, ArrayList<String>>>();
 
 	/**
@@ -93,7 +92,6 @@ public class Collection extends ServiceCluster
 	{
 		super();
 		this.description = this.doc.createElement(GSXML.COLLECTION_ELEM);
-
 	}
 
 	/**
@@ -108,7 +106,6 @@ public class Collection extends ServiceCluster
 	 */
 	public boolean configure()
 	{
-
 		if (this.site_home == null || this.cluster_name == null)
 		{
 			logger.error("Collection: site_home and collection_name must be set before configure called!");
@@ -139,6 +136,8 @@ public class Collection extends ServiceCluster
 		{
 			db_type = "gdbm"; //Default database type
 		}
+
+		_globalFormat = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.FORMAT_ELEM);
 
 		// process the metadata and display items
 		findAndLoadInfo(coll_config_xml, build_config_xml);
@@ -295,7 +294,6 @@ public class Collection extends ServiceCluster
 			}
 		}
 		return true;
-
 	}
 
 	protected void loadSecurityInformation(Element coll_config_xml)
