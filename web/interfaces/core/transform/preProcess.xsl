@@ -53,34 +53,21 @@
   </xsl:template>
 
 
-  <!-- produce an exact copy of the current node, but expand and replace all elements belonging to the gslib namespace. -->
+  <!-- produce an exact copy of the current node, but expand and replace all elements belonging to the gslib/gsvar namespaces. -->
   <xsl:template name="expand_gslib_elements">
 
 
     <xsl:for-each select="*|text()">
       <xsl:choose>
-	
+	<!-- variables -->
 	<xsl:when test="namespace-uri(.)=namespace::gsvar">
 	  <xsl:element name="xsl:value-of">
 		<xsl:attribute name="select">$<xsl:value-of select="local-name()" /></xsl:attribute>
 	      </xsl:element>
 </xsl:when>
-	<!-- if node has gslib prefix, expand it into appropriate copy-of or call-template element -->
-	<xsl:when test="namespace-uri(.)=namespace::gslib">
-	  
+	<!-- templates -->
+	<xsl:when test="namespace-uri(.)=namespace::gslib">	  
 	  <xsl:variable name="name" select="local-name()"/>
-	  <xsl:choose>
-	    
-	    <!-- if library contains a variable of this name, expand to it's value -->
-	    <xsl:when test="/skinAndLibraryXsl/libraryXsl//xsl:variable[@name = $name]">
-	      <xsl:element name="xsl:copy-of">
-		<xsl:attribute name="select">$<xsl:value-of select="local-name()" /></xsl:attribute>
-	      </xsl:element>
-	    </xsl:when>
-	    
-	    
-	    <!-- if library contains a template of this name, expand to a call-template and pass attributes as parameters -->
-	    <xsl:otherwise>
 	      <xsl:element name="xsl:call-template">
 		<xsl:attribute name="name"> <xsl:value-of select="local-name()" /></xsl:attribute>
 		
@@ -91,9 +78,6 @@
 		  </xsl:element>					
 		</xsl:for-each>	
 	      </xsl:element>
-	    </xsl:otherwise>
-	    
-	  </xsl:choose>	
 	</xsl:when>
 
 	<xsl:when test="self::text()">
