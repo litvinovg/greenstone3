@@ -28,7 +28,7 @@ public class Server3 extends BaseServer
 		START_CMD = "start";
 		RESTART_CMD = "restart";
 		CONFIGURE_CMD = "configure";
-		STOP_CMD = "stop";
+		STOP_CMD = "force-stop-tomcat";
 
 		autoStart();
 	}
