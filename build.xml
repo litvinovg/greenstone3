@@ -1209,7 +1209,7 @@
     Doing "cat </dev/null > packages/tomcat/logs/catalina.out" doesn't work as an ant target.
     It seems to have a problem with cat or </dev/null, with or without the < sign. -->
   <target name="clean-logs" description="Empties catalina.out, greenstone.log and contents of web/logs/tmp">
-    <echo>Truncating catalina.out and greenstone.log, and emptying ${web.home}/logs/tmp</echo>
+    <echo>Truncating catalina.out, greenstone.log and server.log, and emptying ${web.home}/logs/tmp</echo>
     <exec executable="truncate" os="${os.unix}" dir="${catalina.home}/logs" spawn="false">
       <arg value="-s0"/>
       <arg value="catalina.out"/>
@@ -1218,12 +1218,19 @@
       <arg value="-s0"/>
       <arg value="greenstone.log"/>
     </exec>
+    <exec executable="truncate" os="${os.unix}" dir="${web.home}/logs" spawn="false">
+      <arg value="-s0"/>
+      <arg value="server.log"/>
+    </exec>
 
     <exec executable="cmd" os="${os.windows}" dir="${catalina.home}/logs" spawn="false">
       <arg line="/c echo. > catalina.out"/>
     </exec>
     <exec executable="cmd" os="${os.windows}" dir="${web.home}/logs" spawn="false">
       <arg line="/c echo. > greenstone.log"/>
+    </exec>
+    <exec executable="cmd" os="${os.windows}" dir="${web.home}/logs" spawn="false">
+      <arg line="/c echo. > server.log"/>
     </exec>
 
     <if>
