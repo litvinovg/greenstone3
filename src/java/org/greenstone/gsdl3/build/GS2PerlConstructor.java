@@ -294,6 +294,12 @@ public class GS2PerlConstructor extends CollectionConstructor
 			BufferedReader stdinbr = new BufferedReader(stdinisr);
 			// Captures the std err of a program and pipes it into
 			// std in of java
+			
+			File logDir = new File(GSFile.collectDir(this.site_home) + File.separator + this.collection_name + File.separator + "log");
+			if(!logDir.exists())
+			{
+				logDir.mkdir();
+			}
 
 			BufferedWriter bw = new BufferedWriter(new FileWriter(GSFile.collectDir(this.site_home) + File.separator + this.collection_name + File.separator + "log" + File.separator + "build_log." + (System.currentTimeMillis()) + ".txt"));
 			bw.write("Document Editor Build\n");
