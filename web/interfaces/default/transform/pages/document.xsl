@@ -12,9 +12,6 @@
 	<xsl:import href="layouts/main.xsl"/>
 	<xsl:import href="layouts/toc.xsl"/>
 	
-	<!-- style includes global params interface_name, library_name -->
-	<xsl:include href=".old/berrytools.xsl"/>
-	
 	<xsl:variable name="bookswitch">
 		<xsl:choose>
 			<xsl:when test="/page/pageRequest/paramList/param[@name='book']/@value">
@@ -226,10 +223,7 @@
 					</xsl:text>
 				</script>
 			</xsl:if>
-		
-			<!-- show the little berries for this document -->
-			<xsl:call-template name="documentBerryForDocumentPage"/>
-			
+					
 			<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 				<xsl:call-template name="editBar"/>
 			</xsl:if>
