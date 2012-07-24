@@ -17,10 +17,7 @@ function getTextForSection(sectionID, callback)
 	template += '<xsl:template match="/">';
 	template +=   '<text>';
 	template +=     '<xsl:for-each select="/page/pageResponse/document//documentNode[@nodeID = \'' + sectionID + '\']">';
-	template +=       '<xsl:call-template name="sectionImage"/>';
-	template +=       '<div id="text' + sectionID + '">';
-	template +=         '<xsl:call-template name="documentNodeText"/>';
-	template +=       '</div>';
+	template +=       '<xsl:call-template name="sectionContent"/>';
 	template +=     '</xsl:for-each>';
 	template +=   '</text>';
 	template += '</xsl:template>';

@@ -56,8 +56,59 @@
 		</xsl:choose>
 	</xsl:template>
 	
+	<xsl:template name="documentHeading">
+		<b><gsf:metadata name="Title"/></b><br/>
+	</xsl:template>
+	
+	<xsl:template name="documentContent">
+		<xsl:choose>
+			<xsl:when test="@docType='simple'">
+				<div id="gs-document">
+					<xsl:call-template name="wrappedSectionImage"/>
+					<div id="gs-document-text">
+						<xsl:call-template name="documentNodeText"/>
+					</div>
+				</div>
+			</xsl:when>
+			<xsl:otherwise> 
+				<xsl:call-template name="wrappedDocument"/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:template>
+	
 	<xsl:template name="sectionHeader">
 		<xsl:call-template name="sectionTitle"/>
+	</xsl:template>
+	
+	<xsl:template name="topLevelSectionContent">
+		<xsl:call-template name="wrappedSectionImage"/>
+		<xsl:call-template name="wrappedSectionText"/>
+	</xsl:template>
+	
+	<xsl:template name="sectionContent">
+		<xsl:call-template name="wrappedSectionImage"/>
+		<xsl:call-template name="wrappedSectionText"/>
+	</xsl:template>
+	
+	<xsl:template name="wrappedSectionText">
+		<div id="text{@nodeID}" class="sectionText"><!-- *** -->
+			<xsl:attribute name="style">
+				<xsl:choose>
+					<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
+						<xsl:text>display:none;</xsl:text>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>display:block;</xsl:text>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:attribute>
+
+			<xsl:call-template name="documentNodeText"/>
+		</div>
+	</xsl:template>
+	
+	<xsl:template name="sectionImage">
+		<gsf:image type="screen"/>
 	</xsl:template>
 	
 	<!-- Used to make sure that regardless what the collection designer uses for the title and content we can wrap it properly -->
@@ -165,22 +216,15 @@
 				</table>
 			</xsl:if>
 			
-			<xsl:call-template name="sectionImage"/>
+			<xsl:choose>
+				<xsl:when test="../../document">
+					<xsl:call-template name="topLevelSectionContent"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:call-template name="sectionContent"/>
+				</xsl:otherwise>
+			</xsl:choose>
 			
-			<div id="text{@nodeID}" class="sectionText"><!-- *** -->
-				<xsl:attribute name="style">
-					<xsl:choose>
-						<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
-							<xsl:text>display:none;</xsl:text>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:text>display:block;</xsl:text>
-						</xsl:otherwise>
-					</xsl:choose>
-				</xsl:attribute>
-				<!-- Get the section content from the document template -->
-				<xsl:call-template name="documentNodeText"/>
-			</div>
 			<xsl:if test="documentNode">
 				<xsl:for-each select="documentNode">
 					<xsl:call-template name="wrapDocumentNodes"/>
@@ -261,21 +305,6 @@
 			</xsl:when>			
 			<xsl:otherwise> <!-- display the standard greenstone document -->
 				<xsl:call-template name="documentContent"/>
-			</xsl:otherwise>
-		</xsl:choose>
-	</xsl:template>
-	<xsl:template name="documentContent">
-		<xsl:choose>
-			<xsl:when test="@docType='simple'">
-			  <div id="gs-document">							
-			    <div id="gs-document-text">
-			      <xsl:call-template name="documentNodeText"/>
-			    </div>
-			  </div>
-
-			</xsl:when>
-			<xsl:otherwise> 
-				<xsl:call-template name="wrappedDocument"/>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -397,7 +426,7 @@
 		<xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Title']"/>
 	</xsl:template>
 	
-	<xsl:template name="sectionImage">
+	<xsl:template name="wrappedSectionImage">
 		<gsf:variable name="screenImageWidth"><gsf:metadata name="ScreenWidth"/></gsf:variable>
 		<gsf:variable name="screenImageHeight"><gsf:metadata name="ScreenHeight"/></gsf:variable>
 		<gsf:variable name="imageWidth"><gsf:metadata name="ImageWidth"/></gsf:variable>
@@ -445,7 +474,7 @@
 					</script>
 				</div>
 			</xsl:when>
-			<xsl:when test="metadataList/metadata[@name = 'Screen']">
+			<xsl:otherwise>
 				<div id="image{@nodeID}">
 					<xsl:attribute name="style">
 						<xsl:choose>
@@ -457,14 +486,10 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</xsl:attribute>
-					<gsf:image type="screen"/>
+					<xsl:call-template name="sectionImage"/><xsl:text> </xsl:text>
 				</div>
-			</xsl:when>
+			</xsl:otherwise>
 		</xsl:choose>
-	</xsl:template>
-	
-	<xsl:template name="documentHeading">
-		<b><gsf:metadata name="Title"/></b><br/>
 	</xsl:template>
 	
 	<!-- The default template for displaying the document node text -->

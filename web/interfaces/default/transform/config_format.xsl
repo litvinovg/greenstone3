@@ -45,25 +45,34 @@
 	</xsl:template>
 
 	<xsl:template match="gsf:image">
-		<img>
-			<xslt:attribute name='src'>
-				<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name = 'httpPath']"/>
-				<xsl:text>/index/assoc/</xsl:text>
-				<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name = 'assocfilepath']"/>
-				<xsl:text>/</xsl:text>
-				<xsl:choose>
-					<xsl:when test="@type = 'thumb'">
-						<xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name = 'Thumb']"/>
-					</xsl:when>
-					<xsl:when test="@type = 'screen'">
-						<xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name = 'Screen']"/>
-					</xsl:when>
-					<xsl:when test="@type = 'source'">
-						<xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name = 'SourceFile']"/>
-					</xsl:when>
-				</xsl:choose>
-			</xslt:attribute>
-		</img>
+		<xsl:variable name="metaName">
+			<xsl:choose>
+				<xsl:when test="@type = 'thumb'">Thumb</xsl:when>
+				<xsl:when test="@type = 'screen'">Screen</xsl:when>
+				<xsl:when test="@type = 'source'">SourceFile</xsl:when>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:if test="(.//metadataList)[last()]/metadata[@name = $metaName]">
+			<img>
+				<xslt:attribute name='src'>
+					<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name = 'httpPath']"/>
+					<xsl:text>/index/assoc/</xsl:text>
+					<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name = 'assocfilepath']"/>
+					<xsl:text>/</xsl:text>
+					<xsl:choose>
+						<xsl:when test="@type = 'thumb'">
+							<xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name = 'Thumb']"/>
+						</xsl:when>
+						<xsl:when test="@type = 'screen'">
+							<xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name = 'Screen']"/>
+						</xsl:when>
+						<xsl:when test="@type = 'source'">
+							<xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name = 'SourceFile']"/>
+						</xsl:when>
+					</xsl:choose>
+				</xslt:attribute>
+			</img>
+		</xsl:if>
 	</xsl:template>
 
 	<xsl:template match="gsf:link">
@@ -266,7 +275,7 @@
 	</xsl:template>
   
 	<xsl:template match="gsf:text">
-    <xslt:call-template name="documentNodeText"/>
+		<xslt:call-template name="documentNodeText"/>
 	</xsl:template>
   
 	<xsl:template match="gsf:choose-metadata">
