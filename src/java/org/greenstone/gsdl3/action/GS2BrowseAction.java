@@ -131,6 +131,17 @@ public class GS2BrowseAction extends Action
 
 				Element new_format = GSXML.duplicateWithNewName(this.doc, this_format, GSXML.FORMAT_ELEM, false);
 				extractMetadataNames(new_format, doc_meta_names, class_meta_names);
+				
+				Element extraMetaListElem = (Element) GSXML.getChildByTagName(request, GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
+				if(extraMetaListElem != null)
+				{
+					NodeList extraMetaList = extraMetaListElem.getElementsByTagName(GSXML.EXTRA_METADATA);
+					for(int i = 0; i < extraMetaList.getLength(); i++)
+					{
+						class_meta_names.add(((Element)extraMetaList.item(i)).getAttribute(GSXML.NAME_ATT));
+					}
+				}
+				
 				// set the format type
 				new_format.setAttribute(GSXML.TYPE_ATT, "browse");
 

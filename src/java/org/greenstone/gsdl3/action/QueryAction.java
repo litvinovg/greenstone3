@@ -227,6 +227,16 @@ public class QueryAction extends Action
 		// just get all for now - the receptionist should perhaps pass in some
 		// metadata that it wants, and QueryAction should look through the format stuff to see if there is any other?
 
+		Element extraMetaListElem = (Element) GSXML.getChildByTagName(request, GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
+		if(extraMetaListElem != null)
+		{
+			NodeList extraMetaList = extraMetaListElem.getElementsByTagName(GSXML.EXTRA_METADATA);
+			for(int i = 0; i < extraMetaList.getLength(); i++)
+			{
+				metadata_names.add(((Element)extraMetaList.item(i)).getAttribute(GSXML.NAME_ATT));
+			}
+		}
+
 		Element dm_param_list = createMetadataParamList(metadata_names);
 
 		mr_metadata_request.appendChild(dm_param_list);

@@ -144,6 +144,16 @@ public class BrowseAction extends Action
 				getRequiredMetadataNames(new_format, metadata_names);
 			}
 		}
+		
+		Element extraMetaListElem = (Element) GSXML.getChildByTagName(request, GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
+		if(extraMetaListElem != null)
+		{
+			NodeList extraMetaList = extraMetaListElem.getElementsByTagName(GSXML.EXTRA_METADATA);
+			for(int i = 0; i < extraMetaList.getLength(); i++)
+			{
+				metadata_names.add(((Element)extraMetaList.item(i)).getAttribute(GSXML.NAME_ATT));
+			}
+		}
 
 		logger.info("extracted meta names, " + metadata_names.toString());
 		// get the browse structure for the selected node

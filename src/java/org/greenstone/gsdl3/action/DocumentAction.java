@@ -380,6 +380,16 @@ public class DocumentAction extends Action
 		{
 			getRequiredMetadataNames(format_elem, meta_names);
 		}
+		
+		Element extraMetaListElem = (Element) GSXML.getChildByTagName(request, GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
+		if(extraMetaListElem != null)
+		{
+			NodeList extraMetaList = extraMetaListElem.getElementsByTagName(GSXML.EXTRA_METADATA);
+			for(int i = 0; i < extraMetaList.getLength(); i++)
+			{
+				meta_names.add(((Element)extraMetaList.item(i)).getAttribute(GSXML.NAME_ATT));
+			}
+		}
 
 		Element dm_param_list = createMetadataParamList(meta_names);
 		if (service_params != null)

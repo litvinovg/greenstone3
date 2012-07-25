@@ -31,8 +31,10 @@ import java.lang.ClassLoader; // to find files on the class path
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import org.apache.log4j.*;
+import org.greenstone.util.GlobalProperties;
 
 /**
  * GSFile - utility class for Greenstone.
@@ -533,4 +535,55 @@ public class GSFile
 		return true;
 	}
 
+	public static ArrayList<File> getAllXSLFiles(String interfaceName, String siteName)
+	{
+		ArrayList<File> filesToReturn = new ArrayList<File>();
+		
+		File siteCollectionDir = new File(GSFile.siteHome(GlobalProperties.getGSDL3Home(), siteName) + File.separator + "collect");
+		if(siteCollectionDir.exists() && siteCollectionDir.isDirectory())
+		{
+			File[] collections = siteCollectionDir.listFiles();
+			
+			for(File collection : collections)
+			{
+				if(collection.isDirectory())
+				{
+					File collectionTranformDir = new File(collection.getAbsolutePath() + File.separator + "transform");
+					if(collectionTranformDir.exists() && collectionTranformDir.isDirectory())
+					{
+						filesToReturn.addAll(getXSLFilesFromDirectoryRecursive(collectionTranformDir));
+					}
+				}
+			}
+		}
+		
+		filesToReturn.addAll(getXSLFilesFromDirectoryRecursive(new File(GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), interfaceName) + File.separator + "transform")));
+		
+		return filesToReturn;
+	}
+
+	protected static ArrayList<File> getXSLFilesFromDirectoryRecursive(File directory)
+	{
+		ArrayList<File> filesToReturn = new ArrayList<File>();
+		
+		if(!directory.isDirectory())
+		{
+			return filesToReturn;
+		}
+		
+		File[] currentFiles = directory.listFiles();
+		for(File current : currentFiles)
+		{
+			if(current.isDirectory())
+			{
+				filesToReturn.addAll(GSFile.getXSLFilesFromDirectoryRecursive(current));
+			}
+			else if(current.getName().endsWith(".xsl"))
+			{
+				filesToReturn.add(current);
+			}
+		}
+		
+		return filesToReturn;
+	}
 }

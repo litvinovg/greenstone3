@@ -78,6 +78,7 @@ public class GSXML
 	public static final String COUNT_ELEM = "count";
 	public static final String SYSTEM_ELEM = "system";
 	public static final String FORMAT_STRING_ELEM = "formatString";
+	public static final String EXTRA_METADATA = "extraMetadata";
 
 	//config file elems
 	public static final String COLLECTION_CONFIG_ELEM = "collectionConfig";
@@ -133,6 +134,7 @@ public class GSXML
 	public static final String USER_ID_ATT = "uid";
 	public static final String FROM_ATT = "from";
 	public static final String LANG_ATT = "lang";
+	public static final String HREF_ATT = "href";
 	public static final String TYPE_ATT = "type";
 	public static final String DB_TYPE_ATT = "dbType";
 	public static final String VALUE_ATT = "value";

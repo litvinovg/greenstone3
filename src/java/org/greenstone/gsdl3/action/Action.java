@@ -111,7 +111,7 @@ abstract public class Action
 			String sep = elem.getAttribute("separator");
 			if (!pos.equals(""))
 			{
-			    metadata.append("pos"+pos); // first, last or indexing number
+				metadata.append("pos" + pos); // first, last or indexing number
 				metadata.append(GSConstants.META_RELATION_SEP);
 			}
 			if (!select.equals(""))
@@ -173,16 +173,12 @@ abstract public class Action
 				meta_names.add(metadata.toString());
 			}
 		}
-		
-		NodeList image_nodes = format.getElementsByTagName("gsf:image");
-		for(int i = 0; i < image_nodes.getLength(); i++)
+
+		if (format.getElementsByTagName("gsf:image").getLength() > 0)
 		{
-			if(format.getElementsByTagName("gsf:image").getLength() > 0)
-			{
-				meta_names.add("Thumb");
-				meta_names.add("Screen");
-				meta_names.add("SourceFile");
-			}
+			meta_names.add("Thumb");
+			meta_names.add("Screen");
+			meta_names.add("SourceFile");
 		}
 	}
 
@@ -257,10 +253,10 @@ abstract public class Action
 	protected void addInterfaceOptions(Element elem)
 	{
 		Element documentOptionList = this.doc.createElement("interfaceOptions");
-		for(Object key : this.config_params.keySet())
+		for (Object key : this.config_params.keySet())
 		{
 			Element option = this.doc.createElement("option");
-			option.setAttribute(GSXML.NAME_ATT, (String)key);
+			option.setAttribute(GSXML.NAME_ATT, (String) key);
 			option.setAttribute(GSXML.VALUE_ATT, this.config_params.get(key).toString());
 			documentOptionList.appendChild(option);
 		}
