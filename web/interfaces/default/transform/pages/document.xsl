@@ -433,7 +433,7 @@
 		<gsf:variable name="imageHeight"><gsf:metadata name="ImageHeight"/></gsf:variable>
 
 		<xsl:choose>
-			<xsl:when test="metadataList/metadata[@name = 'Screen'] and metadataList/metadata[@name = 'Source'] and ($imageWidth div $screenImageWidth > 1.2)">
+			<xsl:when test="metadataList/metadata[@name = 'Screen'] and metadataList/metadata[@name = 'SourceFile'] and ($imageWidth div $screenImageWidth > 1.2)">
 				<div id="image{@nodeID}">
 					<div id="wrap{util:replace(@nodeID, '.', '_')}" class="zoomImage" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
 						<div id="small{util:replace(@nodeID, '.', '_')}" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
@@ -467,8 +467,8 @@
 									expansionSize:50,  
 									speedMultiplier:multiplier   
 								});
-								
-								$("#zoomOptions").css("display", null);
+
+								$("#zoomOptions").css("display", "block");
 							}
 						</xsl:text>
 					</script>
