@@ -517,7 +517,7 @@ public class GSFile
 					FileChannel outC = out.getChannel();
 
 					System.err.println(inC.transferTo(0, inC.size(), outC));
-					
+
 					in.close();
 					out.close();
 
@@ -538,52 +538,67 @@ public class GSFile
 	public static ArrayList<File> getAllXSLFiles(String interfaceName, String siteName)
 	{
 		ArrayList<File> filesToReturn = new ArrayList<File>();
-		
-		File siteCollectionDir = new File(GSFile.siteHome(GlobalProperties.getGSDL3Home(), siteName) + File.separator + "collect");
-		if(siteCollectionDir.exists() && siteCollectionDir.isDirectory())
+
+		String siteHome = GSFile.siteHome(GlobalProperties.getGSDL3Home(), siteName);
+
+		//Add XSL files from the site transform directory
+		File siteTransformDir = new File(siteHome + File.separator + "transform");
+		if (siteTransformDir.exists() && siteTransformDir.isDirectory())
+		{
+			filesToReturn.addAll(getXSLFilesFromDirectoryRecursive(siteTransformDir));
+		}
+
+		//Add XSL files from collection transform directories
+		File siteCollectionDir = new File(siteHome + File.separator + "collect");
+		if (siteCollectionDir.exists() && siteCollectionDir.isDirectory())
 		{
 			File[] collections = siteCollectionDir.listFiles();
-			
-			for(File collection : collections)
+
+			for (File collection : collections)
 			{
-				if(collection.isDirectory())
+				if (collection.isDirectory())
 				{
 					File collectionTranformDir = new File(collection.getAbsolutePath() + File.separator + "transform");
-					if(collectionTranformDir.exists() && collectionTranformDir.isDirectory())
+					if (collectionTranformDir.exists() && collectionTranformDir.isDirectory())
 					{
 						filesToReturn.addAll(getXSLFilesFromDirectoryRecursive(collectionTranformDir));
 					}
 				}
 			}
 		}
-		
-		filesToReturn.addAll(getXSLFilesFromDirectoryRecursive(new File(GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), interfaceName) + File.separator + "transform")));
-		
+
+		//Add XSL files from the interface transform directory
+		File interfaceTransformDir = new File(GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), interfaceName) + File.separator + "transform");
+		if (interfaceTransformDir.exists() && interfaceTransformDir.isDirectory())
+		{
+			filesToReturn.addAll(getXSLFilesFromDirectoryRecursive(interfaceTransformDir));
+		}
+
 		return filesToReturn;
 	}
 
 	protected static ArrayList<File> getXSLFilesFromDirectoryRecursive(File directory)
 	{
 		ArrayList<File> filesToReturn = new ArrayList<File>();
-		
-		if(!directory.isDirectory())
+
+		if (!directory.isDirectory())
 		{
 			return filesToReturn;
 		}
-		
+
 		File[] currentFiles = directory.listFiles();
-		for(File current : currentFiles)
+		for (File current : currentFiles)
 		{
-			if(current.isDirectory())
+			if (current.isDirectory())
 			{
 				filesToReturn.addAll(GSFile.getXSLFilesFromDirectoryRecursive(current));
 			}
-			else if(current.getName().endsWith(".xsl"))
+			else if (current.getName().endsWith(".xsl"))
 			{
 				filesToReturn.add(current);
 			}
 		}
-		
+
 		return filesToReturn;
 	}
 }
