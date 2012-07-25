@@ -60,6 +60,8 @@ public class TransformingReceptionist extends Receptionist
 	protected TransformerFactory transformerFactory = null;
 	protected DOMParser parser = null;
 
+	protected HashMap<String, ArrayList<String>> _metadataRequiredMap = new HashMap<String, ArrayList<String>>();
+
 	boolean _debug = false;
 
 	public TransformingReceptionist()
@@ -96,7 +98,6 @@ public class TransformingReceptionist extends Receptionist
 	/** configures the receptionist - overwrite this to set up the xslt map */
 	public boolean configure()
 	{
-
 		if (this.config_params == null)
 		{
 			logger.error(" config variables must be set before calling configure");
@@ -179,7 +180,180 @@ public class TransformingReceptionist extends Receptionist
 			this.language_list = (Element) this.doc.importNode(lang_list, true);
 		}
 
+		GetRequiredMetadataNamesFromXSLFiles();
+
 		return true;
+	}
+
+	protected void GetRequiredMetadataNamesFromXSLFiles()
+	{
+		ArrayList<File> xslFiles = GSFile.getAllXSLFiles((String) this.config_params.get(GSConstants.INTERFACE_NAME), (String) this.config_params.get(GSConstants.SITE_NAME));
+
+		HashMap<String, ArrayList<String>> includes = new HashMap<String, ArrayList<String>>();
+		HashMap<String, ArrayList<File>> files = new HashMap<String, ArrayList<File>>();
+		HashMap<String, ArrayList<String>> metaNames = new HashMap<String, ArrayList<String>>();
+
+		//First exploratory pass
+		for (File currentFile : xslFiles)
+		{
+			Document currentDoc = this.converter.getDOM(currentFile);
+			NodeList metadataElems = currentDoc.getElementsByTagNameNS("http://www.greenstone.org/greenstone3/schema/ConfigFormat", "metadata"); //gsf:metadata
+			NodeList imageElems = currentDoc.getElementsByTagNameNS("http://www.greenstone.org/greenstone3/schema/ConfigFormat", "image"); //gsf:image
+			NodeList includeElems = currentDoc.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "include");
+			NodeList importElems = currentDoc.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "import");
+
+			ArrayList<String> names = new ArrayList<String>();
+			for (int i = 0; i < metadataElems.getLength(); i++)
+			{
+				Element current = (Element) metadataElems.item(i);
+				String name = current.getAttribute(GSXML.NAME_ATT);
+				if (name != null && name.length() > 0 && !names.contains(name))
+				{
+					names.add(name);
+				}
+			}
+
+			for (int i = 0; i < imageElems.getLength(); i++)
+			{
+				Element current = (Element) imageElems.item(i);
+				String type = current.getAttribute(GSXML.TYPE_ATT);
+				if (type == null || type.length() == 0)
+				{
+					continue;
+				}
+
+				if (type.equals("source"))
+				{
+					String[] standardSourceMeta = new String[] { "SourceFile", "ImageHeight", "ImageWidth", "ImageType", "srcicon" };
+					for (String meta : standardSourceMeta)
+					{
+						if (!names.contains(meta))
+						{
+							names.add(meta);
+						}
+					}
+				}
+				else if (type.equals("screen"))
+				{
+					String[] standardScreenMeta = new String[] { "Screen", "ScreenHeight", "ScreenWidth", "ScreenType", "screenicon" };
+					for (String meta : standardScreenMeta)
+					{
+						if (!names.contains(meta))
+						{
+							names.add(meta);
+						}
+					}
+				}
+				else if (type.equals("thumb"))
+				{
+					String[] standardThumbMeta = new String[] { "Thumb", "ThumbHeight", "ThumbWidth", "ThumbType", "thumbicon" };
+					for (String meta : standardThumbMeta)
+					{
+						if (!names.contains(meta))
+						{
+							names.add(meta);
+						}
+					}
+				}
+			}
+
+			metaNames.put(currentFile.getAbsolutePath(), names);
+
+			ArrayList<String> includeAndImportList = new ArrayList<String>();
+			for (int i = 0; i < includeElems.getLength(); i++)
+			{
+				includeAndImportList.add(((Element) includeElems.item(i)).getAttribute(GSXML.HREF_ATT));
+			}
+			for (int i = 0; i < importElems.getLength(); i++)
+			{
+				includeAndImportList.add(((Element) importElems.item(i)).getAttribute(GSXML.HREF_ATT));
+			}
+			includes.put(currentFile.getAbsolutePath(), includeAndImportList);
+
+			String filename = currentFile.getName();
+			if (files.get(filename) == null)
+			{
+				ArrayList<File> fileList = new ArrayList<File>();
+				fileList.add(currentFile);
+				files.put(currentFile.getName(), fileList);
+			}
+			else
+			{
+				ArrayList<File> fileList = files.get(filename);
+				fileList.add(currentFile);
+			}
+		}
+
+		//Second pass
+		for (File currentFile : xslFiles)
+		{
+			ArrayList<File> filesToGet = new ArrayList<File>();
+			filesToGet.add(currentFile);
+
+			ArrayList<String> fullNameList = new ArrayList<String>();
+
+			while (filesToGet.size() > 0)
+			{
+				File currentFileTemp = filesToGet.remove(0);
+
+				//Add the names from this file
+				ArrayList<String> currentNames = metaNames.get(currentFileTemp.getAbsolutePath());
+				fullNameList.addAll(currentNames);
+
+				ArrayList<String> includedHrefs = includes.get(currentFileTemp.getAbsolutePath());
+
+				for (String href : includedHrefs)
+				{
+					int lastSepIndex = href.lastIndexOf("/");
+					if (lastSepIndex != -1)
+					{
+						href = href.substring(lastSepIndex + 1);
+					}
+
+					ArrayList<File> filesToAdd = files.get(href);
+					if (filesToAdd != null)
+					{
+						filesToGet.addAll(filesToAdd);
+					}
+				}
+			}
+
+			_metadataRequiredMap.put(currentFile.getAbsolutePath(), fullNameList);
+		}
+	}
+
+	protected void preProcessRequest(Element request)
+	{
+		String action = request.getAttribute(GSXML.ACTION_ATT);
+		String subaction = request.getAttribute(GSXML.SUBACTION_ATT);
+
+		String name = null;
+		if (!subaction.equals(""))
+		{
+			String key = action + ":" + subaction;
+			name = this.xslt_map.get(key);
+		}
+		// try the action by itself
+		if (name == null)
+		{
+			name = this.xslt_map.get(action);
+		}
+
+		String stylesheetFile = GSFile.interfaceStylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.INTERFACE_NAME), name);
+		stylesheetFile = stylesheetFile.replace("/", File.separator);
+
+		ArrayList<String> requiredMetadata = _metadataRequiredMap.get(stylesheetFile);
+
+		Element extraMetadataList = this.doc.createElement(GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
+
+		for (String metadataString : requiredMetadata)
+		{
+			Element metadataElem = this.doc.createElement(GSXML.EXTRA_METADATA);
+			metadataElem.setAttribute(GSXML.NAME_ATT, metadataString);
+			extraMetadataList.appendChild(metadataElem);
+		}
+
+		request.appendChild(request.getOwnerDocument().importNode(extraMetadataList, true));
 	}
 
 	protected Node postProcessPage(Element page)
@@ -230,16 +404,8 @@ public class TransformingReceptionist extends Receptionist
 		}
 		else if (excerptTag != null)
 		{
-			/*
-			 * // define a list
-			 * 
-			 * Node selectedElement =
-			 * modifyNodesByTagRecursive(transformed_page, excerptTag);
-			 */
-
 			Node selectedElement = getNodeByTagRecursive(transformed_page, excerptTag);
 			return selectedElement;
-
 		}
 		return transformed_page;
 	}
@@ -295,13 +461,7 @@ public class TransformingReceptionist extends Receptionist
 			Node result = null;
 			if ((result = modifyNodesByTagRecursive(children.item(i), tag)) != null)
 			{
-				//return result;
-				//logger.error("Modify node value = "+result.getNodeValue()); //NamedItem("href"););
-				//logger.error("BEFORE Modify node attribute = " + result.getAttributes().getNamedItem("href").getNodeValue());
-				//String url = result.getAttributes().getNamedItem("href").getNodeValue();
-				//url = url + "&excerptid=results";
-				//result.getAttributes().getNamedItem("href").setNodeValue(url);
-				//logger.error("AFTER Modify node attribute = " + result.getAttributes().getNamedItem("href").getNodeValue());
+				//TODO: DO SOMETHING HERE?
 			}
 		}
 		return null;
@@ -582,7 +742,8 @@ public class TransformingReceptionist extends Receptionist
 		try
 		{
 			String gsLibFile = this.getGSLibXSLFilename();
-			if(new File(gsLibFile).exists()) {
+			if (new File(gsLibFile).exists())
+			{
 				libraryXsl = getDoc(gsLibFile);
 				String errMsg = ((XMLConverter.ParseErrorHandler) parser.getErrorHandler()).getErrorMessage();
 				if (errMsg != null)
@@ -621,12 +782,13 @@ public class TransformingReceptionist extends Receptionist
 			root.appendChild(s);
 
 			Element l = skinAndLibraryXsl.createElement("libraryXsl");
-			if(libraryXsl  != null) {
+			if (libraryXsl != null)
+			{
 				Element libraryXsl_el = libraryXsl.getDocumentElement();
 				l.appendChild(skinAndLibraryXsl.importNode(libraryXsl_el, true));
-			}	
+			}
 			root.appendChild(l);
-			
+
 			//System.out.println("Skin and Library XSL are now together") ;
 
 			//System.out.println("Pre-processing the skin file...") ;
@@ -873,41 +1035,6 @@ public class TransformingReceptionist extends Receptionist
 		Document finalDoc = GSXSLT.mergedXSLTDocumentCascade(name, (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, _debug);
 		return finalDoc;
 	}
-	// 	// now find the absolute path
-	// 	ArrayList<File> stylesheets = GSFile.getStylesheetFiles(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, name);
-	// 	if (stylesheets.size() == 0)
-	// 	{
-	// 		logger.error(" Can't find stylesheet for " + name);
-	// 		return null;
-	// 	}
-	// 	logger.debug("Stylesheet: " + name);
-
-	// 	Document finalDoc = this.converter.getDOM(stylesheets.get(stylesheets.size() - 1), "UTF-8");
-	// 	if (finalDoc == null)
-	// 	{
-	// 		return null;
-	// 	}
-
-	// 	for (int i = stylesheets.size() - 2; i >= 0; i--)
-	// 	{
-	// 		Document currentDoc = this.converter.getDOM(stylesheets.get(i), "UTF-8");
-	// 		if (currentDoc == null)
-	// 		{
-	// 			return null;
-	// 		}
-
-	// 		if (_debug)
-	// 		{
-	// 			GSXSLT.mergeStylesheetsDebug(finalDoc, currentDoc.getDocumentElement(), true, true, stylesheets.get(stylesheets.size() - 1).getAbsolutePath(), stylesheets.get(i).getAbsolutePath());
-	// 		}
-	// 		else
-	// 		{
-	// 			GSXSLT.mergeStylesheets(finalDoc, currentDoc.getDocumentElement(), true);
-	// 		}
-	// 	}
-
-	// 	return finalDoc;
-	// }
 
 	// returns the path to the gslib.xsl file that is applicable for the current interface
 	protected String getGSLibXSLFilename()
