@@ -410,10 +410,12 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 		metadata = metadata.substring(index + 1);
 		// check for pos on the front, indicating which piece of meta the user wants
 		// pos can be "first", "last" or the position value of the requested piece of metadata 
-		if (temp.startsWith(GSConstants.META_POS))
+		if (temp.startsWith(GSConstants.META_POS) || temp.equals("all"))
 		{
+		    if (temp.startsWith(GSConstants.META_POS)) {
 			temp = temp.substring(GSConstants.META_POS.length());
 			pos = temp;
+		    }
 			
 			index = metadata.indexOf(GSConstants.META_RELATION_SEP);
 			if (index == -1)

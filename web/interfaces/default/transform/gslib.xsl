@@ -704,4 +704,47 @@ used on the document page
     </script>
   </xsl:template>
 
+
+  <!-- builds up links to available document types equivalent to the default source
+       document with as anchor the equivalent documents' doctype icons. -->
+  <xsl:template name="equivDocLinks">
+    <xsl:param name="count"/>
+
+      <xsl:variable name="docicon" select="metadataList/metadata[contains(@name, 'equivDocIcon')]"/>
+      <xsl:variable name="docEndlink" select="metadataList/metadata[contains(@name, '/equivDocLink')]"/>
+
+      <!--<xsl:variable name="docStartlink" select="metadataList/metadata[contains(@name, 'all_*,*_equivDocLink')]"/>-->	
+      <!-- In the following variable statement, we're trying to set the docStartlink to any metadata whose value 
+	ends on equivDocLink but NOT /equivDocLink. Unfortunately, the xslt function fn:ends-with only exists from
+	xslt 2.0 onwards. So need to use substring() and string-lenth() functions now to check whether the 13th char
+	from the end is a slash or not, in order to distinguish between the start of a doclink and end of one. 
+	If this 13th char from the end is not a slash, then we found (the string we want to store in) docStartlink. -->
+      <xsl:variable name="docStartlink">
+	<xsl:for-each select="metadataList/metadata">
+	  <xsl:if test="contains(@name, 'equivDocLink')">	
+	    <xsl:variable name="tmpvar" select="substring(@name, string-length(@name)-12, 1)"/>	
+	      <xsl:if test="not($tmpvar='/')">
+	        <xsl:value-of select="self::node()[@name]"/> 	        
+	      </xsl:if>		
+	  </xsl:if>
+	</xsl:for-each>	
+      </xsl:variable>
+
+      <xsl:variable name="equivDocIcon" select="java:org.greenstone.gsdl3.util.XSLTUtil.getNumberedItem($docicon, $count)" />
+      <xsl:variable name="equivStartlink" select="java:org.greenstone.gsdl3.util.XSLTUtil.getNumberedItem($docStartlink, $count)" />
+      <xsl:variable name="equivEndlink" select="java:org.greenstone.gsdl3.util.XSLTUtil.getNumberedItem($docEndlink, $count)" />
+
+      <xsl:if test="$equivDocIcon != ''">
+        <xsl:value-of disable-output-escaping="yes" select="$equivStartlink"/>
+        <xsl:value-of disable-output-escaping="yes" select="$equivDocIcon"/>
+        <xsl:value-of disable-output-escaping="yes" select="$equivEndlink"/>
+
+        <!-- recursively call this template to get multiple entries -->
+        <xsl:call-template name="equivDocLinks">
+          <xsl:with-param name="count"><xsl:value-of select="$count + 1"/></xsl:with-param>
+        </xsl:call-template>
+      </xsl:if>
+
+  </xsl:template>
+
 </xsl:stylesheet>
