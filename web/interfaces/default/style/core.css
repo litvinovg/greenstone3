@@ -294,12 +294,11 @@ body.dAction #gs_banner h2 {
 }
 
 #titlesearchcontainer {	
+	padding-top: 20px;
 	width: 100%;
 }
 
 #titlesearchcontainer, #titlesearchcontainer form, #titlesearchcontainer h2{
-	padding-top: 10px;
-	padding-bottom: 0px;
 	margin-top: 0px;
 	margin-bottom: 0px;
 }
@@ -311,6 +310,7 @@ body.dAction #gs_banner h2 {
 
 #titlearea  h2{	
 	padding-left: 0px;
+	padding-bottom: 20px;
 }
 
 #quicksearcharea {
