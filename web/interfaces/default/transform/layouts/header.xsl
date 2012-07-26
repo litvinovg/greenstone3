@@ -95,12 +95,11 @@
 	<!-- ***** HEADER LAYOUT TEMPLATE ***** -->
 	<xsl:template name="create-banner">		
 		<div id="gs_banner" class="ui-widget-header ui-corner-bottom">
-			<table id="titlesearchcontainer">
-				<tr>
-					<xsl:call-template name="page-title-area"/>
-					<xsl:call-template name="quick-search-area"/>
-				</tr>
-			</table>
+			<div id="titlesearchcontainer">
+				<xsl:call-template name="page-title-area"/>
+				<xsl:call-template name="quick-search-area"/>
+				<div style="clear:both;"><xsl:text> </xsl:text></div>
+			</div>
 			<xsl:call-template name="browsing-tabs"/>
 		</div>
 	</xsl:template>
@@ -315,7 +314,7 @@
 	<!-- ***** PAGE TITLE ***** -->
 	<xsl:template name="page-title-area">
 		<xsl:variable name="pageTitleVar"><xsl:call-template name="pageTitle"/></xsl:variable>
-		<td id="titlearea">
+		<div id="titlearea">
 			<h2>
 				<!-- Resize the title based on how long it is (There's probably a better way to do this) -->
 				<xsl:attribute name="style">
@@ -351,8 +350,8 @@
 				</xsl:attribute>
 				<!--<xsl:value-of select="string-length($pageTitleVar)" />-->
 				<xsl:value-of select="$pageTitleVar" />
-			</h2>
-		</td>
+			</h2><xsl:text> </xsl:text>
+		</div>
 	</xsl:template>
 	
 	<!-- ***** QUICK SEARCH AREA ***** -->
@@ -362,7 +361,7 @@
 	<xsl:template name="quick-search-area">
 		<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']/paramList/param[@name='index']">
 			<xsl:variable name="subaction" select="/page/pageRequest/@subaction"/>
-			<td id="quicksearcharea">
+			<div id="quicksearcharea">
 				<form action="{$library_name}/collection/{$collNameChecked}/search/TextQuery">
 					<input type="hidden" name="rt" value="r"/>
 					<input type="hidden" name="s1.level">
@@ -433,7 +432,7 @@
 						</xsl:for-each>
 					</ul>
 				</form>
-			</td>
+			</div>
 		</xsl:if>
 	</xsl:template>
 	
