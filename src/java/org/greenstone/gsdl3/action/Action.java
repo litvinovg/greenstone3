@@ -109,11 +109,17 @@ abstract public class Action
 			String name = elem.getAttribute("name");
 			String select = elem.getAttribute("select");
 			String sep = elem.getAttribute("separator");
-			if (!pos.equals(""))
+
+			if(pos.equals("offset")) { // offset when requested to use mdoffset
+			    metadata.append("offset");
+			    metadata.append(GSConstants.META_RELATION_SEP);			    
+			}
+			else if (!pos.equals(""))
 			{
 				metadata.append("pos" + pos); // first, last or indexing number
 				metadata.append(GSConstants.META_RELATION_SEP);
 			}
+
 			if (!select.equals(""))
 			{
 				metadata.append(select);

@@ -125,21 +125,21 @@
 	</xsl:template>
 	
   <!-- calls a template in gslib.xsl in order to avoid xsl vs xslt issue -->
-  <xsl:template match="gsf:equivlinkgs3">
+  <!--<xsl:template match="gsf:equivlinkgs3">
     <xslt:call-template name="equivDocLinks">
       <xslt:with-param name="count" select="0"/>
     </xslt:call-template>
-  </xsl:template>
+  </xsl:template>-->
 
   <!-- Another way (also works with DSpace tutorial): build all the equivalent document links for the current document in one go. No looping necessary: handled in function call. -->
-  <!--<xsl:template match="gsf:equivlinkgs3">
+  <xsl:template match="gsf:equivlinkgs3">
 	<xslt:variable name="docicon" select="metadataList/metadata[contains(@name, 'equivDocIcon')]"/>	
 	<xslt:variable name="docStartlink" select="metadataList/metadata[contains(@name, 'all_*,*_equivDocLink')]"/>	
 	<xslt:variable name="docEndlink" select="metadataList/metadata[contains(@name, '/equivDocLink')]"/>
 
 	<xslt:variable name="equivDocLinks" select="java:org.greenstone.gsdl3.util.XSLTUtil.getEquivDocLinks(',',$docicon, $docStartlink, $docEndlink, ' ')" />
 	<xslt:value-of disable-output-escaping="yes" select="$equivDocLinks"/>
-  </xsl:template>-->
+  </xsl:template>
 
 <!--
 In the collection's format statement, could have the following javascript+XSLT in place of
