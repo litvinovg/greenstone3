@@ -643,6 +643,17 @@
     </if>
     <echo>URL   : ${url}</echo>
     <!-- assuming that index.html is not needed here -->   
+
+    <!--Now write out the url with oaiserver suffix as the baseURL property in OAIConfig.xml-->
+    <available file="${web.classes}/OAIConfig.xml" property="oaiconfig.present"/>
+    <antcall target="init-oaiconfig">
+      <param name="url" value="${url}"/>
+    </antcall>
+  </target>
+
+  <target name="init-oaiconfig" if="oaiconfig.present">
+    <echo>Writing out baseURL ${url}oaiserver to ${web.classes}/OAIConfig.xml</echo>
+    <rsr file="${web.classes}/OAIConfig.xml" pattern="&lt;baseURL&gt;.*&lt;/baseURL&gt;" replacement="&lt;baseURL&gt;${url}oaiserver&lt;/baseURL&gt;" />   
   </target>
 
   <target name="stop" depends="init,stop-tomcat" 
