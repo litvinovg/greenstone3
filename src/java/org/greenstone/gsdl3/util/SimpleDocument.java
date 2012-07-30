@@ -38,39 +38,20 @@ public class SimpleDocument extends AbstractSimpleDocument {
 	this.default_document_type = default_document_type;
     }
 
-    /** create an element to go into the search results list. A node element
-     * has the form
-     * <docNode nodeId='xxx' nodeType='leaf' docType='hierarchy' rank='0.23'/>
-     */
-    public Element createDocNode(String node_id, String rank) {
-	// override to provide version that checks 'default_document_type'
- 
-	Element node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
-	node.setAttribute(GSXML.NODE_ID_ATT, node_id);
-	node.setAttribute(GSXML.NODE_RANK_ATT, rank);
-	String doc_type = null;
-	if (default_document_type != null) {
-	    doc_type = default_document_type;
-	} else {
-	    doc_type = getDocType(node_id);
-	}
-	node.setAttribute(GSXML.DOC_TYPE_ATT, doc_type);
-	String node_type = getNodeType(node_id, doc_type);	
-	node.setAttribute(GSXML.NODE_TYPE_ATT, node_type);
-	return node;
-    }
-
-
     /** returns the document type of the doc that the specified node 
 	belongs to. should be one of 
 	GSXML.DOC_TYPE_SIMPLE, 
 	GSXML.DOC_TYPE_PAGED, 
 	GSXML.DOC_TYPE_HIERARCHY
+	GSXML.DOC_TYPE_PAGEDHIERARCHY
 	default implementation returns GSXML.DOC_TYPE_SIMPLE, over ride 
 	if documents can be hierarchical
     */
     public String getDocType(String node_id) {
-	return GSXML.DOC_TYPE_SIMPLE;
+      if (default_document_type != null) {
+	return default_document_type;
+      }
+      return GSXML.DOC_TYPE_SIMPLE;
     }
     
     /** returns true if the node has child nodes 

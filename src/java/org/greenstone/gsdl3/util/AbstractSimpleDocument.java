@@ -34,14 +34,23 @@ public abstract class AbstractSimpleDocument {
 	this.doc = doc;
     }
 
-    /** create an element to go into the search results list. A node element
+    /** create an element to go into a results list. A node element
      * has the form
-     * <docNode nodeId='xxx' nodeType='leaf' docType='hierarchy' rank='0.23'/>
+     * <docNode nodeId='xxx' nodeType='leaf' docType='hierarchy'/>
+     */
+  public Element createDocNode(String node_id) {
+    return createDocNode(node_id, null);
+  }
+    /** create an element to go into a results list. A node element
+     * has the form
+     * <docNode nodeId='xxx' nodeType='leaf' docType='hierarchy' [rank='0.23']/>
      */
     public Element createDocNode(String node_id, String rank) {
 	Element node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
 	node.setAttribute(GSXML.NODE_ID_ATT, node_id);
-	node.setAttribute(GSXML.NODE_RANK_ATT, rank);
+	if (rank != null) {
+	  node.setAttribute(GSXML.NODE_RANK_ATT, rank);
+	}
 	String doc_type = getDocType(node_id);
 	node.setAttribute(GSXML.DOC_TYPE_ATT, doc_type);
 	String node_type = getNodeType(node_id, doc_type);	
@@ -78,6 +87,7 @@ public abstract class AbstractSimpleDocument {
 	belongs to. should be one of 
 	GSXML.DOC_TYPE_SIMPLE, 
 	GSXML.DOC_TYPE_PAGED, 
+	GSXML.DOC_TYPE_PAGEDHIERARCHY, 
 	GSXML.DOC_TYPE_HIERARCHY
     */
     abstract public String getDocType(String node_id);
