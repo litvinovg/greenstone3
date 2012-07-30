@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSXML;
-import org.greenstone.gsdl3.util.SimpleDocumentDatabase;
+import org.greenstone.gsdl3.util.BasicDocumentDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -59,7 +59,7 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 	// maxnumeric - 
 	protected int maxnumeric = 4;
 
-	SimpleDocumentDatabase gs_doc_db = null;
+	BasicDocumentDatabase gs_doc_db = null;
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.AbstractGS2TextSearch.class.getName());
 
@@ -108,7 +108,7 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 		}
 
 		// replaces default AbstractSearch version with one tied to database
-		gs_doc_db = new SimpleDocumentDatabase(this.doc, database_type, this.site_home, this.cluster_name, this.index_stem);
+		gs_doc_db = new BasicDocumentDatabase(this.doc, database_type, this.site_home, this.cluster_name, this.index_stem);
 		if (!gs_doc_db.isValid())
 		{
 			logger.error("Failed to open Document Database.");

@@ -22,17 +22,16 @@ package org.greenstone.gsdl3.service;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
-import org.greenstone.gsdl3.util.AbstractSimpleDocument;
+import org.greenstone.gsdl3.util.AbstractBasicDocument;
+import org.greenstone.gsdl3.util.BasicDocument;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
-import org.greenstone.gsdl3.util.SimpleDocument;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
  * Partially implements a generic search service
  * 
- * @author Katherine Don
  */
 
 public abstract class AbstractSearch extends ServiceRack
@@ -53,7 +52,7 @@ public abstract class AbstractSearch extends ServiceRack
 	protected static final String HITS_PER_PAGE_PARAM = "hitsPerPage";
 	protected static final String START_PAGE_PARAM = "startPage";
 
-	protected AbstractSimpleDocument gs_doc = null;
+	protected AbstractBasicDocument gs_doc = null;
 
 	/** can more than one index be searched at the same time? */
 	protected boolean does_multi_index_search = false;
@@ -164,7 +163,7 @@ public abstract class AbstractSearch extends ServiceRack
 		}
 
 		// Base line for document (might be overriden by sub-classes)
-		gs_doc = new SimpleDocument(this.doc, this.default_document_type);
+		gs_doc = new BasicDocument(this.doc, this.default_document_type);
 
 		return true;
 	}
