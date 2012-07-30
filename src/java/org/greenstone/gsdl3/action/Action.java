@@ -144,6 +144,8 @@ abstract public class Action
 		//   gsf:link type="source" 
 		// makes use of 'assocfilepath' so need to make sure it's asked for
 
+		boolean getEquivLinkMeta = false;
+
 		NodeList link_nodes = format.getElementsByTagName("gsf:link");
 		for (int i = 0; i < link_nodes.getLength(); i++)
 		{
@@ -154,12 +156,20 @@ abstract public class Action
 				meta_names.add("assocfilepath");
 				meta_names.add("srclinkFile");
 			}
+			else if (type.equals("web")) {
+    				meta_names.add("weblink");
+				meta_names.add("webicon");
+				meta_names.add("/weblink");
+			}
+			else if (type.equals("equivdoc")) {
+				getEquivLinkMeta = true;
+			}
 		}
 
 		// get all the metadata necessary for when the user has used "gsf:equivlink"
 		// so that we can build up the equivlink from the metadata components it needs
 		link_nodes = format.getElementsByTagName("gsf:equivlinkgs3");
-		if (link_nodes.getLength() > 0)
+		if (getEquivLinkMeta || link_nodes.getLength() > 0)
 		{
 			String[] equivlink_metanames = { "equivDocIcon", "equivDocLink", "/equivDocLink" };
 
