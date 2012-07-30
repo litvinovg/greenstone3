@@ -1,5 +1,5 @@
 /*
- *    AbstractSimpleDocument.java
+ *    AbstractBasicDocument.java
  *    Copyright (C) 2011 New Zealand Digital Library, http://www.nzdl.org
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -22,14 +22,14 @@ import org.apache.log4j.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public abstract class AbstractSimpleDocument {
+public abstract class AbstractBasicDocument {
 
     /** XML element for describe requests - the container doc */
     protected Document doc = null; // typically a shared reference to the one in ServiceRack
 
-    static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.AbstractSimpleDocument.class.getName());
+    static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.AbstractBasicDocument.class.getName());
 
-    public AbstractSimpleDocument(Document doc) 
+    public AbstractBasicDocument(Document doc) 
     {
 	this.doc = doc;
     }

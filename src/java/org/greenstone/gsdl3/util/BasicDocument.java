@@ -1,5 +1,5 @@
 /*
- *    SimpleDocument.java
+ *    BasicDocument.java
  *    Copyright (C) 2011 New Zealand Digital Library, http://www.nzdl.org
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -22,16 +22,16 @@ import org.apache.log4j.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class SimpleDocument extends AbstractSimpleDocument {
+public class BasicDocument extends AbstractBasicDocument {
 
 
     /** the default document type - use if all documents are the same type
      */
     protected String default_document_type = null;
 
-    static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.SimpleDocument.class.getName());
+    static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.BasicDocument.class.getName());
 
-    public SimpleDocument(Document doc, String default_document_type)
+    public BasicDocument(Document doc, String default_document_type)
     {
 	super(doc);
 

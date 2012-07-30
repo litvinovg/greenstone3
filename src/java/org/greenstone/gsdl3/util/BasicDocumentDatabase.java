@@ -1,5 +1,5 @@
 /*
- *    SimpleDocumentDatabase.java
+ *    BasicDocumentDatabase.java
  *    Copyright (C) 2002 New Zealand Digital Library, http://www.nzdl.org
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -40,16 +40,16 @@ import java.io.File;
 
 import org.apache.log4j.*;
 
-public class SimpleDocumentDatabase extends AbstractSimpleDocument
+public class BasicDocumentDatabase extends AbstractBasicDocument
 {
     // collection database
     protected SimpleCollectionDatabase coll_db = null;
 
-    static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.SimpleDocumentDatabase.class.getName());
+    static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.BasicDocumentDatabase.class.getName());
 
 
     /** constructor */
-    public SimpleDocumentDatabase(Document doc, 
+    public BasicDocumentDatabase(Document doc, 
 				  String database_type, String site_home,
 				  String cluster_name,  String index_stem)
     {
