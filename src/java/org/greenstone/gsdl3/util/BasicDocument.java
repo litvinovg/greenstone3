@@ -18,6 +18,8 @@
  */
 package org.greenstone.gsdl3.util;
 
+import java.util.ArrayList;
+
 import org.apache.log4j.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -38,6 +40,25 @@ public class BasicDocument extends AbstractBasicDocument {
 	this.default_document_type = default_document_type;
     }
 
+	/**
+	 * returns the structural information asked for. info_type may be one of
+	 * INFO_NUM_SIBS, INFO_NUM_CHILDREN, INFO_SIB_POS, INFO_DOC_TYPE
+	 */
+  public String getStructureInfo(String doc_id, String info_type) {
+    if (info_type.equals(INFO_NUM_SIBS)) {
+      return "0";
+    }
+    if (info_type.equals(INFO_NUM_CHILDREN)) {
+      return "0";
+    }
+    if (info_type.equals(INFO_SIB_POS)) {
+      return "-1";
+    }
+    if (info_type.equals(INFO_DOC_TYPE)) {
+      return getDocType(doc_id);
+    }
+    return null;
+  }
     /** returns the document type of the doc that the specified node 
 	belongs to. should be one of 
 	GSXML.DOC_TYPE_SIMPLE, 
@@ -61,11 +82,59 @@ public class BasicDocument extends AbstractBasicDocument {
     public boolean hasChildren(String node_id) {
 	return false;
     }
-
+  public int getNumChildren(String node_id) {
+    return 0;
+  }
+  /** returns a list of the child ids in order, null if no children
+   * default implementation: return null
+   */
+  public ArrayList<String> getChildrenIds(String node_id) {
+    return null;
+  }
     /** returns true if the node has a parent 
      * default implementation returns false, over ride if documents can be 
      * hierarchical*/
     public boolean hasParent(String node_id) {
 	return false;
     }
+
+	/**
+	 * returns the node id of the parent node, null if no parent 
+	 * default implementation return null
+	 */
+  public String getParentId(String node_id) {
+    return null;
+  }
+
+  /** 
+   * returns the node id of the root node of the document containing node_id
+   * default implementation: return node_id
+   */
+  public String getRootId(String node_id) {
+    return node_id;
+  }
+	/**
+	 * adds all the children of doc_id to the doc element, and if
+	 * recursive=true, adds all their children as well
+	 * default implementation: do nothing
+	 */
+  public void addDescendants(Element doc, String doc_id, boolean recursive) {
+    return;
+  }
+
+	/**
+	 * adds all the siblings of current_id to the parent element. returns the
+	 * new current element
+	 */
+  public Element addSiblings(Element parent_node, String parent_id, String current_id)
+  {
+    return null;
+  }
+
+  /** returns the list of sibling ids, including the specified node_id */
+  public ArrayList<String> getSiblingIds(String node_id) {
+    return null;
+  }
+
+ 
 }

@@ -35,9 +35,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.Iterator;
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.*;
 
 public class BasicDocumentDatabase extends AbstractBasicDocument
@@ -135,6 +137,69 @@ public class BasicDocumentDatabase extends AbstractBasicDocument
 
     }
     
+	/**
+	 * returns the structural information asked for. info_type may be one of
+	 * INFO_NUM_SIBS, INFO_NUM_CHILDREN, INFO_SIB_POS, INFO_DOC_TYPE
+	 */
+  public String getStructureInfo(String doc_id, String info_type){
+		String value = "";
+		if (info_type.equals(INFO_NUM_SIBS))
+		{
+			String parent_id = OID.getParent(doc_id);
+			if (parent_id.equals(doc_id))
+			{
+				value = "0";
+			}
+			else
+			{
+				value = String.valueOf(getNumChildren(parent_id));
+			}
+			return value;
+		}
+
+		if (info_type.equals(INFO_NUM_CHILDREN))
+		{
+			return String.valueOf(getNumChildren(doc_id));
+		}
+
+		if (info_type.equals(INFO_SIB_POS))
+		{
+			String parent_id = OID.getParent(doc_id);
+			if (parent_id.equals(doc_id))
+			{
+				return "-1";
+			}
+
+			DBInfo info = this.coll_db.getInfo(parent_id);
+			if (info == null)
+			{
+				return "-1";
+			}
+
+			String contains = info.getInfo("contains");
+			contains = StringUtils.replace(contains, "\"", parent_id);
+			String[] children = contains.split(";");
+			for (int i = 0; i < children.length; i++)
+			{
+				String child_id = children[i];
+				if (child_id.equals(doc_id))
+				{
+					return String.valueOf(i + 1); // make it from 1 to length
+
+				}
+			}
+
+			return "-1";
+		}
+		if (info_type.equals(INFO_DOC_TYPE))
+	
+		{
+		  return getDocType(doc_id);
+		}
+		return null;
+
+  }
+
     /** returns true if the node has child nodes */
     public boolean hasChildren(String node_id){
 	DBInfo info = this.coll_db.getInfo(node_id);
@@ -148,6 +213,48 @@ public class BasicDocumentDatabase extends AbstractBasicDocument
 	return true;
     }
     
+  public int getNumChildren(String node_id) {
+		DBInfo info = this.coll_db.getInfo(node_id);
+		if (info == null)
+		{
+			return 0;
+		}
+		String contains = info.getInfo("contains");
+		if (contains.equals(""))
+		{
+			return 0;
+		}
+		String[] children = contains.split(";");
+		return children.length;
+
+
+  }
+  /** returns a list of the child ids in order, null if no children
+   */
+  public ArrayList<String> getChildrenIds(String node_id) {
+		DBInfo info = this.coll_db.getInfo(node_id);
+		if (info == null)
+		{
+			return null;
+		}
+
+		String contains = info.getInfo("contains");
+		if (contains.equals(""))
+		{
+			return null;
+		}
+		ArrayList<String> children = new ArrayList<String>();
+		StringTokenizer st = new StringTokenizer(contains, ";");
+		while (st.hasMoreTokens())
+		{
+			String child_id = StringUtils.replace(st.nextToken(), "\"", node_id);
+			children.add(child_id);
+		}
+		return children;
+
+
+  }
+
     /** returns true if the node has a parent */
     public boolean hasParent(String node_id){
 	String parent = OID.getParent(node_id);
@@ -156,7 +263,26 @@ public class BasicDocumentDatabase extends AbstractBasicDocument
 	}
 	return true;
     }
+	/**
+	 * returns the node id of the parent node, null if no parent 
+	 */
+  public String getParentId(String node_id) {
+		String parent = OID.getParent(node_id);
+		if (parent.equals(node_id))
+		{
+			return null;
+		}
+		return parent;
+
+  }
     
+  /** 
+   * returns the node id of the root node of the document containing node_id
+   */
+  public String getRootId(String node_id) {
+    return OID.getTop(node_id);
+  }
+
    /** convert indexer internal id to Greenstone oid */
     public String internalNum2OID(long docnum)
     {
@@ -167,6 +293,66 @@ public class BasicDocumentDatabase extends AbstractBasicDocument
     {
 	return this.coll_db.docnum2OID(docnum);
     }
+
+
+	/**
+	 * adds all the children of doc_id to the doc element, and if
+	 * recursive=true, adds all their children as well
+	 */
+	public void addDescendants(Element doc, String doc_id, boolean recursive)
+	{
+		ArrayList<String> child_ids = getChildrenIds(doc_id);
+		if (child_ids == null)
+			return;
+		for (int i = 0; i < child_ids.size(); i++)
+		{
+			String child_id = child_ids.get(i);
+			Element child_elem = createDocNode(child_id);
+			doc.appendChild(child_elem);
+			if (recursive && (!child_elem.getAttribute(GSXML.NODE_TYPE_ATT).equals(GSXML.NODE_TYPE_LEAF) || child_elem.getAttribute(GSXML.DOC_TYPE_ATT).equals(GSXML.DOC_TYPE_PAGED)))
+			{
+				addDescendants(child_elem, child_id, recursive);
+			}
+		}
+	}
+
+	/**
+	 * adds all the siblings of current_id to the parent element. returns the
+	 * new current element
+	 */
+	public Element addSiblings(Element parent_node, String parent_id, String current_id)
+	{
+		Element current_node = GSXML.getFirstElementChild(parent_node);//(Element)parent_node.getFirstChild();
+		if (current_node == null)
+		{
+			// create a sensible error message
+			logger.error(" there should be a first child.");
+			return null;
+		}
+		// remove the current child,- will add it in later in its correct place
+		parent_node.removeChild(current_node);
+
+		// add in all the siblings,
+		addDescendants(parent_node, parent_id, false);
+
+		// find the node that is now the current node
+		// this assumes that the new node that was created is the same as 
+		// the old one that was removed - we may want to replace the new one 
+		// with the old one.
+		Element new_current = GSXML.getNamedElement(parent_node, current_node.getNodeName(), GSXML.NODE_ID_ATT, current_id);
+		return new_current;
+	}
+
+  /** returns the list of sibling ids, including the specified node_id */
+  public ArrayList<String> getSiblingIds(String node_id){
+		String parent_id = getParentId(node_id);
+		if (parent_id == null)
+		{
+			return null;
+		}
+		return getChildrenIds(parent_id);
+
+  }
 
 }
 

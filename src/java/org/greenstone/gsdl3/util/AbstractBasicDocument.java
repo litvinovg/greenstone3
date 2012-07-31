@@ -18,11 +18,19 @@
  */
 package org.greenstone.gsdl3.util;
 
+import java.util.ArrayList;
+
 import org.apache.log4j.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public abstract class AbstractBasicDocument {
+
+  /** info types */
+	protected static final String INFO_NUM_SIBS = "numSiblings";
+	protected static final String INFO_NUM_CHILDREN = "numChildren";
+	protected static final String INFO_SIB_POS = "siblingPosition";
+	protected static final String INFO_DOC_TYPE = "documentType";
 
     /** XML element for describe requests - the container doc */
     protected Document doc = null; // typically a shared reference to the one in ServiceRack
@@ -58,6 +66,18 @@ public abstract class AbstractBasicDocument {
 	return node;
     }
 
+	/**
+	 * adds all the children of doc_id to the doc element, and if
+	 * recursive=true, adds all their children as well
+	 */
+  abstract public void addDescendants(Element doc, String doc_id, boolean recursive);
+  
+
+	/**
+	 * adds all the siblings of current_id to the parent element. returns the
+	 * new current element
+	 */
+  abstract public Element addSiblings(Element parent_node, String parent_id, String current_id);
 
     /** returns the node type of the specified node.
 	should be one of 
@@ -96,7 +116,30 @@ public abstract class AbstractBasicDocument {
      */
     abstract public boolean hasChildren(String node_id);
     
+	/**
+	 * returns the structural information asked for. info_type may be one of
+	 * INFO_NUM_SIBS, INFO_NUM_CHILDREN, INFO_SIB_POS, INFO_DOC_TYPE
+	 */
+	abstract public String getStructureInfo(String doc_id, String info_type);
+
+  abstract public int getNumChildren(String node_id) ;
+  /** returns a list of the child ids in order, null if no children
+   */
+  abstract public ArrayList<String> getChildrenIds(String node_id);
     /** returns true if the node has a parent 
      */
     abstract public boolean hasParent(String node_id);
+
+	/**
+	 * returns the node id of the parent node, null if no parent 
+	 */
+  abstract public String getParentId(String node_id);
+
+  /** 
+   * returns the node id of the root node of the document containing node_id
+   */
+  abstract public String getRootId(String node_id);
+
+  /** returns the list of sibling ids, including the specified node_id */
+  abstract public ArrayList<String> getSiblingIds(String node_id);
 }
