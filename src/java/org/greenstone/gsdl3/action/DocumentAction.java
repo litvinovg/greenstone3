@@ -193,9 +193,7 @@ public class DocumentAction extends Action
 
 		if (document_type == null)
 		{
-			logger.error("getting document type");
 			document_type = getDocumentType(basic_doc_list, collection, userContext, page_response);
-			logger.error("new doc type = " + document_type);
 		}
 		if (document_type != null)
 		{
