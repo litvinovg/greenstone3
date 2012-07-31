@@ -130,6 +130,7 @@ public class GSXML
 	// greenstone xml attributes
 	public static final String COLLECTION_ATT = "collection";
 	public static final String NAME_ATT = "name";
+	public static final String MATCH_ATT = "match";
 	public static final String TO_ATT = "to";
 	public static final String USER_ID_ATT = "uid";
 	public static final String FROM_ATT = "from";
