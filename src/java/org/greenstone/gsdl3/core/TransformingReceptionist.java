@@ -344,20 +344,21 @@ public class TransformingReceptionist extends Receptionist
 
 		ArrayList<String> requiredMetadata = _metadataRequiredMap.get(stylesheetFile);
 
-		Element extraMetadataList = this.doc.createElement(GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
+		if(requiredMetadata !=null){
+		    Element extraMetadataList = this.doc.createElement(GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
 
-		for (String metadataString : requiredMetadata)
-		{
-			Element metadataElem = this.doc.createElement(GSXML.EXTRA_METADATA);
-			metadataElem.setAttribute(GSXML.NAME_ATT, metadataString);
-			extraMetadataList.appendChild(metadataElem);
+		    for (String metadataString : requiredMetadata)
+			{
+			    Element metadataElem = this.doc.createElement(GSXML.EXTRA_METADATA);
+			    metadataElem.setAttribute(GSXML.NAME_ATT, metadataString);
+			    extraMetadataList.appendChild(metadataElem);
+			}
+		    request.appendChild(request.getOwnerDocument().importNode(extraMetadataList, true));
 		}
-
-		request.appendChild(request.getOwnerDocument().importNode(extraMetadataList, true));
 	}
-
-	protected Node postProcessPage(Element page)
-	{
+    
+    protected Node postProcessPage(Element page)
+    {
 		// might need to add some data to the page
 		addExtraInfo(page);
 		// transform the page using xslt
