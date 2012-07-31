@@ -87,6 +87,14 @@
 				  <xsl:apply-templates/>
 				</a>
 			</xsl:when>
+			<xsl:when test="@type='web'">
+			  <xslt:value-of disable-output-escaping="yes" select="metadataList/metadata[contains(@name, 'weblink')]"/>
+			  <xsl:apply-templates/>
+			  <xslt:value-of disable-output-escaping="yes" select="metadataList/metadata[contains(@name, '/weblink')]"/>
+			</xsl:when>
+			<xsl:when test="@type='equivdoc'">
+			  <xsl:call-template name="gsf:equivlinkgs3"/>
+			</xsl:when>
 			<xsl:otherwise> <!-- a document link -->
 				<xslt:variable name="bookswitch">
 					<xslt:value-of select="/page/pageRequest/paramList/param[@name='book']/@value"/>
@@ -118,6 +126,9 @@
 			<xsl:when test="@type='classifier'">
 				<img style="border:0px"><xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'bookshelf_image')"/></xsl:attribute></img>
 			</xsl:when>
+			<xsl:when test="@type='web'">
+			  <xslt:value-of disable-output-escaping="yes" select="metadataList/metadata[contains(@name, 'webicon')]"/>				
+			</xsl:when>
 			<xsl:when test="not(@type) or @type='document'">
 				<img style="border:0px"><xslt:attribute name="id">documentBasketBook<xslt:value-of select="/page/pageResponse/collection/@name"/>:<xslt:value-of select="@nodeID"/></xslt:attribute><xslt:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'page_icon_image')"/></xslt:attribute></img> 
 			</xsl:when>
@@ -132,7 +143,7 @@
   </xsl:template>-->
 
   <!-- Another way (also works with DSpace tutorial): build all the equivalent document links for the current document in one go. No looping necessary: handled in function call. -->
-  <xsl:template match="gsf:equivlinkgs3">
+  <xsl:template match="gsf:equivlinkgs3" name="gsf:equivlinkgs3">
 	<xslt:variable name="docicon" select="metadataList/metadata[contains(@name, 'equivDocIcon')]"/>	
 	<xslt:variable name="docStartlink" select="metadataList/metadata[contains(@name, 'all_*,*_equivDocLink')]"/>	
 	<xslt:variable name="docEndlink" select="metadataList/metadata[contains(@name, '/equivDocLink')]"/>
