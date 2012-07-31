@@ -124,24 +124,24 @@ public class GS2BrowseAction extends Action
 			if (this_format != null)
 			{
 				Element global_format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.GLOBAL_FORMAT_ELEM);
-				if(global_format_elem != null)
+				if (global_format_elem != null)
 				{
 					GSXSLT.mergeFormatElements(this_format, global_format_elem, false);
 				}
 
 				Element new_format = GSXML.duplicateWithNewName(this.doc, this_format, GSXML.FORMAT_ELEM, false);
 				extractMetadataNames(new_format, doc_meta_names, class_meta_names);
-				
+
 				Element extraMetaListElem = (Element) GSXML.getChildByTagName(request, GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
-				if(extraMetaListElem != null)
+				if (extraMetaListElem != null)
 				{
 					NodeList extraMetaList = extraMetaListElem.getElementsByTagName(GSXML.EXTRA_METADATA);
-					for(int i = 0; i < extraMetaList.getLength(); i++)
+					for (int i = 0; i < extraMetaList.getLength(); i++)
 					{
-						class_meta_names.add(((Element)extraMetaList.item(i)).getAttribute(GSXML.NAME_ATT));
+						class_meta_names.add(((Element) extraMetaList.item(i)).getAttribute(GSXML.NAME_ATT));
 					}
 				}
-				
+
 				// set the format type
 				new_format.setAttribute(GSXML.TYPE_ATT, "browse");
 
@@ -453,17 +453,26 @@ public class GS2BrowseAction extends Action
 
 	protected void extractMetadataNames(Element new_format, HashSet<String> doc_meta_names, HashSet<String> class_meta_names)
 	{
-		NodeList templates = new_format.getElementsByTagName("gsf:template");
+		NodeList templates = new_format.getElementsByTagNameNS("http://www.greenstone.org/greenstone3/schema/ConfigFormat", "template");
 		for (int i = 0; i < templates.getLength(); i++)
 		{
 			Element template = (Element) templates.item(i);
-			String match = template.getAttribute("match");
-			if (match.startsWith("documentNode"))
+			String match = template.getAttribute(GSXML.MATCH_ATT);
+			String name = template.getAttribute(GSXML.NAME_ATT);
+			if (match != null && match.length() > 0)
+			{
+				if (match.startsWith("documentNode"))
+				{
+					getRequiredMetadataNames(template, doc_meta_names);
+				}
+				else if (match.startsWith("classifierNode")) // not match.equals, as we want to match nodes like: classifierNode[@classifierStyle = 'VList']
+				{
+					getRequiredMetadataNames(template, class_meta_names);
+				}
+			}
+			else
 			{
 				getRequiredMetadataNames(template, doc_meta_names);
-			}
-			else if (match.startsWith("classifierNode")) // not match.equals, as we want to match nodes like: classifierNode[@classifierStyle = 'VList']
-			{
 				getRequiredMetadataNames(template, class_meta_names);
 			}
 		}
