@@ -23,6 +23,8 @@ package org.greenstone.gsdl3.service;
 // Greenstone classes
 import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.core.GSException;
+import org.greenstone.gsdl3.util.AbstractBasicDocument;
+import org.greenstone.gsdl3.util.BasicDocument;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.MacroResolver;
@@ -66,10 +68,8 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	protected static final String STRUCT_DESCENDS = "descendants";
 	protected static final String STRUCT_ENTIRE = "entire";
 
-	protected static final String INFO_NUM_SIBS = "numSiblings";
-	protected static final String INFO_NUM_CHILDREN = "numChildren";
-	protected static final String INFO_SIB_POS = "siblingPosition";
-	protected static final String INFO_DOC_TYPE = "documentType";
+
+	protected AbstractBasicDocument gs_doc = null;
 
 	// means the id is not a greenstone id and needs translating
 	//	protected static final String EXTID_PARAM = "ext";
@@ -168,6 +168,9 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 				}
 			}
 		}
+
+		// Base line for document (might be overriden by sub-classes)
+		gs_doc = new BasicDocument(this.doc, this.default_document_type);
 
 		return true;
 	}
@@ -630,22 +633,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	 */
 	protected Element createDocNode(String node_id)
 	{
-		Element node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
-		node.setAttribute(GSXML.NODE_ID_ATT, node_id);
-
-		String doc_type = null;
-		if (default_document_type != null)
-		{
-			doc_type = default_document_type;
-		}
-		else
-		{
-			doc_type = getDocType(node_id);
-		}
-		node.setAttribute(GSXML.DOC_TYPE_ATT, doc_type);
-		String node_type = getNodeType(node_id, doc_type);
-		node.setAttribute(GSXML.NODE_TYPE_ATT, node_type);
-		return node;
+		return this.gs_doc.createDocNode(node_id);
 	}
 
 	/**
@@ -654,19 +642,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	 */
 	protected void addDescendants(Element doc, String doc_id, boolean recursive)
 	{
-		ArrayList<String> child_ids = getChildrenIds(doc_id);
-		if (child_ids == null)
-			return;
-		for (int i = 0; i < child_ids.size(); i++)
-		{
-			String child_id = child_ids.get(i);
-			Element child_elem = createDocNode(child_id);
-			doc.appendChild(child_elem);
-			if (recursive && (!child_elem.getAttribute(GSXML.NODE_TYPE_ATT).equals(GSXML.NODE_TYPE_LEAF) || child_elem.getAttribute(GSXML.DOC_TYPE_ATT).equals(GSXML.DOC_TYPE_PAGED)))
-			{
-				addDescendants(child_elem, child_id, recursive);
-			}
-		}
+	  this.gs_doc.addDescendants(doc, doc_id, recursive);
 	}
 
 	/**
@@ -675,25 +651,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	 */
 	protected Element addSiblings(Element parent_node, String parent_id, String current_id)
 	{
-		Element current_node = GSXML.getFirstElementChild(parent_node);//(Element)parent_node.getFirstChild();
-		if (current_node == null)
-		{
-			// create a sensible error message
-			logger.error(" there should be a first child.");
-			return null;
-		}
-		// remove the current child,- will add it in later in its correct place
-		parent_node.removeChild(current_node);
-
-		// add in all the siblings,
-		addDescendants(parent_node, parent_id, false);
-
-		// find the node that is now the current node
-		// this assumes that the new node that was created is the same as 
-		// the old one that was removed - we may want to replace the new one 
-		// with the old one.
-		Element new_current = GSXML.getNamedElement(parent_node, current_node.getNodeName(), GSXML.NODE_ID_ATT, current_id);
-		return new_current;
+	  return this.gs_doc.addSiblings(parent_node, parent_id, current_id);
 	}
 
 	/**
@@ -724,30 +682,12 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	 */
 	protected String getNodeType(String node_id, String doc_type)
 	{
-		if (doc_type.equals(GSXML.DOC_TYPE_SIMPLE))
-		{
-			return GSXML.NODE_TYPE_LEAF;
-		}
-
-		if (getParentId(node_id) == null)
-		{
-			return GSXML.NODE_TYPE_ROOT;
-		}
-		if (doc_type.equals(GSXML.DOC_TYPE_PAGED))
-		{
-			return GSXML.NODE_TYPE_LEAF;
-		}
-		if (getChildrenIds(node_id) == null)
-		{
-			return GSXML.NODE_TYPE_LEAF;
-		}
-		return GSXML.NODE_TYPE_INTERNAL;
-
+	return this.gs_doc.getNodeType(node_id, doc_type);
 	}
 
 	/**
-	 * if id ends in .fc, .pc etc, then translate it to the correct id default
-	 * implementation: just remove the suffix
+	 * if id ends in .fc, .pc etc, then translate it to the correct id 
+	 * default implementation: just remove the suffix
 	 */
 	protected String translateId(String id)
 	{
@@ -783,38 +723,36 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	/**
 	 * returns the document type of the doc that the specified node belongs to.
 	 * should be one of GSXML.DOC_TYPE_SIMPLE, GSXML.DOC_TYPE_PAGED,
-	 * GSXML.DOC_TYPE_HIERARCHY default implementation: return DOC_TYPE_SIMPLE
+	 * GSXML.DOC_TYPE_HIERARCHY
 	 */
 	protected String getDocType(String node_id)
 	{
-		return GSXML.DOC_TYPE_HIERARCHY;
+		return this.gs_doc.getDocType(node_id);
 	}
 
 	/**
 	 * returns the id of the root node of the document containing node node_id.
-	 * may be the same as node_id default implemntation: return node_id
+	 * may be the same as node_id 
 	 */
 	protected String getRootId(String node_id)
 	{
-		return node_id;
+		return  this.gs_doc.getRootId(node_id);
 	}
 
 	/**
-	 * returns a list of the child ids in order, null if no children default
-	 * implementation: return null
+	 * returns a list of the child ids in order, null if no children 
 	 */
 	protected ArrayList<String> getChildrenIds(String node_id)
 	{
-		return null;
+	  return this.gs_doc.getChildrenIds(node_id);
 	}
 
 	/**
-	 * returns the node id of the parent node, null if no parent default
-	 * implementation: return null
+	 * returns the node id of the parent node, null if no parent 
 	 */
 	protected String getParentId(String node_id)
 	{
-		return null;
+	  return this.gs_doc.getParentId(node_id);
 	}
 
 	/**
@@ -833,11 +771,10 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	 * returns the structural information asked for. info_type may be one of
 	 * INFO_NUM_SIBS, INFO_NUM_CHILDREN, INFO_SIB_POS
 	 */
-	abstract protected String getStructureInfo(String doc_id, String info_type);
+  protected String getStructureInfo(String doc_id, String info_type) {
 
-	protected String getHrefOID(String href_url)
-	{
-		return null;
-	}
+    return this.gs_doc.getStructureInfo(doc_id, info_type);
+  }
+
 
 }

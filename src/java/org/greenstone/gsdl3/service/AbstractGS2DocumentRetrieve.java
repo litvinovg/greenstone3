@@ -20,6 +20,7 @@ package org.greenstone.gsdl3.service;
 
 // Greenstone classes
 import org.greenstone.gsdl3.core.GSException;
+import org.greenstone.gsdl3.util.BasicDocumentDatabase;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.OID;
@@ -62,7 +63,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 	protected String index_stem = null;
 
 	protected SimpleCollectionDatabase coll_db = null;
-
+  BasicDocumentDatabase gs_doc_db = null;
 	/** constructor */
 	protected AbstractGS2DocumentRetrieve()
 	{
@@ -73,6 +74,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 	{
 		super.cleanUp();
 		this.coll_db.closeDatabase();
+		this.gs_doc_db.cleanUp();
 	}
 
 	/** configure this service */
@@ -124,6 +126,14 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 			return false;
 		}
 
+		gs_doc_db = new BasicDocumentDatabase(this.doc, database_type, this.site_home, this.cluster_name, this.index_stem);
+		if (!gs_doc_db.isValid())
+		{
+			logger.error("Failed to open Document Database.");
+			return false;
+		}
+		this.gs_doc = gs_doc_db;
+
 		// we need to set the database for our GS2 macro resolver
 		GS2MacroResolver gs2_macro_resolver = (GS2MacroResolver) this.macro_resolver;
 		gs2_macro_resolver.setDB(this.coll_db);
@@ -152,44 +162,10 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 	 */
 	protected String getRootId(String node_id)
 	{
-		return OID.getTop(node_id);
+	  return this.gs_doc.getRootId(node_id);
 	}
 
-	/** returns a list of the child ids in order, null if no children */
-	protected ArrayList<String> getChildrenIds(String node_id)
-	{
-		DBInfo info = this.coll_db.getInfo(node_id);
-		if (info == null)
-		{
-			return null;
-		}
 
-		String contains = info.getInfo("contains");
-		if (contains.equals(""))
-		{
-			return null;
-		}
-		ArrayList<String> children = new ArrayList<String>();
-		StringTokenizer st = new StringTokenizer(contains, ";");
-		while (st.hasMoreTokens())
-		{
-			String child_id = StringUtils.replace(st.nextToken(), "\"", node_id);
-			children.add(child_id);
-		}
-		return children;
-
-	}
-
-	/** returns the node id of the parent node, null if no parent */
-	protected String getParentId(String node_id)
-	{
-		String parent = OID.getParent(node_id);
-		if (parent.equals(node_id))
-		{
-			return null;
-		}
-		return parent;
-	}
 
 	/**
 	 * get the metadata for the classifier node node_id returns a metadataList
@@ -235,135 +211,12 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 		return metadata_list;
 	}
 
-	/**
-	 * returns the structural information asked for. info_type may be one of
-	 * INFO_NUM_SIBS, INFO_NUM_CHILDREN, INFO_SIB_POS
-	 */
-	protected String getStructureInfo(String doc_id, String info_type)
-	{
-		String value = "";
-		if (info_type.equals(INFO_NUM_SIBS))
-		{
-			String parent_id = OID.getParent(doc_id);
-			if (parent_id.equals(doc_id))
-			{
-				value = "0";
-			}
-			else
-			{
-				value = String.valueOf(getNumChildren(parent_id));
-			}
-			return value;
-		}
-
-		if (info_type.equals(INFO_NUM_CHILDREN))
-		{
-			return String.valueOf(getNumChildren(doc_id));
-		}
-
-		if (info_type.equals(INFO_SIB_POS))
-		{
-			String parent_id = OID.getParent(doc_id);
-			if (parent_id.equals(doc_id))
-			{
-				return "-1";
-			}
-
-			DBInfo info = this.coll_db.getInfo(parent_id);
-			if (info == null)
-			{
-				return "-1";
-			}
-
-			String contains = info.getInfo("contains");
-			contains = StringUtils.replace(contains, "\"", parent_id);
-			String[] children = contains.split(";");
-			for (int i = 0; i < children.length; i++)
-			{
-				String child_id = children[i];
-				if (child_id.equals(doc_id))
-				{
-					return String.valueOf(i + 1); // make it from 1 to length
-
-				}
-			}
-
-			return "-1";
-		}
-		if (info_type.equals(INFO_DOC_TYPE))
-	
-		{
-		  return getDocType(doc_id);
-		}
-		return null;
-	}
 
 	protected int getNumChildren(String node_id)
 	{
-		DBInfo info = this.coll_db.getInfo(node_id);
-		if (info == null)
-		{
-			return 0;
-		}
-		String contains = info.getInfo("contains");
-		if (contains.equals(""))
-		{
-			return 0;
-		}
-		String[] children = contains.split(";");
-		return children.length;
+	  return this.gs_doc.getNumChildren(node_id);
 	}
 
-	/**
-	 * returns the document type of the doc that the specified node belongs to.
-	 * should be one of GSXML.DOC_TYPE_SIMPLE, GSXML.DOC_TYPE_PAGED,
-	 * GSXML.DOC_TYPE_HIERARCHY
-	 */
-	protected String getDocType(String node_id)
-	{
-		DBInfo info = this.coll_db.getInfo(node_id);
-		if (info == null)
-		{
-			return GSXML.DOC_TYPE_SIMPLE;
-		}
-		String doc_type = info.getInfo("doctype");
-		if (!doc_type.equals("") && !doc_type.equals("doc"))
-		{
-			return doc_type;
-		}
-
-		String top_id = OID.getTop(node_id);
-		boolean is_top = (top_id.equals(node_id) ? true : false);
-
-		String children = info.getInfo("contains");
-		boolean is_leaf = (children.equals("") ? true : false);
-
-		if (is_top && is_leaf)
-		{ // a single section document
-			return GSXML.DOC_TYPE_SIMPLE;
-		}
-
-		// now we just check the top node
-		if (!is_top)
-		{ // we need to look at the top info
-			info = this.coll_db.getInfo(top_id);
-		}
-		if (info == null)
-		{
-			return GSXML.DOC_TYPE_HIERARCHY;
-		}
-
-		String childtype = info.getInfo("childtype");
-		if (childtype.equals("Paged"))
-		{
-			return GSXML.DOC_TYPE_PAGED;
-		}
-		if (childtype.equals("PagedHierarchy"))
-		  {
-		    return GSXML.DOC_TYPE_PAGED_HIERARCHY;
-		  }
-		return GSXML.DOC_TYPE_HIERARCHY;
-	}
 
 	/**
 	 * returns the content of a node should return a nodeContent element:
@@ -590,70 +443,6 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 		return doc_content;
 	}
 
-	protected Element getInfo(String doc_id, String info_type)
-	{
 
-		String value = "";
-		if (info_type.equals(INFO_NUM_SIBS))
-		{
-			String parent_id = OID.getParent(doc_id);
-			if (parent_id.equals(doc_id))
-			{
-				value = "0";
-			}
-			else
-			{
-				value = String.valueOf(getNumChildren(parent_id));
-			}
-		}
-		else if (info_type.equals(INFO_NUM_CHILDREN))
-		{
-			value = String.valueOf(getNumChildren(doc_id));
-		}
-		else if (info_type.equals(INFO_SIB_POS))
-		{
-			String parent_id = OID.getParent(doc_id);
-			if (parent_id.equals(doc_id))
-			{
-				value = "-1";
-			}
-			else
-			{
-				DBInfo info = this.coll_db.getInfo(parent_id);
-				if (info == null)
-				{
-					value = "-1";
-				}
-				else
-				{
-					String contains = info.getInfo("contains");
-					contains = StringUtils.replace(contains, "\"", parent_id);
-					String[] children = contains.split(";");
-					for (int i = 0; i < children.length; i++)
-					{
-						String child_id = children[i];
-						if (child_id.equals(doc_id))
-						{
-							value = String.valueOf(i + 1); // make it from 1 to length
-							break;
-						}
-					}
-				}
-			}
-		}
-		else
-		{
-			return null;
-		}
-		Element info_elem = this.doc.createElement("info");
-		info_elem.setAttribute(GSXML.NAME_ATT, info_type);
-		info_elem.setAttribute(GSXML.VALUE_ATT, value);
-		return info_elem;
-	}
-
-	protected String getHrefOID(String href_url)
-	{
-		return this.coll_db.docnum2OID(href_url);
-	}
 
 }

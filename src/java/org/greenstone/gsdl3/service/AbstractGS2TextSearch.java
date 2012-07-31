@@ -17,7 +17,6 @@
  */
 package org.greenstone.gsdl3.service;
 
-// Greenstone classes
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;

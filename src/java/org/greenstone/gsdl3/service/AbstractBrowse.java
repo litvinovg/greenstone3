@@ -22,6 +22,8 @@ package org.greenstone.gsdl3.service;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.util.AbstractBasicDocument;
+import org.greenstone.gsdl3.util.BasicDocument;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.MacroResolver;
@@ -60,10 +62,15 @@ public abstract class AbstractBrowse extends ServiceRack
 	protected static final String INFO_NUM_CHILDREN = "numChildren";
 	protected static final String INFO_SIB_POS = "siblingPosition";
 
+	protected AbstractBasicDocument gs_doc = null;
+
 	protected Element config_info = null; // the xml from the config file
 
 	protected MacroResolver macro_resolver = null;
 
+	/**
+	 * the default document type - use if all documents are the same type
+	 */
 	protected String default_document_type = null;
 
 	/** constructor */
@@ -174,6 +181,9 @@ public abstract class AbstractBrowse extends ServiceRack
 				}
 			}
 		}
+
+		// Base line for document (might be overriden by sub-classes)
+		gs_doc = new BasicDocument(this.doc, this.default_document_type);
 
 		return true;
 	}
@@ -643,22 +653,7 @@ public abstract class AbstractBrowse extends ServiceRack
 	 */
 	protected Element createDocNode(String node_id)
 	{
-		Element node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
-		node.setAttribute(GSXML.NODE_ID_ATT, node_id);
-
-		String doc_type = null;
-		if (default_document_type != null)
-		{
-			doc_type = default_document_type;
-		}
-		else
-		{
-			doc_type = getDocType(node_id);
-		}
-		node.setAttribute(GSXML.DOC_TYPE_ATT, doc_type);
-		String node_type = getNodeType(node_id, doc_type);
-		node.setAttribute(GSXML.NODE_TYPE_ATT, node_type);
-		return node;
+	  return this.gs_doc.createDocNode(node_id);
 	}
 
 	/**
@@ -667,25 +662,7 @@ public abstract class AbstractBrowse extends ServiceRack
 	 */
 	protected String getNodeType(String node_id, String doc_type)
 	{
-		if (doc_type.equals(GSXML.DOC_TYPE_SIMPLE))
-		{
-			return GSXML.NODE_TYPE_LEAF;
-		}
-
-		if (getParentId(node_id) == null)
-		{
-			return GSXML.NODE_TYPE_ROOT;
-		}
-		if (doc_type.equals(GSXML.DOC_TYPE_PAGED))
-		{
-			return GSXML.NODE_TYPE_LEAF;
-		}
-		if (getChildrenIds(node_id) == null)
-		{
-			return GSXML.NODE_TYPE_LEAF;
-		}
-		return GSXML.NODE_TYPE_INTERNAL;
-
+	  return this.gs_doc.getNodeType(node_id, doc_type);
 	}
 
 	/**
@@ -733,7 +710,7 @@ public abstract class AbstractBrowse extends ServiceRack
 		// remove the current child,- will add it in later in its correct place
 		parent_node.removeChild(current_node);
 
-		// add in all the siblings,
+		// add in all the siblings,- might be classifier/document nodes
 		addDescendants(parent_node, parent_id, false);
 
 		// find the node that is now the current node
@@ -742,6 +719,7 @@ public abstract class AbstractBrowse extends ServiceRack
 		// with the old one.
 		Element new_current = GSXML.getNamedElement(parent_node, current_node.getNodeName(), GSXML.NODE_ID_ATT, current_id);
 		return new_current;
+
 	}
 
 	/**
@@ -757,13 +735,7 @@ public abstract class AbstractBrowse extends ServiceRack
 	/** returns the list of sibling ids, including the specified node_id */
 	protected ArrayList<String> getSiblingIds(String node_id)
 	{
-		String parent_id = getParentId(node_id);
-		if (parent_id == null)
-		{
-			return null;
-		}
-		return getChildrenIds(parent_id);
-
+	  return this.gs_doc.getSiblingIds(node_id);
 	}
 
 	/** if id ends in .fc, .pc etc, then translate it to the correct id */
@@ -777,19 +749,27 @@ public abstract class AbstractBrowse extends ServiceRack
 	 * should be one of GSXML.DOC_TYPE_SIMPLE, GSXML.DOC_TYPE_PAGED,
 	 * GSXML.DOC_TYPE_HIERARCHY
 	 */
-	abstract protected String getDocType(String node_id);
+  protected String getDocType(String node_id) {
+    return this.gs_doc.getDocType(node_id);
+  }
 
 	/**
 	 * returns the id of the root node of the document containing node node_id.
 	 * . may be the same as node_id
 	 */
-	abstract protected String getRootId(String node_id);
+  protected String getRootId(String node_id) {
+    return this.gs_doc.getRootId(node_id);
+  }
 
 	/** returns a list of the child ids in order, null if no children */
-	abstract protected ArrayList<String> getChildrenIds(String node_id);
+  protected ArrayList<String> getChildrenIds(String node_id) {
+    return this.gs_doc.getChildrenIds(node_id);
+  }
 
 	/** returns the node id of the parent node, null if no parent */
-	abstract protected String getParentId(String node_id);
+  protected String getParentId(String node_id) {
+    return this.gs_doc.getParentId(node_id);
+  }
 
 	/**
 	 * returns true if the id refers to a document (rather than a classifier
@@ -814,8 +794,10 @@ public abstract class AbstractBrowse extends ServiceRack
 
 	/**
 	 * returns the structural information asked for. info_type may be one of
-	 * INFO_NUM_SIBS, INFO_NUM_CHILDREN, INFO_SIB_POS
+	 * INFO_NUM_SIBS, INFO_NUM_CHILDREN, INFO_SIB_POS, INFO_DOC_TYPE
 	 */
-	abstract protected String getStructureInfo(String node_id, String info_type);
+  protected String getStructureInfo(String node_id, String info_type) {
+    return this.gs_doc.getStructureInfo(node_id, info_type);
+  }
 
 }
