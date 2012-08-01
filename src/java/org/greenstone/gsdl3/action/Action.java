@@ -1,21 +1,20 @@
 package org.greenstone.gsdl3.action;
 
-import org.greenstone.gsdl3.core.ModuleInterface;
-import org.greenstone.gsdl3.util.*;
-// XML classes
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
-
-// other java stuff
-import java.io.File;
-import java.util.Vector;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.core.ModuleInterface;
+import org.greenstone.gsdl3.util.GSConstants;
+import org.greenstone.gsdl3.util.GSParams;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /** base class for Actions */
 abstract public class Action
@@ -99,8 +98,7 @@ abstract public class Action
 
 	protected void extractMetadataNames(Element format, HashSet<String> meta_names)
 	{
-		//NodeList nodes = format.getElementsByTagNameNS("metadata", "http://www.greenstone.org/configformat");
-		NodeList metadata_nodes = format.getElementsByTagName("gsf:metadata");
+		NodeList metadata_nodes = format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata");
 		for (int i = 0; i < metadata_nodes.getLength(); i++)
 		{
 			Element elem = (Element) metadata_nodes.item(i);
@@ -110,9 +108,10 @@ abstract public class Action
 			String select = elem.getAttribute("select");
 			String sep = elem.getAttribute("separator");
 
-			if(pos.equals("offset")) { // offset when requested to use mdoffset
-			    metadata.append("offset");
-			    metadata.append(GSConstants.META_RELATION_SEP);			    
+			if (pos.equals("offset"))
+			{ // offset when requested to use mdoffset
+				metadata.append("offset");
+				metadata.append(GSConstants.META_RELATION_SEP);
 			}
 			else if (!pos.equals(""))
 			{
@@ -146,7 +145,7 @@ abstract public class Action
 
 		boolean getEquivLinkMeta = false;
 
-		NodeList link_nodes = format.getElementsByTagName("gsf:link");
+		NodeList link_nodes = format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "link");
 		for (int i = 0; i < link_nodes.getLength(); i++)
 		{
 			Element elem = (Element) link_nodes.item(i);
@@ -156,19 +155,21 @@ abstract public class Action
 				meta_names.add("assocfilepath");
 				meta_names.add("srclinkFile");
 			}
-			else if (type.equals("web")) {
-    				meta_names.add("weblink");
+			else if (type.equals("web"))
+			{
+				meta_names.add("weblink");
 				meta_names.add("webicon");
 				meta_names.add("/weblink");
 			}
-			else if (type.equals("equivdoc")) {
+			else if (type.equals("equivdoc"))
+			{
 				getEquivLinkMeta = true;
 			}
 		}
 
 		// get all the metadata necessary for when the user has used "gsf:equivlink"
 		// so that we can build up the equivlink from the metadata components it needs
-		link_nodes = format.getElementsByTagName("gsf:equivlinkgs3");
+		link_nodes = format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "equivlinkgs3");
 		if (getEquivLinkMeta || link_nodes.getLength() > 0)
 		{
 			String[] equivlink_metanames = { "equivDocIcon", "equivDocLink", "/equivDocLink" };
@@ -190,7 +191,7 @@ abstract public class Action
 			}
 		}
 
-		if (format.getElementsByTagName("gsf:image").getLength() > 0)
+		if (format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "image").getLength() > 0)
 		{
 			meta_names.add("Thumb");
 			meta_names.add("Screen");

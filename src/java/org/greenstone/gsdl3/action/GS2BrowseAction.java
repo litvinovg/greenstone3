@@ -453,7 +453,7 @@ public class GS2BrowseAction extends Action
 
 	protected void extractMetadataNames(Element new_format, HashSet<String> doc_meta_names, HashSet<String> class_meta_names)
 	{
-		NodeList templates = new_format.getElementsByTagNameNS("http://www.greenstone.org/greenstone3/schema/ConfigFormat", "template");
+		NodeList templates = new_format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "template");
 		for (int i = 0; i < templates.getLength(); i++)
 		{
 			Element template = (Element) templates.item(i);

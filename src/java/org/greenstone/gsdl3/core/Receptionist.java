@@ -1,21 +1,21 @@
 package org.greenstone.gsdl3.core;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.action.Action;
+import org.greenstone.gsdl3.util.GSConstants;
+import org.greenstone.gsdl3.util.GSFile;
+import org.greenstone.gsdl3.util.GSParams;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
 import org.greenstone.util.GlobalProperties;
-import org.greenstone.gsdl3.util.*;
-import org.greenstone.gsdl3.action.*;
-// XML classes
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-// other java classes
-import java.io.File;
-import java.util.HashMap;
-import java.util.Enumeration;
-import java.util.ArrayList;
-
-import org.apache.log4j.*;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * the most basic Receptionist, used for interface generation. Receives requests
@@ -244,8 +244,8 @@ public class Receptionist implements ModuleInterface
 		Element page = this.doc.createElement(GSXML.PAGE_ELEM);
 		page.setAttribute(GSXML.LANG_ATT, request.getAttribute(GSXML.LANG_ATT));
 		// just in case these namespaces end up in the page and we want to display the XML
-		page.setAttribute("xmlns:gsf", "http://www.greenstone.org/greenstone3/schema/ConfigFormat");
-		page.setAttribute("xmlns:xsl", "http://www.w3.org/1999/XSL/Transform");
+		page.setAttribute("xmlns:gsf", GSXML.GSF_NAMESPACE);
+		page.setAttribute("xmlns:xsl", GSXML.XSL_NAMESPACE);
 
 		//logger.info(a+" mesa=" + this.converter.getPrettyString(message));
 		// get the page data from the action

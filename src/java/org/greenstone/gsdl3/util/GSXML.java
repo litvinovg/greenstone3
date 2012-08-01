@@ -290,6 +290,12 @@ public class GSXML
 	public static final String HLIST = "HList";
 	public static final String VLIST = "VList";
 
+	//for namespaces
+	public static final String XSL_NAMESPACE = "http://www.w3.org/1999/XSL/Transform";
+	public static final String GSF_NAMESPACE = "http://www.greenstone.org/greenstone3/schema/ConfigFormat";
+	public static final String JAVA_NAMESPACE = "http://xml.apache.org/xslt/java";
+	public static final String UTIL_NAMESPACE = "xalan://org.greenstone.gsdl3.util.XSLTUtil";
+
 	/**
 	 * takes a list of elements, and returns an array of strings of the values
 	 * of attribute att_name

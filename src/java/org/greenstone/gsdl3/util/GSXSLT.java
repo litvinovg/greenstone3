@@ -60,7 +60,7 @@ public class GSXSLT
 
 		Element main = main_xsl.getDocumentElement();
 		Node insertion_point = null;
-		Element last_import = GSXML.getLastElementByTagNameNS(main, "http://www.w3.org/1999/XSL/Transform", "import");
+		Element last_import = GSXML.getLastElementByTagNameNS(main, GSXML.XSL_NAMESPACE, "import");
 		if (last_import != null)
 		{
 			insertion_point = last_import.getNextSibling();
@@ -71,13 +71,13 @@ public class GSXSLT
 		}
 
 		// imports
-		NodeList children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "import");
+		NodeList children = extra_xsl.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "import");
 		for (int i = 0; i < children.getLength(); i++)
 		{
 			Element node = (Element) children.item(i);
 			// If the new xsl:import element is identical (in terms of href attr value) 
 			// to any in the merged document, don't copy it over
-			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "import", "href", node.getAttribute("href")) == null)
+			if (GSXML.getNamedElementNS(main, GSXML.XSL_NAMESPACE, "import", "href", node.getAttribute("href")) == null)
 			{
 				// Import statements should be the first children of an xsl:stylesheet element
 				// If firstchild is null, then this xsl:import element will be inserted at the "end"
@@ -89,14 +89,14 @@ public class GSXSLT
 		}
 
 		// do we have a new insertion point??
-		Element last_include = GSXML.getLastElementByTagNameNS(main, "http://www.w3.org/1999/XSL/Transform", "include");
+		Element last_include = GSXML.getLastElementByTagNameNS(main, GSXML.XSL_NAMESPACE, "include");
 		if (last_include != null)
 		{
 			insertion_point = last_include.getNextSibling();
 		}
 
 		// includes
-		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "include");
+		children = extra_xsl.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "include");
 		for (int i = 0; i < children.getLength(); i++)
 		{
 			Element node = (Element) children.item(i);
@@ -104,17 +104,17 @@ public class GSXSLT
 			// to any in the merged document, don't copy it over
 			// Although Node.appendChild() will first remove identical nodes before appending, we check
 			// only the href attribute to see if they're "identical" to any pre-existing <xsl:include>
-			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "include", "href", node.getAttribute("href")) == null)
+			if (GSXML.getNamedElementNS(main, GSXML.XSL_NAMESPACE, "include", "href", node.getAttribute("href")) == null)
 			{
 				//main.appendChild(main_xsl.importNode(node, true));
 				main.insertBefore(main_xsl.importNode(node, true), insertion_point);
 			}
 		} // for each include
 
-		if (main.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "output").getLength() == 0)
+		if (main.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "output").getLength() == 0)
 		{
 			// outputs
-			children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "output");
+			children = extra_xsl.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "output");
 			for (int i = 0; i < children.getLength(); i++)
 			{
 				Element node = (Element) children.item(i);
@@ -127,13 +127,13 @@ public class GSXSLT
 
 		// variables - only top level ones!!
 		// append to end of document
-		children = GSXML.getChildrenByTagNameNS(extra_xsl, "http://www.w3.org/1999/XSL/Transform", "variable");
+		children = GSXML.getChildrenByTagNameNS(extra_xsl, GSXML.XSL_NAMESPACE, "variable");
 		for (int i = 0; i < children.getLength(); i++)
 		{
 			Element node = (Element) children.item(i);
 			// If the new xsl:import element is identical (in terms of href attr value) 
 			// to any in the merged document, don't copy it over
-			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "variable", "name", node.getAttribute("name")) == null)
+			if (GSXML.getNamedElementNS(main, GSXML.XSL_NAMESPACE, "variable", "name", node.getAttribute("name")) == null)
 			{
 				main.appendChild(main_xsl.importNode(node, true));
 			}
@@ -141,13 +141,13 @@ public class GSXSLT
 
 		// params - only top level ones!!
 		// append to end of document
-		children = GSXML.getChildrenByTagNameNS(extra_xsl, "http://www.w3.org/1999/XSL/Transform", "param");
+		children = GSXML.getChildrenByTagNameNS(extra_xsl, GSXML.XSL_NAMESPACE, "param");
 		for (int i = 0; i < children.getLength(); i++)
 		{
 			Element node = (Element) children.item(i);
 			// If the new xsl:import element is identical (in terms of href attr value) 
 			// to any in the merged document, don't copy it over
-			if (GSXML.getNamedElementNS(main, "http://www.w3.org/1999/XSL/Transform", "param", "name", node.getAttribute("name")) == null)
+			if (GSXML.getNamedElementNS(main, GSXML.XSL_NAMESPACE, "param", "name", node.getAttribute("name")) == null)
 			{
 				main.appendChild(main_xsl.importNode(node, true));
 			}
@@ -155,7 +155,7 @@ public class GSXSLT
 
 		// templates
 		// append to end of document
-		children = extra_xsl.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "template");
+		children = extra_xsl.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
 		for (int i = 0; i < children.getLength(); i++)
 		{
 			Element node = (Element) children.item(i);
@@ -167,7 +167,7 @@ public class GSXSLT
 			if (overwrite)
 			{
 				// if we have a name attribute, remove any other similarly named template
-				GSXML.removeElementsWithAttributesNS(main, "http://www.w3.org/1999/XSL/Transform", "template", new String[] { "name", "match", "mode" }, new String[] { template_name, template_match, template_mode });
+				GSXML.removeElementsWithAttributesNS(main, GSXML.XSL_NAMESPACE, "template", new String[] { "name", "match", "mode" }, new String[] { template_name, template_match, template_mode });
 
 				// now add our good template in
 				main.appendChild(main_xsl.importNode(node, true));
@@ -178,7 +178,7 @@ public class GSXSLT
 				// In this case (eg from expanding imported stylesheets)
 				// there can't be any duplicate named templates, so just look for matches
 				// we already have the one with highest import precedence (from the top most level) so don't add any more in
-				if (GSXML.getElementsWithAttributesNS(main, "http://www.w3.org/1999/XSL/Transform", "template", new String[] { "name", "match", "mode" }, new String[] { template_name, template_match, template_mode }).getLength() == 0)
+				if (GSXML.getElementsWithAttributesNS(main, GSXML.XSL_NAMESPACE, "template", new String[] { "name", "match", "mode" }, new String[] { template_name, template_match, template_mode }).getLength() == 0)
 				{
 					main.appendChild(main_xsl.importNode(node, true));
 				}
@@ -203,7 +203,7 @@ public class GSXSLT
 			{
 				Element xslParent = (Element) current.getParentNode();
 
-				while (xslParent.getNamespaceURI() != "http://www.w3.org/1999/XSL/Transform" && !xslParent.getNodeName().startsWith("xsl:"))
+				while (xslParent.getNamespaceURI() != GSXML.XSL_NAMESPACE && !xslParent.getNodeName().startsWith("xsl:"))
 				{
 					xslParent = (Element) xslParent.getParentNode();
 				}
@@ -219,19 +219,19 @@ public class GSXSLT
 		}
 	}
 
-  public static void inlineImportAndIncludeFiles(Document doc, String pathExtra, String site, String collection, String interface_name, ArrayList<String> base_interfaces)
+	public static void inlineImportAndIncludeFiles(Document doc, String pathExtra, String site, String collection, String interface_name, ArrayList<String> base_interfaces)
 	{
-	  inlineImportAndIncludeFilesDebug(doc, pathExtra, false, null, site, collection, interface_name, base_interfaces);
+		inlineImportAndIncludeFilesDebug(doc, pathExtra, false, null, site, collection, interface_name, base_interfaces);
 	}
 
-  public static void inlineImportAndIncludeFilesDebug(Document doc, String pathExtra, boolean debug, String docFileName, String site, String collection, String interface_name, ArrayList<String> base_interfaces)
+	public static void inlineImportAndIncludeFilesDebug(Document doc, String pathExtra, boolean debug, String docFileName, String site, String collection, String interface_name, ArrayList<String> base_interfaces)
 	{
 		XMLConverter converter = new XMLConverter();
 
 		String path = (pathExtra == null) ? "" : pathExtra;
 
-		NodeList importList = doc.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "import");
-		NodeList includeList = doc.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "include");
+		NodeList importList = doc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "import");
+		NodeList includeList = doc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "include");
 
 		for (int i = 0; i < importList.getLength() + includeList.getLength(); i++)
 		{
@@ -242,8 +242,8 @@ public class GSXSLT
 
 			try
 			{
-			  //Document inlineDoc = converter.getDOM(new File(filePath), "UTF-8");
-			  Document inlineDoc = mergedXSLTDocumentCascade(path+href, site, collection, interface_name, base_interfaces, debug);
+				//Document inlineDoc = converter.getDOM(new File(filePath), "UTF-8");
+				Document inlineDoc = mergedXSLTDocumentCascade(path + href, site, collection, interface_name, base_interfaces, debug);
 				String newPath = path;
 				int lastSepIndex = href.lastIndexOf("/");
 				if (lastSepIndex != -1)
@@ -252,9 +252,9 @@ public class GSXSLT
 				}
 
 				//Do this recursively
-				inlineImportAndIncludeFilesDebug(inlineDoc, newPath, debug, "merged "+href/*filePath*/, site, collection, interface_name, base_interfaces);
+				inlineImportAndIncludeFilesDebug(inlineDoc, newPath, debug, "merged " + href/* filePath */, site, collection, interface_name, base_interfaces);
 
-				GSXSLT.mergeStylesheetsDebug(doc, inlineDoc.getDocumentElement(), false, debug, docFileName, /*filePath*/"merged "+href);
+				GSXSLT.mergeStylesheetsDebug(doc, inlineDoc.getDocumentElement(), false, debug, docFileName, /* filePath */"merged " + href);
 			}
 			catch (Exception ex)
 			{
@@ -275,10 +275,11 @@ public class GSXSLT
 		}
 	}
 
-		public static Document mergedXSLTDocumentCascade(String xslt_filename, String site, String collection, String this_interface, ArrayList<String> base_interfaces, boolean debug) {
-		  XMLConverter converter = new XMLConverter();
-		  // find the list of stylesheets with this name
-		  ArrayList<File> stylesheets = GSFile.getStylesheetFiles(GlobalProperties.getGSDL3Home(), site, collection, this_interface, base_interfaces, xslt_filename);
+	public static Document mergedXSLTDocumentCascade(String xslt_filename, String site, String collection, String this_interface, ArrayList<String> base_interfaces, boolean debug)
+	{
+		XMLConverter converter = new XMLConverter();
+		// find the list of stylesheets with this name
+		ArrayList<File> stylesheets = GSFile.getStylesheetFiles(GlobalProperties.getGSDL3Home(), site, collection, this_interface, base_interfaces, xslt_filename);
 		if (stylesheets.size() == 0)
 		{
 			logger.error(" Can't find stylesheet for " + xslt_filename);
@@ -313,11 +314,9 @@ public class GSXSLT
 		return finalDoc;
 	}
 
-
-
 	public static void modifyConfigFormatForDebug(Document doc, String fileName)
 	{
-		NodeList templateNodes = doc.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "template");
+		NodeList templateNodes = doc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
 		if (templateNodes.getLength() == 0)
 		{
 			templateNodes = doc.getElementsByTagName("xsl:template");
@@ -330,7 +329,7 @@ public class GSXSLT
 		debugElementString += "</span>";
 
 		XMLConverter converter = new XMLConverter();
-		Element debugElement = (Element) converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xslt:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:xslt=\"output.xsl\" xmlns:gsf=\"http://www.greenstone.org/greenstone3/schema/ConfigFormat\">" + debugElementString + "</xslt:stylesheet>").getDocumentElement().getFirstChild();
+		Element debugElement = (Element) converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xslt:stylesheet version=\"1.0\" xmlns:xsl=\"" + GSXML.XSL_NAMESPACE + "\" xmlns:xslt=\"output.xsl\" xmlns:gsf=\"" + GSXML.GSF_NAMESPACE + "\">" + debugElementString + "</xslt:stylesheet>").getDocumentElement().getFirstChild();
 
 		for (int i = 0; i < templateNodes.getLength(); i++)
 		{
@@ -418,8 +417,8 @@ public class GSXSLT
 
 	public static void mergeFormatElements(Element mainFormat, Element secondaryFormat, boolean overwrite)
 	{
-		NodeList xslChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.w3.org/1999/XSL/Transform", "variable");
-		NodeList gsfChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "variable");
+		NodeList xslChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, GSXML.XSL_NAMESPACE, "variable");
+		NodeList gsfChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, GSXML.GSF_NAMESPACE, "variable");
 		for (int i = 0; i < xslChildren.getLength() + gsfChildren.getLength(); i++)
 		{
 			Element node = (Element) ((i < xslChildren.getLength()) ? xslChildren.item(i) : gsfChildren.item(i - xslChildren.getLength()));
@@ -429,8 +428,8 @@ public class GSXSLT
 			}
 		}
 
-		xslChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.w3.org/1999/XSL/Transform", "param");
-		gsfChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "param");
+		xslChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, GSXML.XSL_NAMESPACE, "param");
+		gsfChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, GSXML.GSF_NAMESPACE, "param");
 		for (int i = 0; i < xslChildren.getLength() + gsfChildren.getLength(); i++)
 		{
 			Element node = (Element) ((i < xslChildren.getLength()) ? xslChildren.item(i) : gsfChildren.item(i - xslChildren.getLength()));
@@ -440,8 +439,8 @@ public class GSXSLT
 			}
 		}
 
-		xslChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.w3.org/1999/XSL/Transform", "template");
-		gsfChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "template");
+		xslChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, GSXML.XSL_NAMESPACE, "template");
+		gsfChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, GSXML.GSF_NAMESPACE, "template");
 		for (int i = 0; i < xslChildren.getLength() + gsfChildren.getLength(); i++)
 		{
 			Element node = (Element) ((i < xslChildren.getLength()) ? xslChildren.item(i) : gsfChildren.item(i - xslChildren.getLength()));
@@ -456,8 +455,8 @@ public class GSXSLT
 			if (overwrite)
 			{
 				// if we have a name attribute, remove any other similarly named template
-				GSXML.removeElementsWithAttributesNS(mainFormat, "http://www.w3.org/1999/XSL/Transform", "template", attributeNames, attributeValues);
-				GSXML.removeElementsWithAttributesNS(mainFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "template", attributeNames, attributeValues);
+				GSXML.removeElementsWithAttributesNS(mainFormat, GSXML.XSL_NAMESPACE, "template", attributeNames, attributeValues);
+				GSXML.removeElementsWithAttributesNS(mainFormat, GSXML.GSF_NAMESPACE, "template", attributeNames, attributeValues);
 
 				// now add our good template in
 				mainFormat.appendChild(node);
@@ -475,11 +474,11 @@ public class GSXSLT
 			}
 		}
 
-		gsfChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "option");
+		gsfChildren = GSXML.getChildrenByTagNameNS(secondaryFormat, GSXML.GSF_NAMESPACE, "option");
 		for (int i = 0; i < gsfChildren.getLength(); i++)
 		{
 			Element node = (Element) gsfChildren.item(i);
-			if (GSXML.getNamedElementNS(mainFormat, "http://www.greenstone.org/greenstone3/schema/ConfigFormat", "option", "name", node.getAttribute("name")) == null)
+			if (GSXML.getNamedElementNS(mainFormat, GSXML.GSF_NAMESPACE, "option", "name", node.getAttribute("name")) == null)
 			{
 				mainFormat.appendChild(node);
 			}

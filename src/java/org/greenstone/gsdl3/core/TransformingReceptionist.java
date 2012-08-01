@@ -197,10 +197,10 @@ public class TransformingReceptionist extends Receptionist
 		for (File currentFile : xslFiles)
 		{
 			Document currentDoc = this.converter.getDOM(currentFile);
-			NodeList metadataElems = currentDoc.getElementsByTagNameNS("http://www.greenstone.org/greenstone3/schema/ConfigFormat", "metadata"); //gsf:metadata
-			NodeList imageElems = currentDoc.getElementsByTagNameNS("http://www.greenstone.org/greenstone3/schema/ConfigFormat", "image"); //gsf:image
-			NodeList includeElems = currentDoc.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "include");
-			NodeList importElems = currentDoc.getElementsByTagNameNS("http://www.w3.org/1999/XSL/Transform", "import");
+			NodeList metadataElems = currentDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata"); //gsf:metadata
+			NodeList imageElems = currentDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "image"); //gsf:image
+			NodeList includeElems = currentDoc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "include");
+			NodeList importElems = currentDoc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "import");
 
 			ArrayList<String> names = new ArrayList<String>();
 			for (int i = 0; i < metadataElems.getLength(); i++)
@@ -890,7 +890,7 @@ public class TransformingReceptionist extends Receptionist
 		{
 			try
 			{
-				Document inlineTemplateDoc = this.converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:java=\"http://xml.apache.org/xslt/java\" xmlns:util=\"xalan://org.greenstone.gsdl3.util.XSLTUtil\" xmlns:gsf=\"http://www.greenstone.org/greenstone3/schema/ConfigFormat\">" + inlineTemplate + "</xsl:stylesheet>", "UTF-8");
+				Document inlineTemplateDoc = this.converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"" + GSXML.XSL_NAMESPACE + "\" xmlns:java=\"" + GSXML.JAVA_NAMESPACE + "\" xmlns:util=\"" + GSXML.UTIL_NAMESPACE + "\" xmlns:gsf=\"" + GSXML.GSF_NAMESPACE + "\">" + inlineTemplate + "</xsl:stylesheet>", "UTF-8");
 
 				if (_debug)
 				{

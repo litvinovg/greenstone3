@@ -18,22 +18,17 @@
  */
 package org.greenstone.gsdl3.util;
 
-import java.io.File;
-//import org.apache.soap.encoding.soapenc.Base64;
-import org.apache.axis.encoding.Base64;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
-import java.lang.ClassLoader; // to find files on the class path
-import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Collection;
 
-import org.apache.log4j.*;
+import org.apache.axis.encoding.Base64;
+import org.apache.log4j.Logger;
 import org.greenstone.util.GlobalProperties;
 
 /**

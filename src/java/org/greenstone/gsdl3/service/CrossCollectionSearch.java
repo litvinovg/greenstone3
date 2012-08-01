@@ -85,7 +85,7 @@ public class CrossCollectionSearch extends ServiceRack
 		else
 		{
 			// add in a default format statement
-			String format_string = "<format xmlns:gsf='http://www.greenstone.org/greenstone3/schema/ConfigFormat' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><gsf:template match='documentNode'><td><a><xsl:attribute name='href'>?a=d&amp;c=<xsl:value-of select='@collection'/>&amp;d=<xsl:value-of select='@nodeID'/><xsl:if test=\"@nodeType='leaf'\">&amp;sib=1</xsl:if>&amp;dt=<xsl:value-of select='@docType'/>&amp;p.a=q&amp;p.s=" + TEXT_QUERY_SERVICE + "&amp;p.c=";
+			String format_string = "<format xmlns:gsf='" + GSXML.GSF_NAMESPACE + "' xmlns:xsl='" + GSXML.XSL_NAMESPACE + "'><gsf:template match='documentNode'><td><a><xsl:attribute name='href'>?a=d&amp;c=<xsl:value-of select='@collection'/>&amp;d=<xsl:value-of select='@nodeID'/><xsl:if test=\"@nodeType='leaf'\">&amp;sib=1</xsl:if>&amp;dt=<xsl:value-of select='@docType'/>&amp;p.a=q&amp;p.s=" + TEXT_QUERY_SERVICE + "&amp;p.c=";
 			if (this.cluster_name != null)
 			{
 				format_string += this.cluster_name;
