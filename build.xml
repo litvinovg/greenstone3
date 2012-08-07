@@ -1701,10 +1701,12 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <target name="distclean-packages" depends="init,distclean-javagdbm" description="Distclean only the packages"/>
 
   <target name="distclean-javagdbm" depends="init">
+    <if><bool><available file="${javagdbm.home}/Makefile"/></bool>
     <exec executable="make" os="${os.unix}"
       dir="${javagdbm.home}" failonerror="true">
       <arg value="distclean"/>
     </exec>
+    </if>
   </target>
   
   <target name="compile-packages" description="Compile only the source packages">
@@ -1878,9 +1880,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
   <target name="distclean-common-src" depends="init">
     <!-- unix:  -->
+    <if><bool><available file="${common.src.home}/Makefile"/></bool>
     <exec executable="make" os="${os.unix}" dir="${common.src.home}" failonerror="true">
       <arg value="distclean"/>
     </exec>
+    </if>
     <!-- windows: distclean = clean + remove configure products (remove makefiles). But on Windows there is no removing makefiles, so we just call clean -->    
     <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
       <arg value="/f"/>
@@ -2153,9 +2157,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
  
   <target name="clean-build-src" depends="init" if="collection.building.enabled">
     <!-- unix:  -->
+    <if><bool><available file="${build.src.home}/Makefile"/></bool>
     <exec executable="make" os="${os.unix}" dir="${build.src.home}" failonerror="true">
       <arg value="clean"/>
     </exec>
+    </if>
     <!-- windows: -->    
     <exec executable="nmake" dir="${build.src.home}" os="${os.windows}" failonerror="true">
       <arg value="/f"/>
@@ -2168,9 +2174,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   
   <target name="distclean-build-src" depends="init,clean-build-src" if="collection.building.enabled">
     <!-- unix:  -->
+    <if><bool><available file="${build.src.home}/Makefile"/></bool>
     <exec executable="make" os="${os.unix}" dir="${build.src.home}" failonerror="true">
       <arg value="distclean"/>
     </exec>
+    </if>
     <!-- windows: distclean = clean + remove configure products (remove makefiles). But on Windows there is no removing makefiles, so we just call clean -->    
     <exec executable="nmake" dir="${build.src.home}" os="${os.windows}" failonerror="true">
       <arg value="/f"/>
