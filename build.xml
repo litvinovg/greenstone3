@@ -1692,10 +1692,12 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <target name="clean-packages" depends="init,clean-javagdbm" description="Clean only the packages"/>
 
   <target name="clean-javagdbm" depends="init">
+    <if><bool><available file="${javagdbm.home}/Makefile"/></bool>
     <exec executable="make" os="${os.unix}"
       dir="${javagdbm.home}" failonerror="true">
       <arg value="clean"/>
     </exec>
+    </if>
   </target>
   
   <target name="distclean-packages" depends="init,distclean-javagdbm" description="Distclean only the packages"/>
@@ -1867,9 +1869,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 
   <target name="clean-common-src" depends="init">
     <!-- unix:  -->
+    <if><bool><available file="${common.src.home}/Makefile"/></bool>
     <exec executable="make" os="${os.unix}" dir="${common.src.home}" failonerror="true">
       <arg value="clean"/>
     </exec>
+    </if>
     <!-- windows: -->    
     <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
       <arg value="/f"/>
