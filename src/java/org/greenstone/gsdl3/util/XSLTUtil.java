@@ -120,30 +120,6 @@ public class XSLTUtil
 		return true;
 	}
 
-	/* some preprocessing functions */
-	public static String toLower(String orig)
-	{
-		return orig.toLowerCase();
-	}
-
-	public static String toUpper(String orig)
-	{
-		return orig.toUpperCase();
-	}
-
-	public static byte[] toUTF8(String orig)
-	{
-		try
-		{
-			byte[] utf8 = orig.getBytes("UTF-8");
-			return utf8;
-		}
-		catch (Exception e)
-		{
-			logger.error("unsupported encoding");
-			return orig.getBytes();
-		}
-	}
 
 	public static String replace(String orig, String match, String replacement)
 	{
@@ -324,6 +300,32 @@ public class XSLTUtil
 		return false;
 	}
 
+  // formatting /preprocessing functions
+  // some require a language, so we'll have a language param for all
+  public static String toLower(String orig, String lang)
+	{
+		return orig.toLowerCase();
+	}
+
+	public static String toUpper(String orig, String lang)
+	{
+		return orig.toUpperCase();
+	}
+
+	public static byte[] toUTF8(String orig, String lang)
+	{
+		try
+		{
+			byte[] utf8 = orig.getBytes("UTF-8");
+			return utf8;
+		}
+		catch (Exception e)
+		{
+			logger.error("unsupported encoding");
+			return orig.getBytes();
+		}
+	}
+
 	public static String formatDate(String date, String lang)
 	{
 
@@ -363,7 +365,7 @@ public class XSLTUtil
 		return original;
 	}
 
-	public static String formatBigNumber(String num)
+	public static String formatBigNumber(String num, String lang)
 	{
 
 		String num_str = num;
