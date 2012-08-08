@@ -169,6 +169,7 @@ public class GS2Browse extends AbstractBrowse
 	 * returns all available metadata, otherwise just returns requested metadata
 	 */
 	// assumes only one value per metadata
+  // does no macro resolving. assumes classifier metadata will not have macros.
 	protected Element getMetadataList(String node_id, boolean all_metadata, ArrayList<String> metadata_names)
 	{
 		String lang = "en";
@@ -187,7 +188,7 @@ public class GS2Browse extends AbstractBrowse
 			{
 				String key = it.next();
 				String value = info.getInfo(key);
-				GSXML.addMetadata(this.doc, metadata_list, key, this.macro_resolver.resolve(value, lang, GS2MacroResolver.SCOPE_META, node_id));
+				GSXML.addMetadata(this.doc, metadata_list, key, value);
 			}
 
 		}
