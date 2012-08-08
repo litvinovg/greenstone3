@@ -693,7 +693,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		}
 
 		//Add custom HTTP headers if requested
-		String httpHeadersParam = request.getParameter(GSParams.HTTPHEADERFIELDS);
+		String httpHeadersParam = request.getParameter(GSParams.HTTP_HEADER_FIELDS);
 		if (httpHeadersParam != null && httpHeadersParam.length() > 0)
 		{
 			Gson gson = new Gson();

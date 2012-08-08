@@ -46,7 +46,8 @@ public class GSParams
 	public static final String EXTERNAL_LINK_TYPE = "el"; // for an external link, go direct to the page or frame it in the collection
 	public static final String PROCESS_ID = "pid"; // if a request wasn't completed, this identifies the request - used when asking for a status update
 
-	public static final String HTTPHEADERFIELDS = "hhf";
+	public static final String HTTP_HEADER_FIELDS = "hhf";
+	public static final String QUICK_SEARCH = "qs";
 
 	// internal configure args
 	public static final String SYSTEM_SUBSET = "ss";
@@ -95,6 +96,7 @@ public class GSParams
 		addParameter(LANGUAGE, true);
 		addParameter(DOCUMENT, true);
 		addParameter(DOCUMENT_TYPE, false);
+		addParameter(QUICK_SEARCH, false);
 		addParameter(START_PAGE, false);
 		addParameter(S_START_PAGE, false);
 		// should the following two just be in doc action??

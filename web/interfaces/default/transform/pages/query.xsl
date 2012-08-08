@@ -20,7 +20,9 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page">
-		<xsl:call-template name="queryPage"/>
+		<xsl:if test="not(/page/pageRequest/paramList/param[@name = 'qs']) or /page/pageRequest/paramList/param[@name = 'qs']/@value = ''">
+			<xsl:call-template name="queryPage"/>
+		</xsl:if>
 		<xsl:call-template name="resultsPage"/>
 	</xsl:template>
 	
@@ -308,14 +310,14 @@
 			<!-- Previous button -->
 			<td id="prevArrowTD">
 				<xsl:if test="$currentPage != 1">
-					<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/@subaction}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage - 1}">
+					<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/@subaction}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage - 1}&amp;qs={/page/pageRequest/paramList/param[@name='qs']/@value}">
 						<img src="interfaces/default/images/previous.png"/>
 					</a>
 				</xsl:if>
 			</td>
 			<td id="prevTD">
 				<xsl:if test="$currentPage != 1">
-					<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/@subaction}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage - 1}">Previous</a>
+					<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/@subaction}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage - 1}&amp;qs={/page/pageRequest/paramList/param[@name='qs']/@value}">Previous</a>
 				</xsl:if>
 			</td>
 			
@@ -372,12 +374,12 @@
 			<!-- Next button -->
 			<td id="nextTD">
 				<xsl:if test="($currentPage * $docsPerPage + 1) &lt; $docMax">
-					<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/paramList/param[@name = 'sa']/@value}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage + 1}">Next</a>
+					<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/paramList/param[@name = 'sa']/@value}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage + 1}&amp;qs={/page/pageRequest/paramList/param[@name='qs']/@value}">Next</a>
 				</xsl:if>
 			</td>
 			<td id="nextArrowTD">
 				<xsl:if test="($currentPage * $docsPerPage + 1) &lt; $docMax">
-					<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/paramList/param[@name = 'sa']/@value}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage + 1}">
+					<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/paramList/param[@name = 'sa']/@value}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage + 1}&amp;qs={/page/pageRequest/paramList/param[@name='qs']/@value}">
 						<img src="interfaces/default/images/next.png"/>
 					</a>
 				</xsl:if>
