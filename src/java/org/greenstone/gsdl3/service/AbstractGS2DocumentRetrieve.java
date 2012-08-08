@@ -172,7 +172,6 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 	 * element: <metadataList><metadata
 	 * name="xxx">value</metadata></metadataList>
 	 */
-	// assumes only one value per metadata
 	protected Element getMetadataList(String node_id, boolean all_metadata, ArrayList<String> metadata_names) throws GSException
 	{
 		Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
@@ -182,7 +181,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 			return null;
 		}
 		String lang = "en"; // why do we need this??
-		if (all_metadata)
+		if (all_metadata) // this will get all metadata for current node
 		{
 			// return everything out of the database
 			Set<String> keys = info.getKeys();
@@ -199,18 +198,90 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 			}
 
 		}
-		else
-		{
-			for (int i = 0; i < metadata_names.size(); i++)
+		// now we go through the list of names. If we have specified 
+		// all_metadata, then here we only get the ones like 
+		// parent_Title, that are not the current node.
+		for (int i = 0; i < metadata_names.size(); i++)
+		  {
+		    String meta_name = metadata_names.get(i);
+		    
+		    if (!all_metadata || meta_name.indexOf(GSConstants.META_RELATION_SEP)!=-1) {
+		    Vector <String> values = getMetadata(node_id, info, meta_name, lang);
+		    if (values != null) {
+		      for (int j = 0; j < values.size(); j++)
 			{
-				String meta_name = metadata_names.get(i);
-				String value = getMetadata(node_id, info, meta_name, lang);
-				GSXML.addMetadata(this.doc, metadata_list, meta_name, value);
+			  // some of these may be parent/ancestor. does resolve need a different id???
+			  GSXML.addMetadata(this.doc, metadata_list, meta_name,  this.macro_resolver.resolve(values.elementAt(j), lang, MacroResolver.SCOPE_META, node_id));
 			}
-		}
+		    }
+		    }
+		  }
+		
 		return metadata_list;
 	}
 
+  protected Vector<String> getMetadata(String node_id, DBInfo info, String metadata, String lang) {
+
+    DBInfo current_info = info;
+    
+    int index = metadata.indexOf(GSConstants.META_RELATION_SEP);
+    if (index == -1) {
+      // metadata is for this node
+      Vector<String> values = info.getMultiInfo(metadata);
+      return values;
+    }
+    // we need to get metadata for one or more different nodes
+    String relation = metadata.substring(0, index);
+    String relation_id="";
+    metadata = metadata.substring(index + 1);
+    if (relation.equals("parent") || relation.equals("ancestors")) {
+      relation_id = OID.getParent(node_id);
+      if (relation_id.equals(node_id)) {
+	return null;
+      }
+    } else if (relation.equals("root")) {
+      relation_id = OID.getTop(node_id);
+    }
+
+    DBInfo relation_info;
+    if (relation_id.equals(node_id)) {
+      relation_info = info;
+    } else {
+      relation_info = this.coll_db.getInfo(relation_id);
+    }
+    if (relation_info == null)
+      {
+	return null;
+      }
+
+    Vector<String> values = relation_info.getMultiInfo(metadata);
+    // do resolving
+    if (!relation.equals("ancestors")){
+      return values;
+    }
+
+    // ancestors: go up the chain
+
+    String current_id = relation_id;
+    relation_id = OID.getParent(current_id);
+    while (!relation_id.equals(current_id))
+      {
+	relation_info = this.coll_db.getInfo(relation_id);
+	if (relation_info == null)
+	  return values;
+	
+	Vector<String> more_values = relation_info.getMultiInfo(metadata);
+	if (more_values != null)
+	  {
+	    values.addAll(0, more_values);
+	  }
+	
+			
+	current_id = relation_id;
+	relation_id = OID.getParent(current_id);
+      }
+    return values; // for now
+  }
 
 	protected int getNumChildren(String node_id)
 	{
@@ -224,213 +295,6 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 	 */
 	abstract protected Element getNodeContent(String doc_id, String lang) throws GSException;
 
-	protected String getMetadata(String node_id, DBInfo info, String metadata, String lang)
-	{
-		String pos = "";
-		String relation = "";
-		String separator = ", ";
-		int index = metadata.indexOf(GSConstants.META_RELATION_SEP);
-		if (index == -1)
-		{
-			Vector<String> values = info.getMultiInfo(metadata);
-			if (values != null)
-			{
-				// just a plain meta entry eg dc.Title
-				StringBuffer result = new StringBuffer();
-				boolean first = true;
-				for (int i = 0; i < values.size(); i++)
-				{
-					if (first)
-					{
-						first = false;
-					}
-					else
-					{
-						result.append(separator);
-					}
-					result.append(this.macro_resolver.resolve(values.elementAt(i), lang, MacroResolver.SCOPE_META, node_id));
-				}
-				return result.toString();
-			}
-			else
-			{
-				String result = info.getInfo(metadata);
-				return this.macro_resolver.resolve(result, lang, MacroResolver.SCOPE_META, node_id);
-			}
-		}
-
-		String temp = metadata.substring(0, index);		
-		metadata = metadata.substring(index + 1);
-		// check for pos on the front, indicating which piece of meta the user wants
-		// pos can be "first", "last" or the position value of the requested piece of metadata 
-		if (temp.startsWith(GSConstants.META_POS) || temp.equals("all"))
-		{
-		    if (temp.startsWith(GSConstants.META_POS)) {
-			temp = temp.substring(GSConstants.META_POS.length());
-			pos = temp;
-		    }
-			
-			index = metadata.indexOf(GSConstants.META_RELATION_SEP);
-			if (index == -1)
-			{
-				temp = "";
-			}
-			else
-			{
-				temp = metadata.substring(0, index);
-				metadata = metadata.substring(index + 1);
-			}
-		}
-
-		// now check for relational info
-		if (temp.equals("parent") || temp.equals("root") || temp.equals("ancestors")
-		     || temp.equals("siblings") || temp.equals("children") || temp.equals("descendants"))
-		{ // "current" "siblings" "children" "descendants"
-			// gets all siblings by default
-			relation = temp;
-			index = metadata.indexOf(GSConstants.META_RELATION_SEP);
-			if (index == -1)
-			{
-				temp = "";
-			}
-			else
-			{
-				temp = metadata.substring(0, index);
-				metadata = metadata.substring(index + 1);
-			}
-		}
-
-		// now look for separator info
-		if (temp.startsWith(GSConstants.META_SEPARATOR_SEP) && temp.endsWith(GSConstants.META_SEPARATOR_SEP))
-		{
-			separator = temp.substring(1, temp.length() - 1);
-
-		}
-
-		String relation_id = node_id;
-		if (relation.equals("parent") || relation.equals("ancestors"))
-		{
-			relation_id = OID.getParent(node_id);
-			// parent or ancestor does not include self
-			if (relation_id.equals(node_id))
-			{
-				return "";
-			}
-		}
-		else if (relation.equals("root"))
-		{
-			relation_id = OID.getTop(node_id);
-		}
-
-		// now we either have a single node, or we have ancestors	
-		DBInfo relation_info;
-		if (relation_id.equals(node_id))
-		{
-			relation_info = info;
-		}
-		else
-		{
-			relation_info = this.coll_db.getInfo(relation_id);
-		}
-		if (relation_info == null)
-		{
-			return "";
-		}
-
-		StringBuffer result = new StringBuffer();
-		
-		Vector<String> values = relation_info.getMultiInfo(metadata);
-
-		if (!pos.equals("")) // if a particular position was specified, so not multiple values for the metadata
-		{
-			String meta = "";
-			if (values != null) {
-				if(pos.equals(GSConstants.META_FIRST)) {				
-					meta = values.firstElement();
-				} else if(pos.equals(GSConstants.META_LAST)) {
-					meta = values.lastElement();
-				} else {
-					int position = Integer.parseInt(pos);
-					if(position < values.size()) {			
-						meta = values.elementAt(position);
-					}
-				}				
-			} // else ""
-						
-			result.append(this.macro_resolver.resolve(meta, lang, MacroResolver.SCOPE_META, relation_id));			
-		}
-		else
-		{
-			if (values != null)
-			{
-				boolean first = true;
-				for (int i = 0; i < values.size(); i++)
-				{
-					if (first)
-					{
-						first = false;
-					}
-					else
-					{
-						result.append(separator);
-					}
-					result.append(this.macro_resolver.resolve(values.elementAt(i), lang, MacroResolver.SCOPE_META, relation_id));
-				}
-			}
-			logger.info(result);
-		}
-		// if not ancestors, then this is all we do
-		if (!relation.equals("ancestors"))
-		{
-			return result.toString();
-		}
-
-		// now do the ancestors 
-		String current_id = relation_id;
-		relation_id = OID.getParent(current_id);
-		while (!relation_id.equals(current_id))
-		{
-			relation_info = this.coll_db.getInfo(relation_id);
-			if (relation_info == null)
-				return result.toString();
-			
-			values = relation_info.getMultiInfo(metadata);
-			if (!pos.equals("")) // if a particular position was specified, so not multiple values for the metadata
-			{
-				String meta = "";
-				if (values != null) {
-					if(pos.equals(GSConstants.META_FIRST)) {
-						meta = values.firstElement();
-					} else if(pos.equals(GSConstants.META_LAST)) {
-						meta = values.lastElement();
-					} else {
-						int position = Integer.parseInt(pos);
-						if(position < values.size()) {			
-							meta = values.elementAt(position);
-						}
-					}				
-				} // else ""
-				
-				result.insert(0, separator);
-				result.insert(0, this.macro_resolver.resolve(meta, lang, MacroResolver.SCOPE_META, relation_id));							
-			}
-			else
-			{
-				if (values != null)
-				{
-					for (int i = values.size() - 1; i >= 0; i--)
-					{
-						result.insert(0, separator);
-						result.insert(0, this.macro_resolver.resolve(values.elementAt(i), lang, MacroResolver.SCOPE_META, relation_id));
-					}
-				}
-
-			}
-			current_id = relation_id;
-			relation_id = OID.getParent(current_id);
-		}
-		return result.toString();
-	}
 
 	/**
 	 * needs to get info from collection database - if the calling code gets it
