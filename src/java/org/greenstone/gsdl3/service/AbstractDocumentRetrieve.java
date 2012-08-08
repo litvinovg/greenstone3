@@ -221,7 +221,6 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 				if (metadata.equals("all"))
 				{
 					all_metadata = true;
-					break;
 				}
 				metadata_names_list.add(metadata);
 			}
