@@ -161,8 +161,8 @@
 		</div>
 		
 		<!-- Although these aren't visible, they are necessary because it forces Greenstone to include this metadata in the page xml -->
-		<gsf:metadata name="Latitude"/>
-		<gsf:metadata name="Longitude"/>
+		<gsf:metadata name="Latitude" hidden="true"/>
+		<gsf:metadata name="Longitude" hidden="true"/>
 	</xsl:template>
 	
 	<xsl:template name="mapFeaturesMap">
