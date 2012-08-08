@@ -96,45 +96,24 @@ abstract public class Action
 		addLinkMetadataNames(format, meta_names);
 	}
 
-	protected void extractMetadataNames(Element format, HashSet<String> meta_names)
+  // should change to metadataList?? and use attributes for select rather than
+  // prepending parent_ etc
+  protected void extractMetadataNames(Element format, HashSet<String> meta_names)
 	{
-		NodeList metadata_nodes = format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata");
-		for (int i = 0; i < metadata_nodes.getLength(); i++)
-		{
-			Element elem = (Element) metadata_nodes.item(i);
-			StringBuffer metadata = new StringBuffer();
-			String pos = elem.getAttribute("pos");
-			String name = elem.getAttribute("name");
-			String select = elem.getAttribute("select");
-			String sep = elem.getAttribute("separator");
 
-			if (pos.equals("offset"))
-			{ // offset when requested to use mdoffset
-				metadata.append("offset");
-				metadata.append(GSConstants.META_RELATION_SEP);
-			}
-			else if (!pos.equals(""))
-			{
-				metadata.append("pos" + pos); // first, last or indexing number
-				metadata.append(GSConstants.META_RELATION_SEP);
-			}
+	  NodeList metadata_nodes = format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata");
+	  for (int i = 0; i < metadata_nodes.getLength(); i++)
+	    {
+	      Element elem = (Element) metadata_nodes.item(i);
+	      String name = elem.getAttribute("name");
+	      String select = elem.getAttribute("select");
 
-			if (!select.equals(""))
-			{
-				metadata.append(select);
-				metadata.append(GSConstants.META_RELATION_SEP);
-			}
-			if (!sep.equals(""))
-			{
-				metadata.append(GSConstants.META_SEPARATOR_SEP);
-				metadata.append(sep);
-				metadata.append(GSConstants.META_SEPARATOR_SEP);
-				metadata.append(GSConstants.META_RELATION_SEP);
-			}
-
-			metadata.append(name);
-			meta_names.add(metadata.toString());
-		}
+	      if (!select.equals("")) {
+		name = select+GSConstants.META_RELATION_SEP+name;
+	      }
+	      meta_names.add(name);
+	    }
+	      
 	}
 
 	protected void addLinkMetadataNames(Element format, HashSet<String> meta_names)
