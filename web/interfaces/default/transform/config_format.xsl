@@ -219,9 +219,14 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
       <!-- set hidden=true on a gsf:metadata so that it gets retrieved from the server but not displayed -->
       <xsl:variable name="meta_name"><xsl:call-template name="getMetadataName"/></xsl:variable>
       <xsl:variable name="separator"><xsl:choose><xsl:when test="@separator"><xsl:value-of disable-output-escaping='yes' select="@separator"/></xsl:when><xsl:otherwise><xsl:text>, </xsl:text></xsl:otherwise></xsl:choose></xsl:variable>
+      <xsl:variable name="postest">
+	<xsl:choose><xsl:when test="@pos = 'first'">position()=1</xsl:when><xsl:when test="@pos = 'last'">position() = last()</xsl:when><xsl:when test="@pos">position() = <xsl:value-of select="@pos"/></xsl:when><xsl:otherwise>true()</xsl:otherwise></xsl:choose>
+      </xsl:variable>
+      <xsl:variable name="multiple"><xsl:choose><xsl:when test="@pos">false()</xsl:when><xsl:otherwise>true()</xsl:otherwise></xsl:choose></xsl:variable>
       <xslt:for-each><xsl:attribute name="select">
 	<xsl:if test="@type='collection'">/page/pageResponse/collection/</xsl:if>metadataList/metadata[@name='<xsl:value-of select="$meta_name"/>'<xsl:if test="@lang"><xsl:text> and @lang=</xsl:text><xsl:value-of select="@lang"/></xsl:if><xsl:text>]</xsl:text></xsl:attribute>
-	  <xslt:if test="position()>1"><xsl:value-of select="$separator"/></xslt:if>
+	  <xslt:if test="{$postest}">
+	  <xslt:if test="{$multiple} and position()>1"><xsl:value-of select="$separator"/></xslt:if>
 	  <xsl:choose>
 	    <xsl:when test="@format">
 	    <xslt:value-of disable-output-escaping='yes' select="util:{@format}(., /page/@lang )"/>
@@ -230,6 +235,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 	      <xslt:value-of disable-output-escaping='yes' select="."/>
 </xsl:otherwise>
 	  </xsl:choose>
+	</xslt:if>
 	</xslt:for-each>
   </xsl:if>
   </xsl:template>
@@ -242,100 +248,6 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
     <xsl:value-of select="@name"/>
   </xsl:template>
 
-	<xsl:template match="gsf:metadata-last">
-		<xslt:variable name="langAtt"><xsl:value-of select="@lang"/></xslt:variable>
-		<xsl:if test="not(@hidden = 'true')">
-			<xslt:value-of disable-output-escaping="yes">
-				<xsl:attribute name="select">
-					<xsl:if test="@format">
-						<xsl:text>java:org.greenstone.gsdl3.util.XSLTUtil.</xsl:text>
-						<xsl:value-of select="@format"/>
-						<xsl:text>(</xsl:text>
-					</xsl:if>
-					<xsl:choose>
-						<xsl:when test="@type = 'collection'">
-							<xsl:text>/page/pageResponse/collection/metadataList/metadata[@name='</xsl:text>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:text>(.//metadataList)[last()]/metadata[@name='</xsl:text>
-						</xsl:otherwise>
-					</xsl:choose>
-					<xsl:apply-templates select="." mode="get-metadata-name"/>
-					<xsl:text>'</xsl:text>
-					<xsl:if test="@lang">
-						<xsl:text> and @lang=$langAtt</xsl:text>
-					</xsl:if>
-					<xsl:text>]</xsl:text>
-					<xsl:if test="@format">
-						<xsl:text>, /page/@lang )</xsl:text>
-					</xsl:if>
-				</xsl:attribute>
-			</xslt:value-of>
-		</xsl:if>
-	</xsl:template>
-
-	<xsl:template match="gsf:metadata" mode="get-metadata-name">
-		<xsl:if test="@pos">
-			<xsl:text>pos</xsl:text>
-			<xsl:value-of select='@pos'/>
-			<xsl:text>_</xsl:text>
-		</xsl:if>
-		<xsl:if test='@select'>
-			<xsl:value-of select='@select'/>
-			<xsl:text>_</xsl:text>
-		</xsl:if>
-		<xsl:if test="@separator">
-		  	<xsl:text>*</xsl:text>
-			<xsl:value-of select='@separator'/>
-			<xsl:text>*_</xsl:text>
-		</xsl:if>
-		<xsl:value-of select="@name"/>
-	</xsl:template>
-
-	<xsl:template match="gsf:metadata-old" mode="get-metadata-name">
-		<xsl:if test="@multiple='true'">
-			<xsl:text>all_</xsl:text>
-		</xsl:if>
-		<xsl:if test='@select'>
-			<xsl:value-of select='@select'/>
-			<xsl:text>_</xsl:text>
-		</xsl:if>
-		<xsl:if test="@separator">
-		  	<xsl:text>*</xsl:text>
-			<xsl:value-of select='@separator'/>
-			<xsl:text>*_</xsl:text>
-		</xsl:if>
-		<xsl:value-of select="@name"/>
-	</xsl:template>
-  
-	<xsl:template match="gsf:metadata-older">
-		<xslt:value-of disable-output-escaping="yes">
-			<xsl:attribute name="select">
-				<xsl:text>(.//metadataList)[last()]/metadata[@name="</xsl:text>
-				<xsl:choose>
-					<xsl:when test="@select='parent'">
-						<xsl:text>parent_</xsl:text>
-					</xsl:when>
-					<xsl:when test="@select='root'">
-						<xsl:text>root_</xsl:text>
-					</xsl:when>
-					<xsl:when test="@select='ancestors'">
-						<xsl:text>ancestors'</xsl:text>
-						<xsl:value-of select='@separator'/>
-						<xsl:text>'_</xsl:text>
-					</xsl:when>
-					<xsl:when test="@select='siblings'">
-						<xsl:text>siblings_'</xsl:text>
-						<xsl:value-of select='@separator'/>
-						<xsl:text>'_</xsl:text>
-					</xsl:when>
-				</xsl:choose>
-				<xsl:value-of select="@name"/>
-				<xsl:text>"]</xsl:text>
-			</xsl:attribute>
-		</xslt:value-of>
-	</xsl:template>
-  
 	<xsl:template match="gsf:text">
 		<xslt:call-template name="documentNodeText"/>
 	</xsl:template>
@@ -344,7 +256,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 		<xslt:choose>
 			<xsl:for-each select="gsf:metadata">
 				<xslt:when>
-					<xsl:attribute name="test">(.//metadataList)[last()]/metadata[@name='<xsl:apply-templates select="." mode="get-metadata-name"/>']</xsl:attribute>
+					<xsl:attribute name="test">(.//metadataList)[last()]/metadata[@name='<xsl:call-template name="getMetadataName"/>']</xsl:attribute>
 					<xsl:apply-templates select="."/>
 				</xslt:when>
 			</xsl:for-each>
@@ -355,7 +267,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 	</xsl:template>
   
 	<xsl:template match="gsf:switch">
-		<xsl:variable name="meta-name"><xsl:apply-templates select="gsf:metadata" mode="get-metadata-name"/></xsl:variable>
+		<xsl:variable name="meta-name"><xsl:for-each select="gsf:metadata"><xsl:call-template name="getMetadataName"/></xsl:for-each></xsl:variable>
 		<xslt:variable name="meta"><xsl:choose><xsl:when test="@preprocess"><xslt:value-of select="util:{@preprocess}((.//metadataList)[last()]/metadata[@name='{$meta-name}'], /page/@lang )"/></xsl:when><xsl:otherwise><xslt:value-of select="(.//metadataList)[last()]/metadata[@name='{$meta-name}']"/></xsl:otherwise></xsl:choose></xslt:variable>
 		<xslt:choose>
 			<xsl:for-each select="gsf:when">
