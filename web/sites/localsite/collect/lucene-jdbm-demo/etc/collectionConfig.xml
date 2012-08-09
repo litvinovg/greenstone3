@@ -193,24 +193,15 @@
 					<metadataPrefix>oai_dc</metadataPrefix>
 					<schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
 					<metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
-					<!--<metadataElements>dc.Title,dc.Creator,dc.Subject,dc.Description,dc.Publisher,dc.Contributor,dc.Date,dc.Type,dc.Format,dc.Identifier,dc.Source,dc.Language,dc.Relation,dc.Coverage,dc.Rights</metadataElements>-->
-					<mappingList>
-						<!-- 
-							The mapping is in the form: <publicly supported metadata name>,<mapped metadata name>, short as <A>,<B> 
-							The first metadata name is medatory; if there is no mapped name followed, then the first name must be used by the records and
-							searchable in the database, otherwise it is the mapped name stored in the database. The number of mapping elements matches the
-							number of external metadata of the records. If only one name is present, the returned metadata will use this name plus the retrieved value;
-							if both <A>,<B> are present, the returned metadata will use <A>'s name plus <B>'s value retrieved from database.
-					
-							**Bear in mind: if this mapping list is not present, the standard dc. metadata names (15 in total) will be used to retrieve metadata in the database.
-					
-							**The only case when this mapping is not present is that: 1. this metadata format is oai_dc; 2. the metadata is also stored in the database by Dublin Core's names.
-						-->
-						<mapping>dc.Title,Title</mapping>
-						<!-- This mapping example means that the dc.Title is requested and the value of the metadata Title, which is used in this repository, is returned as response. -->
+					<!--   a custom mapping as this collection doesn't have dc metadata -->                    
+					<mappingList>						
+                        <mapping>dc:title,dls.Title</mapping>
+                        <mapping>dc:subject,dls.Subject</mapping>
+                        <mapping>dc:language,dls.Language</mapping>
+                        <mapping>dc:publisher,dls.Organization</mapping>                    
 					</mappingList>
 				</metadataFormat>
 			</ListMetadataFormats>
-		</serviceRack> 
+		</serviceRack>
 	</serviceRackList>
 </CollectionConfig>
