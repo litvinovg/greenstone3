@@ -359,9 +359,10 @@
 	     By default, all collections end up with some query service (default is MGPP) even when they have
 	     no search indexes, which is why the extra test for the presence of an index/fq-something is necessary. -->
 	<xsl:template name="quick-search-area">
-		<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']/paramList/param[@name='index' or starts-with(@name, 'fq')]">
+		<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']">
 			<xsl:variable name="subaction" select="/page/pageRequest/@subaction"/>
 			<div id="quicksearcharea">
+				<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']">
 				<form action="{$library_name}/collection/{$collNameChecked}/search/TextQuery">
 					<!-- This parameter says that we have come from the quick search area -->
 					<input type="hidden" name="qs" value="1"/>
@@ -422,6 +423,9 @@
 					</input>
 					<br/>
 					</xsl:if>
+				</form>
+				</xsl:if>
+				
 					<!-- The list of other search types -->
 					<ul>
 						<xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']">
@@ -435,7 +439,6 @@
 							</li>
 						</xsl:for-each>
 					</ul>
-				</form>
 			</div>
 		</xsl:if>
 	</xsl:template>
