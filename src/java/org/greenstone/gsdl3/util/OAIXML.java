@@ -98,6 +98,7 @@ public class OAIXML {
     public static final String EXPIRATION_DATE = "expirationDate";
     public static final String GRANULARITY = "granularity";
     public static final String GS3OAI = "GS3OAI";
+	public static final String GS_OAI_RESOURCE_URL = "gs.OAIResourceURL";
     public static final String HAS_OAI = "hasOAI";
     public static final String HEADER = "header";
     public static final String ILLEGAL_OAI_VERB = "Illegal OAI verb";
@@ -176,6 +177,7 @@ public class OAIXML {
      *  initialized in getOAIConfigXML()
      */
     public static String oai_version = "2.0";
+	public static String baseURL = "";
     
     /**response owner document */
     public static Document response_doc = new XMLConverter().newDOM(); 
@@ -193,6 +195,11 @@ public class OAIXML {
     public static String getOAIVersion() {
       return oai_version;
     }
+	
+	public static String getBaseURL() {
+		return baseURL;
+	}
+	
     public static Element createElement(String tag_name) {
       return response_doc.createElement(tag_name);
     }
@@ -285,7 +292,7 @@ public class OAIXML {
       return false;      
     }
     /** Read in OAIConfig.xml (residing web/WEB-INF/classes/) and use it to configure the receptionist etc.
-     *  the oai_version variable is also set in here. 
+     *  the oai_version and baseURL variables are also set in here. 
      *  The init() method is also called in here. */ 
     public static Element getOAIConfigXML() {
       init();
@@ -309,6 +316,10 @@ public class OAIXML {
       Element protocol_version = (Element)GSXML.getChildByTagName(oai_config_elem, PROTOCOL_VERSION);
       oai_version = GSXML.getNodeText(protocol_version).trim();
 
+	  // initialize baseURL
+	  Element base_url_elem = (Element)GSXML.getChildByTagName(oai_config_elem, BASE_URL);
+      baseURL = GSXML.getNodeText(base_url_elem);
+	  
       //initialize token_expiration
       Element expiration = (Element)GSXML.getChildByTagName(oai_config_elem, RESUMPTION_TOKEN_EXPIRATION);
       String expire_str = GSXML.getNodeText(expiration).trim();
@@ -386,9 +397,8 @@ public class OAIXML {
           }
         }
       }//end of for()
-      Element base_url_elem = (Element)GSXML.getChildByTagName(oai_config_elem, BASE_URL);
-      String base_url = GSXML.getNodeText(base_url_elem);
-      GSXML.setNodeText(request_elem, base_url);
+      
+	  GSXML.setNodeText(request_elem, baseURL);
       
       Node resp_date = GSXML.getChildByTagName(response, RESPONSE_DATE);
       if (resp_date != null) {

@@ -482,6 +482,13 @@ public class OAIPMH extends ServiceRack {
         metadata.appendChild(prfx_str_elem);
         String[] metadata_names = getMetadataNameMapping(metadata_format);
         HashMap meta_map = getInfoByNames(info, metadata_names);
+		
+		// if there's no dc:identifier already after the mapping, we'll add it in
+		if(!meta_map.containsKey(OAIXML.DC+":identifier")) { // dc:identifier OAIXML.IDENTIFIER
+			outputCustomMetadata(meta_map, info, OAIXML.DC+":identifier");
+		}
+	
+		
 	if (meta_map == null) {
 	  return metadata;
 	}
@@ -699,6 +706,37 @@ public class OAIPMH extends ServiceRack {
       }
     }
     return (empty_map == true) ? null : map;
+  }
+  
+  // GS3 version of GS2's runtime-src/src/oaiservr/dublincore.cpp function output_custom_metadata
+  protected void outputCustomMetadata(HashMap meta_map, DBInfo info, String dc_identifier) {
+		
+	// try gs.OAIResourceURL, else srclinkFile, else the GS version of the document
+	String identifier_value = info.getInfo(OAIXML.GS_OAI_RESOURCE_URL);
+	
+	if(identifier_value.equals("")) {
+		String url = OAIXML.getBaseURL(); // e.g. e.g. http://host:port/greenstone3/library/oaiserver
+	
+		identifier_value = info.getInfo("srclinkFile");
+		if(identifier_value.equals("")) 
+		{
+			// no source file to link to, so link to the GS version of the document (need to use URL-style slashes)
+			// e.g. http://host:port/greenstone3/library/collection/lucene-jdbm-demo/document/HASH014602ec89e16b7d431c7627
+			
+			identifier_value = url.replace("oaiserver", "library") + "collection/" + this.coll_name + "/document/" + info.getInfo("identifier"); // OID
+		} 
+		else // use srclinkFile
+		{		
+			// e.g. http://host:port/greenstone3/sites/localsite/collect/backdrop/index/assoc/D0.dir/Cat.jpg
+			identifier_value = url.replace("oaiserver", "") + "sites/" + this.site_name 
+				+ "/collect/" + this.coll_name + "/index/assoc/" 
+				+ info.getInfo("assocfilepath") + "/" + identifier_value; // srclinkFile
+		}
+	} // else use gs.OAIResourceURL as-is
+	
+	//logger.info("**** dc:identifier: " + identifier_value);
+	
+	meta_map.put(dc_identifier, identifier_value);
   }
 }
 
