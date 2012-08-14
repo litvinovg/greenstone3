@@ -105,6 +105,7 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 		// set up the query params
 		Set entries = params.entrySet();
 		Iterator i = entries.iterator();
+		String current_physical_index_name = this.physical_index_name;
 		String physical_sub_index_name = this.default_index_subcollection;
 		String physical_index_language_name = this.default_index_language;
 		while (i.hasNext())
@@ -171,16 +172,16 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 		{
 			if (physical_sub_index_name != null)
 			{
-				physical_index_name += physical_sub_index_name;
+				current_physical_index_name += physical_sub_index_name;
 			}
 			if (physical_index_language_name != null)
 			{
-				physical_index_name += physical_index_language_name;
+				current_physical_index_name += physical_index_language_name;
 			}
 		}
 
 		// set up mgpp_src
-		String indexdir = GSFile.collectionBaseDir(this.site_home, this.cluster_name) + File.separatorChar + GSFile.collectionIndexPath(this.index_stem, physical_index_name);
+		String indexdir = GSFile.collectionBaseDir(this.site_home, this.cluster_name) + File.separatorChar + GSFile.collectionIndexPath(this.index_stem, current_physical_index_name);
 		mgpp_src.loadIndexData(indexdir);
 
 		return true;
