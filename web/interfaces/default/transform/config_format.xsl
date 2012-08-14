@@ -130,7 +130,16 @@
 			  <xslt:value-of disable-output-escaping="yes" select="metadataList/metadata[contains(@name, 'webicon')]"/>				
 			</xsl:when>
 			<xsl:when test="not(@type) or @type='document'">
-				<img style="border:0px"><xslt:attribute name="id">documentBasketBook<xslt:value-of select="/page/pageResponse/collection/@name"/>:<xslt:value-of select="@nodeID"/></xslt:attribute><xslt:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'page_icon_image')"/></xslt:attribute></img> 
+				<img style="border:0px"><xslt:attribute name="id">documentBasketBook<xslt:value-of select="/page/pageResponse/collection/@name"/>:<xslt:value-of select="@nodeID"/></xslt:attribute><xslt:attribute name="src">
+					<xslt:choose>
+						<xslt:when test="@docType='hierarchy' and @nodeType='root'">
+							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'book_image')"/>
+						</xslt:when>
+						<xslt:otherwise>
+							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'page_icon_image')"/>
+						</xslt:otherwise>
+					</xslt:choose>
+				</xslt:attribute></img> 
 			</xsl:when>
 		</xsl:choose>
 	</xsl:template>
