@@ -167,16 +167,6 @@ public class XSLTUtil
 		return buffer.toString();
 	}
 
-	public static String tidyWhitespace(String original)
-	{
-
-		if (original == null || original.equals(""))
-		{
-			return original;
-		}
-		String new_s = original.replaceAll("\\s+", " ");
-		return new_s;
-	}
 
 	public static String getInterfaceText(String interface_name, String lang, String key)
 	{
@@ -310,6 +300,28 @@ public class XSLTUtil
 	public static String toUpper(String orig, String lang)
 	{
 		return orig.toUpperCase();
+	}
+
+        public static String tidyWhitespace(String original, String lang)
+	{
+
+		if (original == null || original.equals(""))
+		{
+			return original;
+		}
+		String new_s = original.replaceAll("\\s+", " ");
+		return new_s;
+	}
+
+        public static String stripWhitespace(String original, String lang)
+	{
+
+		if (original == null || original.equals(""))
+		{
+			return original;
+		}
+		String new_s = original.replaceAll("\\s+", "");
+		return new_s;
 	}
 
 	public static byte[] toUTF8(String orig, String lang)
