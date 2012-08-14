@@ -783,9 +783,9 @@ Table~\ref{tab:gsf-format} shows the set of \gst{'gsf'} (Greenstone Format) elem
 \gst{<gsf:icon type='classifier'/>} & bookshelf icon for classification nodes\\
 \gst{<gsf:icon type='source'/>} & An appropriate icon for the original file e.g. Word, PDF icon\\
 \hline
-\gst{<gsf:metadata name='Title'/>} & The value of a metadata element for the current document or section, in this case, Title\\
+\gst{<gsf:metadata name='Title'/>} & All the values of a metadata element for the current document or section, in this case, Title\\
 \gst{<gsf:metadata name='Title' select='select-type' [separator='y' pos='first|last|n']/>} & A more extended selection of metadata values. The select field can be one of those shown in Table~\ref{tab:gsf-select-types}. There are two optional attributes: separator gives a String that will be used to separate the fields, default is ``, ``, and pos can be set to return either the first, last or nth value for that metadata at each section.\\
-\gst{<gsf:metadata name='Date' format='formatDate'/>} & The value of a metadata element for the current document, formatted in some way. Current formatting options available are formatDate: turns '20040201' into '01 February 2004', and formatLanguage: turns 'en' into 'English', both in a language dependent manner. \\
+\gst{<gsf:metadata name='Date' format='formatDate'/>} & The value of a metadata element for the current document, formatted in some way. Current formatting options available are listed in Table~\ref{tab:gsf-process-types}. \\
 \hline
 \gst{<gsf:choose-metadata>
   <gsf:metadata name='metaA'/>
@@ -831,13 +831,32 @@ To get the previous metadata, the format statement would have the following in i
 \hline
 \bf Select Type & \bf Description\\
 \hline
-current & The current section \\
 parent & The immediate parent section\\
 ancestors & All the parents back to the root (topmost) section\\
 root & The root or topmost section \\
-siblings & All the sibling sections\\
-children & The immediate child sections of the current section\\
-descendants & All the descendent sections\\
+%siblings & All the sibling sections\\
+%children & The immediate child sections of the current section\\
+%descendants & All the descendent sections\\
+\hline
+\end{tabular}}
+\end{table}
+
+\begin{table}
+\caption{String processing option, for preprocess in gsf:switch, and format in gsf:metadata}
+\label{tab:gsf-process-types}
+{\footnotesize
+\begin{tabular}{ll}
+\hline
+\bf Process Type & \bf Description\\
+\hline
+toUpper & Make the value upper case \\
+toLower & Make the value lower case \\
+tidyWhitespace & Replace multiple whitespace characters with a single space \\
+stripWhitespace & Removes all whitespace characters \\
+cgiSafe &Make value safe to be a cgi argument \\
+formatDate & turns '20040201' into '01 February 2004' in a language dependent manner \\
+formatLanguage & turns 'en' into 'English' in a language dependent manner\\
+formatBigNumber & \\
 \hline
 \end{tabular}}
 \end{table}
@@ -853,7 +872,7 @@ The \gst{<gsf:choose-metadata>} element selects the first available metadata val
 \end{verbatim}
 \end{gsc}
 
-This will display dls.Title if available, otherwise it will use dc.Title if available, otherwise it will use the Title metadata. If there are no values for any of these metadata elements, then nothing will be displayed.
+This will display dc.Title if available, otherwise it will use dls.Title if available, otherwise it will use the Title metadata. If there are no values for any of these metadata elements, then nothing will be displayed.
 
 The \gst{<gsf:switch>} element allows different formatting depending on the value of a specified metadata element. For example, the following switch statement could be used to display a different icon for each document in a list depending on which organization it came from. 
 
@@ -870,7 +889,7 @@ The \gst{<gsf:switch>} element allows different formatting depending on the valu
 \end{verbatim}
 \end{gsc}
 
-Preprocessing of the metadata value is optional. The preprocess types are \gst{toLower} (make the value lowercase), \gst{toUpper} (make the value uppercase), \gst{stripSpace} (removes any whitespace from the value). These operations are carried out on the value of the selected metadata before the test is carried out. Multiple processing types can be specified, separated by ; and they will be applied in the order specified (from left to right).
+Preprocessing of the metadata value is optional. The preprocess types are listed in Table~\ref{tab:gsf-process-types}. These operations are carried out on the value of the selected metadata before the test is carried out. Multiple processing types can be specified, separated by ; and they will be applied in the order specified (from left to right).
 
 Each option specifies a test and a test value. Test values are just text. Tests include \gst{startsWith}, \gst{contains}, \gst{exists}, \gst{equals}, \gst{endsWith}. Exists doesn't need a test value. Having an otherwise option ensures that something will be displayed even when none of the tests match.
 
