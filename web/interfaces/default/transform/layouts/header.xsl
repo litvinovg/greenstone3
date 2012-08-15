@@ -400,7 +400,7 @@
 						</xsl:variable>
 						<nobr>
 							<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='query']">
-								<xsl:with-param name="default" select="java:org.greenstone.gsdl3.util.XSLTUtil.tidyWhitespace($qs)"/>
+								<xsl:with-param name="default" select="java:org.greenstone.gsdl3.util.XSLTUtil.tidyWhitespace($qs,/page/@lang)"/>
 							</xsl:apply-templates>
 						</nobr>
 					</span>

@@ -143,7 +143,7 @@
 	  </xsl:when>
 	  <xsl:otherwise>
 	    <xsl:variable name="qs"><xsl:apply-templates select="param[@name='query']" mode="calculate-default"/></xsl:variable>
-	    <nobr><xsl:apply-templates select="param[@name='query']"><xsl:with-param name="default" select="java:org.greenstone.gsdl3.util.XSLTUtil.tidyWhitespace($qs)"/></xsl:apply-templates><input type="submit"><xsl:attribute name="value"><xsl:value-of select="../displayItem[@name='submit']"/></xsl:attribute></input></nobr>
+	    <nobr><xsl:apply-templates select="param[@name='query']"><xsl:with-param name="default" select="java:org.greenstone.gsdl3.util.XSLTUtil.tidyWhitespace($qs,/page/@lang)"/></xsl:apply-templates><input type="submit"><xsl:attribute name="value"><xsl:value-of select="../displayItem[@name='submit']"/></xsl:attribute></input></nobr>
 	  </xsl:otherwise>
 	</xsl:choose>
       </xsl:otherwise>
