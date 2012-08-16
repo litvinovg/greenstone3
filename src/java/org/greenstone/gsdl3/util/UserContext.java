@@ -14,6 +14,12 @@ public class UserContext
 		_lang = xmlRequest.getAttribute(GSXML.LANG_ATT);
 		_userID = xmlRequest.getAttribute(GSXML.USER_ID_ATT);
 	}
+
+	public UserContext(String lang, String userID)
+	{
+		_lang = lang;
+		_userID = userID;
+	}
 	
 	public void setLanguage(String lang)
 	{

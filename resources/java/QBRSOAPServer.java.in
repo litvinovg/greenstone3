@@ -44,6 +44,7 @@ import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.core.MessageRouter;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
 
 import org.apache.log4j.Logger; // Import log4j classes
@@ -264,7 +265,7 @@ public class QBRSOAPServer@sitename@ {
 		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 		// <message><request lang="en" to="" type="describe" uid="" /></message>
 		Element request = GSXML.createBasicRequest(
-				this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, lang, "");
+				this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, new UserContext(lang, ""));
 		
 		// Check if only a subset of this Module Interface's data is asked
 		// to be described
@@ -328,7 +329,7 @@ public class QBRSOAPServer@sitename@ {
 		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 		Element request = GSXML.createBasicRequest(
 				this.doc, GSXML.REQUEST_TYPE_PROCESS, 
-				collection+"/"+service, lang, "");
+				collection+"/"+service, new UserContext(lang, ""));
 		
 		request.appendChild(paramList);
 		message.appendChild(request);
@@ -420,7 +421,7 @@ public class QBRSOAPServer@sitename@ {
 		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
 		Element request = GSXML.createBasicRequest(
 				doc, GSXML.REQUEST_TYPE_PROCESS, 
-				collection+"/DocumentContentRetrieve", lang, "");
+				collection+"/DocumentContentRetrieve", new UserContext(lang, ""));
 		
 		// create an empty <paramlist /> element (as example in manual)
 		Element paramlist = doc.createElement(
@@ -480,7 +481,7 @@ public class QBRSOAPServer@sitename@ {
 		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
 		Element request = GSXML.createBasicRequest(
 				doc, GSXML.REQUEST_TYPE_PROCESS, 
-				collection+"/DocumentStructureRetrieve", lang, "");
+				collection+"/DocumentStructureRetrieve", new UserContext(lang, ""));
 		
 		// Create the <paramlist></paramlist> element of param elements,
 		// if any; and only if values are legal (that is, if they occur in  
@@ -631,7 +632,7 @@ public class QBRSOAPServer@sitename@ {
 		
 		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
 		Element request = GSXML.createBasicRequest(doc, 
-				GSXML.REQUEST_TYPE_PROCESS, to, lang, "");
+				GSXML.REQUEST_TYPE_PROCESS, to, new UserContext(lang, ""));
 		
 		request.appendChild(metadataParamList);
 		request.appendChild(nodeList);
@@ -691,7 +692,7 @@ public class QBRSOAPServer@sitename@ {
 		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 		// <message><request lang="en" to="" type="process" uid="" /></message>
 		Element request = GSXML.createBasicRequest(this.doc,
-			GSXML.REQUEST_TYPE_PROCESS, collection+"/"+browseService, lang, "");
+			GSXML.REQUEST_TYPE_PROCESS, collection+"/"+browseService, new UserContext(lang, ""));
 		
 		// <param name="structure" value = "structureParams[i]">
 		Element paramList = this.doc.createElement(
