@@ -144,10 +144,7 @@ public class TestClass
 		 */
 
 		//Type "snails" into quick search area and submit 
-		WebElement quickSearchInput = GSTestingUtil.findElementByXPath(_driver, "//div[@id='quicksearcharea']//input[@name='s1.query']");
-		quickSearchInput.sendKeys("snails");
-		WebElement quickSearchSubmitButton = GSTestingUtil.findElementByXPath(_driver, "//input[@id='quickSearchSubmitButton']");
-		quickSearchSubmitButton.click();
+		GSTestingUtil.performQuickSearch(_driver, "snails", null);
 
 		//Check the number of results on the page
 		List<WebElement> results = GSTestingUtil.findElementsByXPath(_driver, "//table[@id='resultsTable']/tbody/tr");
@@ -180,11 +177,7 @@ public class TestClass
 		//Generate a search that will fail
 		String randomSearchTerm = GSTestingUtil.generateRandomString(20);
 
-		quickSearchInput = GSTestingUtil.findElementByXPath(_driver, "//div[@id='quicksearcharea']//input[@name='s1.query']");
-		quickSearchInput.clear();
-		quickSearchInput.sendKeys(randomSearchTerm);
-		quickSearchSubmitButton = GSTestingUtil.findElementByXPath(_driver, "//input[@id='quickSearchSubmitButton']");
-		quickSearchSubmitButton.click();
+		GSTestingUtil.performQuickSearch(_driver, randomSearchTerm, null);
 
 		//Make sure that no documents match
 		WebElement contentElem = GSTestingUtil.findElementByXPath(_driver, "//div[@id='gs_content']");
