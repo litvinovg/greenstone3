@@ -129,6 +129,15 @@
 			<xsl:when test="@type='web'">
 			  <xslt:value-of disable-output-escaping="yes" select="metadataList/metadata[contains(@name, 'webicon')]"/>				
 			</xsl:when>
+			<xsl:when test="@file">
+				<img>
+				<xslt:attribute name='src'>
+					<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name = 'httpPath']"/>
+					<xsl:text>/images/</xsl:text>
+					<xsl:value-of disable-output-escaping="yes" select="@file"/>
+				</xslt:attribute>
+				</img>
+			</xsl:when>
 			<xsl:when test="not(@type) or @type='document'">
 				<img style="border:0px"><xslt:attribute name="id">documentBasketBook<xslt:value-of select="/page/pageResponse/collection/@name"/>:<xslt:value-of select="@nodeID"/></xslt:attribute><xslt:attribute name="src">
 					<xslt:choose>
