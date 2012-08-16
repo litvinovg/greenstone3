@@ -214,6 +214,8 @@
 												.css("margin-left", "0px")
 												.css("padding", "0px")
 												.css("font-size", "90%");
+												
+											menu.attr("id", "userMenu");
 
 											button.data("userMenu", menu);
 
@@ -363,82 +365,81 @@
 			<xsl:variable name="subaction" select="/page/pageRequest/@subaction"/>
 			<div id="quicksearcharea">
 				<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']">
-				<form action="{$library_name}/collection/{$collNameChecked}/search/TextQuery">
-					<!-- This parameter says that we have come from the quick search area -->
-					<input type="hidden" name="qs" value="1"/>
-					<input type="hidden" name="rt" value="rd"/>
-					<input type="hidden" name="s1.level">
-						<xsl:attribute name="value">
-							<xsl:choose>
-								<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.level']">
-									<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.level']/@value"/>
-								</xsl:when>
-								<xsl:otherwise>
-									<xsl:text>Sec</xsl:text>
-								</xsl:otherwise>
-							</xsl:choose>
-						</xsl:attribute>
-					</input>
-					<xsl:choose>
-						<xsl:when test="/page/pageResponse/service[@name = 'TextQuery']/paramList/param[@name = 'startPage']">
-							<input type="hidden" name="s1.startPage" value="1"/>
-						</xsl:when>
-						<xsl:otherwise>
-							<input type="hidden" name="startPage" value="1"/>
-						</xsl:otherwise>
-					</xsl:choose>
-					<xsl:if test="not(/page/pageRequest/paramList/param[@name = 's1.hitsPerPage'])">
-						<input type="hidden" name="s1.hitsPerPage" value="20"/>
-					</xsl:if>
-					<xsl:if test="not(/page/pageRequest/paramList/param[@name = 's1.maxDocs'])">
-						<input type="hidden" name="s1.maxDocs" value="100"/>
-					</xsl:if>
-					<!-- The query text box -->
-					<span class="querybox">
-						<xsl:variable name="qs">
-							<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='query']" mode="calculate-default"/>
-						</xsl:variable>
-						<nobr>
-							<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='query']">
-								<xsl:with-param name="default" select="java:org.greenstone.gsdl3.util.XSLTUtil.tidyWhitespace($qs,/page/@lang)"/>
-							</xsl:apply-templates>
-						</nobr>
-					</span>
-					<!-- The index selection list -->
-					<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']/@type = 'enum_single'">
-						<span class="textselect">
-							<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']">
-								<xsl:with-param name="default">
-									<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']" mode="calculate-default"/>
-								</xsl:with-param>
-							</xsl:apply-templates>
+					<form action="{$library_name}/collection/{$collNameChecked}/search/TextQuery">
+						<!-- This parameter says that we have come from the quick search area -->
+						<input type="hidden" name="qs" value="1"/>
+						<input type="hidden" name="rt" value="rd"/>
+						<input type="hidden" name="s1.level">
+							<xsl:attribute name="value">
+								<xsl:choose>
+									<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.level']">
+										<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.level']/@value"/>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:text>Sec</xsl:text>
+									</xsl:otherwise>
+								</xsl:choose>
+							</xsl:attribute>
+						</input>
+						<xsl:choose>
+							<xsl:when test="/page/pageResponse/service[@name = 'TextQuery']/paramList/param[@name = 'startPage']">
+								<input type="hidden" name="s1.startPage" value="1"/>
+							</xsl:when>
+							<xsl:otherwise>
+								<input type="hidden" name="startPage" value="1"/>
+							</xsl:otherwise>
+						</xsl:choose>
+						<xsl:if test="not(/page/pageRequest/paramList/param[@name = 's1.hitsPerPage'])">
+							<input type="hidden" name="s1.hitsPerPage" value="20"/>
+						</xsl:if>
+						<xsl:if test="not(/page/pageRequest/paramList/param[@name = 's1.maxDocs'])">
+							<input type="hidden" name="s1.maxDocs" value="100"/>
+						</xsl:if>
+						<!-- The query text box -->
+						<span class="querybox">
+							<xsl:variable name="qs">
+								<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='query']" mode="calculate-default"/>
+							</xsl:variable>
+							<nobr>
+								<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='query']">
+									<xsl:with-param name="default" select="java:org.greenstone.gsdl3.util.XSLTUtil.tidyWhitespace($qs, /page/@lang)"/>
+								</xsl:apply-templates>
+							</nobr>
 						</span>
-					</xsl:if>
-					<!-- The submit button (for TextQuery) -->
-					<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']">
-					<input type="submit" id="quickSearchSubmitButton">
-						<xsl:attribute name="value">
-							<xsl:value-of select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/displayItem[@name='submit']"/>
-						</xsl:attribute>
-					</input>
-					<br/>
-					</xsl:if>
-				</form>
+						<!-- The index selection list -->
+						<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']/@type = 'enum_single'">
+							<span class="textselect">
+								<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']">
+									<xsl:with-param name="default">
+										<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']" mode="calculate-default"/>
+									</xsl:with-param>
+								</xsl:apply-templates>
+							</span>
+						</xsl:if>
+						<!-- The submit button (for TextQuery) -->
+						<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']">
+							<input type="submit" id="quickSearchSubmitButton">
+								<xsl:attribute name="value">
+									<xsl:value-of select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/displayItem[@name='submit']"/>
+								</xsl:attribute>
+							</input>
+							<br/>
+						</xsl:if>
+					</form>
 				</xsl:if>
-				
-					<!-- The list of other search types -->
-					<ul>
-						<xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']">
-							<li class="ui-state-default ui-corner-all">
-								<a>
-									<xsl:attribute name="href">
-										<xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="$collNameChecked"/>/search/<xsl:value-of select="@name"/>
-									</xsl:attribute>
-									<xsl:value-of select="displayItem[@name='name']"/>
-								</a>
-							</li>
-						</xsl:for-each>
-					</ul>
+				<!-- The list of other search types -->
+				<ul>
+					<xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']">
+						<li class="ui-state-default ui-corner-all">
+							<a>
+								<xsl:attribute name="href">
+									<xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="$collNameChecked"/>/search/<xsl:value-of select="@name"/>
+								</xsl:attribute>
+								<xsl:value-of select="displayItem[@name='name']"/>
+							</a>
+						</li>
+					</xsl:for-each>
+				</ul>
 			</div>
 		</xsl:if>
 	</xsl:template>
