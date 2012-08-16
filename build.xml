@@ -22,6 +22,7 @@
   <taskdef name="rsr" classname="org.greenstone.anttasks.RegexSearchReplace" classpathref="project.classpath"/>
   <!--<taskdef name="svn" classname="org.tigris.subversion.svnant.SvnTask" classpathref="project.classpath"/>-->
   <taskdef name="if" classname="ise.antelope.tasks.IfTask" classpathref="project.classpath"/>
+  <taskdef name="for" classname="net.sf.antcontrib.logic.ForTask" classpathref="project.classpath"/>
   <taskdef name="stringutil" classname="ise.antelope.tasks.StringUtilTask" classpathref="project.classpath"/>
 
  
@@ -2419,4 +2420,65 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <rsr file="${gs2build.home}/build-src/packages/rtftohtml/rtftohtml_src/Makefile" pattern="-o rtftohtml(.{2})EXEEXT(.{1})" replacement="-o rtftohtml$1EXEEXT$2 -static" />
   </target>
     
+	<target name="run-collection-tests">
+		<if><bool><not><available file="${basedir}/ext/testing" type="dir"/></not></bool>
+			<fail>The testing extension is not available. This is required to perform the tests. It can be acquired from SVN by running the command "svn co http://svn.greenstone.org/gs3-extensions/testing/trunk/src testing" in the ext directory of your Greenstone 3 installation. </fail>
+		</if>
+		<for param="testjar">
+			<path>
+				<fileset dir="${basedir}" includes="web/sites/*/collect/*/tests/tests.jar"/>
+			</path>
+			<sequential>
+				<echo>Testing @{testjar}</echo>
+				<java classname="org.junit.runner.JUnitCore" fork="true">
+					<arg value="gstests.TestClass"/>
+					<jvmarg value="-DSERVERURL=http://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet} "/>
+					<classpath>
+						<fileset dir="${basedir}/ext/testing/lib/java">
+							<include name="*.jar"/>
+						</fileset>
+						<files includes="@{testjar}"/>
+					</classpath>
+				</java>
+			</sequential>
+		</for>
+	</target>
+	
+	<target name="build-collection-tests">
+		<if><bool><not><available file="${basedir}/ext/testing" type="dir"/></not></bool>
+			<fail>The testing extension is not available. This is required to perform the tests. It can be acquired from SVN by running the command "svn co http://svn.greenstone.org/gs3-extensions/testing/trunk/src testing" in the ext directory of your Greenstone 3 installation. </fail>
+		</if>
+		<for param="compiledir">
+			<path>
+				<dirset dir="${basedir}" includes="web/sites/*/collect/*/tests/src"/>
+			</path>
+			<sequential>
+				<echo>Compiling @{compiledir}</echo>
+				<if><bool><not><available file="@{compiledir}/../build" type="dir"/></not></bool>
+					<mkdir dir="@{compiledir}/../build"/>
+				</if>
+				<javac 
+					srcdir="@{compiledir}" 
+					destdir="@{compiledir}/../build" 
+					debug="${compile.debug}" 
+					deprecation="${compile.deprecation}" 
+					optimize="${compile.optimize}">
+					<classpath>
+						<fileset dir="${basedir}/ext/testing/lib/java">
+							<include name="*.jar"/>
+						</fileset>
+					</classpath>
+					<include name="gstests/*.java"/>
+				</javac>
+				<jar destfile="@{compiledir}/../tests.jar">
+					<fileset dir="@{compiledir}/../build">
+						<include name="gstests/**"/>
+					</fileset>
+					<manifest>
+						<attribute name="Built-By" value="${user.name}" />
+					</manifest>
+				</jar>
+			</sequential>
+		</for>
+	</target>
 </project>
