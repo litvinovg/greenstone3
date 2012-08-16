@@ -123,16 +123,16 @@
 				</xsl:for-each>
 			</xsl:when>
 			<xsl:when test="@childType = 'HList'">
-				<table><tr>
+				<ul class="horizontalContainer">
 					<xsl:for-each select='classifierNode'>
-						<td class="horizontalClassifierNode">
+						<li class="horizontalClassifierNode">
 							<xsl:apply-templates select='.'>
 								<xsl:with-param name='collName' select='$collName'/>
 								<xsl:with-param name='serviceName' select='$serviceName'/>
 							</xsl:apply-templates>
-						</td>
+						</li>
 					</xsl:for-each>
-				</tr></table>
+				</ul>
 				<xsl:for-each select='classifierNode'>
 					<xsl:call-template name="processNodeChildren">
 						<xsl:with-param name='collName' select='$collName'/>

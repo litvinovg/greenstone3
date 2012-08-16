@@ -74,8 +74,15 @@ p {
 	padding-left:1.5em;
 }
 
+.horizontalContainer {
+	padding-left:0px;
+	margin:0px;
+}
+
 .horizontalClassifierNode {
 	padding:0px 0px 10px 10px;
+	list-style:none;
+	display: inline-block;
 }
 
 .icon{
