@@ -35,7 +35,7 @@ public class TestClass
 	@Before
 	public void init()
 	{
-		_driver.get("http://localhost:8487/greenstone3/library");
+		_driver.get(System.getProperty("SERVERURL"));
 	}
 
 	@Test
@@ -45,7 +45,7 @@ public class TestClass
 	 */
 	public void testHomePage()
 	{
-		Assert.assertNotNull(GSTestingUtil.findElementByXPath(_driver, "//div[@id='collectionLinks']/a[@title='Demonstration collection containing a few books from the Humanitarian and Development Libraries. Uses Lucene and JDBM.']"));
+		Assert.assertNotNull("The Demo Collection is not available", GSTestingUtil.findElementByXPath(_driver, "//div[@id='collectionLinks']/a[descendant::text()='Demo Collection']"));
 	}
 
 	@Test
@@ -56,19 +56,19 @@ public class TestClass
 		//Check the title is correct
 		WebElement demoTitleElem = GSTestingUtil.findElementByXPath(_driver, "//div[@id='titlearea']/h2");
 		String title = demoTitleElem.getText();
-		Assert.assertTrue(title.equals("Demo Collection"));
+		Assert.assertTrue("The title is incorrect", title.equals("Demo Collection"));
 
 		//Check we have four browsing classifiers
 		List<WebElement> classifierLinks = GSTestingUtil.findElementsByXPath(_driver, "//ul[@id='gs-nav']/li");
-		Assert.assertEquals(classifierLinks.size(), NUMBER_OF_CLASSIFIERS);
+		Assert.assertEquals("There should be " + NUMBER_OF_CLASSIFIERS + " classifiers but there were " + classifierLinks.size(), classifierLinks.size(), NUMBER_OF_CLASSIFIERS);
 
 		//Check we have 3 search types
 		List<WebElement> searchTypes = GSTestingUtil.findElementsByXPath(_driver, "//div[@id='quicksearcharea']/ul/li");
-		Assert.assertEquals(searchTypes.size(), NUMBER_OF_SEARCH_TYPES);
+		Assert.assertEquals("There should be " + NUMBER_OF_SEARCH_TYPES + " search types but there were " + searchTypes.size(), searchTypes.size(), NUMBER_OF_SEARCH_TYPES);
 
 		//Check we have 5 search indexes
 		List<WebElement> searchIndexes = GSTestingUtil.findElementsByXPath(_driver, "//div[@id='quicksearcharea']/form/span[@class='textselect']/select/option");
-		Assert.assertEquals(searchIndexes.size(), NUMBER_OF_SEARCH_INDEXES);
+		Assert.assertEquals("There should be " + NUMBER_OF_SEARCH_INDEXES + " search indexes but there were " + searchIndexes.size(), searchIndexes.size(), NUMBER_OF_SEARCH_INDEXES);
 	}
 
 	@Test
@@ -81,7 +81,7 @@ public class TestClass
 
 		//Check that we have 11 documents
 		List<WebElement> documents = GSTestingUtil.findElementsByXPath(_driver, "//table[@id='classifiernodelist']/tbody/tr");
-		Assert.assertEquals(documents.size(), TITLE_CLASSIFIER_SIZE);
+		Assert.assertEquals("There should be " + TITLE_CLASSIFIER_SIZE + " documents in the titles classifier but there were " + documents.size(), documents.size(), TITLE_CLASSIFIER_SIZE);
 	}
 
 	@Test
@@ -94,7 +94,7 @@ public class TestClass
 
 		//Check that we have 7 subjects
 		List<WebElement> subjectElems = GSTestingUtil.findElementsByXPath(_driver, "//table[@id='classifiernodelist']/tbody/tr");
-		Assert.assertEquals(subjectElems.size(), SUBJECT_CLASSIFIER_SIZE);
+		Assert.assertEquals("There should be " + SUBJECT_CLASSIFIER_SIZE + " documents in the subjects classifier but there were " + subjectElems.size(), subjectElems.size(), SUBJECT_CLASSIFIER_SIZE);
 
 		//Get all of the subject expand images
 		List<WebElement> expandImages = GSTestingUtil.findElementsByXPath(_driver, "//img[@src='interfaces/default/images/expand.png']");
@@ -106,7 +106,7 @@ public class TestClass
 		//Make sure it opened correctly
 		String sectionNumber = randomSubject.getAttribute("id").substring(6);
 		GSTestingUtil.waitForXPath(_driver, "//table[@id='div" + sectionNumber + "']");
-		Assert.assertNotNull(GSTestingUtil.findElementByXPath(_driver, "//table[@id='div" + sectionNumber + "']"));
+		Assert.assertNotNull("The subjects classifier did not open correctly", GSTestingUtil.findElementByXPath(_driver, "//table[@id='div" + sectionNumber + "']"));
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class TestClass
 
 		//Check that we have 5 organisations
 		List<WebElement> orgElems = GSTestingUtil.findElementsByXPath(_driver, "//table[@id='classifiernodelist']/tbody/tr");
-		Assert.assertEquals(orgElems.size(), ORGANISATIONS_CLASSIFIER_SIZE);
+		Assert.assertEquals("There should be " + ORGANISATIONS_CLASSIFIER_SIZE + " documents in the organisations classifier but there were " + orgElems.size(), orgElems.size(), ORGANISATIONS_CLASSIFIER_SIZE);
 
 		//Get all of the subject expand images
 		List<WebElement> expandImages = GSTestingUtil.findElementsByXPath(_driver, "//img[@src='interfaces/default/images/expand.png']");
@@ -131,7 +131,7 @@ public class TestClass
 		//Make sure it opened correctly
 		String sectionNumber = randomOrganisation.getAttribute("id").substring(6);
 		GSTestingUtil.waitForXPath(_driver, "//table[@id='div" + sectionNumber + "']");
-		Assert.assertNotNull(GSTestingUtil.findElementByXPath(_driver, "//table[@id='div" + sectionNumber + "']"));
+		Assert.assertNotNull("The organisations classifier did not open correctly", GSTestingUtil.findElementByXPath(_driver, "//table[@id='div" + sectionNumber + "']"));
 	}
 
 	@Test
@@ -151,15 +151,15 @@ public class TestClass
 
 		//Check the number of results on the page
 		List<WebElement> results = GSTestingUtil.findElementsByXPath(_driver, "//table[@id='resultsTable']/tbody/tr");
-		Assert.assertEquals(results.size(), HITS_PER_PAGE);
+		Assert.assertEquals("The number of results on the page should have been " + HITS_PER_PAGE + " but it was " + results.size(), results.size(), HITS_PER_PAGE);
 
 		//Check the term info has the correct values
 		WebElement termInfo = GSTestingUtil.findElementByXPath(_driver, "//p[@class='termList']/span[@class='termInfo']");
-		Assert.assertTrue(termInfo.getText().equals("snails occurs " + SNAILS_OCCURENCE_COUNT + " times in " + SNAILS_RESULT_COUNT + " sections"));
+		Assert.assertTrue("The term information was incorrect, it should have been \"" + "snails occurs " + SNAILS_OCCURENCE_COUNT + " times in " + SNAILS_RESULT_COUNT + " sections" + "\" but was \"" + termInfo.getText() + "\"", termInfo.getText().equals("snails occurs " + SNAILS_OCCURENCE_COUNT + " times in " + SNAILS_RESULT_COUNT + " sections"));
 
 		//Check the search results status bar
 		WebElement searchStatus = GSTestingUtil.findElementByXPath(_driver, "//td[@id='searchResultsStatusBar']");
-		Assert.assertTrue(searchStatus.getText().equals("Displaying 1 to " + HITS_PER_PAGE + " of " + SNAILS_RESULT_COUNT + " sections"));
+		Assert.assertTrue("The search status was incorrect, it should have been \"" + "Displaying 1 to " + HITS_PER_PAGE + " of " + SNAILS_RESULT_COUNT + " sections" + "\" but it was \"" + searchStatus.getText() + "\"", searchStatus.getText().equals("Displaying 1 to " + HITS_PER_PAGE + " of " + SNAILS_RESULT_COUNT + " sections"));
 
 		//Click the next button
 		WebElement nextButton = GSTestingUtil.findElementByXPath(_driver, "//td[@id='nextTD']/a");
@@ -167,7 +167,7 @@ public class TestClass
 
 		//Check the search results status bar on the new page
 		searchStatus = GSTestingUtil.findElementByXPath(_driver, "//td[@id='searchResultsStatusBar']");
-		Assert.assertTrue(searchStatus.getText().equals("Displaying " + (HITS_PER_PAGE + 1) + " to " + (HITS_PER_PAGE * 2) + " of " + SNAILS_RESULT_COUNT + " sections"));
+		Assert.assertTrue("The search status was incorrect, it should have been \"" + "Displaying " + (HITS_PER_PAGE + 1) + " to " + (HITS_PER_PAGE * 2) + " of " + SNAILS_RESULT_COUNT + " sections" + "\" but it was \"" + searchStatus.getText() + "\"", searchStatus.getText().equals("Displaying " + (HITS_PER_PAGE + 1) + " to " + (HITS_PER_PAGE * 2) + " of " + SNAILS_RESULT_COUNT + " sections"));
 
 		//Click the previous button
 		WebElement prevButton = GSTestingUtil.findElementByXPath(_driver, "//td[@id='prevTD']/a");
@@ -178,15 +178,17 @@ public class TestClass
 		 */
 
 		//Generate a search that will fail
+		String randomSearchTerm = GSTestingUtil.generateRandomString(20);
+
 		quickSearchInput = GSTestingUtil.findElementByXPath(_driver, "//div[@id='quicksearcharea']//input[@name='s1.query']");
 		quickSearchInput.clear();
-		quickSearchInput.sendKeys(GSTestingUtil.generateRandomString(20));
+		quickSearchInput.sendKeys(randomSearchTerm);
 		quickSearchSubmitButton = GSTestingUtil.findElementByXPath(_driver, "//input[@id='quickSearchSubmitButton']");
 		quickSearchSubmitButton.click();
 
 		//Make sure that no documents match
 		WebElement contentElem = GSTestingUtil.findElementByXPath(_driver, "//div[@id='gs_content']");
-		Assert.assertTrue(contentElem.getText().equals("No documents matched the query."));
+		Assert.assertTrue("No results should have been found for \"" + randomSearchTerm, contentElem.getText().equals("No documents matched the query."));
 	}
 
 	@Test
@@ -200,7 +202,7 @@ public class TestClass
 
 		//Make sure we are logged in correctly
 		WebElement userListTable = GSTestingUtil.findElementByXPath(_driver, "//table[@id='userListTable']");
-		Assert.assertNotNull(userListTable);
+		Assert.assertNotNull("Administrator failed to log in", userListTable);
 
 		//Go to the add new user page
 		WebElement addNewUserButton = GSTestingUtil.findElementByXPath(_driver, "//a[@href='library/admin/AddUser']");
@@ -240,13 +242,13 @@ public class TestClass
 			if (columns.get(0).getText().equals(randomUsername))
 			{
 				found = true;
-				Assert.assertTrue(columns.get(1).getText().equals("enabled"));
-				Assert.assertTrue(columns.get(2).getText().equals("TestGroup"));
-				Assert.assertTrue(columns.get(3).getText().equals("A user added for testing purposes"));
-				Assert.assertTrue(columns.get(4).getText().equals(randomUsername + "@testusername.co.nz"));
+				Assert.assertTrue("The new user enabled status was incorrect", columns.get(1).getText().equals("enabled"));
+				Assert.assertTrue("The new user group was incorrect", columns.get(2).getText().equals("TestGroup"));
+				Assert.assertTrue("The new user comment was incorrect", columns.get(3).getText().equals("A user added for testing purposes"));
+				Assert.assertTrue("The new user email was incorrect", columns.get(4).getText().equals(randomUsername + "@testusername.co.nz"));
 			}
 		}
-		Assert.assertTrue(found);
+		Assert.assertTrue("The new user was not found", found);
 
 		//Log in as the new user
 		GSTestingUtil.logout(_driver);
@@ -254,7 +256,7 @@ public class TestClass
 
 		//Check the log in worked
 		WebElement menuButton = GSTestingUtil.findElementByXPath(_driver, "//li[@id='userMenuButton']/a");
-		Assert.assertTrue(menuButton.getText().equals(randomUsername));
+		Assert.assertTrue("The new user was not able to log in correctly", menuButton.getText().equals(randomUsername));
 
 		//Go to the home page
 		WebElement backToHomePageLink = GSTestingUtil.findElementByXPath(_driver, "//div[@id='breadcrumbs']/a[1]");
@@ -309,7 +311,7 @@ public class TestClass
 
 		//Check the cover image is loaded
 		WebElement coverImage = GSTestingUtil.findElementByXPath(_driver, "//div[@id='coverImage']/img");
-		Assert.assertTrue(GSTestingUtil.isImageLoaded(_driver, coverImage));
+		Assert.assertTrue("The cover image of the document did not load correctly", GSTestingUtil.isImageLoaded(_driver, coverImage));
 	}
 
 	@AfterClass
