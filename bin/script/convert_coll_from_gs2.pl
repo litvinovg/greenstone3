@@ -715,6 +715,28 @@ sub tidy_up_display_item {
     return $value;
 }
 
+sub format_if_or {
+    my ($format, $node_type) = @_;
+
+    # while we find nested if/or statements, recurse to find more nested if/or statements, 
+    # and try to expand (process) these nested statements starting from innermost going to outermost 
+
+    while($format =~ m/^.*\{(?:If|Or)\}\{[^\}\{]*\{/) { # contains nested if/or statement, expand it
+
+	my ($prefix, $nested_to_process, $suffix) = $format =~ m/^(.*\{(?:If|Or)\}\{[^\}\{]*)(\{[^\}]*\}\s*\{[^\}]*\})(.*)$/g; # recursion step
+
+	#print STDERR "prefix: |$prefix|\n\nnested: |$nested_to_process|\n\nsuffix: |$suffix|\n\n";
+	$format = $prefix . &format_if_or($nested_to_process, $node_type) . $suffix;
+    }
+
+    if($format =~ m/\{(If|Or)\}\{[^\}\{]*\}/g) { # base step: contains if/or statement(s), but none nested
+	# expand them
+	$format =~ s/\{If\}\{([^\}]*)\}/&format_if($1, $node_type)/eg;
+	$format =~ s/\{Or\}\{([^\}]*)\}/&format_or($1)/eg;
+    }
+    return $format;
+}
+
 sub write_format {
     my ($writer, $old_format, $node_type) = @_;
     # replace \' with '
@@ -722,9 +744,8 @@ sub write_format {
     # replace \" with "
     $old_format =~ s/\\\"/\"/g;
     #convert [] to <gsf:...>
-    # assume no nesting {If} or {Or} for now
-    $old_format =~ s/\{If\}\{([^\}]*)\}/&format_if($1, $node_type)/eg;
-    $old_format =~ s/\{Or\}\{([^\}]*)\}/&format_or($1)/eg;
+    # now handles nested {If} and {Or}
+    $old_format = &format_if_or($old_format, $node_type);
     $old_format =~ s/\[Text\]/\<gsf:text\/\>/g;
     $old_format =~ s/\[num\]/\<gsf:num\/\>/g;
     $old_format =~ s/\[link\]/\<gsf:link type=\'$node_type\'\>/g;
