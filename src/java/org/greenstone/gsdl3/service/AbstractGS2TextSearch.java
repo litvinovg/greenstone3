@@ -181,10 +181,11 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 		if (extra_info != null)
 		{
 			Document owner = info.getOwnerDocument();
-			// so far we have index specific display elements, and global format elements 
-			NodeList indexes = info.getElementsByTagName(GSXML.INDEX_ELEM);
 			Element config_search = (Element) GSXML.getChildByTagName(extra_info, GSXML.SEARCH_ELEM);
 
+			// so far we have index and indexSubcollection specific display elements, and global format elements 
+
+			NodeList indexes = info.getElementsByTagName(GSXML.INDEX_ELEM);
 			for (int i = 0; i < indexes.getLength(); i++)
 			{
 				Element ind = (Element) indexes.item(i);
@@ -207,6 +208,31 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 					}
 				}
 			} // for each index
+
+			NodeList indexSubcollections = info.getElementsByTagName(INDEX_SUBCOLLECTION_ELEM); // buildConfig.xml
+
+			for (int i = 0; i < indexSubcollections.getLength(); i++)
+			{
+				Element indexSubcollection = (Element) indexSubcollections.item(i);
+				String name = indexSubcollection.getAttribute(GSXML.NAME_ATT);
+				Element node_extra = GSXML.getNamedElement(config_search, INDEX_SUBCOLLECTION_ELEM, GSXML.NAME_ATT, name); // collectionConfig.xml
+				if (node_extra == null)
+				{
+					logger.error("haven't found extra info for indexSubCollection named " + name);
+					continue;
+				}
+
+				// get the display elements if any - displayName
+				NodeList display_names = node_extra.getElementsByTagName(GSXML.DISPLAY_TEXT_ELEM);
+				if (display_names != null)
+				{
+					for (int j = 0; j < display_names.getLength(); j++)
+					{
+						Element e = (Element) display_names.item(j);
+						indexSubcollection.appendChild(owner.importNode(e, true));
+					}
+				}
+			} // for each indexSubCollection
 		}
 		return true;
 	}
