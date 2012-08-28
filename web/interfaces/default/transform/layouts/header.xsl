@@ -146,8 +146,33 @@
 					</xsl:for-each>
 				</xsl:if>
 
+				<!-- PhindApplet. Need something similar for the Collage applet too, probably -->
+				<xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='PhindApplet']">
+					<li>
+						<xsl:choose>
+							<!-- If this tab is selected then colour it differently -->
+							<xsl:when test="/page/pageRequest[@action='a']">
+								<xsl:attribute name='class'>ui-state-default ui-corner-top ui-tabs-selected ui-state-active</xsl:attribute>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:attribute name='class'>ui-state-default ui-corner-top</xsl:attribute>
+							</xsl:otherwise>
+						</xsl:choose>
+						
+						<a>
+							<xsl:if test="displayItem[@name='description']">
+								<xsl:attribute name="title">
+									<xsl:value-of select="displayItem[@name='description']"/>
+								</xsl:attribute>
+							</xsl:if>						  
+							<xsl:attribute name="href"><xsl:value-of select="$library_name"/>?a=a&amp;rt=d&amp;s=<xsl:value-of select="@name"/>&amp;c=<xsl:value-of select="/page/pageResponse/collection/@name"/></xsl:attribute>
+							<xsl:value-of select="displayItem[@name='name']"/>
+						</a>
+					</li>
+				</xsl:for-each>
+				
 				<!-- all other services -->
-				<xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[not(@type='query') and not(@type='browse')]">
+				<xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[not(@type='query') and not(@type='browse') and not (@name='PhindApplet')]">
 					<xsl:call-template name="navigationTab"/>
 				</xsl:for-each>
 			</ul>

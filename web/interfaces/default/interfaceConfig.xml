@@ -15,7 +15,7 @@
     <action class="GS2BrowseAction" name="b" xslt="pages/classifier.xsl"/>
     <action class="DocumentAction" name="d" xslt="pages/document.xsl"/>
 
-    <action class="AppletAction" name="a" xslt="applet.xsl"/>
+    <action class="AppletAction" name="a" xslt="pages/applet.xsl"/>
     <action class="XMLDocumentAction" name="xd">
       <subaction name="toc" xslt="pages/document-toc.xsl"/>
       <subaction name="text" xslt="pages/document-content.xsl"/>

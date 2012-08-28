@@ -97,6 +97,9 @@ public class AppletAction extends Action
 		editLocalParams(applet_elem, (String) config_params.get(GSConstants.LIBRARY_NAME), collection);
 		page_response.appendChild(service_elem);
 
+		//append site metadata
+		addSiteMetadata(page_response, userContext);
+		//addInterfaceOptions(page_response);
 		return result;
 
 	}
