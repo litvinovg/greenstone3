@@ -137,12 +137,11 @@
 					<xsl:variable name="ns">s1.</xsl:variable>
 					<xsl:for-each select="paramList/param">
 						<xsl:choose>
-							<xsl:when test="@name='case' or @name='stem' or @name='accent'">
+							<xsl:when test="@name='case' or @name='stem' or @name='accent' or @name = 'maxDocs' or @name = 'hitsPerPage'">
 							</xsl:when>
 							<xsl:when test="@type='multi'">
 								<xsl:apply-templates select="."><xsl:with-param name="ns" select="$ns"/></xsl:apply-templates>
 							</xsl:when>
-							<xsl:when test="@name = 'maxDocs' or @name = 'hitsPerPage'"></xsl:when>
 							<xsl:otherwise>
 								<xsl:variable name="pvalue"><xsl:apply-templates select="." mode="calculate-default"><xsl:with-param name="ns" select="$ns"/></xsl:apply-templates></xsl:variable>
 								<div class="paramLabel"><xsl:value-of select="displayItem[@name='name']"/></div>
@@ -547,7 +546,7 @@
 		<xsl:variable name="pos" select="@occurs - $occurs"/>	
 		<tr class="queryfieldrow">
 			<xsl:for-each select="param">
-				<xsl:variable name="pname" select="@name"/>
+				<xsl:variable name="pname"><xsl:value-of select="$ns"/><xsl:value-of select="@name"/></xsl:variable>
 				<xsl:variable name="values" select="/page/pageRequest/paramList/param[@name=$pname]/@value"/>
 				<td class="queryfieldcell">
 					<xsl:choose>
