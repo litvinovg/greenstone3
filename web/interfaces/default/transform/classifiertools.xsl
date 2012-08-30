@@ -151,10 +151,14 @@
 	
 	<xsl:template name="documentNodePost">
 		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
-			<xsl:call-template name="mapFeatures"/>
+		    <xsl:if test="metadataList/metadata[@name='Latitude' or @name='Longitude']">
+		        <xsl:call-template name="mapFeatures"/>
+		    </xsl:if>
 		</xsl:if>
 	</xsl:template>
 	
+select="
+
 	<xsl:template name="mapFeatures">
 		<td style="padding-left:5px; padding-right:5px;" valign="top">
 			<a href="javascript:focusDocument('{@nodeID}');"><img src="interfaces/{$interface_name}/images/map_marker.png"/></a>
