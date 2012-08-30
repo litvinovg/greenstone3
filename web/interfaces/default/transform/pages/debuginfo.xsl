@@ -35,6 +35,23 @@
 	    <dd><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo.formatedit')"/></dd>
 	  </dl>	  
 
+
+
+
+	  <!-- better to do the following with a util:getInterfaceText()
+	       so language independent -->
+	  <p>Refresh all the collection configuration files:</p>
+
+	  <dl>
+	    <dt>a=s&amp;sa=c</dt>
+
+	    <dd>
+	      Reconfigures the whole site. Reads in siteCog.xml,
+	      reloads all the collections.
+	    </dd>
+	  </dl>
+
+
 	</xsl:template>
 
 
