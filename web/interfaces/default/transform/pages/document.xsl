@@ -389,9 +389,16 @@
 								<xsl:text>/collection/</xsl:text>
 								<xsl:value-of select="$collName"/>
 								<xsl:text>/document/</xsl:text>
-								<xsl:value-of select="/page/pageResponse/document/documentNode/@nodeID"/>
+								<xsl:choose>
+									<xsl:when test="count(//documentNode) > 0">
+										<xsl:value-of select="/page/pageResponse/document/documentNode/@nodeID"/>
+									</xsl:when>
+									<xsl:otherwise>
+										<xsl:value-of select="/page/pageResponse/document/@nodeID"/>
+									</xsl:otherwise>
+								</xsl:choose>
 								<xsl:if test="not(/page/pageRequest/paramList/param[@name = 'docEdit']/@value = '1')">
-									<xsl:text>?ed=1&amp;docEdit=1</xsl:text>
+									<xsl:text>?ed=1&amp;docEdit=1&amp;dt=hierarchy</xsl:text>
 								</xsl:if>
 							</xsl:attribute>
 							<xsl:choose>

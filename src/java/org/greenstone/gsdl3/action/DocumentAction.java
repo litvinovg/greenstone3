@@ -596,7 +596,7 @@ public class DocumentAction extends Action
 				dummy_node.setAttribute(GSXML.NODE_ID_ATT, modified_doc_id);
 				dummy_node.appendChild(this.doc.importNode(dc_response_doc_content, true));
 				// hack for simple type
-				if (document_type.equals("simple"))
+				if (document_type.equals(GSXML.DOC_TYPE_SIMPLE))
 				{
 					// we dont want the internal docNode, just want the content and metadata in the document
 					// rethink this!!
@@ -617,6 +617,8 @@ public class DocumentAction extends Action
 						}
 					}
 				}
+				
+				the_document.setAttribute(GSXML.NODE_ID_ATT, modified_doc_id);
 			}
 			else
 			{
