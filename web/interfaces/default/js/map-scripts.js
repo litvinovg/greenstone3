@@ -36,6 +36,7 @@ function initializeMapScripts()
 		else
 		{
 			document.getElementById("map_canvas").style.visibility = "hidden";
+			document.getElementById("map_canvas").style.height = "0px";
 		}
 	}
 	
@@ -423,6 +424,7 @@ function getSubClassifier(sectionID)
 				}
 				
 				document.getElementById("map_canvas").style.visibility = "visible";
+				document.getElementById("map_canvas").style.height = undefined;
 			}
 			
 			updateMap();
