@@ -50,7 +50,7 @@
 			</xsl:otherwise>
 		</xsl:choose>
 		<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
-		<link rel="shortcut icon" href="favicon.ico"/> 
+		<link rel="shortcut icon" href="interfaces/{$interface_name}/images/favicon.ico"/> 
 		
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery.min.js"><xsl:text> </xsl:text></script>
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery-ui.min.js"><xsl:text> </xsl:text></script>
