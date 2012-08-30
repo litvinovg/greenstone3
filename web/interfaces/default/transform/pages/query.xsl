@@ -188,7 +188,7 @@
 				<xsl:otherwise>Doc</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-	
+		
 		<!-- The list of search terms with their frequency and document count -->
 		<xsl:choose>
 			<xsl:when test="$docMax &gt; 0">
@@ -260,8 +260,24 @@
 					</xsl:for-each>
 				</p>
 			</xsl:when>
-			<xsl:otherwise>
-				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.nodocsmatch')"/>
+			<xsl:otherwise><!-- 0 results. Still need to check for search term being stopwords -->
+			  <xsl:choose>
+			    <xsl:when test="count(/page/pageResponse/termList/stopword) &gt; 0">
+			      <p class="termList">
+				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.common')"/><xsl:text> </xsl:text>
+				
+				<xsl:if test="/page/pageResponse/termList/stopword">
+				  <xsl:for-each select="/page/pageResponse/termList/stopword">
+				    <span style="font-style:italic;"><xsl:value-of select="@name"/></span><xsl:text> </xsl:text>
+				  </xsl:for-each>
+				  <br /><br />
+				</xsl:if>
+			      </p>		      
+			    </xsl:when>
+			    <xsl:otherwise><!-- 0 results and not owing to stopwords.-->
+			      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.nodocsmatch')"/>
+			    </xsl:otherwise>
+			  </xsl:choose>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
