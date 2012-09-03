@@ -27,8 +27,8 @@
 		<base>
 			<xsl:attribute name="href">
 				<xsl:choose>
-					<xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'baseURL']">
-						<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'baseURL']"/>
+					<xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'siteURL']">
+						<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'siteURL']"/>
 					</xsl:when>
 					<xsl:when test="/page/pageRequest/@baseURL">
 						<xsl:value-of select="/page/pageRequest/@baseURL"/>
