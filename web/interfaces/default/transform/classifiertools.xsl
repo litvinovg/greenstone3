@@ -156,8 +156,6 @@
 		    </xsl:if>
 		</xsl:if>
 	</xsl:template>
-	
-select="
 
 	<xsl:template name="mapFeatures">
 		<td style="padding-left:5px; padding-right:5px;" valign="top">
