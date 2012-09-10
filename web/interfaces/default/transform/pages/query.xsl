@@ -86,7 +86,7 @@
 			</xsl:attribute>
 			<table id="resultsTable">
 				<xsl:for-each select="pageResponse/documentNodeList/documentNode">
-					<tr class="document">
+					<tr id="div{@nodeID}" class="document">
 						<xsl:apply-templates select="."/>
 						<xsl:call-template name="documentNodePost"/>
 					</tr>
@@ -633,7 +633,7 @@
 	
 	<xsl:template name="mapFeaturesIcon">
 		<td style="padding-left:5px; padding-right:5px;" valign="top">
-			<a href="javascript:focusDocument('{@nodeID}');"><img src="interfaces/{$interface_name}/images/bluemarker.png"/></a>
+			<a href="javascript:focusDocument('{@nodeID}');"><img src="interfaces/default/images/map_marker.png"/></a>
 		</td>
 	</xsl:template>
 </xsl:stylesheet>
