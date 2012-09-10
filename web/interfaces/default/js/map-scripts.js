@@ -16,7 +16,6 @@ var _nearbyDocs = new Array();
 function initializeMapScripts() 
 {
 	modifyFunctions();
-	
 	setUpMap();
 	
 	var jsonNodeDiv = document.getElementById("jsonNodes");
@@ -44,6 +43,36 @@ function initializeMapScripts()
 	
 	if(_docList.ids.length > 1)
 	{
+		var startStopCheckbox = document.createElement("input");
+		startStopCheckbox.setAttribute("type", "checkbox");
+		startStopCheckbox.setAttribute("checked", "true");
+		startStopCheckbox.onclick = function()
+		{
+			if(startStopCheckbox.checked)
+			{
+				if(_intervalHandle == null)
+				{
+					_intervalHandle = setInterval(loopThroughMarkers, 2000);
+				}
+			}
+			else
+			{
+				clearInterval(_intervalHandle);
+				_intervalHandle = null;
+			}
+		};
+		
+		var label = document.createElement("span");
+		label.innerHTML = "Scroll through places";
+		
+		var container = document.createElement("DIV");
+		container.appendChild(startStopCheckbox);
+		container.appendChild(label);
+		container.setAttribute("class", "ui-widget-header ui-corner-all");
+		container.setAttribute("style", "clear:right; float:right; padding:0px 5px 3px 0px;");
+
+		$(container).insertAfter("#map_canvas");
+		
 		_intervalHandle = setInterval(loopThroughMarkers, 2000);
 	}
 }
@@ -336,6 +365,7 @@ function focusDocument(id)
 	if(doc)
 	{
 		clearInterval(_intervalHandle);
+		_intervalHandle = null;
 		_map.panTo(new google.maps.LatLng(doc.lat, doc.lng));
 		clearAllInfoBoxes();
 		doc.marker.markerInfo.open(_map, doc.marker);
@@ -361,8 +391,7 @@ function createMarker(doc, mainMarker)
 		({
 			position: pos,
 			title:doc.title,
-			map:_map,
-			icon:"interfaces/" + gs.xsltParams.interface_name + "/images/bluemarker.png"
+			map:_map
 		});
 	}
 	else
@@ -371,7 +400,8 @@ function createMarker(doc, mainMarker)
 		({
 			position: pos,
 			title:doc.title,
-			map:_map
+			map:_map,
+			icon:"interfaces/" + gs.xsltParams.interface_name + "/images/bluemarker.png"
 		});
 	}
 
