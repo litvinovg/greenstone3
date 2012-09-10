@@ -46,6 +46,7 @@ function initializeMapScripts()
 		var startStopCheckbox = document.createElement("input");
 		startStopCheckbox.setAttribute("type", "checkbox");
 		startStopCheckbox.setAttribute("checked", "true");
+		startStopCheckbox.setAttribute("id", "scrollCheckbox");
 		startStopCheckbox.onclick = function()
 		{
 			if(startStopCheckbox.checked)
@@ -369,6 +370,11 @@ function focusDocument(id)
 		_map.panTo(new google.maps.LatLng(doc.lat, doc.lng));
 		clearAllInfoBoxes();
 		doc.marker.markerInfo.open(_map, doc.marker);
+		var scrollCheckbox = document.getElementById("scrollCheckbox");
+		if(scrollCheckbox.checked)
+		{
+			scrollCheckbox.checked = false;
+		}
 	}
 }
 
