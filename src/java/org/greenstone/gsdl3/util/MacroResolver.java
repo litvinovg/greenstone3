@@ -102,7 +102,7 @@ abstract public class MacroResolver {
 		    String bundle = e.getAttribute("bundle");
 		    addMacro(TYPE_DICT, from, bundle, key, scope, resolve);
 		}
-                                                                                                             	    } 
+	    } 
 	}
 	
     }
