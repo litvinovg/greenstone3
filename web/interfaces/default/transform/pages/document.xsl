@@ -77,7 +77,7 @@
 		</xsl:choose>
 	</xsl:template>
 	
-	<xsl:template name="sectionHeader">
+	<xsl:template name="sectionHeading">
 		<xsl:call-template name="sectionTitle"/>
 	</xsl:template>
 	
@@ -150,7 +150,7 @@
 						</span>
 					</xsl:if>
 					<!-- Display the title for the section regardless of whether automatic section numbering is turned on -->
-					<span><xsl:call-template name="sectionHeader"/></span>
+					<span><xsl:call-template name="sectionHeading"/></span>
 				</p>
 			</td>
 			

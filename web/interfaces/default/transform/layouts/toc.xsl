@@ -181,7 +181,7 @@
 							<xsl:value-of select="util:hashToSectionId(@nodeID)"/>
 							<xsl:text> </xsl:text>
 						</xsl:if>
-						<xsl:call-template name="sectionHeader"/>
+						<xsl:call-template name="sectionHeading"/>
 					</a>
 				</td>
 			</tr></table>
