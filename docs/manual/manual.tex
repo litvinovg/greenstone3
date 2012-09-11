@@ -723,6 +723,7 @@ specific to that service---there is no set format. Figure~\ref{fig:buildconfig} 
 
 \subsection{Formatting the collection}\label{sec:formatstmt}
 
+\subsubsection{Modifying the ``format'' xslt templates}
 Part of collection design involves deciding how the collection should look. \gsiii\  has a default 'look' for a collection, so this is optional. However, the default may not suit the purposes of some collections, so many parts to the look of a collection can be determined by the collection designer.
 
 In standard \gsiii, the library is served to a web browser by a servlet, and the HTML is generated using XSLT. XSLT templates are used to format all the parts of the pages. These templates can be overridden by including them in the \gst{collectionConfig.xml} file. Some commonly overridden templates are those for formatting lists: search results list, classifier browsing hierarchies, and for parts of the document display. 
@@ -784,7 +785,8 @@ Table~\ref{tab:gsf-format} shows the set of \gst{'gsf'} (Greenstone Format) elem
 \gst{<gsf:icon type='source'/>} & An appropriate icon for the original file e.g. Word, PDF icon\\
 \hline
 \gst{<gsf:metadata name='Title'/>} & All the values of a metadata element for the current document or section, in this case, Title\\
-\gst{<gsf:metadata name='Title' select='select-type' [separator='y' pos='first|last|n']/>} & A more extended selection of metadata values. The select field can be one of those shown in Table~\ref{tab:gsf-select-types}. There are two optional attributes: separator gives a String that will be used to separate the fields, default is ``, ``, and pos can be set to return either the first, last or nth value for that metadata at each section.\\
+\gst{<gsf:metadata name='Title' select='select-type' [separator='y' prefix="p" suffix="s" pos='first|last|n']/>} & A more extended selection of metadata values. The select field can be one of those shown in Table~\ref{tab:gsf-select-types}. There are some optional attributes: separator gives a String that will be used to separate the fields (default is ``, ``), prefix and suffix give strings that will be output before and after each field, and pos can be set to return either the first, last or nth value for that metadata at each section.\\
+\gst{<gsf:metadata name='Title'> <separator>y</separator> <prefix>p</prefix> <suffix>s</suffix> </gsf:metadata>} & separator, prefix and suffix can all be specified as elements instead of attributes. This format allows for HTML tags to be used. e.g. \gst{<br/>} as a separator. \\
 \gst{<gsf:metadata name='Date' format='formatDate'/>} & The value of a metadata element for the current document, formatted in some way. Current formatting options available are listed in Table~\ref{tab:gsf-process-types}. \\
 \hline
 \gst{<gsf:choose-metadata>
