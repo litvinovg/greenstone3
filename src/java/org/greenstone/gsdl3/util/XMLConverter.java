@@ -66,7 +66,7 @@ public class XMLConverter
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.XMLConverter.class.getName());
 
 	protected EntityResolver resolver = null;
-	
+
 	/** xerces parser */
 	protected DOMParser parser = null;
 
@@ -146,15 +146,16 @@ public class XMLConverter
 			parser.setFeature("http://xml.org/sax/features/validation", false);
 			parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 			parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
-			if(resolver != null)
+			if (resolver != null)
 			{
 				parser.setEntityResolver(this.resolver);
 			}
 			parser.setErrorHandler(new ParseErrorHandler());
 			parser.parse(xml_source);
-			
+
 			Document doc = parser.getDocument();
 
+			reader.close();
 			return doc;
 
 		}
@@ -177,15 +178,16 @@ public class XMLConverter
 			parser.setFeature("http://xml.org/sax/features/validation", false);
 			parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 			parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
-			if(resolver != null)
+			if (resolver != null)
 			{
 				parser.setEntityResolver(this.resolver);
 			}
 			parser.setErrorHandler(new ParseErrorHandler());
 			parser.parse(xml_source);
-			
+
 			Document doc = parser.getDocument();
 
+			reader.close();
 			return doc;
 
 		}
@@ -195,7 +197,7 @@ public class XMLConverter
 		}
 		return null;
 	}
-	
+
 	/** returns a DOM Document */
 	public Document getDOM(File in)
 	{
@@ -203,19 +205,21 @@ public class XMLConverter
 		{
 			FileReader reader = new FileReader(in);
 			InputSource xml_source = new InputSource(reader);
-			
+
 			DOMParser parser = new DOMParser();
 			parser.setFeature("http://xml.org/sax/features/validation", false);
 			parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 			parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
-			if(resolver != null)
+			if (resolver != null)
 			{
 				parser.setEntityResolver(this.resolver);
 			}
 			parser.setErrorHandler(new ParseErrorHandler());
 			parser.parse(xml_source);
-			
+
 			Document doc = parser.getDocument();
+
+			reader.close();
 			return doc;
 
 		}
@@ -240,15 +244,16 @@ public class XMLConverter
 			parser.setFeature("http://xml.org/sax/features/validation", false);
 			parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 			parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
-			if(resolver != null)
+			if (resolver != null)
 			{
 				parser.setEntityResolver(this.resolver);
 			}
 			parser.setErrorHandler(new ParseErrorHandler());
 			parser.parse(xml_source);
-			
+
 			Document doc = parser.getDocument();
 
+			isr.close();
 			return doc;
 
 		}
