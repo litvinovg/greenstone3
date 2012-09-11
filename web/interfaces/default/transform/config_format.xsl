@@ -242,7 +242,9 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
     <xsl:if test="not(@hidden = 'true')">
       <!-- set hidden=true on a gsf:metadata so that it gets retrieved from the server but not displayed -->
       <xsl:variable name="meta_name"><xsl:call-template name="getMetadataName"/></xsl:variable>
-      <xsl:variable name="separator"><xsl:choose><xsl:when test="@separator"><xsl:value-of disable-output-escaping='yes' select="@separator"/></xsl:when><xsl:otherwise><xsl:text>, </xsl:text></xsl:otherwise></xsl:choose></xsl:variable>
+      <xsl:variable name="separator"><xsl:choose><xsl:when test="@separator"><xsl:value-of disable-output-escaping='yes' select="@separator"/></xsl:when><xsl:when test="separator"><xsl:copy-of select="separator/node()"/></xsl:when><xsl:otherwise><xsl:text>, </xsl:text></xsl:otherwise></xsl:choose></xsl:variable>
+      <xsl:variable name="prefix"><xsl:choose><xsl:when test="@prefix"><xsl:value-of disable-output-escaping='yes' select="@prefix"/></xsl:when><xsl:when test="prefix"><xsl:copy-of select="prefix/node()"/></xsl:when></xsl:choose></xsl:variable>
+      <xsl:variable name="suffix"><xsl:choose><xsl:when test="@suffix"><xsl:value-of disable-output-escaping='yes' select="@suffix"/></xsl:when><xsl:when test="suffix"><xsl:copy-of select="suffix/node()"/></xsl:when></xsl:choose></xsl:variable>
       <xsl:variable name="postest">
 	<xsl:choose><xsl:when test="@pos = 'first'">position()=1</xsl:when><xsl:when test="@pos = 'last'">position() = last()</xsl:when><xsl:when test="@pos">position() = <xsl:value-of select="@pos"/></xsl:when><xsl:otherwise>true()</xsl:otherwise></xsl:choose>
       </xsl:variable>
@@ -250,7 +252,8 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
       <xslt:for-each><xsl:attribute name="select">
 	<xsl:if test="@type='collection'">/page/pageResponse/collection/</xsl:if>metadataList/metadata[@name='<xsl:value-of select="$meta_name"/>'<xsl:if test="@lang"><xsl:text> and @lang=</xsl:text><xsl:value-of select="@lang"/></xsl:if><xsl:text>]</xsl:text></xsl:attribute>
 	  <xslt:if test="{$postest}">
-	  <xslt:if test="{$multiple} and position()>1"><xsl:value-of select="$separator"/></xslt:if>
+	  <xslt:if test="{$multiple} and position()>1"><xsl:copy-of select="$separator"/></xslt:if>
+	  <xsl:copy-of select="$prefix"/>
 	  <xsl:choose>
 	    <xsl:when test="@format">
 	    <xslt:value-of disable-output-escaping='yes' select="util:{@format}(., /page/@lang )"/>
@@ -260,6 +263,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 </xsl:otherwise>
 	  </xsl:choose>
 	</xslt:if>
+	<xsl:copy-of select="$suffix"/>
 	</xslt:for-each>
   </xsl:if>
   </xsl:template>
