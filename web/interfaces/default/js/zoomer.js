@@ -73,35 +73,11 @@
 					});
 				}).dblclick(function ()
 				{
-					expand(smallArea, largeArea, wrap, zoomPort, mover, expansionSize, speedMultiplier);
+					image = largeArea.children("img");
+					document.location.href = image.attr("src");
 				});
 			};
 
-			function expand(smallArea, largeArea, wrap, zoomPort, mover, expansionSize, speedMultiplier)
-			{
-				smallArea.hide();
-				zoomPort.hide();
-				mover.fadeIn().data("origWidth", mover.width()).data("origHeight", mover.height()).css(
-				{
-					position: "static",
-					height: "auto",
-					width: "auto",
-					overflow: "visible"
-				});
-				wrap.css(
-				{
-					width: "100%"
-				}).unbind().dblclick(function ()
-				{
-					setup(smallArea, largeArea, wrap, zoomPort, mover, expansionSize, speedMultiplier);
-				});
-				largeArea.css(
-				{
-					left: 0,
-					top: 0,
-					width: largeArea.data("origWidth")
-				});
-			};
 			mover.data("origWidth", mover.width()).data("origHeight", mover.height());
 			// Because the largeArea is often hidden, the width() function returns zero, take width from CSS instead  
 			largeArea.data("origWidth", largeArea.css("width"));
