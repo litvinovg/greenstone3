@@ -1221,17 +1221,30 @@
     Doing "cat </dev/null > packages/tomcat/logs/catalina.out" doesn't work as an ant target.
     It seems to have a problem with cat or </dev/null, with or without the < sign. -->
   <target name="clean-logs" description="Empties catalina.out, greenstone.log and contents of web/logs/tmp">
-    <echo>Truncating catalina.out, greenstone.log and server.log, and emptying ${web.home}/logs/tmp</echo>
-    <exec executable="truncate" os="${os.unix}" dir="${catalina.home}/logs" spawn="false">
-      <arg value="-s0"/>
+    <echo>Truncating catalina.out, greenstone.log and server.log, and emptying ${web.home}/logs/tmp</echo>    
+    <exec executable="rm" os="${os.unix}" dir="${catalina.home}/logs" spawn="false">
+      <arg value="-f"/>
       <arg value="catalina.out"/>
     </exec>
-    <exec executable="truncate" os="${os.unix}" dir="${web.home}/logs" spawn="false">
-      <arg value="-s0"/>
+    <exec executable="rm" os="${os.unix}" dir="${web.home}/logs" spawn="false">
+      <arg value="-f"/>
       <arg value="greenstone.log"/>
     </exec>
-    <exec executable="truncate" os="${os.unix}" dir="${web.home}/logs" spawn="false">
-      <arg value="-s0"/>
+    <exec executable="rm" os="${os.unix}" dir="${web.home}/logs" spawn="false">
+      <arg value="-f"/>
+      <arg value="server.log"/>
+    </exec>
+
+    <exec executable="touch" os="${os.unix}" dir="${catalina.home}/logs"
+    spawn="false">
+      <arg value="catalina.out"/>
+    </exec>
+    <exec executable="touch" os="${os.unix}" dir="${web.home}/logs"
+      spawn="false">
+      <arg value="greenstone.log"/>
+    </exec>
+    <exec executable="touch" os="${os.unix}" dir="${web.home}/logs"
+      spawn="false">
       <arg value="server.log"/>
     </exec>
 
