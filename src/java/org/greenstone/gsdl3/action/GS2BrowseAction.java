@@ -138,10 +138,10 @@ public class GS2BrowseAction extends Action
 					NodeList extraMetaList = extraMetaListElem.getElementsByTagName(GSXML.EXTRA_METADATA);
 					for (int i = 0; i < extraMetaList.getLength(); i++)
 					{
-						class_meta_names.add(((Element) extraMetaList.item(i)).getAttribute(GSXML.NAME_ATT));
+						doc_meta_names.add(((Element) extraMetaList.item(i)).getAttribute(GSXML.NAME_ATT));
 					}
 				}
-
+				
 				// set the format type
 				new_format.setAttribute(GSXML.TYPE_ATT, "browse");
 
