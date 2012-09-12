@@ -574,25 +574,18 @@
 	<xsl:template name="mapFeatures">
 		<div id="map_canvas" class="map_canvas_full"><xsl:text> </xsl:text></div>
 
-		<xsl:for-each select="documentNode">
-			<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
-				<div style="background:#BBFFBB; padding: 5px; margin:0px auto; width:890px;">
-					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.maps.nearby_docs')"/>
-					<img id="nearbyDocumentsToggle" style="margin-left:5px;" src="interfaces/{$interface_name}/images/expand.png">
-						<xsl:attribute name="onclick">
-							<xsl:text>performDistanceSearch('</xsl:text>
-							<xsl:value-of select="@nodeID"/>
-							<xsl:text>', '</xsl:text>
-							<gsf:metadata name="Latitude"/>
-							<xsl:text>', '</xsl:text>
-							<gsf:metadata name="Longitude"/>
-							<xsl:text>', 2);</xsl:text>
-						</xsl:attribute>
-					</img>
-					<div id="nearbyDocuments"><xsl:text> </xsl:text></div>
-				</div>
-			</xsl:if>
-		</xsl:for-each>
+		<xsl:choose>
+			<!-- HIERARCHICAL DOCUMENTS -->
+			<xsl:when test="count(//documentNode) > 0">
+				<xsl:for-each select="documentNode">
+					<xsl:call-template name="mapPlacesNearHere"/>
+				</xsl:for-each>
+			</xsl:when>
+			<!-- SIMPLE DOCUMENTS -->
+			<xsl:otherwise>
+				<xsl:call-template name="mapPlacesNearHere"/>
+			</xsl:otherwise>
+		</xsl:choose>
 		
 		<div id="jsonNodes" style="display:none;">
 			<xsl:text>[</xsl:text>
@@ -629,5 +622,25 @@
 			</xsl:choose>
 			<xsl:text>]</xsl:text>
 		</div>
+	</xsl:template>
+	
+	<xsl:template name="mapPlacesNearHere">
+		<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
+			<div style="background:#BBFFBB; padding: 5px; margin:0px auto; width:890px;">
+				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.maps.nearby_docs')"/>
+				<img id="nearbyDocumentsToggle" style="margin-left:5px;" src="interfaces/{$interface_name}/images/expand.png">
+					<xsl:attribute name="onclick">
+						<xsl:text>performDistanceSearch('</xsl:text>
+						<xsl:value-of select="@nodeID"/>
+						<xsl:text>', '</xsl:text>
+						<gsf:metadata name="Latitude"/>
+						<xsl:text>', '</xsl:text>
+						<gsf:metadata name="Longitude"/>
+						<xsl:text>', 2);</xsl:text>
+					</xsl:attribute>
+				</img>
+				<div id="nearbyDocuments"><xsl:text> </xsl:text></div>
+			</div>
+		</xsl:if>
 	</xsl:template>
 </xsl:stylesheet>
