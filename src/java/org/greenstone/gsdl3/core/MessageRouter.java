@@ -167,8 +167,12 @@ public class MessageRouter implements ModuleInterface
 			return false;
 		}
 		this.site_home = GSFile.siteHome(GlobalProperties.getGSDL3Home(), this.site_name);
-		this.site_http_address = GlobalProperties.getGSDL3WebAddress() + "/sites/" + this.site_name;
-
+		String web_address = GlobalProperties.getGSDL3WebAddress();
+		if (web_address.equals("")) {
+		    this.site_http_address = "sites/"+this.site_name;
+		} else { 
+		    this.site_http_address = web_address + "/sites/" + this.site_name;
+		}
 		// are we behind a firewall?? - is there a better place to set up the proxy?
 		String host = GlobalProperties.getProperty("proxy.host");
 		String port = GlobalProperties.getProperty("proxy.port");
