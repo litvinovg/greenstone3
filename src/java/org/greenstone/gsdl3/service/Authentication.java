@@ -1036,4 +1036,16 @@ public class Authentication extends ServiceRack
 		}
 		return collect_list_node;
 	}
+
+    // main() method - calls hashPassword() on any String argument, printing this to stdout
+    // This main() is invoked by gliserver.pl perl code to encrypt passwords identically to Java code.
+    public static void main(String[] args) {
+	if(args.length < 1) {
+	    System.err.println("Usage: Authentication <string to encrypt>");
+	    System.exit(-1);
+	}
+	// just hash the first argument
+	String hash = Authentication.hashPassword(args[0]);
+	System.out.println(hash);
+    }
 }
