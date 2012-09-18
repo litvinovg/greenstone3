@@ -447,8 +447,8 @@
 						<div id="small{util:replace(@nodeID, '.', '_')}" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
 							<gsf:image type="screen"/>
 						</div>
-						<div id="mover{util:replace(@nodeID, '.', '_')}" style="border: 1px solid green; position: absolute; top: 0; left: 0; width: 198px; height: 198px; overflow: hidden; z-index: 100; background: white; display: none;">
-							<div id="overlay{util:replace(@nodeID, '.', '_')}" style="width: 200px; height: 200px; position: absolute; top: 0; left: 0; z-index: 200;">
+						<div id="mover{util:replace(@nodeID, '.', '_')}" style="border: 1px solid green; position: absolute; top: 0; left: 0; width: 398px; height: 398px; overflow: hidden; z-index: 100; background: white; display: none;">
+							<div id="overlay{util:replace(@nodeID, '.', '_')}" style="width: 400px; height: 400px; position: absolute; top: 0; left: 0; z-index: 200;">
 								<xsl:text> </xsl:text>
 							</div>
 							<div id="large{util:replace(@nodeID, '.', '_')}" style="position: relative; width: {$imageWidth}px; height: {$imageHeight}px;">
