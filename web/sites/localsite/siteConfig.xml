@@ -29,6 +29,10 @@
 	</serviceRackList>
 	<serviceClusterList/>
 	<!-- this is a global replace list for all collections. At this stage it only applies to greenstone 2 collections. It will attempt to resolve most of the common macros that appear in metadata. You can add more items here if you want them to apply to all collections. To turn this on/off for a particular collection, add <replaceListRef id='xx'/> into the collectionConfig for each set that you want to use -->
+  <!-- replace elements can look like: 
+  <replace macro="original text" scope="text|metadata|all" text="replacement text"/>
+  <replace macro="original text" scope="text|metadata|all" metadata="metadata element value to replace with"/>
+  <replace macro="original text" scope="text|metadata|all" key="dictionary key" bundle="dictionary name"/> -->
 	<replaceList  id="gs2-standard">
 		<replace macro="_iconpdf_" scope="metadata" text="&lt;img src='interfaces/default/images/ipdf.gif' border='0'/&gt;" resolve="false"/>
 		<replace macro="_icondoc_" scope="metadata" text="&lt;img src='interfaces/default/images/imsword.gif' border='0'/&gt;" resolve="false"/>
