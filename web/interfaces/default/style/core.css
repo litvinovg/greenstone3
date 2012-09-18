@@ -651,6 +651,10 @@ div.QuickSearch {
 	background: white !important;
 }
 
+.tocTextCell {
+	padding-left:5px;
+}
+
 .tableOfContentsContainer {
 	padding:1px;
 }
@@ -831,6 +835,14 @@ dl dd { padding-bottom:10px}
 .facetedResults{
 	float:left;
 	width:65%;
+}
+
+#gs-slideshow{
+	width:65%;
+}
+
+.slideshowImage{
+	width:100%;
 }
 
 /*

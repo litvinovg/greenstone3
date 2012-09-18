@@ -175,7 +175,7 @@
 				</td>
 				
 				<!-- The section name, links to the section in the document -->
-				<td>				
+				<td class="tocTextCell">				
 					<a id="toclink{@nodeID}" href="javascript:focusSection('{@nodeID}');">
 						<xsl:if test="util:hashToSectionId(@nodeID)">
 							<xsl:value-of select="util:hashToSectionId(@nodeID)"/>
@@ -215,7 +215,7 @@
 				<li id="pagedImageOptions">
 					<xsl:attribute name="style">
 						<xsl:choose>
-							<xsl:when test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageResponse/document/documentNode/@docType = 'paged' or /page/pageResponse/document/documentNode/@docType = 'pagedhierarchy'">
+							<xsl:when test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageResponse/document/@docType = 'paged' or /page/pageResponse/document/@docType = 'pagedhierarchy'">
 							</xsl:when>
 							<xsl:otherwise>
 								display:none;
@@ -241,6 +241,23 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</select>
+				</li>
+				
+				<!-- Slide-show options -->
+				<li id="slideShowOptions">
+					<xsl:attribute name="style">
+						<xsl:choose>
+							<xsl:when test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageResponse/document/@docType = 'paged' or /page/pageResponse/document/@docType = 'pagedhierarchy'">
+							</xsl:when>
+							<xsl:otherwise>
+								display:none;
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:attribute>
+					<img>
+						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'slideshow_image')"/></xsl:attribute>
+					</img>
+					<input id="ssOption" type="checkbox" onclick="showSlideShow()" class="optionCheckBox"/>
 				</li>
 			
 				<!-- Realistic books link -->
@@ -281,7 +298,7 @@
 						<xsl:text disable-output-escaping="yes">
 							$("#zoomToggle").change(function()
 							{
-								_imageZoomEnabled = !_imageZoomEnabled;
+								_imageZoomEnabled = $("#zoomToggle").attr("checked");
 							});
 						</xsl:text>
 					</script>
@@ -300,8 +317,8 @@
 								{
 									if(divs[i].getAttribute("id") &amp;&amp; divs[i].getAttribute("id").search(/^mover.*/) != -1)
 									{
-										divs[i].style.height = 200 + (2 * sliderValue) + "px";
-										divs[i].style.width = 200 + (2 * sliderValue) + "px";
+										divs[i].style.height = 400 + (2 * sliderValue) + "px";
+										divs[i].style.width = 400 + (2 * sliderValue) + "px";
 									}
 								}
 							}
