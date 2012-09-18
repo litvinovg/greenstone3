@@ -344,7 +344,7 @@ function expandOrCollapseAll(expand)
 function loadTopLevelPage(callbackFunction, customURL)
 {
 	var ajax = gs.functions.ajaxRequest();
-	
+
 	var url = gs.xsltParams.library_name + "?a=d&c=" + gs.cgiParams.c + "&excerptid=gs-document";
 	if(gs.cgiParams.d && gs.cgiParams.d.length > 0)
 	{
@@ -363,6 +363,7 @@ function loadTopLevelPage(callbackFunction, customURL)
 	{
 		ajax.open("GET", url, true);
 	}
+
 	ajax.onreadystatechange = function()
 	{
 		if(ajax.readyState == 4 && ajax.status == 200)
@@ -386,8 +387,7 @@ function loadTopLevelPage(callbackFunction, customURL)
 		}
 		else if(ajax.readyState == 4)
 		{
-			var targetElem = document.getElementById("gs-document");
-			targetElem.innerHTML = targetElem.innerHTML + "<br/> <br/> FAILED TO LOAD PAGE";
+			setTimeout(function(){loadTopLevelPage(callbackFunction, customURL);}, 1000);
 		}
 	};
 	ajax.send();
@@ -433,9 +433,7 @@ function retrieveFullTableOfContents()
 		}
 		else if(ajax.readyState == 4)
 		{
-			var loading = document.getElementById("tocLoadingImage");
-			loading.parentNode.removeChild(loading);
-			console.log("Error Loading TOC");
+			setTimeout(retrieveFullTableOfContents, 1000);
 		}
 	}
 	ajax.send();
@@ -604,9 +602,7 @@ function retrieveTableOfContentsAndTitles()
 		}
 		else if(ajax.readyState == 4)
 		{
-			var loading = document.getElementById("tocLoadingImage");
-			loading.parentNode.removeChild(loading);
-			console.log("Error Loading TOC");
+			setTimeout(function(){retrieveTableOfContentsAndTitles();}, 1000);
 		}
 	}
 	ajax.send();
