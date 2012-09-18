@@ -137,7 +137,8 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 		// we need to set the database for our GS2 macro resolver
 		GS2MacroResolver gs2_macro_resolver = (GS2MacroResolver) this.macro_resolver;
 		gs2_macro_resolver.setDB(this.coll_db);
-
+		// set the class loader in case we have collection specific properties files
+		gs2_macro_resolver.setClassLoader(this.class_loader);
 		return true;
 	}
 
@@ -172,7 +173,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 	 * element: <metadataList><metadata
 	 * name="xxx">value</metadata></metadataList>
 	 */
-	protected Element getMetadataList(String node_id, boolean all_metadata, ArrayList<String> metadata_names) throws GSException
+  protected Element getMetadataList(String node_id, boolean all_metadata, ArrayList<String> metadata_names, String lang) throws GSException
 	{
 		Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		DBInfo info = this.coll_db.getInfo(node_id);
@@ -180,7 +181,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 		{
 			return null;
 		}
-		String lang = "en"; // why do we need this??
+		
 		if (all_metadata) // this will get all metadata for current node
 		{
 			// return everything out of the database
@@ -193,7 +194,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
 				Vector<String> values = info.getMultiInfo(key);
 				for (int i = 0; i < values.size(); i++)
 				{
-					GSXML.addMetadata(this.doc, metadata_list, key, this.macro_resolver.resolve(values.elementAt(i), lang, MacroResolver.SCOPE_META, node_id));
+				  GSXML.addMetadata(this.doc, metadata_list, key, this.macro_resolver.resolve(values.elementAt(i), lang, MacroResolver.SCOPE_META, node_id));
 				}
 			}
 

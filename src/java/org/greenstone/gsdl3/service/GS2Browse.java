@@ -105,7 +105,7 @@ public class GS2Browse extends AbstractBrowse
 			logger.error("Could not open collection database!");
 			return false;
 		}
-		this.macro_resolver = new GS2MacroResolver(this.coll_db);
+		this.macro_resolver = new GS2MacroResolver(this.coll_db, this.class_loader);
 		
 		gs_doc_db = new BasicDocumentDatabase(this.doc, database_type, this.site_home, this.cluster_name, index_stem);
 		if (!gs_doc_db.isValid())

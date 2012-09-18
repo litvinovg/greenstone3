@@ -286,7 +286,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 			}
 			try
 			{
-				Element metadata_list = getMetadataList(node_id, all_metadata, metadata_names_list);
+			  Element metadata_list = getMetadataList(node_id, all_metadata, metadata_names_list, lang);
 				if (metadata_list != null)
 				{
 					request_node.appendChild(metadata_list);
@@ -758,7 +758,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	 * get the metadata for the doc node doc_id returns a metadataList element:
 	 * <metadataList><metadata name="xxx">value</metadata></metadataList>
 	 */
-	abstract protected Element getMetadataList(String doc_id, boolean all_metadata, ArrayList<String> metadata_names) throws GSException;
+  abstract protected Element getMetadataList(String doc_id, boolean all_metadata, ArrayList<String> metadata_names, String lang) throws GSException;
 
 	/**
 	 * returns the content of a node should return a nodeContent element:
