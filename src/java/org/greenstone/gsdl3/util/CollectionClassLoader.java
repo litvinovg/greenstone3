@@ -29,6 +29,7 @@ public class CollectionClassLoader
     String base_dir = null;
     public CollectionClassLoader(ClassLoader parent, String site_home, String collection_name) {
 	super(parent);
+	// 'resources directory' in the collection
 	this.base_dir = GSFile.collectionResourceDir(site_home, collection_name);
     } 
 
