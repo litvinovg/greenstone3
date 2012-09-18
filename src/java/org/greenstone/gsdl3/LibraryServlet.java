@@ -360,7 +360,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 			return (coll_name_params_table == null) ? 0 : coll_name_params_table.size();
 		}
 	}
-	
+
 	public void destroy()
 	{
 		recept.cleanUp();
@@ -861,6 +861,11 @@ public class LibraryServlet extends BaseGreenstoneServlet
 			}
 
 			Element securityResponse = (Element) GSXML.getChildByTagName(this.recept.process(securityMessage), GSXML.RESPONSE_ELEM);
+			if (securityResponse == null)
+			{
+				return false;
+			}
+
 			ArrayList<String> groups = GSXML.getGroupsFromSecurityResponse(securityResponse);
 
 			//If guests are not allowed to access this page then check to see if the user is in a group that is allowed to access the page
