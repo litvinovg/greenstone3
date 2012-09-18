@@ -767,7 +767,7 @@ function SliderWidget(_links)
 		});
 	}
 	
-	var getImage = function(page)
+	var getImage = function(page, attemptNumber)
 	{
 		var ajax = gs.functions.ajaxRequest();
 
@@ -823,9 +823,16 @@ function SliderWidget(_links)
 				});
 				$(image).error(function()
 				{
-					page.isLoading = false;
-					page.noImage = true;
-					image.setAttribute("src", gs.imageURLs.blank);
+					if(!attemptNumber || attemptNumber < 3)
+					{
+						setTimeout(function(){getImage(page, ((!attemptNumber) ? 1 : attemptNumber + 1));}, 500);
+					}
+					else
+					{
+						page.isLoading = false;
+						page.noImage = true;
+						image.setAttribute("src", gs.imageURLs.blank);
+					}
 				});
 				image.setAttribute("src", href);
 				
@@ -833,10 +840,22 @@ function SliderWidget(_links)
 				var titleEnd = text.indexOf("</p>");
 				var title = text.substring(titleStart, titleEnd);
 			}
-			else if (ajax.readyState == 4 && !page.failed)
+			else if (ajax.readyState == 4)
 			{
 				page.failed = true;
-				getImage(page);
+				if(!attemptNumber || attemptNumber < 3)
+				{
+					setTimeout(function(){getImage(page, ((!attemptNumber) ? 1 : attemptNumber + 1));}, 500);
+				}
+				else
+				{
+					var image = document.createElement("IMG");
+					image.setAttribute("src", gs.imageURLs.blank);
+					page.link.innerHTML = "";
+					page.link.appendChild(image);
+					page.isLoading = false;
+					page.noImage = true;
+				}
 			}
 		}
 		ajax.send();
