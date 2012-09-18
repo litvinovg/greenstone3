@@ -28,8 +28,8 @@
   <xsl:template name="siteLink">
     <a href="./{$library_name}">
       <xsl:call-template name="siteName"/>
-      <xsl:text> </xsl:text>
     </a>
+	<xsl:text> </xsl:text>
   </xsl:template>
   
   <xsl:variable name="a">
