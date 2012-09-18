@@ -33,14 +33,15 @@ public class GS2MacroResolver extends MacroResolver
 {
 
 	protected SimpleCollectionDatabase coll_db = null;
-
+  protected ClassLoader class_loader = null;
 	private static Pattern p_back_slash = Pattern.compile("\\\"");// create a pattern "\\\"", but it matches both " and \"
 
 	// need to make it not add macros if they are already present
-	public GS2MacroResolver(SimpleCollectionDatabase db)
+  public GS2MacroResolver(SimpleCollectionDatabase db, ClassLoader class_loader)
 	{
 		super();
 		coll_db = db;
+		this.class_loader = class_loader;
 	}
 
 	public GS2MacroResolver()
@@ -52,8 +53,11 @@ public class GS2MacroResolver extends MacroResolver
 	{
 		this.coll_db = db;
 	}
-
-	public String resolve(String text, String lang, String scope, String doc_oid)
+  public void setClassLoader(ClassLoader class_loader) {
+    this.class_loader = class_loader;
+  }
+  
+  public String resolve(String text, String lang, String scope, String doc_oid)
 	{
 		if (text == null || text.equals(""))
 			return text;
@@ -102,15 +106,19 @@ public class GS2MacroResolver extends MacroResolver
 			switch (m.type)
 			{
 			case TYPE_DICT:
-				if (m.text == null || new_lang)
-				{
-					Dictionary dict = new Dictionary(m.bundle, lang);
-					m.text = dict.get(m.key, null);
-				}
+			  if (text.contains(m.macro))
+
+			    {
+			  // if we change the lang, then do a metadata resolve, then a text resolve, the lang hasn't changed, but the text might be leftover from the last language.
+			  // if (m.text == null || new_lang)
+			  // {
+				  Dictionary dict = new Dictionary(m.bundle, lang, this.class_loader);
+				  m.text = dict.get(m.key, null);
+					//	}
 				// we assume that dictionary entries will contain no macros
 				// otherwise we can't cache the answer because it might be 
 				// document specific
-				text = StringUtils.replace(text, m.macro, m.text);
+				  text = StringUtils.replace(text, m.macro, m.text);}
 				break;
 			case TYPE_TEXT:
 				// make sure we resolve any macros in the text
@@ -130,7 +138,7 @@ public class GS2MacroResolver extends MacroResolver
 				{ //match_text.matches()) { //text.matches("(?s).*"+m.macro+".*")) {
 					if (m.resolve)
 					{
-						new_text = this.resolve(m.text, lang, scope, doc_oid);
+					  new_text = this.resolve(m.text, lang, scope, doc_oid);
 					}
 					else
 					{
@@ -190,7 +198,7 @@ public class GS2MacroResolver extends MacroResolver
 					{
 						if (m.resolve)
 						{
-							new_text = this.resolve(new_text, lang, scope, doc_oid);
+						  new_text = this.resolve(new_text, lang, scope, doc_oid);
 						}
 						text = StringUtils.replace(text, m.macro, new_text);
 					}
