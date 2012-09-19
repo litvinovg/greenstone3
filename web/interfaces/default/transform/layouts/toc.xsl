@@ -245,6 +245,7 @@
 				
 				<!-- Slide-show options -->
 				<li id="slideShowOptions">
+					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.slideshowTooltip')"/></xsl:attribute>
 					<xsl:attribute name="style">
 						<xsl:choose>
 							<xsl:when test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageResponse/document/@docType = 'paged' or /page/pageResponse/document/@docType = 'pagedhierarchy'">
@@ -287,6 +288,7 @@
 				</xsl:if><xsl:text> </xsl:text>
 				
 				<li id="zoomOptions" style="display:none;">
+					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoomTooltip')"/></xsl:attribute>
 					<img>
 						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'zoom_image')"/></xsl:attribute>
 					</img>
