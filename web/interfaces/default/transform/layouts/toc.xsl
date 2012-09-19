@@ -38,6 +38,15 @@
 		<div class="tableOfContentsContainer ui-state-default">
 			<table class="tocTable ui-widget-content">
 				<tr>
+					<td id="unfloatTOCButton" style="display:none;">
+						<a href="javascript:floatMenu(false);">
+							<img class="icon" style="padding-top:3px;">
+								<xsl:attribute name="src">
+									<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'left_arrow_image')"/>
+								</xsl:attribute>
+							</img>
+						</a>
+					</td>
 					<td style="vertical-align:top; text-align:right;">
 						<a id="sidebarMinimizeButton" href="javascript:minimizeSidebar();" style="float: right; font-size:0.6em;">
 							<img class="icon" style="padding-top:3px;">
@@ -287,6 +296,7 @@
 					</li>
 				</xsl:if><xsl:text> </xsl:text>
 				
+				<!-- Zoom on/off button -->
 				<li id="zoomOptions" style="display:none;">
 					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoomTooltip')"/></xsl:attribute>
 					<img>
@@ -302,6 +312,26 @@
 						</xsl:text>
 					</script>
 				</li>
+
+				<!-- Floating TOC on/off button -->
+				<xsl:if test="count(//documentNode) > 1 and not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
+					<li id="floatingTOCOptions">
+						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.floatingTooltip')"/></xsl:attribute>
+						<img>
+							<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'float_toc_image')"/></xsl:attribute>
+						</img>
+						<input id="floatTOCToggle" type="checkbox"/>
+						<script type="text/javascript">
+							<xsl:text disable-output-escaping="yes">
+								$("#floatTOCToggle").attr("checked", false);
+								$("#floatTOCToggle").click(function()
+								{
+									floatMenu($("#floatTOCToggle").attr("checked"));
+								});
+							</xsl:text>
+						</script>
+					</li>
+				</xsl:if>
 			</ul>
 			<div style="clear:both;"><xsl:text> </xsl:text></div>
 		</div>

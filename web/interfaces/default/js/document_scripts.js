@@ -1248,6 +1248,44 @@ function readyPageForEditing()
 	_baseURL = gs.xsltParams.library_name;
 }
 
+function floatMenu(enabled)
+{
+	var menu = $(".tableOfContentsContainer");
+	if(enabled)
+	{
+		menu.data("position", menu.css("position"));
+		menu.data("width", menu.css("width"));
+		menu.data("right", menu.css("right"));
+		menu.data("top", menu.css("top"));
+		menu.data("max-height", menu.css("max-height"));
+		menu.data("overflow", menu.css("overflow"));
+		menu.data("z-index", menu.css("z-index"));
+		
+		menu.css("position", "fixed");
+		menu.css("width", "300px");
+		menu.css("right", "0px");
+		menu.css("top", "100px");
+		menu.css("max-height", "600px");
+		menu.css("overflow", "auto");
+		menu.css("z-index", "200");
+		
+		$("#unfloatTOCButton").show();
+	}
+	else
+	{
+		menu.css("position", menu.data("position"));
+		menu.css("width", menu.data("width"));
+		menu.css("right", menu.data("right"));
+		menu.css("top", menu.data("top"));
+		menu.css("max-height", menu.data("max-height"));
+		menu.css("overflow", menu.data("overflow"));
+		menu.css("z-index", menu.data("z-index"));
+		
+		$("#unfloatTOCButton").hide();
+		$("#floatTOCToggle").attr("checked", false);
+	}
+}
+
 function showSlideShow()
 {
 	var visible = $("#ssOption").attr('checked');
