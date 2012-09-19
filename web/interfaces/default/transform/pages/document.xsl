@@ -480,6 +480,7 @@
 									speedMultiplier:multiplier   
 								});
 
+								$("#zoomOptions input").attr("checked", false);
 								$("#zoomOptions").css("display", null);
 							}
 						</xsl:text>
