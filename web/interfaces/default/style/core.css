@@ -169,6 +169,11 @@ p {
 	min-height: 300px;
 }
 
+#gs-document {
+	/*width:67%;
+	overflow:auto;*/
+}
+
 #gs_footer {
 	position: relative;
 	display: block;
@@ -209,19 +214,8 @@ p {
 
 #viewOptions li {
 	list-style:none;
+	float:left;
 	padding: 5px;
-}
-
-#zoomOptions {
-	margin: 0px;
-	padding: 0px;
-	width: 100%;
-}
-
-#zoomOptions li {
-	margin:5px;
-	list-style:none;
-	display: inline-block;
 }
 
 .tableOfContentsTitle{
@@ -657,6 +651,8 @@ div.QuickSearch {
 
 .tableOfContentsContainer {
 	padding:1px;
+	max-height:500px;
+	overflow:auto;
 }
 
 #tableOfContents {

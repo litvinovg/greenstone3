@@ -285,14 +285,11 @@
 						</input>
 					</li>
 				</xsl:if><xsl:text> </xsl:text>
-			</ul>
-			<ul id="zoomOptions">
-				<!-- This is invisible unless it is made visible by Javascript controlling the image zooming -->
-				<xsl:attribute name="style">display: none;</xsl:attribute>
-				<li style="width:10%;">
-					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoom')"/>
-				</li>
-				<li style="width:5%;">
+				
+				<li id="zoomOptions" style="display:none;">
+					<img>
+						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'zoom_image')"/></xsl:attribute>
+					</img>
 					<input id="zoomToggle" type="checkbox"/>
 					<script type="text/javascript">
 						<xsl:text disable-output-escaping="yes">
@@ -303,30 +300,8 @@
 						</xsl:text>
 					</script>
 				</li>
-				<li style="width:15%;"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoom_size')"/><xsl:text>:</xsl:text></li>
-				<li id="zoomSlider" style="width:50%; height:5px;"><xsl:text> </xsl:text></li>
-				<script type="text/javascript">
-					<xsl:text disable-output-escaping="yes">
-						$("#zoomSlider").slider(
-						{
-							change: function(event, ui)
-							{
-								var sliderValue = ui.value;
-								var divs = document.getElementsByTagName("DIV");
-								for(var i = 0; i &lt; divs.length; i++)
-								{
-									if(divs[i].getAttribute("id") &amp;&amp; divs[i].getAttribute("id").search(/^mover.*/) != -1)
-									{
-										divs[i].style.height = 400 + (2 * sliderValue) + "px";
-										divs[i].style.width = 400 + (2 * sliderValue) + "px";
-									}
-								}
-							}
-						});
-					</xsl:text>
-				</script>
-				<style>.ui-slider .ui-slider-handle{height:0.8em; width:1.0em;}</style>
 			</ul>
+			<div style="clear:both;"><xsl:text> </xsl:text></div>
 		</div>
 	</xsl:template>
 </xsl:stylesheet>

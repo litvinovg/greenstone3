@@ -155,7 +155,7 @@
 			</td>
 			
 			<!-- "back to top" link -->
-			<xsl:if test="util:hashToDepthClass(@nodeID) != 'sectionHeaderDepthTitle'">
+			<xsl:if test="util:hashToDepthClass(@nodeID) != 'sectionHeaderDepthTitle' and not(/page/pageResponse/format[@type='display']/gsf:option[@name='backToTopLinks']) or /page/pageResponse/format[@type='display']/gsf:option[@name='backToTopLinks']/@value='true'">
 				<td class="backToTop headerTD">
 					<a href="javascript:scrollToTop();">
 						<xsl:text disable-output-escaping="yes">&#9650;</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.back_to_top')"/>
@@ -480,7 +480,7 @@
 									speedMultiplier:multiplier   
 								});
 
-								$("#zoomOptions").css("display", "block");
+								$("#zoomOptions").css("display", null);
 							}
 						</xsl:text>
 					</script>
