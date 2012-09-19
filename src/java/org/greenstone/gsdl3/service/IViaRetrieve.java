@@ -214,7 +214,8 @@ public class IViaRetrieve
     
     protected Element getMetadataList (String doc_id,
 				       boolean all_metadata,
-				       ArrayList<String> metadata_names) 
+				       ArrayList<String> metadata_names,
+				       String lang) 
 	throws GSException {
 	
 	Element meta_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
