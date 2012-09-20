@@ -215,8 +215,8 @@ public class URLFilter implements Filter
 					{
 						gRequest.setParameter(GSParams.DOCUMENT, segments[i + 1]);
 
-						additionalParameters = new String[] { GSParams.ACTION};
-						defaultParamValues = new String[] { "d"};
+						additionalParameters = new String[] { GSParams.ACTION };
+						defaultParamValues = new String[] { "d" };
 						//additionalParameters = new String[] { GSParams.ACTION, GSParams.DOCUMENT_TYPE };
 						//defaultParamValues = new String[] { "d", "hierarchy" };
 					}
@@ -282,17 +282,37 @@ public class URLFilter implements Filter
 						String cl = "";
 						for (int j = 1; (i + j) < segments.length; j++)
 						{
-							if (!segments[i + j].matches("^(CL|cl)?\\d+$"))
+							String currentSegment = segments[i + j].replace("CL", "").replace("cl", "");
+							if (currentSegment.contains("."))
 							{
-								break;
+								String[] subsegments = currentSegment.split("\\.");
+								for (String subsegment : subsegments)
+								{
+									subsegment = subsegment.replace("CL", "").replace("cl", "");
+
+									if (cl.length() > 0)
+									{
+										cl += ".";
+									}
+
+									if (subsegment.length() > 0)
+									{
+										cl += subsegment;
+									}
+								}
+								continue;
+							}
+							if (!currentSegment.matches("^(CL|cl)?\\d+$"))
+							{
+								continue;
 							}
 
-							if (j > 1)
+							if (cl.length() > 0)
 							{
 								cl += ".";
 							}
 
-							cl += segments[i + j].replace("CL", "").replace("cl", "");
+							cl += currentSegment;
 						}
 
 						gRequest.setParameter("cl", "CL" + cl);
