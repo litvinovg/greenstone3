@@ -105,7 +105,8 @@
 						<xsl:text>/collection/</xsl:text>
 						<xslt:value-of select='/page/pageResponse/collection/@name'/>
 						<xsl:text>/document/</xsl:text>
-						<xslt:value-of select='@nodeID'/>
+	    <xsl:choose><xsl:when test="@OID"><xsl:value-of select="@OID"/></xsl:when><xsl:when test="@OIDmetadata"><xsl:variable name="OIDmeta" select="@OIDmetadata"/><xslt:value-of select="(.//metadataList)[last()]/metadata[@name='{$OIDmeta}']"/></xsl:when><xsl:otherwise>
+						<xslt:value-of select='@nodeID'/></xsl:otherwise></xsl:choose>
 						<xslt:choose>
 							<xslt:when test="$bookswitch = 'on' or $bookswitch = 'flashxml'">
 								<xsl:text>?book=on</xsl:text>
