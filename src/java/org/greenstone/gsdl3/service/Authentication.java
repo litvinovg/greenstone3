@@ -2,6 +2,7 @@ package org.greenstone.gsdl3.service;
 
 import java.io.File;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.sql.SQLException;
@@ -10,6 +11,15 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.regex.Pattern;
+
+import java.util.Properties;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import net.tanesha.recaptcha.ReCaptchaImpl;
 import net.tanesha.recaptcha.ReCaptchaResponse;
@@ -104,6 +114,8 @@ public class Authentication extends ServiceRack
 	protected static final String ACCOUNT_SETTINGS = "AccountSettings";
 	protected static final String PERFORM_ACCOUNT_EDIT = "PerformAccEdit";
 	protected static final String PERFORM_RESET_PASSWORD = "PerformResetPassword";
+	protected static final String PERFORM_CHANGE_PASSWORD = "PerformChangePassword";
+	protected static final String PERFORM_RETRIEVE_PASSWORD = "PerformRetrievePassword";
 	protected static final ArrayList<String> _userOpList;
 	static
 	{
@@ -609,6 +621,67 @@ public class Authentication extends ServiceRack
 				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
 			}
 
+			addUserInformationToNode(null, serviceNode);
+			serviceNode.setAttribute("operation", LIST_USERS);
+		}
+		else if (op.equals(PERFORM_RETRIEVE_PASSWORD))
+		{
+
+		}
+		else if (op.equals(PERFORM_CHANGE_PASSWORD))
+		{
+			String user_name = (String) paramMap.get("username");
+			String oldPassword = (String) paramMap.get("oldPassword");
+			String newPassword = (String) paramMap.get("newPassword");
+			if (user_name==null || oldPassword==null || newPassword==null)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get("missing compulsory parameters: username, oldPassword, or newPassword"));
+				return result;
+			}
+			
+			String prevPassword = retrieveDataForUser(user_name, "password");			
+			
+			oldPassword = hashPassword(oldPassword);
+			if (!oldPassword.equals(prevPassword))
+			{
+				addUserInformationToNode(user_name, serviceNode);
+				serviceNode.setAttribute("operation", PERFORM_CHANGE_PASSWORD);
+				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_INCORRECT_PASSWORD), "Incorrect Password");
+				return result;
+			}
+			
+			//Check the given password
+			int error;
+			if ((error = checkPassword(newPassword)) != NO_ERROR)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				return result;
+			}
+			
+			newPassword = hashPassword(newPassword);
+						
+			//Get the info of the given user, except for password	
+			String prevGroups = retrieveDataForUser(user_name, "groups");
+			String prevStatus = retrieveDataForUser(user_name, "status");
+			String comment = "password_changed_by_user";
+			String prevEmail = retrieveDataForUser(user_name, "email");
+			
+			error = removeUser(user_name);
+			if (error != NO_ERROR)
+			{				
+				addUserInformationToNode(user_name, serviceNode);
+				serviceNode.setAttribute("operation", ACCOUNT_SETTINGS);
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				
+				return result;
+			}
+			
+			error = addUser(user_name, newPassword, prevGroups, prevStatus, comment, prevEmail);
+			if (error != NO_ERROR)
+			{
+				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+			}
+			
 			addUserInformationToNode(null, serviceNode);
 			serviceNode.setAttribute("operation", LIST_USERS);
 		}
