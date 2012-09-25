@@ -237,6 +237,11 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 	<xsl:template match="gsf:interfaceText" name="gsf:interfaceText">
 	  <xslt:value-of disable-output-escaping="yes" select="util:getInterfaceText($interface_name, /page/@lang, '{@name}')"/>
 	</xsl:template>
+	<!-- With gsf:collectionText, a user can request a string from the collection's dictionary in the current lang -->
+	<xsl:template match="gsf:collectionText" name="gsf:collectionText">
+    <!--<xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>-->
+	  <xslt:value-of disable-output-escaping="yes" select="util:getCollectionText($collName, $site_name, /page/@lang, '{@name}')"/>
+	</xsl:template>
 
 	<!-- if this gsf:metadata is a child of a document node then we want to get the metadata for that node -->
 	<xsl:template match="gsf:metadata">
