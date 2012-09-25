@@ -282,6 +282,9 @@ public class XSLTUtil
 		return result;
 	}
 
+  public static String getCollectionText(String collection, String site_name, String lang, String key) {
+    return getCollectionTextWithDOMMulti(collection, site_name, lang, key);
+  }
   // xslt didn't like calling the function with Node varargs, so have this hack for now
   public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1) {
     return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1);
@@ -298,12 +301,15 @@ public class XSLTUtil
   public static String getCollectionTextWithDOMMulti(String collection, String site_name, String lang, String key, Node ... nodes) {
 
     int num_nodes = nodes.length;
-    String[] args = new String[num_nodes];
+    String [] args = null;
+    if (num_nodes != 0) {
+      args = new String[num_nodes];
 
-    for (int i=0; i<num_nodes; i++) {
+      for (int i=0; i<num_nodes; i++) {
       
-      String node_str = XMLConverter.getString(nodes[i]);
-      args[i] = node_str;
+	String node_str = XMLConverter.getString(nodes[i]);
+	args[i] = node_str;
+      }
     }
     CollectionClassLoader class_loader = new CollectionClassLoader(XSLTUtil.class.getClassLoader(), GSFile.siteHome(GlobalProperties.getGSDL3Home(), site_name), collection);
     Dictionary dict = new Dictionary(collection, lang, class_loader);

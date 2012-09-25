@@ -122,6 +122,10 @@ public class Dictionary {
 	    if (initial.indexOf("#") != -1) {
 		initial = initial.substring(0, initial.indexOf("#"));
 	    }
+	    // if we haven't been given any args, don't bother looking for them
+	    if (args == null) {
+	      return initial;
+	    }
 	    // If the string contains arguments we have to insert them.
 	    StringBuffer complete = new StringBuffer();
 	    // While we still have initial string left.
