@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.greenstone.util.GlobalProperties;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * a class to contain various static methods that are used by the xslt
@@ -280,6 +281,40 @@ public class XSLTUtil
 
 		return result;
 	}
+
+  // xslt didn't like calling the function with Node varargs, so have this hack for now
+  public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1) {
+    return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1);
+  }
+   public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2) {
+    return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1, n2);
+  }
+  public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2, Node n3) {
+    return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1, n2, n3);
+  }
+  public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2, Node n3, Node n4) {
+    return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1, n2, n3, n4);
+  }
+  public static String getCollectionTextWithDOMMulti(String collection, String site_name, String lang, String key, Node ... nodes) {
+
+    int num_nodes = nodes.length;
+    String[] args = new String[num_nodes];
+
+    for (int i=0; i<num_nodes; i++) {
+      
+      String node_str = XMLConverter.getString(nodes[i]);
+      args[i] = node_str;
+    }
+    CollectionClassLoader class_loader = new CollectionClassLoader(XSLTUtil.class.getClassLoader(), GSFile.siteHome(GlobalProperties.getGSDL3Home(), site_name), collection);
+    Dictionary dict = new Dictionary(collection, lang, class_loader);
+    String result = dict.get(key, args);
+    if (result != null) {
+      return result;
+    }
+    return "text:"+collection+":"+key;
+    
+  }
+
 
 	public static boolean isImage(String mimetype)
 	{
