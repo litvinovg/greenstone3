@@ -19,28 +19,39 @@
 package org.greenstone.gsdl3.util;
 
 import java.net.URL;
+import java.util.Enumeration;
 import java.io.File;
+import java.io.IOException;
 
-/** Looks for classes/resources in the collection resources directory 
+/**
+ * Looks for classes/resources in the collection resources directory
  */
-public class CollectionClassLoader
-    extends ClassLoader {
+public class CollectionClassLoader extends ClassLoader
+{
 
-    String base_dir = null;
-    public CollectionClassLoader(ClassLoader parent, String site_home, String collection_name) {
-	super(parent);
-	// 'resources directory' in the collection
-	this.base_dir = GSFile.collectionResourceDir(site_home, collection_name);
-    } 
+	String base_dir = null;
 
-    public URL findResource(String name) {
-	File resource_path = new File(this.base_dir, name);
-	try {
-	    if (resource_path.exists()) {
-		return new URL("file://"+resource_path.getAbsolutePath());
-	    }
-	} catch (Exception e) {};
+	public CollectionClassLoader(ClassLoader parent, String site_home, String collection_name)
+	{
+		super(parent);
+		// 'resources directory' in the collection
+		this.base_dir = GSFile.collectionResourceDir(site_home, collection_name);
+	}
 
-	return super.findResource(name);
-    }
+	public URL findResource(String name)
+	{
+		File resource_path = new File(this.base_dir, name);
+		try
+		{
+			if (resource_path.exists())
+			{
+				return resource_path.toURI().toURL();
+			}
+		}
+		catch (Exception e)
+		{
+		}
+
+		return super.findResource(name);
+	}
 }
