@@ -180,11 +180,6 @@ public class Dictionary
 			// convert to unicode, copied from gatherer dictionary
 			String initial = new String(initial_raw.getBytes("ISO-8859-1"), "UTF-8");
 
-			// Remove any comments from the string
-			if (initial.indexOf("#") != -1)
-			{
-				initial = initial.substring(0, initial.indexOf("#"));
-			}
 			// if we haven't been given any args, don't bother looking for them
 			if (args == null)
 			{
