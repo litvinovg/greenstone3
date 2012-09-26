@@ -121,7 +121,6 @@ public class XSLTUtil
 		return true;
 	}
 
-
 	public static String replace(String orig, String match, String replacement)
 	{
 		return orig.replace(match, replacement);
@@ -167,7 +166,6 @@ public class XSLTUtil
 
 		return buffer.toString();
 	}
-
 
 	public static String getInterfaceText(String interface_name, String lang, String key)
 	{
@@ -282,45 +280,58 @@ public class XSLTUtil
 		return result;
 	}
 
-  public static String getCollectionText(String collection, String site_name, String lang, String key) {
-    return getCollectionTextWithDOMMulti(collection, site_name, lang, key);
-  }
-  // xslt didn't like calling the function with Node varargs, so have this hack for now
-  public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1) {
-    return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1);
-  }
-   public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2) {
-    return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1, n2);
-  }
-  public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2, Node n3) {
-    return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1, n2, n3);
-  }
-  public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2, Node n3, Node n4) {
-    return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1, n2, n3, n4);
-  }
-  public static String getCollectionTextWithDOMMulti(String collection, String site_name, String lang, String key, Node ... nodes) {
+	public static String getCollectionText(String collection, String site_name, String lang, String key)
+	{
+		return getCollectionTextWithDOMMulti(collection, site_name, lang, key);
+	}
 
-    int num_nodes = nodes.length;
-    String [] args = null;
-    if (num_nodes != 0) {
-      args = new String[num_nodes];
+	// xslt didn't like calling the function with Node varargs, so have this hack for now
+	public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1)
+	{
+		return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1);
+	}
 
-      for (int i=0; i<num_nodes; i++) {
-      
-	String node_str = XMLConverter.getString(nodes[i]);
-	args[i] = node_str;
-      }
-    }
-    CollectionClassLoader class_loader = new CollectionClassLoader(XSLTUtil.class.getClassLoader(), GSFile.siteHome(GlobalProperties.getGSDL3Home(), site_name), collection);
-    Dictionary dict = new Dictionary(collection, lang, class_loader);
-    String result = dict.get(key, args);
-    if (result != null) {
-      return result;
-    }
-    return "text:"+collection+":"+key;
-    
-  }
+	public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2)
+	{
+		return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1, n2);
+	}
 
+	public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2, Node n3)
+	{
+		return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1, n2, n3);
+	}
+
+	public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2, Node n3, Node n4)
+	{
+		return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1, n2, n3, n4);
+	}
+
+	public static String getCollectionTextWithDOMMulti(String collection, String site_name, String lang, String key, Node... nodes)
+	{
+		int num_nodes = nodes.length;
+		String[] args = null;
+		if (num_nodes != 0)
+		{
+			args = new String[num_nodes];
+
+			for (int i = 0; i < num_nodes; i++)
+			{
+
+				String node_str = XMLConverter.getString(nodes[i]);
+				args[i] = node_str;
+			}
+		}
+
+		CollectionClassLoader class_loader = new CollectionClassLoader(XSLTUtil.class.getClassLoader(), GSFile.siteHome(GlobalProperties.getGSDL3Home(), site_name), collection);
+		Dictionary dict = new Dictionary(collection, lang, class_loader);
+		String result = dict.get(key, args);
+		if (result != null)
+		{
+			return result;
+		}
+		return "text:" + collection + ":" + key;
+
+	}
 
 	public static boolean isImage(String mimetype)
 	{
@@ -331,9 +342,9 @@ public class XSLTUtil
 		return false;
 	}
 
-  // formatting /preprocessing functions
-  // some require a language, so we'll have a language param for all
-  public static String toLower(String orig, String lang)
+	// formatting /preprocessing functions
+	// some require a language, so we'll have a language param for all
+	public static String toLower(String orig, String lang)
 	{
 		return orig.toLowerCase();
 	}
@@ -343,7 +354,7 @@ public class XSLTUtil
 		return orig.toUpperCase();
 	}
 
-        public static String tidyWhitespace(String original, String lang)
+	public static String tidyWhitespace(String original, String lang)
 	{
 
 		if (original == null || original.equals(""))
@@ -354,7 +365,7 @@ public class XSLTUtil
 		return new_s;
 	}
 
-        public static String stripWhitespace(String original, String lang)
+	public static String stripWhitespace(String original, String lang)
 	{
 
 		if (original == null || original.equals(""))
