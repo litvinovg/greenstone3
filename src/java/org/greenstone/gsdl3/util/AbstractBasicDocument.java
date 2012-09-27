@@ -27,10 +27,10 @@ import org.w3c.dom.Element;
 public abstract class AbstractBasicDocument {
 
   /** info types */
-	protected static final String INFO_NUM_SIBS = "numSiblings";
-	protected static final String INFO_NUM_CHILDREN = "numChildren";
-	protected static final String INFO_SIB_POS = "siblingPosition";
-	protected static final String INFO_DOC_TYPE = "documentType";
+	public static final String INFO_NUM_SIBS = "numSiblings";
+	public static final String INFO_NUM_CHILDREN = "numChildren";
+	public static final String INFO_SIB_POS = "siblingPosition";
+	public static final String INFO_DOC_TYPE = "documentType";
 
     /** XML element for describe requests - the container doc */
     protected Document doc = null; // typically a shared reference to the one in ServiceRack
