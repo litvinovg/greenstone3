@@ -37,8 +37,16 @@ public class CollectionClassLoader extends ClassLoader
 		// 'resources directory' in the collection
 		this.base_dir = GSFile.collectionResourceDir(site_home, collection_name);
 	}
-
-	public URL findResource(String name)
+  
+  // Resource Bundle loading with a class loader will call getResource(). 
+  // THe Java implementation of getResource tries using the parent class 
+  // loader to find the resource (or the system class loader if no parent). 
+  // If the resource not found, then it calls the local findResource method. 
+  // Ie parent:child ordering.
+  // Because we want local files to override default ones, we need 
+  // child:parent ordering, so change getResource to look locally first.
+  //public URL findResource(String name)
+	public URL getResource(String name)
 	{
 		File resource_path = new File(this.base_dir, name);
 		try
@@ -52,6 +60,6 @@ public class CollectionClassLoader extends ClassLoader
 		{
 		}
 
-		return super.findResource(name);
+		return super.getResource(name);
 	}
 }
