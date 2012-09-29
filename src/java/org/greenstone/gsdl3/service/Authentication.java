@@ -17,6 +17,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
+import javax.mail.PasswordAuthentication;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -626,10 +627,11 @@ public class Authentication extends ServiceRack
 		}
 		else if (op.equals(PERFORM_RETRIEVE_PASSWORD))
 		{
-
+			
 		}
 		else if (op.equals(PERFORM_CHANGE_PASSWORD))
 		{
+			serviceNode.setAttribute("operation", PERFORM_CHANGE_PASSWORD);
 			String user_name = (String) paramMap.get("username");
 			String oldPassword = (String) paramMap.get("oldPassword");
 			String newPassword = (String) paramMap.get("newPassword");
@@ -639,13 +641,10 @@ public class Authentication extends ServiceRack
 				return result;
 			}
 			
-			String prevPassword = retrieveDataForUser(user_name, "password");			
-			
-			oldPassword = hashPassword(oldPassword);
-			if (!oldPassword.equals(prevPassword))
+			String prevPassword = retrieveDataForUser(user_name, "password");						
+			if (!hashPassword(oldPassword).equals(prevPassword))
 			{
 				addUserInformationToNode(user_name, serviceNode);
-				serviceNode.setAttribute("operation", PERFORM_CHANGE_PASSWORD);
 				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_INCORRECT_PASSWORD), "Incorrect Password");
 				return result;
 			}
@@ -658,32 +657,13 @@ public class Authentication extends ServiceRack
 				return result;
 			}
 			
-			newPassword = hashPassword(newPassword);
-						
-			//Get the info of the given user, except for password	
-			String prevGroups = retrieveDataForUser(user_name, "groups");
-			String prevStatus = retrieveDataForUser(user_name, "status");
-			String comment = "password_changed_by_user";
-			String prevEmail = retrieveDataForUser(user_name, "email");
-			
-			error = removeUser(user_name);
-			if (error != NO_ERROR)
-			{				
-				addUserInformationToNode(user_name, serviceNode);
-				serviceNode.setAttribute("operation", ACCOUNT_SETTINGS);
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
-				
+			String chpa_groups = retrieveDataForUser(user_name, "groups");
+			String chpa_comment = "password_changed_by_user";
+			String info = this._derbyWrapper.modifyUserInfo(user_name, hashPassword(newPassword), chpa_groups, null, chpa_comment, null);
+			if(info != "succeed"){//see DerbyWrapper.modifyUserInfo
+				GSXML.addError(this.doc, result, _errorMessageMap.get(info));
 				return result;
 			}
-			
-			error = addUser(user_name, newPassword, prevGroups, prevStatus, comment, prevEmail);
-			if (error != NO_ERROR)
-			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
-			}
-			
-			addUserInformationToNode(null, serviceNode);
-			serviceNode.setAttribute("operation", LIST_USERS);
 		}
 		else if (op.equals(EDIT_USER))
 		{
