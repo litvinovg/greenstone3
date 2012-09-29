@@ -44,6 +44,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import org.apache.commons.lang3.StringUtils;
 
 /*
 // greenstone classes
@@ -86,6 +87,8 @@ public class FedoraServiceProxy
     extends ServiceRack implements OID.OIDTranslatable
 {
     public static class BasicTextMacroResolver extends MacroResolver {	
+	private static final Pattern p_back_slash = Pattern.compile("\\\"");// create a pattern "\\\"", but it matches both " and \"
+
 	public String resolve(String text, String lang, String scope, String doc_oid) 
 	{
 
@@ -100,38 +103,34 @@ public class FedoraServiceProxy
 	    for (int i=0; i<macros.size(); i++) {
 		String new_text = null;
 		Macro m = (Macro)macros.get(i);
+		
 		if(m.type == TYPE_TEXT) {
 		    // make sure we resolve any macros in the text
-		    // the (?s) treats the string as a single line, cos . 
-		    // doesn't necessarily match line breaks
-		    //if (text.matches("(?s).*"+m.macro+".*")) {
-		    Pattern p_text = Pattern.compile(".*" + m.macro + ".*",Pattern.DOTALL);
-		    Matcher match_text = p_text.matcher(text);
-		    if (match_text.matches()) {
+
+		    if(text.contains(m.macro)) {
 			if (m.resolve) {
 			    new_text = this.resolve(m.text, lang, scope, doc_oid);
 			} else {
 			    new_text = m.text;
 			}
-			text = text.replaceAll(m.macro, new_text);
-			if (m.macro.endsWith("\\\\")){ // to get rid of "\" from the string likes: "src="http://www.greenstone.org:80/.../mw.gif\">"
-			    Pattern p_back_slash = Pattern.compile("\\\"");// create a pattern "\\\"", but it matches both " and \"
+			text = StringUtils.replace(text, m.macro, new_text);//text = text.replaceAll(m.macro, new_text);
+			if (m.macro.endsWith("\\\\")) { // to get rid of "\" from the string like: "src="http://www.greenstone.org:80/.../mw.gif\">"
 			    Matcher m_slash = p_back_slash.matcher(text);
 			    String clean_str = "";
 			    int s=0;
-			    while (m_slash.find()){
-				if (!text.substring(m_slash.end()-2,m_slash.end()-1).equals("\\")){
+			    while (m_slash.find()) {
+				if (!text.substring(m_slash.end()-2, m_slash.end()-1).equals("\\")) {
 				    clean_str = clean_str + text.substring(s,m_slash.end()-1); // it matches ", so get a substring before "
 				}else{
 				    clean_str = clean_str + text.substring(s,m_slash.end()-2);// it matches \", so get a substring before \
-					}
+				}
 				s = m_slash.end();// get the index of the last match
 				clean_str = clean_str + "\"";
 			    }
 			    text = clean_str + text.substring(s,text.length());
 			}
 		    }
-		}		
+		}
 	    }
 	    return text;
 	}
@@ -347,7 +346,7 @@ public class FedoraServiceProxy
 	String[] relLinks = parse(request, GSXML.DOC_NODE_ELEM, "externalURL");
 	
 	//logger.error("### request:"); 
-	//logger.error(GSXML.nodeToFormattedString(request));
+	//logger.error(GSXML.elementToString(request, true));
 
 	if(docIDs == null) {
 	    logger.error("DocumentContentRetrieve request specified no doc nodes.\n");
@@ -515,6 +514,7 @@ public class FedoraServiceProxy
 	}
 	Element response = getResponseAsDOM(fedoraServicesAPIA.retrieveBrowseMetadata(
 	       this.cluster_name, "ClassifierBrowseMetadataRetrieve", classIDs, metafields));
+	//logger.error("**** Response from retrieveBrowseMeta: " + GSXML.elementToString(response, true));
 	return (Element)response.getElementsByTagName(GSXML.RESPONSE_ELEM).item(0);
     }
 
@@ -554,7 +554,7 @@ public class FedoraServiceProxy
 	Element response 
 	    = getResponseAsDOM(fedoraServicesAPIA.retrieveBrowseStructure(collection, "ClassifierBrowse", classifierIDs,
 									  new String[] {structure}, new String[] {info}));
-	///logger.error("**** FedoraServiceProxy - Response from retrieveBrowseStructure: " + GSXML.nodeToFormattedString(response));	
+	//logger.error("**** FedoraServiceProxy - Response from retrieveBrowseStructure: " + GSXML.elementToString(response, true));	
 	
 	return (Element)response.getElementsByTagName(GSXML.RESPONSE_ELEM).item(0);
     }
