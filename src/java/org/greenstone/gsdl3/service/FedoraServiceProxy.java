@@ -592,8 +592,10 @@ public class FedoraServiceProxy
 	}
     }
 
+    // get the requested nodeIDs out of a request message
     protected String[] parse(Element request, String nodeType, String attribute) {	
 	String[] nodevalues = null;
+	int count = 0;
 
 	Element docList = (Element) GSXML.getChildByTagName(request, nodeType+GSXML.LIST_MODIFIER);
 	if (docList != null) {	    
@@ -602,10 +604,28 @@ public class FedoraServiceProxy
 		nodevalues = new String[docNodes.getLength()];
 		for(int i = 0; i < nodevalues.length; i++) {
 		    Element e = (Element)docNodes.item(i);
-		    nodevalues[i] = e.getAttribute(attribute);
+		    String id = e.getAttribute(attribute);
+		    // Not sure why there are at times requests for hashXXX.dir, which is not a fedora PID
+		    // To skip these: if not requesting an externalURL and if requesting a docNode, 
+		    // then the ID has to contain the : character special to fedora PIDs
+		    if(attribute == "externalURL" || (nodeType != GSXML.DOC_NODE_ELEM || id.contains(":"))) {
+			nodevalues[count++] = id;
+		    }
 		}
 	    }
 	}
+
+	if(count == 0) {
+	    return null;
+	}
+
+	String[] tmp = new String[count];
+	for(int i = 0; i < count; i++) {
+	    tmp[i] = nodevalues[i];
+	}
+	nodevalues = null;
+	nodevalues = tmp;
+
 	return nodevalues;
     }
 
