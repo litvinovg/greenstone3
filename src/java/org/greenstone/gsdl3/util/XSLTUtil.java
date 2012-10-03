@@ -43,7 +43,18 @@ public class XSLTUtil
 {
 	protected static HashMap<String, ArrayList<String>> _foundTableValues = new HashMap<String, ArrayList<String>>();
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.XSLTUtil.class.getName());
+	protected static HashMap<String, String> _stringVariables = new HashMap<String, String>();
 
+	public static void storeString(String name, String value)
+	{
+		_stringVariables.put(name, value);
+	}
+	
+	public static String getString(String name)
+	{
+		return _stringVariables.get(name);
+	}
+	
 	/* some tests */
 	public static boolean equals(String s1, String s2)
 	{
@@ -392,7 +403,6 @@ public class XSLTUtil
 
 	public static String formatDate(String date, String lang)
 	{
-
 		String in_pattern = "yyyyMMdd";
 		String out_pattern = "dd MMMM yyyy";
 		if (date.length() == 6)
@@ -413,6 +423,42 @@ public class XSLTUtil
 			return date;
 		}
 
+	}
+
+	public static String getDetailFromDate(String date, String detail, String lang)
+	{
+		String in_pattern = "yyyyMMdd";
+		if (date.length() == 6)
+		{
+			in_pattern = "yyyyMM";
+		}
+
+		SimpleDateFormat formatter = new SimpleDateFormat(in_pattern, new Locale(lang));
+		try
+		{
+			Date d = formatter.parse(date);
+			if (detail.toLowerCase().equals("day"))
+			{
+				formatter.applyPattern("dd");
+			}
+			else if (detail.toLowerCase().equals("month"))
+			{
+				formatter.applyPattern("MMMM");
+			}
+			else if (detail.toLowerCase().equals("year"))
+			{
+				formatter.applyPattern("yyyy");
+			}
+			else
+			{
+				return "";
+			}
+			return formatter.format(d);
+		}
+		catch (Exception ex)
+		{
+			return "";
+		}
 	}
 
 	public static String formatLanguage(String display_lang, String lang)

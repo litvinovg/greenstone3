@@ -73,6 +73,18 @@
 					<tr>
 						<xsl:choose>
 							<xsl:when test="name()='documentNode'">
+								<xsl:if test="../@childType = 'DateList'">
+									<xsl:variable name="prevMonth"><xsl:value-of select="util:getString('prevMonth')"/></xsl:variable>
+									<xsl:variable name="currentDate"><gsf:metadata name="Date"/></xsl:variable>
+									<xsl:variable name="currentMonth"><xsl:value-of select="util:getDetailFromDate($currentDate, 'month', /page/@lang)"/></xsl:variable>
+									<xsl:value-of select="util:storeString('prevMonth', $currentMonth)"/>
+									<td>
+										<xsl:if test="not($currentMonth = $prevMonth)">
+											<xsl:value-of select="$currentMonth"/>
+										</xsl:if>
+										<xsl:text> </xsl:text>
+									</td>
+								</xsl:if>
 								<td>
 									<table id="div{@nodeID}"><tr>
 										<xsl:call-template name="documentNodeWrapper">
