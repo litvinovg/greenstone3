@@ -31,11 +31,11 @@
 	<!-- single selection enum params -->
 	<xsl:template match="param[@type='enum_single']">
 		<xsl:param name="ns">s1.</xsl:param>
-		<xsl:param name="hideEmpty">false</xsl:param>
+		<xsl:param name="hideSingle">false</xsl:param>
 		<xsl:param name="default"/>
 		<xsl:choose>
 			<xsl:when test="count(option) = 1">
-				<xsl:if test="$hideEmpty = 'false'">
+				<xsl:if test="$hideSingle = 'false'">
 					<xsl:value-of select="option/displayItem[@name='name']"/>
 				</xsl:if>
 				<input type='hidden' name='{$ns}{@name}'><xsl:attribute name='value'><xsl:value-of  select='option/@name'/></xsl:attribute></input>

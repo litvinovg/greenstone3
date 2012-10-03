@@ -438,7 +438,7 @@
 									<xsl:with-param name="default">
 										<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']" mode="calculate-default"/>
 									</xsl:with-param>
-									<xsl:with-param name="hideEmpty">true</xsl:with-param>
+									<xsl:with-param name="hideSingle">true</xsl:with-param>
 								</xsl:apply-templates>
 							</span>
 						</xsl:if>
