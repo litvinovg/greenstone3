@@ -79,6 +79,10 @@ p {
 	margin:0px;
 }
 
+.selectedHorizontalClassifierNode {
+	font-weight: bold;
+}
+
 .horizontalClassifierNode {
 	padding:0px 0px 10px 10px;
 	list-style:none;
@@ -169,11 +173,6 @@ p {
 	min-height: 300px;
 }
 
-#gs-document {
-	/*width:67%;
-	overflow:auto;*/
-}
-
 #gs_footer {
 	position: relative;
 	display: block;
@@ -183,10 +182,6 @@ p {
 	font-size: 70%;
 	padding-top:5px;
 	padding-bottom:5px;
-}
-
-#gs_footer a {
-	/*color:#FFF;*/
 }
 
 .termList {

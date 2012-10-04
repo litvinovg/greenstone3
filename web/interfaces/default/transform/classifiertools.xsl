@@ -67,8 +67,10 @@
 	<xsl:template name="processNodeChildren">
 		<xsl:param name="collName"/>
 		<xsl:param name="serviceName"/>
+
 		<xsl:choose>
 			<xsl:when test="@childType = 'VList' or @childType = 'DateList'">
+				<xsl:value-of select="util:storeString('prevMonth', '')"/>
 				<xsl:for-each select='classifierNode|documentNode'>
 					<tr>
 						<xsl:choose>
@@ -137,7 +139,11 @@
 			<xsl:when test="@childType = 'HList'">
 				<ul class="horizontalContainer">
 					<xsl:for-each select='classifierNode'>
-						<li class="horizontalClassifierNode">
+						<li>
+							<xsl:attribute name="class">
+								<xsl:if test="@nodeID = /page/pageRequest/paramList/param[@name = 'cl']/@value">selectedHorizontalClassifierNode </xsl:if>
+								<xsl:text>horizontalClassifierNode</xsl:text>
+							</xsl:attribute>
 							<xsl:apply-templates select='.'>
 								<xsl:with-param name='collName' select='$collName'/>
 								<xsl:with-param name='serviceName' select='$serviceName'/>
