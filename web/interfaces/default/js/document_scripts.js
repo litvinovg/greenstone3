@@ -1370,7 +1370,7 @@ function SlideShowWidget(mainDiv, images, idArray)
 	var _imageDiv = $("<div>", {id:"ssImageDiv"});
 	var _navDiv = $("<div>", {style:"height:2em;"});
 	var _nextButton = $("<img>", {src:gs.imageURLs.next, style:"float:right; cursor:pointer;"});
-	var _prevButton = $("<img>", {src:gs.imageURLs.prev, style:"float:left; cursor:pointer;"});
+	var _prevButton = $("<img>", {src:gs.imageURLs.prev, style:"float:left; cursor:pointer; display:none;"});
 	var _clearDiv = $("<div>", {style:"clear:both;"});
 	var _currentIndex = 0;
 	
@@ -1385,6 +1385,11 @@ function SlideShowWidget(mainDiv, images, idArray)
 		_images.push($("<img>", {src:images[i], "class":"slideshowImage"}));
 	}
 	
+	if(_images.length < 2)
+	{
+		_nextButton.css("display", "none");
+	}
+	
 	_imageDiv.append(_images[0]);
 	
 	this.nextImage = function()
@@ -1394,6 +1399,12 @@ function SlideShowWidget(mainDiv, images, idArray)
 			_inTransition = true;
 			if((_currentIndex + 1) < _images.length)
 			{
+				_prevButton.css("display", "");
+				if(_currentIndex + 1 == _images.length - 1)
+				{
+					_nextButton.css("display", "none");
+				}
+			
 				_imageDiv.fadeOut(1000, function()
 				{
 					_imageDiv.empty();
@@ -1419,6 +1430,12 @@ function SlideShowWidget(mainDiv, images, idArray)
 			_inTransition = true;
 			if((_currentIndex - 1) >= 0)
 			{
+				_nextButton.css("display", "");
+				if(_currentIndex - 1 == 0)
+				{
+					_prevButton.css("display", "none");
+				}
+			
 				_imageDiv.fadeOut(1000, function()
 				{
 					_imageDiv.empty();
