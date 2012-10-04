@@ -314,7 +314,7 @@
 				</li>
 
 				<!-- Floating TOC on/off button -->
-				<xsl:if test="count(//documentNode) > 1 and not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
+				<xsl:if test="count(//documentNode) > 0 and (not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true')">
 					<li id="floatingTOCOptions">
 						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.floatingTooltip')"/></xsl:attribute>
 						<img>
