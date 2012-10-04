@@ -176,6 +176,7 @@
 					<xsl:call-template name="navigationTab"/>
 				</xsl:for-each>
 			</ul>
+			<div style="clear:both;"><xsl:text> </xsl:text></div>
 		</xsl:if>
 	</xsl:template>
 	

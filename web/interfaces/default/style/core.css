@@ -423,7 +423,7 @@ body.dAction #gs_banner h2 {
 #gs-nav {
 	list-style: none outside none;
 	padding: 0px;
-	margin: 9px 0 0 20px;
+	margin: 0 0 0 20px;
 	font-size: 14px;
 }
 
@@ -433,9 +433,10 @@ body.dAction #gs_banner h2 {
 }
 
 #gs-nav li {
+	float:left;
 	display: inline;
 	margin-right: 5px;
-	padding: 3px 5px 0px 7px;
+	padding: 3px 5px 5px 7px;
 	text-transform: capitalize;
 	text-align: center;
 	border-bottom: 0px;
