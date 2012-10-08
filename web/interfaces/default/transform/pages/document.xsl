@@ -314,7 +314,7 @@
 		<xsl:choose>
 			<!-- NOTE: alb = ajax load bypass -->
 			<!-- 
-				If the docType is hierarchy and the we want to bypass the ajax load then do this 
+				If the docType is hierarchy and we want to bypass the ajax load then do this 
 				OR If the docType is hierarchy and we have asked for the expanded document OR we have asked for the top level document then do this 
 			-->
 			<xsl:when test="/page/pageResponse/document/@docType = 'hierarchy' and (/page/pageRequest/paramList/param[@name = 'alb']/@value = '1' or (string-length(/page/pageRequest/paramList/param[@name = 'd']/@value) > 0 and (/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or not(util:contains(/page/pageResponse/document/@selectedNode, '.')))))">
@@ -337,8 +337,19 @@
 					<xsl:text disable-output-escaping="yes">
 						$(window).load(function()
 						{
-							var url = gs.xsltParams.library_name + "?a=d&amp;c=" + gs.cgiParams.c + "&amp;excerptid=gs-document&amp;dt=hierarchy&amp;d=" + gs.cgiParams.d.replace(/([^.]*)\..*/, "$1");
-							loadTopLevelPage(null, url);
+							var sectionID = gs.cgiParams.d;
+							var callbackFunction = null;
+							if(sectionID.indexOf("\\.") == -1)
+							{
+								callbackFunction = function()
+								{
+									focusSection(sectionID);
+								};
+							}
+						
+							var docID = sectionID.replace(/([^.]*)\..*/, "$1");
+							var url = gs.xsltParams.library_name + "?a=d&amp;c=" + gs.cgiParams.c + "&amp;excerptid=gs-document&amp;dt=hierarchy&amp;d=" + docID;
+							loadTopLevelPage(callbackFunction, url);
 						});
 					</xsl:text>
 				</script>
