@@ -61,20 +61,13 @@
 	</xsl:template>
 	
 	<xsl:template name="documentContent">
-		<xsl:choose>
-			<xsl:when test="@docType='simple'">
-				<div id="gs-document">
-					<xsl:call-template name="documentPre"/>
-					<xsl:call-template name="wrappedSectionImage"/>
-					<div id="gs-document-text">
-						<xsl:call-template name="documentNodeText"/>
-					</div>
-				</div>
-			</xsl:when>
-			<xsl:otherwise> 
-				<xsl:call-template name="wrappedDocument"/>
-			</xsl:otherwise>
-		</xsl:choose>
+		<div id="gs-document">
+			<xsl:call-template name="documentPre"/>
+			<xsl:call-template name="wrappedSectionImage"/>
+			<div id="gs-document-text">
+				<xsl:call-template name="documentNodeText"/>
+			</div>
+		</div>
 	</xsl:template>
 	
 	<xsl:template name="sectionHeading">
@@ -305,7 +298,7 @@
 				<xsl:call-template name="documentContent"/>
 			</xsl:when>			
 			<xsl:otherwise> <!-- display the standard greenstone document -->
-				<xsl:call-template name="documentContent"/>
+				<xsl:call-template name="wrappedDocument"/>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
