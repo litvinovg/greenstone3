@@ -892,6 +892,8 @@ function SliderWidget(_links)
 				getImage(page);
 			}
 		}
+		
+		checkFunction();
 		setInterval(checkFunction, 1000);
 	}
 	
