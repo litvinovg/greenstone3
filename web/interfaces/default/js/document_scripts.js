@@ -1323,6 +1323,11 @@ function showSlideShow()
 		{
 			$("#gs-slideshow").show();
 		}
+		
+		if($("#zoomOptions").length)
+		{
+			$("#zoomOptions").hide();
+		}
 	}
 	else
 	{
@@ -1331,6 +1336,11 @@ function showSlideShow()
 			$("#gs-slideshow").hide();
 		}
 		$("#gs-document").show();
+		
+		if($("#zoomOptions").length)
+		{
+			$("#zoomOptions").show();
+		}
 	}
 }
 
