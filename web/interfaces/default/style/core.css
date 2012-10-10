@@ -147,9 +147,10 @@ pre {
 	text-align:center;
 }
 
-#container {	position: relative;
+#container {
+	position: relative;
 	margin: 0 auto 20px auto;
-	max-width: 1000px;
+	width: 80%;
 	padding: 0;
 	line-height: 120%;
 	background-color: #fff;
@@ -157,8 +158,8 @@ pre {
 }
 
 #topArea {
-	border-bottom: 0px;
-	max-width: 998px;
+	border: none;
+	width: 80%;
 	margin: 20px auto 0;
 }
 
