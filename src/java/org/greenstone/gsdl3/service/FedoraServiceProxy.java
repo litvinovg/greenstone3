@@ -265,6 +265,7 @@ public class FedoraServiceProxy
 	Element search_format = (Element) GSXML.getNodeByPath(extra_info, path);
 	if (search_format != null) {
 	    this.format_info_map.put("TextQuery", this.doc.importNode(search_format, true));
+	    this.format_info_map.put("FieldQuery", this.doc.importNode(search_format, true));
 	}
 	
 	// look for document display format
