@@ -150,7 +150,7 @@ pre {
 #container {
 	position: relative;
 	margin: 0 auto 20px auto;
-	width: 80%;
+	max-width: 1000px;
 	padding: 0;
 	line-height: 120%;
 	background-color: #fff;
@@ -159,7 +159,7 @@ pre {
 
 #topArea {
 	border: none;
-	width: 80%;
+	max-width: 1000px;
 	margin: 20px auto 0;
 }
 
@@ -836,10 +836,6 @@ dl dd { padding-bottom:10px}
 
 .facetedResults{
 	float:left;
-	width:65%;
-}
-
-#gs-slideshow{
 	width:65%;
 }
 

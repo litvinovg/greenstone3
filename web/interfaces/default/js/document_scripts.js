@@ -1290,57 +1290,40 @@ function floatMenu(enabled)
 
 function showSlideShow()
 {
-	var visible = $("#ssOption").attr('checked');
-	if(visible)
+	$("#ssOption").attr('checked', false);
+	if(!($("#gs-slideshow").length))
 	{
-		$("#gs-document").hide();
-		if(!($("#gs-slideshow").length))
-		{
-			var slideshowDiv = $("<div>", {id:"gs-slideshow"});
-			var loadingImage = $("<img>", {src:gs.imageURLs.loading});
-			slideshowDiv.append(loadingImage);
-			
-			$("#gs-document").after(slideshowDiv);
-			
-			retrieveImagesForSlideShow(function(imageIDArray)
-			{
-				loadingImage.hide();
-				if(imageIDArray && imageIDArray.length > 0)
-				{
-					var imageURLs = new Array();
-					for(var i = 0; i < imageIDArray.length; i++)
-					{
-						if(imageIDArray[i].source && imageIDArray[i].source.search(/.*\.(gif|jpg|jpeg|png)$/) != -1)
-						{
-							imageURLs.push(gs.collectionMetadata.httpPath + "/index/assoc/" + gs.documentMetadata.assocfilepath + "/" + imageIDArray[i].source);
-						}
-					}
-					new SlideShowWidget(slideshowDiv, imageURLs, imageIDArray);
-				}
-			});
-		}
-		else
-		{
-			$("#gs-slideshow").show();
-		}
+		var slideshowDiv = $("<div>", {id:"gs-slideshow"});
+		var loadingImage = $("<img>", {src:gs.imageURLs.loading});
+		slideshowDiv.append(loadingImage);
 		
-		if($("#zoomOptions").length)
+		$.blockUI({message: $(slideshowDiv), css:{top: "5%", left: "5%", width: "90%", height: "90%", overflow: "auto", cursor: "auto"}});
+		
+		retrieveImagesForSlideShow(function(imageIDArray)
 		{
-			$("#zoomOptions").hide();
-		}
+			loadingImage.hide();
+			if(imageIDArray && imageIDArray.length > 0)
+			{
+				var imageURLs = new Array();
+				for(var i = 0; i < imageIDArray.length; i++)
+				{
+					if(imageIDArray[i].source && imageIDArray[i].source.search(/.*\.(gif|jpg|jpeg|png)$/) != -1)
+					{
+						imageURLs.push(gs.collectionMetadata.httpPath + "/index/assoc/" + gs.documentMetadata.assocfilepath + "/" + imageIDArray[i].source);
+					}
+				}
+				new SlideShowWidget(slideshowDiv, imageURLs, imageIDArray);
+			}
+		});
 	}
 	else
 	{
-		if($("#gs-slideshow").length)
-		{
-			$("#gs-slideshow").hide();
-		}
-		$("#gs-document").show();
-		
-		if($("#zoomOptions").length)
-		{
-			$("#zoomOptions").show();
-		}
+		$("#gs-slideshow").show();
+	}
+	
+	if($("#zoomOptions").length)
+	{
+		$("#zoomOptions").hide();
 	}
 }
 
@@ -1383,10 +1366,12 @@ function SlideShowWidget(mainDiv, images, idArray)
 	var _navDiv = $("<div>", {style:"height:2em;"});
 	var _nextButton = $("<img>", {src:gs.imageURLs.next, style:"float:right; cursor:pointer;"});
 	var _prevButton = $("<img>", {src:gs.imageURLs.prev, style:"float:left; cursor:pointer; display:none;"});
+	var _closeLink = $("<a href=\"javascript:$.unblockUI()\">Close Slideshow</a>");
 	var _clearDiv = $("<div>", {style:"clear:both;"});
 	var _currentIndex = 0;
 	
 	_navDiv.append(_nextButton);
+	_navDiv.append(_closeLink);
 	_navDiv.append(_prevButton);
 	_navDiv.append(_clearDiv);
 	_mainDiv.append(_navDiv);
@@ -1417,12 +1402,12 @@ function SlideShowWidget(mainDiv, images, idArray)
 					_nextButton.css("display", "none");
 				}
 			
-				_imageDiv.fadeOut(1000, function()
+				_imageDiv.fadeOut(500, function()
 				{
 					_imageDiv.empty();
 					_imageDiv.append(_images[_currentIndex + 1]);
 					_currentIndex++;
-					_imageDiv.fadeIn(1000, function()
+					_imageDiv.fadeIn(500, function()
 					{
 						_inTransition = false;
 					});
@@ -1448,12 +1433,12 @@ function SlideShowWidget(mainDiv, images, idArray)
 					_prevButton.css("display", "none");
 				}
 			
-				_imageDiv.fadeOut(1000, function()
+				_imageDiv.fadeOut(500, function()
 				{
 					_imageDiv.empty();
 					_imageDiv.append(_images[_currentIndex - 1]);
 					_currentIndex--;
-					_imageDiv.fadeIn(1000, function()
+					_imageDiv.fadeIn(500, function()
 					{
 						_inTransition = false;
 					});
@@ -1479,11 +1464,11 @@ function SlideShowWidget(mainDiv, images, idArray)
 		{
 			_inTransition = true;
 			_currentIndex = index;
-			_imageDiv.fadeOut(1000, function()
+			_imageDiv.fadeOut(500, function()
 			{
 				_imageDiv.empty();
 				_imageDiv.append(_images[_currentIndex]);
-				_imageDiv.fadeIn(1000, function()
+				_imageDiv.fadeIn(500, function()
 				{
 					_inTransition = false;
 				});
