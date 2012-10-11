@@ -351,6 +351,16 @@
 							</xsl:text>
 						</script>
 					</li>
+					<xsl:if test="/page/pageRequest/paramList/param[@name='ftoc']/@value = '1'">
+						<script type="text/javascript">
+							<xsl:text disable-output-escaping="yes">
+								$(window).load(function()
+								{
+									floatMenu(true);
+								});
+							</xsl:text>
+						</script>
+					</xsl:if>
 				</xsl:if>
 			</ul>
 			<div style="clear:both;"><xsl:text> </xsl:text></div>

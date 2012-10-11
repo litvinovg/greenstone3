@@ -1298,6 +1298,10 @@ function floatMenu(enabled)
 		$("#unfloatTOCButton").hide();
 		$("#floatTOCToggle").attr("checked", false);
 	}
+	
+	var ajax = gs.functions.ajaxRequest();
+	ajax.open("GET", gs.xsltParams.library_name + "?a=d&ftoc=" + (enabled ? "1" : "0") + "&c=" + gs.cgiParams.c);
+	ajax.send();
 }
 
 function showSlideShow()
