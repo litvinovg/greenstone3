@@ -264,7 +264,7 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</xsl:attribute>
-					<img>
+					<img onclick="showSlideShow()">
 						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'slideshow_image')"/></xsl:attribute>
 					</img>
 					<input id="ssOption" type="checkbox" onclick="showSlideShow()" class="optionCheckBox"/>
@@ -282,7 +282,7 @@
 				<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
 					<li>
 						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.realisticBooksTooltip')"/></xsl:attribute>
-						<img>
+						<img id="rbOptionImage" onclick="bookInit();">
 							<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'realistic_books_image')"/></xsl:attribute>
 						</img>
 						<input id="rbOption" type="checkbox" onclick="bookInit();" class="optionCheckBox"/>
@@ -293,10 +293,10 @@
 				<xsl:if test="util:contains(/page/pageRequest/paramList/param[@name = 'p.s']/@value, 'Query')">
 					<li>
 						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.highlightTooltip')"/></xsl:attribute>
-						<img>
+						<img onclick="swapHighlight(true);">
 							<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'highlight_image')"/></xsl:attribute>
 						</img>
-						<input id="highlightOption" type="checkbox" class="optionCheckBox" onclick="swapHighlight();">
+						<input id="highlightOption" type="checkbox" class="optionCheckBox" onclick="swapHighlight(false);">
 							<xsl:if test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'on'">
 								<xsl:attribute name="checked">true</xsl:attribute>
 							</xsl:if>
@@ -307,7 +307,7 @@
 				<!-- Zoom on/off button -->
 				<li id="zoomOptions" style="display:none;">
 					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.zoomTooltip')"/></xsl:attribute>
-					<img>
+					<img id="zoomToggleImage">
 						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'zoom_image')"/></xsl:attribute>
 					</img>
 					<input id="zoomToggle" type="checkbox"/>
@@ -315,6 +315,12 @@
 						<xsl:text disable-output-escaping="yes">
 							$("#zoomToggle").change(function()
 							{
+								_imageZoomEnabled = $("#zoomToggle").attr("checked");
+							});
+							
+							$("#zoomToggleImage").click(function()
+							{
+								$("#zoomToggle").attr("checked", !$("#zoomToggle").attr("checked"));
 								_imageZoomEnabled = $("#zoomToggle").attr("checked");
 							});
 						</xsl:text>
@@ -325,7 +331,7 @@
 				<xsl:if test="count(//documentNode) > 0 and (not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true')">
 					<li id="floatingTOCOptions">
 						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.floatingTooltip')"/></xsl:attribute>
-						<img>
+						<img id="floatTOCToggleImage">
 							<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'float_toc_image')"/></xsl:attribute>
 						</img>
 						<input id="floatTOCToggle" type="checkbox"/>
@@ -334,6 +340,12 @@
 								$("#floatTOCToggle").attr("checked", false);
 								$("#floatTOCToggle").click(function()
 								{
+									floatMenu($("#floatTOCToggle").attr("checked"));
+								});
+								
+								$("#floatTOCToggleImage").click(function()
+								{
+									$("#floatTOCToggle").attr("checked", !$("#floatTOCToggle").attr("checked"))
 									floatMenu($("#floatTOCToggle").attr("checked"));
 								});
 							</xsl:text>

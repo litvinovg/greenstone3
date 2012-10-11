@@ -949,9 +949,14 @@ function SliderWidget(_links)
 /***********************
 * HIGHLIGHTING SCRIPTS *
 ***********************/
-function swapHighlight()
+function swapHighlight(imageClicked)
 {
 	var hlCheckbox = document.getElementById("highlightOption");
+
+	if(imageClicked)
+	{
+		$(hlCheckbox).attr("checked", !$(hlCheckbox).attr("checked"));
+	}
 	
 	var from;
 	var to;
@@ -1034,13 +1039,19 @@ function showBook()
 function swapLinkJavascript(rbOn)
 {
 	var option = document.getElementById("rbOption");
+	var optionImage = document.getElementById("rbOptionImage");
+	
 	if(rbOn)
 	{
 		option.setAttribute("onclick", "hideText(); showBook(); swapLinkJavascript(false);");
+		optionImage.setAttribute("onclick", "hideText(); showBook(); swapLinkJavascript(false);");
+		$(option).attr("checked", false);
 	}
 	else
 	{
 		option.setAttribute("onclick", "hideBook(); showText(); swapLinkJavascript(true);");
+		optionImage.setAttribute("onclick", "hideBook(); showText(); swapLinkJavascript(true);");
+		$(option).attr("checked", true);
 	}
 }
 
