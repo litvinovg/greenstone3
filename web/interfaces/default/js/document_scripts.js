@@ -938,6 +938,7 @@ function SliderWidget(_links)
 		_titles.push([title, _links[i]]);
 		
 		var text = document.createTextNode(title);
+		col.appendChild(document.createElement("BR"));
 		col.appendChild(text);
 	}
 	
