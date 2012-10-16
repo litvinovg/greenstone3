@@ -21,6 +21,8 @@
 		</xsl:choose>
 	</xsl:variable>
 
+	<!-- optional cgi-params for links to document pages -->
+	<xsl:variable name="opt-doc-link-args"></xsl:variable>
 	<!-- set page title -->
 	<xsl:template name="pageTitle"><gslib:documentTitle/></xsl:template>
 
