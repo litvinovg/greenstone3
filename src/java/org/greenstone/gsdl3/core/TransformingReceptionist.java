@@ -996,7 +996,14 @@ public class TransformingReceptionist extends Receptionist
 		{
 			name = this.xslt_map.get(action);
 		}
-
+		if (name== null) {
+		  // so we can reandomly create any named page
+		  if (action.equals("p") && !subaction.equals("")) {
+		    // TODO: pages/ won't work for interface other than default!!
+		    name="pages/"+subaction+".xsl";
+		  }
+		  
+		}
 		Document finalDoc = GSXSLT.mergedXSLTDocumentCascade(name, (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, _debug);
 		return finalDoc;
 	}
