@@ -8,7 +8,7 @@
 	extension-element-prefixes="java">
 	<xsl:param name="interface_name"/>
 	<xsl:param name="library_name"/>
-  
+ 
 	<xsl:output method="xml"/>
 	<xsl:namespace-alias stylesheet-prefix="xslt" result-prefix="xsl"/>
 
@@ -66,6 +66,7 @@
 	</xsl:template>
 
 	<xsl:template match="gsf:link">
+    <xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>
 		<xsl:choose>
 			<xsl:when test="@type='classifier'">
 				<a>
@@ -92,6 +93,18 @@
 			  <xsl:apply-templates/>
 			  <xslt:value-of disable-output-escaping="yes" select="metadataList/metadata[contains(@name, '/weblink')]"/>
 			</xsl:when>
+      <xsl:when test="@type='page'">
+				<a>
+					<xslt:attribute name='href'>
+						<xslt:value-of select='$library_name'/>
+						<xsl:text>/collection/</xsl:text>
+						<xslt:value-of select='/page/pageResponse/collection/@name'/>/page/<xsl:value-of select="@page"/></xslt:attribute>
+	  <xsl:choose>
+	  <xsl:when test="@title"><xsl:attribute name="title"><xsl:value-of select="@title"/></xsl:attribute></xsl:when>
+	    <xsl:when test="@titlekey"><xslt:attribute name="title"><xslt:value-of disable-output-escaping="yes" select="util:getCollectionText($collName, $site_name, /page/@lang, '{@titlekey}')"/></xslt:attribute></xsl:when></xsl:choose>
+					<xsl:apply-templates/>
+				</a>	
+      </xsl:when>
 			<xsl:when test="@type='equivdoc'">
 			  <xsl:call-template name="gsf:equivlinkgs3"/>
 			</xsl:when>
@@ -239,8 +252,8 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 	</xsl:template>
 	<!-- With gsf:collectionText, a user can request a string from the collection's dictionary in the current lang -->
 	<xsl:template match="gsf:collectionText" name="gsf:collectionText">
-    <!--<xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>-->
-	  <xslt:value-of disable-output-escaping="yes" select="util:getCollectionText($collName, $site_name, /page/@lang, '{@name}')"/>
+    <xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>
+	  <xslt:value-of disable-output-escaping="yes" select="util:getCollectionText($collName, $site_name, /page/@lang, '{@name}', '{@args}')"/>
 	</xsl:template>
 
 	<!-- if this gsf:metadata is a child of a document node then we want to get the metadata for that node -->
