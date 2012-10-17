@@ -8,7 +8,9 @@
 	extension-element-prefixes="java">
 	<xsl:param name="interface_name"/>
 	<xsl:param name="library_name"/>
- 
+	<xsl:param name="site_name"/>
+	<xsl:param name="collName"/>
+  
 	<xsl:output method="xml"/>
 	<xsl:namespace-alias stylesheet-prefix="xslt" result-prefix="xsl"/>
 
@@ -68,6 +70,25 @@
 	<xsl:template match="gsf:link">
     <xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>
 		<xsl:choose>
+			<xsl:when test="@type='query'">
+				<a>
+					<xslt:attribute name='href'>
+						<xslt:value-of select='$library_name'/>
+						<xsl:text>/collection/</xsl:text>
+						<xslt:value-of select='/page/pageResponse/collection/@name'/>
+						<xsl:text>/search/</xsl:text>
+						<xsl:choose>
+							<xsl:when test="@name">
+								<xsl:value-of select="@name"/>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:text>TextQuery</xsl:text>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xslt:attribute>
+					<xsl:apply-templates/>
+				</a>
+			</xsl:when>
 			<xsl:when test="@type='classifier'">
 				<a>
 					<xslt:attribute name='href'>
@@ -75,7 +96,14 @@
 						<xsl:text>/collection/</xsl:text>
 						<xslt:value-of select='/page/pageResponse/collection/@name'/>
 						<xsl:text>/browse/</xsl:text>
-						<xslt:value-of select='util:replace(@nodeID, ".", "/")'/>
+						<xsl:choose>
+							<xsl:when test="@nodeID">
+								<xsl:value-of select="@nodeID"/>
+							</xsl:when>
+							<xsl:otherwise>
+								<xslt:value-of select='util:replace(@nodeID, ".", "/")'/>
+							</xsl:otherwise>
+						</xsl:choose>
 					</xslt:attribute>
 					<xsl:apply-templates/>
 				</a>
@@ -93,18 +121,22 @@
 			  <xsl:apply-templates/>
 			  <xslt:value-of disable-output-escaping="yes" select="metadataList/metadata[contains(@name, '/weblink')]"/>
 			</xsl:when>
-      <xsl:when test="@type='page'">
+			<xsl:when test="@type='page'">
 				<a>
 					<xslt:attribute name='href'>
 						<xslt:value-of select='$library_name'/>
 						<xsl:text>/collection/</xsl:text>
-						<xslt:value-of select='/page/pageResponse/collection/@name'/>/page/<xsl:value-of select="@page"/></xslt:attribute>
-	  <xsl:choose>
-	  <xsl:when test="@title"><xsl:attribute name="title"><xsl:value-of select="@title"/></xsl:attribute></xsl:when>
-	    <xsl:when test="@titlekey"><xslt:attribute name="title"><xslt:value-of disable-output-escaping="yes" select="util:getCollectionText($collName, $site_name, /page/@lang, '{@titlekey}')"/></xslt:attribute></xsl:when></xsl:choose>
+						<xslt:value-of select='/page/pageResponse/collection/@name'/>
+						<xsl:text>/page/</xsl:text>
+						<xsl:value-of select="@page"/>
+					</xslt:attribute>
+					<xsl:choose>
+						<xsl:when test="@title"><xsl:attribute name="title"><xsl:value-of select="@title"/></xsl:attribute></xsl:when>
+						<xsl:when test="@titlekey"><xslt:attribute name="title"><xslt:value-of disable-output-escaping="yes" select="util:getCollectionText($collName, $site_name, /page/@lang, '{@titlekey}')"/></xslt:attribute></xsl:when>
+					</xsl:choose>
 					<xsl:apply-templates/>
 				</a>	
-      </xsl:when>
+			</xsl:when>
 			<xsl:when test="@type='equivdoc'">
 			  <xsl:call-template name="gsf:equivlinkgs3"/>
 			</xsl:when>
@@ -252,8 +284,8 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 	</xsl:template>
 	<!-- With gsf:collectionText, a user can request a string from the collection's dictionary in the current lang -->
 	<xsl:template match="gsf:collectionText" name="gsf:collectionText">
-    <xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>
-	  <xslt:value-of disable-output-escaping="yes" select="util:getCollectionText($collName, $site_name, /page/@lang, '{@name}', '{@args}')"/>
+    <!--<xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>-->
+		<xslt:value-of select="util:getCollectionText($collName, $site_name, /page/@lang, '{@name}')"/>
 	</xsl:template>
 
 	<!-- if this gsf:metadata is a child of a document node then we want to get the metadata for that node -->
