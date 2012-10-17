@@ -285,7 +285,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 	<!-- With gsf:collectionText, a user can request a string from the collection's dictionary in the current lang -->
 	<xsl:template match="gsf:collectionText" name="gsf:collectionText">
     <!--<xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>-->
-		<xslt:value-of select="util:getCollectionText($collName, $site_name, /page/@lang, '{@name}')"/>
+		<xslt:value-of select="util:getCollectionText($collName, $site_name, /page/@lang, '{@name}', '{@args}')"/>
 	</xsl:template>
 
 	<!-- if this gsf:metadata is a child of a document node then we want to get the metadata for that node -->

@@ -10,18 +10,19 @@
 	<xsl:param name="library_name"/>
 	<xsl:param name="site_name"/>
 	<xsl:param name="collName"/>
+	<xsl:param name="lang"/>
   
 	<xsl:output method="xml"/>
 	<xsl:namespace-alias stylesheet-prefix="xslt" result-prefix="xsl"/>
 
 	<!-- With gsf:interfaceText, a user can request a string from the interface dictionaries in the current lang -->
 	<xsl:template match="gsf:interfaceText" name="gsf:interfaceText">
-		<xsl:value-of disable-output-escaping="yes" select="util:getInterfaceText($interface_name, /page/@lang, @name)"/>
+		<xsl:value-of disable-output-escaping="yes" select="util:getInterfaceText($interface_name, $lang, @name)"/>
 	</xsl:template>
 
 	<!-- With gsf:collectionText, a user can request a string from the collection's dictionary in the current lang -->
 	<xsl:template match="gsf:collectionText" name="gsf:collectionText">
-		<xsl:copy-of select="util:getCollectionText($collName, $site_name, /page/@lang, @name)"/>
+		<xsl:copy-of select="util:getCollectionText($collName, $site_name, $lang, @name, @args)"/>
 	</xsl:template>
 
 	<xsl:template match="*">
