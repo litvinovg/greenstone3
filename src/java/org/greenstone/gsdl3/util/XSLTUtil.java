@@ -361,7 +361,7 @@ public class XSLTUtil
 			String result = dict.get(key, args);
 			if (result != null)
 			{
-				return docBuilder.parse(new ByteArrayInputStream(("<fragment>" + result + "</fragment>").getBytes())).getDocumentElement();
+				return docBuilder.parse(new ByteArrayInputStream(("<fragment>" + result + "</fragment>").getBytes("UTF-8"))).getDocumentElement();
 			}
 			return docBuilder.parse(new ByteArrayInputStream(("<fragment>" + "text:" + collection + ":" + key + "</fragment>").getBytes())).getDocumentElement();
 		}

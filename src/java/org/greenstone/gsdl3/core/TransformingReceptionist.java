@@ -653,6 +653,18 @@ public class TransformingReceptionist extends Receptionist
 		Element page_response = (Element) GSXML.getChildByTagName(page, GSXML.PAGE_RESPONSE_ELEM);
 		Element format_elem = (Element) GSXML.getChildByTagName(page_response, GSXML.FORMAT_ELEM);
 
+		NodeList pageElems = doc.getElementsByTagName("page");
+		if (pageElems.getLength() > 0)
+		{
+			Element pageElem = (Element) pageElems.item(0);
+			String langAtt = pageElem.getAttribute(GSXML.LANG_ATT);
+
+			if (langAtt != null && langAtt.length() > 0)
+			{
+				config_params.put("lang", langAtt);
+			}
+		}
+
 		if (output.equals("formatelem"))
 		{
 			return format_elem;
