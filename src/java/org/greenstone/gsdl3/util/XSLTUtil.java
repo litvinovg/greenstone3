@@ -18,6 +18,7 @@
  */
 package org.greenstone.gsdl3.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,6 +26,9 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import net.tanesha.recaptcha.ReCaptcha;
 import net.tanesha.recaptcha.ReCaptchaFactory;
@@ -49,12 +53,12 @@ public class XSLTUtil
 	{
 		_stringVariables.put(name, value);
 	}
-	
+
 	public static String getString(String name)
 	{
 		return _stringVariables.get(name);
 	}
-	
+
 	/* some tests */
 	public static boolean equals(String s1, String s2)
 	{
@@ -291,45 +295,45 @@ public class XSLTUtil
 		return result;
 	}
 
-	public static String getCollectionText(String collection, String site_name, String lang, String key)
+	public static Node getCollectionText(String collection, String site_name, String lang, String key)
 	{
-	  return getCollectionTextWithArgs(collection, site_name, lang, key, null);
+		return getCollectionTextWithArgs(collection, site_name, lang, key, null);
 	}
 
-  public static String getCollectionText(String collection, String site_name, String lang, String key, String args_str)
-  {
+	public static Node getCollectionText(String collection, String site_name, String lang, String key, String args_str)
+	{
 
-    String[] args = null;
-    if (args_str != null && !args_str.equals(""))
-      {
-	args = StringUtils.split(args_str, ";");
-      }
+		String[] args = null;
+		if (args_str != null && !args_str.equals(""))
+		{
+			args = StringUtils.split(args_str, ";");
+		}
 
-    return getCollectionTextWithArgs(collection, site_name, lang, key, args);
-  }
+		return getCollectionTextWithArgs(collection, site_name, lang, key, args);
+	}
 
 	// xslt didn't like calling the function with Node varargs, so have this hack for now
-	public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1)
+	public static Node getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1)
 	{
 		return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1);
 	}
 
-	public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2)
+	public static Node getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2)
 	{
 		return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1, n2);
 	}
 
-	public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2, Node n3)
+	public static Node getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2, Node n3)
 	{
 		return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1, n2, n3);
 	}
 
-	public static String getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2, Node n3, Node n4)
+	public static Node getCollectionTextWithDOM(String collection, String site_name, String lang, String key, Node n1, Node n2, Node n3, Node n4)
 	{
 		return getCollectionTextWithDOMMulti(collection, site_name, lang, key, n1, n2, n3, n4);
 	}
 
-	public static String getCollectionTextWithDOMMulti(String collection, String site_name, String lang, String key, Node... nodes)
+	public static Node getCollectionTextWithDOMMulti(String collection, String site_name, String lang, String key, Node... nodes)
 	{
 		int num_nodes = nodes.length;
 		String[] args = null;
@@ -339,7 +343,6 @@ public class XSLTUtil
 
 			for (int i = 0; i < num_nodes; i++)
 			{
-
 				String node_str = XMLConverter.getString(nodes[i]);
 				args[i] = node_str;
 			}
@@ -347,17 +350,25 @@ public class XSLTUtil
 		return getCollectionTextWithArgs(collection, site_name, lang, key, args);
 	}
 
-  public static String getCollectionTextWithArgs(String collection, String site_name, String lang, String key, String [] args) {
-
-		CollectionClassLoader class_loader = new CollectionClassLoader(XSLTUtil.class.getClassLoader(), GSFile.siteHome(GlobalProperties.getGSDL3Home(), site_name), collection);
-		Dictionary dict = new Dictionary(collection, lang, class_loader);
-		String result = dict.get(key, args);
-		if (result != null)
+	public static Node getCollectionTextWithArgs(String collection, String site_name, String lang, String key, String[] args)
+	{
+		try
 		{
-			return result;
-		}
-		return "text:" + collection + ":" + key;
+			DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
+			CollectionClassLoader class_loader = new CollectionClassLoader(XSLTUtil.class.getClassLoader(), GSFile.siteHome(GlobalProperties.getGSDL3Home(), site_name), collection);
+			Dictionary dict = new Dictionary(collection, lang, class_loader);
+			String result = dict.get(key, args);
+			if (result != null)
+			{
+				return docBuilder.parse(new ByteArrayInputStream(("<fragment>" + result + "</fragment>").getBytes())).getDocumentElement();
+			}
+			return docBuilder.parse(new ByteArrayInputStream(("<fragment>" + "text:" + collection + ":" + key + "</fragment>").getBytes())).getDocumentElement();
+		}
+		catch (Exception ex)
+		{
+			return null;
+		}
 	}
 
 	public static boolean isImage(String mimetype)

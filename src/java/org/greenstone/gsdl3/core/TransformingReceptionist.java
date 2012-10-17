@@ -20,7 +20,6 @@ import org.greenstone.gsdl3.action.Action;
 import org.greenstone.gsdl3.util.GSConstants;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSParams;
-import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.UserContext;
@@ -180,12 +179,12 @@ public class TransformingReceptionist extends Receptionist
 			this.language_list = (Element) this.doc.importNode(lang_list, true);
 		}
 
-		GetRequiredMetadataNamesFromXSLFiles();
+		getRequiredMetadataNamesFromXSLFiles();
 
 		return true;
 	}
 
-	protected void GetRequiredMetadataNamesFromXSLFiles()
+	protected void getRequiredMetadataNamesFromXSLFiles()
 	{
 		ArrayList<File> xslFiles = GSFile.getAllXSLFiles((String) this.config_params.get(GSConstants.INTERFACE_NAME), (String) this.config_params.get(GSConstants.SITE_NAME));
 
@@ -344,21 +343,22 @@ public class TransformingReceptionist extends Receptionist
 
 		ArrayList<String> requiredMetadata = _metadataRequiredMap.get(stylesheetFile);
 
-		if(requiredMetadata !=null){
-		    Element extraMetadataList = this.doc.createElement(GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
+		if (requiredMetadata != null)
+		{
+			Element extraMetadataList = this.doc.createElement(GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
 
-		    for (String metadataString : requiredMetadata)
+			for (String metadataString : requiredMetadata)
 			{
-			    Element metadataElem = this.doc.createElement(GSXML.EXTRA_METADATA);
-			    metadataElem.setAttribute(GSXML.NAME_ATT, metadataString);
-			    extraMetadataList.appendChild(metadataElem);
+				Element metadataElem = this.doc.createElement(GSXML.EXTRA_METADATA);
+				metadataElem.setAttribute(GSXML.NAME_ATT, metadataString);
+				extraMetadataList.appendChild(metadataElem);
 			}
-		    request.appendChild(request.getOwnerDocument().importNode(extraMetadataList, true));
+			request.appendChild(request.getOwnerDocument().importNode(extraMetadataList, true));
 		}
 	}
-    
-    protected Node postProcessPage(Element page)
-    {
+
+	protected Node postProcessPage(Element page)
+	{
 		// might need to add some data to the page
 		addExtraInfo(page);
 		// transform the page using xslt
@@ -631,6 +631,8 @@ public class TransformingReceptionist extends Receptionist
 
 			inlineTemplate = (String) params.get(GSParams.INLINE_TEMPLATE);
 		}
+
+		config_params.put("collName", collection);
 
 		Document style_doc = getXSLTDocument(action, subaction, collection);
 		if (style_doc == null)
@@ -908,7 +910,8 @@ public class TransformingReceptionist extends Receptionist
 		}
 
 		GSXSLT.inlineImportAndIncludeFiles(skinAndLibraryDoc, null, (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces);
-		skinAndLibraryDoc = (Document) secondConfigFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request));
+		skinAndLibraryDoc = (Document) performTextFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request));
+		skinAndLibraryDoc = (Document) performConfigFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request));
 
 		if (_debug)
 		{
@@ -934,9 +937,21 @@ public class TransformingReceptionist extends Receptionist
 		//return null; // For now - change later
 	}
 
-	protected Node secondConfigFormatPass(String collection, Document skinAndLibraryDoc, Document doc, UserContext userContext)
+	protected Node performConfigFormatPass(String collection, Document skinAndLibraryDoc, Document doc, UserContext userContext)
 	{
 		String configStylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, "config_format.xsl");
+		Document configStylesheet_doc = this.converter.getDOM(new File(configStylesheet_file));
+
+		if (configStylesheet_doc != null)
+		{
+			return this.transformer.transform(configStylesheet_doc, skinAndLibraryDoc, config_params);
+		}
+		return skinAndLibraryDoc;
+	}
+
+	protected Node performTextFormatPass(String collection, Document skinAndLibraryDoc, Document doc, UserContext userContext)
+	{
+		String configStylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, "text_fragment_format.xsl");
 		Document configStylesheet_doc = this.converter.getDOM(new File(configStylesheet_file));
 
 		if (configStylesheet_doc != null)
@@ -996,13 +1011,15 @@ public class TransformingReceptionist extends Receptionist
 		{
 			name = this.xslt_map.get(action);
 		}
-		if (name== null) {
-		  // so we can reandomly create any named page
-		  if (action.equals("p") && !subaction.equals("")) {
-		    // TODO: pages/ won't work for interface other than default!!
-		    name="pages/"+subaction+".xsl";
-		  }
-		  
+		if (name == null)
+		{
+			// so we can reandomly create any named page
+			if (action.equals("p") && !subaction.equals(""))
+			{
+				// TODO: pages/ won't work for interface other than default!!
+				name = "pages/" + subaction + ".xsl";
+			}
+
 		}
 		Document finalDoc = GSXSLT.mergedXSLTDocumentCascade(name, (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, _debug);
 		return finalDoc;
