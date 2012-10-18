@@ -1089,7 +1089,14 @@
   <target name="start-tomcat" description="Startup only Tomcat" depends="init" if="tomcat.islocal">
     <property name="tomcat.classpath" refid="local.tomcat.classpath"/>
     <property name="tomcat.path" refid="local.tomcat.path"/>
-    <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx400M ${fedora.maxpermsize}"/>
+
+    <if><bool>
+	<isset property="fedora.maxpermsize"/></bool>
+      <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx400M ${fedora.maxpermsize}"/>
+      <else>
+	<property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx400M"/>
+      </else>
+    </if>
 
 	<echo file="${catalina.home}/bin/setenv.bat">set CLASSPATH=${tomcat.classpath}</echo>
 	<echo file="${catalina.home}/bin/setenv.sh">export CLASSPATH=${tomcat.classpath}</echo>
