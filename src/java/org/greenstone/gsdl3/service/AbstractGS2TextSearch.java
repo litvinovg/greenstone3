@@ -51,10 +51,14 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 	protected String index_stem = null;
 
 	// stem indexes available
-	protected boolean does_case = true;
-	protected boolean does_stem = true;
+	protected boolean does_case = false;
+	protected boolean does_stem = false;
 	protected boolean does_accent = false;
 
+  // default values for stem indexes
+  protected String case_default = BOOLEAN_PARAM_ON;
+  protected String accent_default = BOOLEAN_PARAM_ON;
+  protected String stem_default = BOOLEAN_PARAM_OFF;
 	// maxnumeric - 
 	protected int maxnumeric = 4;
 
@@ -160,14 +164,13 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 				else if (name.equals(STEMINDEX_OPTION))
 				{
 					int stemindex = Integer.parseInt(value);
-					// stem and case are true by default, accent folding false by default
-					if ((stemindex & 1) == 0)
+					if ((stemindex & 1) != 0)
 					{
-						does_case = false;
+						does_case = true;
 					}
-					if ((stemindex & 2) == 0)
+					if ((stemindex & 2) != 0)
 					{
-						does_stem = false;
+						does_stem = true;
 					}
 					if ((stemindex & 4) != 0)
 					{
@@ -182,6 +185,27 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 		{
 			Document owner = info.getOwnerDocument();
 			Element config_search = (Element) GSXML.getChildByTagName(extra_info, GSXML.SEARCH_ELEM);
+
+			// work out what the default values for the stemming options are
+			if (does_case || does_accent || does_stem) {
+			  // only bother looking for this is we have some of these set
+			  NodeList index_options = config_search.getElementsByTagName(GSXML.INDEX_OPTION_ELEM);
+			  for (int i = 0; i < index_options.getLength(); i++) {
+			    Element ind = (Element) index_options.item(i);
+			    String name = ind.getAttribute(GSXML.NAME_ATT);
+			    String def_val = ind.getAttribute(GSXML.DEFAULT_ATT);
+
+			    if (!def_val.equals("")) {
+			      if (name.equals("stem")) {
+				stem_default = (def_val.equals("on")? BOOLEAN_PARAM_ON: BOOLEAN_PARAM_OFF);
+			      } else if (name.equals("casefold")) {
+				case_default = (def_val.equals("on")? BOOLEAN_PARAM_ON: BOOLEAN_PARAM_OFF);
+			      } else if (name.equals("accentfold")) {
+				accent_default = (def_val.equals("on")? BOOLEAN_PARAM_ON: BOOLEAN_PARAM_OFF);
+			      }
+			    }
+			  }
+			}
 
 			// so far we have index and indexSubcollection specific display elements, and global format elements 
 
@@ -329,18 +353,15 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 	{
 		if (this.does_case)
 		{
-			// gs2 has case on by default
-			createParameter(CASE_PARAM, param_list, lang, BOOLEAN_PARAM_ON);
+			createParameter(CASE_PARAM, param_list, lang, case_default);
 		}
 		if (this.does_stem)
 		{
-			// but stem is off by default
-			createParameter(STEM_PARAM, param_list, lang, BOOLEAN_PARAM_OFF);
+			createParameter(STEM_PARAM, param_list, lang, stem_default);
 		}
 		if (this.does_accent)
 		{
-			// and so is accent folding
-			createParameter(ACCENT_PARAM, param_list, lang, BOOLEAN_PARAM_OFF);
+			createParameter(ACCENT_PARAM, param_list, lang, accent_default);
 		}
 		createParameter(MATCH_PARAM, param_list, lang);
 	}
