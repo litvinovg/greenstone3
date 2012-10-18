@@ -1336,11 +1336,6 @@ function showSlideShow()
 	{
 		$("#gs-slideshow").show();
 	}
-	
-	if($("#zoomOptions").length)
-	{
-		$("#zoomOptions").hide();
-	}
 }
 
 function retrieveImagesForSlideShow(callback)
