@@ -83,6 +83,9 @@ with.gli.and.gems=true
 #install.flax=true
 flax.checkout.path=${flax.svn.root}/trunk/flaxmain
 
+##This needs to be uncommented if using Fedora and Fedora GSearch with Greenstone's tomcat
+#fedora.maxpermsize= -XX:MaxPermSize=128m
+
 ##Web services related constants##
 base.webservice.name=SOAPServer
 ##listing and description of all the web services deployable on GS3##
