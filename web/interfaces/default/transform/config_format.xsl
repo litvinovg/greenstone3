@@ -69,6 +69,12 @@
 
 	<xsl:template match="gsf:link">
     <xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>
+    <xsl:variable name="opt-title">					
+      <xsl:choose>
+	<xsl:when test="@title"><xslt:attribute name="title"><xsl:value-of select="@title"/></xslt:attribute></xsl:when>
+	<xsl:when test="@titlekey"><xslt:attribute name="title"><xslt:value-of disable-output-escaping="yes" select="util:getCollectionText($collName, $site_name, /page/@lang, '{@titlekey}')"/></xslt:attribute></xsl:when>
+      </xsl:choose>
+    </xsl:variable>
 		<xsl:choose>
 			<xsl:when test="@type='query'">
 				<a>
@@ -86,6 +92,7 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</xslt:attribute>
+                                        <xsl:copy-of select="$opt-title"/>
 					<xsl:apply-templates/>
 				</a>
 			</xsl:when>
@@ -105,6 +112,7 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</xslt:attribute>
+                                        <xsl:copy-of select="$opt-title"/>
 					<xsl:apply-templates/>
 				</a>
 			</xsl:when>
@@ -113,11 +121,12 @@
 				   disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']" />/index/assoc/<xslt:value-of 
 				   disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='assocfilepath']" />/<xslt:value-of 
 				   disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='srclinkFile']" /></xslt:attribute>
+                                  <xsl:copy-of select="$opt-title"/>
 				  <xsl:apply-templates/>
 				</a>
 			</xsl:when>
 			<xsl:when test="@type='web'">
-			  <xslt:value-of disable-output-escaping="yes" select="metadataList/metadata[contains(@name, 'weblink')]"/>
+	<xslt:value-of disable-output-escaping="yes" select="metadataList/metadata[contains(@name, 'weblink')]"/>
 			  <xsl:apply-templates/>
 			  <xslt:value-of disable-output-escaping="yes" select="metadataList/metadata[contains(@name, '/weblink')]"/>
 			</xsl:when>
@@ -130,11 +139,8 @@
 						<xsl:text>/page/</xsl:text>
 						<xsl:value-of select="@page"/>
 					</xslt:attribute>
-					<xsl:choose>
-						<xsl:when test="@title"><xsl:attribute name="title"><xsl:value-of select="@title"/></xsl:attribute></xsl:when>
-						<xsl:when test="@titlekey"><xslt:attribute name="title"><xslt:value-of disable-output-escaping="yes" select="util:getCollectionText($collName, $site_name, /page/@lang, '{@titlekey}')"/></xslt:attribute></xsl:when>
-					</xsl:choose>
-					<xsl:apply-templates/>
+	                                <xsl:copy-of select="$opt-title"/>
+				<xsl:apply-templates/>
 				</a>	
 			</xsl:when>
 			<xsl:when test="@type='equivdoc'">
@@ -145,6 +151,7 @@
 					<xslt:value-of select="/page/pageRequest/paramList/param[@name='book']/@value"/>
 				</xslt:variable>
 				<a>
+	                          <xsl:copy-of select="$opt-title"/>
 					<xslt:attribute name="href">
 						<xslt:value-of select='$library_name'/>
 						<xsl:text>/collection/</xsl:text>
@@ -284,7 +291,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 	</xsl:template>
 	<!-- With gsf:collectionText, a user can request a string from the collection's dictionary in the current lang -->
 	<xsl:template match="gsf:collectionText" name="gsf:collectionText">
-    <!--<xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>-->
+    <xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>
 		<xslt:value-of select="util:getCollectionText($collName, $site_name, /page/@lang, '{@name}', '{@args}')"/>
 	</xsl:template>
 
