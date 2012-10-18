@@ -259,6 +259,13 @@ sub main {
     #output the defaultIndex to coll cfg
     $collwriter->emptyTag('defaultIndex','name'=>$defaultindex);
 
+    # indexOptions
+    if (defined $collectcfg->{'indexoptions'}) {
+	foreach my $i (@{$collectcfg->{'indexoptions'}}) {
+	    $collwriter->emptyTag('indexOption', 'name'=>$i);
+	}
+    }
+
     #indexSubcollection
     my $indexsubcollections = $collectcfg->{'indexsubcollections'};
    
