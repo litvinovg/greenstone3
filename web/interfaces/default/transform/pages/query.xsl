@@ -137,7 +137,7 @@
 					<xsl:variable name="ns">s1.</xsl:variable>
 					<xsl:for-each select="paramList/param">
 						<xsl:choose>
-							<xsl:when test="@name='case' or @name='stem' or @name='accent' or @name = 'maxDocs' or @name = 'hitsPerPage'">
+							<xsl:when test="@name = 'maxDocs' or @name = 'hitsPerPage'">
 							</xsl:when>
 							<xsl:when test="@type='multi'">
 								<xsl:apply-templates select="."><xsl:with-param name="ns" select="$ns"/></xsl:apply-templates>
