@@ -22,7 +22,7 @@
 
 	<!-- With gsf:collectionText, a user can request a string from the collection's dictionary in the current lang -->
 	<xsl:template match="gsf:collectionText" name="gsf:collectionText">
-		<xsl:copy-of select="util:getCollectionText($collName, $site_name, $lang, @name, @args)"/>
+		<xsl:copy-of select="util:getCollectionText($collName, $site_name, $lang, @name, @args)/*"/>
 	</xsl:template>
 
 	<xsl:template match="*">
