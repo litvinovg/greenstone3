@@ -65,7 +65,7 @@
          Java HTTP Connector: /docs/config/http.html (blocking & non-blocking)
          Java AJP  Connector: /docs/config/ajp.html
          APR (HTTP/AJP) Connector: /docs/apr.html
-         Define a non-SSL HTTP/1.1 Connector on port 8080
+         Define a non-SSL HTTP/1.1 Connector on port @port@
     -->
     <Connector port="@port@" protocol="HTTP/1.1"
                connectionTimeout="20000"
@@ -74,6 +74,7 @@
 	       compressionMinSize="524288"
 	       compressableMimeType="text/html,text/xml,text/css,text/xsl,text/javascript"
 	       noCompressionUserAgents="gozilla, traviata"
+               URIEncoding="UTF-8"
 	       />
     <!-- A "Connector" using the shared thread pool-->
     <!--
