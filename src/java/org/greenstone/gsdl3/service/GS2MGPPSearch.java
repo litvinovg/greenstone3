@@ -100,7 +100,9 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 		// set up the defaults that may be changed by query params
 		mgpp_src.setQueryLevel(this.default_level);
 		// we have case folding on by default
-		mgpp_src.setCase(true);
+		mgpp_src.setCase(case_default.equals(BOOLEAN_PARAM_ON) ? true : false);
+		mgpp_src.setStem(stem_default.equals(BOOLEAN_PARAM_ON) ? true : false);
+		mgpp_src.setAccentFold(accent_default.equals(BOOLEAN_PARAM_ON) ? true : false);
 
 		// set up the query params
 		Set entries = params.entrySet();
