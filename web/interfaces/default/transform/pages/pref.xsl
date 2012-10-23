@@ -22,8 +22,47 @@
 	</xsl:template>
 
 	<!-- the page content -->
-	<xsl:template match="/page">
+  <xsl:template match="/page">
+    <xsl:call-template name="prefs-javascript"/>
+    <xsl:variable name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
+    
+    <div id="queryform">
+      <form name="PrefForm" method="get" action="{$library_name}" id="prefform">
+	
+	<input type='hidden' name='a' value='p'/>
+	<input type='hidden' name='sa' value='pref'/>
+	<input type='hidden' name='c' value="{$collName}"/>
 
+	<xsl:call-template name="presentation-prefs"/>
+	<xsl:call-template name="search-prefs"/>
+	<br/>
+	
+	<input type='submit' onclick="bypass=true;"><xsl:attribute name="value"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.set_prefs')"/></xsl:attribute></input>
+	
+      </form>
+    </div>
+    
+  </xsl:template>
+	<xsl:template name="presentation-prefs">
+    <h3 class="formheading"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.prespref')"/></h3>
+    <div id="presprefs">
+      <xsl:call-template name="lang-param"/>
+     <!-- <xsl:call-template name="encoding-param"/>-->
+      <xsl:call-template name="format-edit-param"/>
+    <xsl:call-template name="berry-basket-param"/>
+    <xsl:call-template name="document-maker-param"/>
+    <xsl:call-template name="book-param"/>
+    <xsl:call-template name="theme-change-param"/>
+      </div>
+  </xsl:template>
+<xsl:template name="search-prefs">
+				<h3><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.searchpref')"/></h3>
+				<div id="searchprefs">
+	<xsl:call-template name="hits-param"/>
+	<xsl:call-template name="max-docs-param"/>
+				</div>
+</xsl:template>
+    <xsl:template name="prefs-javascript">
 		<!-- 
 		Add some javascript to the page that notices when a preference is changed 
 		so that, if the user tries to navigate away from the page without clicking
@@ -115,22 +154,10 @@
 			YAHOO.util.Event.addListener(window, 'load', pageLoad);
 			YAHOO.util.Event.addListener(window, 'beforeunload', checkModified);
 		</xsl:text></script>
+    </xsl:template>
 
-		<xsl:variable name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
-		<xsl:variable name="tidyoption"><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='tidyoption']"/></xsl:variable>
 
-		<div id="queryform">
-			<form name="PrefForm" method="get" action="{$library_name}" id="prefform">
-
-				<input type='hidden' name='a' value='p'/>
-				<input type='hidden' name='sa' value='pref'/>
-				<input type='hidden' name='c' value="{$collName}"/>
-
-				<!-- presentation preferences -->
-				<h3 class="formheading"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.prespref')"/></h3>
-				<div id="presprefs">
-
-					<!-- language -->
+				<xsl:template name="lang-param">
 					<div class="paramLabel">
 						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.interfacelang')"/>
 					</div>
@@ -142,15 +169,21 @@
 						</select>
 
 					</div>
-					<br class="clear"/>
+      <br class="clear"/>
 
-					<!-- encoding -->
+</xsl:template>
+					
+
+				<xsl:template name="encoding-param">
 					<div class="paramValue">
 						<span class="rightspace"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.encoding')"/></span>
 					</div>
-					<br class="clear"/>
+      <br class="clear"/>
 
-                    <!-- format editing -->
+	</xsl:template>
+					
+
+                    <xsl:template name="format-edit-param">
 					<xsl:if test="/page/pageResponse/collection/serviceList/service[@name='CoverageMetadataRetrieve']">
 						<div id="formateditprefs">
 							<xsl:variable name="formatedit"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='formatedit']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='formatedit']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
@@ -166,9 +199,9 @@
 							<br class="clear"/>
 						</div>
 					</xsl:if>
-				</div>
+</xsl:template>
 
-				<!-- berry baskets -->
+<xsl:template name="berry-basket-param">
 				<div id="berrybasketprefs">
 					<xsl:variable name="berrybasket"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='berrybasket']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='berrybasket']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
 					<div class="paramLabel">
@@ -182,8 +215,8 @@
 					</div>
 					<br class="clear"/>
 				</div>
-				
-				<!-- document maker -->
+</xsl:template>
+				<xsl:template name="document-maker-param">
 				<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 					<div id="documentmakerprefs">
 						<xsl:variable name="documentbasket"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='documentbasket']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='documentbasket']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
@@ -197,8 +230,10 @@
 						<br class="clear"/>
 					</div>
 				</xsl:if>
-
+      </xsl:template>
+      <xsl:template name="book-param">
 				<!-- tidy (?) -->
+		<xsl:variable name="tidyoption"><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='tidyoption']"/></xsl:variable>
 				<xsl:if test="$tidyoption='tidy'">
 					<xsl:variable name="book"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='book']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='book']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
 					<div class="paramLabel">
@@ -212,7 +247,8 @@
 					</div>
 					<br class="clear"/>
 				</xsl:if>
-				
+      </xsl:template>
+      <xsl:template name="theme-change-param">
 				<!-- Theme Changer -->
 				<xsl:if test="/page/pageRequest/userInformation and util:contains(/page/pageRequest/userInformation/@groups, 'administrator')">
 					<div>
@@ -236,10 +272,9 @@
 					</div>
 					<br class="clear"/>
 				</xsl:if>
+</xsl:template>
 
-				<!-- search preferences -->
-				<h3><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.searchpref')"/></h3>
-				<div id="searchprefs">
+<xsl:template name="hits-param">
 					<xsl:variable name="hits">
 						<xsl:choose>
 							<xsl:when test="/page/pageRequest/paramList/param[@name='hitsPerPage']">
@@ -286,7 +321,8 @@
 					</div>
 					
 					<br class="clear"/>
-					
+					</xsl:template>
+	<xsl:template name="max-docs-param">
 					<xsl:variable name="mdocs">
 						<xsl:choose>
 							<xsl:when test="/page/pageRequest/paramList/param[@name='maxDocs']">
@@ -306,15 +342,16 @@
 					</div>
 					
 					<br class="clear"/>
-				</div>
+</xsl:template>
 
-				<br/>
-
-				<input type='submit' onclick="bypass=true;"><xsl:attribute name="value"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.set_prefs')"/></xsl:attribute></input>
-
-			</form>
-		</div>
-
-	</xsl:template>
-
+  <!-- what happens if more than one query service??-->
+  <xsl:template name="casefold-param">
+    <xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']/paramList/param[@name='case']"><xsl:call-template name="param-display"/></xsl:for-each>
+  </xsl:template>
+  <xsl:template name="stem-param">
+    <xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']/paramList/param[@name='stem']"><xsl:call-template name="param-display"/></xsl:for-each>
+  </xsl:template>
+  <xsl:template name="accentfold-param">
+    <xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']/paramList/param[@name='accent']"><xsl:call-template name="param-display"/></xsl:for-each>
+  </xsl:template>
 </xsl:stylesheet>
