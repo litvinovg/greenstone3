@@ -29,6 +29,7 @@
 	
 	<xsl:template name="resultsPage">
 		<xsl:call-template name="resultsPagePre"/>
+    <xsl:call-template name="displayMatchDocs"/>
 		<xsl:call-template name="displayTermInfo"/>
 		<xsl:call-template name="displayResults"/>
 		<xsl:call-template name="resultsPagePost"/>
@@ -154,7 +155,28 @@
 			</form>
 		</xsl:for-each>
 	</xsl:template>
-	
+	<xsl:template name="displayMatchDocs">
+    <div id="matchdocs">
+      <xsl:variable name="numDocsMatched" select="/page/pageResponse/metadataList/metadata[@name='numDocsMatched']"/>
+      <xsl:variable name="numDocsReturned" select="/page/pageResponse/metadataList/metadata[@name='numDocsReturned']"/>
+      <xsl:choose>
+        <xsl:when test="$numDocsMatched='0' or $numDocsReturned='0'">
+          <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.nodocsmatch')"/>
+        </xsl:when>
+        <xsl:when test="$numDocsMatched='1' or $numDocsReturned='1'">
+          <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.onedocsmatch')"/>
+        </xsl:when>
+        <xsl:when test="$numDocsMatched">
+          <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.manydocsmatch', $numDocsMatched)"/>
+          <xsl:if test="$numDocsReturned and not($numDocsMatched=$numDocsReturned)"> (<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.docsreturned', $numDocsReturned)"/>)</xsl:if>
+        </xsl:when>
+         <xsl:when test="$numDocsReturned">
+          <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.atleastdocsmatch', $numDocsReturned)"/>
+        </xsl:when>
+      </xsl:choose>
+    </div>
+
+  </xsl:template>
 	<xsl:template name="displayTermInfo">
 		<!-- Find the total number of documents returned -->
 		<xsl:variable name="docMax">
@@ -183,14 +205,9 @@
 		</xsl:variable>
 		
 		<!-- The list of search terms with their frequency and document count -->
-		<xsl:choose>
-			<xsl:when test="$docMax &gt; 0">
 				<p class="termList">
 					<xsl:if test="count(/page/pageResponse/termList/stopword) &gt; 0">
 						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.common')"/><xsl:text> </xsl:text>
-					</xsl:if>
-					
-					<xsl:if test="/page/pageResponse/termList/stopword">
 						<xsl:for-each select="/page/pageResponse/termList/stopword">
 							<span style="font-style:italic;"><xsl:value-of select="@name"/></span><xsl:text> </xsl:text>
 						</xsl:for-each>
@@ -209,13 +226,13 @@
 											<xsl:value-of select="@freq"/>
 											<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.time')"/>
 										</xsl:when>
-										<xsl:when test="@freq &lt; 0"></xsl:when>
-										<xsl:when test="@freq &gt; 1">
+										<xsl:otherwise>
 											<xsl:value-of select="@freq"/>
 											<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.time_plural')"/>
-										</xsl:when>
+										</xsl:otherwise>
 									</xsl:choose>
-									<xsl:if test="not(not(@numDocsMatch) or @numDocsMatch = '')">
+									<!--<xsl:if test="not(not(@numDocsMatch) or @numDocsMatch = '')">-->
+	                                                                     <xsl:if test="@numDocsMatch &gt; 0">
 										<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.in')"/><xsl:text> </xsl:text>
 										<xsl:value-of select="@numDocsMatch"/>
 										<xsl:choose>
@@ -252,27 +269,6 @@
 						</xsl:choose>
 					</xsl:for-each>
 				</p>
-			</xsl:when>
-			<xsl:otherwise><!-- 0 results. Still need to check for search term being stopwords -->
-			  <xsl:choose>
-			    <xsl:when test="count(/page/pageResponse/termList/stopword) &gt; 0">
-			      <p class="termList">
-				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.common')"/><xsl:text> </xsl:text>
-				
-				<xsl:if test="/page/pageResponse/termList/stopword">
-				  <xsl:for-each select="/page/pageResponse/termList/stopword">
-				    <span style="font-style:italic;"><xsl:value-of select="@name"/></span><xsl:text> </xsl:text>
-				  </xsl:for-each>
-				  <br /><br />
-				</xsl:if>
-			      </p>		      
-			    </xsl:when>
-			    <xsl:otherwise><!-- 0 results and not owing to stopwords.-->
-			      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.nodocsmatch')"/>
-			    </xsl:otherwise>
-			  </xsl:choose>
-			</xsl:otherwise>
-		</xsl:choose>
 	</xsl:template>
 	
 	<xsl:template name="prevNextButtons">	
