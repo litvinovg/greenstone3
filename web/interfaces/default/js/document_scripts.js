@@ -1309,7 +1309,7 @@ function showSlideShow()
 	$("#ssOption").attr('checked', false);
 	if(!($("#gs-slideshow").length))
 	{
-		var slideshowDiv = $("<div>", {id:"gs-slideshow"});
+		var slideshowDiv = $("<div>", {id:"gs-slideshow", style:"height:100%;"});
 		var loadingImage = $("<img>", {src:gs.imageURLs.loading});
 		slideshowDiv.append(loadingImage);
 		
@@ -1373,8 +1373,8 @@ function SlideShowWidget(mainDiv, images, idArray)
 	var _inTransition = false;
 	var _images = new Array();
 	var _mainDiv = mainDiv;
-	var _imageDiv = $("<div>", {id:"ssImageDiv"});
-	var _navDiv = $("<div>", {style:"height:2em;"});
+	var _imageDiv = $("<div>", {id:"ssImageDiv", style:"height:95%; overflow:auto;"});
+	var _navDiv = $("<div>", {style:"height:5%;"});
 	var _nextButton = $("<img>", {src:gs.imageURLs.next, style:"float:right; cursor:pointer;"});
 	var _prevButton = $("<img>", {src:gs.imageURLs.prev, style:"float:left; cursor:pointer; display:none;"});
 	var _closeLink = $("<a href=\"javascript:$.unblockUI()\">Close Slideshow</a>");
