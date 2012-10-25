@@ -630,11 +630,10 @@ function asyncRegisterEditSection(cell)
 
 function addFunctionalityToTable(table)
 {
-	var rows = table.getElementsByTagName("TR");
-	for(var i = 0; i < rows.length; i++)
+	table.find("tr").each(function()
 	{
-		var cells = rows[i].getElementsByTagName("TD");
-		var metadataName = cells[0].innerHTML;
+		var cells = $(this).find("td");
+		var metadataName = $(cells[0]).html();
 		
 		if(metadataName.indexOf(".") != -1)
 		{
@@ -654,45 +653,41 @@ function addFunctionalityToTable(table)
 			{
 				_metadataSetList.push(metadataSetName);
 				
-				var metadataSetList = document.getElementById("metadataSetList");
-				var newOption = document.createElement("OPTION");
-				newOption.innerHTML = metadataSetName;
-				metadataSetList.appendChild(newOption);
+				var metadataSetList = $("#metadataSetList");
+				var newOption = $("<option>");
+				newOption.html(metadataSetName);
+				metadataSetList.append(newOption);
 			}
 		}
 			
 		asyncRegisterEditSection(cells[1]);
+		addRemoveLinkToRow(this);
+	});
 
-		addRemoveLinkToRow(rows[i]);
-	}
-
-	var metaNameField = document.createElement("INPUT");
-	metaNameField.setAttribute("type", "text");
-	insertAfter(metaNameField, table);
+	var metaNameField = $("<input>", {"type": "text"});
+	table.after(metaNameField);
 	table.metaNameField = metaNameField;
 	
-	var addRowButton = document.createElement("BUTTON");
-	addRowButton.innerHTML = gs.text.dse.add_new_metadata;
-	addRowButton.onclick = function() 
+	var addRowButton = $("<button>");
+	addRowButton.html(gs.text.dse.add_new_metadata);
+	addRowButton.click(function() 
 	{ 
-		var name = metaNameField.value;
+		var name = metaNameField.val();
 		if(!name || name == "")
 		{
 			console.log(gs.text.dse.no_value_given);
 			return;
 		}
 		
-		var newRow = document.createElement("TR");
-		var nameCell = document.createElement("TD");
-		var valueCell = document.createElement("TD");
-		nameCell.setAttribute("class", "metaTableCellName");
-		nameCell.innerHTML = name;
-		valueCell.setAttribute("class", "metaTableCell");
+		var newRow = $("<tr>");
+		var nameCell = $("<td>" + name + "</td>");
+		nameCell.attr("class", "metaTableCellName");
+		var valueCell = $("<td>", {"class": "metaTableCell"});
 		
-		newRow.appendChild(nameCell);
-		newRow.appendChild(valueCell);
+		newRow.append(nameCell);
+		newRow.append(valueCell);
 		addRemoveLinkToRow(newRow);
-		table.appendChild(newRow);
+		table.append(newRow);
 		
 		var undo = new Array();
 		undo.op = "delMeta";
@@ -701,19 +696,17 @@ function addFunctionalityToTable(table)
 		_undoOperations.push(undo);
 		
 		//Threading this function here probably isn't necessary like the other times it is called
-		de.doc.registerEditSection(valueCell);
-	};
+		de.doc.registerEditSection(valueCell[0]);
+	});
 	table.addRowButton = addRowButton;
-	insertAfter(addRowButton, metaNameField);
+	metaNameField.after(addRowButton);
 }
 
 function addRemoveLinkToRow(row)
 {
-	var newCell = document.createElement("TD");
-	var removeLink = document.createElement("A");
-	removeLink.innerHTML = "remove";
-	removeLink.setAttribute("href", "javascript:;");
-	removeLink.onclick = function()
+	var newCell = $("<td>");
+	var removeLink = $("<a>remove</a>", {"href": "javascript:;"});
+	removeLink.click(function()
 	{
 		var undo = new Array();
 		undo.srcElem = row;
@@ -722,12 +715,11 @@ function addRemoveLinkToRow(row)
 		undo.removeDeletedMetadata = true;
 		_undoOperations.push(undo);
 		_deletedMetadata.push(row);
-		row.style.display = "none";
-	}
-	newCell.appendChild(removeLink);
-	newCell.setAttribute("class", "metaTableCell");
-	newCell.setAttribute("style", "font-size:0.6em; padding-left: 3px; padding-right: 3px;");
-	row.appendChild(newCell);
+		row.css("display", "none");
+	});
+	newCell.append(removeLink);
+	newCell.attr({"class": "metaTableCell", "style": "font-size:0.6em; padding-left: 3px; padding-right: 3px;"});
+	$(row).append(newCell);
 }
 
 function createTopMenuBar()

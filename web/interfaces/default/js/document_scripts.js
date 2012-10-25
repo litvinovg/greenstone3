@@ -37,38 +37,33 @@ function getTextForSection(sectionID, callback)
 		}
 	}
 	
-	var ajax = gs.functions.ajaxRequest();
-	ajax.open("GET", gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + sectionID + "?hl=" + hl + "&p.s=TextQuery&ilt=" + template.replace(" ", "%20"), true);
-	ajax.onreadystatechange = function()
+	var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + sectionID + "?hl=" + hl + "&p.s=TextQuery&ilt=" + template.replace(" ", "%20");
+	
+	$.ajax(url)
+	.success(function(response)
 	{
-		if(ajax.readyState == 4 && ajax.status == 200)
+		if(response)
 		{
-			var response = ajax.responseText;
+			var textStart = response.indexOf(">", response.indexOf(">") + 1) + 1;
+			var textEnd = response.lastIndexOf("<");
 			
-			if(response)
+			if(textStart == 0 || textEnd == -1 || textEnd <= textStart)
 			{
-				var textStart = response.indexOf(">", response.indexOf(">") + 1) + 1;
-				var textEnd = response.lastIndexOf("<");
-				
-				if(textStart == 0 || textEnd == -1 || textEnd <= textStart)
-				{
-					callback("");
-				}
-				
-				var text = response.substring(textStart, textEnd);
-				callback(text);
+				callback("");
 			}
-			else
-			{
-				callback(null);
-			}
+			
+			var text = response.substring(textStart, textEnd);
+			callback(text);
 		}
-		else if(ajax.readyState == 4)
+		else
 		{
 			callback(null);
 		}
-	}
-	ajax.send();
+	})
+	.error(function()
+	{
+		callback(null);
+	});
 }
 
 function getSubSectionsForSection(sectionID, callback)
@@ -87,68 +82,62 @@ function getSubSectionsForSection(sectionID, callback)
 	template +=   '</sections>';
 	template += '</xsl:template>';
 
-	var ajax = gs.functions.ajaxRequest();
 	var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + sectionID + "?ilt=" + template.replace(" ", "%20");
 
 	if(gs.documentMetadata.docType == "paged")
 	{
 		url += "&dt=hierarchy";
 	}
-	ajax.open("GET", url, true);
-	ajax.onreadystatechange = function()
+	
+	$.ajax(url)
+	.success(function(response)
 	{
-		if(ajax.readyState == 4 && ajax.status == 200)
+		if(response)
 		{
-			var response = ajax.responseText;
+			var sectionsStart = response.indexOf(">", response.indexOf(">") + 1) + 1;
+			var sectionsEnd = response.lastIndexOf("<");
 			
-			if(response)
+			if(sectionsStart == 0 || sectionsEnd == -1 || sectionsEnd <= sectionsStart)
 			{
-				var sectionsStart = response.indexOf(">", response.indexOf(">") + 1) + 1;
-				var sectionsEnd = response.lastIndexOf("<");
-				
-				if(sectionsStart == 0 || sectionsEnd == -1 || sectionsEnd <= sectionsStart)
-				{
-					callback(" ");
-					return;
-				}
-				
-				var sections = response.substring(sectionsStart, sectionsEnd);
-				callback(sections);
+				callback(" ");
+				return;
 			}
-			else
-			{
-				callback(null);
-			}
+			
+			var sections = response.substring(sectionsStart, sectionsEnd);
+			callback(sections);
 		}
-		else if(ajax.readyState == 4)
+		else
 		{
 			callback(null);
 		}
-	}
-	ajax.send();
+	})
+	.error(function()
+	{
+		callback(null);
+	});
 }
 
 function toggleSection(sectionID, callback, tocDisabled)
 {
-	var docElem = document.getElementById("doc" + sectionID);
-	var tocElem = document.getElementById("toc" + sectionID);
+	var docElem = gs.jqGet("doc" + sectionID);
+	var tocElem = gs.jqGet("toc" + sectionID);
 	
-	var tocToggleElem = document.getElementById("ttoggle" + sectionID);
-	var docToggleElem = document.getElementById("dtoggle" + sectionID);
+	var tocToggleElem = gs.jqGet("ttoggle" + sectionID);
+	var docToggleElem = gs.jqGet("dtoggle" + sectionID);
 	
-	if(docElem.style.display == "none")
+	if(docElem.css("display") == "none")
 	{
-		if(tocToggleElem && !tocDisabled)
+		if(tocToggleElem.length && !tocDisabled)
 		{
-			tocToggleElem.setAttribute("src", gs.imageURLs.collapse);
+			tocToggleElem.attr("src", gs.imageURLs.collapse);
 		}
 		
-		if(tocElem && !tocDisabled)
+		if(tocElem.length && !tocDisabled)
 		{
-			tocElem.style.display = "block";
+			tocElem.css("display", "block");
 		}
 		
-		if(gs.functions.hasClass(docElem, "noText"))
+		if(docElem.hasClass("noText"))
 		{
 			getTextForSection(sectionID, function(text)
 			{
@@ -157,33 +146,33 @@ function toggleSection(sectionID, callback, tocDisabled)
 					var nodeID = sectionID.replace(/\./g, "_");
 					if(text.search("wrap" + nodeID) != -1)
 					{
-						document.getElementById("zoomOptions").style.display = null;
-						document.getElementById("pagedImageOptions").style.display = null;
+						gs.jqGet("zoomOptions").css("display", null);
+						gs.jqGet("pagedImageOptions").css("display", null);
 					}
 					getSubSectionsForSection(sectionID, function(sections)
 					{					
 						if(sections)
 						{
-							var textElem = document.getElementById("doc" + sectionID);
-							$(textElem).html(text + sections);
+							var textElem = gs.jqGet("doc" + sectionID);
+							textElem.html(text + sections);
 							
-							docElem.setAttribute("class", docElem.getAttribute("class").replace(/\bnoText\b/g, ""));
-							docElem.style.display = "block";
-							docToggleElem.setAttribute("src", gs.imageURLs.collapse);
+							docElem.removeClass("noText");
+							docElem.css("display", "block");
+							docToggleElem.attr("src", gs.imageURLs.collapse);
 							
 							if(callback)
 							{
 								callback(true);
 							}
 							
-							if(document.getElementById("viewSelection"))
+							if(gs.jqGet("viewSelection").length)
 							{
 								changeView();
 							}
 						}
 						else
 						{
-							docToggleElem.setAttribute("src", gs.imageURLs.expand);
+							docToggleElem.attr("src", gs.imageURLs.expand);
 							if(callback)
 							{
 								callback(false);
@@ -193,7 +182,7 @@ function toggleSection(sectionID, callback, tocDisabled)
 				}
 				else
 				{
-					docToggleElem.setAttribute("src", gs.imageURLs.expand);
+					docToggleElem.attr("src", gs.imageURLs.expand);
 					if(callback)
 					{
 						callback(false);
@@ -201,12 +190,12 @@ function toggleSection(sectionID, callback, tocDisabled)
 				}
 			});
 		
-			docToggleElem.setAttribute("src", gs.imageURLs.loading);
+			docToggleElem.attr("src", gs.imageURLs.loading);
 		}
 		else
 		{
-			docToggleElem.setAttribute("src", gs.imageURLs.collapse);
-			docElem.style.display = "block";
+			docToggleElem.attr("src", gs.imageURLs.collapse);
+			docElem.css("display", "block");
 			
 			if(callback)
 			{
@@ -216,19 +205,19 @@ function toggleSection(sectionID, callback, tocDisabled)
 	}
 	else
 	{
-		docElem.style.display = "none";
+		docElem.css("display", "none");
 		
 		//Use the page image if this is a leaf node and the chapter image if it not
-		docToggleElem.setAttribute("src", gs.imageURLs.expand);
+		docToggleElem.attr("src", gs.imageURLs.expand);
 		
-		if(tocToggleElem)
+		if(tocToggleElem.length)
 		{
-			tocToggleElem.setAttribute("src", gs.imageURLs.expand);
+			tocToggleElem.attr("src", gs.imageURLs.expand);
 		}
 		
-		if(tocElem)
+		if(tocElem.length)
 		{
-			tocElem.style.display = "none";
+			tocElem.css("display", "none");
 		}
 		
 		if(callback)
@@ -287,15 +276,15 @@ function focusSection(sectionID, level, tocDisabled)
 
 function expandOrCollapseAll(expand)
 {
-	var divs = document.getElementsByTagName("DIV");
+	var divs = $("div");
 	var startCounter = 0;
 	var endCounter = 0;
 	
 	for(var i = 0; i < divs.length; i++)
 	{
-		if(divs[i].getAttribute("id") && divs[i].getAttribute("id").search(/^doc/) != -1)
+		if($(divs[i]).attr("id") && $(divs[i]).attr("id").search(/^doc/) != -1)
 		{
-			var id = divs[i].getAttribute("id").replace(/^doc(.*)/, "$1");
+			var id = $(divs[i]).attr("id").replace(/^doc(.*)/, "$1");
 			if(isExpanded(id) != expand)
 			{
 				//Don't collapse the top level
@@ -343,60 +332,50 @@ function expandOrCollapseAll(expand)
 
 function loadTopLevelPage(callbackFunction, customURL)
 {
-	var ajax = gs.functions.ajaxRequest();
-
-	var url = gs.xsltParams.library_name + "?a=d&c=" + gs.cgiParams.c + "&excerptid=gs-document";
-	if(gs.cgiParams.d && gs.cgiParams.d.length > 0)
+	var url;
+	if(customURL)
 	{
-		url += "&d=" + gs.cgiParams.d.replace(/([^.]*)\..*/, "$1");
-	}
-	else if(gs.cgiParams.href && gs.cgiParams.href.length > 0)
-	{
-		url += "&d=&alb=1&rl=1&href=" + gs.cgiParams.href;
-	}
-
-	if(customURL != null)
-	{
-		ajax.open("GET", customURL, true);
+		url = customURL;
 	}
 	else
 	{
-		ajax.open("GET", url, true);
+		url = gs.xsltParams.library_name + "?a=d&c=" + gs.cgiParams.c + "&excerptid=gs-document";
+		if(gs.cgiParams.d && gs.cgiParams.d.length > 0)
+		{
+			url += "&d=" + gs.cgiParams.d.replace(/([^.]*)\..*/, "$1");
+		}
+		else if(gs.cgiParams.href && gs.cgiParams.href.length > 0)
+		{
+			url += "&d=&alb=1&rl=1&href=" + gs.cgiParams.href;
+		}
 	}
 
-	ajax.onreadystatechange = function()
+	$.ajax(url)
+	.success(function(response)
 	{
-		if(ajax.readyState == 4 && ajax.status == 200)
+		if(response)
 		{
-			var response = ajax.responseText;
-			
-			if(response)
-			{
-				var targetElem = document.getElementById("gs-document");
-				var docStart = response.indexOf(">") + 1;
-				var docEnd = response.lastIndexOf("<");
-				var doc = response.substring(docStart, docEnd);
+			var targetElem = gs.jqGet("gs-document");
+			var docStart = response.indexOf(">") + 1;
+			var docEnd = response.lastIndexOf("<");
+			var doc = response.substring(docStart, docEnd);
 
-				targetElem.innerHTML = doc;
-				
-				if(callbackFunction)
-				{
-					callbackFunction();
-				}
+			targetElem.html(doc);
+			
+			if(callbackFunction)
+			{
+				callbackFunction();
 			}
 		}
-		else if(ajax.readyState == 4)
-		{
-			setTimeout(function(){loadTopLevelPage(callbackFunction, customURL);}, 1000);
-		}
-	};
-	ajax.send();
+	})
+	.error(function()
+	{
+		setTimeout(function(){loadTopLevelPage(callbackFunction, customURL);}, 1000);
+	});
 }
 
 function retrieveFullTableOfContents()
 {
-	var ajax = gs.functions.ajaxRequest();
-	
 	var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "?excerptid=tableOfContents&ed=1";
 	if(gs.cgiParams.d && gs.cgiParams.d.length > 0)
 	{
@@ -406,52 +385,38 @@ function retrieveFullTableOfContents()
 	{
 		url += "&a=d&d=&alb=1&rl=1&href=" + gs.cgiParams.href;
 	}
-	
-	ajax.open("GET", url, true);
-	ajax.onreadystatechange = function()
+
+	$.ajax(url)
+	.success(function(newTOCElem)
 	{
-		if(ajax.readyState == 4 && ajax.status == 200)
-		{
-			var newTOCElem = ajax.responseText;
-			var tocStart = newTOCElem.indexOf(">") + 1;
-			var tocEnd = newTOCElem.lastIndexOf("<");
-			
-			var newTOC = newTOCElem.substring(tocStart, tocEnd);
-			
-			//Add the "Expand document"/"Collapse document" links
-			newTOC = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">Expand document</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">Collapse document</a></td></tr></table>" + newTOC;
-			
-			//Collapse the TOC
-			newTOC = newTOC.replace(/display:block/g, "display:none");
-			newTOC = newTOC.replace(/display:none/, "display:block");
-			newTOC = newTOC.replace(/images\/collapse/g, "images/expand");
-			
-			var tocElem = document.getElementById("tableOfContents");
-			tocElem.innerHTML = newTOC;
-			
-			gs.variables.tocLoaded = true;
-		}
-		else if(ajax.readyState == 4)
-		{
-			setTimeout(retrieveFullTableOfContents, 1000);
-		}
-	}
-	ajax.send();
+		var tocStart = newTOCElem.indexOf(">") + 1;
+		var tocEnd = newTOCElem.lastIndexOf("<");
+		
+		var newTOC = newTOCElem.substring(tocStart, tocEnd);
+		
+		//Add the "Expand document"/"Collapse document" links
+		newTOC = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">Expand document</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">Collapse document</a></td></tr></table>" + newTOC;
+		
+		//Collapse the TOC
+		newTOC = newTOC.replace(/display:block/g, "display:none");
+		newTOC = newTOC.replace(/display:none/, "display:block");
+		newTOC = newTOC.replace(/images\/collapse/g, "images/expand");
+		
+		var tocElem = gs.jqGet("tableOfContents");
+		tocElem.html(newTOC);
+		
+		gs.variables.tocLoaded = true;
+	})
+	.error(function()
+	{
+		setTimeout(retrieveFullTableOfContents, 1000);
+	});
 }
 
 function isExpanded(sectionID)
 {
-	var docElem = document.getElementById("doc" + sectionID);
-	if(docElem.style.display == "block")
-	{
-		return true;
-	}
-	return false;
-}
-
-function isParentOf(parent, child)
-{
-	if(child.indexOf(parent) != -1 && child.length > parent.length && child[parent.length] == '.')
+	var docElem = gs.jqGet("doc" + sectionID);
+	if(docElem.css("display") == "block")
 	{
 		return true;
 	}
@@ -460,38 +425,38 @@ function isParentOf(parent, child)
 
 function minimizeSidebar()
 {
-	var toc = document.getElementById("contentsArea");
-	var maxLink = document.getElementById("sidebarMaximizeButton");
-	var minLink = document.getElementById("sidebarMinimizeButton");
+	var toc = gs.jqGet("contentsArea");
+	var maxLink = gs.jqGet("sidebarMaximizeButton");
+	var minLink = gs.jqGet("sidebarMinimizeButton");
 	
-	if(toc)
+	if(toc.length)
 	{
-		toc.style.display = "none";
+		toc.css("display", "none");
 	}
 	
-	maxLink.style.display = "block";
-	minLink.style.display = "none";
+	maxLink.css("display", "block");
+	minLink.css("display", "none");
 }
 
 function maximizeSidebar()
 {
-	var coverImage = document.getElementById("coverImage");
-	var toc = document.getElementById("contentsArea");
-	var maxLink = document.getElementById("sidebarMaximizeButton");
-	var minLink = document.getElementById("sidebarMinimizeButton");
+	var coverImage = gs.jqGet("coverImage");
+	var toc = gs.jqGet("contentsArea");
+	var maxLink = gs.jqGet("sidebarMaximizeButton");
+	var minLink = gs.jqGet("sidebarMinimizeButton");
 	
-	if(coverImage)
+	if(coverImage.length)
 	{
-		coverImage.style.display = "block";
+		coverImage.css("display", "block");
 	}
 	
-	if(toc)
+	if(toc.length)
 	{
-		toc.style.display = "block";
+		toc.css("display", "block");
 	}
 	
-	maxLink.style.display = "none";
-	minLink.style.display = "block";
+	maxLink.css("display", "none");
+	minLink.css("display", "block");
 }
 
 /**********************
@@ -500,8 +465,8 @@ function maximizeSidebar()
 
 function changeView()
 {
-	var viewList = document.getElementById("viewSelection");
-	var currentVal = viewList.value;
+	var viewList = gs.jqGet("viewSelection");
+	var currentVal = viewList.val();
 	
 	var view;
 	if(currentVal == "Image view")
@@ -523,20 +488,19 @@ function changeView()
 		view = "";
 	}
 	
-	var ajax = gs.functions.ajaxRequest();
-	ajax.open("GET", gs.xsltParams.library_name + "?a=d&view=" + view + "&c=" + gs.cgiParams.c);
-	ajax.send();
+	var url = gs.xsltParams.library_name + "?a=d&view=" + view + "&c=" + gs.cgiParams.c;
+	$.ajax(url);
 }
 
 function setImageVisible(visible)
 {
-	var divs = document.getElementsByTagName("DIV");
+	var divs = $("div");
 	var images = new Array();
 	for (var i = 0; i < divs.length; i++)
 	{
-		if(divs[i].id && divs[i].id.search(/^image/) != -1)
+		if($(divs[i]).attr("id") && $(divs[i]).attr("id").search(/^image/) != -1)
 		{
-			images.push(divs[i]);
+			images.push($(divs[i]));
 		}
 	}
 	
@@ -545,24 +509,24 @@ function setImageVisible(visible)
 		var image = images[i];
 		if(visible)
 		{
-			image.style.display = "block";
+			image.css("display", "block");
 		}
 		else
 		{
-			image.style.display = "none";
+			image.css("display", "none");
 		}
 	}
 }
 
 function setTextVisible(visible)
 {
-	var divs = document.getElementsByTagName("DIV");
+	var divs = $("div");
 	var textDivs = new Array();
 	for (var i = 0; i < divs.length; i++)
 	{
-		if(divs[i].id && divs[i].id.search(/^text/) != -1)
+		if($(divs[i]).attr("id") && $(divs[i]).attr("id").search(/^text/) != -1)
 		{
-			textDivs.push(divs[i]);
+			textDivs.push($(divs[i]));
 		}
 	}
 
@@ -571,11 +535,11 @@ function setTextVisible(visible)
 		var text = textDivs[i];
 		if(visible)
 		{
-			text.style.display = "block";
+			text.css("display", "block");
 		}
 		else
 		{
-			text.style.display = "none";
+			text.css("display", "none");
 		}
 	}
 }
@@ -588,52 +552,49 @@ function retrieveTableOfContentsAndTitles()
 	ilt +=     '<xsl:call-template name="documentNodeTOC"/>';
 	ilt +=   '</xsl:for-each>';
 	ilt += '</xsl:template>';
+	
+	var url = gs.xsltParams.library_name + "?a=d&ed=1&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&ilt=" + ilt.replace(/ /g, "%20");
 
-	var ajax = gs.functions.ajaxRequest();
-	ajax.open("GET", gs.xsltParams.library_name + "?a=d&ed=1&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&ilt=" + ilt.replace(/ /g, "%20"), true);
-	ajax.onreadystatechange = function()
+	$.ajax(url)
+	.success(function(response)
 	{
-		if(ajax.readyState == 4 && ajax.status == 200)
-		{
-			document.getElementById("tableOfContents").innerHTML = ajax.responseText;
-			replaceLinksWithSlider();
-			var loading = document.getElementById("tocLoadingImage");
-			loading.parentNode.removeChild(loading);
-		}
-		else if(ajax.readyState == 4)
-		{
-			setTimeout(function(){retrieveTableOfContentsAndTitles();}, 1000);
-		}
-	}
-	ajax.send();
+		gs.jqGet("tableOfContents").html(response);
+		replaceLinksWithSlider();
+		var loading = gs.jqGet("tocLoadingImage");
+		loading.remove();
+	})
+	.error(function()
+	{
+		setTimeout(function(){retrieveTableOfContentsAndTitles();}, 1000);
+	});
 }
 
 function replaceLinksWithSlider()
 {
-	var tableOfContents = document.getElementById("tableOfContents");
-	var liElems = tableOfContents.getElementsByTagName("LI");
-	
+	var tableOfContents = gs.jqGet("tableOfContents");
+	var liElems = tableOfContents.find("li");
+
 	var leafSections = new Array();
 	for (var i = 0; i < liElems.length; i++)
 	{
-		var section = liElems[i];
+		var section = $(liElems[i]);
 		var add = true;
 		for(var j = 0; j < leafSections.length; j++)
 		{
 			if(leafSections[j] == undefined){continue;}
 			
-			var leaf = leafSections[j];
-			if(leaf.getAttribute("id").search(section.getAttribute("id")) != -1)
+			var leaf = $(leafSections[j]);
+			if(leaf.attr("id").search(section.attr("id")) != -1)
 			{
 				add = false;
 			}
 			
-			if(section.getAttribute("id").search(leaf.getAttribute("id")) != -1)
+			if(section.attr("id").search(leaf.attr("id")) != -1)
 			{
 				delete leafSections[j];
 			}
 		}
-		
+
 		if(add)
 		{
 			leafSections.push(section);
@@ -643,24 +604,26 @@ function replaceLinksWithSlider()
 	for(var i = 0 ; i < leafSections.length; i++)
 	{
 		if(leafSections[i] == undefined){continue;}
-		leafSections[i].style.display = "none";
-		var links = leafSections[i].getElementsByTagName("A");
+
+		leafSections[i].css("display", "none");
+		var links = leafSections[i].find("a");
+
 		var widget = new SliderWidget(links);
-		leafSections[i].parentNode.insertBefore(widget.getElem(), leafSections[i]);
+		leafSections[i].before(widget.getElem());
 	}
-	
+
 	//Disable all TOC toggles
-	var imgs = document.getElementsByTagName("IMG");
+	var imgs = $("img");
 	for(var j = 0; j < imgs.length; j++)
 	{
-		var currentImage = imgs[j];
-		if(currentImage.getAttribute("id") && currentImage.getAttribute("id").search(/^ttoggle/) != -1)
+		var currentImage = $(imgs[j]);
+		if(currentImage.attr("id") && currentImage.attr("id").search(/^ttoggle/) != -1)
 		{
-			currentImage.setAttribute("onclick", "");
+			currentImage.attr("onclick", "");
 		}
-		else if(currentImage.getAttribute("id") && currentImage.getAttribute("id").search(/^dtoggle/) != -1)
+		else if(currentImage.attr("id") && currentImage.attr("id").search(/^dtoggle/) != -1)
 		{
-			currentImage.setAttribute("onclick", currentImage.getAttribute("onclick").replace(/\)/, ", null, true)"));
+			currentImage.attr("onclick", currentImage.attr("onclick").replace(/\)/, ", null, true)"));
 		}
 	}
 }
@@ -672,19 +635,22 @@ function SliderWidget(_links)
 	//****************
 
 	//The container for the widget
-	var _mainDiv = document.createElement("DIV");
-	_mainDiv.setAttribute("class", "ui-widget-content pageSlider");
+	var _mainDiv = $("<div>");
+	_mainDiv.attr("class", "ui-widget-content pageSlider");
 	
 	//The table of images
-	var _linkTable = document.createElement("TABLE");
-	_mainDiv.appendChild(_linkTable);
+	var _linkTable = $("<table>");
+	_mainDiv.append(_linkTable);
 	
 	//The image row of the table
-	var _linkRow = document.createElement("TR");
-	_linkTable.appendChild(_linkRow);
+	var _linkRow = $("<tr>");
+	_linkTable.append(_linkRow);
 	
 	//The list of titles we can search through
 	var _titles = new Array();
+	
+	//Keep track of the slider position
+	var _prevScroll = 0;
 
 	//****************
 	//PUBLIC FUNCTIONS
@@ -740,12 +706,12 @@ function SliderWidget(_links)
 					
 					for(var i = 0; i < _titles.length; i++)
 					{
-						_titles[i][1].cell.style.display = "none";
+						$(_titles[i][1].cell).css("display", "none");
 					}
 					
 					for(var i = 0; i < matchingTitles.length; i++)
 					{
-						matchingTitles[i][1].cell.style.display = "table-cell";
+						$(matchingTitles[i][1].cell).css("display", "table-cell");
 					}
 				}
 			}
@@ -756,11 +722,11 @@ function SliderWidget(_links)
 					var currentTitle = _titles[i];
 					if(currentTitle[0].search(currentValue.replace(/\./g, "\\.")) != -1)
 					{
-						currentTitle[1].cell.style.display = "table-cell";
+						$(currentTitle[1].cell).css("display", "table-cell");
 					}
 					else
 					{
-						currentTitle[1].cell.style.display = "none";
+						$(currentTitle[1].cell).css("display", "none");
 					}
 				}
 			}
@@ -769,8 +735,6 @@ function SliderWidget(_links)
 	
 	var getImage = function(page, attemptNumber)
 	{
-		var ajax = gs.functions.ajaxRequest();
-
 		var href = page.getAttribute("href");
 		var startHREF = href.indexOf("'") + 1;
 		var endHREF = href.indexOf("'", startHREF);
@@ -796,105 +760,110 @@ function SliderWidget(_links)
 		template +=   '</html>';
 		template += '</xsl:template>';
 
-		ajax.open("GET", href + "?ilt=" + template.replace(" ", "%20"));
-		ajax.onreadystatechange = function()
+		var url = href + "?ilt=" + template.replace(" ", "%20");
+		$.ajax(url)
+		.success(function(text)
 		{
-			if(ajax.readyState == 4 && ajax.status == 200)
+			var hrefStart = text.indexOf("src=\"") + 5;
+			if(hrefStart == -1)
 			{
-				var text = ajax.responseText;
-				var hrefStart = text.indexOf("src=\"") + 5;
-				if(hrefStart == -1)
-				{
-					page.isLoading = false;
-					page.noImage = true;
-					page.image.setAttribute("src", gs.imageURLs.blank);
-					return;
-				}
-				var hrefEnd = text.indexOf("\"", hrefStart);
-				var href = text.substring(hrefStart, hrefEnd);
-
-				var image = document.createElement("IMG");
-				$(image).load(function()
-				{
-					page.link.innerHTML = "";
-					page.link.appendChild(image);
-					page.isLoading = false;
-					page.imageLoaded = true;
-				});
-				$(image).error(function()
-				{
-					if(!attemptNumber || attemptNumber < 3)
-					{
-						setTimeout(function(){getImage(page, ((!attemptNumber) ? 1 : attemptNumber + 1));}, 500);
-					}
-					else
-					{
-						page.isLoading = false;
-						page.noImage = true;
-						image.setAttribute("src", gs.imageURLs.blank);
-					}
-				});
-				image.setAttribute("src", href);
-				
-				var titleStart = text.indexOf("<p>") + 3;
-				var titleEnd = text.indexOf("</p>");
-				var title = text.substring(titleStart, titleEnd);
+				page.isLoading = false;
+				page.noImage = true;
+				$(page.image).attr("src", gs.imageURLs.blank);
+				return;
 			}
-			else if (ajax.readyState == 4)
+			var hrefEnd = text.indexOf("\"", hrefStart);
+			var href = text.substring(hrefStart, hrefEnd);
+
+			var image = $("<img>");
+			image.load(function()
 			{
-				page.failed = true;
+				$(page.link).html("");
+				$(page.link).append(image);
+				page.isLoading = false;
+				page.imageLoaded = true;
+			});
+			image.error(function()
+			{
 				if(!attemptNumber || attemptNumber < 3)
 				{
 					setTimeout(function(){getImage(page, ((!attemptNumber) ? 1 : attemptNumber + 1));}, 500);
 				}
 				else
 				{
-					var image = document.createElement("IMG");
-					image.setAttribute("src", gs.imageURLs.blank);
-					page.link.innerHTML = "";
-					page.link.appendChild(image);
 					page.isLoading = false;
 					page.noImage = true;
+					image.attr("src", gs.imageURLs.blank);
 				}
+			});
+			image.attr("src", href);
+			
+			var titleStart = text.indexOf("<p>") + 3;
+			var titleEnd = text.indexOf("</p>");
+			var title = text.substring(titleStart, titleEnd);
+		})
+		.error(function()
+		{
+			page.failed = true;
+			if(!attemptNumber || attemptNumber < 3)
+			{
+				setTimeout(function(){getImage(page, ((!attemptNumber) ? 1 : attemptNumber + 1));}, 500);
 			}
-		}
-		ajax.send();
+			else
+			{
+				var image = document.createElement("IMG");
+				image.setAttribute("src", gs.imageURLs.blank);
+				page.link.innerHTML = "";
+				page.link.appendChild(image);
+				page.isLoading = false;
+				page.noImage = true;
+			}
+		});
 	}
 	
 	var startCheckFunction = function()
 	{
-		var checkFunction = function()
+		var checkFunction = function(forced)
 		{
-			var widgetLeft = _mainDiv.scrollLeft;
-			var widgetRight = _mainDiv.clientWidth + _mainDiv.scrollLeft;
-
-			var visiblePages = new Array();
-			for(var i = 0; i < _links.length; i++)
+			//Don't bother checking if we haven't scrolled very far
+			if(Math.abs(_mainDiv.scrollLeft() - _prevScroll) > 100 || forced)
 			{
-				var current = _links[i].cell;
-				var currentLeft = current.offsetLeft;
-				var currentRight = currentLeft + current.clientWidth;
-				if(currentRight > widgetLeft && currentLeft < widgetRight)
+				_prevScroll = _mainDiv.scrollLeft();
+				_checking = true;
+				var widgetLeft = _mainDiv.offset().left;
+				var widgetRight = widgetLeft + _mainDiv.width();
+				
+				var visiblePages = new Array();
+				for(var i = 0; i < _links.length; i++)
 				{
-					visiblePages.push(_links[i]);
-				}
-			}
+					var current = _links[i].cell;
+					var currentLeft = current.offset().left;
+					var currentRight = currentLeft + current.width();
 
-			for(var i = 0; i < visiblePages.length; i++)
-			{
-				var page = visiblePages[i];
-				if(!page || page.imageLoaded || page.noImage || page.isLoading)
-				{
-					continue;
+					if(currentRight > widgetLeft && currentLeft < widgetRight)
+					{
+						visiblePages.push(_links[i]);
+					}
 				}
 				
-				page.isLoading = true;
-				getImage(page);
+				for(var i = 0; i < visiblePages.length; i++)
+				{
+					var page = visiblePages[i];
+					if(!page || page.imageLoaded || page.noImage || page.isLoading)
+					{
+						continue;
+					}
+					
+					page.isLoading = true;
+					getImage(page);
+				}
+				_checking = false;
 			}
 		}
-		
-		checkFunction();
-		setInterval(checkFunction, 1000);
+
+		setTimeout(checkFunction, 250);
+		setInterval(function(){checkFunction(true)}, 2000);
+		_mainDiv.scroll(checkFunction);
 	}
 	
 	//***********
@@ -903,16 +872,16 @@ function SliderWidget(_links)
 	
 	for(var i = 0; i < _links.length; i++)
 	{
-		var col = document.createElement("TD");
-		_linkRow.appendChild(col);
-		col.setAttribute("class", "pageSliderCol");
+		var col = $("<td>");
+		_linkRow.append(col);
+		col.addClass("pageSliderCol");
 		_links[i].cell = col;
 		
-		var link = document.createElement("A");
-		col.appendChild(link);
+		var link = $("<a>");
+		col.append(link);
 		_links[i].link = link;
-		var href = _links[i].getAttribute("href");
-		link.setAttribute("href", href.replace(/\)/, ", 0, true)"));
+		var href = $(_links[i]).attr("href");
+		link.attr("href", href.replace(/\)/, ", 0, true)"));
 		
 		if(!_linkCellMap[href])
 		{
@@ -920,12 +889,15 @@ function SliderWidget(_links)
 		}
 		_linkCellMap[href].push(_links[i]);
 		
-		var image = document.createElement("IMG");
-		link.appendChild(image);
-		image.setAttribute("src", gs.imageURLs.loading);
+		var loadingText = $("<p>Loading image</p>");
+		link.append(loadingText);
+		
+		var image = $("<img>");
+		link.append(image);
+		image.attr("src", gs.imageURLs.loading);
 		_links[i].image = image;
 		
-		var title = _links[i].innerHTML;
+		var title = $(_links[i]).html();
 		if(title.search(/^[^ ]+ [^ ]+$/) != -1)
 		{
 			var section = title.replace(/^([^ ]+) [^ ]+$/, "$1");
@@ -937,9 +909,8 @@ function SliderWidget(_links)
 		}
 		_titles.push([title, _links[i]]);
 		
-		var text = document.createTextNode(title);
-		col.appendChild(document.createElement("BR"));
-		col.appendChild(text);
+		col.append($("<br>"));
+		col.append(title);
 	}
 	
 	setUpFilterBox();
@@ -951,7 +922,7 @@ function SliderWidget(_links)
 ***********************/
 function swapHighlight(imageClicked)
 {
-	var hlCheckbox = document.getElementById("highlightOption");
+	var hlCheckbox = $("#highlightOption");
 
 	if(imageClicked)
 	{
@@ -960,7 +931,7 @@ function swapHighlight(imageClicked)
 	
 	var from;
 	var to;
-	if(hlCheckbox.checked)
+	if(hlCheckbox.attr("checked"))
 	{
 		from = "noTermHighlight";
 		to = "termHighlight";
@@ -970,16 +941,15 @@ function swapHighlight(imageClicked)
 		from = "termHighlight";
 		to = "noTermHighlight";
 	}
-	
-	var spans = document.getElementsByTagName("span");
-	for(var i = 0; i < spans.length; i++)
+
+	var spans = $("span").each(function()
 	{
-		var currentSpan = spans[i];
-		if(currentSpan.getAttribute("class") == from)
+		if($(this).hasClass(from))
 		{
-			currentSpan.setAttribute("class", to);
+			$(this).removeClass(from);
+			$(this).addClass(to);
 		}
-	}
+	});
 }
 
 /**************************
@@ -996,72 +966,41 @@ function bookInit()
 
 function hideText()
 {
-	var textDiv = document.getElementById("gs-document-text");
-	textDiv.style.visibility = "hidden";
+	$("#gs-document-text").css("visibility", "hidden");
 }
 
 function showText()
 {
-	var textDiv = document.getElementById("gs-document-text");
-	textDiv.style.visibility = "visible";
+	$("#gs-document-text").css("visibility", "visible");
 }
 
 function hideBook()
 {
-	var bookDiv = document.getElementById("bookdiv");
-	bookDiv.style.visibility = "hidden";
-	bookDiv.style.height = "0px";
-	
-	var bookObject = document.getElementById("bookObject");
-	bookObject.style.visibility = "hidden";
-	bookObject.style.height = "0px";
-	
-	var bookEmbed = document.getElementById("bookEmbed");
-	bookEmbed.style.visibility = "hidden";
-	bookEmbed.style.height = "0px";
+	$("#bookDiv, #bookObject, #bookEmbed").css({"visibility": "hidden", "height": "0px"});
 }
 
 function showBook()
 {
-	var bookDiv = document.getElementById("bookdiv");
-	bookDiv.style.visibility = "visible";
-	bookDiv.style.height = "600px";
-	
-	var bookObject = document.getElementById("bookObject");
-	bookObject.style.visibility = "visible";
-	bookObject.style.height = "600px";
-	
-	var bookEmbed = document.getElementById("bookEmbed");
-	bookEmbed.style.visibility = "visible";
-	bookEmbed.style.height = "600px";
+	$("#bookDiv, #bookObject, #bookEmbed").css({"visibility": "visible", "height": "600px"});
 }
 
 function swapLinkJavascript(rbOn)
 {
-	var option = document.getElementById("rbOption");
-	var optionImage = document.getElementById("rbOptionImage");
+	var option = $("#rbOption");
+	var optionImage = $("#rbOptionImage");
 	
 	if(rbOn)
 	{
-		option.setAttribute("onclick", "hideText(); showBook(); swapLinkJavascript(false);");
-		optionImage.setAttribute("onclick", "hideText(); showBook(); swapLinkJavascript(false);");
+		option.attr("onclick", "hideText(); showBook(); swapLinkJavascript(false);");
+		optionImage.attr("onclick", "hideText(); showBook(); swapLinkJavascript(false);");
 		$(option).attr("checked", false);
 	}
 	else
 	{
-		option.setAttribute("onclick", "hideBook(); showText(); swapLinkJavascript(true);");
-		optionImage.setAttribute("onclick", "hideBook(); showText(); swapLinkJavascript(true);");
+		option.attr("onclick", "hideBook(); showText(); swapLinkJavascript(true);");
+		optionImage.attr("onclick", "hideBook(); showText(); swapLinkJavascript(true);");
 		$(option).attr("checked", true);
 	}
-}
-
-//Helper function to create param elements
-function createParam(name, value)
-{
-	var param = document.createElement("PARAM");
-	param.setAttribute("name", name);
-	param.setAttribute("value", value);
-	return param;
 }
 
 function loadBook()
@@ -1095,122 +1034,106 @@ function loadBook()
 	flash_plug_html += '"\n'; 
 	flash_plug_html += '      type="application/x-shockwave-flash" width="70%" />\n';
 	flash_plug_html += '</OBJECT>\n';
-	var flash_div = document.getElementById("bookdiv");
-	flash_div.innerHTML = flash_plug_html;
+	$("#bookdiv").html(flash_plug_html);
 }
+
+/************************
+* METADATA EDIT SCRIPTS *
+************************/
 
 function addEditMetadataLink(cell)
 {
-	var id = cell.getAttribute("id").substring(6);
-	var metaTable = document.getElementById("meta" + id);
+	cell = $(cell);
+	var id = cell.attr("id").substring(6);
+	var metaTable = gs.jqGet("meta" + id);
 
-	var row = cell.parentNode;
-	var newCell = document.createElement("TD");
-	newCell.setAttribute("style", "font-size:0.7em; padding:0px 10px");
-	newCell.setAttribute("class", "editMetadataButton");
+	var row = cell.parent();
+	var newCell = $("<td>", {"style": "font-size:0.7em; padding:0px 10px", "class": "editMetadataButton"});
+	var linkSpan = $("<span>", {"class": "ui-state-default ui-corner-all", "style": "padding: 2px; float:left;"});
 	
-	var linkSpan = document.createElement("SPAN");
-	linkSpan.setAttribute("class", "ui-state-default ui-corner-all");
-	linkSpan.setAttribute("style", "padding: 2px; float:left;");
-	
-	var linkLabel = document.createElement("SPAN");
-	linkLabel.innerHTML = "edit metadata";
-	newCell.linkLabel = linkLabel;
-	var linkIcon = document.createElement("SPAN");
-	linkIcon.setAttribute("class", "ui-icon ui-icon-folder-collapsed");
+	var linkLabel = $("<span>edit metadata</span>");	
+	var linkIcon = $("<span>", {"class": "ui-icon ui-icon-folder-collapsed"});
 	newCell.linkIcon = linkIcon;
+	newCell.linkLabel = linkLabel;
 	
-	var uList = document.createElement("UL");
-	var labelItem = document.createElement("LI");
-	var iconItem = document.createElement("LI");
-	uList.appendChild(iconItem);
-	uList.appendChild(labelItem);
-	labelItem.appendChild(linkLabel);
-	iconItem.appendChild(linkIcon);
+	var uList = $("<ul>", {"style": "outline: 0 none; margin:0px; padding:0px;"});
+	var labelItem = $("<li>", {"style": "float:left; list-style:none outside none;"});
+	var iconItem = $("<li>", {"style": "float:left; list-style:none outside none;"});
+
+	uList.append(iconItem);
+	uList.append(labelItem);
+	labelItem.append(linkLabel);
+	iconItem.append(linkIcon);
 	
-	uList.setAttribute("style", "outline: 0 none; margin:0px; padding:0px;");
-	labelItem.setAttribute("style", "float:left; list-style:none outside none;");
-	iconItem.setAttribute("style", "float:left; list-style:none outside none;");
-	
-	var newLink = document.createElement("A");
-	newLink.setAttribute("href", "javascript:;");
-	newLink.onclick = function()
+	var newLink = $("<a>", {"href": "javascript:;"});
+	newLink.click(function()
 	{
-		if(metaTable.style.display == "none")
+		if(metaTable.css("display") == "none")
 		{
-			linkLabel.innerHTML = "hide metadata";
-			linkIcon.setAttribute("class", "ui-icon ui-icon-folder-open");
-			metaTable.style.display = "block";
-			metaTable.metaNameField.style.display = "inline";
-			metaTable.addRowButton.style.display = "inline";
+			linkLabel.html("hide metadata");
+			linkIcon.attr("class", "ui-icon ui-icon-folder-open");
+			metaTable.css("display", "block");
+			metaTable.metaNameField.css("display", "inline");
+			metaTable.addRowButton.css("display", "inline");
 		}
 		else
 		{
-			linkLabel.innerHTML = "edit metadata";
-			linkIcon.setAttribute("class", "ui-icon ui-icon-folder-collapsed");
-			metaTable.style.display = "none";
-			metaTable.metaNameField.style.display = "none";
-			metaTable.addRowButton.style.display = "none";
+			linkLabel.html("edit metadata");
+			linkIcon.attr("class", "ui-icon ui-icon-folder-collapsed");
+			metaTable.css("display", "none");
+			metaTable.metaNameField.css("display", "none");
+			metaTable.addRowButton.css("display", "none");
 		}
-	}
-	newLink.appendChild(uList);
-	linkSpan.appendChild(newLink);
-	newCell.appendChild(linkSpan);
-	row.appendChild(newCell);
+	});
+
+	newLink.append(uList);
+	linkSpan.append(newLink);
+	newCell.append(linkSpan);
+	row.append(newCell);
 	
 	addFunctionalityToTable(metaTable);
-	metaTable.metaNameField.style.display = "none";
-	metaTable.addRowButton.style.display = "none";
+	metaTable.metaNameField.css("display", "none");
+	metaTable.addRowButton.css("display", "none");
 }
 
 function setEditingFeaturesVisible(visible)
 {
 	if(visible)
 	{
-		document.getElementById("editContentButton").innerHTML = "Hide editor";
+		$("#editContentButton").html("Hide editor");
 	}
 	else
 	{
-		document.getElementById("editContentButton").innerHTML = "Edit content";
+		$("#editContentButton").html("Edit content");
 	}
-
-	var saveButton = document.getElementById("saveButton");
-	var metadataListLabel = document.getElementById("metadataListLabel");
-	var metadataList = document.getElementById("metadataSetList");
 	
 	var visibility = (visible ? "" : "none");
-	saveButton.style.display = visibility;
-	metadataListLabel.style.display = visibility;
-	metadataList.style.display = visibility;
+	$("#saveButton, #metadataListLabel, #metadataSetList").css("display", visibility);
 	
-	var buttons = gs.functions.getElementsByClassName("editMetadataButton");
-	
-	for(var i = 0; i < buttons.length; i++)
+	$(".editMetadataButton").each(function()
 	{
-		buttons[i].style.display = visibility;
-		buttons[i].linkLabel.innerHTML = "edit metadata";
-		buttons[i].linkIcon.setAttribute("class", "ui-icon ui-icon-folder-collapsed");
-	}
+		$(this).css("display", visibility);
+		$(this.linkLabel).html("edit metadata");
+		$(this.linkIcon).attr("class", "ui-icon ui-icon-folder-collapsed");
+	});
 	
-	var tables = document.getElementsByTagName("TABLE");
-	for(var i = 0; i < tables.length; i++)
+	$("table").each(function()
 	{
-		var currentTable = tables[i];
-		if(currentTable.getAttribute("id") && currentTable.getAttribute("id").search(/^meta/) != -1)
+		if($(this).attr("id") && $(this).attr("id").search(/^meta/) != -1)
 		{
-			currentTable.style.display = "none";
-			currentTable.metaNameField.style.display = "none";
-			currentTable.addRowButton.style.display = "none";
+			$(this).css("display", "none");
+			$(this.metaNameField).css("display", "none");
+			$(this.addRowButton).css("display", "none");
 		}
-	}
+	});
 }
 
 function readyPageForEditing()
 {
-	if(document.getElementById("metadataSetList"))
+	if($("#metadataSetList").length)
 	{
-		var setList = document.getElementById("metadataSetList");
-		if(!setList.style.display || setList.style.display == "")
+		var setList = $("#metadataSetList");
+		if(!setList.css("display") || setList.css("display") == "")
 		{
 			setEditingFeaturesVisible(false);
 		}
@@ -1221,39 +1144,31 @@ function readyPageForEditing()
 		return;
 	}
 
-	document.getElementById("editContentButton").innerHTML = "Hide Editor";
+	$("#editContentButton").html("Hide Editor");
 	
-	var textDivs = gs.functions.getElementsByClassName("sectionText");
-	for(var i = 0; i < textDivs.length; i++)
-	{
-		de.doc.registerEditSection(textDivs[i]);
-	}
+	var textDivs = $(".sectionText").each(function(){de.doc.registerEditSection(this);});
 	
-	var editBar = document.getElementById("editBarLeft");
-	var saveButton = document.createElement("BUTTON");
-	saveButton.onclick = save;
-	saveButton.innerHTML = "Save changes";
-	saveButton.setAttribute("id", "saveButton");
-	editBar.appendChild(saveButton);
+	var editBar = $("#editBarLeft");
+	var saveButton = $("<button>", {"id": "saveButton"});
+	saveButton.click(save);
+	saveButton.html("Save changes");
+	editBar.append(saveButton);
 	
-	var visibleMetadataList = document.createElement("SELECT");
-	var allOption = document.createElement("OPTION");
-	allOption.innerHTML = "All";
-	visibleMetadataList.appendChild(allOption);
-	visibleMetadataList.setAttribute("id", "metadataSetList");
-	var metadataListLabel = document.createElement("SPAN");
-	metadataListLabel.setAttribute("id", "metadataListLabel");
-	metadataListLabel.setAttribute("style", "margin-left:20px;");
-	metadataListLabel.innerHTML = "Visible metadata: ";
-	editBar.appendChild(metadataListLabel);
-	editBar.appendChild(visibleMetadataList);
-	visibleMetadataList.onchange = onVisibleMetadataSetChange;
+	var visibleMetadataList = $("<select>", {"id": "metadataSetList"});
+	var allOption = $("<option>All</option>");
+	visibleMetadataList.append(allOption);
+
+	var metadataListLabel = $("<span>", {"id": "metadataListLabel", "style": "margin-left:20px;"});
+	metadataListLabel.html("Visible metadata: ");
+	editBar.append(metadataListLabel);
+	editBar.append(visibleMetadataList);
+	visibleMetadataList.change(onVisibleMetadataSetChange);
 	
-	var statusBarDiv = document.createElement("DIV");
-	editBar.appendChild(statusBarDiv);
-	_statusBar = new StatusBar(statusBarDiv);
+	var statusBarDiv = $("<div>");
+	editBar.append(statusBarDiv);
+	_statusBar = new StatusBar(statusBarDiv[0]);
 	
-	var titleDivs = gs.functions.getElementsByClassName("sectionTitle");
+	var titleDivs = $(".sectionTitle");
 	for(var i = 0; i < titleDivs.length; i++)
 	{
 		addEditMetadataLink(titleDivs[i]);
@@ -1261,6 +1176,10 @@ function readyPageForEditing()
 	
 	_baseURL = gs.xsltParams.library_name;
 }
+
+/***************
+* MENU SCRIPTS *
+***************/
 
 function floatMenu(enabled)
 {
@@ -1299,10 +1218,14 @@ function floatMenu(enabled)
 		$("#floatTOCToggle").attr("checked", false);
 	}
 	
-	var ajax = gs.functions.ajaxRequest();
-	ajax.open("GET", gs.xsltParams.library_name + "?a=d&ftoc=" + (enabled ? "1" : "0") + "&c=" + gs.cgiParams.c);
-	ajax.send();
+	var url = gs.xsltParams.library_name + "?a=d&ftoc=" + (enabled ? "1" : "0") + "&c=" + gs.cgiParams.c;
+	
+	$.ajax(url);
 }
+
+/********************
+* SLIDESHOW SCRIPTS *
+********************/
 
 function showSlideShow()
 {
