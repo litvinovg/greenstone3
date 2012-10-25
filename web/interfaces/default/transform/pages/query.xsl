@@ -155,54 +155,97 @@
 			</form>
 		</xsl:for-each>
 	</xsl:template>
+
 	<xsl:template name="displayMatchDocs">
     <div id="matchdocs">
       <xsl:variable name="numDocsMatched" select="/page/pageResponse/metadataList/metadata[@name='numDocsMatched']"/>
-      <xsl:variable name="numDocsReturned" select="/page/pageResponse/metadataList/metadata[@name='numDocsReturned']"/>
+      <xsl:variable name="numDocsReturned"><xsl:call-template name="numDocsReturned"/></xsl:variable> <!-- select="/page/pageResponse/metadataList/metadata[@name='numDocsReturned']"/>-->
+      <xsl:variable name="docLevel"><xsl:call-template name="documentLevel"/></xsl:variable>
+      <xsl:variable name="docLevelText"><xsl:call-template name="documentLevelText"><xsl:with-param name="numDocsMatched" select="$numDocsMatched"/><xsl:with-param name="level" select="$docLevelText"/></xsl:call-template></xsl:variable>
       <xsl:choose>
         <xsl:when test="$numDocsMatched='0' or $numDocsReturned='0'">
-          <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.nodocsmatch')"/>
+          <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.nodocsmatch', $docLevelText)"/>
         </xsl:when>
         <xsl:when test="$numDocsMatched='1' or $numDocsReturned='1'">
-          <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.onedocsmatch')"/>
+          <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.onedocsmatch', $docLevelText)"/>
         </xsl:when>
         <xsl:when test="$numDocsMatched">
-          <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.manydocsmatch', $numDocsMatched)"/>
-          <xsl:if test="$numDocsReturned and not($numDocsMatched=$numDocsReturned)"> (<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.docsreturned', $numDocsReturned)"/>)</xsl:if>
+          <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.manydocsmatch', concat($numDocsMatched, ';', $docLevelText))"/>
+          <xsl:if test="$numDocsReturned and not($numDocsMatched=$numDocsReturned)"> (<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.docsreturned', concat($numDocsReturned, ';', $docLevelText))"/>)</xsl:if>
         </xsl:when>
          <xsl:when test="$numDocsReturned">
-          <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.atleastdocsmatch', $numDocsReturned)"/>
+          <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.atleastdocsmatch', concat($numDocsReturned, ';', $docLevelText))"/>
         </xsl:when>
       </xsl:choose>
     </div>
-
+   
   </xsl:template>
+
+  <xsl:template name="numDocsMatched">
+    <xsl:choose>
+      <xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'numDocsMatched']">
+	<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'numDocsMatched']"/>
+      </xsl:when>
+      <xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']">
+	<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']"/>
+      </xsl:when>
+      <xsl:otherwise><xsl:value-of select="count(/page/pageResponse/documentNodeList/documentNode)"/></xsl:otherwise>
+    </xsl:choose>   
+  </xsl:template>
+
+  <xsl:template name="numDocsReturned">
+    <xsl:choose>
+      <xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']">
+	<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']"/>
+      </xsl:when>
+      <xsl:otherwise><xsl:value-of select="count(/page/pageResponse/documentNodeList/documentNode)"/></xsl:otherwise>
+    </xsl:choose>   
+  </xsl:template>
+
+  <xsl:template name="documentLevel">
+      <xsl:choose>
+	<xsl:when test="/page/pageRequest/paramList/param[@name='level']">
+	  <xsl:value-of select="/page/pageRequest/paramList/param[@name='level']/@value" />
+	</xsl:when>
+	<xsl:when test="/page/pageRequest/paramList/param[@name='s1.level']">
+	  <xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.level']/@value" />
+	</xsl:when>
+	<xsl:otherwise>Doc</xsl:otherwise>
+      </xsl:choose>
+  </xsl:template>
+
+  <xsl:template name="documentLevelText">
+    <xsl:param name="numDocsMatched">0</xsl:param>
+    <xsl:param name="level">Doc</xsl:param>
+     <xsl:choose>	
+      <xsl:when test="$numDocsMatched = 1">
+	<xsl:choose>
+	  <xsl:when test="$level = 'Doc'">
+	    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document')"/>
+	  </xsl:when>
+	  <xsl:otherwise>
+	    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.section')"/>
+	  </xsl:otherwise>
+	</xsl:choose>
+      </xsl:when>
+      <!-- 0 or more than one use plural. is that the case for all langs??-->
+      <xsl:otherwise>
+	<xsl:choose>
+	  <xsl:when test="$level = 'Doc'">
+	    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document_plural')"/>
+	  </xsl:when>
+	  <xsl:otherwise>
+	    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.section_plural')"/>
+	  </xsl:otherwise>
+	</xsl:choose>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
 	<xsl:template name="displayTermInfo">
-		<!-- Find the total number of documents returned -->
-		<xsl:variable name="docMax">
-			<xsl:choose>
-				<xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']">
-					<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']"/>
-				</xsl:when>
-				<xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'numDocsMatched']">
-					<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'numDocsMatched']"/>
-				</xsl:when>
-				<xsl:otherwise><xsl:value-of select="count(/page/pageResponse/documentNodeList/documentNode)"/></xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
 	
 		<!-- Find the number of documents displayed per page -->
-		<xsl:variable name="level">
-			<xsl:choose>
-				<xsl:when test="/page/pageRequest/paramList/param[@name='level']">
-					<xsl:value-of select="/page/pageRequest/paramList/param[@name='level']/@value" />
-				</xsl:when>
-				<xsl:when test="/page/pageRequest/paramList/param[@name='s1.level']">
-					<xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.level']/@value" />
-				</xsl:when>
-				<xsl:otherwise>Doc</xsl:otherwise>
-			</xsl:choose>
-		</xsl:variable>
+		<xsl:variable name="level"><xsl:call-template name="documentLevel"/></xsl:variable>
 		
 		<!-- The list of search terms with their frequency and document count -->
 				<p class="termList">
@@ -214,61 +257,26 @@
 						<br /><br />
 					</xsl:if>
 				
-					<xsl:for-each select="/page/pageResponse/termList/term">
-						<xsl:choose>
-							<!-- If there is only one or two search terms then show the expanded information -->
-							<xsl:when test="count(/page/pageResponse/termList/term) &lt; 3">
-								<span class="termInfo">
-									<span style="font-style:italic;"><xsl:value-of select="@name"/></span>
-									<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.occurs')"/><xsl:text> </xsl:text>
-									<xsl:choose>
-										<xsl:when test="@freq = 1">
-											<xsl:value-of select="@freq"/>
-											<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.time')"/>
-										</xsl:when>
-										<xsl:otherwise>
-											<xsl:value-of select="@freq"/>
-											<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.time_plural')"/>
-										</xsl:otherwise>
-									</xsl:choose>
-									<!--<xsl:if test="not(not(@numDocsMatch) or @numDocsMatch = '')">-->
-	                                                                     <xsl:if test="@numDocsMatch &gt; 0">
-										<xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.in')"/><xsl:text> </xsl:text>
-										<xsl:value-of select="@numDocsMatch"/>
-										<xsl:choose>
-											<xsl:when test="@numDocsMatch = 1">
-												<xsl:text> </xsl:text>
-												<xsl:choose>
-													<xsl:when test="$level = 'Doc'">
-														<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document')"/>
-													</xsl:when>
-													<xsl:otherwise>
-														<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.section')"/>
-													</xsl:otherwise>
-												</xsl:choose>
-											</xsl:when>
-											<xsl:when test="@numDocsMatch &gt; 1">
-												<xsl:text> </xsl:text>
-												<xsl:choose>
-													<xsl:when test="$level = 'Doc'">
-														<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document_plural')"/>
-													</xsl:when>
-													<xsl:otherwise>
-														<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.section_plural')"/>
-													</xsl:otherwise>
-												</xsl:choose>
-											</xsl:when>
-										</xsl:choose>
-									</xsl:if>
-									<br />
-								</span>
-							</xsl:when>
-							<xsl:otherwise>
-								<span style="font-style:italic;"><xsl:value-of select="@name"/></span> (<xsl:value-of select="@freq"/>)
-							</xsl:otherwise>
-						</xsl:choose>
-					</xsl:for-each>
-				</p>
+<!-- If there is only one or two search terms then show the expanded information --><xsl:choose>
+      <xsl:when test="count(/page/pageResponse/termList/term) &lt; 3">
+	<xsl:for-each select="/page/pageResponse/termList/term">
+	<xsl:variable name="occursTextKey">
+	  <xsl:choose>
+	  <xsl:when test="@freq = 1">query.termoccurs.1.1</xsl:when>
+	  <xsl:when test="@numDocsMatch = 1">query.termoccurs.x.1</xsl:when>
+	  <xsl:otherwise>query.termoccurs.x.x</xsl:otherwise></xsl:choose></xsl:variable>
+	    <xsl:variable name="levelText"><xsl:call-template name="documentLevelText"><xsl:with-param name="level" select="$level"/><xsl:with-param name="numDocsMatched" select="@numDocsMatch"/></xsl:call-template></xsl:variable>
+	  <span class="termInfo">
+	    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, $occursTextKey, concat(@name,';', @freq,';',  @numDocsMatch,';',  $levelText))"/></span><br/>
+	</xsl:for-each>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:for-each select="/page/pageResponse/termList/term">
+	  <span style="font-style:italic;"><xsl:value-of select="@name"/></span> (<xsl:value-of select="@freq"/>)
+	  </xsl:for-each>
+	</xsl:otherwise>
+      </xsl:choose>
+    </p>
 	</xsl:template>
 	
 	<xsl:template name="prevNextButtons">	
