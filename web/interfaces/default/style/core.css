@@ -221,6 +221,7 @@ pre {
 	list-style:none;
 	float:left;
 	padding: 5px;
+	cursor:pointer;
 }
 
 .tableOfContentsTitle{
@@ -746,7 +747,6 @@ table{
 }
 
 .pageSliderCol {
-	width:75px;
 	height:100px;
 	padding: 2px;
 	text-align: center;
