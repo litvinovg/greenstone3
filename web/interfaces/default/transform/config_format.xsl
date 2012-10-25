@@ -292,7 +292,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 	<!-- With gsf:collectionText, a user can request a string from the collection's dictionary in the current lang -->
 	<xsl:template match="gsf:collectionText" name="gsf:collectionText">
     <xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>
-		<xslt:value-of select="util:getCollectionText($collName, $site_name, /page/@lang, '{@name}', '{@args}')/*"/>
+		<xslt:copy-of select="util:getCollectionText($collName, $site_name, /page/@lang, '{@name}', '{@args}')/node()"/>
 	</xsl:template>
 
 	<!-- if this gsf:metadata is a child of a document node then we want to get the metadata for that node -->
@@ -366,6 +366,19 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 		<xslt:call-template name="documentNodeText"/>
 	</xsl:template>
   
+  <xsl:template match="gsf:if-metadata-exists">
+    <xsl:variable name="meta-path"><xsl:for-each select="gsf:metadata">(.//metadataList)[last()]/metadata[@name='<xsl:call-template name="getMetadataName"/>']</xsl:for-each></xsl:variable>
+    <xslt:choose>
+	<xslt:when test="{$meta-path}">
+	  <xsl:apply-templates select="gsf:if/node()"/>
+	</xslt:when>
+      <xsl:if test="gsf:else">
+	<xslt:otherwise><xsl:apply-templates select="gsf:else/node()"/>
+	</xslt:otherwise>
+      </xsl:if>
+    </xslt:choose>
+  </xsl:template>
+
 	<xsl:template match="gsf:choose-metadata">
 		<xslt:choose>
 			<xsl:for-each select="gsf:metadata">
