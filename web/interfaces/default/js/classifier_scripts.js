@@ -4,8 +4,8 @@ var busy = false;
 
 function isExpanded(sectionID)
 {
-	var divElem = document.getElementById("div" + sectionID);
-	if(!divElem.style.display || divElem.style.display == "block")
+	var divElem = gs.jqGet("div" + sectionID);
+	if(!divElem.css("display") || divElem.css("display") != "none")
 	{
 		return true;
 	}
@@ -14,21 +14,22 @@ function isExpanded(sectionID)
 
 function toggleSection(sectionID)
 {
-	var section = document.getElementById("div" + sectionID);
-	var sectionToggle = document.getElementById("toggle" + sectionID);
+	var section = gs.jqGet("div" + sectionID);
+	var sectionToggle = gs.jqGet("toggle" + sectionID);
 	
 	if(sectionToggle == undefined)
 	{
 		return;
 	}
 	
-	if(section)
+	//If the div exists
+	if(section.length)
 	{
 		if(isExpanded(sectionID))
 		{
-			section.style.display = "none";
-			sectionToggle.setAttribute("src", gs.imageURLs.expand);
-			
+			section.css("display", "none");
+			sectionToggle.attr("src", gs.imageURLs.expand);
+
 			if(openClassifiers[sectionID] != undefined)
 			{
 				delete openClassifiers[sectionID];
@@ -36,8 +37,8 @@ function toggleSection(sectionID)
 		}
 		else
 		{
-			section.style.display = "block";
-			sectionToggle.setAttribute("src", gs.imageURLs.collapse);
+			section.css("display", "block");
+			sectionToggle.attr("src", gs.imageURLs.collapse);
 			openClassifiers[sectionID] = true;	
 		}
 		updateOpenClassifiers();
@@ -112,8 +113,8 @@ function httpRequest(sectionID)
 		inProgress[sectionID] = true;
 		var httpRequest = new gs.functions.ajaxRequest();
 		
-		var sectionToggle = document.getElementById("toggle" + sectionID);
-		sectionToggle.setAttribute("src", gs.imageURLs.loading);
+		var sectionToggle = gs.jqGet("toggle" + sectionID);
+		sectionToggle.attr("src", gs.imageURLs.loading);
 		
 		var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/browse/" + sectionID.replace(/\./g, "/") + "?excerptid=div" + sectionID;
 
@@ -126,47 +127,36 @@ function httpRequest(sectionID)
 		{
 			url = url.substring(0, url.indexOf("#"));
 		}
-		httpRequest.open('GET', url, true);
-		httpRequest.onreadystatechange = function() 
+		
+		$.ajax(url)
+		.success(function(data)
 		{
-			if (httpRequest.readyState == 4) 
+			var newDiv = $("<div>");										
+			var sibling = gs.jqGet("title" + sectionID);
+			sibling.after(newDiv);
+			
+			newDiv.html(data);
+			sectionToggle.attr("src", gs.imageURLs.collapse);
+			openClassifiers[sectionID] = true;	
+			
+			if(gs.cgiParams.berryBasket == "on")
 			{
-				if (httpRequest.status == 200) 
-				{
-					var newDiv = document.createElement("div");										
-					var sibling = document.getElementById("title" + sectionID);
-					var parent = sibling.parentNode;
-					if(sibling.nextSibling)
-					{
-						parent.insertBefore(newDiv, sibling.nextSibling);
-					}
-					else
-					{
-						parent.appendChild(newDiv);
-					}
-					
-					newDiv.innerHTML = httpRequest.responseText;
-					sectionToggle.setAttribute("src", gs.imageURLs.collapse);
-					openClassifiers[sectionID] = true;	
-					
-					if(gs.cgiParams.berryBasket == "on")
-					{
-						checkout();
-					}
-					else if(gs.cgiParams.documentbasket == "on")
-					{
-						dmcheckout();
-					}
-					updateOpenClassifiers();
-				}
-				else
-				{
-					sectionToggle.setAttribute("src", gs.imageURLs.expand);
-				}
-				inProgress[sectionID] = false;
-				busy = false;
+				checkout();
 			}
-		}
-		httpRequest.send();
+			else if(gs.cgiParams.documentbasket == "on")
+			{
+				dmcheckout();
+			}
+			updateOpenClassifiers();
+		})
+		.error(function()
+		{
+			sectionToggle.attr("src", gs.imageURLs.expand);
+		})
+		.complete(function()
+		{
+			inProgress[sectionID] = false;
+			busy = false;
+		});
 	}
 }

@@ -1,5 +1,10 @@
 gs.functions = new Array();
 
+gs.jqGet = function(id)
+{
+	return $("#" + id.replace(/\./g, "\\."));
+}
+
 gs.functions.ajaxRequest = function()
 {
 	var activexmodes=["Msxml2.XMLHTTP", "Microsoft.XMLHTTP"]; 
