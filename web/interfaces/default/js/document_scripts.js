@@ -355,7 +355,7 @@ function loadTopLevelPage(callbackFunction, customURL)
 	{
 		if(response)
 		{
-			var targetElem = gs.jqGet("gs-document");
+			var targetElem = $("#gs-document");
 			var docStart = response.indexOf(">") + 1;
 			var docEnd = response.lastIndexOf("<");
 			var doc = response.substring(docStart, docEnd);
@@ -402,7 +402,7 @@ function retrieveFullTableOfContents()
 		newTOC = newTOC.replace(/display:none/, "display:block");
 		newTOC = newTOC.replace(/images\/collapse/g, "images/expand");
 		
-		var tocElem = gs.jqGet("tableOfContents");
+		var tocElem = $("#tableOfContents");
 		tocElem.html(newTOC);
 		
 		gs.variables.tocLoaded = true;
@@ -425,9 +425,9 @@ function isExpanded(sectionID)
 
 function minimizeSidebar()
 {
-	var toc = gs.jqGet("contentsArea");
-	var maxLink = gs.jqGet("sidebarMaximizeButton");
-	var minLink = gs.jqGet("sidebarMinimizeButton");
+	var toc = $("#contentsArea");
+	var maxLink = $("#sidebarMaximizeButton");
+	var minLink = $("#sidebarMinimizeButton");
 	
 	if(toc.length)
 	{
@@ -440,10 +440,10 @@ function minimizeSidebar()
 
 function maximizeSidebar()
 {
-	var coverImage = gs.jqGet("coverImage");
-	var toc = gs.jqGet("contentsArea");
-	var maxLink = gs.jqGet("sidebarMaximizeButton");
-	var minLink = gs.jqGet("sidebarMinimizeButton");
+	var coverImage = $("#coverImage");
+	var toc = $("#contentsArea");
+	var maxLink = $("#sidebarMaximizeButton");
+	var minLink = $("#sidebarMinimizeButton");
 	
 	if(coverImage.length)
 	{
@@ -465,7 +465,7 @@ function maximizeSidebar()
 
 function changeView()
 {
-	var viewList = gs.jqGet("viewSelection");
+	var viewList = $("#viewSelection");
 	var currentVal = viewList.val();
 	
 	var view;
@@ -494,54 +494,24 @@ function changeView()
 
 function setImageVisible(visible)
 {
-	var divs = $("div");
-	var images = new Array();
-	for (var i = 0; i < divs.length; i++)
+	$("div").each(function()
 	{
-		if($(divs[i]).attr("id") && $(divs[i]).attr("id").search(/^image/) != -1)
+		if($(this).attr("id") && $(this).attr("id").search(/^image/) != -1)
 		{
-			images.push($(divs[i]));
+			$(this).css("display", (visible ? "block" : "none"));
 		}
-	}
-	
-	for(var i = 0; i < images.length; i++)
-	{
-		var image = images[i];
-		if(visible)
-		{
-			image.css("display", "block");
-		}
-		else
-		{
-			image.css("display", "none");
-		}
-	}
+	});
 }
 
 function setTextVisible(visible)
 {
-	var divs = $("div");
-	var textDivs = new Array();
-	for (var i = 0; i < divs.length; i++)
+	$("div").each(function()
 	{
-		if($(divs[i]).attr("id") && $(divs[i]).attr("id").search(/^text/) != -1)
+		if($(this).attr("id") && $(this).attr("id").search(/^text/) != -1)
 		{
-			textDivs.push($(divs[i]));
+			$(this).css("display", (visible ? "block" : "none"));
 		}
-	}
-
-	for(var i = 0; i < textDivs.length; i++)
-	{
-		var text = textDivs[i];
-		if(visible)
-		{
-			text.css("display", "block");
-		}
-		else
-		{
-			text.css("display", "none");
-		}
-	}
+	});
 }
 
 function retrieveTableOfContentsAndTitles()
@@ -558,9 +528,9 @@ function retrieveTableOfContentsAndTitles()
 	$.ajax(url)
 	.success(function(response)
 	{
-		gs.jqGet("tableOfContents").html(response);
+		$("#tableOfContents").html(response);
 		replaceLinksWithSlider();
-		var loading = gs.jqGet("tocLoadingImage");
+		var loading = $("#tocLoadingImage");
 		loading.remove();
 	})
 	.error(function()
@@ -571,13 +541,12 @@ function retrieveTableOfContentsAndTitles()
 
 function replaceLinksWithSlider()
 {
-	var tableOfContents = gs.jqGet("tableOfContents");
-	var liElems = tableOfContents.find("li");
-
+	var tableOfContents = $("#tableOfContents");
+	
 	var leafSections = new Array();
-	for (var i = 0; i < liElems.length; i++)
+	var liElems = tableOfContents.find("li").each(function()
 	{
-		var section = $(liElems[i]);
+		var section = $(this);
 		var add = true;
 		for(var j = 0; j < leafSections.length; j++)
 		{
@@ -599,7 +568,7 @@ function replaceLinksWithSlider()
 		{
 			leafSections.push(section);
 		}
-	}
+	});
 	
 	for(var i = 0 ; i < leafSections.length; i++)
 	{
@@ -613,10 +582,9 @@ function replaceLinksWithSlider()
 	}
 
 	//Disable all TOC toggles
-	var imgs = $("img");
-	for(var j = 0; j < imgs.length; j++)
+	var imgs = $("img").each(function()
 	{
-		var currentImage = $(imgs[j]);
+		var currentImage = $(this);
 		if(currentImage.attr("id") && currentImage.attr("id").search(/^ttoggle/) != -1)
 		{
 			currentImage.attr("onclick", "");
@@ -625,7 +593,7 @@ function replaceLinksWithSlider()
 		{
 			currentImage.attr("onclick", currentImage.attr("onclick").replace(/\)/, ", null, true)"));
 		}
-	}
+	});
 }
 
 function SliderWidget(_links)
@@ -811,10 +779,9 @@ function SliderWidget(_links)
 			}
 			else
 			{
-				var image = document.createElement("IMG");
-				image.setAttribute("src", gs.imageURLs.blank);
-				page.link.innerHTML = "";
-				page.link.appendChild(image);
+				var image = $("<img>", {"src": gs.imageURLs.blank});
+				$(page.link).html("");
+				$(page.link).append(image);
 				page.isLoading = false;
 				page.noImage = true;
 			}
@@ -876,27 +843,27 @@ function SliderWidget(_links)
 		_linkRow.append(col);
 		col.addClass("pageSliderCol");
 		_links[i].cell = col;
-		
+
 		var link = $("<a>");
 		col.append(link);
 		_links[i].link = link;
 		var href = $(_links[i]).attr("href");
 		link.attr("href", href.replace(/\)/, ", 0, true)"));
-		
+
 		if(!_linkCellMap[href])
 		{
 			_linkCellMap[href] = new Array();
 		}
 		_linkCellMap[href].push(_links[i]);
-		
+
 		var loadingText = $("<p>Loading image</p>");
 		link.append(loadingText);
-		
+
 		var image = $("<img>");
 		link.append(image);
 		image.attr("src", gs.imageURLs.loading);
 		_links[i].image = image;
-		
+
 		var title = $(_links[i]).html();
 		if(title.search(/^[^ ]+ [^ ]+$/) != -1)
 		{
@@ -908,11 +875,11 @@ function SliderWidget(_links)
 			}
 		}
 		_titles.push([title, _links[i]]);
-		
+
 		col.append($("<br>"));
 		col.append(title);
 	}
-	
+
 	setUpFilterBox();
 	startCheckFunction();
 }
