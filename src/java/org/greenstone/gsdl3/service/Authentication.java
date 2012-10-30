@@ -2,9 +2,7 @@ package org.greenstone.gsdl3.service;
 
 import java.io.File;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,19 +10,10 @@ import java.util.UUID;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
-import java.util.Properties;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.PasswordAuthentication;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
 import net.tanesha.recaptcha.ReCaptchaImpl;
 import net.tanesha.recaptcha.ReCaptchaResponse;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.greenstone.gsdl3.util.DerbyWrapper;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserQueryResult;
@@ -39,7 +28,7 @@ public class Authentication extends ServiceRack
 	protected static final int USERNAME_MAX_LENGTH = 30;
 	protected static final int PASSWORD_MIN_LENGTH = 3;
 	protected static final int PASSWORD_MAX_LENGTH = 64;
-	
+
 	//Error codes
 	protected static final int NO_ERROR = 0;
 	protected static final int ERROR_REQUEST_HAS_NO_PARAM_LIST = -1;
@@ -627,7 +616,7 @@ public class Authentication extends ServiceRack
 		}
 		else if (op.equals(PERFORM_RETRIEVE_PASSWORD))
 		{
-			
+
 		}
 		else if (op.equals(PERFORM_CHANGE_PASSWORD))
 		{
@@ -635,20 +624,20 @@ public class Authentication extends ServiceRack
 			String user_name = (String) paramMap.get("username");
 			String oldPassword = (String) paramMap.get("oldPassword");
 			String newPassword = (String) paramMap.get("newPassword");
-			if (user_name==null || oldPassword==null || newPassword==null)
+			if (user_name == null || oldPassword == null || newPassword == null)
 			{
 				GSXML.addError(this.doc, result, _errorMessageMap.get("missing compulsory parameters: username, oldPassword, or newPassword"));
 				return result;
 			}
-			
-			String prevPassword = retrieveDataForUser(user_name, "password");						
+
+			String prevPassword = retrieveDataForUser(user_name, "password");
 			if (!hashPassword(oldPassword).equals(prevPassword))
 			{
 				addUserInformationToNode(user_name, serviceNode);
 				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_INCORRECT_PASSWORD), "Incorrect Password");
 				return result;
 			}
-			
+
 			//Check the given password
 			int error;
 			if ((error = checkPassword(newPassword)) != NO_ERROR)
@@ -656,11 +645,12 @@ public class Authentication extends ServiceRack
 				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
 				return result;
 			}
-			
+
 			String chpa_groups = retrieveDataForUser(user_name, "groups");
 			String chpa_comment = "password_changed_by_user";
 			String info = this._derbyWrapper.modifyUserInfo(user_name, hashPassword(newPassword), chpa_groups, null, chpa_comment, null);
-			if(info != "succeed"){//see DerbyWrapper.modifyUserInfo
+			if (info != "succeed")
+			{//see DerbyWrapper.modifyUserInfo
 				GSXML.addError(this.doc, result, _errorMessageMap.get(info));
 				return result;
 			}
@@ -791,19 +781,7 @@ public class Authentication extends ServiceRack
 
 	public static String hashPassword(String password)
 	{
-		String hashedPassword = null;
-		try
-		{
-			MessageDigest digest = MessageDigest.getInstance("SHA-1");
-			digest.reset();
-			hashedPassword = new String(digest.digest(password.getBytes("US-ASCII"))); // toHex after using ASCII charset will result in acceptable length of hex string
-			hashedPassword = toHex(hashedPassword); // this conversion is required to avoid the strange error of login failure on some legal password strings
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-		}
-		return hashedPassword;
+		return DigestUtils.sha1Hex(password);
 	}
 
 	// This method can also be used for printing out the password in hex (in case
@@ -1090,15 +1068,17 @@ public class Authentication extends ServiceRack
 		return collect_list_node;
 	}
 
-    // main() method - calls hashPassword() on any String argument, printing this to stdout
-    // This main() is invoked by gliserver.pl perl code to encrypt passwords identically to Java code.
-    public static void main(String[] args) {
-	if(args.length < 1) {
-	    System.err.println("Usage: Authentication <string to encrypt>");
-	    System.exit(-1);
+	// main() method - calls hashPassword() on any String argument, printing this to stdout
+	// This main() is invoked by gliserver.pl perl code to encrypt passwords identically to Java code.
+	public static void main(String[] args)
+	{
+		if (args.length < 1)
+		{
+			System.err.println("Usage: Authentication <string to encrypt>");
+			System.exit(-1);
+		}
+		// just hash the first argument
+		String hash = Authentication.hashPassword(args[0]);
+		System.out.println(hash);
 	}
-	// just hash the first argument
-	String hash = Authentication.hashPassword(args[0]);
-	System.out.println(hash);
-    }
 }
