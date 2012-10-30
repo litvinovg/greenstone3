@@ -347,6 +347,7 @@
 							<xsl:text disable-output-escaping="yes">
 								$(window).load(function()
 								{
+									$("#floatTOCToggle").attr("checked", true);
 									floatMenu(true);
 								});
 							</xsl:text>
