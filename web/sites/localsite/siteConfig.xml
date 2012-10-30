@@ -15,14 +15,15 @@
 		<serviceRack name="DocXMLUtil"/>
 		<serviceRack name="DocumentBasket"/>
 		<serviceRack name="BerryBasket"/>
-		<serviceRack name="GS2Construct"/>
+<!--		<serviceRack name="GS2Construct"/>-->
 		<serviceRack name="CrossCollectionSearch">
 			<format>
 				<!-- this format is used for the search results -->
 				<gsf:template match="documentNode">
+	  <xsl:variable name="collname" select="@collection"/>
 					<td><a><xsl:attribute name='href'><xsl:value-of select="$library_name"/>/collection/<xsl:value-of select='@collection'/>/document/<xsl:value-of select='@nodeID'/></xsl:attribute><gsf:icon/></a></td>
 					<td><gsf:metadata name='Title'/></td>
-					<td>[<a href='{$library_name}/collection/{@collection}/page/about'><xsl:value-of select='@collection'/></a>]</td>
+					<td><a href='{$library_name}/collection/{$collname}/page/about'><xsl:value-of select="/page/pageResponse/service/paramList/param[@name='collection']/option[@name=$collname]/displayItem[@name='name']"/> </a></td>
 				</gsf:template>
 			</format>
 		</serviceRack>
