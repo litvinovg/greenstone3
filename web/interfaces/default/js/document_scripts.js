@@ -146,8 +146,8 @@ function toggleSection(sectionID, callback, tocDisabled)
 					var nodeID = sectionID.replace(/\./g, "_");
 					if(text.search("wrap" + nodeID) != -1)
 					{
-						gs.jqGet("zoomOptions").css("display", null);
-						gs.jqGet("pagedImageOptions").css("display", null);
+						$("#zoomOptions").css("display", "");
+						$("#pagedImageOptions").css("display", "");
 					}
 					getSubSectionsForSection(sectionID, function(sections)
 					{					
@@ -1196,7 +1196,6 @@ function floatMenu(enabled)
 
 function showSlideShow()
 {
-	$("#ssOption").attr('checked', false);
 	if(!($("#gs-slideshow").length))
 	{
 		var slideshowDiv = $("<div>", {id:"gs-slideshow", style:"height:100%;"});

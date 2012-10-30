@@ -267,15 +267,6 @@
 					<img onclick="showSlideShow()">
 						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'slideshow_image')"/></xsl:attribute>
 					</img>
-					<input id="ssOption" type="checkbox" onclick="showSlideShow()" class="optionCheckBox"/>
-					<script type="text/javascript">
-						<xsl:text disable-output-escaping="yes">
-							$(window).load(function()
-							{
-								$("#ssOption").attr("checked", false);
-							});
-						</xsl:text>
-					</script>
 				</li>
 			
 				<!-- Realistic books link -->
