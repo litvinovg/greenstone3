@@ -44,6 +44,8 @@ import org.xml.sax.InputSource;
  */
 public class TransformingReceptionist extends Receptionist
 {
+	protected static final int CONFIG_PASS = 1;
+	protected static final int TEXT_PASS = 2;
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.core.TransformingReceptionist.class.getName());
 
@@ -922,8 +924,8 @@ public class TransformingReceptionist extends Receptionist
 		}
 
 		GSXSLT.inlineImportAndIncludeFiles(skinAndLibraryDoc, null, (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces);
-		skinAndLibraryDoc = (Document) performTextFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request));
-		skinAndLibraryDoc = (Document) performConfigFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request));
+		skinAndLibraryDoc = (Document) performFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request), TEXT_PASS);
+		skinAndLibraryDoc = (Document) performFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request), CONFIG_PASS);
 
 		if (_debug)
 		{
@@ -949,21 +951,18 @@ public class TransformingReceptionist extends Receptionist
 		//return null; // For now - change later
 	}
 
-	protected Node performConfigFormatPass(String collection, Document skinAndLibraryDoc, Document doc, UserContext userContext)
+	protected Node performFormatPass(String collection, Document skinAndLibraryDoc, Document doc, UserContext userContext, int pass)
 	{
-		String configStylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, "config_format.xsl");
-		Document configStylesheet_doc = this.converter.getDOM(new File(configStylesheet_file));
-
-		if (configStylesheet_doc != null)
+		String formatFile;
+		if (pass == CONFIG_PASS)
 		{
-			return this.transformer.transform(configStylesheet_doc, skinAndLibraryDoc, config_params);
+			formatFile = "config_format.xsl";
 		}
-		return skinAndLibraryDoc;
-	}
-
-	protected Node performTextFormatPass(String collection, Document skinAndLibraryDoc, Document doc, UserContext userContext)
-	{
-		String configStylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, "text_fragment_format.xsl");
+		else
+		{
+			formatFile = "text_fragment_format.xsl";
+		}
+		String configStylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, formatFile);
 		Document configStylesheet_doc = this.converter.getDOM(new File(configStylesheet_file));
 
 		if (configStylesheet_doc != null)
