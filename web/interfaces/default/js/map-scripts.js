@@ -18,10 +18,10 @@ function initializeMapScripts()
 	modifyFunctions();
 	setUpMap();
 	
-	var jsonNodeDiv = document.getElementById("jsonNodes");
-	if(jsonNodeDiv)
+	var jsonNodeDiv = $("#jsonNodes");
+	if(jsonNodeDiv.length)
 	{
-		var jsonNodes = eval(jsonNodeDiv.innerHTML);
+		var jsonNodes = eval(jsonNodeDiv.html());
 		if(jsonNodes && jsonNodes.length > 0)
 		{
 			for(var i = 0; i < jsonNodes.length; i++)
@@ -34,8 +34,7 @@ function initializeMapScripts()
 		}
 		else
 		{
-			document.getElementById("map_canvas").style.visibility = "hidden";
-			document.getElementById("map_canvas").style.height = "0px";
+			$("#map_canvas").css({visibility:"hidden", height:"0px"});
 		}
 	}
 	
@@ -43,13 +42,10 @@ function initializeMapScripts()
 	
 	if(_docList.ids.length > 1)
 	{
-		var startStopCheckbox = document.createElement("input");
-		startStopCheckbox.setAttribute("type", "checkbox");
-		startStopCheckbox.setAttribute("checked", "true");
-		startStopCheckbox.setAttribute("id", "scrollCheckbox");
-		startStopCheckbox.onclick = function()
+		var startStopCheckbox = $("<input>", {"type": "checkbox", "checked": "true", "id": "scrollCheckbox"});
+		startStopCheckbox.click(function()
 		{
-			if(startStopCheckbox.checked)
+			if(startStopCheckbox.attr("checked"))
 			{
 				if(_intervalHandle == null)
 				{
@@ -61,16 +57,12 @@ function initializeMapScripts()
 				clearInterval(_intervalHandle);
 				_intervalHandle = null;
 			}
-		};
+		});
 		
-		var label = document.createElement("span");
-		label.innerHTML = "Scroll through places";
-		
-		var container = document.createElement("DIV");
-		container.appendChild(startStopCheckbox);
-		container.appendChild(label);
-		container.setAttribute("class", "ui-widget-header ui-corner-all");
-		container.setAttribute("style", "clear:right; float:right; padding:0px 5px 3px 0px;");
+		var label = $("<span>Scroll through places</span>");
+		var container = $("<div>", {"class": "ui-widget-header ui-corner-all", "style": "clear:right; float:right; padding:0px 5px 3px 0px;"});
+		container.append(startStopCheckbox);
+		container.append(label);
 
 		$(container).insertAfter("#map_canvas");
 		
@@ -86,7 +78,7 @@ function setUpMap()
 		center: new google.maps.LatLng(0, 0),
 		mapTypeId: google.maps.MapTypeId.HYBRID
 	};
-	_map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+	_map = new google.maps.Map($("#map_canvas")[0], myOptions);
 	google.maps.event.addListener(_map, 'bounds_changed', performSearchForMarkers);
 }
 
@@ -178,46 +170,43 @@ function performSearchForMarkers()
 		}
 	}
 	
-	var ajax = new gs.functions.ajaxRequest();
-	ajax.open("GET", gs.xsltParams.library_name + "?a=q&s=RawQuery&rt=rd&c=" + gs.cgiParams.c + "&s1.rawquery=" + query + "&excerptid=jsonNodes", true);
-	ajax.onreadystatechange = function()
+	var url = gs.xsltParams.library_name + "?a=q&s=RawQuery&rt=rd&c=" + gs.cgiParams.c + "&s1.rawquery=" + query + "&excerptid=jsonNodes";
+	
+	$.ajax(url)
+	.success(function(responseText)
 	{
-		if(ajax.readyState == 4 && ajax.status == 200)
+		if(responseText.search("id=\"jsonNodes") != -1)
 		{
-			if(ajax.responseText.search("id=\"jsonNodes") != -1)
+			var startIndex = responseText.indexOf(">");
+			var endIndex = responseText.indexOf("</");
+
+			var jsonNodes = eval(responseText.substring(startIndex+1, endIndex));
+			if(jsonNodes && jsonNodes.length > 0)
 			{
-				var startIndex = ajax.responseText.indexOf(">");
-				var endIndex = ajax.responseText.indexOf("</");
-
-				var jsonNodes = eval(ajax.responseText.substring(startIndex+1, endIndex));
-				if(jsonNodes && jsonNodes.length > 0)
+				for(var i = 0; i < jsonNodes.length; i++)
 				{
-					for(var i = 0; i < jsonNodes.length; i++)
+					var doc = jsonNodes[i];
+					
+					var found = false;
+					for(var j = 0; j < _docList.ids.length; j++){if(doc.nodeID == _docList.ids[j]){found = true; break;}}
+					
+					if(!found)
 					{
-						var doc = jsonNodes[i];
-						
-						var found = false;
-						for(var j = 0; j < _docList.ids.length; j++){if(doc.nodeID == _docList.ids[j]){found = true; break;}}
-						
-						if(!found)
-						{
-							_docList[doc.nodeID] = doc;
-							_docList.ids.push(doc.nodeID);
+						_docList[doc.nodeID] = doc;
+						_docList.ids.push(doc.nodeID);
 
-							createMarker(doc, false);
-						}
+						createMarker(doc, false);
 					}
 				}
 			}
-			else
-			{
-				console.log("No JSON information received");
-			}
-			
-			_searchRunning = false;
 		}
-	}
-	ajax.send();
+		else
+		{
+			console.log("No JSON information received");
+		}
+		
+		_searchRunning = false;
+	});
 }
 
 function coordToAbsDirected(coord, type)
@@ -341,11 +330,11 @@ function loopThroughMarkers()
 		}
 
 		var doc = visibleMarkers[_docList.loopIndex];
-		var elem = document.getElementById("div" + doc.nodeID);
-		if(elem)
+		var elem = gs.jqGet("div" + doc.nodeID);
+		if(elem.length)
 		{
-			elem.style.background = "#BBFFBB";
-			setTimeout(function(){elem.style.background = "";}, 2000);
+			elem.css("background", "#BBFFBB");
+			setTimeout(function(){elem.css("background", "");}, 2000);
 		}
 		_docList.loopIndex++;
 	}
@@ -370,7 +359,7 @@ function focusDocument(id)
 		_map.panTo(new google.maps.LatLng(doc.lat, doc.lng));
 		clearAllInfoBoxes();
 		doc.marker.markerInfo.open(_map, doc.marker);
-		var scrollCheckbox = document.getElementById("scrollCheckbox");
+		var scrollCheckbox = $("#scrollCheckbox");
 		if(scrollCheckbox.checked)
 		{
 			scrollCheckbox.checked = false;
@@ -411,7 +400,7 @@ function createMarker(doc, mainMarker)
 		});
 	}
 
-	var docElement = document.getElementById("div" + doc.nodeID);
+	var docElement = gs.jqGet("div" + doc.nodeID);
 	var parent;
 	if(docElement)
 	{
@@ -420,7 +409,7 @@ function createMarker(doc, mainMarker)
 
 	while(parent && parent.nodeName != "BODY")
 	{
-		if(parent.getAttribute("id") && parent.getAttribute("id").search("divCL") != -1)
+		if($(parent).attr("id") && $(parent).attr("id").search("divCL") != -1)
 		{
 			doc.parentCL = parent;
 			break;
@@ -438,40 +427,35 @@ function createMarker(doc, mainMarker)
 
 function getSubClassifier(sectionID)
 {
-	var ajax = new gs.functions.ajaxRequest();
-	ajax.open("GET", gs.xsltParams.library_name + "?a=b&rt=s&s=ClassifierBrowse&c=" + gs.cgiParams.c + "&cl=" + sectionID + "&excerptid=jsonNodes", true);		
-	ajax.onreadystatechange = function()
+	var url = gs.xsltParams.library_name + "?a=b&rt=s&s=ClassifierBrowse&c=" + gs.cgiParams.c + "&cl=" + sectionID + "&excerptid=jsonNodes";
+	$.ajax(url)
+	.success(function(responseText)
 	{
-		if(ajax.readyState == 4 && ajax.status == 200)
+		var startIndex = responseText.indexOf(">");
+		var endIndex = responseText.indexOf("</");
+		
+		var jsonNodes = eval(responseText.substring(startIndex+1, endIndex));
+		if(jsonNodes && jsonNodes.length > 0)
 		{
-			var startIndex = ajax.responseText.indexOf(">");
-			var endIndex = ajax.responseText.indexOf("</");
-			
-			var jsonNodes = eval(ajax.responseText.substring(startIndex+1, endIndex));
-			if(jsonNodes && jsonNodes.length > 0)
+			for(var i = 0; i < jsonNodes.length; i++)
 			{
-				for(var i = 0; i < jsonNodes.length; i++)
-				{
-					var doc = jsonNodes[i];
-					_docList[doc.nodeID] = doc;
-					_docList.ids.push(doc.nodeID);
+				var doc = jsonNodes[i];
+				_docList[doc.nodeID] = doc;
+				_docList.ids.push(doc.nodeID);
 
-					createMarker(doc, false);
-				}
-				
-				document.getElementById("map_canvas").style.visibility = "visible";
-				document.getElementById("map_canvas").style.height = undefined;
+				createMarker(doc, false);
 			}
 			
-			updateMap();
+			$("#map_canvas").css({"visibility": "visible", "height": ""});
 		}
-		else if(ajax.readyState == 4)
-		{
-			console.log("Error getting subclassifiers");
-			return;
-		}
-	}
-	ajax.send();
+		
+		updateMap();
+	})
+	.error(function()
+	{
+		console.log("Error getting subclassifiers");
+		return;
+	});	
 }
 
 function performDistanceSearch(id, lat, lng, degrees)
@@ -521,68 +505,61 @@ function performDistanceSearch(id, lat, lng, degrees)
 		</tr>\
 	</xsl:template>';
 	
-	var ajax = new gs.functions.ajaxRequest();
-	ajax.open("GET", gs.xsltParams.library_name + "?a=q&s=RawQuery&rt=rd&c=" + gs.cgiParams.c + "&s1.rawquery=" + query + "&excerptid=nearbyDocs&ilt=" + inlineTemplate.replace(/ /, "%20"), true);		
-	ajax.onreadystatechange = function()
+	var url = gs.xsltParams.library_name + "?a=q&s=RawQuery&rt=rd&c=" + gs.cgiParams.c + "&s1.rawquery=" + query + "&excerptid=nearbyDocs&ilt=" + inlineTemplate.replace(/ /, "%20");
+	$.ajax(url)
+	.success(function(response)
 	{
-		if(ajax.readyState == 4 && ajax.status == 200)
+		response = response.replace(/<img src="[^"]*map_marker.png"[^>]*>/g, "");
+
+		var nearbyDocsArray = new Array();
+
+		var lats = new Array();
+		var lngs = new Array();
+
+		var matches = response.match(/___(-?[0-9\.]*)___/g);
+		for(var i = 0; i < matches.length; i += 2)
 		{
-			var response = ajax.responseText;
-			response = response.replace(/<img src="[^"]*map_marker.png"[^>]*>/g, "");
+			var matchLatFloat = parseFloat(matches[i].replace("___", ""));
+			var matchLngFloat = parseFloat(matches[i+1].replace("___", ""));
 
-			console.log(ajax.responseText);
-
-			var nearbyDocsArray = new Array();
-
-			var lats = new Array();
-			var lngs = new Array();
-
-			var matches = response.match(/___(-?[0-9\.]*)___/g);
-			for(var i = 0; i < matches.length; i += 2)
-			{
-				var matchLatFloat = parseFloat(matches[i].replace("___", ""));
-				var matchLngFloat = parseFloat(matches[i+1].replace("___", ""));
-
-				lats.push(matchLatFloat);
-				lngs.push(matchLngFloat);
-				
-				var distance = Math.sqrt(Math.pow(matchLatFloat - parseFloat(lat), 2) + Math.pow(matchLngFloat - parseFloat(lng), 2)) * (40000.0/360.0);
-				var distanceString = "" + distance;
-				distanceString = distanceString.substring(0, 6);
-
-				response = response.replace(matches[i] + matches[i+1], distanceString);
-			}
+			lats.push(matchLatFloat);
+			lngs.push(matchLngFloat);
 			
-			var index = 0;
-			var i = 0;
-			while(true)
-			{
-				var distanceStart = response.indexOf("<td>", index);
-				if(distanceStart == -1)
-				{
-					break;
-				}
-				var distanceEnd = response.indexOf("</td>", distanceStart);
-				
-				var docLinkStart = response.indexOf("<td>", distanceEnd);
-				var docLinkEnd = response.indexOf("</td>", docLinkStart);
-				
-				var dist = response.substring(distanceStart + 4, distanceEnd);
-				var docLink = response.substring(docLinkStart + 4, docLinkEnd);
+			var distance = Math.sqrt(Math.pow(matchLatFloat - parseFloat(lat), 2) + Math.pow(matchLngFloat - parseFloat(lng), 2)) * (40000.0/360.0);
+			var distanceString = "" + distance;
+			distanceString = distanceString.substring(0, 6);
 
-				_nearbyDocs.push({title:docLink, distance:dist, lat:lats[i], lng:lngs[i++]});
-				
-				index = docLinkEnd;
-			}
-			
-			sortByDistance();
-			
-			var toggle = document.getElementById("nearbyDocumentsToggle");
-			toggle.setAttribute("src", gs.imageURLs.collapse);
-			gs.functions.makeToggle(toggle, document.getElementById("nearbyDocuments"));
+			response = response.replace(matches[i] + matches[i+1], distanceString);
 		}
-	}
-	ajax.send();
+		
+		var index = 0;
+		var i = 0;
+		while(true)
+		{
+			var distanceStart = response.indexOf("<td>", index);
+			if(distanceStart == -1)
+			{
+				break;
+			}
+			var distanceEnd = response.indexOf("</td>", distanceStart);
+			
+			var docLinkStart = response.indexOf("<td>", distanceEnd);
+			var docLinkEnd = response.indexOf("</td>", docLinkStart);
+			
+			var dist = response.substring(distanceStart + 4, distanceEnd);
+			var docLink = response.substring(docLinkStart + 4, docLinkEnd);
+
+			_nearbyDocs.push({title:docLink, distance:dist, lat:lats[i], lng:lngs[i++]});
+			
+			index = docLinkEnd;
+		}
+		
+		sortByDistance();
+		
+		var toggle = $("#nearbyDocumentsToggle");
+		toggle.attr("src", gs.imageURLs.collapse);
+		gs.functions.makeToggle(toggle, $("#nearbyDocuments"));
+	});
 }
 
 function sortByDistance()
@@ -595,7 +572,7 @@ function sortByDistance()
 	}
 	sortedTable += "</table>";
 	
-	document.getElementById("nearbyDocuments").innerHTML = sortedTable;
+	$("#nearbyDocuments").html(sortedTable);
 }
 
 function sortAlphabetically()
@@ -617,7 +594,7 @@ function sortAlphabetically()
 	}
 	sortedTable += "</table>";
 	
-	document.getElementById("nearbyDocuments").innerHTML = sortedTable;
+	$("#nearbyDocuments").html(sortedTable);
 }
 
 function getDistanceQueryString(currentCoord, delta, precision, indexName, dirs)
@@ -645,8 +622,8 @@ function modifyFunctions()
 {
 	toggleSection = function(sectionID)
 	{
-		var section = document.getElementById("div" + sectionID);
-		var sectionToggle = document.getElementById("toggle" + sectionID);
+		var section = gs.jqGet("div" + sectionID);
+		var sectionToggle = gs.jqGet("toggle" + sectionID);
 		
 		if(sectionToggle == undefined)
 		{
@@ -657,8 +634,8 @@ function modifyFunctions()
 		{
 			if(isExpanded(sectionID))
 			{
-				section.style.display = "none";
-				sectionToggle.setAttribute("src", gs.imageURLs.expand);
+				section.css("display", "none");
+				sectionToggle.attr("src", gs.imageURLs.expand);
 				
 				if(openClassifiers[sectionID] != undefined)
 				{
@@ -667,8 +644,8 @@ function modifyFunctions()
 			}
 			else
 			{
-				section.style.display = "block";
-				sectionToggle.setAttribute("src", gs.imageURLs.collapse);
+				section.css("display", "block");
+				sectionToggle.attr("src", gs.imageURLs.collapse);
 				openClassifiers[sectionID] = true;	
 			}
 			updateOpenClassifiers();
@@ -685,10 +662,9 @@ function modifyFunctions()
 		if(!inProgress[sectionID])
 		{
 			inProgress[sectionID] = true;
-			var httpRequest = new gs.functions.ajaxRequest();
 			
-			var sectionToggle = document.getElementById("toggle" + sectionID);
-			sectionToggle.setAttribute("src", gs.imageURLs.loading);
+			var sectionToggle = gs.jqGet("toggle" + sectionID);
+			sectionToggle.attr("src", gs.imageURLs.loading);
 
 			var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/browse/" + sectionID.replace(/\./g, "/") + "?excerptid=div" + sectionID;
 
@@ -701,45 +677,34 @@ function modifyFunctions()
 			{
 				url = url.substring(0, url.indexOf("#"));
 			}
-			httpRequest.open('GET', url, true);
-			httpRequest.onreadystatechange = function() 
+			
+			$.ajax(url)
+			.success(function(responseText)
 			{
-				if (httpRequest.readyState == 4) 
+				var newDiv = $("<div>");										
+				var sibling = gs.jqGet("title" + sectionID);
+				sibling.before(newDiv);
+				
+				newDiv.html(responseText);
+				sectionToggle.attr("src", gs.imageURLs.collapse);
+				openClassifiers[sectionID] = true;	
+				
+				if(gs.cgiParams.berryBasket == "on")
 				{
-					if (httpRequest.status == 200) 
-					{
-						var newDiv = document.createElement("div");										
-						var sibling = document.getElementById("title" + sectionID);
-						var parent = sibling.parentNode;
-						if(sibling.nextSibling)
-						{
-							parent.insertBefore(newDiv, sibling.nextSibling);
-						}
-						else
-						{
-							parent.appendChild(newDiv);
-						}
-						
-						newDiv.innerHTML = httpRequest.responseText;
-						sectionToggle.setAttribute("src", gs.imageURLs.collapse);
-						openClassifiers[sectionID] = true;	
-						
-						if(gs.cgiParams.berryBasket == "on")
-						{
-							checkout();
-						}
-						updateOpenClassifiers();
-						getSubClassifier(sectionID);
-					}
-					else
-					{
-						sectionToggle.setAttribute("src", gs.imageURLs.expand);
-					}
-					inProgress[sectionID] = false;
-					busy = false;
+					checkout();
 				}
-			}
-			httpRequest.send();
+				updateOpenClassifiers();
+				getSubClassifier(sectionID);
+			})
+			.error(function()
+			{
+				sectionToggle.attr("src", gs.imageURLs.expand);
+			})
+			.complete(function()
+			{
+				inProgress[sectionID] = false;
+				busy = false;
+			});
 		}
 	}
 }
