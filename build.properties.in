@@ -87,7 +87,7 @@ flax.checkout.path=${flax.svn.root}/trunk/flaxmain
 fedora.home=#${basedir}/ext/fedora3
 #fedora.maxpermsize=-XX:MaxPermSize=128m
 #fedora.password=pounamu
-
+#index.writelock.timeout=10000
 
 ##Web services related constants##
 base.webservice.name=SOAPServer

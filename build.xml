@@ -1111,6 +1111,7 @@
       <env key="LD_LIBRARY_PATH" path="${env.LD_LIBRARY_PATH}:${lib.jni}"/>
       <env key="DYLD_LIBRARY_PATH" path="${env.DYLD_LIBRARY_PATH}:${lib.jni}:${gdbm.home}/lib"/> <!-- for mac os --> <!-- need gdbm here these days ??-->
       <env key="WNHOME" path="${wn.home}"/>
+      <env key="FEDORA_HOME" path="${fedora.home}"/>
     </exec>
     <exec executable="${catalina.home}/bin/startup.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="true">
       <env key="GSDLOS" value="windows"/>
@@ -1120,6 +1121,7 @@
       <env key="CATALINA_OPTS" value="${catalina.opts}"/>
       <env key="CATALINA_HOME" value="${catalina.home}"/>
       <env key="CLASSPATH" path="${tomcat.classpath}"/>
+      <env key="FEDORA_HOME" path="${fedora.home}"/>
     </exec>
     <!-- wait for the server to startup in case other targets need it running -->
     <waitfor maxwait="5" maxwaitunit="second">
@@ -1153,10 +1155,12 @@
        stopped as happens when stop-tomcat is called consecutively. -->
   <target name="force-stop-tomcat" description="Shutdown only Tomcat" depends="init" if="tomcat.islocal">
     <exec executable="${catalina.home}/bin/shutdown.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
+      <env key="FEDORA_HOME" path="${fedora.home}"/>
       <env key="CATALINA_HOME" value="${catalina.home}"/>
       <arg line=">/dev/null 2>&amp;1"/>
     </exec>
     <exec executable="${catalina.home}/bin/shutdown.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="false">
+      <env key="FEDORA_HOME" path="${fedora.home}"/>
       <env key="CATALINA_HOME" value="${catalina.home}"/>
       <arg line=">nul 2>&amp;1"/>
     </exec>    
