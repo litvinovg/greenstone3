@@ -2,7 +2,7 @@ gs.functions = new Array();
 
 gs.jqGet = function(id)
 {
-	return $("#" + id.replace(/\./g, "\\."));
+	return $("#" + id.replace(/\./g, "\\.")).replace(/:/g,"\\:"));
 }
 
 gs.functions.ajaxRequest = function()
