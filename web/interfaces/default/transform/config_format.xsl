@@ -46,6 +46,42 @@
 		<xslt:call-template name="defaultClassifierNode"/>
 	</xsl:template>
 
+
+	<xsl:template match="gsf:script[@src]">
+	  <script>
+	    <xsl:attribute name='src'>
+	      <xsl:value-of select="@src"/>		
+	    </xsl:attribute>
+	    <xslt:attribute name='type'>text/javascript</xslt:attribute>
+	    <xslt:comment></xslt:comment><!-- comment used to ensure script tag is not collapsed -->
+	  </script>
+	</xsl:template>
+
+
+	<xsl:template match="gsf:script">
+	  <script type="text/javascript">
+	    <xslt:text disable-output-escaping="yes">
+	      <xsl:apply-templates/>
+	    </xslt:text>
+	  </script>
+	</xsl:template>
+
+
+	<xsl:template match="gsf:style[@src]">
+	  <link rel="stylesheet" type="text/css">
+	    <xsl:attribute name='href'>
+	      <xsl:value-of select="@src"/>		
+	    </xsl:attribute>
+	  </link>
+	</xsl:template>
+
+	<xsl:template match="gsf:style">
+	  <style type="text/css">
+	      <xsl:apply-templates/>
+	  </style>
+	</xsl:template>
+
+
 	<xsl:template match="gsf:image">
 		<xslt:variable name="metaName">
 			<xsl:choose>
