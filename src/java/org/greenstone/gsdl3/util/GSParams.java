@@ -20,7 +20,7 @@ package org.greenstone.gsdl3.util;
 
 import java.util.HashMap;
 
-/** keeps track of the interface parameters, and their defaults */
+/** keeps track of the servlet parameters, and their defaults */
 public class GSParams
 {
 
