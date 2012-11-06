@@ -47,12 +47,12 @@ public class XMLCollection
 	}
 
 	//plugin stuff
-	Element import_list = (Element)GSXML.getChildByTagName(coll_config_xml, GSXML.IMPORT_ELEM);
-	if (import_list != null)
-	{
-		Element plugin_list = (Element)GSXML.getChildByTagName(import_list, GSXML.PLUGIN_ELEM+GSXML.LIST_MODIFIER);
-		addPlugins(plugin_list);
-	}
+	// Element import_list = (Element)GSXML.getChildByTagName(coll_config_xml, GSXML.IMPORT_ELEM);
+	// if (import_list != null)
+	// {
+	// 	Element plugin_list = (Element)GSXML.getChildByTagName(import_list, GSXML.PLUGIN_ELEM+GSXML.LIST_MODIFIER);
+	// 	addPlugins(plugin_list);
+	// }
 	
 	// are we a private collection??
 	if (this.metadata_list != null) {
@@ -99,7 +99,7 @@ public class XMLCollection
 		addAllDisplayInfo(description, lang);
 		description.appendChild(this.service_list);
 		description.appendChild(this.metadata_list);
-		description.appendChild(this.plugin_item_list);
+		description.appendChild(this.library_param_list);
 		description.appendChild(this.document_list);
 		return response;
 	    }
@@ -121,10 +121,14 @@ public class XMLCollection
 			
 		    } else if (info.equals(GSXML.DOCUMENT_ELEM+GSXML.LIST_MODIFIER)) {
 			description.appendChild(this.document_list);
-		    } else if (info.equals(GSXML.PLUGIN_ELEM+GSXML.LIST_MODIFIER)) {
-		    	description.appendChild(this.plugin_item_list);
+		    // } else if (info.equals(GSXML.PLUGIN_ELEM+GSXML.LIST_MODIFIER)) {
+		    // 	description.appendChild(this.plugin_item_list);
+		    // }
+		    } else if (info.equals("libraryParamlist")) {
+		      
+		      description.appendChild(this.library_param_list);
 		    }
-		    
+		
 		}
 	    }
 	    return response;

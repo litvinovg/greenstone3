@@ -31,6 +31,7 @@ import org.greenstone.gsdl3.service.ServiceRack;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.SimpleMacroResolver;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
 import org.w3c.dom.Document;
@@ -41,8 +42,6 @@ import org.w3c.dom.NodeList;
 /* ServiceCluster - a groups of services that are related in some way
  * Implements ModuleInterface. Contains a list of services provided by the cluster, along with metadata about the cluster itself.
  * a collection is a special type of cluster
- *  @author <a href="mailto:kjdon@cs.waikato.ac.nz">Katherine Don</a>
- *  @version $Revision$
  *  @see ModuleInterface
  */
 public class ServiceCluster implements ModuleInterface
@@ -60,11 +59,7 @@ public class ServiceCluster implements ModuleInterface
 	protected String site_http_address = null;
 	/** The name of the cluster - for a collection, this is the collection name */
 	protected String cluster_name = null;
-	/** collection type : mg, mgpp or lucene */
-	protected String col_type = "";
-	/** database type : gdbm, jdbm or sqlite */
-	protected String db_type = "";
-
+ 
 	/** a reference to the message router */
 	protected MessageRouter router = null;
 	/**
@@ -84,6 +79,8 @@ public class ServiceCluster implements ModuleInterface
 
 	/** XML converter for String to DOM and vice versa */
 	protected XMLConverter converter = null;
+  /** a MacroResolver for resolving macros in displayItems */
+  protected SimpleMacroResolver macro_resolver = null;
 
 	/** container doc for description elements */
 	protected Document doc = null;
@@ -91,14 +88,16 @@ public class ServiceCluster implements ModuleInterface
 	protected Element service_list = null;
 	/** list of metadata - all metadata, regardless of language goes in here */
 	protected Element metadata_list = null;
-	/** language specific stuff */
-	//protected Element lang_specific_metadata_list = null;
+  /** language specific display items */
+
 	protected Element display_item_list = null;
+  /** default values for servlet params */
+  protected Element library_param_list = null;
 	/** the element that will have any descriptions passed back in */
 	protected Element description = null;
 
 	/** list of plugin */
-	protected Element plugin_item_list = null;
+	//protected Element plugin_item_list = null;
 
 	protected Element _globalFormat = null;
 
@@ -138,11 +137,14 @@ public class ServiceCluster implements ModuleInterface
 		this.service_map = new HashMap<String, ServiceRack>();
 		this.service_name_map = new HashMap<String, String>();
 		this.converter = new XMLConverter();
+		this.macro_resolver = new SimpleMacroResolver();
 		this.doc = this.converter.newDOM();
 		this.description = this.doc.createElement(GSXML.CLUSTER_ELEM);
 		this.display_item_list = this.doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
 		this.metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		this.plugin_item_list = this.doc.createElement(GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER);
+		this.library_param_list = this.doc.createElement("libraryParamList");
+		this.service_list = this.doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		//this.plugin_item_list = this.doc.createElement(GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER);
 	}
 
 	/**
@@ -155,6 +157,7 @@ public class ServiceCluster implements ModuleInterface
 	 * configure(Element) should be used if the config file has already been
 	 * parsed. This method will work with any subclass.
 	 * 
+	 * This is called by ServiceCluster itself when asked to do a reconfigure
 	 * @return true if configure successful, false otherwise.
 	 */
 	public boolean configure()
@@ -166,6 +169,7 @@ public class ServiceCluster implements ModuleInterface
 			return false;
 		}
 		logger.info("configuring service cluster");
+		macro_resolver.addMacro("_httpsite_", this.site_http_address);
 		// read the site configuration file
 		File config_file = new File(GSFile.siteConfigFile(this.site_home));
 
@@ -186,12 +190,57 @@ public class ServiceCluster implements ModuleInterface
 		Element cluster_list = (Element) GSXML.getChildByTagName(doc.getDocumentElement(), GSXML.CLUSTER_ELEM + GSXML.LIST_MODIFIER);
 		Element sc = GSXML.getNamedElement(cluster_list, GSXML.CLUSTER_ELEM, GSXML.NAME_ATT, this.cluster_name);
 
+		// this is probably a reconfigure, so clear all previous info
+		clearServices();
+		clearLocalData();
 		return this.configure(sc);
 	}
 
+  /** this is called by configure(), but also by MR when it is loading up all the service clusters */
 	public boolean configure(Element service_cluster_info)
 	{
+	  configureLocalData(service_cluster_info);
+		// //get the plugin info
+		// Element import_list = (Element) GSXML.getChildByTagName(service_cluster_info, GSXML.IMPORT_ELEM);
+		// if (import_list != null)
+		// {
+		// 	Element plugin_list = (Element) GSXML.getChildByTagName(service_cluster_info, GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER);
+		// 	if (plugin_list != null)
+		// 	{
+		// 		if (!addPlugins(plugin_list))
+		// 		{
 
+		// 			logger.error("couldn't configure the plugins");
+		// 		}
+		// 	}
+		// }
+
+		// do the service racks
+		// empty the service map in case this is a reconfigure
+		//clearServices();
+		Element service_rack_list = (Element) GSXML.getChildByTagName(service_cluster_info, GSXML.SERVICE_CLASS_ELEM + GSXML.LIST_MODIFIER);
+		logger.error("cluster service rack list =");
+		logger.error(GSXML.xmlNodeToString(service_rack_list));
+		if (service_rack_list == null)
+		{
+			// is this an error? could you ever have a service cluster
+			// without service racks???
+			logger.error(cluster_name+" has no service racks!!");
+		}
+		else
+		{
+
+			if (!configureServiceRackList(service_rack_list, null))
+			{
+				logger.error("couldn't configure "+cluster_name+" service racks!!");
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+    protected void configureLocalData(Element service_cluster_info) {
 		// get the metadata - for now just add it to the list
 		Element meta_list = (Element) GSXML.getChildByTagName(service_cluster_info, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		if (meta_list != null)
@@ -207,6 +256,7 @@ public class ServiceCluster implements ModuleInterface
 		Element display_list = (Element) GSXML.getChildByTagName(service_cluster_info, GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
 		if (display_list != null)
 		{
+		  resolveMacros(display_list);
 			if (!addDisplayItems(display_list))
 			{
 
@@ -214,44 +264,15 @@ public class ServiceCluster implements ModuleInterface
 			}
 		}
 
-		//get the plugin info
-		Element import_list = (Element) GSXML.getChildByTagName(service_cluster_info, GSXML.IMPORT_ELEM);
-		if (import_list != null)
-		{
-			Element plugin_list = (Element) GSXML.getChildByTagName(service_cluster_info, GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER);
-			if (plugin_list != null)
-			{
-				if (!addPlugins(plugin_list))
-				{
-
-					logger.error("couldn't configure the plugins");
-				}
-			}
+		// get the servlet params
+		Element param_list = (Element) GSXML.getChildByTagName(service_cluster_info, "libraryParamList");
+		if (param_list != null) {
+		  if (!addLibraryParams(param_list)) {
+		    logger.error("couldn't configure the library param list");
+		  }
 		}
 
-		// do the service racks
-		// empty the service map in case this is a reconfigure
-		clearServices();
-		Element service_rack_list = (Element) GSXML.getChildByTagName(service_cluster_info, GSXML.SERVICE_CLASS_ELEM + GSXML.LIST_MODIFIER);
-		if (service_rack_list == null)
-		{
-			// is this an error? could you ever have a service cluster
-			// without service racks???
-			logger.error("cluster has no service racks!!");
-		}
-		else
-		{
-
-			if (!configureServiceRackList(service_rack_list, null))
-			{
-				logger.error("couldn't configure the  service racks!!");
-				return false;
-			}
-		}
-
-		return true;
-	}
-
+  }
 	/**
 	 * adds metadata from a metadataList into the metadata_list xml
 	 */
@@ -270,7 +291,17 @@ public class ServiceCluster implements ModuleInterface
 
 		return true;
 	}
-
+  /** adds an individual metadata element into the list */
+  protected boolean addMetadata(String name, String value) {
+    return GSXML.addMetadata(this.doc, this.metadata_list, name, value);
+  }
+  
+  /** in displayItemList, end up with the following for each named displayItem
+      <displayItem name="">
+        <displayItem name="" lang="">value</displayItem>
+        <displayItem name="" lang="">value</displayItem>
+      </displayItem>
+  */
 	protected boolean addDisplayItems(Element display_list)
 	{
 
@@ -304,28 +335,76 @@ public class ServiceCluster implements ModuleInterface
 		return true;
 	}
 
-	protected boolean addPlugins(Element plugin_list)
+	// protected boolean addPlugins(Element plugin_list)
+	// {
+	// 	if (plugin_list == null)
+	// 		return false;
+	// 	NodeList pluginNodes = plugin_list.getElementsByTagName(GSXML.PLUGIN_ELEM);
+	// 	if (pluginNodes.getLength() > 0)
+	// 	{
+	// 		for (int k = 0; k < pluginNodes.getLength(); k++)
+	// 		{
+	// 			this.plugin_item_list.appendChild(this.doc.importNode(pluginNodes.item(k), true));
+	// 		}
+	// 	}
+
+	// 	return true;
+	// }
+	protected boolean resolveMacros(Element display_list)
 	{
-		if (plugin_list == null)
+		if (display_list == null)
 			return false;
-		NodeList pluginNodes = plugin_list.getElementsByTagName(GSXML.PLUGIN_ELEM);
-		if (pluginNodes.getLength() > 0)
+		NodeList displaynodes = display_list.getElementsByTagName(GSXML.DISPLAY_TEXT_ELEM);
+		if (displaynodes.getLength() > 0)
 		{
-			for (int k = 0; k < pluginNodes.getLength(); k++)
+		  //String http_site = this.site_http_address;
+		  //String http_collection = this.site_http_address + "/collect/" + this.cluster_name;
+			for (int k = 0; k < displaynodes.getLength(); k++)
 			{
-				this.plugin_item_list.appendChild(this.doc.importNode(pluginNodes.item(k), true));
+				Element d = (Element) displaynodes.item(k);
+				String text = GSXML.getNodeText(d);
+				text= macro_resolver.resolve(text);
+				//text = StringUtils.replace(text, "_httpsite_", http_site);
+				//text = StringUtils.replace(text, "_httpcollection_", http_collection);
+				GSXML.setNodeText(d, text);
+			}
+		}
+		return true;
+	}
+
+  	/**
+	 * adds library params from libraryParamList into library_param_list xml
+	 */
+	protected boolean addLibraryParams(Element param_list)
+	{
+		if (param_list == null)
+			return false;
+		NodeList paramnodes = param_list.getElementsByTagName(GSXML.PARAM_ELEM);
+		if (paramnodes.getLength() > 0)
+		{
+			for (int k = 0; k < paramnodes.getLength(); k++)
+			{
+				this.library_param_list.appendChild(this.doc.importNode(paramnodes.item(k), true));
 			}
 		}
 
 		return true;
 	}
-
 	protected void clearServices()
 	{
+	  cleanUp();
 		service_map.clear();
+		service_name_map.clear();
 		this.service_list = this.doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
 	}
 
+  protected void clearLocalData() {
+    this.description = this.doc.createElement(GSXML.CLUSTER_ELEM);
+    this.display_item_list = this.doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+    this.metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+    this.library_param_list = this.doc.createElement("libraryParamList");
+ 
+  }
 	/**
 	 * creates and configures all the services - extra_info is some more xml
 	 * that is passed to teh service - eg used for coll config files for
@@ -554,8 +633,8 @@ public class ServiceCluster implements ModuleInterface
 			// create the collection element
 			Element description = (Element) this.description.cloneNode(false);
 			// set collection type : mg, mgpp, lucene or solr
-			description.setAttribute(GSXML.TYPE_ATT, col_type);
-			description.setAttribute(GSXML.DB_TYPE_ATT, db_type);
+			//description.setAttribute(GSXML.TYPE_ATT, col_type);
+			//description.setAttribute(GSXML.DB_TYPE_ATT, db_type);
 
 			response.appendChild(description);
 			// check the param list
@@ -565,7 +644,8 @@ public class ServiceCluster implements ModuleInterface
 				addAllDisplayInfo(description, lang);
 				description.appendChild(this.service_list);
 				description.appendChild(this.metadata_list);
-				description.appendChild(this.plugin_item_list);
+				description.appendChild(this.library_param_list);
+				//description.appendChild(this.plugin_item_list);
 				return response;
 			}
 
@@ -585,15 +665,15 @@ public class ServiceCluster implements ModuleInterface
 					}
 					else if (info.equals(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER))
 					{
-						description.appendChild(metadata_list);
+						description.appendChild(this.metadata_list);
 					}
 					else if (info.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER))
 					{
 						addAllDisplayInfo(description, lang);
 					}
-					else if (info.equals(GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER))
+					else if (info.equals("libraryParamlist"))
 					{
-						description.appendChild(plugin_item_list);
+					  description.appendChild(this.library_param_list);
 					}
 				}
 			}
@@ -819,18 +899,18 @@ public class ServiceCluster implements ModuleInterface
 			Element metadata_list = (Element) GSXML.getChildByTagName(cluster_config_elem, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 			return addMetadata(metadata_list);
 		}
-		else if (subset.equals(GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER))
-		{
-			this.plugin_item_list = this.doc.createElement(GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER);
-			Element import_list = (Element) GSXML.getChildByTagName(cluster_config_elem, GSXML.IMPORT_ELEM);
-			if (import_list != null)
-			{
-				Element plugin_item_list = (Element) GSXML.getChildByTagName(cluster_config_elem, GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER);
-				return addPlugins(plugin_item_list);
-			}
-			else
-				return false;
-		}
+		// else if (subset.equals(GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER))
+		// {
+		// 	this.plugin_item_list = this.doc.createElement(GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER);
+		// 	Element import_list = (Element) GSXML.getChildByTagName(cluster_config_elem, GSXML.IMPORT_ELEM);
+		// 	if (import_list != null)
+		// 	{
+		// 		Element plugin_item_list = (Element) GSXML.getChildByTagName(cluster_config_elem, GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER);
+		// 		return addPlugins(plugin_item_list);
+		// 	}
+		// 	else
+		// 		return false;
+		// }
 		else
 		{
 			logger.error("cannot process system request, configure " + subset);
@@ -846,7 +926,7 @@ public class ServiceCluster implements ModuleInterface
 		for (int i = 0; i < items.getLength(); i++)
 		{ // for each key
 			Element m = (Element) items.item(i);
-			// find the child with the correct language
+			// findthe child with the correct language
 			Element new_m = GSXML.getNamedElement(m, GSXML.DISPLAY_TEXT_ELEM, GSXML.LANG_ATT, lang);
 			if (new_m == null && lang != DEFAULT_LANG)
 			{

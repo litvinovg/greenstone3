@@ -35,6 +35,7 @@ import org.greenstone.gsdl3.core.ModuleInterface;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.OAIXML;
+import org.greenstone.gsdl3.util.SimpleMacroResolver;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLTransformer;
 import org.w3c.dom.Document;
@@ -54,13 +55,18 @@ public class Collection extends ServiceCluster
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.collection.Collection.class.getName());
 
-	/** is this collection being tidied */
+	/** is this collection being tidied and therefore can support realistic book view?*/
 	protected boolean useBook = false;
-	/** is this collection public or private */
+	/** is this collection public or private  - public collections will 
+	    appear on the home page, whereas private collections won't*/
 	protected boolean is_public = true;
+	/** collection type : mg, mgpp or lucene */
+	protected String col_type = "";
+	/** database type : gdbm, jdbm or sqlite */
+	protected String db_type = "";
 
 	/** does this collection provide the OAI service */
-	protected boolean has_oai = true;
+	protected boolean has_oai = false;
 	/** time when this collection was built */
 	protected long lastmodified = 0;
 	/** earliestDatestamp of this collection. Necessary for OAI */
@@ -74,12 +80,7 @@ public class Collection extends ServiceCluster
 	protected HashMap<String, ArrayList<Element>> _documentSets = new HashMap<String, ArrayList<Element>>();
 	protected ArrayList<HashMap<String, ArrayList<String>>> _securityExceptions = new ArrayList<HashMap<String, ArrayList<String>>>();
 
-	/**
-	 * An element containing the serviceRackList element of buildConfig.xml,
-	 * used to determine whether it contains the OAIPMH serviceRack
-	 */
-	//protected Element service_rack_list = null;
-
+  
 	protected XMLTransformer transformer = null;
 
 	/** same as setClusterName */
@@ -111,6 +112,8 @@ public class Collection extends ServiceCluster
 			logger.error("Collection: site_home and collection_name must be set before configure called!");
 			return false;
 		}
+		
+		macro_resolver.addMacro("_httpcollection_", this.site_http_address + "/collect/" + this.cluster_name);
 
 		Element coll_config_xml = loadCollConfigFile();
 		Element build_config_xml = loadBuildConfigFile();
@@ -137,9 +140,14 @@ public class Collection extends ServiceCluster
 			db_type = "gdbm"; //Default database type
 		}
 
+		this.description.setAttribute(GSXML.TYPE_ATT, col_type);
+		this.description.setAttribute(GSXML.DB_TYPE_ATT, db_type);
+		
 		_globalFormat = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.FORMAT_ELEM);
-
-		// process the metadata and display items
+		// process the metadata and display items and default library params
+		super.configureLocalData(coll_config_xml);
+		super.configureLocalData(build_config_xml);
+		// get extra collection specific stuff
 		findAndLoadInfo(coll_config_xml, build_config_xml);
 
 		loadSecurityInformation(coll_config_xml);
@@ -196,7 +204,7 @@ public class Collection extends ServiceCluster
 			logger.error("Collection: couldn't configure collection: " + this.cluster_name + ", " + coll_config_file + " does not exist");
 			return null;
 		}
-		// get the xml for both files
+		// get the xml
 		Document coll_config_doc = this.converter.getDOM(coll_config_file, CONFIG_ENCODING);
 		Element coll_config_elem = null;
 		if (coll_config_doc != null)
@@ -236,29 +244,26 @@ public class Collection extends ServiceCluster
 	 */
 	protected boolean findAndLoadInfo(Element coll_config_xml, Element build_config_xml)
 	{
-		Element meta_list = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		addMetadata(meta_list);
-		meta_list = (Element) GSXML.getChildByTagName(build_config_xml, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		addMetadata(meta_list);
-
-		meta_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		GSXML.addMetadata(this.doc, meta_list, "httpPath", this.site_http_address + "/collect/" + this.cluster_name);
-		addMetadata(meta_list);
+		// Element meta_list = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		// addMetadata(meta_list);
+		// meta_list = (Element) GSXML.getChildByTagName(build_config_xml, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		// addMetadata(meta_list);
+		addMetadata("httpPath", this.site_http_address + "/collect/" + this.cluster_name);
 
 		// display stuff
-		Element display_list = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
-		if (display_list != null)
-		{
-			resolveMacros(display_list);
-			addDisplayItems(display_list);
-		}
+		// Element display_list = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+		// if (display_list != null)
+		// {
+		// 	resolveMacros(display_list);
+		// 	addDisplayItems(display_list);
+		// }
 
 		//check whether the html are tidy or not
 		Element import_list = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.IMPORT_ELEM);
 		if (import_list != null)
 		{
 			Element plugin_list = (Element) GSXML.getChildByTagName(import_list, GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER);
-			addPlugins(plugin_list);
+			//addPlugins(plugin_list);
 			if (plugin_list != null)
 			{
 				Element plugin_elem = (Element) GSXML.getNamedElement(plugin_list, GSXML.PLUGIN_ELEM, GSXML.NAME_ATT, "HTMLPlugin");
@@ -273,12 +278,8 @@ public class Collection extends ServiceCluster
 				}
 			}
 		}
-		meta_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		if (useBook == true)
-			GSXML.addMetadata(this.doc, meta_list, "tidyoption", "tidy");
-		else
-			GSXML.addMetadata(this.doc, meta_list, "tidyoption", "untidy");
-		addMetadata(meta_list);
+		String tidy = (useBook == true ? "tidy" : "untidy");
+		addMetadata("tidyoption", tidy);
 
 		// check whether we are public or not
 		if (this.metadata_list != null)
@@ -388,81 +389,55 @@ public class Collection extends ServiceCluster
 	{
 		clearServices();
 		Element service_list = (Element) GSXML.getChildByTagName(build_config_xml, GSXML.SERVICE_CLASS_ELEM + GSXML.LIST_MODIFIER);
-		configureServiceRackList(service_list, coll_config_xml);
-
+		Element oai_service_rack = null;
+		if (service_list != null) {
+		  configureServiceRackList(service_list, coll_config_xml);
+		  oai_service_rack = GSXML.getNamedElement(service_list, GSXML.SERVICE_CLASS_ELEM, OAIXML.NAME, OAIXML.OAIPMH);
+		}
 		// collection Config may also contain manually added service racks
 		service_list = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.SERVICE_CLASS_ELEM + GSXML.LIST_MODIFIER);
 		if (service_list != null)
 		{
-			configureServiceRackList(service_list, build_config_xml);
-
-			// Check for oai
-			Element oai_service_rack = GSXML.getNamedElement(service_list, GSXML.SERVICE_CLASS_ELEM, OAIXML.NAME, OAIXML.OAIPMH);
-			if (oai_service_rack == null)
-			{
-				has_oai = false;
-				logger.info("No oai for collection: " + this.cluster_name);
-
-			}
-			else
-			{
-				has_oai = true;
-
-				// extract earliestDatestamp from the buildconfig.xml for OAI
-				Element metadata_list = (Element) GSXML.getChildByTagName(build_config_xml, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-
-				if (metadata_list != null)
-				{
-					NodeList children = metadata_list.getElementsByTagName(GSXML.METADATA_ELEM);
-					// can't do getChildNodes(), because whitespace, such as newlines, creates Text nodes
-					for (int i = 0; i < children.getLength(); i++)
-					{
-						Element metadata = (Element) children.item(i);
-						if (metadata.getAttribute(GSXML.NAME_ATT).equals(OAIXML.EARLIEST_DATESTAMP))
-						{
-							String earliestDatestampStr = GSXML.getValue(metadata);
-							if (!earliestDatestampStr.equals(""))
-							{
-								earliestDatestamp = Long.parseLong(earliestDatestampStr);
-							}
-							break; // found a metadata element with name=earliestDatestamp in buildconfig
-						}
-					}
-				}
-
-				// If at the end of this, there is no value for earliestDatestamp, print out a warning
-				logger.warn("No earliestDatestamp in buildConfig.xml for collection: " + this.cluster_name + ". Defaulting to 0.");
-
-			}
+		  configureServiceRackList(service_list, build_config_xml);
+		  // this oai used in preference to one in buildConfig.xml
+		  oai_service_rack = GSXML.getNamedElement(service_list, GSXML.SERVICE_CLASS_ELEM, OAIXML.NAME, OAIXML.OAIPMH);
 		}
-		else
-		{ // no list of services (no ServiceRackList), so no oai_service_rack either
-			// explicitly set has_oai to false here, since it's initialised to true by default
-			has_oai = false;
-		}
+		// Check for oai
+
+		if (oai_service_rack != null)
+		  {
+		    has_oai = true;
+		    logger.info(this.cluster_name +" has OAI services");
+		    // extract earliestDatestamp from the buildconfig.xml for OAI
+		    Element metadata_list = (Element) GSXML.getChildByTagName(build_config_xml, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		    
+		    if (metadata_list != null)
+		      {
+			NodeList children = metadata_list.getElementsByTagName(GSXML.METADATA_ELEM);
+			// can't do getChildNodes(), because whitespace, such as newlines, creates Text nodes
+			for (int i = 0; i < children.getLength(); i++)
+			  {
+			    Element metadata = (Element) children.item(i);
+			    if (metadata.getAttribute(GSXML.NAME_ATT).equals(OAIXML.EARLIEST_DATESTAMP))
+			      {
+				String earliestDatestampStr = GSXML.getValue(metadata);
+				if (!earliestDatestampStr.equals(""))
+				  {
+				    earliestDatestamp = Long.parseLong(earliestDatestampStr);
+				  }
+				break; // found a metadata element with name=earliestDatestamp in buildconfig
+			      }
+			  }
+		      }
+		    
+		    // If at the end of this, there is no value for earliestDatestamp, print out a warning
+		    logger.warn("No earliestDatestamp in buildConfig.xml for collection: " + this.cluster_name + ". Defaulting to 0.");
+		    
+		  } // if oai_service_rack != null
+	
 		return true;
 	}
 
-	protected boolean resolveMacros(Element display_list)
-	{
-		if (display_list == null)
-			return false;
-		NodeList displaynodes = display_list.getElementsByTagName(GSXML.DISPLAY_TEXT_ELEM);
-		if (displaynodes.getLength() > 0)
-		{
-			String http_site = this.site_http_address;
-			String http_collection = this.site_http_address + "/collect/" + this.cluster_name;
-			for (int k = 0; k < displaynodes.getLength(); k++)
-			{
-				Element d = (Element) displaynodes.item(k);
-				String text = GSXML.getNodeText(d);
-				text = StringUtils.replace(text, "_httpsite_", http_site);
-				text = StringUtils.replace(text, "_httpcollection_", http_collection);
-				GSXML.setNodeText(d, text);
-			}
-		}
-		return true;
-	}
 
 	/**
 	 * do a configure on only part of the collection
@@ -484,8 +459,10 @@ public class Collection extends ServiceCluster
 			return configureServiceRacks(coll_config_elem, build_config_elem);
 		}
 
-		if (subset.equals(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER) || subset.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER) || subset.equals(GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER))
+		if (subset.equals(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER) || subset.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER) || subset.equals("libraryParamList"))
 		{
+		  configureLocalData(coll_config_elem);
+		  configureLocalData(build_config_elem);
 			return findAndLoadInfo(coll_config_elem, build_config_elem);
 
 		}
@@ -503,285 +480,55 @@ public class Collection extends ServiceCluster
 	 */
 	protected Element processMessage(Element request)
 	{
-
-		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
-		response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
-		String type = request.getAttribute(GSXML.TYPE_ATT);
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		response.setAttribute(GSXML.TYPE_ATT, type);
-
+	  String type = request.getAttribute(GSXML.TYPE_ATT);
 		if (type.equals(GSXML.REQUEST_TYPE_FORMAT_STRING))
 		{
-			String subaction = request.getAttribute("subaction");
-			String service = request.getAttribute("service");
-
-			String classifier = null;
-			if (service.equals("ClassifierBrowse"))
-			{
-				classifier = request.getAttribute("classifier");
-			}
-
-			// check for version file
-			String directory = new File(GSFile.collectionConfigFile(this.site_home, this.cluster_name)).getParent() + File.separator;
-
-			String version_filename = "";
-			if (service.equals("ClassifierBrowse"))
-				version_filename = directory + "browse_" + classifier + "_format_statement_version.txt";
-			else
-				version_filename = directory + "query_format_statement_version.txt";
-
-			File version_file = new File(version_filename);
-
-			if (subaction.equals("update"))
-			{
-				Element format_element = (Element) GSXML.getChildByTagName(request, GSXML.FORMAT_STRING_ELEM);
-				//String format_string = GSXML.getNodeText(format_element);
-				Element format_statement = (Element) format_element.getFirstChild();
-
-				String version_number = "1";
-				BufferedWriter writer;
-
-				try
-				{
-
-					if (version_file.exists())
-					{
-						// Read version
-						BufferedReader reader = new BufferedReader(new FileReader(version_filename));
-						version_number = reader.readLine();
-						int aInt = Integer.parseInt(version_number) + 1;
-						version_number = Integer.toString(aInt);
-						reader.close();
-					}
-					else
-					{
-						// Create
-						version_file.createNewFile();
-						writer = new BufferedWriter(new FileWriter(version_filename));
-						writer.write(version_number);
-						writer.close();
-					}
-
-					// Write version file
-					String format_statement_filename = "";
-
-					if (service.equals("ClassifierBrowse"))
-						format_statement_filename = directory + "browse_" + classifier + "_format_statement_v" + version_number + ".txt";
-					else
-						format_statement_filename = directory + "query_format_statement_v" + version_number + ".txt";
-
-					// Write format statement
-					String format_string = this.converter.getString(format_statement); //GSXML.xmlNodeToString(format_statement);
-					writer = new BufferedWriter(new FileWriter(format_statement_filename));
-					writer.write(format_string);
-					writer.close();
-
-					// Update version number
-					writer = new BufferedWriter(new FileWriter(version_filename));
-					writer.write(version_number);
-					writer.close();
-
-				}
-				catch (IOException e)
-				{
-					logger.error("IO Exception " + e);
-				}
-			}
-
-			if (subaction.equals("saveDocument"))
-			{
-				Element format_element = (Element) GSXML.getChildByTagName(request, GSXML.FORMAT_STRING_ELEM);
-				//String format_string = GSXML.getNodeText(format_element);
-				// Get display tag
-				Element display_format = (Element) format_element.getFirstChild();
-
-				String collection_config = directory + "collectionConfig.xml";
-				Document config = this.converter.getDOM(new File(collection_config), "UTF-8");
-
-				Node current_node = GSXML.getChildByTagName(config, "CollectionConfig");
-
-				// Get display child
-				if (GSXML.getChildByTagName(current_node, "display") == null)
-				{
-					// well then create a format tag
-					Element display_tag = config.createElement("display");
-					current_node = (Node) current_node.appendChild(display_tag);
-				}
-				else
-				{
-					current_node = GSXML.getChildByTagName(current_node, "display");
-				}
-
-				if (GSXML.getChildByTagName(current_node, "format") == null)
-				{
-					// well then create a format tag
-					Element format_tag = config.createElement("format");
-					current_node.appendChild(format_tag);
-				}
-
-				current_node.replaceChild(config.importNode(display_format, true), GSXML.getChildByTagName(current_node, "format"));
-
-				String new_config = this.converter.getString(config);
-
-				new_config = StringUtils.replace(new_config, "&lt;", "<");
-				new_config = StringUtils.replace(new_config, "&gt;", ">");
-				new_config = StringUtils.replace(new_config, "&quot;", "\"");
-
-				try
-				{
-					// Write to file (not original! for now)
-					BufferedWriter writer = new BufferedWriter(new FileWriter(collection_config + ".new"));
-					writer.write(new_config);
-					writer.close();
-				}
-				catch (IOException e)
-				{
-					logger.error("IO Exception " + e);
-				}
-			}
-
-			if (subaction.equals("save"))
-			{
-				Element format_element = (Element) GSXML.getChildByTagName(request, GSXML.FORMAT_STRING_ELEM);
-				Element format_statement = (Element) format_element.getFirstChild();
-
-				try
-				{
-					// open collectionConfig.xml and read in to w3 Document
-					String collection_config = directory + "collectionConfig.xml";
-					Document config = this.converter.getDOM(new File(collection_config), "UTF-8");
-
-					//String tag_name = "";
-					int k;
-					int index;
-					Element elem;
-					// Try importing entire tree to this.doc so we can add and remove children at ease
-					//Node current_node = this.doc.importNode(GSXML.getChildByTagName(config, "CollectionConfig"),true);
-					Node current_node = GSXML.getChildByTagName(config, "CollectionConfig");
-					NodeList current_node_list;
-
-					if (service.equals("ClassifierBrowse"))
-					{
-						//tag_name = "browse";
-						// if CLX then need to look in <classifier> X then <format>
-						// default is <browse><format>
-
-						current_node = GSXML.getChildByTagName(current_node, "browse");
-
-						// find CLX
-						if (classifier != null)
-						{
-							current_node_list = GSXML.getChildrenByTagName(current_node, "classifier");
-							index = Integer.parseInt(classifier.substring(2)) - 1;
-
-							// index should be given by X-1
-							current_node = current_node_list.item(index);
-							// what if classifier does not have a format tag?
-							if (GSXML.getChildByTagName(current_node, "format") == null)
-							{
-								// well then create a format tag
-								Element format_tag = config.createElement("format");
-								current_node.appendChild(format_tag);
-							}
-						}
-						else
-						{
-							// To support all classifiers, set classifier to null?  There is the chance here that the format tag does not exist
-							if (GSXML.getChildByTagName(current_node, "format") == null)
-							{
-								// well then create a format tag
-								Element format_tag = config.createElement("format");
-								current_node.appendChild(format_tag);
-							}
-						}
-					}
-					else if (service.equals("AllClassifierBrowse"))
-					{
-						current_node = GSXML.getChildByTagName(current_node, "browse");
-						if (GSXML.getChildByTagName(current_node, "format") == null)
-						{
-							// well then create a format tag
-							Element format_tag = config.createElement("format");
-							current_node.appendChild(format_tag);
-						}
-					}
-					else
-					{
-						// look in <format> with no attributes
-						current_node_list = GSXML.getChildrenByTagName(current_node, "search");
-						for (k = 0; k < current_node_list.getLength(); k++)
-						{
-							current_node = current_node_list.item(k);
-							// if current_node has no attributes then break
-							elem = (Element) current_node;
-							if (elem.hasAttribute("name") == false)
-								break;
-						}
-					}
-
-					current_node.replaceChild(config.importNode(format_statement, true), GSXML.getChildByTagName(current_node, "format"));
-
-					// Now convert config document to string for writing to file
-					String new_config = this.converter.getString(config);
-
-					new_config = StringUtils.replace(new_config, "&lt;", "<");
-					new_config = StringUtils.replace(new_config, "&gt;", ">");
-					new_config = StringUtils.replace(new_config, "&quot;", "\"");
-
-					// Write to file (not original! for now)
-					BufferedWriter writer = new BufferedWriter(new FileWriter(collection_config + ".new"));
-					writer.write(new_config);
-					writer.close();
-
-				}
-				catch (Exception ex)
-				{
-					logger.error("There was an exception " + ex);
-
-					StringWriter sw = new StringWriter();
-					PrintWriter pw = new PrintWriter(sw, true);
-					ex.printStackTrace(pw);
-					pw.flush();
-					sw.flush();
-					logger.error(sw.toString());
-				}
-
-			}
+		  return processFormatStringRequest(request);
 		}
 		else if (type.equals(GSXML.REQUEST_TYPE_SECURITY))
 		{
-			String oid = request.getAttribute("oid");
-			if (oid.contains("."))
-			{
-				oid = oid.substring(0, oid.indexOf("."));
-			}
-
-			ArrayList<String> groups = getPermittedGroups(oid);
-
-			Element groupList = this.doc.createElement(GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
-			response.appendChild(groupList);
-
-			for (String groupName : groups)
-			{
-				Element group = this.doc.createElement(GSXML.GROUP_ELEM);
-				groupList.appendChild(group);
-				group.setAttribute(GSXML.NAME_ATT, groupName);
-			}
+		  return processSecurityRequest(request);
 		}
 		else if (type.equals(GSXML.REQUEST_TYPE_FORMAT))
 		{
+		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
+		response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_FORMAT);
 			if(_globalFormat != null)
 			{
-				response.appendChild(response.getOwnerDocument().importNode(_globalFormat, true));
+				response.appendChild(this.doc.importNode(_globalFormat, true));
 			}
+			return response;
 		}
-		else
-		{ // unknown type
-			return super.processMessage(request);
+		// unknown type
+		return super.processMessage(request);
 
-		}
-		return response;
 	}
+
+  protected Element processSecurityRequest(Element request) {
+    Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+    response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
+    response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_SECURITY);
+    
+    String oid = request.getAttribute("oid");
+    if (oid.contains("."))
+      {
+	oid = oid.substring(0, oid.indexOf("."));
+      }
+    
+    ArrayList<String> groups = getPermittedGroups(oid);
+    
+    Element groupList = this.doc.createElement(GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
+    response.appendChild(groupList);
+    
+    for (String groupName : groups)
+      {
+	Element group = this.doc.createElement(GSXML.GROUP_ELEM);
+	groupList.appendChild(group);
+	group.setAttribute(GSXML.NAME_ATT, groupName);
+      }
+    return response;
+  }
 
 	protected ArrayList<String> getPermittedGroups(String oid)
 	{
@@ -932,4 +679,248 @@ public class Collection extends ServiceCluster
 
 		return null;
 	}
+
+  protected Element processFormatStringRequest(Element request) {
+    Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+    response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_FORMAT_STRING);
+    response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
+
+    String subaction = request.getAttribute("subaction");
+    String service = request.getAttribute("service");
+    
+    String classifier = null;
+    if (service.equals("ClassifierBrowse"))
+      {
+	classifier = request.getAttribute("classifier");
+      }
+
+    // check for version file
+    String directory = new File(GSFile.collectionConfigFile(this.site_home, this.cluster_name)).getParent() + File.separator;
+
+    String version_filename = "";
+    if (service.equals("ClassifierBrowse"))
+      version_filename = directory + "browse_" + classifier + "_format_statement_version.txt";
+    else
+      version_filename = directory + "query_format_statement_version.txt";
+
+    File version_file = new File(version_filename);
+
+    if (subaction.equals("update"))
+      {
+	Element format_element = (Element) GSXML.getChildByTagName(request, GSXML.FORMAT_STRING_ELEM);
+	//String format_string = GSXML.getNodeText(format_element);
+	Element format_statement = (Element) format_element.getFirstChild();
+
+	String version_number = "1";
+	BufferedWriter writer;
+
+	try
+	  {
+
+	    if (version_file.exists())
+	      {
+		// Read version
+		BufferedReader reader = new BufferedReader(new FileReader(version_filename));
+		version_number = reader.readLine();
+		int aInt = Integer.parseInt(version_number) + 1;
+		version_number = Integer.toString(aInt);
+		reader.close();
+	      }
+	    else
+	      {
+		// Create
+		version_file.createNewFile();
+		writer = new BufferedWriter(new FileWriter(version_filename));
+		writer.write(version_number);
+		writer.close();
+	      }
+
+	    // Write version file
+	    String format_statement_filename = "";
+
+	    if (service.equals("ClassifierBrowse"))
+	      format_statement_filename = directory + "browse_" + classifier + "_format_statement_v" + version_number + ".txt";
+	    else
+	      format_statement_filename = directory + "query_format_statement_v" + version_number + ".txt";
+
+	    // Write format statement
+	    String format_string = this.converter.getString(format_statement); //GSXML.xmlNodeToString(format_statement);
+	    writer = new BufferedWriter(new FileWriter(format_statement_filename));
+	    writer.write(format_string);
+	    writer.close();
+
+	    // Update version number
+	    writer = new BufferedWriter(new FileWriter(version_filename));
+	    writer.write(version_number);
+	    writer.close();
+
+	  }
+	catch (IOException e)
+	  {
+	    logger.error("IO Exception " + e);
+	  }
+      }
+
+    if (subaction.equals("saveDocument"))
+      {
+	Element format_element = (Element) GSXML.getChildByTagName(request, GSXML.FORMAT_STRING_ELEM);
+	//String format_string = GSXML.getNodeText(format_element);
+	// Get display tag
+	Element display_format = (Element) format_element.getFirstChild();
+
+	String collection_config = directory + "collectionConfig.xml";
+	Document config = this.converter.getDOM(new File(collection_config), "UTF-8");
+
+	Node current_node = GSXML.getChildByTagName(config, "CollectionConfig");
+
+	// Get display child
+	if (GSXML.getChildByTagName(current_node, "display") == null)
+	  {
+	    // well then create a format tag
+	    Element display_tag = config.createElement("display");
+	    current_node = (Node) current_node.appendChild(display_tag);
+	  }
+	else
+	  {
+	    current_node = GSXML.getChildByTagName(current_node, "display");
+	  }
+
+	if (GSXML.getChildByTagName(current_node, "format") == null)
+	  {
+	    // well then create a format tag
+	    Element format_tag = config.createElement("format");
+	    current_node.appendChild(format_tag);
+	  }
+
+	current_node.replaceChild(config.importNode(display_format, true), GSXML.getChildByTagName(current_node, "format"));
+
+	String new_config = this.converter.getString(config);
+
+	new_config = StringUtils.replace(new_config, "&lt;", "<");
+	new_config = StringUtils.replace(new_config, "&gt;", ">");
+	new_config = StringUtils.replace(new_config, "&quot;", "\"");
+
+	try
+	  {
+	    // Write to file (not original! for now)
+	    BufferedWriter writer = new BufferedWriter(new FileWriter(collection_config + ".new"));
+	    writer.write(new_config);
+	    writer.close();
+	  }
+	catch (IOException e)
+	  {
+	    logger.error("IO Exception " + e);
+	  }
+      }
+
+    if (subaction.equals("save"))
+      {
+	Element format_element = (Element) GSXML.getChildByTagName(request, GSXML.FORMAT_STRING_ELEM);
+	Element format_statement = (Element) format_element.getFirstChild();
+
+	try
+	  {
+	    // open collectionConfig.xml and read in to w3 Document
+	    String collection_config = directory + "collectionConfig.xml";
+	    Document config = this.converter.getDOM(new File(collection_config), "UTF-8");
+
+	    //String tag_name = "";
+	    int k;
+	    int index;
+	    Element elem;
+	    // Try importing entire tree to this.doc so we can add and remove children at ease
+	    //Node current_node = this.doc.importNode(GSXML.getChildByTagName(config, "CollectionConfig"),true);
+	    Node current_node = GSXML.getChildByTagName(config, "CollectionConfig");
+	    NodeList current_node_list;
+
+	    if (service.equals("ClassifierBrowse"))
+	      {
+		//tag_name = "browse";
+		// if CLX then need to look in <classifier> X then <format>
+		// default is <browse><format>
+
+		current_node = GSXML.getChildByTagName(current_node, "browse");
+
+		// find CLX
+		if (classifier != null)
+		  {
+		    current_node_list = GSXML.getChildrenByTagName(current_node, "classifier");
+		    index = Integer.parseInt(classifier.substring(2)) - 1;
+
+		    // index should be given by X-1
+		    current_node = current_node_list.item(index);
+		    // what if classifier does not have a format tag?
+		    if (GSXML.getChildByTagName(current_node, "format") == null)
+		      {
+			// well then create a format tag
+			Element format_tag = config.createElement("format");
+			current_node.appendChild(format_tag);
+		      }
+		  }
+		else
+		  {
+		    // To support all classifiers, set classifier to null?  There is the chance here that the format tag does not exist
+		    if (GSXML.getChildByTagName(current_node, "format") == null)
+		      {
+			// well then create a format tag
+			Element format_tag = config.createElement("format");
+			current_node.appendChild(format_tag);
+		      }
+		  }
+	      }
+	    else if (service.equals("AllClassifierBrowse"))
+	      {
+		current_node = GSXML.getChildByTagName(current_node, "browse");
+		if (GSXML.getChildByTagName(current_node, "format") == null)
+		  {
+		    // well then create a format tag
+		    Element format_tag = config.createElement("format");
+		    current_node.appendChild(format_tag);
+		  }
+	      }
+	    else
+	      {
+		// look in <format> with no attributes
+		current_node_list = GSXML.getChildrenByTagName(current_node, "search");
+		for (k = 0; k < current_node_list.getLength(); k++)
+		  {
+		    current_node = current_node_list.item(k);
+		    // if current_node has no attributes then break
+		    elem = (Element) current_node;
+		    if (elem.hasAttribute("name") == false)
+		      break;
+		  }
+	      }
+
+	    current_node.replaceChild(config.importNode(format_statement, true), GSXML.getChildByTagName(current_node, "format"));
+
+	    // Now convert config document to string for writing to file
+	    String new_config = this.converter.getString(config);
+
+	    new_config = StringUtils.replace(new_config, "&lt;", "<");
+	    new_config = StringUtils.replace(new_config, "&gt;", ">");
+	    new_config = StringUtils.replace(new_config, "&quot;", "\"");
+
+	    // Write to file (not original! for now)
+	    BufferedWriter writer = new BufferedWriter(new FileWriter(collection_config + ".new"));
+	    writer.write(new_config);
+	    writer.close();
+
+	  }
+	catch (Exception ex)
+	  {
+	    logger.error("There was an exception " + ex);
+
+	    StringWriter sw = new StringWriter();
+	    PrintWriter pw = new PrintWriter(sw, true);
+	    ex.printStackTrace(pw);
+	    pw.flush();
+	    sw.flush();
+	    logger.error(sw.toString());
+	  }
+
+      }
+
+    return response;
+  }
 }
