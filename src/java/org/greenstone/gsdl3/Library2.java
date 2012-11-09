@@ -20,6 +20,7 @@ package org.greenstone.gsdl3;
 
 import org.greenstone.gsdl3.core.*;
 import org.greenstone.gsdl3.util.*;
+import org.greenstone.util.GlobalProperties;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -66,6 +67,8 @@ final public class Library2
 		//config_params.put(GSConstants.GSDL3_HOME, gsdl_home);
 		config_params.put(GSConstants.SITE_NAME, site_name);
 		config_params.put(GSConstants.INTERFACE_NAME, interface_name);
+		config_params.put(GSConstants.ALLOW_CLIENT_SIDE_XSLT, false);
+
 		// new message router - create it and pass a handle to recept.
 		// the servlet wont use this directly
 		MessageRouter message_router = new MessageRouter();
@@ -79,6 +82,14 @@ final public class Library2
 		recept.configure();
 	}
 
+    /*
+     *  On Linux, run as:
+     *  GS3> java -classpath "web/WEB-INF/lib/*":"lib/jni/*" org.greenstone.gsdl3.Library2 localsite default
+     *  Press enter to accept the default cgi-args to pass in.
+     * 
+     *  For how to include all jars in a folder, see:
+     *  http://stackoverflow.com/questions/6780678/run-class-in-jar-file
+     */
 	public static void main(String args[])
 	{
 
@@ -87,6 +98,9 @@ final public class Library2
 			System.out.println("Usage: Library2 <site name> <interface name>");
 			System.exit(1);
 		}
+
+		// force GlobalProperties to default GSDL3HOME to GSDL3SRCHOME/web if not already set
+		GlobalProperties.loadGlobalProperties("");
 
 		Library2 library = new Library2();
 		library.configure(args[0], args[1]);
