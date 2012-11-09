@@ -87,7 +87,8 @@ final public class Library2
      *  GS3> java -classpath "web/WEB-INF/lib/*":"lib/jni/*" org.greenstone.gsdl3.Library2 localsite default
      *  Press enter to accept the default cgi-args to pass in.
      * 
-     *  For how to include all jars in a folder, see:
+     *  For how to include all jars in a folder into the classpath to run a java program, see
+     *  http://stackoverflow.com/questions/219585/setting-multiple-jars-in-java-classpath
      *  http://stackoverflow.com/questions/6780678/run-class-in-jar-file
      */
 	public static void main(String args[])
