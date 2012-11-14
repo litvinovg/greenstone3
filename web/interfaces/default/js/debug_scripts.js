@@ -45,6 +45,8 @@ function DebugWidget()
 				pickElementButton.attr("value", "Enable debugging");
 				$("a").off("click");
 				clearAll();
+				_unpauseButton.attr("disabled", "disabled");
+				_pauseSelector = false;
 				_debugOn = false;
 			}
 		});
