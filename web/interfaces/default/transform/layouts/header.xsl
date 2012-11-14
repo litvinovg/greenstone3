@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:java="http://xml.apache.org/xslt/java"
@@ -67,6 +68,9 @@
 		<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 			<xsl:call-template name="init-direct-edit"/>
 		</xsl:if>
+		
+		<script type="text/javascript" src="interfaces/{$interface_name}/js/debug_scripts.js"><xsl:text> </xsl:text></script>
+		
 		<xsl:call-template name="setup-gs-variable"/>
 		<xsl:call-template name="additionalHeaderContent"/>
 	</xsl:template>
@@ -80,7 +84,7 @@
 			<xsl:text disable-output-escaping="yes">
 				de.onready(function() 
 				{
-					try 
+					try
 					{
 						de.init();
 					}
