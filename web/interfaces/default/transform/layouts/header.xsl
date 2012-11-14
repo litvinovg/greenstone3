@@ -407,7 +407,7 @@
 										<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.level']/@value"/>
 									</xsl:when>
 									<xsl:otherwise>
-										<xsl:text>Sec</xsl:text>
+									        <xsl:value-of select="/page/pageResponse/collection/serviceList/service[@name='TextQuery']/paramList/param[@name = 'level']/@default"/>
 									</xsl:otherwise>
 								</xsl:choose>
 							</xsl:attribute>
