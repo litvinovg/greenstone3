@@ -442,7 +442,7 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</xsl:variable>
-					<xsl:variable name="level">
+					<xsl:variable name="levelString">
 						<xsl:choose>
 							<xsl:when test="$docMax = 1">
 								<xsl:text/>
@@ -469,7 +469,7 @@
 						</xsl:choose>
 					</xsl:variable>
 					<td id="searchResultsStatusBar">
-						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.displayingnumdocs', concat($startdoc,';', $enddoc, ';', $docMax, ';', $level))"/>
+						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.displayingnumdocs', concat($startdoc,';', $enddoc, ';', $docMax, ';', $levelString))"/>
 					</td>
 				</xsl:if>
 
