@@ -22,13 +22,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
 import org.greenstone.util.GlobalProperties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import org.apache.log4j.*;
 
 /** various functions for manipulating Greenstone xslt */
 public class GSXSLT
@@ -54,7 +54,6 @@ public class GSXSLT
 	{
 		if (debug)
 		{
-			System.err.println("ADDING DEBUG ELEMENTS WITH FILE NAME " + firstDocFileName);
 			insertDebugElements(main_xsl, firstDocFileName);
 		}
 
@@ -187,35 +186,83 @@ public class GSXSLT
 
 		if (debug)
 		{
-			System.err.println("ADDING DEBUG ELEMENTS WITH FILE NAME " + secondDocFileName);
 			insertDebugElements(main_xsl, secondDocFileName);
 		}
 	}
 
-	protected static void insertDebugElements(Document doc, String fileName)
+	protected static void insertDebugElements(Document doc, String filename)
 	{
-		NodeList htmlTags = GSXML.getHTMLStructureElements(doc);
-		System.err.println("HTML TAGS SIZE IS " + htmlTags.getLength());
-		for (int i = 0; i < htmlTags.getLength(); i++)
+		NodeList xslTemplates = doc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
+		NodeList gsfTemplates = doc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "template");
+
+		for (int i = 0; i < xslTemplates.getLength() + gsfTemplates.getLength(); i++)
 		{
-			Element current = (Element) htmlTags.item(i);
-			if (current.getUserData("GSDEBUGFILENAME") == null)
+			boolean gsf = (i >= xslTemplates.getLength());
+			Element currentTemplate = (Element) (!gsf ? xslTemplates.item(i) : gsfTemplates.item(i - xslTemplates.getLength()));
+
+			NodeList childNodes = currentTemplate.getChildNodes();
+			boolean debugInformationAlreadyExists = false;
+			for (int j = 0; j < childNodes.getLength(); j++)
 			{
-				Element xslParent = (Element) current.getParentNode();
-
-				while (xslParent.getNamespaceURI() != GSXML.XSL_NAMESPACE && !xslParent.getNodeName().startsWith("xsl:"))
+				Node current = childNodes.item(j);
+				if (current instanceof Element && ((Element) current).getNodeName().equals("debug") && (!((Element) current).getAttribute("nodename").startsWith("gsf:") || ((Element) current).getAttribute("nodename").equals("gsf:template")))
 				{
-					xslParent = (Element) xslParent.getParentNode();
+					debugInformationAlreadyExists = true;
+					break;
 				}
+			}
 
-				System.err.println("ADDING FILE NAME " + fileName);
-				current.setUserData("GSDEBUGFILENAME", fileName, null);
-				current.setUserData("GSDEBUGXML", xslParent.cloneNode(true), null);
+			if (debugInformationAlreadyExists)
+			{
+				continue;
+			}
+
+			Element debugElement = doc.createElement("debug");
+			debugElement.setAttribute("filename", filename);
+			debugElement.setAttribute("nodename", gsf ? "gsf:template" : "xsl:template");
+			if (currentTemplate.getAttribute("match").length() > 0)
+			{
+				debugElement.setAttribute("match", currentTemplate.getAttribute("match"));
+			}
+			if (currentTemplate.getAttribute("name").length() > 0)
+			{
+				debugElement.setAttribute("name", currentTemplate.getAttribute("name"));
+			}
+
+			Element currentDebugElement = (Element) debugElement.cloneNode(true);
+
+			if (childNodes.getLength() > 0)
+			{
+				int paramCount = 0;
+				while (childNodes.getLength() > paramCount)
+				{
+					Node currentNode = childNodes.item(paramCount);
+					if (currentNode instanceof Element)
+					{
+						if (((Element) currentNode).getNodeName().equals("xsl:param") || ((Element) currentNode).getNodeName().equals("xslt:param") || (((Element) currentNode).getNodeName().equals("param") && ((Element) currentNode).getNamespaceURI().equals(GSXML.XSL_NAMESPACE)))
+						{
+							paramCount++;
+						}
+						else
+						{
+							currentDebugElement.appendChild(currentNode);
+						}
+					}
+					else
+					{
+						currentDebugElement.appendChild(currentNode);
+					}
+				}
+				currentTemplate.appendChild(currentDebugElement);
 			}
 			else
 			{
-				System.err.println("ALREADY SET!");
+				currentTemplate.appendChild(currentDebugElement);
 			}
+
+			Element textElement = doc.createElementNS(GSXML.XSL_NAMESPACE, "text");
+			textElement.appendChild(doc.createTextNode(" "));
+			currentDebugElement.appendChild(textElement);
 		}
 	}
 
@@ -226,8 +273,6 @@ public class GSXSLT
 
 	public static void inlineImportAndIncludeFilesDebug(Document doc, String pathExtra, boolean debug, String docFileName, String site, String collection, String interface_name, ArrayList<String> base_interfaces)
 	{
-		XMLConverter converter = new XMLConverter();
-
 		String path = (pathExtra == null) ? "" : pathExtra;
 
 		NodeList importList = doc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "import");
@@ -237,8 +282,6 @@ public class GSXSLT
 		{
 			Element current = (Element) ((i < importList.getLength()) ? importList.item(i) : includeList.item(i - importList.getLength()));
 			String href = current.getAttribute("href");
-			//String filePath = GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), interface_name) + File.separator + "transform" + File.separator + path.replace("/", File.separator) + href.replace("/", File.separator);
-			//String filePath = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), site_name, collection, interface_name, base_interfaces, 
 
 			try
 			{
@@ -253,7 +296,6 @@ public class GSXSLT
 
 				//Do this recursively
 				inlineImportAndIncludeFilesDebug(inlineDoc, newPath, debug, "merged " + href/* filePath */, site, collection, interface_name, base_interfaces);
-
 				GSXSLT.mergeStylesheetsDebug(doc, inlineDoc.getDocumentElement(), false, debug, docFileName, /* filePath */"merged " + href);
 			}
 			catch (Exception ex)
@@ -311,10 +353,15 @@ public class GSXSLT
 			}
 		}
 
+		if (stylesheets.size() == 1 && debug)
+		{
+			insertDebugElements(finalDoc, stylesheets.get(0).getAbsolutePath());
+		}
+
 		return finalDoc;
 	}
 
-	public static void modifyConfigFormatForDebug(Document doc, String fileName)
+	public static void modifyConfigFormatForDebug(Document doc, String filename)
 	{
 		NodeList templateNodes = doc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
 		if (templateNodes.getLength() == 0)
@@ -322,30 +369,44 @@ public class GSXSLT
 			templateNodes = doc.getElementsByTagName("xsl:template");
 		}
 
-		String debugElementString = "";
-		debugElementString += "<span class=\"configDebugSpan\" style=\"display:none;\">";
-		debugElementString += "  \"filename\":\"" + fileName + "\",";
-		debugElementString += "  \"xml\":\"<xsl:value-of select=\"util:xmlNodeToString(.)\"/>\""; //<xsl:copy><xsl:copy-of select=\"@*\"/></xsl:copy>
-		debugElementString += "</span>";
-
-		XMLConverter converter = new XMLConverter();
-		Element debugElement = (Element) converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xslt:stylesheet version=\"1.0\" xmlns:xsl=\"" + GSXML.XSL_NAMESPACE + "\" xmlns:xslt=\"output.xsl\" xmlns:gsf=\"" + GSXML.GSF_NAMESPACE + "\">" + debugElementString + "</xslt:stylesheet>").getDocumentElement().getFirstChild();
+		Element debugElement = doc.createElement("debug");
+		debugElement.setAttribute("filename", filename);
 
 		for (int i = 0; i < templateNodes.getLength(); i++)
 		{
 			Element currentTemplate = (Element) templateNodes.item(i);
-			if (currentTemplate.getAttribute("match") != null && (currentTemplate.getAttribute("match").equals("gsf:metadata") || currentTemplate.getAttribute("match").equals("*") || currentTemplate.getAttribute("match").equals("format")))
+			if (currentTemplate.getAttribute("match").equals("*") || currentTemplate.getAttribute("match").equals("format"))
 			{
 				continue;
 			}
 
+			Element currentDebugElement = (Element) debugElement.cloneNode(true);
+
+			//The xsl that gets the name of current node (e.g. gsf:icon)
+			Element nodeNameAttribute = doc.createElementNS(GSXML.XSL_NAMESPACE, "attribute");
+			nodeNameAttribute.setAttribute(GSXML.NAME_ATT, "nodeName");
+			Element nodeNameValue = doc.createElementNS(GSXML.XSL_NAMESPACE, "value-of");
+			nodeNameValue.setAttribute("select", "name()");
+			nodeNameAttribute.appendChild(nodeNameValue);
+			currentDebugElement.appendChild(nodeNameAttribute);
+
+			//The xsl that copies the attributes of the current node
+			Element attributeCopy = doc.createElementNS(GSXML.XSL_NAMESPACE, "copy-of");
+			attributeCopy.setAttribute("select", "@*");
+			currentDebugElement.appendChild(attributeCopy);
+
 			if (currentTemplate.hasChildNodes())
 			{
-				currentTemplate.insertBefore(doc.importNode(debugElement.cloneNode(true), true), currentTemplate.getFirstChild());
+				NodeList childNodes = currentTemplate.getChildNodes();
+				while (childNodes.getLength() > 0)
+				{
+					currentDebugElement.appendChild(childNodes.item(0));
+				}
+				currentTemplate.appendChild(currentDebugElement);
 			}
 			else
 			{
-				currentTemplate.appendChild(doc.importNode(debugElement.cloneNode(true), true));
+				currentTemplate.appendChild(currentDebugElement);
 			}
 		}
 	}
@@ -481,6 +542,43 @@ public class GSXSLT
 			if (GSXML.getNamedElementNS(mainFormat, GSXML.GSF_NAMESPACE, "option", "name", node.getAttribute("name")) == null)
 			{
 				mainFormat.appendChild(node);
+			}
+		}
+	}
+
+	public static void fixTables(Document doc)
+	{
+		NodeList debugElements = doc.getElementsByTagName("debug");
+		for (int i = 0; i < debugElements.getLength(); i++)
+		{
+			Element currentElement = (Element) debugElements.item(i);
+
+			boolean hasChildElements = false;
+			NodeList children = currentElement.getChildNodes();
+			for (int j = 0; j < children.getLength(); j++)
+			{
+				Node current = children.item(j);
+				if (current instanceof Element)
+				{
+					hasChildElements = true;
+				}
+			}
+
+			if (hasChildElements && currentElement.getParentNode() != null && currentElement.getParentNode() instanceof Element)
+			{
+				Element parent = (Element) currentElement.getParentNode();
+				if (parent.getNodeName().toLowerCase().equals("table") || parent.getNodeName().toLowerCase().equals("tr"))
+				{
+					parent.setAttribute("debug", "true");
+					NamedNodeMap attributes = currentElement.getAttributes();
+					for (int j = 0; j < attributes.getLength(); j++)
+					{
+						Node currentAttribute = attributes.item(j);
+						String name = currentAttribute.getNodeName();
+						String value = currentAttribute.getNodeValue();
+						parent.setAttribute(name, value);
+					}
+				}
 			}
 		}
 	}

@@ -923,14 +923,16 @@ public class TransformingReceptionist extends Receptionist
 			}
 		}
 
-		GSXSLT.inlineImportAndIncludeFiles(skinAndLibraryDoc, null, (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces);
-		skinAndLibraryDoc = (Document) performFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request), TEXT_PASS);
-		skinAndLibraryDoc = (Document) performFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request), CONFIG_PASS);
-
 		if (_debug)
 		{
-			GSXML.addDebugSpanTags(skinAndLibraryDoc);
+			GSXSLT.inlineImportAndIncludeFilesDebug(skinAndLibraryDoc, null, _debug, this.getGSLibXSLFilename(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces);
 		}
+		else
+		{
+			GSXSLT.inlineImportAndIncludeFiles(skinAndLibraryDoc, null, (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces);
+		}
+		skinAndLibraryDoc = (Document) performFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request), TEXT_PASS);
+		skinAndLibraryDoc = (Document) performFormatPass(collection, skinAndLibraryDoc, doc, new UserContext(request), CONFIG_PASS);
 
 		if (output.equals("xmlfinal"))
 		{
@@ -942,7 +944,14 @@ public class TransformingReceptionist extends Receptionist
 			return converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
 		}
 
-		return this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype);
+		Node finalResult = this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype);
+
+		if (_debug)
+		{
+			GSXSLT.fixTables((Document) finalResult);
+		}
+
+		return finalResult;
 
 		// The line below will do the transformation like we use to do before having Skin++ implemented,
 		// it will not contain any GS-Lib statements expanded, and the result will not contain any doctype.
