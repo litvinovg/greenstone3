@@ -18,44 +18,37 @@
  */
 package org.greenstone.gsdl3.util;
 
-import org.greenstone.util.GlobalProperties;
-
-// XML classes
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.ErrorListener;
-
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.dom.DOMResult;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
-
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-// other java classes
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-import org.apache.xml.utils.DefaultErrorHandler;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
+import org.greenstone.util.GlobalProperties;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * XMLTransformer - utility class for greenstone
@@ -287,9 +280,9 @@ public class XMLTransformer
 		{
 			TransformErrorListener transformerErrorListener = (TransformErrorListener) this.t_factory.getErrorListener();
 			transformerErrorListener.setStylesheet(stylesheet);
-			Transformer transformer = this.t_factory.newTransformer(new StreamSource(stylesheet));
+			Transformer transformer = this.t_factory.newTransformer(new StreamSource(new InputStreamReader(new FileInputStream(stylesheet), "UTF-8")));
 			DOMResult result = (docDocType == null) ? new DOMResult() : new DOMResult(docDocType);
-			StreamSource streamSource = new StreamSource(source);
+			StreamSource streamSource = new StreamSource(new InputStreamReader(new FileInputStream(source), "UTF-8"));
 
 			transformer.setErrorListener(new TransformErrorListener(stylesheet, streamSource));
 
@@ -304,21 +297,32 @@ public class XMLTransformer
 		{
 			return transformError("XMLTransformer.transform(File, File)" + "\ncouldn't transform the source for files\n" + stylesheet + "\n" + source, e);
 		}
+		catch (UnsupportedEncodingException e)
+		{
+			return transformError("XMLTransformer.transform(File, File)" + "\ncouldn't read file due to an unsupported encoding\n" + stylesheet + "\n" + source, e);
+		}
+		catch (FileNotFoundException e)
+		{
+			return transformError("XMLTransformer.transform(File, File)" + "\ncouldn't find the file specified\n" + stylesheet + "\n" + source, e);
+		}
 	}
 
 	// Given a heading string on the sort of transformation error that occurred and the exception object itself, 
 	// this method prints the exception to the tomcat window (system.err) and the greenstone log and then returns
 	// an xhtml error page that is constructed from it.
-	protected Node transformError(String heading, TransformerException e)
+	protected Node transformError(String heading, Exception e)
 	{
 		String message = heading + "\n" + e.getMessage();
 		logger.error(heading + ": " + e.getMessage());
 
-		String location = e.getLocationAsString();
-		if (location != null)
+		if (e instanceof TransformerException)
 		{
-			logger.error(location);
-			message = message + "\n" + location;
+			String location = ((TransformerException) e).getLocationAsString();
+			if (location != null)
+			{
+				logger.error(location);
+				message = message + "\n" + location;
+			}
 		}
 		System.err.println("****\n" + message + "\n****");
 		return constructErrorXHTMLPage(message);
@@ -551,7 +555,6 @@ public class XMLTransformer
 			}
 			File styleFile = new File(webLogsTmpFolder + File.separator + "stylesheet" + XMLTransformer.debugFileCount + ".xml");
 			File sourceFile = new File(webLogsTmpFolder + File.separator + "source" + XMLTransformer.debugFileCount + ".xml");
-
 			try
 			{
 				// write stylesheet to a file called stylesheet_systemID in tmp
@@ -612,7 +615,6 @@ public class XMLTransformer
 			{ // ErrorListener was set on a Transformer object
 				XMLTransformer.this.transform(styleFile, sourceFile); // calls the File, File version, so debugAsFile will be false		
 			}
-
 			else
 			{ // ErrorListener was set on a TransformerFactory object
 
