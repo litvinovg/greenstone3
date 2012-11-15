@@ -107,7 +107,9 @@
 		</xslt:if>
 	</xsl:template>
 
+  <xsl:template match="params"></xsl:template>
 	<xsl:template match="gsf:link">
+
 		<xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>
 		<xsl:variable name="opt-title">					
 			<xsl:choose>
@@ -123,6 +125,7 @@
 				</xsl:when>
 			</xsl:choose>
 		</xsl:variable>
+
 		<xsl:choose>
 			<xsl:when test="@type='query'">
 				<a>
@@ -139,6 +142,7 @@
 								<xsl:text>TextQuery</xsl:text>
 							</xsl:otherwise>
 						</xsl:choose>
+	    <xsl:if test="params">?rt=rd&amp;<xsl:copy-of select="params/node()"/></xsl:if>
 					</xslt:attribute>
 					<xsl:copy-of select="$opt-title"/>
 					<xsl:apply-templates/>
@@ -447,6 +451,20 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 		</xsl:if>
 	</xsl:template>
 
+
+  <xsl:template match="gsf:foreach-metadata">
+    <xsl:variable name="meta_name"><xsl:call-template name="getMetadataName"/></xsl:variable>
+    <xslt:for-each>
+      <xsl:attribute name="select">
+	<xsl:if test="@type='collection'">/page/pageResponse/collection/</xsl:if>(.//metadataList)[last()]/metadata[@name='<xsl:value-of select="$meta_name"/>'<xsl:if test="@lang"><xsl:text> and @lang=</xsl:text><xsl:value-of select="@lang"/></xsl:if><xsl:text>]</xsl:text>
+      </xsl:attribute><xsl:if test='@separator'><xslt:if test='position()>1'><xsl:value-of select='@separator'/></xslt:if></xsl:if>
+      <xsl:apply-templates/>
+    </xslt:for-each>
+  </xsl:template>
+
+  <xsl:template match="gsf:meta-value">
+    <xslt:value-of select="."/>
+  </xsl:template>
 	<xsl:template name="getMetadataName">
 		<xsl:if test='@select'>
 			<xsl:value-of select='@select'/>
@@ -454,6 +472,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 		</xsl:if>
 		<xsl:value-of select="@name"/>
 	</xsl:template>
+
 
 	<xsl:template match="gsf:text">
 		<xslt:call-template name="documentNodeText"/>
