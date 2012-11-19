@@ -199,6 +199,7 @@ public class TransformingReceptionist extends Receptionist
 		{
 			Document currentDoc = this.converter.getDOM(currentFile);
 			NodeList metadataElems = currentDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata"); //gsf:metadata
+			NodeList foreachMetadataElems = currentDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "foreach-metadata"); //gsf:foreach-metadata
 			NodeList imageElems = currentDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "image"); //gsf:image
 			NodeList includeElems = currentDoc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "include");
 			NodeList importElems = currentDoc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "import");
@@ -207,6 +208,16 @@ public class TransformingReceptionist extends Receptionist
 			for (int i = 0; i < metadataElems.getLength(); i++)
 			{
 				Element current = (Element) metadataElems.item(i);
+				String name = current.getAttribute(GSXML.NAME_ATT);
+				if (name != null && name.length() > 0 && !names.contains(name))
+				{
+					names.add(name);
+				}
+			}
+
+			for (int i = 0; i < foreachMetadataElems.getLength(); i++)
+			{
+				Element current = (Element) foreachMetadataElems.item(i);
 				String name = current.getAttribute(GSXML.NAME_ATT);
 				if (name != null && name.length() > 0 && !names.contains(name))
 				{
