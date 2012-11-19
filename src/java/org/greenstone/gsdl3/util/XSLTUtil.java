@@ -136,6 +136,14 @@ public class XSLTUtil
 		return true;
 	}
 
+	public static String oidDocumentRoot(String oid)
+	{
+		String[] oidParts = oid.split("\\.");
+
+		return oidParts[0];
+	}
+
+
 	public static String replace(String orig, String match, String replacement)
 	{
 		return orig.replace(match, replacement);
