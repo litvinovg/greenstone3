@@ -235,12 +235,22 @@
 				<!-- tidy (?) -->
 		<xsl:variable name="tidyoption"><xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name='tidyoption']"/></xsl:variable>
 				<xsl:if test="$tidyoption='tidy'">
-					<xsl:variable name="book"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='book']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='book']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
+					<xsl:variable name="book">
+					  <xsl:choose>
+					    <xsl:when test="/page/pageRequest/paramList/param[@name='book']">
+					      <xsl:value-of select="/page/pageRequest/paramList/param[@name='book']/@value"/>
+					    </xsl:when>
+					    <xsl:when test="/page/pageRequest/paramList/param[@name='s1.book']">
+					      <xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.book']/@value"/>
+					    </xsl:when>
+					    <xsl:otherwise>off</xsl:otherwise>
+					  </xsl:choose>
+					</xsl:variable>
 					<div class="paramLabel">
 						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.book')"/>
 					</div>
 					<div class="paramValue">
-						<select name="book">
+						<select name="s1.book">
 							<option value="on"><xsl:if test="$book='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.on')"/></option> 
 							<option value="off"><xsl:if test="$book='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.off')"/></option>
 						</select>
