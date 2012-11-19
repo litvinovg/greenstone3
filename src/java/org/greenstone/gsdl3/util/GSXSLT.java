@@ -152,6 +152,19 @@ public class GSXSLT
 			}
 		}
 
+		// key -- xsl:key elements need to be defined at the top level
+		children = GSXML.getChildrenByTagNameNS(extra_xsl, GSXML.XSL_NAMESPACE, "key");
+		for (int i = 0; i < children.getLength(); i++)
+		{
+			Element node = (Element) children.item(i);
+			// If the new xsl:key element is identical (in terms of name attr value) 
+			// to any in the merged document, don't copy it over
+			if (GSXML.getNamedElementNS(main, GSXML.XSL_NAMESPACE, "key", "name", node.getAttribute("name")) == null)
+			{
+				main.appendChild(main_xsl.importNode(node, true));
+			}
+		}
+
 		// templates
 		// append to end of document
 		children = extra_xsl.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
