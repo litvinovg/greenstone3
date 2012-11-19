@@ -33,7 +33,9 @@
 		<xsl:if test="not(/page/pageRequest/paramList/param[@name = 'qs']) or /page/pageRequest/paramList/param[@name = 'qs']/@value = ''">
 			<xsl:call-template name="queryPage"/>
 		</xsl:if>
+    <xsl:if test="contains(/page/pageRequest/paramList/param[@name='rt']/@value, 'r')">
 		<xsl:call-template name="resultsPage"/>
+   </xsl:if>
 	</xsl:template>
 
 	<xsl:template name="resultsPage">
