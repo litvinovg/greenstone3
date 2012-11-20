@@ -100,8 +100,8 @@ abstract public class Action
   // prepending parent_ etc
   protected void extractMetadataNames(Element format, HashSet<String> meta_names)
 	{
-
-	  NodeList metadata_nodes = format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata");
+	    
+	  NodeList metadata_nodes = format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata"); // gsf:metadata
 	  for (int i = 0; i < metadata_nodes.getLength(); i++)
 	    {
 	      Element elem = (Element) metadata_nodes.item(i);
@@ -114,6 +114,18 @@ abstract public class Action
 	      meta_names.add(name);
 	    }
 	      
+	  NodeList foreach_metadata_nodes = format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "foreach-metadata"); // gsf:foreach-metadata
+	  for (int i = 0; i < foreach_metadata_nodes.getLength(); i++)
+	    {
+	      Element elem = (Element) foreach_metadata_nodes.item(i);
+	      String name = elem.getAttribute("name");
+	      String select = elem.getAttribute("select");
+
+	      if (!select.equals("")) {
+		name = select+GSConstants.META_RELATION_SEP+name;
+	      }
+	      meta_names.add(name);
+	    }	      
 	}
 
 	protected void addLinkMetadataNames(Element format, HashSet<String> meta_names)
