@@ -11,7 +11,7 @@
 	<xsl:include href="layouts/main.xsl"/>
 
 	<!-- set page title -->
-	<xsl:template name="pageTitle"><xsl:value-of select="java:org.greenstone.gsdl3.util.XSLTUtil.getInterfaceText($interface_name, /page/@lang, 'system.title')"/></xsl:template>
+	<xsl:template name="pageTitle"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'system.title')"/></xsl:template>
 
 	<!-- set page breadcrumbs -->
 	<xsl:template name="breadcrumbs"><gslib:siteLink/><gslib:rightArrow/></xsl:template>
