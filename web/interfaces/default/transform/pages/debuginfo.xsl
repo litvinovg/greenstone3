@@ -9,7 +9,7 @@
 
 	<!-- use the 'main' layout -->
 	<xsl:include href="layouts/main.xsl"/>
-
+  <xsl:variable name="debug_property_file" select="concat($interface_name, '2')"/>
 	<!-- set page title -->
 	<xsl:template name="pageTitle"><gslib:collectionName/></xsl:template>
 
@@ -18,27 +18,27 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page">
-	  <p><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo.usage')"/></p>
+	  <p><xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.usage')"/></p>
 
 	  <dl>
 	    <dt>o=xml</dt>
-	    <dd><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo.xml')"/></dd>
+	    <dd><xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.xml')"/></dd>
 	    <dt>o=xmlfinal</dt>
-	    <dd><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo.xmlfinal')"/></dd>
+	    <dd><xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.xmlfinal')"/></dd>
 	    <dt>o=skindoc</dt>
-	    <dd><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo.skindoc')"/></dd>
+	    <dd><xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.skindoc')"/></dd>
 	    <dt>o=skinandlib</dt>
-	    <dd><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo.skinandlib')"/></dd>
+	    <dd><xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.skinandlib')"/></dd>
 	    <dt>o=skinandlibdoc</dt>
-	    <dd><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo.skinandlibdoc')"/></dd>
+	    <dd><xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.skinandlibdoc')"/></dd>
 	    <dt>formatedit=on</dt>
-	    <dd><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo.formatedit')"/></dd>
+	    <dd><xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.formatedit')"/></dd>
 	  </dl>	  
 
 
 
 
-	  <!-- better to do the following with a util:getInterfaceText()
+	  <!-- better to do the following with a util:getInterfaceText
 	       so language independent -->
 	  <p>Refresh all the collection configuration files:</p>
 
