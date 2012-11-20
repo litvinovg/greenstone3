@@ -5,6 +5,7 @@
   xmlns:gslib="http://www.greenstone.org/XSL/Library"
   xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
   xmlns:util="http://org.greenstone.gsdl3.util.XSLTUtil"
+  extension-element-prefixes="util"
   exclude-result-prefixes="util gslib gsf xslt">
 
   <!-- extension-element-prefixes="java"> -->
@@ -267,7 +268,7 @@
   
   <!--
   <xsl:template name="pageTitle">
-    <xsl:value-of select="java:org.greenstone.gsdl3.util.XSLTUtil.getInterfaceText($interface_name, /page/@lang, 'gsdl')"/>
+    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/>
   </xsl:template> -->
   
 </xsl:stylesheet>
