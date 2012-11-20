@@ -2,7 +2,8 @@
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:java="http://xml.apache.org/xslt/java"
-  extension-element-prefixes="java">
+  xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
+  extension-element-prefixes="java util">
 
   <xsl:strip-space elements="*"/>
   
@@ -259,7 +260,7 @@
   </xsl:template>
   
   <xsl:template name="pageTitle">
-    <xsl:value-of select="java:org.greenstone.gsdl3.util.XSLTUtil.getInterfaceText($interface_name, /page/@lang, 'gsdl')"/>
+    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'gsdl')"/>
   </xsl:template>
   
 </xsl:stylesheet>
