@@ -116,7 +116,7 @@
   </xsl:template>
   
   <xsl:template match="error">
-    Error: <xsl:value-of select="."/>
+    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'error')"/> <xsl:value-of select="."/>
   </xsl:template>
   <xsl:template name="displayErrorsIfAny">
     <xsl:if test="descendant::error">
