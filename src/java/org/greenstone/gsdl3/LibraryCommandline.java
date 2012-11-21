@@ -1,5 +1,5 @@
 /*
- *    Library2.java
+ *    LibraryCommandline.java
  *    Copyright (C) 2002 New Zealand Digital Library, http://www.nzdl.org
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -41,7 +41,7 @@ import java.util.Iterator;
  * @version $Revision$
  */
 
-final public class Library2
+final public class LibraryCommandline
 {
 
 	protected XMLConverter converter = null;
@@ -51,7 +51,7 @@ final public class Library2
 	protected GSParams params = null;
 	protected DefaultReceptionist recept = null;
 
-	public Library2()
+	public LibraryCommandline()
 	{
 		this.converter = new XMLConverter();
 		this.doc = converter.newDOM();
@@ -84,7 +84,7 @@ final public class Library2
 
     /*
      *  On Linux, run as:
-     *  GS3> java -classpath "web/WEB-INF/lib/*":"lib/jni/*" org.greenstone.gsdl3.Library2 localsite default
+     *  GS3> java -classpath "web/WEB-INF/lib/*":"lib/jni/*" org.greenstone.gsdl3.LibraryCommandline localsite default
      *  Press enter to accept the default cgi-args to pass in.
      * 
      *  For how to include all jars in a folder into the classpath to run a java program, see
@@ -101,14 +101,14 @@ final public class Library2
 
 		if (args.length != 2)
 		{
-			System.out.println("Usage: Library2 <site name> <interface name>");
+			System.out.println("Usage: LibraryCommandline <site name> <interface name>");
 			System.exit(1);
 		}
 
 		// force GlobalProperties to default GSDL3HOME to GSDL3SRCHOME/web if not already set
 		GlobalProperties.loadGlobalProperties("");
 
-		Library2 library = new Library2();
+		LibraryCommandline library = new LibraryCommandline();
 		library.configure(args[0], args[1]);
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -123,7 +123,7 @@ final public class Library2
 			}
 			catch (Exception e)
 			{
-				System.err.println("Library2 exception:" + e.getMessage());
+				System.err.println("LibraryCommandline exception:" + e.getMessage());
 			}
 			if (query.startsWith("exit"))
 			{
