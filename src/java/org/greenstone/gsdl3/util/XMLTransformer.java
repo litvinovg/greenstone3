@@ -24,9 +24,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -39,6 +44,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -263,6 +269,158 @@ public class XMLTransformer
 			return transformError("XMLTransformer.transform(Doc, Doc, HashMap, Doc)" + "\ncouldn't transform the source", e);
 		}
 	}
+
+    /**
+      When transforming an XML with an XSLT from the command-line, there's two problems if calling 
+      XMLTransformer.transform(File xslt, File xml):
+
+      1. Need to run the transformation process from the location of the stylesheet, else it can't find
+      the stylesheet in order to load it. This is resolved by setting the SystemID for the stylesheet.
+
+      2. The XSLT stylesheet has &lt;xsl:import&gt; statements importing further XSLTs which are furthermore 
+      specified by relative paths, requiring that the XSLT (and perhaps also XML) input file is located
+      in the folder from which the relative paths of the import statements are specified. This is resolved
+      by working out the absolute path of each imported XSLT file and setting their SystemIDs too.
+
+      Without solving these problems, things will only work if we 1. run the transformation from the 
+      web/interfaces/default/transform folder and 2. need to have the input XSLT file (and XML?)
+      placed in the web/interfacces/default/transform folder too
+
+      Both parts of the solution are described in:
+      http://stackoverflow.com/questions/3699860/resolving-relative-paths-when-loading-xslt-filse
+
+      After the systemID on the XSLT input file is set, we can run the command from the toplevel GS3 
+      folder.
+      After resolving the URIs of the XSLT files imported by the input XSLT, by setting their systemIDs,
+      the input XSLT (and XML) file need not be located in web/interfaces/default/transform anymore.
+     */
+    public Node transform(File stylesheet, File source, String interfaceName, Document docDocType)
+	{
+		try
+		{
+			TransformErrorListener transformerErrorListener = (TransformErrorListener) this.t_factory.getErrorListener();
+			transformerErrorListener.setStylesheet(stylesheet);
+
+			// http://stackoverflow.com/questions/3699860/resolving-relative-paths-when-loading-xslt-files
+			Source xsltSource = new StreamSource(new InputStreamReader(new FileInputStream(stylesheet), "UTF-8"));
+			URI systemID = stylesheet.toURI();
+			try {			    
+			    URL url = systemID.toURL();			
+			    xsltSource.setSystemId(url.toExternalForm());
+			} catch (MalformedURLException mue) {
+			    logger.error("Warning: Unable to set systemID for stylesheet to " + systemID);
+			    logger.error("Got exception: " + mue.getMessage(), mue);
+			}
+
+			this.t_factory.setURIResolver(new ClasspathResourceURIResolver(interfaceName));			
+			Transformer transformer = this.t_factory.newTransformer(xsltSource);
+			// Alternative way of instantiating a newTransformer():
+			//Templates cachedXSLT = this.t_factory.newTemplates(xsltSource);
+			//Transformer transformer = cachedXSLT.newTransformer();
+
+			DOMResult result = (docDocType == null) ? new DOMResult() : new DOMResult(docDocType);
+			StreamSource streamSource = new StreamSource(new InputStreamReader(new FileInputStream(source), "UTF-8"));
+
+			transformer.setErrorListener(new TransformErrorListener(stylesheet, streamSource));
+
+			transformer.transform(streamSource, result);
+			return result.getNode().getFirstChild();
+		}
+		catch (TransformerConfigurationException e)
+		{
+			return transformError("XMLTransformer.transform(File, File)" + "\ncouldn't create transformer object for files\n" + stylesheet + "\n" + source, e);
+		}
+		catch (TransformerException e)
+		{
+			return transformError("XMLTransformer.transform(File, File)" + "\ncouldn't transform the source for files\n" + stylesheet + "\n" + source, e);
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			return transformError("XMLTransformer.transform(File, File)" + "\ncouldn't read file due to an unsupported encoding\n" + stylesheet + "\n" + source, e);
+		}
+		catch (FileNotFoundException e)
+		{
+			return transformError("XMLTransformer.transform(File, File)" + "\ncouldn't find the file specified\n" + stylesheet + "\n" + source, e);
+		}
+	}
+
+    /** 
+     * Class for resolving the relative paths used for &lt;xsl:import&gt;s 
+     * when transforming XML with an XSLT
+    */
+    class ClasspathResourceURIResolver implements URIResolver {
+	String interface_name;
+
+	public ClasspathResourceURIResolver(String interfaceName) {
+	    interface_name = interfaceName;	    
+	}
+
+	/** 
+	 * Override the URIResolver.resolve() method to turn relative paths of imported xslt files into
+	 * absolute paths and set these absolute paths as their SystemIDs when loading them into memory.
+	 * @see http://stackoverflow.com/questions/3699860/resolving-relative-paths-when-loading-xslt-files
+	 */
+	
+	@Override
+	    public Source resolve(String href, String base) throws TransformerException {
+	    
+	    //System.err.println("href: " + href); // e.g. href: layouts/main.xsl
+	    //System.err.println("base: " + base); // e.g for *toplevel* base: file:/path/to/gs3-svn/CL1.xslt
+
+
+	    // 1. for any xsl imported by the original stylesheet, try to work out its absolute path location
+	    // by concatenating the parent folder of the base stylesheet file with the href of the file it
+	    // imports (which is a path relative to the base file). This need not hold true for the very 1st
+	    // base stylesheet: it may be located somewhere entirely different from the greenstone XSLT
+	    // files it refers to. This is the case when running transforms on the commandline for testing
+
+	    File importXSLfile = new File(href); // assume the xsl imported has an absolute path
+
+	    if(!importXSLfile.isAbsolute()) { // imported xsl specifies a path relative to parent of base
+		try {
+		    URI baseURI = new URI(base);
+		    importXSLfile = new File(new File(baseURI).getParent(), href);
+
+		    if(!importXSLfile.exists()) { // if the imported file does not exist, it's not
+			// relative to the base (the stylesheet file importing it). So look in the
+			// interface's transform subfolder for the xsl file to be imported
+			importXSLfile = new File(GSFile.interfaceStylesheetFile(GlobalProperties.getGSDL3Home(), interface_name, href));
+		    }
+		} catch(URISyntaxException use) {
+		    importXSLfile = new File(href); // try
+		}
+	    }
+	    
+	    String importXSLfilepath = ""; // for printing the expected file path on error
+	    try {
+		// path of import XSL file after resolving any .. and . dir paths
+		importXSLfilepath = importXSLfile.getCanonicalPath();
+	    } catch(IOException ioe) { // resort to using the absolute path
+		importXSLfilepath = importXSLfile.getAbsolutePath();
+	    }
+
+	    // 2. now we know where the XSL file being imported lives, so set the systemID to its
+	    // absolute path when loading it into a Source object
+	    URI systemID = importXSLfile.toURI();
+	    Source importXSLsrc = null;
+	    try {
+		importXSLsrc = new StreamSource(new InputStreamReader(new FileInputStream(importXSLfile), "UTF-8"));		
+		URL url = systemID.toURL();			
+		importXSLsrc.setSystemId(url.toExternalForm());
+	    } catch (MalformedURLException mue) {
+		logger.error("Warning: Unable to set systemID for imported stylesheet to " + systemID);
+		logger.error("Got exception: " + mue.getMessage(), mue);
+	    } catch(FileNotFoundException fne) {
+		logger.error("ERROR: importXSLsrc file does not exist " + importXSLfilepath);
+		logger.error("\tError msg: " + fne.getMessage(), fne);
+	    } catch(UnsupportedEncodingException uee) {
+		logger.error("ERROR: could not resolve relative path of import XSL file " + importXSLfilepath
+			     + " because of encoding issues: " + uee.getMessage(), uee);
+	    }	    
+	    return importXSLsrc;
+	    //return new StreamSource(this.getClass().getClassLoader().getResourceAsStream(href)); // won't work
+	}	
+    }
 
 	public Node transform(File stylesheet, File source)
 	{

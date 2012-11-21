@@ -94,6 +94,11 @@ final public class Library2
 	public static void main(String args[])
 	{
 
+	    if (System.getenv("GSDL3SRCHOME") == null) {
+		System.out.println("Before calling this script, run: source gs3-setup.sh");	
+		System.exit(1);
+	    }
+
 		if (args.length != 2)
 		{
 			System.out.println("Usage: Library2 <site name> <interface name>");
