@@ -1,33 +1,56 @@
 function DebugWidget()
 {
+	//************************
 	//Private member variables
+	//************************
+	
+	//Debugger state-keeping variables
 	var _debugOn = false;
 	var _pauseSelector = false;
 	var _elements = new Array();
 	var _itemSelected = false; //Used to prevent multiple elements from being highlighted
+	
+	//Page elements
 	var _mainDiv;
 	var _textDiv;
+	var _editingDiv;
 	var _unpauseButton;
+	var _closeEditorButtonButton;
+	var _xmlStatusBar;
+	var _saveButton;
+	
+	//Editor state-keeping variables
+	var _currentFilepath;
+	var _currentNodename;
+	var _currentName;
+	var _currentMatch;
+	var _currentNamespace;
 	
 	var createDebugDiv = function()
 	{
-		_mainDiv = $("<div>", {"id":"debugDiv", "class":"ui-corner-all"});
+		_mainDiv = $("<div>", {"id":"debugDiv"});
 		_mainDiv.css(
 		{
 			"position":"fixed", 
 			"font-size":"0.7em", 
 			"bottom":"0px",  
-			"height":"25%", 
-			"width":"100%", 
+			"height":"300px", 
+			"width":"100%",
 			"background":"white", 
 			"border":"1px black solid", 
-			"padding":"5px"
+			"padding":"5px",
+			"z-index":100
 		});
 
+		_editingDiv = $("<div>");
 		var toolBarDiv = $("<div>");
-		toolBarDiv.css({"height":"15%"});
+		toolBarDiv.css({"height":"40px"});
+		var buttonDiv = $("<div>");
+		buttonDiv.css("float", "left");
+		toolBarDiv.append(buttonDiv);
 		_textDiv = $("<div>");
-		_textDiv.css({"overflow":"auto", "width":"100%", "height":"85%", "margin-top":"5px"});
+		_textDiv.css({"overflow":"auto", "width":"100%", "height":"260px"});
+
 		var pickElementButton = $("<input type=\"button\" value=\"Enable debugging\">");
 		pickElementButton.click(function()
 		{
@@ -50,6 +73,7 @@ function DebugWidget()
 				_debugOn = false;
 			}
 		});
+
 		_unpauseButton = $("<input type=\"button\" value=\"Select new element\" disabled=\"disabled\">");
 		_unpauseButton.click(function()
 		{
@@ -60,8 +84,120 @@ function DebugWidget()
 			}
 		});
 		
-		toolBarDiv.append(pickElementButton);
-		toolBarDiv.append(_unpauseButton);
+		_closeEditorButton = $("<input type=\"button\" value=\"Close editor\" disabled=\"disabled\">");
+		_closeEditorButton.click(function()
+		{
+			if($(this).val() == "Close editor")
+			{
+				$(this).val("Open editor");
+				_editingDiv.hide();
+				_mainDiv.css("height", "300px");
+			}
+			else
+			{
+				$(this).val("Close editor");
+				_editingDiv.show();
+				_mainDiv.css("height", "500px");
+			}
+		});
+		
+		_xmlStatusBar = $("<span>");
+		_xmlStatusBar.css("padding", "5px");
+		
+		//Check the XML for errors every 2 seconds
+		setInterval(function()
+		{
+			var editor = _editingDiv.find("textarea");
+			if(editor.length)
+			{
+				var xmlString = editor.val();
+				try
+				{
+					var xml = $.parseXML('<testContainer xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
+				}
+				catch(error)
+				{
+					console.log(error);
+					_xmlStatusBar.text("XML ERROR! (Mouse over for details)");
+					_xmlStatusBar.css({"color":"white", "background":"red"});
+					_xmlStatusBar.attr("title", error);
+					_saveButton.attr("disabled", "disabled");
+					return;
+				}
+				
+				_xmlStatusBar.text("XML OK!");
+				_xmlStatusBar.css({"color":"white", "background": "green"});
+				_xmlStatusBar.removeAttr("title");
+				_saveButton.removeAttr("disabled");
+			}
+			
+		}, 2000);
+		
+		_saveButton = $("<input type=\"button\" value=\"Save changes\" disabled=\"disabled\">");
+		_saveButton.click(function()
+		{
+			var editor = _editingDiv.find("textarea");
+			if(editor.length)
+			{
+				var xmlString = editor.val();
+				try
+				{
+					var xml = $.parseXML('<testContainer xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
+				}
+				catch(error)
+				{
+					alert("Could not save as there is a problem with the XML.");
+					return;
+				}
+				
+				var url = gs.xsltParams.library_name;
+				var parameters = {"a":"g", "rt":"r", "s":"SaveXMLTemplateToFile", "s1.filePath":_currentFilepath, "s1.namespace":_currentNamespace, "s1.nodename":_currentNodename, "s1.xml":xmlString};
+				
+				if(_currentName && _currentName.length > 0){parameters["s1.name"] = _currentName;}
+				if(_currentMatch && _currentMath.length > 0){parameters["s1.match"] = _currentMatch;}
+				
+				$.post(url, parameters)
+				.success(function()
+				{
+					alert("The template has been saved successfully.");
+				})
+				.error(function()
+				{
+					alert("There was an error sending the request to the server, please try again.");
+				});
+			}
+		});
+		
+		var minimiseButton = $("<img>", {"src":gs.imageURLs.collapse});
+		minimiseButton.css({"cursor":"pointer", "float":"right", "margin-right":"20px"});
+		minimiseButton.click(function()
+		{
+			if($(this).attr("src") == gs.imageURLs.collapse)
+			{
+				_textDiv.hide();
+				$(this).attr("src", gs.imageURLs.expand);
+				_mainDiv.css("height", (_mainDiv.height() - 260) + "px");
+			}
+			else
+			{
+				_textDiv.show();
+				$(this).attr("src", gs.imageURLs.collapse);
+				_mainDiv.css("height", (_mainDiv.height() + 260) + "px");
+			}
+		});
+		
+		var clear = $("<span>");
+		clear.css("clear", "both");
+		
+		toolBarDiv.append(minimiseButton);
+		toolBarDiv.append(clear);
+		
+		buttonDiv.append(pickElementButton);
+		buttonDiv.append(_unpauseButton);
+		buttonDiv.append(_closeEditorButton);
+		buttonDiv.append(_xmlStatusBar);
+		buttonDiv.append(_saveButton);
+		_mainDiv.append(_editingDiv);
 		_mainDiv.append(toolBarDiv);
 		_mainDiv.append(_textDiv);
 	}
@@ -81,18 +217,74 @@ function DebugWidget()
 		var bottomBorderDiv = $("<div>");
 		var leftBorderDiv = $("<div>");
 		var rightBorderDiv = $("<div>");
-		
+
 		topBorderDiv.css({"position":"absolute", "top":e.offset().top + "px", "left":e.offset().left + "px", "height":"0px", "width":e.width() + "px", "border":"1px solid red"});
 		bottomBorderDiv.css({"position":"absolute", "top":(e.offset().top + e.height()) + "px", "left":e.offset().left + "px", "height":"0px", "width":e.width() + "px", "border":"1px solid red"});
 		leftBorderDiv.css({"position":"absolute", "top":e.offset().top + "px", "left":e.offset().left + "px", "height":e.height() + "px", "width":"0px", "border":"1px solid red"});
 		rightBorderDiv.css({"position":"absolute", "top":e.offset().top + "px", "left":(e.offset().left + e.width()) + "px", "height":e.height() + "px", "width":"0px",	"border":"1px solid red"});
-		
+
 		$("body").append(topBorderDiv, bottomBorderDiv, leftBorderDiv, rightBorderDiv);
-		
+
 		_elements.push(topBorderDiv);
 		_elements.push(bottomBorderDiv);
 		_elements.push(leftBorderDiv);
 		_elements.push(rightBorderDiv);
+	}
+	
+	var addMouseEventsToInfoContainer = function(infoContainer, filepath, nodename, namespace, name, match)
+	{
+		infoContainer.click(function()
+		{
+			_currentFilepath = filepath;
+			_currentNodename = nodename;
+			_currentNamespace = namespace;
+			_currentName = name;
+			_currentMatch = match;
+		
+			var url = gs.xsltParams.library_name + "?a=g&rt=r&s=RetrieveXMLTemplateFromFile&s1.filePath=" + _currentFilepath + "&s1.namespace=" + _currentNamespace + "&s1.nodename=" + _currentNodename;
+			if(_currentName && _currentName.length > 0){url += "&s1.name=" + _currentName;}
+			if(_currentMatch && _currentMatch.length > 0){url += "&s1.match=" + _currentMatch;}
+			$.ajax(url)
+			.success(function(response)
+			{
+				var template;
+				if(response.search(/<requestedTemplate>/) != -1)
+				{
+					var startIndex = response.indexOf("<requestedTemplate>") + ("<requestedTemplate>").length;
+					var endIndex = response.indexOf("</requestedTemplate>");
+					template = response.substring(startIndex, endIndex);
+				}
+				else
+				{
+					return;
+				}
+			
+				var editArea = $("<textarea>");
+				editArea.css({"width":"98%", "height":"180px"});
+				editArea.val(template);
+				
+				_editingDiv.empty();
+				_editingDiv.append(editArea);
+				_editingDiv.css({"height":"190px"});
+				
+				_mainDiv.css({"height":"500px"});
+				
+				_closeEditorButton.removeAttr("disabled");
+			})
+			.error(function()
+			{
+				console.log("ERROR");
+			});
+		});
+		infoContainer.mouseover(function()
+		{
+			$(this).data("background", $(this).css("background"));
+			$(this).css("background", "yellow");
+		});
+		infoContainer.mouseout(function()
+		{
+			$(this).css("background", $(this).data("background"));
+		});
 	}
 	
 	var addMouseEventsToDebugElements = function(debugElems)
@@ -110,33 +302,28 @@ function DebugWidget()
 		{
 			if(_debugOn && !_pauseSelector)
 			{
-				var surroundingDiv = $("<div>");
-				surroundingDiv.css("cursor","pointer");
+				var infoContainer = $("<div>");
+				infoContainer.css({"cursor":"pointer", "border":"1px dashed #AAAAAA", "margin":"5px"});
 				var fromDIV = $("<div>");
 				var elementDIV = $("<div>");
-				elementDIV.css("margin-bottom", "0.6em");
 
-				surroundingDiv.append(fromDIV);
-				surroundingDiv.append(elementDIV);
-				
-				_elements.push(surroundingDiv);
+				elementDIV.css("font-size", "1.1em");
+				fromDIV.css("font-size", "0.9em");
 
-				surroundingDiv.click(function()
-				{
-					var editArea = $("<textarea>");
-					$.ajax();
-				});
+				infoContainer.append(fromDIV);
+				infoContainer.append(elementDIV);
 				
-				surroundingDiv.mouseover(function()
-				{
-					$(this).data("background", $(this).css("background"));
-					$(this).css("background", "yellow");
-				});
+				_elements.push(infoContainer);
 				
-				surroundingDiv.mouseout(function()
-				{
-					$(this).css("background", $(this).data("background"));
-				});
+				var filepath = $(this).attr("filename");
+				var fullNodename = $(this).attr("nodename");
+				var colonIndex = fullNodename.indexOf(":");
+				var namespace = fullNodename.substring(0, colonIndex);
+				var nodename = fullNodename.substring(colonIndex + 1);
+				var name = $(this).attr("name");
+				var match = $(this).attr("match");
+
+				addMouseEventsToInfoContainer(infoContainer, filepath, nodename, namespace, name, match);
 				
 				var nodeName = $(this).attr("nodename");
 				var filename = $(this).attr("filename");
@@ -155,7 +342,7 @@ function DebugWidget()
 				fromDIV.text("From " + filename + ":");
 				elementDIV.text("<" + nodeName + " " + attrstr + ">");
 				
-				_textDiv.prepend(surroundingDiv);
+				_textDiv.prepend(infoContainer);
 				
 				if(!_itemSelected)
 				{
