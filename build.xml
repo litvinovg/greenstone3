@@ -1082,7 +1082,65 @@
     <!-- re-setup the server.xml file -->
     <!-- need to edit the config file, or do we get the user to do this???-->
   </target>
+
  
+  <!-- This target runs tomcat's "bin/catalina.bat(.sh) jpda start" 
+       to allow debugging the running GS3 server in Eclipse. See the instructions at 
+       http://www.wikijava.org/wiki/Debugging_a_servlet_with_tomcat_and_Eclipse_tutorial
+       on how to use this with eclipse
+    -->
+  <target name="debug-start-tomcat" description="Startup Tomcat for debugger" depends="init" if="tomcat.islocal">
+    <property name="tomcat.classpath" refid="local.tomcat.classpath"/>
+    <property name="tomcat.path" refid="local.tomcat.path"/>
+
+    <if><bool>
+	<isset property="fedora.maxpermsize"/></bool>
+      <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx400M ${fedora.maxpermsize}"/>
+      <else>
+	<property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx400M"/>
+      </else>
+    </if>
+
+	<echo file="${catalina.home}/bin/setenv.bat">set CLASSPATH=${tomcat.classpath}</echo>
+	<echo file="${catalina.home}/bin/setenv.sh">export CLASSPATH=${tomcat.classpath}</echo>
+	
+    <exec executable="${catalina.home}/bin/catalina.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
+      <arg value="jpda" />
+      <arg value="start" />
+      <env key="JPDA_ADDRESS" value="8000"/> <!-- for debugging Tomcat in Eclipse -->
+      <env key="JPDA_TRANSPORT" value="dt_socket"/> <!-- for debugging Tomcat in Eclipse -->
+      <!--<env key="GSDLOS" value="linux"/> do we need this?? -->
+      <env key="PATH" path="${tomcat.path}"/>
+      <env key="CATALINA_OPTS" value="${catalina.opts}"/>
+      <env key="CATALINA_HOME" value="${catalina.home}"/>
+      <env key="CLASSPATH" path="${tomcat.classpath}"/>
+      <env key="LD_LIBRARY_PATH" path="${env.LD_LIBRARY_PATH}:${lib.jni}"/>
+      <env key="DYLD_LIBRARY_PATH" path="${env.DYLD_LIBRARY_PATH}:${lib.jni}:${gdbm.home}/lib"/> <!-- for mac os --> <!-- need gdbm here these days ??-->
+      <env key="WNHOME" path="${wn.home}"/>
+      <env key="FEDORA_HOME" path="${fedora.home}"/>
+    </exec>
+    <exec executable="${catalina.home}/bin/catalina.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="true">
+      <arg value="jpda" />
+      <arg value="start" />
+      <env key="JPDA_ADDRESS" value="8000"/> <!-- for debugging Tomcat in Eclipse -->
+      <env key="JPDA_TRANSPORT" value="dt_socket"/> <!-- for debugging Tomcat in Eclipse -->
+      <env key="GSDLOS" value="windows"/>
+      <env key="GSDL3HOME" value="${basedir}"/>
+      <env key="Path" path="${tomcat.path}"/>
+      <env key="PATH" path="${tomcat.path}"/>
+      <env key="CATALINA_OPTS" value="${catalina.opts}"/>
+      <env key="CATALINA_HOME" value="${catalina.home}"/>
+      <env key="CLASSPATH" path="${tomcat.classpath}"/>
+      <env key="FEDORA_HOME" path="${fedora.home}"/>
+    </exec>
+    <!-- wait for the server to startup in case other targets need it running -->
+    <waitfor maxwait="5" maxwaitunit="second">
+      <and>
+        <socket server="${tomcat.server}" port="${tomcat.port}"/>
+        <http url="http://${tomcat.server}:${tomcat.port}${app.path}/index.html"/>
+      </and>
+    </waitfor>
+  </target>  
   
 
 <!-- Another way: http://ptrthomas.wordpress.com/2006/03/25/how-to-start-and-stop-tomcat-from-ant/ -->
