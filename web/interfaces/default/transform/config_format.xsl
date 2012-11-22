@@ -129,6 +129,12 @@
 		<xsl:choose>
 			<xsl:when test="@type='query'">
 				<a>
+				        <xsl:if test="@target">
+					  <xsl:attribute name='target'>
+					    <xsl:value-of select='@target'/>
+					  </xsl:attribute>   
+					</xsl:if>
+
 					<xslt:attribute name='href'>
 						<xslt:value-of select='$library_name'/>
 						<xsl:text>/collection/</xsl:text>
@@ -150,6 +156,12 @@
 			</xsl:when>
 			<xsl:when test="@type='classifier'">
 				<a>
+				        <xsl:if test="@target">
+					  <xsl:attribute name='target'>
+					    <xsl:value-of select='@target'/>
+					  </xsl:attribute>   
+					</xsl:if>
+
 					<xslt:attribute name='href'>
 						<xslt:value-of select='$library_name'/>
 						<xsl:text>/collection/</xsl:text>
@@ -170,6 +182,12 @@
 			</xsl:when>
 			<xsl:when test="@type='source'">
 				<a>
+				        <xsl:if test="@target">
+					  <xsl:attribute name='target'>
+					    <xsl:value-of select='@target'/>
+					  </xsl:attribute>   
+					</xsl:if>
+
 					<xslt:attribute name='href'>
 						<xslt:value-of 
 				   disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']" />/index/assoc/<xslt:value-of 
@@ -187,6 +205,12 @@
 			</xsl:when>
 			<xsl:when test="@type='page'">
 				<a>
+				        <xsl:if test="@target">
+					  <xsl:attribute name='target'>
+					    <xsl:value-of select='@target'/>
+					  </xsl:attribute>   
+					</xsl:if>
+
 					<xslt:attribute name='href'>
 						<xslt:value-of select='$library_name'/>
 						<xsl:text>/collection/</xsl:text>
@@ -207,6 +231,12 @@
 					<xslt:value-of select="/page/pageRequest/paramList/param[@name='book']/@value"/>
 				</xslt:variable>
 				<a>
+				        <xsl:if test="@target">
+					  <xsl:attribute name='target'>
+					    <xsl:value-of select='@target'/>
+					  </xsl:attribute>   
+					</xsl:if>
+
 					<xsl:copy-of select="$opt-title"/>
 					<xslt:attribute name="href">
 						<xslt:value-of select='$library_name'/>
