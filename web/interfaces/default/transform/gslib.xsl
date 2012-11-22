@@ -293,7 +293,46 @@
   <xsl:param name="pageType"/>
   <xsl:variable name="this-element" select="/page/pageResponse/collection|/page/pageResponse/serviceCluster"/>
   <xsl:variable name="this-service" select="/page/pageRequest/paramList/param[@name = 's']/@value"/>
-  
+
+<!--  
+_httpimages_ {_httpweb_/images}
+_httpscript_ {_httpweb_/script}
+_httpstyle_ {_httpweb_/style}
+_httpflash_ {_httpweb_/flash}
+_httpjava_ {_httpweb_/java}
+-->
+
+
+  <xsl:template name="define-js-variable">
+    <xsl:param name="name"/>
+    <xsl:param name="value"/>
+    <script type="text/javascript">
+      gs.variables[<xslt:text disable-output-escaping="yes">"</xslt:text><xsl:value-of select="$name"/><xslt:text disable-output-escaping="yes">"</xslt:text>]
+      <xslt:text disable-output-escaping="yes"> = "</xslt:text>
+      <xsl:value-of select="$value"/>
+      <xslt:text disable-output-escaping="yes">";</xslt:text>
+    </script>
+  </xsl:template>
+
+  <xsl:variable name="_httpcollection_" select="$httpPath"/>
+  <xsl:variable name="_httpbrowse_"><xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="$collName"/>/browse</xsl:variable>
+  <xsl:variable name="_httpquery_"><xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="$collName"/>/search</xsl:variable>
+
+  <xsl:template name="define-js-macro-variables">
+
+    <xsl:call-template name="define-js-variable">
+      <xsl:with-param name="name"  select="'_httpbrowse_'"/>
+      <xsl:with-param name="value" select="$_httpbrowse_"/>
+    </xsl:call-template>
+
+    <xsl:call-template name="define-js-variable">
+      <xsl:with-param name="name"  select="'_httpquery_'"/>
+      <xsl:with-param name="value" select="$_httpquery_"/>
+    </xsl:call-template>
+
+  </xsl:template>
+
+
   <xsl:template name="aboutCollectionPageTitle">
     <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
     <xsl:value-of select="/page/pageResponse/collection/displayItem[@name='name']"/>
