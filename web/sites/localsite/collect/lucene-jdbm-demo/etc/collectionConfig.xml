@@ -6,11 +6,13 @@
 		<metadata lang="en" name="maintainer"></metadata>
 		<metadata lang="en" name="public">true</metadata>
 	</metadataList>
+
 	<displayItemList>
 		<displayItem assigned="true" lang="en" name="name">Demo Collection</displayItem> 
 		<displayItem assigned="true" lang="en" name="description">This is a demonstration collection for the Greenstone3 digital library software. It contains a small subset (11 books) of the Humanitarian and Development Libraries. It is the Greenstone 3 equivalent of the Greenstone 2 demo collection, built with Lucene for indexing and JDBM as the database for metadata.</displayItem>
 		<displayItem lang="en" name="shortDescription">Demonstration collection containing a few books from the Humanitarian and Development Libraries. Uses Lucene and JDBM.</displayItem> 
 	</displayItemList>
+
 	<search type="lucene">
 		<level name="section">
 			<displayItem lang="en" name="name">chapter</displayItem>
@@ -144,6 +146,7 @@
 							<i>(<gsf:metadata name="Source"/>)</i>
 						</gsf:when>
 					</gsf:switch>
+
 				</td>
 			</gsf:template>
 			<gsf:template match="classifierNode[@classifierStyle = 'VList']">
@@ -179,6 +182,13 @@
 	<display>
 		<format>
 			<gsf:option name="TOC" value="true"/>
+			
+			<gsf:headMetaTags>
+			  <gsf:metadata name="dls.Title"/>
+			  <gsf:metadata name="dls.Subject"/>
+			  <gsf:metadata name="dls.Organization"/>
+			</gsf:headMetaTags>
+
 		</format>
 	</display>
 	<replaceListRef id="gs2-standard"/>
