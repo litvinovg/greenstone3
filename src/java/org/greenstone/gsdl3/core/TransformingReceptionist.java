@@ -63,7 +63,7 @@ public class TransformingReceptionist extends Receptionist
 
 	protected HashMap<String, ArrayList<String>> _metadataRequiredMap = new HashMap<String, ArrayList<String>>();
 
-	boolean _debug = false;
+	boolean _debug = true;
 
 	public TransformingReceptionist()
 	{
@@ -495,6 +495,8 @@ public class TransformingReceptionist extends Receptionist
 	 */
 	protected Node transformPage(Element page)
 	{
+		_debug = false;
+
 		boolean allowsClientXSLT = (Boolean) config_params.get(GSConstants.ALLOW_CLIENT_SIDE_XSLT);
 		//System.out.println("Client side transforms allowed? " + allowsClientXSLT);
 
@@ -643,6 +645,11 @@ public class TransformingReceptionist extends Receptionist
 			}
 
 			inlineTemplate = (String) params.get(GSParams.INLINE_TEMPLATE);
+
+			if (params.get(GSParams.DEBUG) != null && (((String) params.get(GSParams.DEBUG)).equals("on") || ((String) params.get(GSParams.DEBUG)).equals("1")))
+			{
+				_debug = true;
+			}
 		}
 
 		config_params.put("collName", collection);

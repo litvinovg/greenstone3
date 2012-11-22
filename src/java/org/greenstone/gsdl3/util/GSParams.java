@@ -80,6 +80,8 @@ public class GSParams
 
 	public static final String EXTERNAL_LINK_TYPE_DIRECT = "direct";
 	public static final String EXTERNAL_LINK_TYPE_FRAMED = "frame";
+	
+	public static final String DEBUG = "debug";
 
 	protected HashMap<String, Param> param_map = null;
 
@@ -126,6 +128,8 @@ public class GSParams
 		// filtering args must be specified each time
 		addParameter(EXCERPT_ID, false);
 		addParameter(EXCERPT_TAG, false);
+		
+		addParameter(DEBUG, false);
 	}
 
 	public boolean addParameter(String name, boolean save)
