@@ -70,7 +70,6 @@
 		</script>
 	</xsl:template>
 
-
 	<xsl:template match="gsf:style[@src]">
 		<link rel="stylesheet" type="text/css">
 			<xsl:attribute name='href'>
@@ -107,7 +106,8 @@
 		</xslt:if>
 	</xsl:template>
 
-  <xsl:template match="params"></xsl:template>
+	<xsl:template match="params"></xsl:template>
+
 	<xsl:template match="gsf:link">
 
 		<xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>
@@ -451,7 +451,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 		</xsl:if>
 	</xsl:template>
 
-
+	
   <xsl:template match="gsf:foreach-metadata">
     <xsl:variable name="meta_name"><xsl:call-template name="getMetadataName"/></xsl:variable>
     <xslt:for-each>
@@ -465,13 +465,14 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
   <xsl:template match="gsf:meta-value">
     <xslt:value-of select="."/>
   </xsl:template>
-	<xsl:template name="getMetadataName">
-		<xsl:if test='@select'>
-			<xsl:value-of select='@select'/>
-			<xsl:text>_</xsl:text>
-		</xsl:if>
-		<xsl:value-of select="@name"/>
-	</xsl:template>
+
+  <xsl:template name="getMetadataName">
+    <xsl:if test='@select'>
+      <xsl:value-of select='@select'/>
+      <xsl:text>_</xsl:text>
+    </xsl:if>
+    <xsl:value-of select="@name"/>
+  </xsl:template>
 
 
 	<xsl:template match="gsf:text">
@@ -539,6 +540,11 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 			</xsl:if>
 		</xslt:choose>
 	</xsl:template>
+
+	<!-- 
+	     <gsf:headMetaTags> exists for controlling the <meta name="x" content="y"> elements that appear in the HTML <head></head>
+	     XPATH is used to select this item (in header.xsl).  It does not need an explicit definition here in this file 
+	-->
 
 	<xsl:template match="*">
 		<xsl:copy>
