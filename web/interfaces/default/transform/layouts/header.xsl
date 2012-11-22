@@ -41,6 +41,21 @@
 	
 		<title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
 		
+		<xsl:if test="/page/pageRequest/@action ='d'">
+		  
+		  <xsl:variable name="myMetadataHeader" select="/page/pageResponse/format/gsf:headMetaTags/gsf:metadata"/>
+		  <xsl:for-each select="$myMetadataHeader">
+		    <xsl:variable name="metaname" select="@name"/>
+		    
+		    <xsl:variable name="metavals" 
+				  select="/page/pageResponse/document/metadataList/metadata[@name = $metaname]|/page/pageResponse/document/documentNode/metadataList/metadata[@name = $metaname]"/>
+		    <xsl:for-each select="$metavals">
+		      <META NAME="{$metaname}" CONTENT="{.}"/>
+		    </xsl:for-each>
+		  </xsl:for-each>
+		  
+		</xsl:if>
+
 		<xsl:choose>
 			<xsl:when test="/page/pageResponse/interfaceOptions/option[@name = 'cssTheme']/@value">
 				<!-- Get the theme from the interfaceConfig.xml file -->
@@ -72,6 +87,7 @@
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/debug_scripts.js"><xsl:text> </xsl:text></script>
 		
 		<xsl:call-template name="setup-gs-variable"/>
+
 		<xsl:call-template name="additionalHeaderContent"/>
 	</xsl:template>
 	
