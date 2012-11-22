@@ -92,6 +92,21 @@
 				addMetadataToList(name, value, gs.documentMetadata, lang);
 			</xsl:for-each>
 			
+			<xsl:for-each select="/page/pageResponse/classifier/documentNode">
+				{
+				<xsl:text disable-output-escaping="yes">var nodeID = "</xsl:text><xsl:value-of select="@nodeID"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+				<xsl:text disable-output-escaping="yes">var emptyLang = "";</xsl:text>
+				<xsl:text disable-output-escaping="yes">var metaList = new Array();</xsl:text>
+				<xsl:for-each select="metadataList/metadata">
+					<xsl:text disable-output-escaping="yes">name = "</xsl:text><xsl:value-of select="@name"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+					<xsl:text disable-output-escaping="yes">value = "</xsl:text><xsl:value-of disable-output-escaping="yes" select="util:escapeNewLinesAndQuotes(.)"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+					<xsl:text disable-output-escaping="yes">lang = "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+					addMetadataToList(name, value, metaList, lang);
+				</xsl:for-each>
+				addMetadataToList(nodeID, metaList, gs.documentMetadata, emptyLang);
+				}
+			</xsl:for-each>
+			
 			<xsl:text disable-output-escaping="yes">addMetadataToList("docType", "</xsl:text><xsl:value-of select="/page/pageResponse/document/@docType"/><xsl:text disable-output-escaping="yes">", gs.documentMetadata, "</xsl:text><xsl:value-of select="@lang"/><xsl:text disable-output-escaping="yes">");</xsl:text>
 		</script>
 	</xsl:template>
