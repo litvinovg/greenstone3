@@ -592,7 +592,7 @@ public class TransformingReceptionist extends Receptionist
 		// the page xml
 		Document theXML = null;
 
-		if (output.equals("xml") || output.equals("clientside"))
+		if (output.equals("xml") || (output.equals("json")) || output.equals("clientside"))
 		{
 			// Append some bits and pieces first...
 			theXML = converter.newDOM();
@@ -627,9 +627,12 @@ public class TransformingReceptionist extends Receptionist
 			root.appendChild(siteName);
 			root.appendChild(filepath);
 
-			if (output.equals("xml"))
-				return theXML.getDocumentElement();
+			if ((output.equals("xml")) || output.equals("json")) {
+			    // in the case of "json", calling method responsible for converting to JSON-string
+			    return theXML.getDocumentElement();
+			}
 		}
+
 
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		String collection = "";
