@@ -21,6 +21,8 @@ public class GS2BrowseAction extends Action
 
 	public static final String CLASSIFIER_ARG = "cl";
 
+	public static final String DESCENDANTS_ARG = "descendants";
+
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.action.GS2BrowseAction.class.getName());
 
 	/** process the request */
@@ -53,6 +55,13 @@ public class GS2BrowseAction extends Action
 		{
 			logger.error("classifierBrowse, need to specify a collection!");
 			return page_response;
+		}
+
+		boolean get_descendants = false;
+		String descendants_str = (String) params.get(DESCENDANTS_ARG);
+		if (descendants_str != null && descendants_str.equals("1"))
+		{
+			get_descendants = true;
 		}
 
 		UserContext userContext = new UserContext(request);
@@ -170,6 +179,15 @@ public class GS2BrowseAction extends Action
 		param_list.appendChild(param);
 		param.setAttribute(GSXML.NAME_ATT, "structure");
 		param.setAttribute(GSXML.VALUE_ATT, "children");
+
+		if (get_descendants)
+		{
+			param = this.doc.createElement(GSXML.PARAM_ELEM);
+			param_list.appendChild(param);
+			param.setAttribute(GSXML.NAME_ATT, "structure");
+			param.setAttribute(GSXML.VALUE_ATT, "descendants");
+		}
+
 
 		// put the classifier node into a classifier node list
 		Element classifier_list = this.doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
