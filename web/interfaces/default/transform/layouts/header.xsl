@@ -87,6 +87,7 @@
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/debug_scripts.js"><xsl:text> </xsl:text></script>
 		
 		<xsl:call-template name="setup-gs-variable"/>
+		<xsl:call-template name="define-js-macro-variables"/>
 
 		<xsl:call-template name="additionalHeaderContent"/>
 	</xsl:template>
