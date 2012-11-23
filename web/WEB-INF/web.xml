@@ -408,4 +408,23 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
     <mime-type>text/xml</mime-type>
   </mime-mapping>
 
+<!-- Deny access to contents of URL pattern /usersDB/*
+It appears the url pattern has to be relative to the web directory (a url-pattern of /usersDB/* is insufficient), so this may need to be done for all sites.
+http://stackoverflow.com/questions/5333266/tomcat-deny-access-to-specific-files
+and http://www.coderanch.com/t/84442/Tomcat/write-correct-url-pattern-security -->
+  <security-constraint>
+    <web-resource-collection>
+        <web-resource-name>usersDB files</web-resource-name>
+        <description>No direct access to usersDB files.</description>
+        <url-pattern>/sites/localsite/etc/usersDB/*</url-pattern>
+	<!--<url-pattern>/usersDB/*</url-pattern>-->
+        <http-method>POST</http-method>
+        <http-method>GET</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+        <description>No direct browser access to usersDB files.</description>
+        <role-name>NobodyHasThisRole</role-name>
+    </auth-constraint>
+  </security-constraint>
+
 </web-app>
