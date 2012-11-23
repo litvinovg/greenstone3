@@ -40,14 +40,12 @@
 
 	  <!-- better to do the following with a util:getInterfaceText
 	       so language independent -->
-	  <p>Refresh all the collection configuration files:</p>
+	  <p><xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.refreshconfig')"/></p>
 
 	  <dl>
 	    <dt>a=s&amp;sa=c</dt>
 
-	    <dd>
-	      Reconfigures the whole site. Reads in siteCog.xml,
-	      reloads all the collections.
+	    <dd><xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.reconfigsite')"/>
 	    </dd>
 	  </dl>
 
