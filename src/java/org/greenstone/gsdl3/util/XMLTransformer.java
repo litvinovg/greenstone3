@@ -676,6 +676,11 @@ public class XMLTransformer
 			// since the error reporting would have provided accurate locations for those.
 			if (debugAsFile)
 			{
+			    System.err.println("\n****Original error transforming xml:\n" + this.errorMessage + "\n****\n"); 
+			    System.err.println("***** About to perform the transform again with actual files\n******\n");
+			    logger.error("Original transformation error: " + this.errorMessage);
+			    logger.error("**** About to perform transform again with actual files");
+
 
 				performTransformWithPhysicalFiles(); // will give accurate line numbers
 
