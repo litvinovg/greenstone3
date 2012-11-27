@@ -462,7 +462,7 @@
 	  <tr><td align="right">
 	      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.new_password')"/></td><td><input type="password" name="s1.umpw1" size="10" value=""/></td></tr>
 	  <tr><td align="right">
-	      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.retype_new_password')"/></td><td><input type="password" name="s1.umpw2" size="10" value=""/></td></tr>
+	      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.retype_password')"/></td><td><input type="password" name="s1.umpw2" size="10" value=""/></td></tr>
 	  <tr><td></td><td>
 	      <input type="submit" value="submit"></input></td>
 	  </tr>
@@ -489,7 +489,7 @@
 	<input type='hidden' name='s1.asn' value='{$asn}'/>
 	<input type='hidden' name='s1.uan' value='1'/>
 	<input type='hidden' name='s1.umun' value='{$umun_s}'/>
-	<p><font color='red'><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.do_you_really_want_to_permanently_remove_user')"/> <xsl:value-of select="$umun_s"/>" ?</font></p>
+	<p><font color='red'><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.do_you_really_want_to_permanently_remove_user', $umun_s)"/></font></p>
 	<input type="submit" value="yes"><xsl:attribute name="name">s1.cm</xsl:attribute></input>
 	<input type="submit" value="no"><xsl:attribute name="name">s1.cm</xsl:attribute></input>
       </form>
