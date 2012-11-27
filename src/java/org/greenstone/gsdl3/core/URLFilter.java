@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
-import org.greenstone.gsdl3.action.DocumentAction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -30,11 +29,13 @@ public class URLFilter implements Filter
 
 	//Restricted URLs
 	protected static final String SITECONFIG_URL = "sites/[^/]+/siteConfig.xml";
+	protected static final String USERS_DB_URL = "sites/[^/]+/etc/usersDB/.*";
 	protected static final ArrayList<String> _restrictedURLs;
 	static
 	{
 		ArrayList<String> restrictedURLs = new ArrayList<String>();
 		restrictedURLs.add(SITECONFIG_URL);
+		restrictedURLs.add(USERS_DB_URL);
 		_restrictedURLs = restrictedURLs;
 	}
 
