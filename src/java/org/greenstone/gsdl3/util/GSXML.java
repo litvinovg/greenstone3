@@ -1487,48 +1487,4 @@ public class GSXML
 
 		return groups;
 	}
-
-	public static NodeList getHTMLStructureElements(Document doc)
-	{
-		MyNodeList elems = new MyNodeList();
-
-		String[] structureTagNames = new String[] { "html", "div", "td", "li" };
-
-		for (String tagName : structureTagNames)
-		{
-			NodeList htmlElems = doc.getElementsByTagName(tagName);
-			elems.addNodeList(htmlElems);
-		}
-
-		return elems;
-	}
-
-	public static void addDebugSpanTags(Document doc)
-	{
-		NodeList allElements = doc.getElementsByTagName("*");
-
-		for (int i = 0; i < allElements.getLength(); i++)
-		{
-			Element current = (Element) allElements.item(i);
-			String debugString = null;
-			if ((debugString = (String) current.getUserData("GSDEBUGFILENAME")) != null)
-			{
-				System.err.println("DEBUGSTRING = " + debugString);
-
-				Element xmlSpan = doc.createElement("span");
-				xmlSpan.setAttribute("style", "display:none;");
-				xmlSpan.setAttribute("class", "debugSpan");
-				xmlSpan.appendChild(doc.createTextNode("\"filename\":\"" + debugString + "\", \"xml\":\"" + GSXML.xmlNodeToString((Element) current.getUserData("GSDEBUGXML")) + "\""));
-
-				if (current.hasChildNodes())
-				{
-					current.insertBefore(xmlSpan, current.getFirstChild());
-				}
-				else
-				{
-					current.appendChild(xmlSpan);
-				}
-			}
-		}
-	}
 }
