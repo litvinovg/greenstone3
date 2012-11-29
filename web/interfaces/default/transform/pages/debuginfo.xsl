@@ -43,7 +43,8 @@
 	  <p><xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.refreshconfig')"/></p>
 
 	  <dl>
-	    <dt>a=s&amp;sa=c</dt>
+	    <!--<a href="http://host:port/greenstone3/library?a=s&sa=c">a=s&amp;sa=c</a>-->
+	    <dt><a href="{$library_name}?a=s&amp;sa=c">a=s&amp;sa=c</a></dt>
 
 	    <dd><xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.reconfigsite')"/>
 	    </dd>
