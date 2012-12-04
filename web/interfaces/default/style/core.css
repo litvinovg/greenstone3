@@ -85,6 +85,7 @@ pre {
 .horizontalContainer {
 	padding-left:0px;
 	margin:0px;
+	text-transform: uppercase; /* To get the bookshelves and buckets titlecased (they're stored lowercased) */
 }
 
 .selectedHorizontalClassifierNode a{
@@ -841,6 +842,12 @@ dl dd { padding-bottom:10px}
 
 .slideshowImage{
 	width:100%;
+}
+
+/* To get the bookshelves and buckets titlecased (they're stored lowercased) */
+table#classifiernodelist {
+    
+    text-transform: capitalize;
 }
 
 /*
