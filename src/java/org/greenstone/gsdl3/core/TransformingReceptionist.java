@@ -700,15 +700,17 @@ public class TransformingReceptionist extends Receptionist
 			String configStylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, "config_format.xsl");
 			Document configStylesheet_doc = this.converter.getDOM(new File(configStylesheet_file));
 
-			if (_debug)
-			{
-				GSXSLT.modifyConfigFormatForDebug(configStylesheet_doc, GSFile.collectionConfigFile(GSFile.collectDir(GSFile.siteHome(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME)) + File.separator + collection)));
-			}
-
 			if (configStylesheet_doc != null)
 			{
 				Document format_doc = this.converter.newDOM();
 				format_doc.appendChild(format_doc.importNode(format_elem, true));
+
+				if (_debug)
+				{
+					String siteHome = GSFile.siteHome(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME));
+					GSXSLT.insertDebugElements(format_doc, GSFile.collectionConfigFile(siteHome, collection));
+				}
+
 				Node result = this.transformer.transform(configStylesheet_doc, format_doc, config_params); // Needs addressing <-
 
 				// Since we started creating documents with DocTypes, we can end up with 
@@ -732,7 +734,8 @@ public class TransformingReceptionist extends Receptionist
 				// add extracted GSF statements in to the main stylesheet
 				if (_debug)
 				{
-					GSXSLT.mergeStylesheetsDebug(style_doc, new_format, true, true, "OTHER1", GSFile.collectionConfigFile(GSFile.collectDir(GSFile.siteHome(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME)) + File.separator + collection)));
+					String siteHome = GSFile.siteHome(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME));
+					GSXSLT.mergeStylesheetsDebug(style_doc, new_format, true, true, "OTHER1", GSFile.collectionConfigFile(siteHome, collection));
 				}
 				else
 				{
