@@ -20,6 +20,7 @@ package org.greenstone.gsdl3.util;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -203,7 +204,7 @@ public class GSXSLT
 		}
 	}
 
-	protected static void insertDebugElements(Document doc, String filename)
+	public static void insertDebugElements(Document doc, String filename)
 	{
 		NodeList xslTemplates = doc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
 		NodeList gsfTemplates = doc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "template");
@@ -233,6 +234,7 @@ public class GSXSLT
 			Element debugElement = doc.createElement("debug");
 			debugElement.setAttribute("filename", filename);
 			debugElement.setAttribute("nodename", gsf ? "gsf:template" : "xsl:template");
+
 			if (currentTemplate.getAttribute("match").length() > 0)
 			{
 				debugElement.setAttribute("match", currentTemplate.getAttribute("match"));
@@ -241,8 +243,6 @@ public class GSXSLT
 			{
 				debugElement.setAttribute("name", currentTemplate.getAttribute("name"));
 			}
-
-			Element currentDebugElement = (Element) debugElement.cloneNode(true);
 
 			if (childNodes.getLength() > 0)
 			{
@@ -258,24 +258,24 @@ public class GSXSLT
 						}
 						else
 						{
-							currentDebugElement.appendChild(currentNode);
+							debugElement.appendChild(currentNode);
 						}
 					}
 					else
 					{
-						currentDebugElement.appendChild(currentNode);
+						debugElement.appendChild(currentNode);
 					}
 				}
-				currentTemplate.appendChild(currentDebugElement);
+				currentTemplate.appendChild(debugElement);
 			}
 			else
 			{
-				currentTemplate.appendChild(currentDebugElement);
+				currentTemplate.appendChild(debugElement);
 			}
 
 			Element textElement = doc.createElementNS(GSXML.XSL_NAMESPACE, "text");
 			textElement.appendChild(doc.createTextNode(" "));
-			currentDebugElement.appendChild(textElement);
+			debugElement.appendChild(textElement);
 		}
 	}
 
@@ -372,56 +372,6 @@ public class GSXSLT
 		}
 
 		return finalDoc;
-	}
-
-	public static void modifyConfigFormatForDebug(Document doc, String filename)
-	{
-		NodeList templateNodes = doc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
-		if (templateNodes.getLength() == 0)
-		{
-			templateNodes = doc.getElementsByTagName("xsl:template");
-		}
-
-		Element debugElement = doc.createElement("debug");
-		debugElement.setAttribute("filename", filename);
-
-		for (int i = 0; i < templateNodes.getLength(); i++)
-		{
-			Element currentTemplate = (Element) templateNodes.item(i);
-			if (currentTemplate.getAttribute("match").equals("*") || currentTemplate.getAttribute("match").equals("format"))
-			{
-				continue;
-			}
-
-			Element currentDebugElement = (Element) debugElement.cloneNode(true);
-
-			//The xsl that gets the name of current node (e.g. gsf:icon)
-			Element nodeNameAttribute = doc.createElementNS(GSXML.XSL_NAMESPACE, "attribute");
-			nodeNameAttribute.setAttribute(GSXML.NAME_ATT, "nodeName");
-			Element nodeNameValue = doc.createElementNS(GSXML.XSL_NAMESPACE, "value-of");
-			nodeNameValue.setAttribute("select", "name()");
-			nodeNameAttribute.appendChild(nodeNameValue);
-			currentDebugElement.appendChild(nodeNameAttribute);
-
-			//The xsl that copies the attributes of the current node
-			Element attributeCopy = doc.createElementNS(GSXML.XSL_NAMESPACE, "copy-of");
-			attributeCopy.setAttribute("select", "@*");
-			currentDebugElement.appendChild(attributeCopy);
-
-			if (currentTemplate.hasChildNodes())
-			{
-				NodeList childNodes = currentTemplate.getChildNodes();
-				while (childNodes.getLength() > 0)
-				{
-					currentDebugElement.appendChild(childNodes.item(0));
-				}
-				currentTemplate.appendChild(currentDebugElement);
-			}
-			else
-			{
-				currentTemplate.appendChild(currentDebugElement);
-			}
-		}
 	}
 
 	/**
@@ -562,6 +512,8 @@ public class GSXSLT
 	public static void fixTables(Document doc)
 	{
 		NodeList debugElements = doc.getElementsByTagName("debug");
+
+		HashMap<Element, ArrayList<Element>> tracker = new HashMap<Element, ArrayList<Element>>();
 		for (int i = 0; i < debugElements.getLength(); i++)
 		{
 			Element currentElement = (Element) debugElements.item(i);
@@ -579,20 +531,76 @@ public class GSXSLT
 
 			if (hasChildElements && currentElement.getParentNode() != null && currentElement.getParentNode() instanceof Element)
 			{
-				Element parent = (Element) currentElement.getParentNode();
+				Element parent = findNonDebugParent(currentElement);
+				if (parent == null)
+				{
+					continue;
+				}
+
 				if (parent.getNodeName().toLowerCase().equals("table") || parent.getNodeName().toLowerCase().equals("tr"))
 				{
-					parent.setAttribute("debug", "true");
-					NamedNodeMap attributes = currentElement.getAttributes();
-					for (int j = 0; j < attributes.getLength(); j++)
+					if (tracker.get(parent) == null)
 					{
-						Node currentAttribute = attributes.item(j);
-						String name = currentAttribute.getNodeName();
-						String value = currentAttribute.getNodeValue();
-						parent.setAttribute(name, value);
+						ArrayList<Element> debugElems = new ArrayList<Element>();
+						debugElems.add(currentElement);
+						tracker.put(parent, debugElems);
+					}
+					else
+					{
+						ArrayList<Element> debugElems = tracker.get(parent);
+						debugElems.add(currentElement);
 					}
 				}
 			}
 		}
+
+		for (Element tableElem : tracker.keySet())
+		{
+			ArrayList<Element> debugElems = tracker.get(tableElem);
+			ArrayList<String> attrNames = new ArrayList<String>();
+
+			for (Element debugElem : debugElems)
+			{
+				NamedNodeMap attributes = debugElem.getAttributes();
+				for (int i = 0; i < attributes.getLength(); i++)
+				{
+					attrNames.add(attributes.item(i).getNodeName());
+				}
+			}
+
+			for (String name : attrNames)
+			{
+				String attrValueString = "[";
+				for (int i = debugElems.size() - 1; i >= 0; i--)
+				{
+					Element current = debugElems.get(i);
+					attrValueString += "\'" + current.getAttribute(name).replace("\\", "\\\\").replace("'", "\\'") + "\'";
+					if (i != 0)
+					{
+						attrValueString += ",";
+					}
+				}
+				attrValueString += "]";
+
+				tableElem.setAttribute(name, attrValueString);
+			}
+			tableElem.setAttribute("debug", "true");
+			tableElem.setAttribute("debugSize", "" + debugElems.size());
+		}
+	}
+
+	private static Element findNonDebugParent(Element elem)
+	{
+		Node parent = elem.getParentNode();
+		while (parent instanceof Element && parent.getNodeName().equals("debug"))
+		{
+			parent = parent.getParentNode();
+		}
+
+		if (parent instanceof Element)
+		{
+			return (Element) parent;
+		}
+		return null;
 	}
 }
