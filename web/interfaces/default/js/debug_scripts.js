@@ -91,13 +91,13 @@ function DebugWidget()
 			{
 				$(this).val("Open editor");
 				_editingDiv.hide();
-				_mainDiv.css("height", "300px");
+				_mainDiv.css("height", (_mainDiv.height() - 200) + "px");
 			}
 			else
 			{
 				$(this).val("Close editor");
 				_editingDiv.show();
-				_mainDiv.css("height", "500px");
+				_mainDiv.css("height", (_mainDiv.height() + 200) + "px");
 			}
 		});
 		
@@ -128,7 +128,10 @@ function DebugWidget()
 				_xmlStatusBar.text("XML OK!");
 				_xmlStatusBar.css({"color":"white", "background": "green"});
 				_xmlStatusBar.removeAttr("title");
-				_saveButton.removeAttr("disabled");
+				if(_saveButton.val() == "Save changes")
+				{
+					_saveButton.removeAttr("disabled");
+				}
 			}
 			
 		}, 2000);
@@ -154,12 +157,28 @@ function DebugWidget()
 				var parameters = {"a":"g", "rt":"r", "s":"SaveXMLTemplateToFile", "s1.filePath":_currentFilepath, "s1.namespace":_currentNamespace, "s1.nodename":_currentNodename, "s1.xml":xmlString};
 				
 				if(_currentName && _currentName.length > 0){parameters["s1.name"] = _currentName;}
-				if(_currentMatch && _currentMath.length > 0){parameters["s1.match"] = _currentMatch;}
+				if(_currentMatch && _currentMatch.length > 0){parameters["s1.match"] = _currentMatch;}
+				
+				_saveButton.val("Saving...");
+				_saveButton.attr("disabled", "disabled");
 				
 				$.post(url, parameters)
 				.success(function()
 				{
-					alert("The template has been saved successfully.");
+					$.ajax(gs.xsltParams.library_name + "?a=s&sa=c")
+					.success(function()
+					{
+						alert("The template has been saved successfully.");
+					})
+					.error(function()
+					{
+						alert("Error reloading collection.");
+					})
+					.complete(function()
+					{
+						_saveButton.val("Save changes");
+						_saveButton.removeAttr("disabled");
+					});
 				})
 				.error(function()
 				{
@@ -241,17 +260,19 @@ function DebugWidget()
 			_currentName = name;
 			_currentMatch = match;
 		
+			var responseName = "requestedNameTemplate";
+		
 			var url = gs.xsltParams.library_name + "?a=g&rt=r&s=RetrieveXMLTemplateFromFile&s1.filePath=" + _currentFilepath + "&s1.namespace=" + _currentNamespace + "&s1.nodename=" + _currentNodename;
+			if(_currentMatch && _currentMatch.length > 0){url += "&s1.match=" + _currentMatch; responseName = "requestedMatchTemplate";}
 			if(_currentName && _currentName.length > 0){url += "&s1.name=" + _currentName;}
-			if(_currentMatch && _currentMatch.length > 0){url += "&s1.match=" + _currentMatch;}
 			$.ajax(url)
 			.success(function(response)
 			{
 				var template;
-				if(response.search(/<requestedTemplate>/) != -1)
+				if(response.search(responseName) != -1)
 				{
-					var startIndex = response.indexOf("<requestedTemplate>") + ("<requestedTemplate>").length;
-					var endIndex = response.indexOf("</requestedTemplate>");
+					var startIndex = response.indexOf("<" + responseName + ">") + responseName.length + 2;
+					var endIndex = response.indexOf("</" + responseName + ">");
 					template = response.substring(startIndex, endIndex);
 				}
 				else
@@ -302,47 +323,79 @@ function DebugWidget()
 		{
 			if(_debugOn && !_pauseSelector)
 			{
-				var infoContainer = $("<div>");
-				infoContainer.css({"cursor":"pointer", "border":"1px dashed #AAAAAA", "margin":"5px"});
-				var fromDIV = $("<div>");
-				var elementDIV = $("<div>");
-
-				elementDIV.css("font-size", "1.1em");
-				fromDIV.css("font-size", "0.9em");
-
-				infoContainer.append(fromDIV);
-				infoContainer.append(elementDIV);
-				
-				_elements.push(infoContainer);
-				
-				var filepath = $(this).attr("filename");
-				var fullNodename = $(this).attr("nodename");
-				var colonIndex = fullNodename.indexOf(":");
-				var namespace = fullNodename.substring(0, colonIndex);
-				var nodename = fullNodename.substring(colonIndex + 1);
-				var name = $(this).attr("name");
-				var match = $(this).attr("match");
-
-				addMouseEventsToInfoContainer(infoContainer, filepath, nodename, namespace, name, match);
-				
-				var nodeName = $(this).attr("nodename");
-				var filename = $(this).attr("filename");
-				var attrstr = "";
-				var illegalNames = ["nodename", "filename", "style", "debug", "id", "class"];
-
-				$(this.attributes).each(function()
+				var nodes = new Array();
+				if($(this).is("table, tr"))
 				{
-					for(var i = 0; i < illegalNames.length; i++)
+					var size = parseInt($(this).attr("debugSize"));
+					for(var i = 0; i < size; i++)
 					{
-						if(this.name == illegalNames[i]){return;}
+						var tempNode = $("<div>");
+						tempNode.tempAttrs = new Array();
+						$(this.attributes).each(function()
+						{
+							if(this.value.charAt(0) == '[')
+							{
+								var values = eval(this.value);
+								if(values[i] == "")
+								{
+									return;
+								}
+								tempNode.attr(this.name, values[i]);
+								tempNode.tempAttrs.push({name:this.name, value:values[i]});
+							}
+						});
+						nodes.push(tempNode);
 					}
-					attrstr += this.name + "=\"" + this.value + "\" ";
+				}
+				else
+				{
+					nodes.push(this);
+				}
+				
+				$(nodes).each(function()
+				{
+					var filepath = $(this).attr("filename");
+					var fullNodename = $(this).attr("nodename");
+					var colonIndex = fullNodename.indexOf(":");
+					var namespace = fullNodename.substring(0, colonIndex);
+					var nodename = fullNodename.substring(colonIndex + 1);
+					var name = $(this).attr("name");
+					var match = $(this).attr("match");
+
+					var infoContainer = $("<div>");
+					infoContainer.css({"cursor":"pointer", "border":"1px dashed #AAAAAA", "margin":"5px"});
+					var fromDIV = $("<div>");
+					var elementDIV = $("<div>");
+
+					elementDIV.css("font-size", "1.1em");
+					fromDIV.css("font-size", "0.9em");
+
+					infoContainer.append(fromDIV);
+					infoContainer.append(elementDIV);
+					
+					_elements.push(infoContainer);
+					
+					addMouseEventsToInfoContainer(infoContainer, filepath, nodename, namespace, name, match);
+					
+					var attrstr = "";
+					var illegalNames = ["nodename", "filename", "style", "debug", "id", "class"];
+
+					var attributes = ((this.tempAttrs) ? this.tempAttrs : this.attributes);
+					
+					$(attributes).each(function()
+					{
+						for(var i = 0; i < illegalNames.length; i++)
+						{
+							if(this.name == illegalNames[i]){return;}
+						}
+						attrstr += this.name + "=\"" + this.value + "\" ";
+					});
+					
+					fromDIV.text("From " + filepath + ":");
+					elementDIV.text("<" + fullNodename + " " + attrstr + ">");
+					
+					_textDiv.prepend(infoContainer);
 				});
-				
-				fromDIV.text("From " + filename + ":");
-				elementDIV.text("<" + nodeName + " " + attrstr + ">");
-				
-				_textDiv.prepend(infoContainer);
 				
 				if(!_itemSelected)
 				{
