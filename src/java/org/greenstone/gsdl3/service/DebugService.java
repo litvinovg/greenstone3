@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -127,12 +126,13 @@ public class DebugService extends ServiceRack
 					Element template = (Element) templateElems.item(i);
 					if (template.getAttribute("name").equals(nameToGet))
 					{
-						Element requestedTemplate = this.doc.createElement("requestedTemplate");
+						Element requestedTemplate = this.doc.createElement("requestedNameTemplate");
 						requestedTemplate.appendChild(this.doc.importNode(template, true));
 						result.appendChild(requestedTemplate);
 					}
 				}
 			}
+
 			//Maybe should look for highest priority
 			if (matchToGet != null && matchToGet.length() != 0)
 			{
@@ -141,7 +141,7 @@ public class DebugService extends ServiceRack
 					Element template = (Element) templateElems.item(i);
 					if (template.getAttribute("match").equals(matchToGet))
 					{
-						Element requestedTemplate = this.doc.createElement("requestedTemplate");
+						Element requestedTemplate = this.doc.createElement("requestedMatchTemplate");
 						requestedTemplate.appendChild(this.doc.importNode(template, true));
 						result.appendChild(requestedTemplate);
 					}
