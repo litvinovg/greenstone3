@@ -37,7 +37,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.greenstone.util.GlobalProperties;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * a class to contain various static methods that are used by the xslt
@@ -143,7 +142,6 @@ public class XSLTUtil
 		return oidParts[0];
 	}
 
-
 	public static String replace(String orig, String match, String replacement)
 	{
 		return orig.replace(match, replacement);
@@ -230,6 +228,44 @@ public class XSLTUtil
 			return "_" + key + "_";
 		}
 		result = result.replaceAll("__INTERFACE_NAME__", interface_name);
+		return result;
+	}
+
+	public static String getInterfaceText(String interfaceName, String dictionaryName, String lang, String key, String args_str)
+	{
+		key = key.replaceAll("__INTERFACE_NAME__", interfaceName);
+
+		String[] args = null;
+		if (args_str != null && !args_str.equals(""))
+		{
+			args = StringUtils.split(args_str, ";");
+		}
+		Dictionary dict = new Dictionary(dictionaryName, lang);
+		String result = dict.get(key, args);
+		if (result == null)
+		{ // not found
+			//if not found, search a separate subdirectory named by the interface name
+			String sep_interface_dir = interfaceName + File.separatorChar + lang + File.separatorChar + "interface";
+			dict = new Dictionary(sep_interface_dir, lang);
+			result = dict.get(key, args);
+			if (result != null)
+			{
+				result = result.replaceAll("__INTERFACE_NAME__", interfaceName);
+				return result;
+			}
+		}
+
+		if (result == null && !interfaceName.equals("default"))
+		{ // not found, try the default interface
+			dict = new Dictionary("interface_default", lang);
+			result = dict.get(key, args);
+		}
+
+		if (result == null)
+		{ // not found
+			return "_" + key + "_";
+		}
+		result = result.replaceAll("__INTERFACE_NAME__", interfaceName);
 		return result;
 	}
 
@@ -684,31 +720,39 @@ public class XSLTUtil
 		outputStr.append(prependToPrefix + "." + prefix + " = new Array(); ");
 		outputStr.append("}\n");
 
-		Dictionary dict = new Dictionary("interface_" + interface_name, lang);
-		Enumeration keys = dict.getKeys();
-		if (keys == null)
-		{ // try default interface
-			//logger.debug("****** Interface name: " + interface_name + " does not have any keys. Trying interface_default.");
-			dict = new Dictionary("interface_default", lang);
-			keys = dict.getKeys();
-		}
+		int foundCount = 0;
 
-		// Get all properties in the language-specific dictionary with the given key prefix
-		// Create Javascript strings of the form:
-		// prependToPrefix.key= "value";\n
-		while (keys.hasMoreElements())
+		for (String dictName : new String[] { "interface_" + interface_name, "interface_default", "interface_default2" })
 		{
-			String key = (String) keys.nextElement();
-			if (key.startsWith(prefix))
+			Dictionary dict = new Dictionary(dictName, lang);
+			Enumeration keys = dict.getKeys();
+			if (keys == null)
 			{
-				String value = getInterfaceText(interface_name, lang, key);
+				continue;
+			}
 
-				outputStr.append(prependToPrefix);
-				outputStr.append(".");
-				outputStr.append(key);
-				outputStr.append("=\"");
-				outputStr.append(value);
-				outputStr.append("\";\n");
+			// Get all properties in the language-specific dictionary with the given key prefix
+			// Create Javascript strings of the form:
+			// prependToPrefix.key= "value";\n
+			while (keys.hasMoreElements())
+			{
+				String key = (String) keys.nextElement();
+				if (key.startsWith(prefix))
+				{
+					String value = getInterfaceText(interface_name, dictName, lang, key, null);
+
+					outputStr.append(prependToPrefix);
+					outputStr.append(".");
+					outputStr.append(key);
+					outputStr.append("=\"");
+					outputStr.append(value);
+					outputStr.append("\";\n");
+				}
+			}
+
+			if (foundCount > 0)
+			{
+				break;
 			}
 		}
 
