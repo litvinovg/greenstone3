@@ -246,6 +246,7 @@
 				</xsl:text>
 			</script>
 			<gsf:metadata name="all"/>
+			<gslib:langfrag name="dse"/>
 		</xsl:if>
 
 		<xsl:if test="$bookswitch = 'off'">
