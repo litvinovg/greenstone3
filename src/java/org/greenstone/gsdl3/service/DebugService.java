@@ -15,6 +15,8 @@ import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.XMLConverter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class DebugService extends ServiceRack
@@ -126,6 +128,8 @@ public class DebugService extends ServiceRack
 					Element template = (Element) templateElems.item(i);
 					if (template.getAttribute("name").equals(nameToGet))
 					{
+						fixAttributes(template);
+
 						Element requestedTemplate = this.doc.createElement("requestedNameTemplate");
 						requestedTemplate.appendChild(this.doc.importNode(template, true));
 						result.appendChild(requestedTemplate);
@@ -141,6 +145,8 @@ public class DebugService extends ServiceRack
 					Element template = (Element) templateElems.item(i);
 					if (template.getAttribute("match").equals(matchToGet))
 					{
+						fixAttributes(template);
+
 						Element requestedTemplate = this.doc.createElement("requestedMatchTemplate");
 						requestedTemplate.appendChild(this.doc.importNode(template, true));
 						result.appendChild(requestedTemplate);
@@ -150,6 +156,25 @@ public class DebugService extends ServiceRack
 		}
 
 		return result;
+	}
+
+	protected void fixAttributes(Element template)
+	{
+		NodeList nodes = template.getElementsByTagName("*");
+		for (int j = 0; j < nodes.getLength(); j++)
+		{
+			Node current = nodes.item(j);
+			NamedNodeMap attributes = current.getAttributes();
+			for (int k = 0; k < attributes.getLength(); k++)
+			{
+				Node currentAttr = attributes.item(k);
+				String value = currentAttr.getNodeValue();
+				if (value.contains("&") || value.contains("<") || value.contains(">"))
+				{
+					currentAttr.setNodeValue(value.replace("&", "&amp;amp;").replace("<", "&lt;").replace(">", "&gt;"));
+				}
+			}
+		}
 	}
 
 	protected Element processSaveXMLTemplateToFile(Element request)
@@ -206,14 +231,6 @@ public class DebugService extends ServiceRack
 
 			NodeList templateElems = xslDoc.getElementsByTagNameNS(fullNamespace, nodeName);
 
-			/*
-			 * NodeList textElems =
-			 * xslDoc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "text"); for
-			 * (int i = 0; i < textElems.getLength(); i++) {
-			 * System.err.println("\n\n" + i + "\n\n" +
-			 * GSXML.xmlNodeToString(textElems.item(i))); }
-			 */
-
 			boolean found = false;
 			if (nameToSave != null && nameToSave.length() != 0)
 			{
@@ -224,7 +241,6 @@ public class DebugService extends ServiceRack
 					{
 						try
 						{
-							System.err.println(xml);
 							Element newTemplate = (Element) converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"" + GSXML.XSL_NAMESPACE + "\" xmlns:java=\"" + GSXML.JAVA_NAMESPACE + "\" xmlns:util=\"" + GSXML.UTIL_NAMESPACE + "\" xmlns:gsf=\"" + GSXML.GSF_NAMESPACE + "\">" + xml + "</xsl:stylesheet>", "UTF-8").getDocumentElement().getElementsByTagNameNS(fullNamespace, nodeName).item(0);
 							template.getParentNode().replaceChild(xslDoc.importNode(newTemplate, true), template);
 							found = true;
