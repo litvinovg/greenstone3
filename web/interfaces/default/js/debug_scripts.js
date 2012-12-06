@@ -34,7 +34,7 @@ function DebugWidget()
 			"position":"fixed", 
 			"font-size":"0.7em", 
 			"bottom":"0px",  
-			"height":"300px", 
+			"height":"40px", 
 			"width":"100%",
 			"background":"white", 
 			"border":"1px black solid", 
@@ -187,7 +187,7 @@ function DebugWidget()
 			}
 		});
 		
-		var minimiseButton = $("<img>", {"src":gs.imageURLs.collapse});
+		var minimiseButton = $("<img>", {"src":gs.imageURLs.expand});
 		minimiseButton.css({"cursor":"pointer", "float":"right", "margin-right":"20px"});
 		minimiseButton.click(function()
 		{
