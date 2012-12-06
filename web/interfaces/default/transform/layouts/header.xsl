@@ -82,9 +82,8 @@
 		
 		<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 			<xsl:call-template name="init-direct-edit"/>
+			<script type="text/javascript" src="interfaces/{$interface_name}/js/debug_scripts.js"><xsl:text> </xsl:text></script>
 		</xsl:if>
-		
-		<script type="text/javascript" src="interfaces/{$interface_name}/js/debug_scripts.js"><xsl:text> </xsl:text></script>
 		
 		<xsl:call-template name="setup-gs-variable"/>
 		<xsl:call-template name="define-js-macro-variables"/>
