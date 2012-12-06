@@ -142,7 +142,7 @@ function DebugWidget()
 			var editor = _editingDiv.find("textarea");
 			if(editor.length)
 			{
-				var xmlString = editor.val();
+				var xmlString = editor.val().replace(/&/g, "&amp;");
 				try
 				{
 					var xml = $.parseXML('<testContainer xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
@@ -155,13 +155,13 @@ function DebugWidget()
 				
 				var url = gs.xsltParams.library_name;
 				var parameters = {"a":"g", "rt":"r", "s":"SaveXMLTemplateToFile", "s1.filePath":_currentFilepath, "s1.namespace":_currentNamespace, "s1.nodename":_currentNodename, "s1.xml":xmlString};
-				
+
 				if(_currentName && _currentName.length > 0){parameters["s1.name"] = _currentName;}
 				if(_currentMatch && _currentMatch.length > 0){parameters["s1.match"] = _currentMatch;}
-				
+
 				_saveButton.val("Saving...");
 				_saveButton.attr("disabled", "disabled");
-				
+
 				$.post(url, parameters)
 				.success(function()
 				{
