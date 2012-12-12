@@ -26,12 +26,15 @@
 		<h2><gslib:selectACollectionTextBar/></h2>
 
 		<div id="collectionLinks">
+			<xsl:if test="count(collectionList/collection) = 0">
+				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.no_collections')"/>
+				<br/>
+			</xsl:if>
 			<xsl:for-each select="collectionList/collection">
 				<gslib:collectionLinkWithImage/>
 			</xsl:for-each>
 			<br class="clear"/>
 		</div>
-
 
 		<gslib:serviceClusterList/>
 
