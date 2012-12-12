@@ -297,6 +297,7 @@ public class CrossCollectionSearch extends ServiceRack
 			//Element metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, name, userContext);
 			//metadata_message.appendChild(metadata_request);
 		}
+
 		Element metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, colls_sb.toString(), userContext);
 		metadata_message.appendChild(metadata_request);
 		logger.debug("metadata request = " + this.converter.getPrettyString(metadata_message));
@@ -322,10 +323,8 @@ public class CrossCollectionSearch extends ServiceRack
 			valid_coll_names.add(coll_name);
 		}
 
-		if (valid_colls.size() == 0)
-		{
-			return false;
-		}
+		this.coll_names_map = new HashMap<String, String[]>();
+
 		// ids no all has the list without 'all' option.
 		this.coll_ids_list_no_all = new String[1];
 		this.coll_ids_list_no_all = valid_colls.toArray(coll_ids_list_no_all);
@@ -336,7 +335,6 @@ public class CrossCollectionSearch extends ServiceRack
 		this.coll_ids_list = new String[1];
 		this.coll_ids_list = valid_colls.toArray(coll_ids_list);
 
-		this.coll_names_map = new HashMap<String, String[]>();
 		String[] coll_names_list = new String[1];
 		coll_names_list = valid_coll_names.toArray(coll_names_list);
 		this.coll_names_map.put(lang, coll_names_list);
