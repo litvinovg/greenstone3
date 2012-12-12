@@ -18,21 +18,19 @@
  */
 package org.greenstone.gsdl3.service;
 
-import org.greenstone.gsdl3.util.GSXML;
-import org.greenstone.gsdl3.util.GSPath;
-import org.greenstone.gsdl3.util.UserContext;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserContext;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.HashMap;
-
-import org.apache.log4j.*;
 
 /**
  * 
@@ -52,9 +50,10 @@ public class CrossCollectionSearch extends ServiceRack
 
 	protected String[] coll_ids_list = null;
 	protected String[] coll_ids_list_no_all = null;
-  // maps lang to coll names list
-  protected HashMap<String, String[]> coll_names_map = null;
-  //protected String[] coll_names_list = null;
+	// maps lang to coll names list
+	protected HashMap<String, String[]> coll_names_map = null;
+
+	//protected String[] coll_names_list = null;
 
 	/** constructor */
 	public CrossCollectionSearch()
@@ -122,8 +121,9 @@ public class CrossCollectionSearch extends ServiceRack
 				{
 					initCollectionList(lang);
 				}
-				if (!coll_names_map.containsKey(lang)) {
-				  addCollectionNames(lang);
+				if (!coll_names_map.containsKey(lang))
+				{
+					addCollectionNames(lang);
 				}
 				Element param = GSXML.createParameterDescription(this.doc, COLLECTION_PARAM, getTextString("param." + COLLECTION_PARAM, lang), GSXML.PARAM_TYPE_ENUM_MULTI, "all", coll_ids_list, coll_names_map.get(lang));
 				param_list.appendChild(param);
@@ -152,7 +152,7 @@ public class CrossCollectionSearch extends ServiceRack
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
 		UserContext userContext = new UserContext(request);
-		
+
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
@@ -289,8 +289,9 @@ public class CrossCollectionSearch extends ServiceRack
 		{
 			Element c = (Element) colls.item(i);
 			String name = c.getAttribute(GSXML.NAME_ATT);
-			if (i!=0) {
-			  colls_sb.append(",");
+			if (i != 0)
+			{
+				colls_sb.append(",");
 			}
 			colls_sb.append(name);
 			//Element metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, name, userContext);
@@ -316,7 +317,7 @@ public class CrossCollectionSearch extends ServiceRack
 				continue;
 			// use the name of the response in case we are talking to a remote collection, not the name of the collection.
 			String coll_id = response.getAttribute(GSXML.FROM_ATT);
-			String coll_name = GSXML.getDisplayText(coll, GSXML.DISPLAY_TEXT_NAME, lang, "en"); 
+			String coll_name = GSXML.getDisplayText(coll, GSXML.DISPLAY_TEXT_NAME, lang, "en");
 			valid_colls.add(coll_id);
 			valid_coll_names.add(coll_name);
 		}
@@ -342,51 +343,54 @@ public class CrossCollectionSearch extends ServiceRack
 		return true;
 	}
 
-  protected void addCollectionNames(String lang) {
+	protected void addCollectionNames(String lang)
+	{
 
-    UserContext userContext = new UserContext();
-    userContext.setLanguage(lang);
-    userContext.setUserID("");
+		UserContext userContext = new UserContext();
+		userContext.setLanguage(lang);
+		userContext.setUserID("");
 
-    ArrayList<String> coll_names = new ArrayList<String>();
-    coll_names.add(getTextString("param." + COLLECTION_PARAM + ".all", lang));
+		ArrayList<String> coll_names = new ArrayList<String>();
+		coll_names.add(getTextString("param." + COLLECTION_PARAM + ".all", lang));
 
-    // need to request MR for collection descriptions
-    Element metadata_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		// need to request MR for collection descriptions
+		Element metadata_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
 
-    // get a comma separated list of coll ids to send to MR
-    // the first item is the place holder for 'all'
-    StringBuffer colls_sb = new StringBuffer();
-    for (int i=1; i<coll_ids_list.length; i++) {
-      if (i!=1) {
-	colls_sb.append(",");
-      }
-      colls_sb.append(coll_ids_list[i]);
-    }
-    Element metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, colls_sb.toString(), userContext);
-    // param_list to request just displayTextList
-    Element param_list = this.doc.createElement(GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
-    Element param = GSXML.createParameter(this.doc, GSXML.SUBSET_PARAM, GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
-    param_list.appendChild(param);
-    metadata_request.appendChild(param_list);
-    metadata_message.appendChild(metadata_request);
-    logger.debug("coll names metadata request = " + this.converter.getPrettyString(metadata_message));
-    Element metadata_response = (Element) this.router.process(metadata_message);
-    logger.debug("coll names metadata response = " + this.converter.getPrettyString(metadata_response));
-    NodeList coll_responses = metadata_response.getElementsByTagName(GSXML.RESPONSE_ELEM);
-    for (int i = 0; i < coll_responses.getLength(); i++)
-      {		
-	Element response = (Element) coll_responses.item(i);
-	Element coll = (Element) GSXML.getChildByTagName(response, GSXML.COLLECTION_ELEM);
-	String coll_name = GSXML.getDisplayText(coll, GSXML.DISPLAY_TEXT_NAME, lang, "en"); 
-	coll_names.add(coll_name);
-      }
+		// get a comma separated list of coll ids to send to MR
+		// the first item is the place holder for 'all'
+		StringBuffer colls_sb = new StringBuffer();
+		for (int i = 1; i < coll_ids_list.length; i++)
+		{
+			if (i != 1)
+			{
+				colls_sb.append(",");
+			}
+			colls_sb.append(coll_ids_list[i]);
+		}
+		Element metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, colls_sb.toString(), userContext);
+		// param_list to request just displayTextList
+		Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element param = GSXML.createParameter(this.doc, GSXML.SUBSET_PARAM, GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+		param_list.appendChild(param);
+		metadata_request.appendChild(param_list);
+		metadata_message.appendChild(metadata_request);
+		logger.debug("coll names metadata request = " + this.converter.getPrettyString(metadata_message));
+		Element metadata_response = (Element) this.router.process(metadata_message);
+		logger.debug("coll names metadata response = " + this.converter.getPrettyString(metadata_response));
+		NodeList coll_responses = metadata_response.getElementsByTagName(GSXML.RESPONSE_ELEM);
+		for (int i = 0; i < coll_responses.getLength(); i++)
+		{
+			Element response = (Element) coll_responses.item(i);
+			Element coll = (Element) GSXML.getChildByTagName(response, GSXML.COLLECTION_ELEM);
+			String coll_name = GSXML.getDisplayText(coll, GSXML.DISPLAY_TEXT_NAME, lang, "en");
+			coll_names.add(coll_name);
+		}
 
-    String[] coll_names_list = new String[1];
-    coll_names_list = coll_names.toArray(coll_names_list);
-    this.coll_names_map.put(lang, coll_names_list);
+		String[] coll_names_list = new String[1];
+		coll_names_list = coll_names.toArray(coll_names_list);
+		this.coll_names_map.put(lang, coll_names_list);
 
-  }
+	}
 
 	protected Element processDocumentMetadataRetrieve(Element request)
 	{
