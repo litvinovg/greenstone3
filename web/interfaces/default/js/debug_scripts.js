@@ -13,6 +13,7 @@ function DebugWidget()
 	//Page elements
 	var _mainDiv;
 	var _textDiv;
+	var _editor;
 	var _editingDiv;
 	var _unpauseButton;
 	var _closeEditorButtonButton;
@@ -107,10 +108,9 @@ function DebugWidget()
 		//Check the XML for errors every 2 seconds
 		setInterval(function()
 		{
-			var editor = _editingDiv.find("textarea");
-			if(editor.length)
+			if(_editor)
 			{
-				var xmlString = editor.val();
+				var xmlString = _editor.getValue();
 				try
 				{
 					var xml = $.parseXML('<testContainer xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
@@ -139,10 +139,9 @@ function DebugWidget()
 		_saveButton = $("<input type=\"button\" value=\"Save changes\" disabled=\"disabled\">");
 		_saveButton.click(function()
 		{
-			var editor = _editingDiv.find("textarea");
-			if(editor.length)
+			if(_editor)
 			{
-				var xmlString = editor.val().replace(/&/g, "&amp;");
+				var xmlString = _editor.getValue().replace(/&/g, "&amp;");
 				try
 				{
 					var xml = $.parseXML('<testContainer xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
@@ -280,13 +279,19 @@ function DebugWidget()
 					return;
 				}
 			
-				var editArea = $("<textarea>");
+				var editArea = $("<div>", {"id":"textEditor"});
 				editArea.css({"width":"98%", "height":"180px"});
 				editArea.val(template);
 				
 				_editingDiv.empty();
 				_editingDiv.append(editArea);
 				_editingDiv.css({"height":"190px"});
+				
+				_editor = ace.edit("textEditor");
+				_editor.getSession().setMode("ace/mode/xml");
+				_editor.setValue(template);
+				_editor.clearSelection();
+				console.log(_editor);
 				
 				_mainDiv.css({"height":"500px"});
 				
