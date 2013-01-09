@@ -53,7 +53,7 @@
 	<xsl:template name="displayResults">
 		<xsl:if test="/page/pageResponse/facetList/facet">
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/facet-scripts.js">
-				<xsl:text/>
+				<xsl:text> </xsl:text>
 			</script>
 			<div id="facetSelector">
 				<xsl:for-each select="/page/pageResponse/facetList/facet">
@@ -125,7 +125,7 @@
 		</div>
 		<xsl:if test="/page/pageResponse/facetList/facet">
 			<div style="clear:both;">
-				<xsl:text/>
+				<xsl:text> </xsl:text>
 			</div>
 		</xsl:if>
 	</xsl:template>
@@ -305,12 +305,12 @@
 		<p class="termList">
 			<xsl:if test="count(/page/pageResponse/termList/stopword) &gt; 0">
 				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.common')"/>
-				<xsl:text/>
+				<xsl:text> </xsl:text>
 				<xsl:for-each select="/page/pageResponse/termList/stopword">
 					<span style="font-style:italic;">
 						<xsl:value-of select="@name"/>
 					</span>
-					<xsl:text/>
+					<xsl:text> </xsl:text>
 				</xsl:for-each>
 				<br />
 				<br />
@@ -447,7 +447,7 @@
 					<xsl:variable name="levelString">
 						<xsl:choose>
 							<xsl:when test="$docMax = 1">
-								<xsl:text/>
+								<xsl:text> </xsl:text>
 								<xsl:choose>
 									<xsl:when test="$level = 'Doc'">
 										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document')"/>
@@ -458,7 +458,7 @@
 								</xsl:choose>
 							</xsl:when>
 							<xsl:otherwise>
-								<xsl:text/>
+								<xsl:text> </xsl:text>
 								<xsl:choose>
 									<xsl:when test="$level = 'Doc'">
 										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document_plural')"/>
@@ -555,7 +555,7 @@
 		</div>
 
 		<div id="map_canvas" style="margin:0px auto; width:450px; height:500px; float:right;">
-			<xsl:text/>
+			<xsl:text> </xsl:text>
 		</div>
 
 		<!-- Although these aren't visible, they are necessary because it forces Greenstone to include this metadata in the page xml -->
