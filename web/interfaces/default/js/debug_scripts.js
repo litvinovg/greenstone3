@@ -280,7 +280,7 @@ function DebugWidget()
 				}
 			
 				var editArea = $("<div>", {"id":"textEditor"});
-				editArea.css({"width":"98%", "height":"180px"});
+				editArea.css({"width":"100%", "height":"180px"});
 				editArea.val(template);
 				
 				_editingDiv.empty();
@@ -289,6 +289,7 @@ function DebugWidget()
 				
 				_editor = ace.edit("textEditor");
 				_editor.getSession().setMode("ace/mode/xml");
+				_editor.getSession().setUseSoftTabs(false);
 				_editor.setValue(template);
 				_editor.clearSelection();
 				console.log(_editor);
