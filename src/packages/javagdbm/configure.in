@@ -194,14 +194,16 @@ AC_SUBST(LIBS)
 AC_MSG_CHECKING(for OS to set JNI options)
 # set defaults
 JNIINC=""
+JNIPREFIX="lib"
 JNISUFFIX="so"
-JNIFLAGS="-shared"
+JNICFLAGS=""
+JNILDFLAGS="-shared"
 
 if test "`(uname -s) 2> /dev/null`" = 'Darwin'; then
   AC_MSG_RESULT(Darwin)
   JNIINC="-I/System/Library/Frameworks/JavaVM.framework/Headers/ "
   JNISUFFIX="jnilib"
-  JNIFLAGS="-dynamiclib -fno-common -single_module -framework JavaVM"
+  JNILDFLAGS="-dynamiclib -fno-common -single_module -framework JavaVM"
 fi
 if test "`(uname -s) 2> /dev/null`" = 'SunOS'; then
   AC_MSG_RESULT(Solaris)
@@ -209,12 +211,23 @@ if test "`(uname -s) 2> /dev/null`" = 'SunOS'; then
 fi
 if test "`(uname -s) 2> /dev/null`" = 'Linux'; then
   AC_MSG_RESULT(Linux)
-  JNIINC="-I\$(JAVA_HOME)/include/linux "
+  JNIINC="-I\$(JAVA_HOME)/include/linux -I\$(JAVA_HOME)/in5Aclude "
+fi
+
+if test "x$crossOS" != "x" ; then
+  if test "$crossOS" = "windows" ; then
+    JNIINC="-I../java-windows-include/win32 -I../java-windows-include "
+    JNICFLAGS="-Wall -D_JNI_IMPLEMENTATION_ -Wl,--kill-at"
+    JNIPREFIX=""
+    JNISUFFIX="dll"
+  fi
 fi
 
 AC_SUBST(JNIINC)
+AC_SUBST(JNIPREFIX)
 AC_SUBST(JNISUFFIX)
-AC_SUBST(JNIFLAGS)
+AC_SUBST(JNICFLAGS)
+AC_SUBST(JNILDFLAGS)
 
 # write the output
 AC_OUTPUT([Makefile jni/Makefile java/Makefile])
