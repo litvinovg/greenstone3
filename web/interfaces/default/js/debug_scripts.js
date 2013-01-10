@@ -292,6 +292,7 @@ function DebugWidget()
 				textEditor.resizable({handles: 'n', resize:function()
 				{
 					textEditor.css({top:"0px"});
+					_editor.resize();
 				}});
 				
 				_closeEditorButton.removeAttr("disabled");
