@@ -27,7 +27,8 @@ CFLAGS=-c @CFLAGS@ @ARCH_DEP_FLAGS@ $(INC) -DWRAPPER_VERSION=\"$(WRAPPER_VERSION
 GDBM_LIBS=@GDBM_LIBPATH@ -lgdbm
 LIBS= $(GDBM_LIBS) @LIBS@
 LDFLAGS = @LDFLAGS@ @ARCH_DEP_FLAGS@
-JNIFLAGS=@JNIFLAGS@
+JNICFLAGS=@JNICFLAGS@
+JNILDFLAGS=@JNILDFLAGS@
 JNISUFFIX=@JNISUFFIX@
 JNIINC=@JNIINC@
 INC=-I. -I$(JAVA_HOME)/include @GDBM_INCLUDE@ @JNIINC@
@@ -39,15 +40,15 @@ INC=-I. -I$(JAVA_HOME)/include @GDBM_INCLUDE@ @JNIINC@
 # platforms -- mbp
 
 WRAPPER_VERSION=0005
-NATIVE_LIB=libgdbmjava.$(JNISUFFIX)
+NATIVE_LIB=$(JNIPREFIX)gdbmjava.$(JNISUFFIX)
 
 all: $(NATIVE_LIB)
 
 $(NATIVE_LIB): GdbmFile.h gdbmjava.o Makefile
-	$(CC) $(LDFLAGS) $(JNIFLAGS) -o $(NATIVE_LIB) gdbmjava.o $(LIBS)
+	$(CC) $(LDFLAGS) $(JNILDFLAGS) -o $(NATIVE_LIB) gdbmjava.o $(LIBS)
 
 gdbmjava.o: gdbmjava.c	
-	$(CC) $(INC) $(CFLAGS) $?
+	$(CC) $(INC) $(CFLAGS) $(JNICFLAGS) $?
 
 # no easy way to tell if a class file has changed or not
 #GdbmFile.h: 
