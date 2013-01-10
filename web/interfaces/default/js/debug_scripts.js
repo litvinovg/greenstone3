@@ -32,13 +32,12 @@ function DebugWidget()
 		_mainDiv = $("<div>", {"id":"debugDiv"});
 		_mainDiv.css(
 		{
-			"position":"fixed", 
-			"font-size":"0.7em", 
-			"bottom":"0px",  
-			"height":"40px", 
+			"position":"fixed",
+			"font-size":"0.7em",
+			"bottom":"0px",
 			"width":"100%",
-			"background":"white", 
-			"border":"1px black solid", 
+			"background":"white",
+			"border":"1px black solid",
 			"padding":"5px",
 			"z-index":100
 		});
@@ -50,7 +49,7 @@ function DebugWidget()
 		buttonDiv.css("float", "left");
 		toolBarDiv.append(buttonDiv);
 		_textDiv = $("<div>");
-		_textDiv.css({"overflow":"auto", "width":"100%", "height":"260px"});
+		_textDiv.css({"overflow":"auto", "width":"100%"});
 
 		var pickElementButton = $("<input type=\"button\" value=\"Enable debugging\">");
 		pickElementButton.click(function()
@@ -92,13 +91,11 @@ function DebugWidget()
 			{
 				$(this).val("Open editor");
 				_editingDiv.hide();
-				_mainDiv.css("height", (_mainDiv.height() - 200) + "px");
 			}
 			else
 			{
 				$(this).val("Close editor");
 				_editingDiv.show();
-				_mainDiv.css("height", (_mainDiv.height() + 200) + "px");
 			}
 		});
 		
@@ -186,7 +183,7 @@ function DebugWidget()
 			}
 		});
 		
-		var minimiseButton = $("<img>", {"src":gs.imageURLs.expand});
+		var minimiseButton = $("<img>", {"src":gs.imageURLs.collapse});
 		minimiseButton.css({"cursor":"pointer", "float":"right", "margin-right":"20px"});
 		minimiseButton.click(function()
 		{
@@ -194,13 +191,11 @@ function DebugWidget()
 			{
 				_textDiv.hide();
 				$(this).attr("src", gs.imageURLs.expand);
-				_mainDiv.css("height", (_mainDiv.height() - 260) + "px");
 			}
 			else
 			{
 				_textDiv.show();
 				$(this).attr("src", gs.imageURLs.collapse);
-				_mainDiv.css("height", (_mainDiv.height() + 260) + "px");
 			}
 		});
 		
@@ -279,22 +274,25 @@ function DebugWidget()
 					return;
 				}
 			
-				var editArea = $("<div>", {"id":"textEditor"});
-				editArea.css({"width":"100%", "height":"180px"});
-				editArea.val(template);
+				var textEditor = $("<div>", {"id":"textEditor"});
+				textEditor.css({"width":"100%"});
+				textEditor.val(template);
 				
 				_editingDiv.empty();
-				_editingDiv.append(editArea);
-				_editingDiv.css({"height":"190px"});
+				_editingDiv.append($("<p>" + filepath + "</p>"));
+				_editingDiv.append(textEditor);
 				
 				_editor = ace.edit("textEditor");
 				_editor.getSession().setMode("ace/mode/xml");
 				_editor.getSession().setUseSoftTabs(false);
 				_editor.setValue(template);
 				_editor.clearSelection();
-				console.log(_editor);
 				
-				_mainDiv.css({"height":"500px"});
+				textEditor.css({"min-height":"200px", "border-top":"5px solid #444"});
+				textEditor.resizable({handles: 'n', resize:function()
+				{
+					textEditor.css({top:"0px"});
+				}});
 				
 				_closeEditorButton.removeAttr("disabled");
 			})
@@ -370,13 +368,10 @@ function DebugWidget()
 
 					var infoContainer = $("<div>");
 					infoContainer.css({"cursor":"pointer", "border":"1px dashed #AAAAAA", "margin":"5px"});
-					var fromDIV = $("<div>");
 					var elementDIV = $("<div>");
 
 					elementDIV.css("font-size", "1.1em");
-					fromDIV.css("font-size", "0.9em");
 
-					infoContainer.append(fromDIV);
 					infoContainer.append(elementDIV);
 					
 					_elements.push(infoContainer);
@@ -396,8 +391,7 @@ function DebugWidget()
 						}
 						attrstr += this.name + "=\"" + this.value + "\" ";
 					});
-					
-					fromDIV.text("From " + filepath + ":");
+
 					elementDIV.text("<" + fullNodename + " " + attrstr + ">");
 					
 					_textDiv.prepend(infoContainer);
