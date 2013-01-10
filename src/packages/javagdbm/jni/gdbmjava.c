@@ -31,7 +31,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined (__WIN32__)
+#ifdef __MINGW32__
+#define MSDOS
+#endif
+
+#if defined (_MSC_VER)
 #include <gdbmdefs.h>
 #include <gdbmerrno.h>
 #define GDBM_FILE gdbm_file_info *
@@ -41,6 +45,22 @@ extern char* gdbm_version;
 #endif
 
 #include <jni.h>
+
+#ifdef __MINGW32__
+
+/* (Cross) compiling for Windows Want the type definitions in *win32*
+   version of jni_md.h but with the mingw c compiler this then leads
+   to C-mangled style functions (param/num args encoded in function
+   name) which we *don't* want.  The following achieves this */
+
+#undef JNIEXPORT
+#undef JNIIMPORT
+#undef JNICALL
+
+#define JNIEXPORT
+#define JNIIMPORT
+#define JNICALL
+#endif
 
 #include <GdbmFile.h>
 
