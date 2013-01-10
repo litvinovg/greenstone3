@@ -260,8 +260,7 @@ public class DebugService extends ServiceRack
 					Element template = (Element) templateElems.item(i);
 					if (template.getAttribute("match").equals(matchToSave))
 					{
-
-						Element newTemplate = (Element) converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"" + GSXML.XSL_NAMESPACE + "\" xmlns:java=\"" + GSXML.JAVA_NAMESPACE + "\" xmlns:util=\"" + GSXML.UTIL_NAMESPACE + "\" xmlns:gsf=\"" + GSXML.GSF_NAMESPACE + "\">" + xml + "</xsl:stylesheet>", "UTF-8").getDocumentElement().getFirstChild();
+						Element newTemplate = (Element) converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"" + GSXML.XSL_NAMESPACE + "\" xmlns:java=\"" + GSXML.JAVA_NAMESPACE + "\" xmlns:util=\"" + GSXML.UTIL_NAMESPACE + "\" xmlns:gsf=\"" + GSXML.GSF_NAMESPACE + "\">" + xml + "</xsl:stylesheet>", "UTF-8").getDocumentElement().getElementsByTagNameNS(fullNamespace, nodeName).item(0);
 						template.getParentNode().replaceChild(xslDoc.importNode(newTemplate, true), template);
 						found = true;
 					}
