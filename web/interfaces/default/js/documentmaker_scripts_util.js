@@ -664,11 +664,12 @@ function addFunctionalityToTable(table)
 		addRemoveLinkToRow(this);
 	});
 
-	var metaNameField = $("<input>", {"type": "text"});
+	
+	var metaNameField = $("<input>", {"type": "text","style":"margin: 5px; border: 1px solid #000;"});
 	table.after(metaNameField);
 	table.metaNameField = metaNameField;
 	
-	var addRowButton = $("<button>");
+	var addRowButton = $("<button>",{"class": "ui-state-default ui-corner-all", "style": "margin: 5px;"});
 	addRowButton.html(gs.text.dse.add_new_metadata);
 	addRowButton.click(function() 
 	{ 

@@ -1116,10 +1116,12 @@ function readyPageForEditing()
 	var textDivs = $(".sectionText").each(function(){de.doc.registerEditSection(this);});
 	
 	var editBar = $("#editBarLeft");
-	var saveButton = $("<button>", {"id": "saveButton"});
+
+	var saveButton = $("<button>", {"id": "saveButton", "class": "ui-state-default ui-corner-all"});
 	saveButton.click(save);
 	saveButton.html("Save changes");
 	editBar.append(saveButton);
+	
 	
 	var visibleMetadataList = $("<select>", {"id": "metadataSetList"});
 	var allOption = $("<option>All</option>");
