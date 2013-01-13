@@ -211,7 +211,7 @@ if test "`(uname -s) 2> /dev/null`" = 'SunOS'; then
 fi
 if test "`(uname -s) 2> /dev/null`" = 'Linux'; then
   AC_MSG_RESULT(Linux)
-  JNIINC="-I\$(JAVA_HOME)/include/linux -I\$(JAVA_HOME)/in5Aclude "
+  JNIINC="-I\$(JAVA_HOME)/include/linux -I\$(JAVA_HOME)/include "
 fi
 
 if test "x$crossOS" != "x" ; then
