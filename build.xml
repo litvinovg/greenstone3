@@ -175,6 +175,9 @@
   </condition>
 
   <!-- is there a better way to do this?? what about solaris?? -->
+  <condition property="os.bin.dir" value="${cross.os}">
+      <istrue value="${compile.cross}"/>
+  </condition>
   <condition property="os.bin.dir" value="windows">
     <os family="windows"/>
   </condition>
@@ -189,7 +192,7 @@
       </not>
     </and>
   </condition>
-  
+
   
   <condition property="collection.building.disabled">
     <and>
@@ -347,6 +350,18 @@
 	</else>
   </if>
   <property name="allargs" value="${cflags.arg} ${cxxflags.arg} ${cppflags.arg} ${ldflags.arg} ${path.arg} ${ldlpath.arg} ${pcpath.arg}"/>
+
+  <condition property="opt.cross.build" 
+	     value="--build=${cross.build}" else=" ">
+    <isset property="cross.build"/>
+  </condition>
+
+
+  <condition property="cross.configure.args" 
+	     value="--host=${cross.host} ${opt.cross.build} CPP=${cross.host}-cpp CC=${cross.host}-gcc CXX=${cross.host}-g++ LD=${cross.host}-ld AR=${cross.host}-ar RANLIB=${cross.host}-ranlib ${cross.configure.extraargs} crossOS=${cross.os}">
+    <istrue value="${compile.cross}"/>
+  </condition>
+
 
   <condition property="gs2.opt.args" value= " " else="--disable-mg --disable-mgpp --disable-accentfold --disable-gdbm --disable-sqlite">
     <istrue value="${with.jni}"/>
@@ -1769,6 +1784,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="--prefix=${basedir}"/>
       <arg value="--libdir=${lib.jni}"/>
       <arg value="--with-gdbm=${gdbm.home}"/>
+      <arg line="${cross.configure.args}"/>
     </exec>    
   </target>
 
@@ -1849,6 +1865,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <exec executable="${src.packages.home}/search4j/configure" dir="${src.packages.home}/search4j" failonerror="true">
         <arg value="--bindir=${basedir}/bin"/>
         <arg value="${static.arg}"/>
+        <arg line="${cross.configure.args}"/>
       </exec>
       <exec executable="make" dir="${src.packages.home}/search4j" failonerror="true"/>
       <exec executable="make" dir="${src.packages.home}/search4j" failonerror="true">
@@ -1885,12 +1902,30 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
 
   <target name="install-jni-files-linux" depends="init" if="current.os.isunixnotmac">
-    <copy file="${mg.home}/jni/libmgretrievejni.so" todir="${lib.jni}"/>
-    <copy file="${mg.home}/jni/libmgsearchjni.so" todir="${lib.jni}"/>
-    <copy file="${mg.home}/jni/libmgpassjni.so" todir="${lib.jni}"/>
-    <copy file="${mgpp.home}/jni/libmgppretrievejni.so" todir="${lib.jni}"/>
-    <copy file="${mgpp.home}/jni/libmgppsearchjni.so" todir="${lib.jni}"/>
-    <copy file="${mgpp.home}/jni/libmgpppassjni.so" todir="${lib.jni}"/>
+
+    <if>
+
+      <bool><equals arg1="${os.bin.dir}" arg2="windows"/></bool>
+      <!-- cross compiling to windows -->
+      <copy file="${mg.home}/jni/mgretrievejni.dll" todir="${lib.jni}"/>
+      <copy file="${mg.home}/jni/mgsearchjni.dll" todir="${lib.jni}"/>
+      <copy file="${mg.home}/jni/mgpassjni.dll" todir="${lib.jni}"/>
+      <copy file="${mgpp.home}/jni/mgppretrievejni.dll" todir="${lib.jni}"/>
+      <copy file="${mgpp.home}/jni/mgppsearchjni.dll" todir="${lib.jni}"/>
+      <copy file="${mgpp.home}/jni/mgpppassjni.dll" todir="${lib.jni}"/>
+      
+      <else>
+	<!-- otherwise do the usual Unix copies -->
+	<copy file="${mg.home}/jni/libmgretrievejni.so" todir="${lib.jni}"/>
+	<copy file="${mg.home}/jni/libmgsearchjni.so" todir="${lib.jni}"/>
+	<copy file="${mg.home}/jni/libmgpassjni.so" todir="${lib.jni}"/>
+	<copy file="${mgpp.home}/jni/libmgppretrievejni.so" todir="${lib.jni}"/>
+	<copy file="${mgpp.home}/jni/libmgppsearchjni.so" todir="${lib.jni}"/>
+	<copy file="${mgpp.home}/jni/libmgpppassjni.so" todir="${lib.jni}"/>
+      </else>
+    </if>
+
+
   </target>
   <target name="install-jni-files-windows" depends="init" if="current.os.iswindows">
     <copy file="${mg.home}/jni/mgretrievejni.dll" todir="${lib.jni}"/>
@@ -1940,12 +1975,16 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
     
   <target name="configure-common-src" depends="init">
+<!--
+    <echo>cross configure args: ${cross.configure.args}</echo>
+-->
     <exec executable="${common.src.home}/configure" os="${os.unix}"
       dir="${common.src.home}" failonerror="true">
       <arg value="--prefix=${gs2build.home}"/> <!-- what value to use?? -->
       <arg value="--bindir=${gs2build.home}/bin/${os.bin.dir}"/> <!-- what value to use?? -->
       <arg line="${gs2.opt.args}"/>
       <arg line="${static.arg}"/>
+      <arg line="${cross.configure.args}"/>
       <arg line="${allargs}"/>
     </exec>
   </target>
@@ -2280,7 +2319,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <exec executable="${build.src.home}/configure" os="${os.unix}"
       dir="${build.src.home}" failonerror="true">
       <arg value="--prefix=${gs2build.home}"/>
-      <arg line="${gs2.opt.args} ${static.arg} ${allargs}"/>
+      <arg line="${gs2.opt.args} ${static.arg} ${cross.configure.args} ${allargs}"/>
     </exec>
   </target>
 
