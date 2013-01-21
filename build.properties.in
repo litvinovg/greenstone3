@@ -51,6 +51,15 @@ compile.deprecation=true
 # Should compilation include the optimize option?
 compile.optimize=true
 
+# Properties that control cross-compiling
+compile.cross        = false
+#cross.os             = windows
+#cross.host           = i686-w64-mingw32
+#cross.build          = i686-pc-linux-gnu
+
+#cross.configure.extraargs =
+
+
 # Control whether or not JNI bindings are used
 #   e.g. MG, MG++ and GDBM and the like
 # Setting this false means these components are not available to the install
