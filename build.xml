@@ -1304,7 +1304,7 @@
   <!-- http://blog.andrewbeacock.com/2007/11/how-to-truncate-log-file-using-ubuntu.html 
     Doing "cat </dev/null > packages/tomcat/logs/catalina.out" doesn't work as an ant target.
     It seems to have a problem with cat or </dev/null, with or without the < sign. -->
-  <target name="clean-logs" description="Empties catalina.out, greenstone.log and contents of web/logs/tmp">
+  <target name="reset-logs" description="Empties catalina.out, greenstone.log and contents of web/logs/tmp">
     <echo>Truncating catalina.out, greenstone.log and server.log, and emptying ${web.home}/logs/tmp</echo>    
     <exec executable="rm" os="${os.unix}" dir="${catalina.home}/logs" spawn="false">
       <arg value="-f"/>
