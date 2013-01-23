@@ -26,10 +26,46 @@ Make sure an SVN executable is on your PATH.
 
 Checkout the code:
 
-svn co http://svn.greenstone.org/greenstone3/trunk greenstone3
+  svn co http://svn.greenstone.org/greenstone3/trunk greenstone3
+
+
+Local Settings
+--------------
+
+You will then need to make sure 'ant' (version 1.7 or greater) and 'javac'
+(along with an appropriate JAVA_HOME environment variable) can be 
+found from your command line.
+
+To help with getting such local command-line settings right, we have
+started to build up a set of 'local' folder examples available
+on our svn server.  You can browse these at:
+
+  http://trac.greenstone.org/browser/local/
+
+For example, in the top-level folder of your Greenstone3 installation,
+for a build on a 64-bit linux computer you might like to check out:
+
+  svn co http://svn.greenstone.org/local/greenstone3/linux-64bit local
+
+You should then check files like 'local/gs3-setup.bash' and 
+'local/gs3-devel.bash' and edit the values there, such as JAVA_HOME,
+to reflect where such programs exist on your local filesystem.
+to reflect where 
+
+Prior to compiling, 'cd' into this folder and source the appropriate setup
+file (the developer 'gs3-devel' file if it exists, as in the case of cross
+compiling for Anroid), or else the 'gs3-setup' one (for instance gs-setup.sh,
+gs-setup.bash, or setup.bash)
+
+For example:
+
+  cd local
+  source ./gs3-setup.bash
+  cd ..
+
 
 Build and install:
-
+-----------------
 
 In the greenstone3 directory, check and/or edit the build.properties file. In
  particular, set the Tomcat port number. See 'Configuring your installation' in
