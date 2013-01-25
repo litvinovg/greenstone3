@@ -745,6 +745,7 @@
     <available file="${basedir}/gli" property="gli.present"/>
     <available file="${basedir}/common-src" property="common.src.present"/>
     <available file="${basedir}/gs2build" property="gs2build.present"/>
+    <available file="${gnome-lib-dir}" property="gnome-lib.present"/>
 
     <condition property="tomcat.islocal">
       <or>
@@ -2209,6 +2210,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     
   <target name="prepare-gs2build" depends="init" if="collection.building.enabled" unless="gs2build.present">
     <antcall target="checkout-gs2build"/>
+    <antcall target="prepare-gnome-lib"/>
     <antcall target="unzip-windows-packages"/>
     <antcall target="checkout-winbin"/>
     <antcall target="get-windows-binaries"/>
@@ -2222,8 +2224,19 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="${svn.root}/main/${branch.path}/gs2build"/>
       <arg value="-r"/><arg value="${branch.revision}"/>
     </exec>
+  </target>
 
+  <target name="prepare-gnome-lib" depends="init" if="collection.building.enabled" unless="gnome-lib.present">
+    <antcall target="checkout-gnome-lib"/>
+  </target>
 
+  <target name="checkout-gnome-lib" depends="init" if="collection.building.enabled" unless="nosvn.mode">
+    <echo>checking out gnome-lib extension</echo>
+    <exec executable="svn">
+      <arg value="checkout"/>
+      <arg value="${svn.root}/gs2-extensions/gnome-lib/trunk/src"/>
+      <arg value="${gs2build.home}/ext/gnome-lib"/>
+    </exec>
   </target>
 
   <target name="checkout-winbin" depends="init" if="current.os.iswindows" 
