@@ -65,11 +65,13 @@ function setGS3ENV() {
   export GSDL3HOME
   export GSDL3SRCHOME
 
-  GSDLOS=`uname -s | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
-  # check for running bash under cygwin
-  if test "`echo $GSDLOS | sed 's/cygwin//'`" != "$GSDLOS" ; then
-    GSDLOS=windows
-  fi 
+  if test "x$GSDLOS" = "x" ; then
+    GSDLOS=`uname -s | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+    # check for running bash under cygwin
+    if test "`echo $GSDLOS | sed 's/cygwin//'`" != "$GSDLOS" ; then
+      GSDLOS=windows
+    fi 
+  fi
   export GSDLOS
   echo "  - Exported GSDL3HOME, GSDL3SRCHOME and GSDLOS"
 
