@@ -56,8 +56,12 @@ compile.cross        = false
 #cross.os             = windows
 #cross.host           = i686-w64-mingw32
 #cross.build          = i686-pc-linux-gnu
-
 #cross.configure.extraargs =
+
+#cross.os             = android
+#cross.host           = arm-linux-androideabi
+#cross.build          = i686-pc-linux-gnu
+#cross.configure.extraargs = gl_cv_header_working_stdint_h=yes
 
 
 # Control whether or not JNI bindings are used
