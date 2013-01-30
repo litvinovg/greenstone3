@@ -358,7 +358,7 @@
 
 
   <condition property="cross.configure.args" 
-	     value="--host=${cross.host} ${opt.cross.build} CPP=${cross.host}-cpp CC=${cross.host}-gcc CXX=${cross.host}-g++ LD=${cross.host}-ld AR=${cross.host}-ar RANLIB=${cross.host}-ranlib ${cross.configure.extraargs} crossOS=${cross.os}" else=" ">
+	     value="--host=${cross.host} ${opt.cross.build} CPP=${cross.host}-cpp CC=${cross.host}-gcc CXX=${cross.host}-g++ LD=${cross.host}-ld AR=${cross.host}-ar RANLIB=${cross.host}-ranlib STRIP=${cross.host}-strip ${cross.configure.extraargs} crossOS=${cross.os}" else=" ">
     <istrue value="${compile.cross}"/>
   </condition>
 
