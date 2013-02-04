@@ -198,6 +198,12 @@ public class TransformingReceptionist extends Receptionist
 		for (File currentFile : xslFiles)
 		{
 			Document currentDoc = this.converter.getDOM(currentFile);
+			if (currentDoc == null) {
+			    // Can happen if an editor creates an auto-save temporary file 
+			    // (such as #header.xsl#) that is not well formed XML
+			    continue;
+			}
+
 			NodeList metadataElems = currentDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata"); //gsf:metadata
 			NodeList foreachMetadataElems = currentDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "foreach-metadata"); //gsf:foreach-metadata
 			NodeList imageElems = currentDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "image"); //gsf:image
