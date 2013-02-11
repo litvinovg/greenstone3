@@ -809,6 +809,47 @@ table{
 	height:500px;
 }
 
+.pano_canvas_full{
+	margin:0px auto;
+	width:900px;
+	height:500px;
+}
+
+.pano_canvas_fullscreen{
+	margin:0px auto;
+	width:1280px;
+	height:720px;
+}
+
+.pano_canvas_half{
+	z-index: 1;
+	float: right;
+	width:450px;
+	height:500px;
+	background-color:#000000;
+}
+
+.navigate-point {
+	z-index: 97;
+  	position: absolute;
+	overflow: hidden;
+	width: 80px;
+	height: 80px;
+	margin-left: -40px;
+	margin-top: -40px;
+	background-image: url("../images/navMarker.png");
+	cursor: pointer;
+}
+
+.fullscreenToggle{
+	z-index: 2;
+	position: relative;
+	float: right;
+	top: 28px;
+	left: 128px;
+	padding: 5px;
+}
+
 dl dt { font-weight:bold;
       padding-top:10px; }
 dl dd { padding-bottom:10px}

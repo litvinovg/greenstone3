@@ -78,12 +78,22 @@
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/zoomer.js"><xsl:text> </xsl:text></script>
 
 		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
-			<xsl:call-template name="map-scripts"/>
+		  <xsl:call-template name="map-scripts"/>
 		</xsl:if>
 		
+		<xsl:if test="/page/pageResponse/format/gsf:option[@name='mapEnabledOpenLayers']/@value = 'true'">
+		  <xsl:call-template name="openlayers-map-scripts"/>
+		</xsl:if>
+
+
+		<xsl:if test="/page/pageResponse/format/gsf:option[@name='panoramaViewerEnabled']/@value = 'true'">
+		  <xsl:call-template name="panoramaViewer-scripts"/>
+		</xsl:if>
+
+		
 		<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
-			<xsl:call-template name="init-direct-edit"/>
-			<script type="text/javascript" src="interfaces/{$interface_name}/js/debug_scripts.js"><xsl:text> </xsl:text></script>
+		  <xsl:call-template name="init-direct-edit"/>
+		  <script type="text/javascript" src="interfaces/{$interface_name}/js/debug_scripts.js"><xsl:text> </xsl:text></script>
 		</xsl:if>
 		
 		<xsl:call-template name="setup-gs-variable"/>
@@ -499,4 +509,21 @@
 		<script src="interfaces/{$interface_name}/js/map-scripts.js" type="text/javascript"><xsl:text> </xsl:text></script>
 		<script type="text/javascript">$(window).load(initializeMapScripts);</script>
 	</xsl:template>
+
+	<xsl:template name="openlayers-map-scripts">
+		<script src="interfaces/{interface_name}/js/OpenLayers.js" type="text/javascript"><xsl:text> </xsl:text></script>
+	</xsl:template>
+
+	<xsl:template name="panoramaViewer-scripts">
+           <script src="interfaces/{$interface_name}/js/three45.min.js" type="text/javascript"><xsl:text> </xsl:text></script>
+	   <script src="interfaces/{$interface_name}/js/Tween.js" type="text/javascript"><xsl:text> </xsl:text></script>
+	   <script src="interfaces/{$interface_name}/js/THREEx.FullScreen.js" type="text/javascript"><xsl:text> </xsl:text></script>
+	   <script src="interfaces/{$interface_name}/js/Detector.js" type="text/javascript"><xsl:text> </xsl:text></script>
+	   <script src="interfaces/{$interface_name}/js/RequestAnimationFrame.js" type="text/javascript"><xsl:text> </xsl:text></script>
+	   <script src="interfaces/{$interface_name}/js/OpenLayers.js" type="text/javascript"><xsl:text> </xsl:text></script>
+	   <script src="interfaces/{$interface_name}/js/panoramaMarker.js" type="text/javascript"><xsl:text> </xsl:text></script>
+	   <script src="interfaces/{$interface_name}/js/panoramaViewer.js" type="text/javascript"><xsl:text> </xsl:text></script>
+	   <script type="text/javascript">$(window).load(initPanoramaViewer);$(window).load(_animate);</script>
+	</xsl:template>
+
 </xsl:stylesheet>

@@ -170,14 +170,32 @@
 	<xsl:template name="documentNodePost">
 		<xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
 		    <xsl:if test="metadataList/metadata[@name='Latitude' or @name='Longitude']">
-		        <xsl:call-template name="mapFeatures"/>
+		        <xsl:call-template name="mapFeaturesIcon"/>
 		    </xsl:if>
 		</xsl:if>
+
+
+		<xsl:if test="/page/pageResponse/format/gsf:option[@name='panoramaViewerEnabled']/@value = 'true'">
+		  <xsl:if test=" metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude'] and metadataList/metadata[@name = 'PhotoType']='Panorama'">
+                    <xsl:call-template name="panoramaViewerFeaturesIcon"/>
+                  </xsl:if>
+		</xsl:if>
+
 	</xsl:template>
 
-	<xsl:template name="mapFeatures">
+	<xsl:template name="mapFeaturesIcon">
 		<td style="padding-left:5px; padding-right:5px;" valign="top">
 			<a href="javascript:focusDocument('{@nodeID}');"><img src="interfaces/{$interface_name}/images/map_marker.png"/></a>
 		</td>
 	</xsl:template>
+
+
+	<xsl:template name="panoramaViewerFeaturesIcon">
+                <td style="padding-left:5px; padding-right:5px;" valign="top">
+                        <a href="javascript:switchPanorama('{@nodeID}');">
+                                <img src="interfaces/default/images/map_marker.png"/>
+                        </a>
+                </td>
+        </xsl:template>
+
 </xsl:stylesheet>
