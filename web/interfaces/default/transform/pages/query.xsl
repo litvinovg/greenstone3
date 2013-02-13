@@ -568,6 +568,14 @@
 		<!-- Although these aren't visible, they are necessary because it forces Greenstone to include this metadata in the page xml -->
 		<gsf:metadata name="Latitude" hidden="true"/>
 		<gsf:metadata name="Longitude" hidden="true"/>
+		<gsf:metadata name="Image" hidden="true"/>
+		<gsf:metadata name="SourceFile" hidden="true"/>
+                <gsf:metadata name="assocfilepath" hidden="true"/>
+		<gsf:metadata name="PhotoType" hidden="true"/>
+		<gsf:metadata name="cv.rotation" hidden="true"/>
+		<gsf:metadata name="Angle" hidden="true"/>
+
+
 	</xsl:template>
 
 	<xsl:template name="mapFeaturesIcon">

@@ -156,9 +156,6 @@
 				<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
 					<xsl:text>{</xsl:text>
 					<xsl:text disable-output-escaping="yes">"nodeID":"</xsl:text><xsl:value-of select="@nodeID"/><xsl:text disable-output-escaping="yes">",</xsl:text>
-					<xsl:text disable-output-escaping="yes">"title":"</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Title']"/><xsl:text disable-output-escaping="yes">",</xsl:text>
-					<xsl:text disable-output-escaping="yes">"lat":</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Latitude']"/><xsl:text>,</xsl:text>
-					<xsl:text disable-output-escaping="yes">"lng":</xsl:text><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Longitude']"/>
 					<xsl:text>}</xsl:text>
 					<xsl:if test="not(position() = count(//documentNode))">
 						<xsl:text>,</xsl:text>
@@ -198,11 +195,15 @@
                 <!-- Although these aren't visible, they are necessary because it forces Greenstone to include this metadata in the page xml -->
                 <gsf:metadata name="Latitude" hidden="true"/>
                 <gsf:metadata name="Longitude" hidden="true"/>
+                <gsf:metadata name="Image" hidden="true"/>
                 <gsf:metadata name="SourceFile" hidden="true"/>
                 <gsf:metadata name="assocfilepath" hidden="true"/>
 		<gsf:metadata name="PhotoType" hidden="true"/>
 		<gsf:metadata name="cv.rotation" hidden="true"/>
-        </xsl:template>
+		<gsf:metadata name="ex.Angle" hidden="true"/>
+		<gsf:metadata name="Angle" hidden="true"/>
+        
+	</xsl:template>
 	
 	<xsl:template name="panoramaViewerFeatures">
 

@@ -816,9 +816,10 @@ table{
 }
 
 .pano_canvas_fullscreen{
-	margin:0px auto;
-	width:1280px;
-	height:720px;
+	margin-left:0px auto;
+	margin-right:0px auto;
+	width:1024px;
+	height:768px;;
 }
 
 .pano_canvas_half{

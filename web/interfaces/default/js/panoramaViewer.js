@@ -27,7 +27,7 @@ Array.prototype.move = function(pos1, pos2) {
     }
 }
 
-    var panoContainer, camera, scene, renderer, projector;
+var panoContainer, camera, scene, renderer, projector;
 
 var mouse = { x: 0, y: 0 };
 
@@ -39,9 +39,8 @@ var fov = 70, maxFov = 90, minFov = 15,
     lat = 0, onMouseDownLat = 0,
     phi = 0, theta = 0,
     mesh, sphereRadius = 500,
-    meshRotation =  Math.PI,
+    meshRotation =  Math.PI / 2 * 3,
     panoSelectionRadius = 40;
-
 
 var panoDocList = new Array();
 panoDocList.ids = new Array();
@@ -51,11 +50,8 @@ panoDocList.getDocByIndex = function(index) {
 
 var nearbyPanoList = new Array();
 nearbyPanoList.ids = new Array();
-nearbyPanoList.pos = new Array();
-
 
 function initPanoramaViewer() {    
-    
     //Creating the document list to store data about the panoramams
     var jsonNodeDiv = $("#jsonPanoNodes");
     if(jsonNodeDiv.length) {
@@ -72,15 +68,17 @@ function initPanoramaViewer() {
     }    
 
     panoContainer = document.getElementById( 'pano-container' );
-
     // Creating the camera
     // Setting width and height variables as the container dimensions changes when fov is changed
-    width = panoContainer.offsetWidth;
-    height = panoContainer.offsetHeight;
-    aspect = width / height;
-    
-    // camera = new THREE.PerspectiveCamera( fov, window.innerWidth / window.innerHeight, 1, 1100 );
-    // camera = new THREE.PerspectiveCamera( fov, container.offsetWidth / container.offsetHeight, 1, 1100 );
+    if(panoContainer.className == "pano_canvas_fullscreen") {
+	width = window.innerWidth;
+	height = window.innerHeight;
+	aspect = width / height;
+    } else if(panoContainer.className == "pano_canvas_half") {
+	width = panoContainer.offsetWidth;
+	height = panoContainer.offsetHeight;
+	aspect = width / height;
+    }
     camera = new THREE.PerspectiveCamera( fov, aspect, 1, 1100 );
     camera.target = new THREE.Vector3(0, 0, 0 );
     
@@ -89,21 +87,26 @@ function initPanoramaViewer() {
     
     projector = new THREE.Projector();
     
+    var sourceFile = gs.documentMetadata[panoDocList.ids[0]].Image;
+    var assocfilepath = gs.documentMetadata[panoDocList.ids[0]].assocfilepath;
+    var httpPath = gs.collectionMetadata.httpPath;
+
+    var fullPanoURL = httpPath + "/index/assoc/" + assocfilepath + "/" + sourceFile;
+
     // Creating a sphere with the panorama applied as a texture
     if (Detector.webgl) {
-	mesh = new THREE.Mesh( new THREE.SphereGeometry( sphereRadius, 60, 40 ), new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( gs.collectionMetadata.httpPath + '/import/panorama/' + 'panorama0.jpg' ), wireframe: false } ) );
+	mesh = new THREE.Mesh( new THREE.SphereGeometry( sphereRadius, 60, 40 ), new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( fullPanoURL ), wireframe: false, overdraw: true, opacity:0 } ) );
     } else {
-	mesh = new THREE.Mesh( new THREE.SphereGeometry( sphereRadius, 30, 20 ), new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( gs.collectionMetadata.httpPath + '/import/panorama/' + 'panorama0.jpg' ), wireframe: false, overdraw: true } ) );
+	mesh = new THREE.Mesh( new THREE.SphereGeometry( sphereRadius, 30, 20 ), new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( fullPanoURL ), wireframe: false, overdraw: true, opacity:0 } ) );
     }
+    
     mesh.scale.x = -1;
-    // mesh.rotation.y = meshRotation + (90 * Math.PI / 180);
-    scene.add( mesh ); // Adding the sphere to the scene
+    // Adding the sphere to the scene
+    scene.add( mesh );
 
     switchPanorama(panoDocList.ids[0]);
 
     renderer = Detector.webgl? new THREE.WebGLRenderer(): new THREE.CanvasRenderer();
-    //renderer.setSize( window.innerWidth, window.innerHeight );
-    //renderer.setSize(container.offsetWidth,container.offsetHeight);
     renderer.setSize(width,height);
 
     panoContainer.appendChild( renderer.domElement );
@@ -114,8 +117,9 @@ function initPanoramaViewer() {
     document.addEventListener( 'mouseup', onDocumentMouseUp, false );
     panoContainer.addEventListener( 'mousewheel', onDocumentMouseWheel, false );
     panoContainer.addEventListener( 'DOMMouseScroll', onDocumentMouseWheel, false);
-    
-    // window.addEventListener( 'resize', onWindowResize, false );
+
+    if(panoContainer.className == "pano_canvas_fullscreen")
+	window.addEventListener( 'resize', onWindowResize, false );
 }
 
 function degreesToCoords(degrees, radius) {
@@ -152,43 +156,14 @@ function calculateDistance(from, to) {
     return d * 1000;
 }
 
-/*
-function fullscreenToggle () {
-    console.log("blah");
-    if( THREEx.FullScreen.activated() ){
-	THREEx.FullScreen.cancel();
-
-	camera.aspect = width / height;
-	camera.updateProjectionMatrix();
-
-	renderer.setSize( width, height );
-
-    }else{
-	console.log("Fullscreen");
-	THREEx.FullScreen.request(document.getElementById( 'asdf' ));
-
-	//THREEx.FullScreen.request(panoContainer);
-
-	// THREEx.FullScreen.request(document.getElementById( renderer ));
-	camera.aspect = window.innerWidth / window.innerHeight;
-	camera.updateProjectionMatrix();
-
-	//renderer.setSize( window.innerWidth, window.innerHeight );
-
-    }
-}
-*/
-
 function switchPanorama( panoramaID, destMarker ) {
     // Building the file path
-    var sourceFile = gs.documentMetadata[panoramaID].SourceFile;
+    var sourceFile = gs.documentMetadata[panoramaID].Image;
     var assocfilepath = gs.documentMetadata[panoramaID].assocfilepath;
     var httpPath = gs.collectionMetadata.httpPath;
 
     var fullPanoURL = httpPath + "/index/assoc/" + assocfilepath + "/" + sourceFile;
 
-    console.log("pano URL = " + fullPanoURL);
-    
     // Creating the material
     if (Detector.webgl) {
 	var texture =  new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( fullPanoURL ), opacity: 0 } );
@@ -204,21 +179,24 @@ function switchPanorama( panoramaID, destMarker ) {
     }
 	
     new TWEEN.Tween(mesh.materials[0]).to({opacity: 0}, 500).onComplete(function () {
+	    // Rotation
+	    if (gs.documentMetadata[panoramaID].Angle) {
+		var temp = 360 + parseFloat(gs.documentMetadata[panoramaID].Angle);
+		temp = temp % 360;
+		console.log(temp);
+		mesh.rotation.y =  meshRotation + (gs.documentMetadata[panoramaID].Angle * Math.PI / 180);
+	    } else if (gs.documentMetadata[panoramaID].cv_rotation) 
+		mesh.rotation.y =  meshRotation + (gs.documentMetadata[panoramaID].cv_rotation * Math.PI / 180);
+	    else
+		mesh.rotation.y = meshRotation;
+	    
 	    mesh.materials[0] = texture;		
 	    new TWEEN.Tween(mesh.materials[0]).to({opacity: 1}, 500).start();
     }).start();
     
-    // Setting the mesh material
-
     
-    // Rotation
-    if (gs.documentMetadata[panoramaID].cv_rotation) 
-	mesh.rotation.y =  meshRotation + (gs.documentMetadata[panoramaID].cv_rotation * Math.PI / 180);
-    else
-	mesh.rotation.y = meshRotation;
-
     // Checking if there are markers to remove
-    if (nearbyPanoList.length > 1) {
+    if (nearbyPanoList.length > 0) {
 	for(var i = 0; i < nearbyPanoList.length; i++) {
 	    panoContainer.removeChild(nearbyPanoList[i]);
 	    // document.body.appendChild(nearbyPanoList[i]);
@@ -240,7 +218,6 @@ function switchPanorama( panoramaID, destMarker ) {
 	var endPanoLonLat = new THREE.Vector3(gs.documentMetadata[panoDocList.ids[i]].Latitude,gs.documentMetadata[panoDocList.ids[i]].Longitude);
 	if(calculateDistance(startPanoLonLat,endPanoLonLat) < panoSelectionRadius) {
 	    var bearing = calculateBearing(startPanoLonLat,endPanoLonLat); 
-	    console.log(bearing);
 	    var pos =  degreesToCoords(bearing, sphereRadius);
 	    var navMarker = NavMarker.create(panoDocList.ids[i],pos);	
 	    nearbyPanoList.push(navMarker);
@@ -259,23 +236,20 @@ function switchPanorama( panoramaID, destMarker ) {
     
 } 
 
-/*
+
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
-*/
+
 
 function onDocumentMouseDown( event ) {
     event.preventDefault();
-    
     isUserInteracting = true;
-    
       onPointerDownPointerX = event.clientX;
       onPointerDownPointerY = event.clientY;
-      
       onPointerDownLon = lon;
       onPointerDownLat = lat;
       
@@ -283,7 +257,6 @@ function onDocumentMouseDown( event ) {
 
 function onDocumentMouseMove( event ) {
     if ( isUserInteracting ) {
-	
 	lon = ( onPointerDownPointerX - event.clientX ) * 0.1 + onPointerDownLon;
 	lat = ( event.clientY - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
     }
@@ -296,25 +269,15 @@ function onDocumentMouseUp( event ) {
 }
 
 function onDocumentMouseWheel( event ) {
-    
-    // WebKit
-    
     if ( event.wheelDeltaY ) {
-	
+	// WebKit
 	fov -= event.wheelDeltaY * 0.05;
-	
-	// Opera / Explorer 9
-	
     } else if ( event.wheelDelta ) {
-	
+	// Opera / Explorer 9	
 	fov -= event.wheelDelta * 0.05;
-	
-	// Firefox
-	
     } else if ( event.detail ) {
-	
+	// Firefox	
 	fov += event.detail * 1.0;
-	
     }
 
     if ( fov > maxFov) {
@@ -323,14 +286,11 @@ function onDocumentMouseWheel( event ) {
 	fov = minFov;
     }
 
-    // camera.projectionMatrix.makePerspective( fov, container.offsetWidth / container.offsetHeight, 1, 1100 );
     camera.projectionMatrix = THREE.Matrix4.makePerspective( fov, aspect , 1, 1100 );
     _render();
-    
 }
 
 function _animate() {
-    
     requestAnimationFrame( _animate );
     _render();
     TWEEN.update();
@@ -338,12 +298,6 @@ function _animate() {
 }
 
 function _render() {
-    /*
-    lat = Math.max( - 85, Math.min( 85, lat ) );
-    phi = THREE.Math.degToRad( 90 - lat );
-    theta = THREE.Math.degToRad( lon );
-    */
-
     lat = Math.max( - 85, Math.min( 85, lat ) );
     phi = ( 90 - lat ) * Math.PI / 180;
     theta = lon * Math.PI / 180;
@@ -364,6 +318,8 @@ function _render() {
     var camUnitVector = camera.target.clone().normalize();
     var i, angle, sameSide, p2D, marker;
 
+    // Snippet of code from Thanh Tran from in2ideas
+    // thanh.tran@in2ideas.com
     for (i = 0; i < nearbyPanoList.length; ++i) {
 	marker =  nearbyPanoList[i];
 	p2D = projector.projectVector(marker.position.clone(), camera);
@@ -371,7 +327,6 @@ function _render() {
 	p2D.x = (p2D.x + 1)/2 * width;
 	p2D.y = - (p2D.y - 1)/2 * height;
 	
-	//my trick
 	angle = Math.acos(camUnitVector.dot(marker.unitVector)) * 180 / 3.14;
 	sameSide = (angle < 90);
 	
@@ -383,8 +338,5 @@ function _render() {
 	    marker.setPosition(p2D.x, p2D.y);
 	}
     }
-    
-    
     renderer.render( scene, camera );
-    
 }
