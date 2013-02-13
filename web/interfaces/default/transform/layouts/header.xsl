@@ -517,10 +517,8 @@
 	<xsl:template name="panoramaViewer-scripts">
            <script src="interfaces/{$interface_name}/js/three45.min.js" type="text/javascript"><xsl:text> </xsl:text></script>
 	   <script src="interfaces/{$interface_name}/js/Tween.js" type="text/javascript"><xsl:text> </xsl:text></script>
-	   <script src="interfaces/{$interface_name}/js/THREEx.FullScreen.js" type="text/javascript"><xsl:text> </xsl:text></script>
 	   <script src="interfaces/{$interface_name}/js/Detector.js" type="text/javascript"><xsl:text> </xsl:text></script>
 	   <script src="interfaces/{$interface_name}/js/RequestAnimationFrame.js" type="text/javascript"><xsl:text> </xsl:text></script>
-	   <script src="interfaces/{$interface_name}/js/OpenLayers.js" type="text/javascript"><xsl:text> </xsl:text></script>
 	   <script src="interfaces/{$interface_name}/js/panoramaMarker.js" type="text/javascript"><xsl:text> </xsl:text></script>
 	   <script src="interfaces/{$interface_name}/js/panoramaViewer.js" type="text/javascript"><xsl:text> </xsl:text></script>
 	   <script type="text/javascript">$(window).load(initPanoramaViewer);$(window).load(_animate);</script>
