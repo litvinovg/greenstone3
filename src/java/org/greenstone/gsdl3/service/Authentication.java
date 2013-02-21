@@ -126,7 +126,8 @@ public class Authentication extends ServiceRack
 	protected static final String AUTHENTICATION_SERVICE = "Authentication";
 	protected static final String GET_USER_INFORMATION_SERVICE = "GetUserInformation";
 
-	protected DerbyWrapper _derbyWrapper = null;
+	protected static DerbyWrapper _derbyWrapper = null;
+        protected static boolean _derbyWrapperDoneForcedShutdown = false;
 
 	protected String _recaptchaPrivateKey = null;
 	protected String _recaptchaPublicKey = null;
@@ -134,6 +135,28 @@ public class Authentication extends ServiceRack
 	/** constructor */
 	public Authentication()
 	{
+	}
+
+        public void cleanUp() {
+
+	    super.cleanUp();
+
+	    if (!_derbyWrapperDoneForcedShutdown) {		
+
+		// This boolean is used to ensure we always shutdown the derby server, even if it is never
+		// used by the Authentication server.  This is because the Tomcat greenstone3.xml
+		// config file also specifies a connection to the database, which can result in the
+		// server being initialized when the servlet is first accessed.  Note also, 
+		// Authentication is a ServiceRack, meaning cleanUp() is called for each service
+		// supported, however we only need to shutdown the Derby server once.  Again
+		// this boolean variable helps achieve this.
+
+		logger.info("Authentication Service performing forced shutdown of Derby Server ...");
+	    
+		DerbyWrapper.shutdownDatabaseServer();
+		_derbyWrapper = null;
+		_derbyWrapperDonwForcedShutdown = true;
+
 	}
 
 	public boolean configure(Element info, Element extra_info)
@@ -253,20 +276,18 @@ public class Authentication extends ServiceRack
 			return result;
 		}
 
-		DerbyWrapper dbWrapper = new DerbyWrapper();
+		openDatabase();
 
-		String usersDB_dir = this.site_home + File.separatorChar + "etc" + File.separatorChar + "usersDB";
-		dbWrapper.connectDatabase(usersDB_dir, true);
-
-		UserQueryResult userQueryResult;
 		try
 		{
-			userQueryResult = dbWrapper.findUser(username);
+		        UserQueryResult userQueryResult = _derbyWrapper.findUser(username);
+			
 			Vector<UserTermInfo> terms = userQueryResult.getUserTerms();
 
 			if (terms.size() == 0)
 			{
 				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUESTED_USER_NOT_FOUND));
+				closeDatabase();
 				return result;
 			}
 
@@ -291,6 +312,9 @@ public class Authentication extends ServiceRack
 			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_SQL_EXCEPTION));
 			ex.printStackTrace();
 		}
+
+
+		closeDatabase();
 
 		return result;
 	}
@@ -802,13 +826,9 @@ public class Authentication extends ServiceRack
 
 	private void checkAdminUserExists()
 	{
-		if (_derbyWrapper == null)
-		{
-			openDatabase();
-		}
+	        openDatabase();
 
 		UserQueryResult userQueryResult = _derbyWrapper.findUser(null, null);
-		closeDatabase();
 
 		if (userQueryResult != null)
 		{
@@ -834,6 +854,7 @@ public class Authentication extends ServiceRack
 
 	private boolean openDatabase()
 	{
+	    if (_derbyWrapper == null) {
 		_derbyWrapper = new DerbyWrapper();
 
 		// check the usersDb database, if it isn't existing, check the etc dir, create the etc dir if it isn't existing, then create the  user database and add a "admin" user
@@ -859,7 +880,8 @@ public class Authentication extends ServiceRack
 		{
 			_derbyWrapper.connectDatabase(usersDB_dir, false);
 		}
-		return true;
+	    }
+	    return true;
 	}
 
 	private void closeDatabase()
@@ -872,14 +894,10 @@ public class Authentication extends ServiceRack
 	}
 
 	private int addUserInformationToNode(String username, Element serviceNode)
-	{
-		if (_derbyWrapper == null)
-		{
-			openDatabase();
-		}
+	{	    
+	        openDatabase();
 
 		UserQueryResult userQueryResult = _derbyWrapper.findUser(username, null);
-		closeDatabase();
 
 		if (userQueryResult != null)
 		{
@@ -900,33 +918,29 @@ public class Authentication extends ServiceRack
 			return ERROR_USERNAME_NOT_SPECIFIED;
 		}
 
-		if (_derbyWrapper == null)
-		{
-			openDatabase();
-		}
+		openDatabase();
 
 		boolean success = _derbyWrapper.deleteUser(username);
-		closeDatabase();
 
 		if (success)
 		{
-			return NO_ERROR;
+		    closeDatabase();
+		    return NO_ERROR;
 		}
 
+		closeDatabase();
 		return ERROR_REMOVING_USER;
 	}
 
 	private int addUser(String newUsername, String newPassword, String newGroups, String newStatus, String newComment, String newEmail)
 	{
-		if (_derbyWrapper == null)
-		{
-			openDatabase();
-		}
+	        openDatabase();
 
 		newGroups = newGroups.replaceAll(" ", "");
 
 		//Check if the user already exists
 		UserQueryResult userQueryResult = _derbyWrapper.findUser(newUsername, null);
+
 		if (userQueryResult != null)
 		{
 			closeDatabase();
@@ -942,16 +956,16 @@ public class Authentication extends ServiceRack
 				return ERROR_ADDING_USER;
 			}
 		}
+
 		closeDatabase();
 		return NO_ERROR;
 	}
 
 	private boolean checkUserExists(String username)
 	{
-		if (_derbyWrapper == null)
-		{
-			openDatabase();
-		}
+  	        boolean check_status = false;
+
+		openDatabase();
 
 		try
 		{
@@ -959,32 +973,25 @@ public class Authentication extends ServiceRack
 
 			if (result != null)
 			{
-				return true;
-			}
-			else
-			{
-				return false;
+				check_status = true;
 			}
 
 		}
 		catch (Exception ex)
 		{
-			return false;
+		    // some error occurred accessing the database
+		    ex.printStackTrace();
 		}
-		finally
-		{
-			closeDatabase();
-		}
+
+		closeDatabase();
+		return check_status;
 	}
 
 	private String retrieveDataForUser(String username, String dataType)
 	{
-		if (_derbyWrapper == null)
-		{
-			openDatabase();
-		}
+	        openDatabase();
 
-		String password = null;
+		String data = null;
 
 		try
 		{
@@ -995,23 +1002,28 @@ public class Authentication extends ServiceRack
 			{
 				if (dataType.equals("password"))
 				{
-					return ((UserTermInfo) userInfo.get(i)).password;
+					data = ((UserTermInfo) userInfo.get(i)).password;
+					break;
 				}
 				else if (dataType.equals("groups"))
 				{
-					return ((UserTermInfo) userInfo.get(i)).groups;
+					data = ((UserTermInfo) userInfo.get(i)).groups;
+					break;
 				}
 				else if (dataType.equals("status"))
 				{
-					return ((UserTermInfo) userInfo.get(i)).accountstatus;
+					data = ((UserTermInfo) userInfo.get(i)).accountstatus;
+					break;
 				}
 				else if (dataType.equals("comment"))
 				{
-					return ((UserTermInfo) userInfo.get(i)).comment;
+					data = ((UserTermInfo) userInfo.get(i)).comment;
+					break;
 				}
 				else if (dataType.equals("email"))
 				{
-					return ((UserTermInfo) userInfo.get(i)).email;
+					data = ((UserTermInfo) userInfo.get(i)).email;
+					break;
 				}
 			}
 		}
@@ -1021,7 +1033,7 @@ public class Authentication extends ServiceRack
 		}
 
 		closeDatabase();
-		return password;
+		return data;
 	}
 
 	private Element getUserNode(UserQueryResult userQueryResult)
