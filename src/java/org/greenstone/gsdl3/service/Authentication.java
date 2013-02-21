@@ -155,7 +155,8 @@ public class Authentication extends ServiceRack
 	    
 		DerbyWrapper.shutdownDatabaseServer();
 		_derbyWrapper = null;
-		_derbyWrapperDonwForcedShutdown = true;
+		_derbyWrapperDoneForcedShutdown = true;
+	    }
 
 	}
 
