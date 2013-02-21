@@ -86,22 +86,53 @@ public class DerbyWrapper
 
 	public void closeDatabase()
 	{
-		state = null;
-		conn = null;
+	        //state = null;
+		//conn = null;
 		boolean gotSQLExc = false;
 		try
-		{
-			DriverManager.getConnection(protocol_str + ";shutdown=true");
-		}
+		    {
+		    //  shutdown the database
+		    DriverManager.getConnection(protocol_str + ";shutdown=true");
+			
+		    }
 		catch (SQLException se)
 		{
-			gotSQLExc = true;
+		    // this is good (i.e. what Derby is designed to do on a successful shutdown)
+		    gotSQLExc = true;
 		}
+		catch (Exception e) {
+		    e.printStackTrace();
+		}
+
 		if (!gotSQLExc)
 		{
-			System.out.println("Database did not shut down normally");
+		    System.err.println("Warning: Derby Database did not shut down normally");
 		}
 	}
+
+       public static void shutdownDatabaseServer()
+       {
+	   boolean gotSQLExc = false;
+
+	   try {
+	       //  shutdown the whole server
+	       DriverManager.getConnection(PROTOCOL + ";shutdown=true");
+	       
+	   }
+	   catch (SQLException se) {
+	       // this is good (i.e. what Derby is designed to do on a successful shutdown)
+	       gotSQLExc = true;
+	       //System.out.println("Shutdown returned: " + se);
+	   }
+	   catch (Exception e) {
+
+	       e.printStackTrace();
+	   }
+	   if (!gotSQLExc) {
+	       System.err.println("Warning: Derby did not shut down normally");
+	   }
+
+       }
 
 	public void createDatabase()
 	{
