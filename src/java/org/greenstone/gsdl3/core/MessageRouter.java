@@ -381,15 +381,12 @@ public class MessageRouter implements ModuleInterface
 	 */
 	protected void cleanUpModuleMapEntire()
 	{
-	        //System.err.println("**** in MessageRouter, cleanUpModuleMapEntire");
-	    
 		if (this.module_map != null)
 		{
 			Iterator<ModuleInterface> i = this.module_map.values().iterator();
 			while (i.hasNext())
 			{
 			    ModuleInterface i_next = i.next();
-			    // System.err.println("**** in MessageRouter, cleanUpModuleMapEntire, away to call cleanUp on " + i_next.toString());
 			    
 			    i_next.cleanUp();
 			    i.remove();
