@@ -22,6 +22,7 @@ import java.io.File;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 
 import org.apache.commons.lang3.StringUtils;
@@ -380,13 +381,30 @@ public class MessageRouter implements ModuleInterface
 	 */
 	protected void cleanUpModuleMapEntire()
 	{
+	    //System.err.println("**** in MessageRouter, cleanUpModuleMapEntire");
+
 		if (this.module_map != null)
 		{
+		    /*
+		        // Iterate through the keys
+		        Iterator<Map.Entry<String,ModuleInterface>> j = this.module_map.entrySet().iterator();
+			while (j.hasNext())
+			    {
+				Map.Entry<String, ModuleInterface> me = j.next();
+				System.err.println("**** in MessageRouter, key = "+ me.getKey()+" value = "+me.getValue().toString());
+
+			    }
+		    */
+
 			Iterator<ModuleInterface> i = this.module_map.values().iterator();
 			while (i.hasNext())
 			{
-				i.next().cleanUp();
-				i.remove();
+			    ModuleInterface i_next = i.next();
+			    // System.err.println("**** in MessageRouter, cleanUpModuleMapEntire, away to call cleanUp on " + i_next.toString());
+
+			    
+			    i_next.cleanUp();
+			    i.remove();
 			}
 		}
 	}
