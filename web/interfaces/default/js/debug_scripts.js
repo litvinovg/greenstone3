@@ -9,16 +9,23 @@ function DebugWidget()
 	var _pauseSelector = false;
 	var _elements = new Array();
 	var _itemSelected = false; //Used to prevent multiple elements from being highlighted
+	var _editModeText = false;
+	var _selectedTemplate;
 	
 	//Page elements
 	var _mainDiv;
-	var _textDiv;
+	
+	var _textEditor;
+	var _vEditor;
+	
+	var _templateSelector;
 	var _editor;
 	var _editingDiv;
 	var _unpauseButton;
 	var _closeEditorButtonButton;
 	var _xmlStatusBar;
 	var _saveButton;
+	var _swapEditorButton;
 	
 	//Editor state-keeping variables
 	var _currentFilepath;
@@ -26,6 +33,7 @@ function DebugWidget()
 	var _currentName;
 	var _currentMatch;
 	var _currentNamespace;
+	var _isVisualEditor = true;
 	
 	var createDebugDiv = function()
 	{
@@ -33,7 +41,7 @@ function DebugWidget()
 		_mainDiv.css(
 		{
 			"position":"fixed",
-			"font-size":"0.7em",
+			"font-size":"0.8em",
 			"bottom":"0px",
 			"width":"100%",
 			"background":"white",
@@ -45,11 +53,13 @@ function DebugWidget()
 		_editingDiv = $("<div>");
 		var toolBarDiv = $("<div>");
 		toolBarDiv.css({"height":"40px"});
+
 		var buttonDiv = $("<div>");
 		buttonDiv.css("float", "left");
 		toolBarDiv.append(buttonDiv);
-		_textDiv = $("<div>");
-		_textDiv.css({"overflow":"auto", "width":"100%"});
+
+		_templateSelector = $("<div>", {"id":"templateSelector"});
+		_templateSelector.css({"overflow":"auto", "width":"100%"});
 
 		var pickElementButton = $("<input type=\"button\" value=\"Enable debugging\">");
 		pickElementButton.click(function()
@@ -119,6 +129,7 @@ function DebugWidget()
 					_xmlStatusBar.css({"color":"white", "background":"red"});
 					_xmlStatusBar.attr("title", error);
 					_saveButton.attr("disabled", "disabled");
+					_swapEditorButton.attr("disabled", "disabled");
 					return;
 				}
 				
@@ -129,6 +140,10 @@ function DebugWidget()
 				{
 					_saveButton.removeAttr("disabled");
 				}
+				if(_swapEditorButton.val() == "Switch to Visual Editor")
+				{
+					_swapEditorButton.removeAttr("disabled");
+				}
 			}
 			
 		}, 2000);
@@ -138,7 +153,17 @@ function DebugWidget()
 		{
 			if(_editor)
 			{
-				var xmlString = _editor.getValue().replace(/&/g, "&amp;");
+				var xmlString;
+				if(_isVisualEditor)
+				{
+					xmlString = new XMLSerializer().serializeToString(_vEditor.getXML());
+				}
+				else
+				{
+					xmlString = _editor.getValue();
+				}
+				xmlString = xmlString.replace(/&/g, "&amp;");
+				
 				try
 				{
 					var xml = $.parseXML('<testContainer xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
@@ -183,26 +208,48 @@ function DebugWidget()
 			}
 		});
 		
-		var minimiseButton = $("<img>", {"src":gs.imageURLs.collapse});
-		minimiseButton.css({"cursor":"pointer", "float":"right", "margin-right":"20px"});
-		minimiseButton.click(function()
+		_swapEditorButton = $("<input type=\"button\" value=\"Switch to XML Editor\">");
+		_swapEditorButton.click(function()
 		{
-			if($(this).attr("src") == gs.imageURLs.collapse)
+			if(_vEditor && _textEditor)
 			{
-				_textDiv.hide();
-				$(this).attr("src", gs.imageURLs.expand);
-			}
-			else
-			{
-				_textDiv.show();
-				$(this).attr("src", gs.imageURLs.collapse);
+				if(_isVisualEditor)
+				{
+					_vEditor.getMainDiv().hide();
+					var containerNode = _vEditor.getXML().firstChild;
+					var templateNode = containerNode.firstChild;
+					while(templateNode)
+					{
+						if(templateNode.nodeType == 1)
+						{
+							break;
+						}
+						templateNode = templateNode.nextSibling;
+					}
+					var xmlText = new XMLSerializer().serializeToString(templateNode);
+					_editor.setValue(xmlText);
+					_editor.clearSelection();
+					_textEditor.show();
+					_swapEditorButton.val("Switch to Visual Editor");
+					_isVisualEditor = false;
+				}
+				else
+				{
+					_textEditor.hide();
+					var xmlText = _editor.getValue();
+					_vEditor.getMainDiv().remove();
+					_vEditor = new visualXMLEditor(xmlText);
+					_editingDiv.append(_vEditor.getMainDiv());
+					_vEditor.selectRootElement();
+					_vEditor.getMainDiv().show();
+					_swapEditorButton.val("Switch to XML Editor");
+					_isVisualEditor = true;
+				}
 			}
 		});
-		
+
 		var clear = $("<span>");
 		clear.css("clear", "both");
-		
-		toolBarDiv.append(minimiseButton);
 		toolBarDiv.append(clear);
 		
 		buttonDiv.append(pickElementButton);
@@ -210,9 +257,12 @@ function DebugWidget()
 		buttonDiv.append(_closeEditorButton);
 		buttonDiv.append(_xmlStatusBar);
 		buttonDiv.append(_saveButton);
-		_mainDiv.append(_editingDiv);
+		buttonDiv.append(_swapEditorButton);
+
 		_mainDiv.append(toolBarDiv);
-		_mainDiv.append(_textDiv);
+		_mainDiv.append(_editingDiv);
+		_mainDiv.append("<div>Templates:</div>");
+		_mainDiv.append(_templateSelector);
 	}
 	
 	var clearAll = function()
@@ -248,6 +298,14 @@ function DebugWidget()
 	{
 		infoContainer.click(function()
 		{
+			if(_selectedTemplate)
+			{
+				_selectedTemplate.css("border", _selectedTemplate.prevBorder);
+			}
+			_selectedTemplate = infoContainer;
+			_selectedTemplate.prevBorder = _selectedTemplate.css("border");
+			_selectedTemplate.css("border", "red 1px solid");
+		
 			_currentFilepath = filepath;
 			_currentNodename = nodename;
 			_currentNamespace = namespace;
@@ -274,13 +332,27 @@ function DebugWidget()
 					return;
 				}
 			
-				var textEditor = $("<div>", {"id":"textEditor"});
-				textEditor.css({"width":"100%"});
-				textEditor.val(template);
+				_textEditor = $("<div>", {"id":"textEditor"});
+				_textEditor.css({"width":"100%", "height":"300px"});
+				_textEditor.val(template);
+				
+				if(_isVisualEditor)
+				{
+					_textEditor.hide();
+				}
 				
 				_editingDiv.empty();
 				_editingDiv.append($("<p>" + filepath + "</p>"));
-				_editingDiv.append(textEditor);
+				_editingDiv.append(_textEditor);
+				
+				_vEditor = new visualXMLEditor(template);
+				_editingDiv.append(_vEditor.getMainDiv());
+				_vEditor.selectRootElement();
+				
+				if(!_isVisualEditor)
+				{
+					_vEditor.getMainDiv().hide();
+				}
 				
 				_editor = ace.edit("textEditor");
 				_editor.getSession().setMode("ace/mode/xml");
@@ -288,12 +360,13 @@ function DebugWidget()
 				_editor.setValue(template);
 				_editor.clearSelection();
 				
-				textEditor.css({"min-height":"200px", "border-top":"5px solid #444"});
-				textEditor.resizable({handles: 'n', resize:function()
+				_textEditor.css({"min-height":"200px", "border-top":"5px solid #444"});
+				_textEditor.resizable({handles: 'n', resize:function()
 				{
-					textEditor.css({top:"0px"});
+					_textEditor.css({top:"0px"});
 					_editor.resize();
 				}});
+
 				
 				_closeEditorButton.removeAttr("disabled");
 			})
@@ -312,7 +385,7 @@ function DebugWidget()
 			$(this).css("background", $(this).data("background"));
 		});
 	}
-	
+
 	var addMouseEventsToDebugElements = function(debugElems)
 	{
 		debugElems.click(function()
@@ -366,19 +439,15 @@ function DebugWidget()
 					var nodename = fullNodename.substring(colonIndex + 1);
 					var name = $(this).attr("name");
 					var match = $(this).attr("match");
-
+					
 					var infoContainer = $("<div>");
-					infoContainer.css({"cursor":"pointer", "border":"1px dashed #AAAAAA", "margin":"5px"});
-					var elementDIV = $("<div>");
-
-					elementDIV.css("font-size", "1.1em");
-
-					infoContainer.append(elementDIV);
+					infoContainer.addClass("gbTemplateContainer");
 					
 					_elements.push(infoContainer);
 					
 					addMouseEventsToInfoContainer(infoContainer, filepath, nodename, namespace, name, match);
 					
+					/*
 					var attrstr = "";
 					var illegalNames = ["nodename", "filename", "style", "debug", "id", "class"];
 
@@ -393,9 +462,30 @@ function DebugWidget()
 						attrstr += this.name + "=\"" + this.value + "\" ";
 					});
 
-					elementDIV.text("<" + fullNodename + " " + attrstr + ">");
+					infoContainer.text("<" + fullNodename + " " + attrstr + ">");
+					*/
 					
-					_textDiv.prepend(infoContainer);
+					if(name && name.length > 0)
+					{
+						infoContainer.text(name);
+					}
+					if(match && match.length > 0)
+					{
+						infoContainer.text(match);
+					}
+					
+					if(_templateSelector.children("div").length > 0)
+					{
+						var spacer = $("<div>&gt;&gt;</div>");
+						spacer.addClass("gbSpacer");
+
+						_templateSelector.prepend(spacer);
+						_elements.push(spacer);
+					}
+					
+					_templateSelector.prepend(infoContainer);
+					
+					resizeContainers();
 				});
 				
 				if(!_itemSelected)
@@ -413,6 +503,21 @@ function DebugWidget()
 				clearAll();
 			}
 		});
+	}
+	
+	var resizeContainers = function()
+	{
+		var templates = _templateSelector.children(".gbTemplateContainer");
+		var spacers = _templateSelector.children(".gbSpacer");
+		
+		var templateWidth = (79/templates.length) + "%";
+		templates.css("width", templateWidth);
+		
+		if(spacers.length > 0)
+		{
+			var spacersWidth = (19/spacers.length) + "%";
+			spacers.css("width", spacersWidth);
+		}
 	}
 	
 	this.init = function()
