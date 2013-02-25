@@ -886,6 +886,154 @@ dl dd { padding-bottom:10px}
 	width:100%;
 }
 
+/* GREENBUG */
+.gbTemplateContainer{
+	float:left;
+	cursor:pointer;
+	border:1px dashed #AAAAAA;
+	margin:0;
+	font-size:1.1em;
+	text-align:center;
+}
+
+.gbSpacer{
+	margin:0;
+	float:left;
+	height:1.2em;
+	text-align:center;
+}
+
+/* VISUAL XML EDITOR */
+#veMainDiv{
+	margin:0;
+	padding:0;
+}
+
+#veToolboxDiv{
+	float:left;
+	width:10%;
+	margin:0;
+	padding:0;
+	overflow:auto;
+	height:300px;
+}
+
+#veEditorDiv{
+	width:100%;
+}
+
+#veEditorContainer{
+	float:left;
+	width:70%;
+	margin:0;
+	padding:0;
+	overflow:hidden;
+	border: 3px groove;
+	background-image: url(../images/veBackground.gif);
+}
+
+#veSpacerDiv{
+	float:left;
+	width:1%;
+	height:1px;
+	margin:0;
+	padding:0;
+}
+
+#veInfoDiv{
+	float:left;
+	width:17%;
+	margin:0 0 10px 0;
+	padding:0;
+	overflow:auto;
+}
+
+.veElement{
+	border:1px dashed black;
+	float:left;
+	margin:5px -1px;
+	overflow:hidden;
+	color:black;
+	cursor:pointer;
+}
+
+.veDropArea{
+	margin:5px 0;
+	float:left;
+	height:1em;
+	background:#FFAAAA;
+}
+
+.veContainerElement{
+	width:90%;
+	margin:0 auto;
+}
+
+.veTitleElement{
+	text-align:center;
+}
+
+.veGSFElement{
+	background:#DFD;
+}
+
+.veGSLIBElement{
+	background:#FF9;
+}
+
+.veXSLElement{
+	background:#DDF;
+}
+
+.veHTMLElement{
+	background:#FFFFFF;
+}
+
+.veTextElement{
+	background:#F9F;
+}
+
+.veTempElement{
+	background:#9FF;
+}
+
+.veTab{
+	font-size:0.8em;
+	padding:0.5em;
+}
+
+.veAttributeTableContainer{
+	text-align:center;
+	width:100%;
+}
+
+.veAttributeTableContainer td{
+	border:1px solid black;
+}
+
+.veAttributeTableRow{
+	min-height:1.1em;
+}
+
+.veNameCell{
+	width:25%;
+}
+
+.veValueCell{
+	width:50%;
+}
+
+.veUtilCell{
+	font-size:0.8em;
+	width:25%;
+}
+
+.toolbarElem{
+	border:1px dashed black;
+	text-align:center;
+	margin-bottom:2px;
+}
+
 /* To get the bookshelves and buckets titlecased (they're stored lowercased) */
 table#classifiernodelist {
     
