@@ -247,6 +247,19 @@ function DebugWidget()
 				}
 			}
 		});
+		
+		undoButton = $("<input type=\"button\" value=\"Undo\">");
+		undoButton.click(function()
+		{
+			if(_isVisualEditor)
+			{
+				_vEditor.undo();
+			}
+			else
+			{
+				_editor.undo();
+			}
+		});
 
 		var clear = $("<span>");
 		clear.css("clear", "both");
@@ -258,6 +271,7 @@ function DebugWidget()
 		buttonDiv.append(_xmlStatusBar);
 		buttonDiv.append(_saveButton);
 		buttonDiv.append(_swapEditorButton);
+		buttonDiv.append(undoButton);
 
 		_mainDiv.append(toolBarDiv);
 		_mainDiv.append(_editingDiv);

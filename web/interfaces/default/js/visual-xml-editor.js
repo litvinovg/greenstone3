@@ -27,9 +27,86 @@ function visualXMLEditor(xmlString)
 	var _overList = new Array();
 	_overList.freeSpaces = new Array();
 	
+	var _transactions = new Array();
+	
 	this.getXML = function()
 	{
 		return _xml;
+	}
+	
+	this.undo = function()
+	{
+		if(_transactions.length > 0)
+		{
+			var t = _transactions.pop();
+			//Undo an added element
+			if(t.type == "addElem")
+			{
+				$(t.vElem.data("parentVEElement").getXMLNode()).remove();
+				t.vElem.remove();
+				resizeAll();
+			}
+			//Undo a removed or moved element
+			else if(t.type == "remMvElem")
+			{
+				var parent = t.vElemParent;
+				var pos = t.vElemPos;
+				var elem = t.vElem;
+				if(pos == 0)
+				{
+					parent.prepend(elem);
+					$(parent.parent().data("parentVEElement").getXMLNode()).prepend(elem.data("parentVEElement").getXMLNode());
+				}
+				else if(pos == parent.children(".veElement").length - 1)
+				{
+					parent.children(".veElement").eq(pos - 1).after(elem);
+					$(parent.children(".veElement").eq(pos - 1).data("parentVEElement").getXMLNode()).after(elem.data("parentVEElement").getXMLNode());
+				}
+				else
+				{
+					parent.children(".veElement").eq(pos).before(elem);
+					$(parent.children(".veElement").eq(pos).data("parentVEElement").getXMLNode()).before(elem.data("parentVEElement").getXMLNode());
+				}
+				resizeAll();
+			}
+			//Undo an added attribute
+			else if(t.type == "addAttr")
+			{
+				if(t.row)
+				{
+					t.row.remove();
+				}
+			}
+			//Undo a removed or edited attribute
+			else if(t.type == "editAttr")
+			{
+				t.elem.removeAttribute(t.newName);
+				t.elem.setAttribute(t.name, t.value);
+				if(t.row)
+				{
+					t.row.children("td").eq(0).text(t.name);
+					t.row.children("td").eq(1).text(t.value);
+				}
+			}
+			//Undo a removed or edited attribute
+			else if(t.type == "remAttr")
+			{
+				t.elem.setAttribute(t.name, t.value);
+				if(t.rowParent)
+				{
+					t.rowParent.append(t.row);
+				}
+			}
+			//Undo edited text
+			else if(t.type == "editText")
+			{
+				t.elem.nodeValue = t.value;
+				if(t.vElem)
+				{
+					t.vElem.text(t.value);
+				}
+			}
+		}
 	}
 	
 	var populateToolbar = function()
@@ -390,8 +467,8 @@ function visualXMLEditor(xmlString)
 			var link = $("<a href=\"javascript:;\">edit</a>");
 			link.click(function()
 			{
-				var nameCell = cell.parent().children("td").eq(0);
-				var valueCell = cell.parent().children("td").eq(1);
+				var nameCell = _row.children("td").eq(0);
+				var valueCell = _row.children("td").eq(1);
 				if(link.text() == "edit")
 				{
 					link.text("save edit");
@@ -432,6 +509,8 @@ function visualXMLEditor(xmlString)
 					}
 					_xmlElem.setAttribute(name, value);
 					
+					_transactions.push({type:"editAttr", elem:_xmlElem, row:_row, newName:name, name:_name, value:_value});
+					
 					_name = name;
 					_value = value;
 				}
@@ -446,8 +525,9 @@ function visualXMLEditor(xmlString)
 			var link = $("<a href=\"javascript:;\">delete</a>");
 			link.click(function()
 			{
+				_transactions.push({type:"remAttr", elem:_xmlElem, row:_row, rowParent:_row.parent(), name:_name, value:_value});
 				_xmlElem.removeAttribute(_name);
-				_row.remove();
+				_row.detach();	
 			});
 			cell.append(link);
 			return cell;
@@ -608,6 +688,7 @@ function visualXMLEditor(xmlString)
 				},
 				"stop":function(event, ui)
 				{
+					var transactionType = (_div.data("toolbar")) ? "addElem" : "remMvElem";
 					_div.data("dragging", false);
 					_div.data("toolbar", false);
 
@@ -648,6 +729,7 @@ function visualXMLEditor(xmlString)
 						{
 							$(xmlNode).append(_xmlNode);
 						}
+						_transactions.push({type:transactionType, vElemParent:_origDDParent, vElemPos:_origDDPosition, vElem:_div});
 					}
 				}
 			});
@@ -725,7 +807,9 @@ function visualXMLEditor(xmlString)
 				addButton.click(function()
 				{
 					var newAtt = new VEAttribute(null, _xmlNode, "", "");
-					attributeTable.append(newAtt.getAsTableRow());
+					var row = newAtt.getAsTableRow();
+					attributeTable.append(row);
+					_transactions.push({type:"addAttr", row:row})
 				});
 				_infoDiv.append(addButton);
 			}
@@ -747,6 +831,7 @@ function visualXMLEditor(xmlString)
 				{
 					if(editButton.text() == "edit text")
 					{
+						nodeText.data("prevTextValue", nodeText.text());
 						var textArea = $("<textarea>");
 						textArea.val(nodeText.text());
 						nodeText.text("");
@@ -755,6 +840,7 @@ function visualXMLEditor(xmlString)
 					}
 					else
 					{
+						_transactions.push({type:"editText", elem:_xmlNode, vElem: nodeText, value:nodeText.data("prevTextValue")});
 						var textArea = nodeText.find("textarea");
 						var newValue = textArea.val();
 						_xmlNode.nodeValue = newValue;
