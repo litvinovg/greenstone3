@@ -52,20 +52,21 @@ function visualXMLEditor(xmlString)
 				var parent = t.vElemParent;
 				var pos = t.vElemPos;
 				var elem = t.vElem;
+				
 				if(pos == 0)
 				{
 					parent.prepend(elem);
 					$(parent.parent().data("parentVEElement").getXMLNode()).prepend(elem.data("parentVEElement").getXMLNode());
 				}
-				else if(pos == parent.children(".veElement").length - 1)
+				else if(pos == parent.children(".veElement").length)
 				{
-					parent.children(".veElement").eq(pos - 1).after(elem);
 					$(parent.children(".veElement").eq(pos - 1).data("parentVEElement").getXMLNode()).after(elem.data("parentVEElement").getXMLNode());
+					parent.children(".veElement").eq(pos - 1).after(elem);
 				}
 				else
 				{
-					parent.children(".veElement").eq(pos).before(elem);
 					$(parent.children(".veElement").eq(pos).data("parentVEElement").getXMLNode()).before(elem.data("parentVEElement").getXMLNode());
+					parent.children(".veElement").eq(pos).before(elem);
 				}
 				resizeAll();
 			}
@@ -674,6 +675,10 @@ function visualXMLEditor(xmlString)
 								else
 								{
 									_validDropElem = overChildren.eq(pos - 1);
+									if(!_validDropElem.length)
+									{
+										_validDropElem = overChildren.eq(pos - 2);
+									}
 									_validDropType = "after";
 									overChildren.eq(pos - 1).after(_div);
 								}
@@ -861,8 +866,10 @@ function visualXMLEditor(xmlString)
 			removeButton.click(function()
 			{
 				var divParent = _div.parents(".veElement");
+				_transactions.push({type:"remMvElem", vElemParent:_div.parent(), vElemPos:_div.index(), vElem:_div});
+				_div.data("expanded", "normal");
 				$(_xmlNode).remove();
-				_div.remove();
+				_div.detach();
 				_infoDiv.empty();
 				
 				if(divParent.length)
