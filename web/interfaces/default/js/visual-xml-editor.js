@@ -736,7 +736,7 @@ function visualXMLEditor(xmlString)
 						}
 					}
 				},
-				"stop":function(event, ui)
+				"stop":function(event)
 				{
 					var transactionType = (_div.data("toolbar")) ? "addElem" : "remMvElem";
 					_div.data("dragging", false);
@@ -782,12 +782,15 @@ function visualXMLEditor(xmlString)
 						}
 						_transactions.push({type:transactionType, vElemParent:_origDDParent, vElemPos:_origDDPosition, vElem:_div});
 					}
+					
+					_overList = new Array();
+					_overList.freeSpaces = new Array();
 				}
 			});
 
 			_div.droppable(
 			{
-				"over":function(event)
+				"over":function(event, ui)
 				{
 					addToOverList($(this).data("parentVEElement"));
 					event.stopPropagation();
