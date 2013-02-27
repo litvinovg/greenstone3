@@ -61,6 +61,7 @@ function visualXMLEditor(xmlString)
 				var pos = t.vElemPos;
 				var elem = t.vElem;
 				
+				elem.detach();
 				if(pos == 0)
 				{
 					parent.prepend(elem);
@@ -672,13 +673,8 @@ function visualXMLEditor(xmlString)
 					if(foundDefined)
 					{
 						var overElement = getDeepestOverElement();
-						if(overElement)
+						if(overElement && overElement.getXMLNode().nodeType != 3 && checkRestricted(_xmlNode, overElement.getXMLNode()))
 						{
-							if(overElement.getXMLNode().nodeType == 3 || !checkRestricted(_xmlNode, overElement.getXMLNode()))
-							{
-								return;
-							}
-							
 							_validDropSpot = true;
 							var overDiv = overElement.getDiv();
 
@@ -752,11 +748,12 @@ function visualXMLEditor(xmlString)
 					//If the element was not dropped in a valid place then put it back
 					if(!_validDropSpot)
 					{
+						_div.detach();
 						if(_origDDPosition == 0)
 						{
 							_origDDParent.prepend(_div);
 						}
-						else if(_origDDPosition == _origDDParent.children(".veElement").length - 1)
+						else if(_origDDPosition == _origDDParent.children(".veElement").length)
 						{
 							_origDDParent.children(".veElement").eq(_origDDPosition - 1).after(_div);
 						}
