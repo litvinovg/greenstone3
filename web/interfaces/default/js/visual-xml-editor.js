@@ -29,6 +29,14 @@ function visualXMLEditor(xmlString)
 	
 	var _transactions = new Array();
 	
+	var _childRestrictions = 
+	{
+		gsf:
+		{
+			"choose-metadata":["gsf:metadata", "gsf:default"]
+		}
+	};
+	
 	this.getXML = function()
 	{
 		return _xml;
@@ -110,11 +118,47 @@ function visualXMLEditor(xmlString)
 		}
 	}
 	
+	var checkRestricted = function(child, parent)
+	{
+		var pFullNodename = parent.tagName;
+		var cFullNodename = child.tagName;
+		var pNamespace;
+		var pNodeName;
+		if(pFullNodename.indexOf(":") == -1)
+		{
+			pNamespace = "no namespace";
+			pNodeName = pFullNodename;
+		}
+		else
+		{
+			pNamespace = pFullNodename.substring(0, pFullNodename.indexOf(":"));
+			pNodeName = pFullNodename.substring(pFullNodename.indexOf(":") + 1);
+		}
+		
+		var namespaceList = _childRestrictions[pNamespace];
+		if(namespaceList)
+		{
+			var childList = namespaceList[pNodeName];
+			if(childList)
+			{
+				for(var i = 0; i < childList.length; i++)
+				{
+					if(childList[i] == cFullNodename)
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	var populateToolbar = function()
 	{
 		var elemList = 
 		{
-			keys:["html", "xsl", "gsf"], // NEED TO ADD GSLIB AT SOME POINT
 			html:["a", "div", "li", "script", "span", "table", "td", "tr", "ul"],
 			xsl:
 			[
@@ -132,15 +176,14 @@ function visualXMLEditor(xmlString)
 				"equivlinkgs3", "foreach-metadata", "icon", "if-metadata-exists", "image",
 				"interfaceText", "link", "meta-value", "metadata", "script",
 				"style", "switch", "template", "text", "variable"
-			],
+			]
 		};
 
 		var tabHolder = $("<ul>");
 		_toolboxDiv.append(tabHolder);
 
-		for(var i = 0; i < elemList.keys.length; i++)
+		for(var key in elemList)
 		{
-			var key = elemList.keys[i];
 			var currentList = elemList[key];
 
 			var tab = $("<li>");
@@ -631,6 +674,11 @@ function visualXMLEditor(xmlString)
 						var overElement = getDeepestOverElement();
 						if(overElement)
 						{
+							if(overElement.getXMLNode().nodeType == 3 || !checkRestricted(_xmlNode, overElement.getXMLNode()))
+							{
+								return;
+							}
+							
 							_validDropSpot = true;
 							var overDiv = overElement.getDiv();
 
@@ -675,6 +723,7 @@ function visualXMLEditor(xmlString)
 								else
 								{
 									_validDropElem = overChildren.eq(pos - 1);
+									//Necessary to fix a rare bug that causes pos to be off by one
 									if(!_validDropElem.length)
 									{
 										_validDropElem = overChildren.eq(pos - 2);
