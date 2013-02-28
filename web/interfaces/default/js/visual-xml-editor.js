@@ -33,7 +33,8 @@ function visualXMLEditor(xmlString)
 	{
 		gsf:
 		{
-			"choose-metadata":["gsf:metadata", "gsf:default"]
+			"choose-metadata":["gsf:metadata", "gsf:default"],
+			"metadata":[]
 		}
 	};
 	
@@ -160,7 +161,7 @@ function visualXMLEditor(xmlString)
 	{
 		var elemList = 
 		{
-			html:["a", "div", "li", "script", "span", "table", "td", "tr", "ul"],
+			html:["a", "br", "div", "li", "link", "script", "span", "table", "td", "tr", "ul"],
 			xsl:
 			[
 				"apply-imports", "apply-templates", "attribute", "attribute-set", "call-template", 
@@ -516,7 +517,7 @@ function visualXMLEditor(xmlString)
 				var valueCell = _row.children("td").eq(1);
 				if(link.text() == "edit")
 				{
-					link.text("save edit");
+					link.text("done");
 
 					var nameInput = $("<input type=\"text\">");
 					nameInput.width(nameCell.width() - 5);
@@ -890,7 +891,7 @@ function visualXMLEditor(xmlString)
 						textArea.val(nodeText.text());
 						nodeText.text("");
 						nodeText.append(textArea);
-						editButton.text("save edit");
+						editButton.text("done");
 					}
 					else
 					{
