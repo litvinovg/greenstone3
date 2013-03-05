@@ -35,6 +35,40 @@ function DebugWidget()
 	var _currentNamespace;
 	var _isVisualEditor = true;
 	
+	var partialPageReload = function()
+	{
+		$.ajax(document.URL)
+		.success(function(response)
+		{
+			//Get the body text from the response
+			var bodyStartIndex = response.indexOf("<body");
+			var bodyEndIndex = response.indexOf("</body>");
+			var bodyText = response.substring(bodyStartIndex, bodyEndIndex + 7);
+			
+			//Get the current top area and container
+			var topLevelTopArea = $("#topArea");
+			var topLevelContainer = $("#container");
+			
+			//Create a temporary div and put the html into it
+			var tempDiv = $("<div>");
+			tempDiv.html(bodyText);
+			
+			//Replace the contents of the old elements with the new elements
+			var topArea = tempDiv.find("#topArea");
+			var container = tempDiv.find("#container");
+			topLevelTopArea.html(topArea.html());
+			topLevelContainer.html(container.html());
+			
+			//Update the events for the debug elements that currently don't have events associated with them
+			var debugElems = $('debug, [debug="true"]').filter(function(){return (!($.data(this, "events"))) ? true : false});
+			addMouseEventsToDebugElements(debugElems);
+		})
+		.error(function()
+		{
+			alert("There was an error reloading the page, please reload manually.");
+		});
+	}
+	
 	var createDebugDiv = function()
 	{
 		_mainDiv = $("<div>", {"id":"debugDiv"});
@@ -62,7 +96,7 @@ function DebugWidget()
 		_templateSelector.css({"overflow":"auto", "width":"100%"});
 
 		var pickElementButton = $("<input type=\"button\" value=\"Enable debugging\">");
-		pickElementButton.click(function()
+		pickElementButton.button().click(function()
 		{
 			if(!_debugOn)
 			{
@@ -79,23 +113,27 @@ function DebugWidget()
 				$("a").off("click");
 				clearAll();
 				_unpauseButton.attr("disabled", "disabled");
+				_unpauseButton.addClass("ui-state-disabled");
 				_pauseSelector = false;
 				_debugOn = false;
 			}
 		});
 
-		_unpauseButton = $("<input type=\"button\" value=\"Select new element\" disabled=\"disabled\">");
-		_unpauseButton.click(function()
+		_unpauseButton = $("<input type=\"button\" value=\"Select new element\">");
+		_unpauseButton.button().click(function()
 		{
 			if(_pauseSelector)
 			{
 				_pauseSelector = false;
 				$(this).attr("disabled", "disabled");
+				$(this).addClass("ui-state-disabled");
 			}
 		});
+		_unpauseButton.attr("disabled", "disabled");
+		_unpauseButton.addClass("ui-state-disabled");
 		
-		_closeEditorButton = $("<input type=\"button\" value=\"Close editor\" disabled=\"disabled\">");
-		_closeEditorButton.click(function()
+		_closeEditorButton = $("<input type=\"button\" value=\"Close editor\">");
+		_closeEditorButton.button().click(function()
 		{
 			if($(this).val() == "Close editor")
 			{
@@ -108,9 +146,12 @@ function DebugWidget()
 				_editingDiv.show();
 			}
 		});
+		_closeEditorButton.attr("disabled", "disabled");
+		_closeEditorButton.addClass("ui-state-disabled");
 		
 		_xmlStatusBar = $("<span>");
 		_xmlStatusBar.css("padding", "5px");
+		_xmlStatusBar.addClass("ui-corner-all");
 		
 		//Check the XML for errors every 2 seconds
 		setInterval(function()
@@ -126,30 +167,36 @@ function DebugWidget()
 				{
 					console.log(error);
 					_xmlStatusBar.text("XML ERROR! (Mouse over for details)");
-					_xmlStatusBar.css({"color":"white", "background":"red"});
+					_xmlStatusBar.addClass("ui-state-error");
+					_xmlStatusBar.removeClass("ui-state-active");
 					_xmlStatusBar.attr("title", error);
 					_saveButton.attr("disabled", "disabled");
+					_saveButton.addClass("ui-state-disabled");
 					_swapEditorButton.attr("disabled", "disabled");
+					_swapEditorButton.addClass("ui-state-disabled");
 					return;
 				}
 				
 				_xmlStatusBar.text("XML OK!");
-				_xmlStatusBar.css({"color":"white", "background": "green"});
+				_xmlStatusBar.addClass("ui-state-active");
+				_xmlStatusBar.removeClass("ui-state-error");
 				_xmlStatusBar.removeAttr("title");
 				if(_saveButton.val() == "Save changes")
 				{
 					_saveButton.removeAttr("disabled");
+					_saveButton.removeClass("ui-state-disabled");
 				}
 				if(_swapEditorButton.val() == "Switch to Visual Editor")
 				{
 					_swapEditorButton.removeAttr("disabled");
+					_swapEditorButton.removeClass("ui-state-disabled");
 				}
 			}
 			
 		}, 2000);
 		
-		_saveButton = $("<input type=\"button\" value=\"Save changes\" disabled=\"disabled\">");
-		_saveButton.click(function()
+		_saveButton = $("<input type=\"button\" value=\"Save changes\">");
+		_saveButton.button().click(function()
 		{
 			if(_editor)
 			{
@@ -182,6 +229,7 @@ function DebugWidget()
 
 				_saveButton.val("Saving...");
 				_saveButton.attr("disabled", "disabled");
+				_saveButton.addClass("ui-state-default");
 
 				$.post(url, parameters)
 				.success(function()
@@ -199,6 +247,8 @@ function DebugWidget()
 					{
 						_saveButton.val("Save changes");
 						_saveButton.removeAttr("disabled");
+						_saveButton.removeClass("ui-state-default");
+						partialPageReload();
 					});
 				})
 				.error(function()
@@ -207,9 +257,11 @@ function DebugWidget()
 				});
 			}
 		});
+		_saveButton.attr("disabled", "disabled");
+		_saveButton.addClass("ui-state-disabled");
 		
 		_swapEditorButton = $("<input type=\"button\" value=\"Switch to XML Editor\">");
-		_swapEditorButton.click(function()
+		_swapEditorButton.button().click(function()
 		{
 			if(_vEditor && _textEditor)
 			{
@@ -249,7 +301,7 @@ function DebugWidget()
 		});
 		
 		undoButton = $("<input type=\"button\" value=\"Undo\">");
-		undoButton.click(function()
+		undoButton.button().click(function()
 		{
 			if(_isVisualEditor)
 			{
@@ -268,10 +320,10 @@ function DebugWidget()
 		buttonDiv.append(pickElementButton);
 		buttonDiv.append(_unpauseButton);
 		buttonDiv.append(_closeEditorButton);
-		buttonDiv.append(_xmlStatusBar);
 		buttonDiv.append(_saveButton);
 		buttonDiv.append(_swapEditorButton);
 		buttonDiv.append(undoButton);
+		buttonDiv.append(_xmlStatusBar);
 
 		_mainDiv.append(toolBarDiv);
 		_mainDiv.append(_editingDiv);
@@ -383,6 +435,7 @@ function DebugWidget()
 
 				
 				_closeEditorButton.removeAttr("disabled");
+				_closeEditorButton.removeClass("ui-state-disabled");
 			})
 			.error(function()
 			{
@@ -408,6 +461,7 @@ function DebugWidget()
 			{
 				_pauseSelector = true;
 				_unpauseButton.removeAttr("disabled");
+				_unpauseButton.removeClass("ui-state-disabled");
 			}
 		});
 
@@ -546,6 +600,8 @@ function DebugWidget()
 		
 		createDebugDiv();
 		$("body").append(_mainDiv);
+		
+		$(".ui-button").css({"padding":"0.2em", "margin-right":"0.5em"});
 
 		addMouseEventsToDebugElements(debugElems);
 	}
