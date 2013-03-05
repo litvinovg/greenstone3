@@ -415,7 +415,7 @@ function visualXMLEditor(xmlString)
 			var size = $(this).data("expanded");
 			if(size == "small")
 			{
-				var width = (10 / ($(this).siblings(".veElement").filter(function(){return !($(this).data("helper"))}).length - 1));
+				var width = (20 / ($(this).siblings(".veElement").filter(function(){return !($(this).data("helper"))}).length - 1));
 				$(this).css("width", width + "%");
 			}
 			else if(size == "normal")
@@ -425,7 +425,7 @@ function visualXMLEditor(xmlString)
 			}
 			else if(size == "expanded")
 			{
-				$(this).css("width", "90%");
+				$(this).css("width", "80%");
 			}
 		});
 	}
@@ -980,14 +980,14 @@ function visualXMLEditor(xmlString)
 			var siblings = _div.siblings(".veElement");
 			if(!(_div.data("expanded") == "expanded") && siblings.length && siblings.length > 0)
 			{
-				var sibWidth = 10 / siblings.length;
+				var sibWidth = 20 / siblings.length;
 				siblings.each(function()
 				{
 					$(this).animate({width:sibWidth + "%"}, 900);
 					$(this).data("expanded", "small");
 				});
 				
-				_div.animate({width:"90%"}, 1000);
+				_div.animate({width:"80%"}, 1000);
 				_div.data("expanded", "expanded");
 			}
 		}
