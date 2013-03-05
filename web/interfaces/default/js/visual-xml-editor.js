@@ -17,6 +17,8 @@ function visualXMLEditor(xmlString)
 	var _rootElement;
 	var _selectedElement;
 
+	var _overTrash = false;
+	
 	var _validDropSpot = false;
 	var _validDropType;
 	var _validDropElem;
@@ -155,6 +157,25 @@ function visualXMLEditor(xmlString)
 		}
 		
 		return true;
+	}
+	
+	var placeTrashBin = function()
+	{
+		var bin = $("<div id=\"veTrash\">Trash</div>");
+		bin.addClass("ui-state-default");
+		bin.addClass("ui-corner-all");
+		bin.droppable(
+		{
+			"over":function()
+			{
+				_overTrash = true;
+			},
+			"out":function()
+			{
+				_overTrash = false;
+			}
+		});
+		_editorContainer.append(bin);
 	}
 	
 	var populateToolbar = function()
@@ -444,13 +465,14 @@ function visualXMLEditor(xmlString)
 		}
 
 		populateToolbar();
+		placeTrashBin();
 
 		_editorContainer.append(_editorDiv);
 		_mainDiv.append(_toolboxDiv);
 		_mainDiv.append(_editorContainer);
 		_mainDiv.append($("<div>", {"id":"veSpacerDiv"}));
 		_mainDiv.append(_infoDiv);
-		_mainDiv.append($("<div>", {"style":"clear:both;"}));
+		_mainDiv.append($("<div>", {"style":"clear:both;"}));		
 	}
 
 	// *********************************************************************** //
@@ -637,6 +659,7 @@ function visualXMLEditor(xmlString)
 				"appendTo":_mainDiv,
 				"start":function(event, ui)
 				{
+					_overTrash = false;
 					_origDDParent = _div.parent();
 					_origDDPosition = _div.index();
 
@@ -745,7 +768,7 @@ function visualXMLEditor(xmlString)
 
 					_div.css("border", "1px dashed black");
 					_div.css("background", _div.data("prevBackground"));
-
+					
 					//If the element was not dropped in a valid place then put it back
 					if(!_validDropSpot)
 					{
@@ -761,6 +784,12 @@ function visualXMLEditor(xmlString)
 						else
 						{
 							_origDDParent.children(".veElement").eq(_origDDPosition).before(_div);
+						}
+						
+						if(_overTrash)
+						{
+							_div.data("parentVEElement").remove();
+							return;
 						}
 
 						resizeAll();
@@ -915,18 +944,23 @@ function visualXMLEditor(xmlString)
 			_infoDiv.append(removeButton);
 			removeButton.click(function()
 			{
-				var divParent = _div.parents(".veElement");
-				_transactions.push({type:"remMvElem", vElemParent:_div.parent(), vElemPos:_div.index(), vElem:_div});
-				_div.data("expanded", "normal");
-				$(_xmlNode).remove();
-				_div.detach();
-				_infoDiv.empty();
-				
-				if(divParent.length)
-				{
-					divParent.first().trigger("click");
-				}
+				_div.data("parentVEElement").remove();
 			});
+		}
+		
+		this.remove = function()
+		{
+			var divParent = _div.parents(".veElement");
+			_transactions.push({type:"remMvElem", vElemParent:_div.parent(), vElemPos:_div.index(), vElem:_div});
+			_div.data("expanded", "normal");
+			$(_xmlNode).remove();
+			_div.detach();
+			_infoDiv.empty();
+			
+			if(divParent.length)
+			{
+				divParent.first().trigger("click");
+			}
 		}
 
 		var addMouseEvents = function()
