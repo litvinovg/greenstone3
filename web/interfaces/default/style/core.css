@@ -923,6 +923,7 @@ dl dd { padding-bottom:10px}
 }
 
 #veEditorContainer{
+	position:relative;
 	float:left;
 	width:70%;
 	margin:0;
@@ -1026,6 +1027,15 @@ dl dd { padding-bottom:10px}
 .veUtilCell{
 	font-size:0.8em;
 	width:25%;
+}
+
+#veTrash{
+	position:absolute;
+	right:0px;
+	bottom:0px;
+	width:5%;
+	height:20%;
+	text-align:center;
 }
 
 .toolbarElem{

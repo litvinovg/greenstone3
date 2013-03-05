@@ -161,7 +161,7 @@ function visualXMLEditor(xmlString)
 	
 	var placeTrashBin = function()
 	{
-		var bin = $("<div id=\"veTrash\">Trash</div>");
+		var bin = $("<div id=\"veTrash\">Recycle Bin</div>");
 		bin.addClass("ui-state-default");
 		bin.addClass("ui-corner-all");
 		bin.droppable(
