@@ -22,7 +22,7 @@ function DebugWidget()
 	var _editor;
 	var _editingDiv;
 	var _unpauseButton;
-	var _closeEditorButtonButton;
+	var _closeEditorButton;
 	var _xmlStatusBar;
 	var _saveButton;
 	var _swapEditorButton;
@@ -34,6 +34,8 @@ function DebugWidget()
 	var _currentMatch;
 	var _currentNamespace;
 	var _isVisualEditor = true;
+	
+	var _styleFunctions = new Array();
 	
 	var partialPageReload = function()
 	{
@@ -69,6 +71,15 @@ function DebugWidget()
 		});
 	}
 	
+	var callStyleFunctions = function()
+	{
+		for(var i = 0; i < _styleFunctions.length; i++)
+		{
+			var sFunction = _styleFunctions[i];
+			sFunction();
+		}
+	}
+	
 	var createDebugDiv = function()
 	{
 		_mainDiv = $("<div>", {"id":"debugDiv"});
@@ -95,12 +106,12 @@ function DebugWidget()
 		_templateSelector = $("<div>", {"id":"templateSelector"});
 		_templateSelector.css({"overflow":"auto", "width":"100%"});
 
-		var pickElementButton = $("<input type=\"button\" value=\"Enable debugging\">");
-		pickElementButton.button().click(function()
+		var pickElementButton = $("<button>Enable debugging</button>");
+		pickElementButton.click(function()
 		{
 			if(!_debugOn)
 			{
-				pickElementButton.attr("value", "Disable debugging");
+				pickElementButton.button("option", "label", "Disable debugging");
 				$("a").click(function(e)
 				{
 					e.preventDefault();
@@ -109,94 +120,45 @@ function DebugWidget()
 			}
 			else
 			{
-				pickElementButton.attr("value", "Enable debugging");
+				pickElementButton.button("option", "label", "Enable debugging");
 				$("a").off("click");
 				clearAll();
-				_unpauseButton.attr("disabled", "disabled");
-				_unpauseButton.addClass("ui-state-disabled");
+				_unpauseButton.button("option", "disabled", true);
 				_pauseSelector = false;
 				_debugOn = false;
 			}
 		});
+		_styleFunctions.push(function(){pickElementButton.button({icons:{primary:"ui-icon-power"}})});
 
-		_unpauseButton = $("<input type=\"button\" value=\"Select new element\">");
-		_unpauseButton.button().click(function()
+		_unpauseButton = $("<button>Select new element</button>");
+		_unpauseButton.click(function()
 		{
 			if(_pauseSelector)
 			{
 				_pauseSelector = false;
-				$(this).attr("disabled", "disabled");
-				$(this).addClass("ui-state-disabled");
+				_unpauseButton.button("option", "disabled", true);
 			}
 		});
-		_unpauseButton.attr("disabled", "disabled");
-		_unpauseButton.addClass("ui-state-disabled");
+		_styleFunctions.push(function(){_unpauseButton.button({icons:{primary:"ui-icon-pencil"}, disabled:true})});
 		
-		_closeEditorButton = $("<input type=\"button\" value=\"Close editor\">");
-		_closeEditorButton.button().click(function()
+		_closeEditorButton = $("<button>Close editor</button>");
+		_closeEditorButton.click(function()
 		{
-			if($(this).val() == "Close editor")
+			if(_closeEditorButton.button("option", "label") == "Close editor")
 			{
-				$(this).val("Open editor");
+				_closeEditorButton.button("option", "label", "Open editor");
 				_editingDiv.hide();
 			}
 			else
 			{
-				$(this).val("Close editor");
+				_closeEditorButton.button("option", "label", "Close editor");
 				_editingDiv.show();
 			}
 		});
-		_closeEditorButton.attr("disabled", "disabled");
-		_closeEditorButton.addClass("ui-state-disabled");
+		_styleFunctions.push(function(){_closeEditorButton.button({icons:{primary:"ui-icon-newwin"}, disabled:true})});
 		
-		_xmlStatusBar = $("<span>");
-		_xmlStatusBar.css("padding", "5px");
-		_xmlStatusBar.addClass("ui-corner-all");
-		
-		//Check the XML for errors every 2 seconds
-		setInterval(function()
-		{
-			if(_editor)
-			{
-				var xmlString = _editor.getValue();
-				try
-				{
-					var xml = $.parseXML('<testContainer xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
-				}
-				catch(error)
-				{
-					console.log(error);
-					_xmlStatusBar.text("XML ERROR! (Mouse over for details)");
-					_xmlStatusBar.addClass("ui-state-error");
-					_xmlStatusBar.removeClass("ui-state-active");
-					_xmlStatusBar.attr("title", error);
-					_saveButton.attr("disabled", "disabled");
-					_saveButton.addClass("ui-state-disabled");
-					_swapEditorButton.attr("disabled", "disabled");
-					_swapEditorButton.addClass("ui-state-disabled");
-					return;
-				}
-				
-				_xmlStatusBar.text("XML OK!");
-				_xmlStatusBar.addClass("ui-state-active");
-				_xmlStatusBar.removeClass("ui-state-error");
-				_xmlStatusBar.removeAttr("title");
-				if(_saveButton.val() == "Save changes")
-				{
-					_saveButton.removeAttr("disabled");
-					_saveButton.removeClass("ui-state-disabled");
-				}
-				if(_swapEditorButton.val() == "Switch to Visual Editor")
-				{
-					_swapEditorButton.removeAttr("disabled");
-					_swapEditorButton.removeClass("ui-state-disabled");
-				}
-			}
-			
-		}, 2000);
-		
-		_saveButton = $("<input type=\"button\" value=\"Save changes\">");
-		_saveButton.button().click(function()
+		_saveButton = $("<button>Save changes</button>");
+		_saveButton.click(function()
 		{
 			if(_editor)
 			{
@@ -227,9 +189,8 @@ function DebugWidget()
 				if(_currentName && _currentName.length > 0){parameters["s1.name"] = _currentName;}
 				if(_currentMatch && _currentMatch.length > 0){parameters["s1.match"] = _currentMatch;}
 
-				_saveButton.val("Saving...");
-				_saveButton.attr("disabled", "disabled");
-				_saveButton.addClass("ui-state-default");
+				_saveButton.button("option", "label", "Saving...");
+				_saveButton.button("option", "disabled", true);
 
 				$.post(url, parameters)
 				.success(function()
@@ -245,9 +206,8 @@ function DebugWidget()
 					})
 					.complete(function()
 					{
-						_saveButton.val("Save changes");
-						_saveButton.removeAttr("disabled");
-						_saveButton.removeClass("ui-state-default");
+						_saveButton.button("option", "label", "Save changes");
+						_saveButton.button("option", "disabled", false);
 						partialPageReload();
 					});
 				})
@@ -257,10 +217,9 @@ function DebugWidget()
 				});
 			}
 		});
-		_saveButton.attr("disabled", "disabled");
-		_saveButton.addClass("ui-state-disabled");
+		_styleFunctions.push(function(){_saveButton.button({icons:{primary:"ui-icon-disk"}, disabled:true})});
 		
-		_swapEditorButton = $("<input type=\"button\" value=\"Switch to XML Editor\">");
+		_swapEditorButton = $("<button>Switch to XML Editor</button>");
 		_swapEditorButton.button().click(function()
 		{
 			if(_vEditor && _textEditor)
@@ -282,7 +241,7 @@ function DebugWidget()
 					_editor.setValue(xmlText);
 					_editor.clearSelection();
 					_textEditor.show();
-					_swapEditorButton.val("Switch to Visual Editor");
+					_swapEditorButton.button("option", "label", "Switch to Visual Editor");
 					_isVisualEditor = false;
 				}
 				else
@@ -294,14 +253,15 @@ function DebugWidget()
 					_editingDiv.append(_vEditor.getMainDiv());
 					_vEditor.selectRootElement();
 					_vEditor.getMainDiv().show();
-					_swapEditorButton.val("Switch to XML Editor");
+					_swapEditorButton.button("option", "label", "Switch to XML Editor");
 					_isVisualEditor = true;
 				}
 			}
 		});
+		_styleFunctions.push(function(){_swapEditorButton.button({icons:{primary:"ui-icon-refresh"}})});
 		
-		undoButton = $("<input type=\"button\" value=\"Undo\">");
-		undoButton.button().click(function()
+		undoButton = $("<button>Undo</button>");
+		undoButton.click(function()
 		{
 			if(_isVisualEditor)
 			{
@@ -312,7 +272,50 @@ function DebugWidget()
 				_editor.undo();
 			}
 		});
+		_styleFunctions.push(function(){undoButton.button({icons:{primary:"ui-icon-arrowreturnthick-1-w"}})});
 
+		_xmlStatusBar = $("<span>");
+		_xmlStatusBar.css("padding", "5px");
+		_xmlStatusBar.addClass("ui-corner-all");
+		
+		//Check the XML for errors every 2 seconds
+		setInterval(function()
+		{
+			if(_editor)
+			{
+				var xmlString = _editor.getValue();
+				try
+				{
+					var xml = $.parseXML('<testContainer xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
+				}
+				catch(error)
+				{
+					console.log(error);
+					_xmlStatusBar.text("XML ERROR! (Mouse over for details)");
+					_xmlStatusBar.addClass("ui-state-error");
+					_xmlStatusBar.removeClass("ui-state-active");
+					_xmlStatusBar.attr("title", error);
+					_saveButton.button("option", "disabled", true);
+					_swapEditorButton.button("option", "disabled", true);
+					return;
+				}
+				
+				_xmlStatusBar.text("XML OK!");
+				_xmlStatusBar.addClass("ui-state-active");
+				_xmlStatusBar.removeClass("ui-state-error");
+				_xmlStatusBar.removeAttr("title");
+				if(_saveButton.button("option", "label") == "Save changes")
+				{
+					_saveButton.button("option", "disabled", false);
+				}
+				if(_swapEditorButton.button("option", "label") == "Switch to Visual Editor")
+				{
+					_swapEditorButton.button("option", "disabled", false);
+				}
+			}
+			
+		}, 2000);
+		
 		var clear = $("<span>");
 		clear.css("clear", "both");
 		toolBarDiv.append(clear);
@@ -324,7 +327,9 @@ function DebugWidget()
 		buttonDiv.append(_swapEditorButton);
 		buttonDiv.append(undoButton);
 		buttonDiv.append(_xmlStatusBar);
-
+		
+		_styleFunctions.push(function(){$(".ui-button").css({"margin-right":"0.5em"});});
+		
 		_mainDiv.append(toolBarDiv);
 		_mainDiv.append(_editingDiv);
 		_mainDiv.append("<div>Templates:</div>");
@@ -433,9 +438,7 @@ function DebugWidget()
 					_editor.resize();
 				}});
 
-				
-				_closeEditorButton.removeAttr("disabled");
-				_closeEditorButton.removeClass("ui-state-disabled");
+				_closeEditorButton.button("option", "disabled", true);
 			})
 			.error(function()
 			{
@@ -460,8 +463,7 @@ function DebugWidget()
 			if(_debugOn)
 			{
 				_pauseSelector = true;
-				_unpauseButton.removeAttr("disabled");
-				_unpauseButton.removeClass("ui-state-disabled");
+				_unpauseButton.button("option", "disabled", false);
 			}
 		});
 
@@ -601,7 +603,7 @@ function DebugWidget()
 		createDebugDiv();
 		$("body").append(_mainDiv);
 		
-		$(".ui-button").css({"padding":"0.2em", "margin-right":"0.5em"});
+		callStyleFunctions();
 
 		addMouseEventsToDebugElements(debugElems);
 	}
