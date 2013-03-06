@@ -5,6 +5,8 @@
 
 function visualXMLEditor(xmlString)
 {
+	var thisEditor = this;
+
 	var _globalID = 0;
 
 	var _xml;
@@ -25,6 +27,8 @@ function visualXMLEditor(xmlString)
 	
 	var _origDDParent;
 	var _origDDPosition;
+	
+	var _editingNodes = new Array();
 	
 	var _overList = new Array();
 	_overList.freeSpaces = new Array();
@@ -81,6 +85,18 @@ function visualXMLEditor(xmlString)
 					parent.children(".veElement").eq(pos).before(elem);
 				}
 				resizeAll();
+
+				//Check if we need to change the recycle bin icon
+				var found = false;
+				for(var i = 0; i < _transactions.length; i++)
+				{
+					if(_transactions[i].type == "remMvElem"){found = true; break;}
+				}
+
+				if(!found)
+				{
+					$("#veTrash").children("img").attr("src", gs.imageURLs.trashEmpty);
+				}
 			}
 			//Undo an added attribute
 			else if(t.type == "addAttr")
@@ -161,7 +177,9 @@ function visualXMLEditor(xmlString)
 	
 	var placeTrashBin = function()
 	{
-		var bin = $("<div id=\"veTrash\">Recycle Bin</div>");
+		var binImage = $("<img src=\"" + gs.imageURLs.trashEmpty + "\"/>");
+		var bin = $("<div id=\"veTrash\">");
+		bin.append(binImage);
 		bin.addClass("ui-state-default");
 		bin.addClass("ui-corner-all");
 		bin.droppable(
@@ -182,7 +200,7 @@ function visualXMLEditor(xmlString)
 	{
 		var elemList = 
 		{
-			html:["a", "br", "div", "li", "link", "script", "span", "table", "td", "tr", "ul"],
+			html:["a", "br", "div", "li", "link", "p", "script", "span", "table", "td", "tr", "ul"],
 			xsl:
 			[
 				"apply-imports", "apply-templates", "attribute", "attribute-set", "call-template", 
@@ -342,6 +360,15 @@ function visualXMLEditor(xmlString)
 		return _mainDiv;
 	}
 	
+	this.savePendingEdits = function()
+	{
+		while(_editingNodes && _editingNodes.length > 0)
+		{
+			var attr = _editingNodes.pop();
+			attr.saveEdits();
+		}
+	}
+	
 	var addToOverList = function(veElement)
 	{
 		for(var i = 0; i < _overList.length; i++)
@@ -474,7 +501,76 @@ function visualXMLEditor(xmlString)
 		_mainDiv.append(_infoDiv);
 		_mainDiv.append($("<div>", {"style":"clear:both;"}));		
 	}
+	
+	// *********************************************************************** //
+	// Visual Editor Text                                                      //
+	// This inner class represents a single xml text node in the visual editor //
+	// *********************************************************************** //
 
+	var VEText = function(node)
+	{
+		var _thisNode = this;
+		var _xmlNode = node;
+	
+		var _textEditor = $("<div>");
+		var textTitle = $("<div>Text:</div>");
+		var _nodeText = $("<div>");
+		_nodeText.text(_xmlNode.nodeValue);
+
+		_textEditor.append(textTitle);
+		_textEditor.append(_nodeText);
+		
+		var editButton = $("<button>edit text</button>");
+		editButton.click(function()
+		{
+			if(editButton.text() == "edit text")
+			{
+				_thisNode.editMode();
+			}
+			else
+			{
+				_thisNode.saveEdits();
+			}
+		});
+		_textEditor.append(editButton);
+		
+		this.editMode = function()
+		{
+			_editingNodes.push(_thisNode);
+			_nodeText.data("prevTextValue", _nodeText.text());
+			var textArea = $("<textarea>");
+			textArea.val(_nodeText.text());
+			_nodeText.text("");
+			_nodeText.append(textArea);
+			editButton.text("done");
+		}
+
+		this.saveEdits = function()
+		{
+			for(var i = 0; i < _editingNodes.length; i++)
+			{
+				if(_editingNodes[i] == _thisNode)
+				{
+					_editingNodes.splice(i, 1);
+					break;
+				}
+			}
+		
+			_transactions.push({type:"editText", elem:_xmlNode, vElem: _nodeText, value:_nodeText.data("prevTextValue")});
+			var textArea = _nodeText.find("textarea");
+			var newValue = textArea.val();
+			_xmlNode.nodeValue = newValue;
+			_nodeText.empty();
+			_nodeText.text(newValue);
+			editButton.text("edit text");
+		}
+
+		this.getDiv = function()
+		{
+			return _textEditor;
+		}
+	}
+	
 	// *********************************************************************** //
 	// Visual Editor Attribute                                                 //
 	// This inner class represents a single xml attribute in the visual editor //
@@ -501,10 +597,11 @@ function visualXMLEditor(xmlString)
 		{
 			_value = attrElem.value;
 		}
-		
 		var _xmlElem = xmlElem;
 		var _row;
 
+		var _thisAttr = this;
+		
 		this.getName = function()
 		{
 			return _name;
@@ -533,55 +630,10 @@ function visualXMLEditor(xmlString)
 		{
 			var cell = $("<td>", {"class":"veEditCell"});
 			var link = $("<a href=\"javascript:;\">edit</a>");
+			
 			link.click(function()
 			{
-				var nameCell = _row.children("td").eq(0);
-				var valueCell = _row.children("td").eq(1);
-				if(link.text() == "edit")
-				{
-					link.text("done");
-
-					var nameInput = $("<input type=\"text\">");
-					nameInput.width(nameCell.width() - 5);
-					nameInput.val(_name);
-
-					var valueInput = $("<input type=\"text\">");
-					valueInput.width(valueCell.width() - 5);
-					valueInput.val(_value);
-
-					nameCell.text("");
-					valueCell.text("");
-
-					nameCell.append(nameInput);
-					valueCell.append(valueInput);
-				}
-				else
-				{
-					link.text("edit");
-
-					var nameInput = nameCell.children("input");
-					var valueInput = valueCell.children("input");
-
-					var name = nameInput.val();
-					var value = valueInput.val();
-
-					nameCell.empty();
-					nameCell.text(name);
-
-					valueCell.empty();
-					valueCell.text(value);
-
-					if(nameCell.data("prevName") != "")
-					{
-						_xmlElem.removeAttribute(_name);
-					}
-					_xmlElem.setAttribute(name, value);
-					
-					_transactions.push({type:"editAttr", elem:_xmlElem, row:_row, newName:name, name:_name, value:_value});
-					
-					_name = name;
-					_value = value;
-				}
+				_thisAttr.editMode();
 			});
 			cell.append(link);
 			return cell;
@@ -620,6 +672,87 @@ function visualXMLEditor(xmlString)
 			_row = tableRow;
 
 			return tableRow;
+		}
+		
+		this.editMode = function()
+		{
+			_editingNodes.push(_thisAttr);
+		
+			var nameCell = _row.children("td").eq(0);
+			var valueCell = _row.children("td").eq(1);
+			var editLink = _row.children("td").eq(2).find("a");
+
+			editLink.text("done");
+			editLink.off("click");
+			editLink.click(function()
+			{
+				_thisAttr.saveEdits();
+			});
+
+			var nameInput = $("<input type=\"text\">");
+			nameInput.width(nameCell.width() - 5);
+			nameInput.val(_name);
+
+			var valueInput = $("<input type=\"text\">");
+			valueInput.width(valueCell.width() - 5);
+			valueInput.val(_value);
+
+			nameCell.text("");
+			valueCell.text("");
+
+			nameCell.append(nameInput);
+			valueCell.append(valueInput);
+
+			nameInput.focus();
+		}
+		
+		this.saveEdits = function()
+		{
+			for(var i = 0; i < _editingNodes.length; i++)
+			{
+				if(_editingNodes[i] == _thisAttr)
+				{
+					_editingNodes.splice(i, 1);
+					break;
+				}
+			}
+
+			var nameCell = _row.children("td").eq(0);
+			var valueCell = _row.children("td").eq(1);
+			var editLink = _row.children("td").eq(2).find("a");
+		
+			editLink.text("edit");
+			editLink.off("click");
+			editLink.click(function()
+			{
+				_thisAttr.editMode();
+			});
+
+			var nameInput = nameCell.children("input");
+			var valueInput = valueCell.children("input");
+			
+			nameInput.blur();
+			valueInput.blur();
+
+			var name = nameInput.val();
+			var value = valueInput.val();
+			
+			nameCell.empty();
+			nameCell.text(name);
+
+			valueCell.empty();
+			valueCell.text(value);
+			
+			if(nameCell.data("prevName") != "")
+			{
+				_xmlElem.removeAttribute(_name);
+			}
+			_xmlElem.setAttribute(name, value);
+			
+			_transactions.push({type:"editAttr", elem:_xmlElem, row:_row, newName:name, name:_name, value:_value});
+			
+			_name = name;
+			_value = value;
 		}
 	}
 	
@@ -857,6 +990,7 @@ function visualXMLEditor(xmlString)
 		
 		this.populateInformationDiv = function()
 		{
+			thisEditor.savePendingEdits();
 			_infoDiv.empty();
 
 			var nameElement = $("<p>");
@@ -893,6 +1027,7 @@ function visualXMLEditor(xmlString)
 					var newAtt = new VEAttribute(null, _xmlNode, "", "");
 					var row = newAtt.getAsTableRow();
 					attributeTable.append(row);
+					newAtt.editMode();
 					_transactions.push({type:"addAttr", row:row})
 				});
 				_infoDiv.append(addButton);
@@ -900,52 +1035,9 @@ function visualXMLEditor(xmlString)
 
 			if(_xmlNode.nodeType == 3)
 			{
-				var textEditor = $("<div>");
-				var textTitle = $("<div>Text:</div>");
-				var nodeText = $("<div>");
-				nodeText.text(_xmlNode.nodeValue);
-
-				textEditor.append(textTitle);
-				textEditor.append(nodeText);
-
-				_infoDiv.append(textEditor);
-				
-				var editButton = $("<button>edit text</button>");
-				editButton.click(function()
-				{
-					if(editButton.text() == "edit text")
-					{
-						nodeText.data("prevTextValue", nodeText.text());
-						var textArea = $("<textarea>");
-						textArea.val(nodeText.text());
-						nodeText.text("");
-						nodeText.append(textArea);
-						editButton.text("done");
-					}
-					else
-					{
-						_transactions.push({type:"editText", elem:_xmlNode, vElem: nodeText, value:nodeText.data("prevTextValue")});
-						var textArea = nodeText.find("textarea");
-						var newValue = textArea.val();
-						_xmlNode.nodeValue = newValue;
-						nodeText.empty();
-						nodeText.text(newValue);
-						editButton.text("edit text");
-					}
-				});
-				
-				textEditor.append(editButton);
+				var textNode = new VEText(_xmlNode);
+				_infoDiv.append(textNode.getDiv());
 			}
-			
-			_infoDiv.append($("<br>"));
-			_infoDiv.append($("<br>"));
-			
-			var removeButton = $("<button>Delete this element</button>");
-			_infoDiv.append(removeButton);
-			removeButton.click(function()
-			{
-				_div.data("parentVEElement").remove();
-			});
 		}
 		
 		this.remove = function()
@@ -961,6 +1053,8 @@ function visualXMLEditor(xmlString)
 			{
 				divParent.first().trigger("click");
 			}
+			
+			$("#veTrash").children("img").attr("src", gs.imageURLs.trashFull);
 		}
 
 		var addMouseEvents = function()

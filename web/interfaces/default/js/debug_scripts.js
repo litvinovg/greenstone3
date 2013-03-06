@@ -37,7 +37,7 @@ function DebugWidget()
 	
 	var _styleFunctions = new Array();
 	
-	var partialPageReload = function()
+	var partialPageReload = function(callback)
 	{
 		$.ajax(document.URL)
 		.success(function(response)
@@ -69,6 +69,11 @@ function DebugWidget()
 		{
 			alert("There was an error reloading the page, please reload manually.");
 		});
+		
+		if(callback)
+		{
+			callback();
+		}
 	}
 	
 	var callStyleFunctions = function()
@@ -165,6 +170,7 @@ function DebugWidget()
 				var xmlString;
 				if(_isVisualEditor)
 				{
+					_vEditor.savePendingEdits();
 					xmlString = new XMLSerializer().serializeToString(_vEditor.getXML());
 				}
 				else
@@ -189,8 +195,8 @@ function DebugWidget()
 				if(_currentName && _currentName.length > 0){parameters["s1.name"] = _currentName;}
 				if(_currentMatch && _currentMatch.length > 0){parameters["s1.match"] = _currentMatch;}
 
-				_saveButton.button("option", "label", "Saving...");
 				_saveButton.button("option", "disabled", true);
+				$.blockUI({message:'<div class="ui-state-active">Saving, please wait...</div>'});
 
 				$.post(url, parameters)
 				.success(function()
@@ -198,17 +204,16 @@ function DebugWidget()
 					$.ajax(gs.xsltParams.library_name + "?a=s&sa=c")
 					.success(function()
 					{
-						alert("The template has been saved successfully.");
+						partialPageReload(function(){$.unblockUI();});
 					})
 					.error(function()
 					{
+						$.unblockUI();
 						alert("Error reloading collection.");
 					})
 					.complete(function()
 					{
-						_saveButton.button("option", "label", "Save changes");
 						_saveButton.button("option", "disabled", false);
-						partialPageReload();
 					});
 				})
 				.error(function()
@@ -226,6 +231,7 @@ function DebugWidget()
 			{
 				if(_isVisualEditor)
 				{
+					_vEditor.savePendingEdits();
 					_vEditor.getMainDiv().hide();
 					var containerNode = _vEditor.getXML().firstChild;
 					var templateNode = containerNode.firstChild;
