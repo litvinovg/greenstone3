@@ -240,6 +240,32 @@ function visualXMLEditor(xmlString)
 		_editorContainer.append(bin);
 	}
 	
+	var retrieveGSLIBTemplates = function(callback)
+	{
+		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetGSLIBElementsFromFile&s1.interfaceName=" + gs.xsltParams.interface_name;
+
+		$.ajax(url)
+		.success(function(response)
+		{
+			startIndex = response.search("<templateList>") + "<templateList>".length;
+			endIndex = response.search("</templateList>");
+			
+			var listString = response.substring(startIndex, endIndex);
+			var list = eval(listString.replace(/&quot;/g, "\""));
+			
+			_elemList["gslib"] = list;
+			
+			if(callback)
+			{
+				callback();
+			}
+		})
+		.error(function()
+		{
+			console.log("Error retrieving GSLIB templates");
+		});
+	}
+	
 	var populateToolbar = function()
 	{
 		var tabHolder = $("<ul>");
@@ -513,7 +539,7 @@ function visualXMLEditor(xmlString)
 			return null;
 		}
 
-		populateToolbar();
+		retrieveGSLIBTemplates(function(){populateToolbar();});
 		placeTrashBin();
 
 		_editorContainer.append(_editorDiv);
