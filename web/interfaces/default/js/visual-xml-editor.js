@@ -35,6 +35,50 @@ function visualXMLEditor(xmlString)
 	
 	var _transactions = new Array();
 	
+	var _validAttrList = 
+	{
+		gsf:
+		{
+			"cgi-param":["name"],
+			"collectionText":["args", "name"],
+			"displayItem":["name"],
+			"displayText":["name"],
+			"equivlinkgs3":["name"],
+			"foreach-metadata":["name", "separator"],
+			"icon":["type"],
+			"if-metadata-exists":["name"],
+			"image":["type"],
+			"interfaceText":["name"],
+			"link":["OID", "OIDmetadata", "name", "nodeID", "target", "title", "titlekey", "type"],
+			"metadata":["format", "hidden", "name", "pos", "prefix", "separator", "suffix", "type"],
+			"script":["src"],
+			"style":["src"],
+			"switch":["preprocess", "test", "test-value"]
+		}
+	}
+	
+	var _elemList = 
+	{
+		html:["a", "br", "div", "li", "link", "p", "script", "span", "table", "td", "tr", "ul"],
+		xsl:
+		[
+			"apply-imports", "apply-templates", "attribute", "attribute-set", "call-template", 
+			"choose", "copy", "copy-of", "decimal-format", "element", 
+			"fallback", "for-each", "if", "import", "include",
+			"key", "message", "namespace-alias", "number", "otherwise",
+			"output", "param", "preserve-space", "processing-instruction", "sort",
+			"strip-space", "stylesheet", "template", "text", "transform",
+			"value-of", "variable", "when", "with-param"
+		],
+		gsf:
+		[
+			"cgi-param", "choose-metadata", "collectionText", "displayItem", "displayText",
+			"equivlinkgs3", "foreach-metadata", "icon", "if-metadata-exists", "image",
+			"interfaceText", "link", "meta-value", "metadata", "script",
+			"style", "switch", "template", "text", "variable"
+		]
+	};
+	
 	var _childRestrictions = 
 	{
 		gsf:
@@ -198,34 +242,12 @@ function visualXMLEditor(xmlString)
 	
 	var populateToolbar = function()
 	{
-		var elemList = 
-		{
-			html:["a", "br", "div", "li", "link", "p", "script", "span", "table", "td", "tr", "ul"],
-			xsl:
-			[
-				"apply-imports", "apply-templates", "attribute", "attribute-set", "call-template", 
-				"choose", "copy", "copy-of", "decimal-format", "element", 
-				"fallback", "for-each", "if", "import", "include",
-				"key", "message", "namespace-alias", "number", "otherwise",
-				"output", "param", "preserve-space", "processing-instruction", "sort",
-				"strip-space", "stylesheet", "template", "text", "transform",
-				"value-of", "variable", "when", "with-param"
-			],
-			gsf:
-			[
-				"cgi-param", "choose-metadata", "collectionText", "displayItem", "displayText",
-				"equivlinkgs3", "foreach-metadata", "icon", "if-metadata-exists", "image",
-				"interfaceText", "link", "meta-value", "metadata", "script",
-				"style", "switch", "template", "text", "variable"
-			]
-		};
-
 		var tabHolder = $("<ul>");
 		_toolboxDiv.append(tabHolder);
 
-		for(var key in elemList)
+		for(var key in _elemList)
 		{
-			var currentList = elemList[key];
+			var currentList = _elemList[key];
 
 			var tab = $("<li>");
 			var tabLink = $("<a>", {"href":"#ve" + key});
@@ -674,7 +696,7 @@ function visualXMLEditor(xmlString)
 			return tableRow;
 		}
 		
-		this.editMode = function()
+		this.editMode = function(editValue)
 		{
 			_editingNodes.push(_thisAttr);
 		
@@ -703,7 +725,14 @@ function visualXMLEditor(xmlString)
 			nameCell.append(nameInput);
 			valueCell.append(valueInput);
 
-			nameInput.focus();
+			if(editValue)
+			{
+				valueInput.focus();
+			}
+			else
+			{
+				nameInput.focus();
+			}
 		}
 		
 		this.saveEdits = function()
@@ -1021,15 +1050,57 @@ function visualXMLEditor(xmlString)
 				_infoDiv.append(attributeTableTitle);
 				_infoDiv.append(attributeTable);
 				
+				var addSelect = $("<select>");
+				addSelect.append("<option>[blank]</option>", {value:"[blank]"});
+				var fullName = _xmlNode.tagName;
+				var namespace;
+				var nodeName;
+				if(fullName.indexOf(":") == -1)
+				{
+					namespace = "no namespace";
+					nodeName = fullName;
+				}
+				else
+				{
+					namespace = fullName.substring(0, fullName.indexOf(":"));
+					nodeName = fullName.substring(fullName.indexOf(":") + 1);
+				}
+				var nameList = _validAttrList[namespace];
+				if(nameList)
+				{
+					var nameList = _validAttrList[namespace];
+					var attrList = nameList[nodeName];
+					if(attrList)
+					{
+						for(var i = 0; i < attrList.length; i++)
+						{
+							addSelect.append($("<option>" + attrList[i] + "</option>", {value:attrList[i]}));
+						}
+					}
+				}
+				
 				var addButton = $("<button>Add attribute</button>");
 				addButton.click(function()
 				{
-					var newAtt = new VEAttribute(null, _xmlNode, "", "");
+					var newAtt;
+					var editModeValue;
+					if(addSelect.find(":selected").val() == "[blank]")
+					{
+						newAtt = new VEAttribute(null, _xmlNode, "", "");
+						editModeValue = false;
+					}
+					else
+					{
+						newAtt = new VEAttribute(null, _xmlNode, addSelect.find(":selected").val(), "");
+						editModeValue = true;
+					}
+ 
 					var row = newAtt.getAsTableRow();
 					attributeTable.append(row);
-					newAtt.editMode();
+					newAtt.editMode(editModeValue);
 					_transactions.push({type:"addAttr", row:row})
 				});
+				_infoDiv.append(addSelect);
 				_infoDiv.append(addButton);
 			}
 
