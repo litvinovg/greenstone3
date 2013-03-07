@@ -362,8 +362,8 @@
     <istrue value="${compile.cross}"/>
   </condition>
 
-
-  <condition property="gs2.opt.args" value= " " else="--disable-mg --disable-mgpp --disable-accentfold --disable-gdbm --disable-sqlite">
+<!-- if you want to disable wvware, do so here: set the value (not else) field to contain minus-minus-disable-wvware -->
+  <condition property="gs2.opt.args" value=" " else="--disable-mg --disable-mgpp --disable-accentfold --disable-gdbm --disable-sqlite">
     <istrue value="${with.jni}"/>
   </condition>
   <condition property="gs2.compile.target" value="with-jni" else="without-jni">
