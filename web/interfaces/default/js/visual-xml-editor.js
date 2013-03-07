@@ -766,6 +766,12 @@ function visualXMLEditor(xmlString)
 			var name = nameInput.val();
 			var value = valueInput.val();
 			
+			if(name.length == 0 || name.search(/\w/g) == -1)
+			{
+				_row.remove();
+				return;
+			}
+			
 			nameCell.empty();
 			nameCell.text(name);
 
