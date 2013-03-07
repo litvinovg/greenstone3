@@ -444,7 +444,7 @@ function DebugWidget()
 					_editor.resize();
 				}});
 
-				_closeEditorButton.button("option", "disabled", true);
+				_closeEditorButton.button("option", "disabled", false);
 			})
 			.error(function()
 			{
