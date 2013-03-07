@@ -15,8 +15,8 @@
 		<serviceRack name="DocXMLUtil"/>
 		<serviceRack name="DocumentBasket"/>
 		<serviceRack name="BerryBasket"/>
-<!--		<serviceRack name="GS2Construct"/>-->
-<!--		<serviceRack name="DebugService"/>-->
+		<serviceRack name="GS2Construct"/>
+		<serviceRack name="DebugService"/>
 		<serviceRack name="CrossCollectionSearch">
 			<format>
 				<!-- this format is used for the search results -->
