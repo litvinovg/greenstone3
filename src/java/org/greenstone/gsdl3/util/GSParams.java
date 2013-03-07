@@ -129,7 +129,7 @@ public class GSParams
 		addParameter(EXCERPT_ID, false);
 		addParameter(EXCERPT_TAG, false);
 		
-		addParameter(DEBUG, false);
+		addParameter(DEBUG, true);
 	}
 
 	public boolean addParameter(String name, boolean save)
