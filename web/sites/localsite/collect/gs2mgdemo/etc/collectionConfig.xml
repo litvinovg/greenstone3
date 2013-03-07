@@ -55,16 +55,16 @@
     </import>
     <browse>
         <classifier name="List">
-            <option name="-metadata" value="dls.Title"/>
+            <option name="-metadata" value="dc.Title"/>
             <option name="-partition_type_within_level" value="constant_size"/>
         </classifier>
         <classifier name="Hierarchy">
-            <option name="-metadata" value="dls.Subject"/>
-            <option name="-sort" value="dls.Title"/>
+            <option name="-metadata" value="dc.Subject"/>
+            <option name="-sort" value="dc.Title"/>
         </classifier>
         <classifier name="List">
             <option name="-metadata" value="dls.Organization"/>
-            <option name="-sort_leaf_nodes_using" value="dls.Title"/>
+            <option name="-sort_leaf_nodes_using" value="dc.Title"/>
             <option name="-partition_type_within_level" value="constant_size"/>
             <option name="-bookshelf_type" value="always"/>
             <option name="-buttonname" value="Organization"/>
@@ -94,9 +94,9 @@
 					<metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
 					<!--   a custom mapping as this collection doesn't have dc metadata -->
 					<mappingList>
-						<mapping>dc:title,dls.Title</mapping>
-						<mapping>dc:subject,dls.Subject</mapping>
-						<mapping>dc:language,dls.Language</mapping>
+						<mapping>dc:title,dc.Title</mapping>
+						<mapping>dc:subject,dc.Subject</mapping>
+						<mapping>dc:language,dc.Language</mapping>
 						<mapping>dc:publisher,dls.Organization</mapping>
 					</mappingList>
 				</metadataFormat>
