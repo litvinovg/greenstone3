@@ -534,6 +534,26 @@
       includes="*.sh"/>
     <chmod dir="${basedir}/bin/script" perm="ugo+rx" 
       includes="*.sh,*.pl"/>
+
+    <!-- if the user has set use.support.lib to true, and is using a compiled version of gnome-lib
+	 (it would have been compiled up by this stage), remind them to source devel.bash before compiling -->
+    <condition property="run.source.devel">
+      <available file="${basedir}/gs2build/ext/gnome-lib/${os.bin.dir}" type="dir"/>
+    </condition>
+    <if><bool>
+	<and>
+	  <istrue value="${use.support.lib}"/>
+	  <istrue value="${run.source.devel}"/>
+	</and>
+      </bool>
+      <echo>
+	*********************************************
+	As you have set use.support.lib, 
+	before running ant install next,
+	run source devel.bash from 
+	${basedir}/gs2build/ext/gnome-lib 
+	*********************************************</echo>
+    </if>
   </target>
 
   <!-- install-common-src and install-collection-building are mutually exclusive and either one or the other will be done depending on whether collection building is enabled or not -->
@@ -2226,8 +2246,49 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </exec>
   </target>
 
+
+  <!-- Compile up gnome-lib src folder if: use.support.lib is turned on, and if not using the binary
+       version (gnome-lib-minimal), and if the gnome-lib src folder is not already compiled up. -->
+  <target name="compile-gnome-lib" if="use.support.lib">
+
+    <!-- http://stackoverflow.com/questions/3290307/sourcing-a-shell-profile-in-an-ant-build-file 
+	 TODO: CASCADE-MAKE already sources devel.bash, but we still want to source it more globally, 
+	 so that the rest of the GS3 compilation process also has access to those env variables -->
+    
+    <property name="gnome.lib.src.dir" value="${basedir}/gs2build/ext/gnome-lib"/>
+    <property name="gnome.lib.compiled.dir" value="${basedir}/gs2build/ext/gnome-lib/${os.bin.dir}"/>
+
+    <condition property="gnome.src.lib.present">
+      <available file="${gnome.lib.src.dir}" type="dir" />
+    </condition>
+    <condition property="gnome.compiled.lib.present">
+      <available file="${gnome.lib.compiled.dir}" type="dir"/>
+    </condition>
+    <condition property="gnome.lib.min.present">
+      <available file="${basedir}/gs2build/ext/gnome-lib-minimal" type="dir" />
+    </condition>
+
+    <if>
+      <bool>
+	<and>
+	  <!-- <istrue value="${use.support.lib}"/> make sure user wants gnome-lib -->
+	  <not><isset property="${gnome.lib.min.present}"/></not> <!-- no gnome-lib-minimal binary present -->
+	  <istrue value="${gnome.src.lib.present}"/> <!-- gnome-lib folder for compilation is present-->
+	  <not><istrue value="${gnome.compiled.lib.present}"/></not> <!-- gnome-lib not yet compiled, so no gnome-lib/os subfolder yet -->
+	</and>
+      </bool>
+
+      <!-- then compile it. Only necessary for mac/linux, since windows doesn't need gnome lib -->
+      <exec executable="/bin/bash" dir="${gnome.lib.src.dir}" failonerror="true">
+        <arg value="CASCADE-MAKE.sh"/>
+      </exec>  
+    </if>
+  </target>
+
+
   <target name="prepare-gnome-lib" depends="init" if="collection.building.enabled" unless="gnome-lib.present">
     <antcall target="checkout-gnome-lib"/>
+    <antcall target="compile-gnome-lib"/>
   </target>
 
   <target name="checkout-gnome-lib" depends="init" if="collection.building.enabled" unless="nosvn.mode">
