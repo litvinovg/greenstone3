@@ -288,9 +288,9 @@ function visualXMLEditor(xmlString)
 				var elemName = currentList[j];
 
 				var ns = (key == "html") ? "" : (key + ":");
-
 				var newElem = _xml.createElement(ns + elemName);
 				var veElement = new VEElement(newElem);
+				veElement.setShortName(true);
 				var veDiv = veElement.getDiv();
 				veDiv.css("float", "none");
 				veDiv.data("toolbar", true);
@@ -867,6 +867,7 @@ function visualXMLEditor(xmlString)
 					if(_div.data("toolbar"))
 					{
 						var cloneElem = new VEElement(_xmlNode.cloneNode(true));
+						cloneElem.setShortName(true);
 						var cloneDiv = cloneElem.getDiv();
 						cloneDiv.css("float", "none");
 						cloneDiv.data("toolbar", true);
@@ -957,10 +958,16 @@ function visualXMLEditor(xmlString)
 				"stop":function(event)
 				{
 					var transactionType = (_div.data("toolbar")) ? "addElem" : "remMvElem";
+					
+					if(_div.data("toolbar"))
+					{
+						_div.data("parentVEElement").setShortName(false);
+					}
+					
 					_div.data("dragging", false);
 					_div.data("toolbar", false);
 
-					_div.css("border", "1px dashed black");
+					_div.css("border", "1px solid black");
 					_div.css("background", _div.data("prevBackground"));
 					
 					//If the element was not dropped in a valid place then put it back
@@ -1186,7 +1193,7 @@ function visualXMLEditor(xmlString)
 			});
 			_div.mouseout(function(event)
 			{
-				_div.css("border", "1px dashed black");
+				_div.css("border", "1px solid black");
 				event.stopPropagation();
 			});
 			_div.click(function(event)
@@ -1246,6 +1253,18 @@ function visualXMLEditor(xmlString)
 
 			_div.data("parentVEElement").evenlyDistributeChildren();
 		}
+		
+		this.setShortName = function(short)
+		{
+			if(short && _xmlNode.nodeType == 1 && _xmlNode.tagName.indexOf(":") != -1)
+			{
+				_div.children(".veTitleElement").text(_xmlNode.tagName.substring(_xmlNode.tagName.indexOf(":") + 1));
+			}
+			else if(!short)
+			{
+				_div.children(".veTitleElement").text(_xmlNode.tagName);
+			}
+		}
 
 		this.setWidth = function(width)
 		{
@@ -1256,6 +1275,7 @@ function visualXMLEditor(xmlString)
 		var initVEE = function()
 		{
 			_div.addClass("veElement");
+			_div.addClass("ui-corner-all");
 			makeDraggable();
 			
 			var titleText;

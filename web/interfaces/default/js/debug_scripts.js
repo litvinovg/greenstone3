@@ -224,7 +224,7 @@ function DebugWidget()
 		});
 		_styleFunctions.push(function(){_saveButton.button({icons:{primary:"ui-icon-disk"}, disabled:true})});
 		
-		_swapEditorButton = $("<button>Switch to XML Editor</button>");
+		_swapEditorButton = $("<button>Switch to XML editor</button>");
 		_swapEditorButton.button().click(function()
 		{
 			if(_vEditor && _textEditor)
@@ -246,9 +246,12 @@ function DebugWidget()
 					var xmlText = new XMLSerializer().serializeToString(templateNode);
 					_editor.setValue(xmlText);
 					_editor.clearSelection();
+					var UndoManager = require("ace/undomanager").UndoManager;
+					_editor.getSession().setUndoManager(new UndoManager());
 					_textEditor.show();
-					_swapEditorButton.button("option", "label", "Switch to Visual Editor");
+					_swapEditorButton.button("option", "label", "Switch to visual editor");
 					_isVisualEditor = false;
+					_xmlStatusBar.show();
 				}
 				else
 				{
@@ -259,8 +262,9 @@ function DebugWidget()
 					_editingDiv.append(_vEditor.getMainDiv());
 					_vEditor.selectRootElement();
 					_vEditor.getMainDiv().show();
-					_swapEditorButton.button("option", "label", "Switch to XML Editor");
+					_swapEditorButton.button("option", "label", "Switch to XML editor");
 					_isVisualEditor = true;
+					_xmlStatusBar.hide();
 				}
 			}
 		});
@@ -283,6 +287,7 @@ function DebugWidget()
 		_xmlStatusBar = $("<span>");
 		_xmlStatusBar.css("padding", "5px");
 		_xmlStatusBar.addClass("ui-corner-all");
+		_styleFunctions.push(function(){_xmlStatusBar.hide();});
 		
 		//Check the XML for errors every 2 seconds
 		setInterval(function()
@@ -314,7 +319,7 @@ function DebugWidget()
 				{
 					_saveButton.button("option", "disabled", false);
 				}
-				if(_swapEditorButton.button("option", "label") == "Switch to Visual Editor")
+				if(_swapEditorButton.button("option", "label") == "Switch to visual editor")
 				{
 					_swapEditorButton.button("option", "disabled", false);
 				}
@@ -445,6 +450,11 @@ function DebugWidget()
 				}});
 
 				_closeEditorButton.button("option", "disabled", false);
+				if(_closeEditorButton.button("option", "label") == "Open editor")
+				{
+					_closeEditorButton.button("option", "label", "Close editor");
+					_editingDiv.show();
+				}
 			})
 			.error(function()
 			{
@@ -581,6 +591,11 @@ function DebugWidget()
 		});
 	}
 	
+	var fixTitle = function()
+	{
+		$("title").text($("title").text().replace(/<[^>]*>/g, ""));
+	}
+	
 	var resizeContainers = function()
 	{
 		var templates = _templateSelector.children(".gbTemplateContainer");
@@ -612,6 +627,7 @@ function DebugWidget()
 		callStyleFunctions();
 
 		addMouseEventsToDebugElements(debugElems);
+		fixTitle();
 	}
 	
 }

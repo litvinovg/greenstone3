@@ -950,7 +950,7 @@ dl dd { padding-bottom:10px}
 }
 
 .veElement{
-	border:1px dashed black;
+	border:1px solid black;
 	float:left;
 	margin:5px -1px;
 	overflow:hidden;
