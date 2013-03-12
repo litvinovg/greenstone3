@@ -29,7 +29,7 @@ public class DebugService extends ServiceRack
 	 *********************************************************/
 	protected static final String RETRIEVE_TEMPLATE_FROM_XML_FILE = "RetrieveXMLTemplateFromFile";
 	protected static final String SAVE_TEMPLATE_TO_XML_FILE = "SaveXMLTemplateToFile";
-	protected static final String GET_GSLIB_ELEMENTS_FROM_FILE = "GetGSLIBElementsFromFile";	
+	protected static final String GET_GSLIB_ELEMENTS_FROM_FILE = "GetGSLIBElementsFromFile";
 	/*********************************************************/
 
 	String[] services = { RETRIEVE_TEMPLATE_FROM_XML_FILE, SAVE_TEMPLATE_TO_XML_FILE, GET_GSLIB_ELEMENTS_FROM_FILE };
@@ -299,7 +299,7 @@ public class DebugService extends ServiceRack
 	protected Element processGetGSLIBElementsFromFile(Element request)
 	{
 		Element result = GSXML.createBasicResponse(this.doc, GET_GSLIB_ELEMENTS_FROM_FILE);
-		
+
 		if (request == null)
 		{
 			GSXML.addError(this.doc, result, GET_GSLIB_ELEMENTS_FROM_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
@@ -308,7 +308,7 @@ public class DebugService extends ServiceRack
 
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 		String uid = request.getAttribute(GSXML.USER_ID_ATT);
-		
+
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 
@@ -324,38 +324,35 @@ public class DebugService extends ServiceRack
 
 		String filePath = GlobalProperties.getGSDL3Home() + File.separator + "interfaces" + File.separator + interfaceName + File.separator + "transform" + File.separator + "gslib.xsl";
 		File xslFile = new File(filePath);
-		
-		System.err.println("1 -> " + filePath);
-		if(xslFile.exists())
+
+		if (xslFile.exists())
 		{
-			System.err.println("2");
 			XMLConverter converter = new XMLConverter();
 			Document xslDoc = converter.getDOM(xslFile, "UTF-8");
 
 			Element templateList = this.doc.createElement("templateList");
 			String templateListString = "[";
-			
+
 			NodeList templateElems = xslDoc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
-			for(int i = 0; i < templateElems.getLength(); i++)
+			for (int i = 0; i < templateElems.getLength(); i++)
 			{
-				Element currentElem = (Element)templateElems.item(i);
-				if(currentElem.hasAttribute(GSXML.NAME_ATT))
+				Element currentElem = (Element) templateElems.item(i);
+				if (currentElem.hasAttribute(GSXML.NAME_ATT))
 				{
 					templateListString += "\"" + currentElem.getAttribute(GSXML.NAME_ATT) + "\"";
-					if(i < templateElems.getLength() - 1)
+					if (i < templateElems.getLength() - 1)
 					{
 						templateListString += ",";
 					}
 				}
 			}
-			
+
 			templateListString += "]";
-			System.err.println("3 -> " + templateListString);
+
 			templateList.setTextContent(templateListString);
 			result.appendChild(templateList);
 		}
-		System.err.println("4");
-		
+
 		return result;
 	}
 }
