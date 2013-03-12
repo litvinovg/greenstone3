@@ -105,7 +105,6 @@ function DebugWidget()
 		toolBarDiv.css({"height":"40px"});
 
 		var buttonDiv = $("<div>");
-		buttonDiv.css("float", "left");
 		toolBarDiv.append(buttonDiv);
 
 		_templateSelector = $("<div>", {"id":"templateSelector"});
@@ -160,7 +159,8 @@ function DebugWidget()
 				_editingDiv.show();
 			}
 		});
-		_styleFunctions.push(function(){_closeEditorButton.button({icons:{primary:"ui-icon-newwin"}, disabled:true})});
+		_closeEditorButton.css("float", "right");
+		_styleFunctions.push(function(){_closeEditorButton.button({icons:{secondary:"ui-icon-newwin"}, disabled:true})});
 		
 		_saveButton = $("<button>Save changes</button>");
 		_saveButton.click(function()
