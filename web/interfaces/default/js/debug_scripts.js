@@ -441,6 +441,8 @@ function DebugWidget()
 				_editor.getSession().setUseSoftTabs(false);
 				_editor.setValue(template);
 				_editor.clearSelection();
+				var UndoManager = require("ace/undomanager").UndoManager;
+				_editor.getSession().setUndoManager(new UndoManager());
 				
 				_textEditor.css({"min-height":"200px", "border-top":"5px solid #444"});
 				_textEditor.resizable({handles: 'n', resize:function()
