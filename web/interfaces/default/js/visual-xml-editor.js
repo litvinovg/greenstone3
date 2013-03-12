@@ -339,6 +339,8 @@ function visualXMLEditor(xmlString)
 		_toolboxDiv.append(otherTabDiv);
 
 		_toolboxDiv.tabs();
+		
+		customCreateButton.button();
 	}
 
 	var constructDivsRecursive = function(currentDiv, currentParent, level)
@@ -419,6 +421,11 @@ function visualXMLEditor(xmlString)
 	
 	var addToOverList = function(veElement)
 	{
+		if(veElement.getDiv().data("toolbar"))
+		{
+			return;
+		}
+	
 		for(var i = 0; i < _overList.length; i++)
 		{
 			if(!_overList[i])
@@ -561,17 +568,17 @@ function visualXMLEditor(xmlString)
 		var _xmlNode = node;
 	
 		var _textEditor = $("<div>");
-		var textTitle = $("<div>Text:</div>");
+		var _textTitle = $("<div>Text:</div>");
 		var _nodeText = $("<div>");
 		_nodeText.text(_xmlNode.nodeValue);
 
-		_textEditor.append(textTitle);
+		_textEditor.append(_textTitle);
 		_textEditor.append(_nodeText);
 		
-		var editButton = $("<button>edit text</button>");
-		editButton.click(function()
+		var _editButton = $("<button>Edit text</button>");
+		_editButton.click(function()
 		{
-			if(editButton.text() == "edit text")
+			if(_editButton.button("option", "label") == "Edit text")
 			{
 				_thisNode.editMode();
 			}
@@ -580,7 +587,7 @@ function visualXMLEditor(xmlString)
 				_thisNode.saveEdits();
 			}
 		});
-		_textEditor.append(editButton);
+		_textEditor.append(_editButton);
 		
 		this.editMode = function()
 		{
@@ -590,7 +597,7 @@ function visualXMLEditor(xmlString)
 			textArea.val(_nodeText.text());
 			_nodeText.text("");
 			_nodeText.append(textArea);
-			editButton.text("done");
+			_editButton.button("option", "label", "Done");
 		}
 
 		this.saveEdits = function()
@@ -610,11 +617,13 @@ function visualXMLEditor(xmlString)
 			_xmlNode.nodeValue = newValue;
 			_nodeText.empty();
 			_nodeText.text(newValue);
-			editButton.text("edit text");
+			_editButton.button("option", "label", "Edit text");
 		}
 
 		this.getDiv = function()
 		{
+			//A hack to make sure the edit text button is styled correctly
+			setTimeout(function(){_editButton.button()}, 1);
 			return _textEditor;
 		}
 	}
@@ -963,15 +972,12 @@ function visualXMLEditor(xmlString)
 					{
 						_div.data("parentVEElement").setShortName(false);
 					}
-					
-					_div.data("dragging", false);
-					_div.data("toolbar", false);
 
 					_div.css("border", "1px solid black");
 					_div.css("background", _div.data("prevBackground"));
 					
 					//If the element was not dropped in a valid place then put it back
-					if(!_validDropSpot)
+					if(!_validDropSpot && !_div.data("toolbar"))
 					{
 						_div.detach();
 						if(_origDDPosition == 0)
@@ -1013,6 +1019,9 @@ function visualXMLEditor(xmlString)
 						}
 						_transactions.push({type:transactionType, vElemParent:_origDDParent, vElemPos:_origDDPosition, vElem:_div});
 					}
+					
+					_div.data("dragging", false);
+					_div.data("toolbar", false);
 					
 					_overList = new Array();
 					_overList.freeSpaces = new Array();
@@ -1141,6 +1150,7 @@ function visualXMLEditor(xmlString)
 				});
 				_infoDiv.append(addSelect);
 				_infoDiv.append(addButton);
+				addButton.button();
 			}
 
 			if(_xmlNode.nodeType == 3)
@@ -1205,12 +1215,36 @@ function visualXMLEditor(xmlString)
 				_selectedElement = _div;
 				_div.prevBorder = _div.css("border");
 				_div.css("border", "red solid 1px");
-				
+
 				_div.data("parentVEElement").focus();
 				_div.data("parentVEElement").populateInformationDiv();
 
 				event.stopPropagation();
 			});
+		}
+		
+		var checkResizeNecessary = function()
+		{
+			var elemsToCheck = _div.find(".veTitleElement");
+			for(var i = 0; i < elemsToCheck.length; i++)
+			{
+				var titleElem = elemsToCheck.eq(i);
+				titleElem.html("<span>" + titleElem.html() + "</span>");
+				var titleSpan = titleElem.children("span");
+
+				var resizeNecessary = false;
+				if(titleSpan.width() >= titleElem.parent().width())
+				{
+					resizeNecessary = true;
+				}
+				titleElem.html(titleSpan.text());
+				
+				if(resizeNecessary)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		this.expand = function()
@@ -1243,13 +1277,16 @@ function visualXMLEditor(xmlString)
 
 		this.focus = function()
 		{
-			_div.data("parentVEElement").expand();
-			
-			var parents = _div.parents(".veElement");
-			parents.each(function()
+			if(checkResizeNecessary())
 			{
-				$(this).data("parentVEElement").expand();
-			});
+				_div.data("parentVEElement").expand();
+				
+				var parents = _div.parents(".veElement");
+				parents.each(function()
+				{
+					$(this).data("parentVEElement").expand();
+				});
+			}
 
 			_div.data("parentVEElement").evenlyDistributeChildren();
 		}
