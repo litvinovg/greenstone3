@@ -12,6 +12,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
 import org.greenstone.util.GlobalProperties;
 import org.w3c.dom.Document;
@@ -81,8 +82,21 @@ public class DebugService extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext context = new UserContext(request);
+		boolean found = false;
+		for (String group : context.getGroups())
+		{
+			if (group.equals("administrator"))
+			{
+				found = true;
+			}
+		}
+
+		if (!found)
+		{
+			GSXML.addError(this.doc, result, "This user does not have the required permissions to perform this action.");
+			return result;
+		}
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -189,8 +203,21 @@ public class DebugService extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext context = new UserContext(request);
+		boolean foundGroup = false;
+		for (String group : context.getGroups())
+		{
+			if (group.equals("administrator"))
+			{
+				foundGroup = true;
+			}
+		}
+
+		if (!foundGroup)
+		{
+			GSXML.addError(this.doc, result, "This user does not have the required permissions to perform this action.");
+			return result;
+		}
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -306,8 +333,21 @@ public class DebugService extends ServiceRack
 			return result;
 		}
 
-		String lang = request.getAttribute(GSXML.LANG_ATT);
-		String uid = request.getAttribute(GSXML.USER_ID_ATT);
+		UserContext context = new UserContext(request);
+		boolean found = false;
+		for (String group : context.getGroups())
+		{
+			if (group.equals("administrator"))
+			{
+				found = true;
+			}
+		}
+
+		if (!found)
+		{
+			GSXML.addError(this.doc, result, "This user does not have the required permissions to perform this action.");
+			return result;
+		}
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
