@@ -35,13 +35,11 @@ import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import org.json.JSONObject;
-import org.json.XML;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -690,8 +688,9 @@ public class LibraryServlet extends BaseGreenstoneServlet
 			}
 		}
 
-		if (output.equals("json")) {
-			response.setContentType("application/json"); 
+		if (output.equals("json"))
+		{
+			response.setContentType("application/json");
 		}
 		else if (!output.equals("html") && !output.equals("server") && !output.equals("xsltclient"))
 		{
@@ -755,19 +754,23 @@ public class LibraryServlet extends BaseGreenstoneServlet
 
 		String xml_string = this.converter.getPrettyString(xml_result);
 
-		if (output.equals("json")) {
-		    try {
-			JSONObject json_obj = org.json.XML.toJSONObject(xml_string);
-		    
-			out.println(json_obj.toString());
-		    }
-		    catch (Exception e) {
-			e.printStackTrace();
-			out.println("Error: failed to convert output XML to JSON format");
-		    }
+		if (output.equals("json"))
+		{
+			try
+			{
+				JSONObject json_obj = org.json.XML.toJSONObject(xml_string);
+
+				out.println(json_obj.toString());
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				out.println("Error: failed to convert output XML to JSON format");
+			}
 		}
-		else {
-		    out.println(xml_string);
+		else
+		{
+			out.println(xml_string);
 		}
 
 		displaySize(session_ids_table);
