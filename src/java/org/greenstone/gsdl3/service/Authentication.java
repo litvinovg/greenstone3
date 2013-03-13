@@ -127,7 +127,7 @@ public class Authentication extends ServiceRack
 	protected static final String GET_USER_INFORMATION_SERVICE = "GetUserInformation";
 
 	protected static DerbyWrapper _derbyWrapper = null;
-        protected static boolean _derbyWrapperDoneForcedShutdown = false;
+	protected static boolean _derbyWrapperDoneForcedShutdown = false;
 
 	protected String _recaptchaPrivateKey = null;
 	protected String _recaptchaPublicKey = null;
@@ -137,26 +137,28 @@ public class Authentication extends ServiceRack
 	{
 	}
 
-        public void cleanUp() {
+	public void cleanUp()
+	{
 
-	    super.cleanUp();
+		super.cleanUp();
 
-	    if (!_derbyWrapperDoneForcedShutdown) {		
+		if (!_derbyWrapperDoneForcedShutdown)
+		{
 
-		// This boolean is used to ensure we always shutdown the derby server, even if it is never
-		// used by the Authentication server.  This is because the Tomcat greenstone3.xml
-		// config file also specifies a connection to the database, which can result in the
-		// server being initialized when the servlet is first accessed.  Note also, 
-		// Authentication is a ServiceRack, meaning cleanUp() is called for each service
-		// supported, however we only need to shutdown the Derby server once.  Again
-		// this boolean variable helps achieve this.
+			// This boolean is used to ensure we always shutdown the derby server, even if it is never
+			// used by the Authentication server.  This is because the Tomcat greenstone3.xml
+			// config file also specifies a connection to the database, which can result in the
+			// server being initialized when the servlet is first accessed.  Note also, 
+			// Authentication is a ServiceRack, meaning cleanUp() is called for each service
+			// supported, however we only need to shutdown the Derby server once.  Again
+			// this boolean variable helps achieve this.
 
-		logger.info("Authentication Service performing forced shutdown of Derby Server ...");
-	    
-		DerbyWrapper.shutdownDatabaseServer();
-		_derbyWrapper = null;
-		_derbyWrapperDoneForcedShutdown = true;
-	    }
+			logger.info("Authentication Service performing forced shutdown of Derby Server ...");
+
+			DerbyWrapper.shutdownDatabaseServer();
+			_derbyWrapper = null;
+			_derbyWrapperDoneForcedShutdown = true;
+		}
 
 	}
 
@@ -281,8 +283,8 @@ public class Authentication extends ServiceRack
 
 		try
 		{
-		        UserQueryResult userQueryResult = _derbyWrapper.findUser(username);
-			
+			UserQueryResult userQueryResult = _derbyWrapper.findUser(username);
+
 			Vector<UserTermInfo> terms = userQueryResult.getUserTerms();
 
 			if (terms.size() == 0)
@@ -313,7 +315,6 @@ public class Authentication extends ServiceRack
 			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_SQL_EXCEPTION));
 			ex.printStackTrace();
 		}
-
 
 		closeDatabase();
 
@@ -827,7 +828,7 @@ public class Authentication extends ServiceRack
 
 	private void checkAdminUserExists()
 	{
-	        openDatabase();
+		openDatabase();
 
 		UserQueryResult userQueryResult = _derbyWrapper.findUser(null, null);
 
@@ -855,34 +856,35 @@ public class Authentication extends ServiceRack
 
 	private boolean openDatabase()
 	{
-	    if (_derbyWrapper == null) {
-		_derbyWrapper = new DerbyWrapper();
+		if (_derbyWrapper == null)
+		{
+			_derbyWrapper = new DerbyWrapper();
 
-		// check the usersDb database, if it isn't existing, check the etc dir, create the etc dir if it isn't existing, then create the  user database and add a "admin" user
-		String usersDB_dir = this.site_home + File.separatorChar + "etc" + File.separatorChar + "usersDB";
-		File usersDB_file = new File(usersDB_dir);
-		if (!usersDB_file.exists())
-		{
-			String etc_dir = this.site_home + File.separatorChar + "etc";
-			File etc_file = new File(etc_dir);
-			if (!etc_file.exists())
+			// check the usersDb database, if it isn't existing, check the etc dir, create the etc dir if it isn't existing, then create the  user database and add a "admin" user
+			String usersDB_dir = this.site_home + File.separatorChar + "etc" + File.separatorChar + "usersDB";
+			File usersDB_file = new File(usersDB_dir);
+			if (!usersDB_file.exists())
 			{
-				boolean success = etc_file.mkdir();
-				if (!success)
+				String etc_dir = this.site_home + File.separatorChar + "etc";
+				File etc_file = new File(etc_dir);
+				if (!etc_file.exists())
 				{
-					logger.error("Couldn't create the etc dir under " + this.site_home + ".");
-					return false;
+					boolean success = etc_file.mkdir();
+					if (!success)
+					{
+						logger.error("Couldn't create the etc dir under " + this.site_home + ".");
+						return false;
+					}
 				}
+				_derbyWrapper.connectDatabase(usersDB_dir, true);
+				_derbyWrapper.createDatabase();
 			}
-			_derbyWrapper.connectDatabase(usersDB_dir, true);
-			_derbyWrapper.createDatabase();
+			else
+			{
+				_derbyWrapper.connectDatabase(usersDB_dir, false);
+			}
 		}
-		else
-		{
-			_derbyWrapper.connectDatabase(usersDB_dir, false);
-		}
-	    }
-	    return true;
+		return true;
 	}
 
 	private void closeDatabase()
@@ -895,8 +897,8 @@ public class Authentication extends ServiceRack
 	}
 
 	private int addUserInformationToNode(String username, Element serviceNode)
-	{	    
-	        openDatabase();
+	{
+		openDatabase();
 
 		UserQueryResult userQueryResult = _derbyWrapper.findUser(username, null);
 
@@ -925,8 +927,8 @@ public class Authentication extends ServiceRack
 
 		if (success)
 		{
-		    closeDatabase();
-		    return NO_ERROR;
+			closeDatabase();
+			return NO_ERROR;
 		}
 
 		closeDatabase();
@@ -935,7 +937,7 @@ public class Authentication extends ServiceRack
 
 	private int addUser(String newUsername, String newPassword, String newGroups, String newStatus, String newComment, String newEmail)
 	{
-	        openDatabase();
+		openDatabase();
 
 		newGroups = newGroups.replaceAll(" ", "");
 
@@ -964,7 +966,7 @@ public class Authentication extends ServiceRack
 
 	private boolean checkUserExists(String username)
 	{
-  	        boolean check_status = false;
+		boolean check_status = false;
 
 		openDatabase();
 
@@ -980,8 +982,8 @@ public class Authentication extends ServiceRack
 		}
 		catch (Exception ex)
 		{
-		    // some error occurred accessing the database
-		    ex.printStackTrace();
+			// some error occurred accessing the database
+			ex.printStackTrace();
 		}
 
 		closeDatabase();
@@ -990,7 +992,7 @@ public class Authentication extends ServiceRack
 
 	private String retrieveDataForUser(String username, String dataType)
 	{
-	        openDatabase();
+		openDatabase();
 
 		String data = null;
 
