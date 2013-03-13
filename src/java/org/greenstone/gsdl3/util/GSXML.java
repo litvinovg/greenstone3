@@ -791,6 +791,24 @@ public class GSXML
 		request.setAttribute(LANG_ATT, userContext._lang);
 		request.setAttribute(TO_ATT, to);
 		request.setAttribute(USER_ID_ATT, userContext._userID);
+		
+		if(userContext._groups != null)
+		{
+			String groupString = "";
+			for(int i = 0; i < userContext._groups.length; i++)
+			{
+				groupString += userContext._groups[i];
+				if(i != userContext._groups.length - 1)
+				{
+					groupString += ",";
+				}
+			}
+			
+			if(groupString.length() > 0)
+			{
+				request.setAttribute(GROUPS_ATT, groupString);
+			}
+		}
 		return request;
 	}
 
