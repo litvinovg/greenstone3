@@ -451,6 +451,29 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		userContext.setLanguage(lang);
 		userContext.setUserID(uid);
 
+		if (request.getAuthType() != null)
+		{
+			//Get the groups for the user
+			Element acquireGroupMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
+			Element acquireGroupRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, "GetUserInformation", userContext);
+			acquireGroupMessage.appendChild(acquireGroupRequest);
+
+			Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			acquireGroupRequest.appendChild(paramList);
+			paramList.appendChild(GSXML.createParameter(this.doc, "username", request.getUserPrincipal().getName()));
+
+			Element aquireGroupsResponseMessage = (Element) this.recept.process(acquireGroupMessage);
+			Element aquireGroupsResponse = (Element) GSXML.getChildByTagName(aquireGroupsResponseMessage, GSXML.RESPONSE_ELEM);
+			Element param_list = (Element) GSXML.getChildByTagName(aquireGroupsResponse, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+
+			if (param_list != null)
+			{
+				HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
+				String groups = (String) params.get("groups");
+				userContext.setGroups(groups.split(","));
+			}
+		}
+
 		// set the lang in the session
 		session.setAttribute(GSParams.LANGUAGE, lang);
 
