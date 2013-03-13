@@ -619,7 +619,26 @@ function DebugWidget()
 		var debugElems = $('debug, [debug="true"]');
 		if(!debugElems.length)
 		{
-			console.log("No debug tags present, debugging disabled.");
+			var enableGBButtonHolder = $("<div>", {"title":"Enable Greenbug", "id":"gbEnableButton", "class":"ui-state-default ui-corner-all"});
+			enableGBButtonHolder.append($("<img>", {"src":gs.imageURLs.greenBug}));
+			enableGBButtonHolder.click(function()
+			{
+				var url = document.URL;
+				url = url.replace("debug=0", "");
+				if(url.indexOf("?") != -1)
+				{
+					document.location.href = url += "&debug=1";
+				}
+				else if(url.indexOf("?") == url.length - 1)
+				{
+					document.location.href = url += "debug=1";
+				}
+				else
+				{
+					document.location.href = url += "?debug=1";
+				}
+			});
+			$("body").append(enableGBButtonHolder);
 			return;
 		}
 		
