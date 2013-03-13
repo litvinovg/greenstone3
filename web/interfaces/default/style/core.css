@@ -887,6 +887,12 @@ dl dd { padding-bottom:10px}
 }
 
 /* GREENBUG */
+#gbEnableButton{
+	position:fixed;
+	left:0px;
+	bottom:0px;
+}
+
 .gbTemplateContainer{
 	float:left;
 	cursor:pointer;
@@ -903,7 +909,7 @@ dl dd { padding-bottom:10px}
 	text-align:center;
 }
 
-/* VISUAL XML EDITOR */
+/* VISUAL XML EDITOR (GREENBUG)*/
 #veMainDiv{
 	margin:0;
 	padding:0;
@@ -1006,6 +1012,7 @@ dl dd { padding-bottom:10px}
 .veAttributeTableContainer{
 	text-align:center;
 	width:100%;
+	margin-bottom:2em;
 }
 
 .veAttributeTableContainer td{
