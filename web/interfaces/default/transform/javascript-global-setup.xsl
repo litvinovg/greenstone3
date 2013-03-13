@@ -129,6 +129,7 @@
 			<xsl:text disable-output-escaping="yes">gs.imageURLs.prev = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'prev_image')"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 			<xsl:text disable-output-escaping="yes">gs.imageURLs.trashEmpty = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'trash_empty_image')"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 			<xsl:text disable-output-escaping="yes">gs.imageURLs.trashFull = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'trash_full_image')"/><xsl:text disable-output-escaping="yes">";</xsl:text>
+			<xsl:text disable-output-escaping="yes">gs.imageURLs.greenBug = "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'green_bug_image')"/><xsl:text disable-output-escaping="yes">";</xsl:text>
 		</script>
 	</xsl:template>
 	
