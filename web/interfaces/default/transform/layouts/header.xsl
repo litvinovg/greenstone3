@@ -62,7 +62,7 @@
 				<link rel="stylesheet" href="{/page/pageResponse/interfaceOptions/option[@name = 'cssTheme']/@value}" type="text/css"/>
 			</xsl:when>
 			<xsl:otherwise>
-				<link rel="stylesheet" href="interfaces/{$interface_name}/style/themes/main/jquery-ui-1.8.15.custom.css" type="text/css"/>
+				<link rel="stylesheet" href="interfaces/{$interface_name}/style/themes/main/jquery-ui-1.8.16.custom.css" type="text/css"/>
 			</xsl:otherwise>
 		</xsl:choose>
 		<link rel="stylesheet" href="interfaces/{$interface_name}/style/core.css" type="text/css"/>
