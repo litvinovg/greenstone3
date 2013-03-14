@@ -469,6 +469,7 @@ public class ServiceCluster implements ModuleInterface
 			s.setSiteHome(this.site_home);
 			s.setSiteAddress(this.site_http_address);
 			s.setClusterName(this.cluster_name);
+			s.setServiceCluster(this);
 			s.setMessageRouter(this.router);
 			// pass the xml node to the service for configuration
 			if (s.configure(n, extra_info))

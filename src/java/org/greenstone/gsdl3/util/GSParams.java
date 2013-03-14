@@ -78,6 +78,9 @@ public class GSParams
 	// some standard arg values
 	public static final String SYSTEM_ACTION = "s";
 
+	// rss feeds
+	public static final String RSS_ACTION = "rss";
+
 	public static final String EXTERNAL_LINK_TYPE_DIRECT = "direct";
 	public static final String EXTERNAL_LINK_TYPE_FRAMED = "frame";
 	

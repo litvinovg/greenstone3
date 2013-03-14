@@ -8,12 +8,11 @@
   exclude-result-prefixes="util xalan gslib gsf xslt">
 
 
-<xsl:output
-	method="html" 
-	doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" 
-	doctype-system="http://www.w3.org/TR/html4/loose.dtd"/>
+  <!-- force lower priority on xsl:output, so other files like rss.xsl can override with their own xsl:output stmt 
+    If other files don't specify any, gslib.xsl specifies html output as default and defines a loose DOCTYPE for it. -->
+  <xsl:import href="html-output.xsl" />
 
-	<xsl:include href="xml-to-string.xsl"/>
+  <xsl:include href="xml-to-string.xsl"/>
 	
   <!-- some global parameters - these are set by whoever is invoking the transformation -->
   <xsl:param name="interface_name"/>

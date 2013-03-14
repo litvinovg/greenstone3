@@ -11,6 +11,7 @@
       <subaction name="nav" xslt="nav.xsl"/><!-- used for the collection header frame -->
       <subaction name="html" xslt="html.xsl"/> <!-- use to put an external page into a frame with a collection header-->
     </action>
+    <action class="RSSAction" name="rss" xslt="pages/rss.xsl"/>
     <action class="QueryAction" name="q" xslt="pages/query.xsl"/>
     <action class="GS2BrowseAction" name="b" xslt="pages/classifier.xsl"/>
     <action class="DocumentAction" name="d" xslt="pages/document.xsl"/>

@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.collection.ServiceCluster;
 import org.greenstone.gsdl3.core.MessageRouter;
 import org.greenstone.gsdl3.core.ModuleInterface;
 import org.greenstone.gsdl3.util.CollectionClassLoader;
@@ -66,6 +67,9 @@ public abstract class ServiceRack implements ModuleInterface
 	/** some services can talk back to the message router */
 	protected MessageRouter router = null;
 
+        /** Access to the collection/serviceCluster object for service subclasses */
+        protected ServiceCluster serviceCluster = null;
+
 	/** a converter class to create Documents etc */
 	protected XMLConverter converter = null;
 
@@ -98,6 +102,12 @@ public abstract class ServiceRack implements ModuleInterface
 	public void setClusterName(String cluster_name)
 	{
 		this.cluster_name = cluster_name;
+	}
+
+    	/** sets the serviceCluster/Collection object */
+	public void setServiceCluster(ServiceCluster serviceCluster)
+	{
+		this.serviceCluster = serviceCluster;
 	}
 
 	/** sets the collect name */
