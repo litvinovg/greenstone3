@@ -37,6 +37,11 @@ import org.w3c.dom.Element;
 
 public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 {
+
+  protected static final String SORT_ORDER_PARAM = "sortOrder";
+  protected static final String SORT_ORDER_DESCENDING = "1";
+  protected static final String SORT_ORDER_ASCENDING = "0";
+
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.GS2LuceneSearch.class.getName());
 
 	private GS2LuceneQuery lucene_src = null;
@@ -52,6 +57,34 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 		this.lucene_src.cleanUp();
 	}
 
+	/** add in the Lucene specific params to TextQuery */
+	protected void addCustomQueryParams(Element param_list, String lang)
+	{
+		super.addCustomQueryParams(param_list, lang);
+		/** Lucene's/Solr's rank param is based on index fields, not ranked/not */
+		createParameter(SORT_ORDER_PARAM, param_list, lang);
+	}
+  
+  /** create a param and add to the list */
+  protected void createParameter(String name, Element param_list, String lang)
+	{
+	  Element param = null;
+	  if (name.equals(SORT_ORDER_PARAM)) {
+	    String[] vals = { SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING };
+	    String[] vals_texts = { getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_ASCENDING, lang), getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_DESCENDING, lang) };
+
+	    param = GSXML.createParameterDescription(this.doc, SORT_ORDER_PARAM, getTextString("param." + SORT_ORDER_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, SORT_ORDER_ASCENDING, vals, vals_texts);
+	  }
+	  
+	  if (param != null)
+	    {
+	      param_list.appendChild(param);
+	    }
+	  else
+	    {
+	      super.createParameter(name, param_list, lang);
+	    }
+	}
 	/** methods to handle actually doing the query */
 
 	/** do any initialisation of the query object */
@@ -106,6 +139,11 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 				}
 				this.lucene_src.setSortField(value);
 			}
+			else if (name.equals(SORT_ORDER_PARAM)) {
+			    if (value.equals(SORT_ORDER_DESCENDING)) {
+			      this.lucene_src.setReverseSort();
+			    }
+			  }
 			else if (name.equals(LEVEL_PARAM))
 			{
 				if (value.toUpperCase().equals("SEC"))
