@@ -35,10 +35,12 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.ErrorListener;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -224,6 +226,8 @@ public class XMLTransformer
 		return transform(stylesheet, source, parameters, docDocType, null);
 	}
 
+	// This method will now set the docType in the new document created and returned, if any are specified in the
+	// (merged) stylesheet being applied. The docDocType parameter is therefore no longer necessary nor used by default.
 	protected Node transform(Document stylesheet, Document source, HashMap<String, Comparable> parameters, Document docDocType, Document resultNode)
 	{
 		try
@@ -248,9 +252,45 @@ public class XMLTransformer
 			// When we transform the DOMResult, we need to make sure the result of
 			// the transformation has a DocType. For that to happen, we need to create
 			// the DOMResult using a Document with a predefined docType.
-			// If we don't have a DocType then do the transformation with a DOMResult
-			// that does not contain any doctype (like we use to do before).
-			DOMResult result = docDocType == null ? new DOMResult() : new DOMResult(docDocType);
+
+			// When the DOCType is not explicitly specified (default case), the docDocType variable is null
+			// In such a case, the transformer will work out the docType and output method and the rest 
+			// from the stylesheet. Better to let the transformer work this out than GS manually aggregating 
+			// all xsls being applied and the GS code deciding on which output method and doctype to use.
+
+			//DOMResult result = docDocType == null ? new DOMResult() : new DOMResult(docDocType);
+			DOMResult result = null;
+
+			Properties props = transformer.getOutputProperties();
+			if(docDocType == null) { // default case
+			
+			    String outputMethod = props.getProperty(OutputKeys.METHOD);
+			    if(outputMethod.equals("html")) {				
+				String doctype_public = props.getProperty(OutputKeys.DOCTYPE_PUBLIC);
+				String doctype_system = props.getProperty(OutputKeys.DOCTYPE_SYSTEM);
+				
+				if(doctype_public == null) {
+				    doctype_public = ""; // or default to PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"?
+				}
+				if(doctype_system == null) {
+				    doctype_system = ""; // or default to "http://www.w3.org/TR/html4/loose.dtd"?
+				}
+
+				Document docDocTypeFromTransformer = XMLConverter.newDOM(outputMethod, doctype_public, doctype_system);
+				result = new DOMResult(docDocTypeFromTransformer);
+			    } 
+			    // if output method=xml, the <?xml ?> processing method goes missing hereafter, although it
+			    // still exists in OutputKeys' VERSION, ENCODING and OMIT_XML_DECLARATION props at this point
+					    
+			} else { // if document with doctype was already specified (no longer the default case)
+			    result = new DOMResult(docDocType);
+			}
+			// At this point if we haven't initialised result yet, set it to an empty DOMResult
+			if(result == null) {
+			    result = new DOMResult();
+			}
+
+
 			if (resultNode != null)
 			{
 				result.setNode(resultNode);

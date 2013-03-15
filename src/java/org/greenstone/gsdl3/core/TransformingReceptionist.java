@@ -900,6 +900,11 @@ public class TransformingReceptionist extends Receptionist
 			return converter.getDOM(getStringFromDocument(oldStyle_doc));
 		}
 
+		// We now no longer create a document with doctype before the transformation
+		// We let the XMLTransformer do the work of first working out the doctype from any 
+		// that may be set in the (merged) stylesheets and then setting the doctype when transforming
+
+		/*
 		// Try to get the system and public ID from the current skin xsl document
 		// otherwise keep the default values.
 		Element root = skinAndLibraryDoc.getDocumentElement();
@@ -928,6 +933,7 @@ public class TransformingReceptionist extends Receptionist
 		//System.out.println("Doctype vals: " + qualifiedName + " " + publicID + " " + systemID) ;
 
 		docWithDoctype = converter.newDOM(qualifiedName, publicID, systemID);
+		*/
 
 		//System.out.println("Generate final HTML from current skin") ;
 		//Transformation of the XML message from the receptionist to HTML with doctype
@@ -974,7 +980,11 @@ public class TransformingReceptionist extends Receptionist
 			return converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
 		}
 
-		Node finalResult = this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype);
+		
+		// The transformer will now work out the resulting doctype from any set in the (merged) stylesheets and
+		// will set this in the output document it creates. So don't pass in any docWithDocType to the transformer
+		//Node finalResult = this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype);
+		Node finalResult = this.transformer.transform(skinAndLibraryDoc, doc, config_params);
 
 		if (_debug)
 		{
