@@ -225,6 +225,18 @@
 			<xsl:when test="@type='equivdoc'">
 				<xsl:call-template name="gsf:equivlinkgs3"/>
 			</xsl:when>
+			<xsl:when test="@type='rss'">
+				<a>				       
+					<xslt:attribute name='href'>
+						<xslt:value-of select='$library_name'/>
+						<xsl:text>?a=rss&amp;l=en&amp;site=</xsl:text>
+						<xslt:value-of select="$site_name"/>
+						<xsl:text>&amp;c=</xsl:text>
+						<xslt:value-of select='/page/pageResponse/collection/@name'/>
+					</xslt:attribute>
+					<xsl:apply-templates/>
+				</a>	
+			</xsl:when>
 			<xsl:otherwise>
 				<!-- a document link -->
 				<xslt:variable name="bookswitch">

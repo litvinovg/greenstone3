@@ -218,6 +218,9 @@
 	<!-- ***** HOME HELP PREFERENCES LOGIN ***** -->
 	<xsl:template name="home-help-preferences">
 		<ul id="bannerLinks">
+		  <xsl:if test="/page/pageResponse/collection/serviceList/service[@name='RSSFeed']">
+			<li><gsf:link type="rss"><gsf:icon file="rssicon.png"/></gsf:link></li>
+		  </xsl:if>
 			<!-- preferences -->
 			<li class="ui-state-default ui-corner-all">
 				<a href="{$library_name}/collection/{$collNameChecked}/page/pref">

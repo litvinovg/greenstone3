@@ -205,6 +205,7 @@
 	</display>
 	<replaceListRef id="gs2-standard"/>
 	<serviceRackList>
+	  	<serviceRack name="RSSRetrieve"/>
 		<!-- comment out the following serviceRack if you want to disable OAI for this collection -->
 		<serviceRack name="OAIPMH">
 			<ListMetadataFormats>
