@@ -37,11 +37,9 @@
         <index name="dls.Organization">
             <displayItem lang="en" name="name">organisations</displayItem>
         </index>
-        <indexOption>
-            <option name="accentfold"/>
-            <option name="casefold"/>
-            <option name="stem"/>
-        </indexOption>
+        <indexOption name="accentfold"/>
+        <indexOption name="casefold"/>
+        <indexOption name="stem"/>
         <searchType name="plain"/>
         <searchType name="simpleform"/>
         <searchType name="advancedform"/>
