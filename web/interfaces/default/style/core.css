@@ -896,10 +896,12 @@ dl dd { padding-bottom:10px}
 .gbTemplateContainer{
 	float:left;
 	cursor:pointer;
-	border:1px dashed #AAAAAA;
-	margin:0;
+	margin:0 1em;
 	font-size:1.1em;
 	text-align:center;
+	overflow:hidden;
+	min-width:4em;
+	padding: 0.5em;
 }
 
 .gbSpacer{
@@ -913,6 +915,20 @@ dl dd { padding-bottom:10px}
 #veMainDiv{
 	margin:0;
 	padding:0;
+}
+
+#veNavArea{
+	width:100%;
+}
+
+#veTemplateSelector{
+	width:75%;
+	float:right;
+}
+
+#veFileSelector{
+	float:left;
+	padding:0.5em;
 }
 
 #veToolboxDiv{
@@ -1009,10 +1025,15 @@ dl dd { padding-bottom:10px}
 	padding:0.5em;
 }
 
+.veInfoDivTitle{
+	text-align:center;
+	margin-bottom:1em;
+}
+
 .veAttributeTableContainer{
 	text-align:center;
 	width:100%;
-	margin-bottom:2em;
+	margin-bottom:1em;
 }
 
 .veAttributeTableContainer td{

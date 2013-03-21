@@ -5,7 +5,8 @@
 
 function visualXMLEditor(xmlString)
 {
-	var thisEditor = this;
+	var _thisEditor = this;
+	var _greenbug;
 
 	var _globalID = 0;
 
@@ -87,6 +88,11 @@ function visualXMLEditor(xmlString)
 			"metadata":[]
 		}
 	};
+	
+	this.setGreenbug = function(gb)
+	{
+		_greenbug = gb;
+	}
 	
 	this.getXML = function()
 	{
@@ -242,7 +248,7 @@ function visualXMLEditor(xmlString)
 	
 	var retrieveGSLIBTemplates = function(callback)
 	{
-		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetGSLIBElementsFromFile&s1.interfaceName=" + gs.xsltParams.interface_name;
+		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetTemplateListFromFile&s1.locationName=interface&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.fileName=gslib.xsl";
 
 		$.ajax(url)
 		.success(function(response)
@@ -252,8 +258,18 @@ function visualXMLEditor(xmlString)
 			
 			var listString = response.substring(startIndex, endIndex);
 			var list = eval(listString.replace(/&quot;/g, "\""));
+			var modifiedList = new Array();
 			
-			_elemList["gslib"] = list;
+			for(var i = 0; i < list.length; i++)
+			{
+				var current = list[i];
+				if(current.name)
+				{
+					modifiedList.push(current.name);
+				}
+			}
+			
+			_elemList["gslib"] = modifiedList;
 			
 			if(callback)
 			{
@@ -568,11 +584,9 @@ function visualXMLEditor(xmlString)
 		var _xmlNode = node;
 	
 		var _textEditor = $("<div>");
-		var _textTitle = $("<div>Text:</div>");
 		var _nodeText = $("<div>");
 		_nodeText.text(_xmlNode.nodeValue);
 
-		_textEditor.append(_textTitle);
 		_textEditor.append(_nodeText);
 		
 		var _editButton = $("<button>Edit text</button>");
@@ -1067,23 +1081,25 @@ function visualXMLEditor(xmlString)
 		
 		this.populateInformationDiv = function()
 		{
-			thisEditor.savePendingEdits();
+			_thisEditor.savePendingEdits();
 			_infoDiv.empty();
 
-			var nameElement = $("<p>");
 			if(_xmlNode.nodeType == 1)
 			{
-				nameElement.text("Name: " + _xmlNode.nodeName);
+				var nameElementTitle = $("<div>", {"class":"ui-state-default ui-corner-all veInfoDivTitle"}).text("Element name:");
+				_infoDiv.append(nameElementTitle);
+				_infoDiv.append($("<p>").text(_xmlNode.nodeName));
 			}
 			else
 			{
-				nameElement.text("[text node]");
+				var textElementTitle = $("<div>", {"class":"ui-state-default ui-corner-all veInfoDivTitle"}).text("Text node:");
+				_infoDiv.append(textElementTitle);
 			}
-			_infoDiv.append(nameElement);
 
 			if(_xmlNode.nodeType == 1)
 			{
-				var attributeTableTitle = $("<p>Attributes:<p/>");
+				var attributeTableTitle = $("<div>", {"class":"ui-state-default ui-corner-all veInfoDivTitle"});
+				attributeTableTitle.text("Attributes:");
 				var attributeTable = $("<table>");
 				attributeTable.addClass("veAttributeTableContainer");
 
@@ -1098,6 +1114,7 @@ function visualXMLEditor(xmlString)
 				_infoDiv.append(attributeTableTitle);
 				_infoDiv.append(attributeTable);
 				
+				var addDiv = $("<div>", {"class":"veInfoDivTitle"});
 				var addSelect = $("<select>");
 				addSelect.append("<option>[blank]</option>", {value:"[blank]"});
 				var fullName = _xmlNode.tagName;
@@ -1148,9 +1165,77 @@ function visualXMLEditor(xmlString)
 					newAtt.editMode(editModeValue);
 					_transactions.push({type:"addAttr", row:row})
 				});
-				_infoDiv.append(addSelect);
-				_infoDiv.append(addButton);
+				addDiv.append(addSelect);
+				addDiv.append(addButton);
+				_infoDiv.append(addDiv);
 				addButton.button();
+				
+				/*
+				if(_xmlNode.tagName == "xsl:call-template" && _xmlNode.getAttribute("name").length > 0)
+				{
+					var extraOptionsTitle = $("<div>", {"class":"ui-state-default ui-corner-all veInfoDivTitle"}).text("Additional options:");
+					var visitTemplateOption = $("<button>View called template</button>");
+					
+					_infoDiv.append(extraOptionsTitle);
+					_infoDiv.append(visitTemplateOption);
+					
+					visitTemplateOption.button();
+					visitTemplateOption.click(function()
+					{
+						var template = "";
+						template += '<xsl:template match="/">';
+						template +=   '<calledTemplate>';
+						var params = $(_xmlNode).children("xsl\\:with-param");
+						if(!params.length)
+						{
+							template += '<xsl:call-template name="' + _xmlNode.getAttribute("name") + '"/>';
+						}
+						else
+						{
+							template += '<xsl:call-template name="' + _xmlNode.getAttribute("name") + '">';
+							for(var i = 0; i < params.length; i++)
+							{
+								var param = params.eq(i);
+								template += "<xsl:with-param";
+								for(var j = 0; j < param[0].attributes.length; j++)
+								{
+									var attr = param[0].attributes[j];
+									template += " " + attr.name + "=\"" + attr.value + "\"";
+								}
+								template += "/>";
+							}
+							template += '</xsl:call-template>';
+						}
+						template +=   '</calledTemplate>';
+						template += '</xsl:template>';
+						template = template.replace(" ", "%20");
+						
+						var url = document.URL;
+						if(url.indexOf("?") == url.length - 1)
+						{
+							url += "ilt=" + template;
+						}
+						else if(url.indexOf("?") != -1)
+						{
+							url += "&ilt=" + template;
+						}
+						else
+						{
+							url += "?ilt=" + template;
+						}
+						
+						$.ajax(url)
+						.success(function(response)
+						{
+							var xml = $.parseXML(response);
+							var debug = $(xml).find("calledTemplate debug");
+
+							_greenbug.changeCurrentTemplate(debug[0].getAttribute("filename"), "template", "xsl", debug[0].getAttribute("name"), null);
+							$(".gbTemplateContainer").css("border", "1px dashed #AAAAAA");
+						});
+					});
+				}
+				*/
 			}
 
 			if(_xmlNode.nodeType == 3)
@@ -1158,23 +1243,6 @@ function visualXMLEditor(xmlString)
 				var textNode = new VEText(_xmlNode);
 				_infoDiv.append(textNode.getDiv());
 			}
-		}
-		
-		this.remove = function()
-		{
-			var divParent = _div.parents(".veElement");
-			_transactions.push({type:"remMvElem", vElemParent:_div.parent(), vElemPos:_div.index(), vElem:_div});
-			_div.data("expanded", "normal");
-			$(_xmlNode).remove();
-			_div.detach();
-			_infoDiv.empty();
-			
-			if(divParent.length)
-			{
-				divParent.first().trigger("click");
-			}
-			
-			$("#veTrash").children("img").attr("src", gs.imageURLs.trashFull);
 		}
 
 		var addMouseEvents = function()
@@ -1245,6 +1313,23 @@ function visualXMLEditor(xmlString)
 				}
 			}
 			return false;
+		}
+		
+		this.remove = function()
+		{
+			var divParent = _div.parents(".veElement");
+			_transactions.push({type:"remMvElem", vElemParent:_div.parent(), vElemPos:_div.index(), vElem:_div});
+			_div.data("expanded", "normal");
+			$(_xmlNode).remove();
+			_div.detach();
+			_infoDiv.empty();
+			
+			if(divParent.length)
+			{
+				divParent.first().trigger("click");
+			}
+			
+			$("#veTrash").children("img").attr("src", gs.imageURLs.trashFull);
 		}
 
 		this.expand = function()

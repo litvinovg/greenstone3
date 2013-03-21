@@ -4,6 +4,9 @@ function DebugWidget()
 	//Private member variables
 	//************************
 	
+	//The this variable
+	var _greenbug = this;
+	
 	//Debugger state-keeping variables
 	var _debugOn = false;
 	var _pauseSelector = false;
@@ -18,6 +21,8 @@ function DebugWidget()
 	var _textEditor;
 	var _vEditor;
 	
+	var _navArea;
+	var _fileSelector;
 	var _templateSelector;
 	var _editor;
 	var _editingDiv;
@@ -28,7 +33,8 @@ function DebugWidget()
 	var _swapEditorButton;
 	
 	//Editor state-keeping variables
-	var _currentFilepath;
+	var _currentFileName;
+	var _currentLocation;
 	var _currentNodename;
 	var _currentName;
 	var _currentMatch;
@@ -85,37 +91,14 @@ function DebugWidget()
 		}
 	}
 	
-	var createDebugDiv = function()
+	var createButtonDiv = function(buttonDiv)
 	{
-		_mainDiv = $("<div>", {"id":"debugDiv"});
-		_mainDiv.css(
-		{
-			"position":"fixed",
-			"font-size":"0.8em",
-			"bottom":"0px",
-			"width":"100%",
-			"background":"white",
-			"border":"1px black solid",
-			"padding":"5px",
-			"z-index":100
-		});
-
-		_editingDiv = $("<div>");
-		var toolBarDiv = $("<div>");
-		toolBarDiv.css({"height":"40px"});
-
-		var buttonDiv = $("<div>");
-		toolBarDiv.append(buttonDiv);
-
-		_templateSelector = $("<div>", {"id":"templateSelector"});
-		_templateSelector.css({"overflow":"auto", "width":"100%"});
-
-		var pickElementButton = $("<button>Enable debugging</button>");
+		var pickElementButton = $("<button>Enable selector</button>");
 		pickElementButton.click(function()
 		{
 			if(!_debugOn)
 			{
-				pickElementButton.button("option", "label", "Disable debugging");
+				pickElementButton.button("option", "label", "Disable selector");
 				$("a").click(function(e)
 				{
 					e.preventDefault();
@@ -124,7 +107,7 @@ function DebugWidget()
 			}
 			else
 			{
-				pickElementButton.button("option", "label", "Enable debugging");
+				pickElementButton.button("option", "label", "Enable selector");
 				$("a").off("click");
 				clearAll();
 				_unpauseButton.button("option", "disabled", true);
@@ -190,7 +173,7 @@ function DebugWidget()
 				}
 				
 				var url = gs.xsltParams.library_name;
-				var parameters = {"a":"g", "rt":"r", "s":"SaveXMLTemplateToFile", "s1.filePath":_currentFilepath, "s1.namespace":_currentNamespace, "s1.nodename":_currentNodename, "s1.xml":xmlString};
+				var parameters = {"a":"g", "rt":"r", "s":"SaveXMLTemplateToFile", "s1.locationName":_currentLocation, "s1.fileName":_currentFileName, "s1.interfaceName":gs.xsltParams.interface_name, "s1.siteName":gs.xsltParams.site_name, "s1.collectionName":gs.cgiParams.c, "s1.namespace":_currentNamespace, "s1.nodename":_currentNodename, "s1.xml":xmlString};
 
 				if(_currentName && _currentName.length > 0){parameters["s1.name"] = _currentName;}
 				if(_currentMatch && _currentMatch.length > 0){parameters["s1.match"] = _currentMatch;}
@@ -283,7 +266,17 @@ function DebugWidget()
 			}
 		});
 		_styleFunctions.push(function(){undoButton.button({icons:{primary:"ui-icon-arrowreturnthick-1-w"}})});
-
+		
+		buttonDiv.append(pickElementButton);
+		buttonDiv.append(_unpauseButton);
+		buttonDiv.append(_closeEditorButton);
+		buttonDiv.append(_saveButton);
+		buttonDiv.append(_swapEditorButton);
+		buttonDiv.append(undoButton);
+	}
+	
+	var createXMLStatusBar = function(buttonDiv)
+	{
 		_xmlStatusBar = $("<span>");
 		_xmlStatusBar.css("padding", "5px");
 		_xmlStatusBar.addClass("ui-corner-all");
@@ -326,25 +319,139 @@ function DebugWidget()
 			}
 			
 		}, 2000);
-		
-		var clear = $("<span>");
-		clear.css("clear", "both");
-		toolBarDiv.append(clear);
-		
-		buttonDiv.append(pickElementButton);
-		buttonDiv.append(_unpauseButton);
-		buttonDiv.append(_closeEditorButton);
-		buttonDiv.append(_saveButton);
-		buttonDiv.append(_swapEditorButton);
-		buttonDiv.append(undoButton);
 		buttonDiv.append(_xmlStatusBar);
+	}
+	
+	var createDebugDiv = function()
+	{
+		_mainDiv = $("<div>", {"id":"debugDiv"});
+		_mainDiv.css(
+		{
+			"position":"fixed",
+			"font-size":"0.8em",
+			"bottom":"0px",
+			"width":"100%",
+			"background":"white",
+			"border":"1px black solid",
+			"padding":"5px",
+			"z-index":100
+		});
+
+		_editingDiv = $("<div>");
+		var toolBarDiv = $("<div>");
+		toolBarDiv.css({"height":"40px"});
+		toolBarDiv.append("<div>", {style:"clear:both;"});
+
+		var buttonDiv = $("<div>");
+		toolBarDiv.append(buttonDiv);
+		createButtonDiv(buttonDiv);
+		createXMLStatusBar(buttonDiv);
+		
+		_navArea = $("<div>", {"id":"veNavArea"});
+		_templateSelector = $("<div>", {"id":"veTemplateSelector"});
+		_fileSelector = $("<div>", {"id":"veFileSelector", "class":"ui-state-default ui-corner-all"});
+		_navArea.append(_fileSelector);
+		_navArea.append(_templateSelector);
+		_navArea.append("<div>", {style:"clear:both;"});
+		
+		//Populate the file selector
+		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetXSLTFilesForCollection&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c;
+		$.ajax(url)
+		.success(function(response)
+		{
+			var listStartIndex = response.indexOf("<fileListJSON>") + "<fileListJSON>".length;
+			var listEndIndex = response.indexOf("</fileListJSON>");
+			
+			var listString = response.substring(listStartIndex, listEndIndex).replace(/&quot;/g, "\"").replace(/\\/g, "/");
+			var list = eval(listString);
+			
+			var selectBox = $("<select>");
+			selectBox.append($("<option>-- Select a file --</option>", {value:"none"}));
+			_fileSelector.append("<span>Files: </span>");
+			_fileSelector.append(selectBox);
+			for(var i = 0; i < list.length; i++)
+			{
+				var item = list[i];
+				var option = $("<option>" + item.path + " (" + item.location + ")</option>", {value:item.path});
+				option.data("fileItem", item);
+				selectBox.append(option);
+			}
+
+			selectBox.change(function()
+			{
+				var selectedItem = selectBox.find(":selected");
+				
+				var getURL = gs.xsltParams.library_name + "?a=g&rt=r&s=GetTemplateListFromFile&s1.fileName=" + selectedItem.data("fileItem").path + "&s1.locationName=" + selectedItem.data("fileItem").location + "&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c;
+				$.ajax(getURL)
+				.success(function(templateResponse)
+				{
+					var templateListStart = templateResponse.indexOf("<templateList>") + "<templateList>".length;
+					var templateListEnd = templateResponse.indexOf("</templateList>");
+					var templateListString = templateResponse.substring(templateListStart, templateListEnd).replace(/&quot;/g, "\"");
+					var templateList = eval(templateListString);
+					
+					clearAll();
+					
+					for(var i = 0; i < templateList.length; i++)
+					{
+						var fileName = selectedItem.data("fileItem").path;
+						var location = selectedItem.data("fileItem").location;
+						var namespace = templateList[i].namespace;
+						var nodename = "template";
+						var name = templateList[i].name;
+						var match = templateList[i].match;
+						
+						if(name)
+						{
+							name = templateList[i].name.replace(/&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
+						}
+						if(match)
+						{
+							match = templateList[i].match.replace(/&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
+						}
+						
+						var infoContainer = $("<div>", {"class":"gbTemplateContainer ui-state-default ui-corner-all"});
+						
+						_elements.push(infoContainer);
+						
+						addMouseEventsToInfoContainer(infoContainer, fileName, location, nodename, namespace, name, match);
+						
+						if(name && name.length > 0)
+						{
+							infoContainer.text(name);
+						}
+						if(match && match.length > 0)
+						{
+							infoContainer.text(match);
+						}
+						
+						if(_templateSelector.children("div").length > 0)
+						{/*
+							var spacer = $("<div>&gt;&gt;</div>");
+							spacer.addClass("gbSpacer");
+
+							_templateSelector.prepend(spacer);
+							_elements.push(spacer);
+							*/
+						}
+						
+						_templateSelector.prepend(infoContainer);
+						
+						//resizeContainers();
+					}
+				});
+			});
+		})
+		.error(function()
+		{
+			console.log("Error retrieving XSLT files");
+		});
 		
 		_styleFunctions.push(function(){$(".ui-button").css({"margin-right":"0.5em"});});
 		
 		_mainDiv.append(toolBarDiv);
 		_mainDiv.append(_editingDiv);
-		_mainDiv.append("<div>Templates:</div>");
-		_mainDiv.append(_templateSelector);
+		_mainDiv.append(_navArea);
 	}
 	
 	var clearAll = function()
@@ -376,7 +483,81 @@ function DebugWidget()
 		_elements.push(rightBorderDiv);
 	}
 	
-	var addMouseEventsToInfoContainer = function(infoContainer, filepath, nodename, namespace, name, match)
+	this.changeCurrentTemplate = function(location, fileName, nodename, namespace, name, match)
+	{
+		var responseName = "requestedNameTemplate";
+		
+		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetXMLTemplateFromFile&s1.fileName=" + fileName + "&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c + "&s1.locationName=" + location + "&s1.namespace=" + namespace + "&s1.nodename=" + nodename;
+		if(match && match.length > 0){url += "&s1.match=" + match; responseName = "requestedMatchTemplate";}
+		if(name && name.length > 0){url += "&s1.name=" + name;}
+
+		$.ajax(url)
+		.success(function(response)
+		{
+			var template;
+			if(response.search(responseName) != -1)
+			{
+				var startIndex = response.indexOf("<" + responseName + ">") + responseName.length + 2;
+				var endIndex = response.indexOf("</" + responseName + ">");
+				template = response.substring(startIndex, endIndex);
+			}
+			else
+			{
+				return;
+			}
+		
+			_textEditor = $("<div>", {"id":"textEditor"});
+			_textEditor.css({"width":"100%", "height":"300px"});
+			_textEditor.val(template);
+			
+			if(_isVisualEditor)
+			{
+				_textEditor.hide();
+			}
+			
+			_editingDiv.empty();
+			_editingDiv.append($("<p>Location: " + location + " <br/>Filename: " + fileName + "</p>"));
+			_editingDiv.append(_textEditor);
+			
+			_vEditor = new visualXMLEditor(template);
+			_editingDiv.append(_vEditor.getMainDiv());
+			_vEditor.setGreenbug(_greenbug);
+			_vEditor.selectRootElement();
+			
+			if(!_isVisualEditor)
+			{
+				_vEditor.getMainDiv().hide();
+			}
+			
+			_editor = ace.edit("textEditor");
+			_editor.getSession().setMode("ace/mode/xml");
+			_editor.getSession().setUseSoftTabs(false);
+			_editor.setValue(template);
+			_editor.clearSelection();
+			var UndoManager = require("ace/undomanager").UndoManager;
+			_editor.getSession().setUndoManager(new UndoManager());
+			
+			_textEditor.css({"min-height":"200px", "border-top":"5px solid #444"});
+			_textEditor.resizable({handles: 'n', resize:function()
+			{
+				_textEditor.css({top:"0px"});
+				_editor.resize();
+			}});
+
+			_closeEditorButton.button("option", "disabled", false);
+			if(_closeEditorButton.button("option", "label") == "Open editor")
+			{
+				_closeEditorButton.button("option", "label", "Close editor");
+				_editingDiv.show();
+			}
+		})
+		.error(function()
+		{
+			console.log("ERROR");
+		});
+	}
+	
+	var addMouseEventsToInfoContainer = function(infoContainer, fileName, location, nodename, namespace, name, match)
 	{
 		infoContainer.click(function()
 		{
@@ -388,89 +569,24 @@ function DebugWidget()
 			_selectedTemplate.prevBorder = _selectedTemplate.css("border");
 			_selectedTemplate.css("border", "red 1px solid");
 		
-			_currentFilepath = filepath;
+			_currentFileName = fileName;
+			_currentLocation = location;
 			_currentNodename = nodename;
 			_currentNamespace = namespace;
 			_currentName = name;
 			_currentMatch = match;
 		
-			var responseName = "requestedNameTemplate";
-		
-			var url = gs.xsltParams.library_name + "?a=g&rt=r&s=RetrieveXMLTemplateFromFile&s1.filePath=" + _currentFilepath + "&s1.namespace=" + _currentNamespace + "&s1.nodename=" + _currentNodename;
-			if(_currentMatch && _currentMatch.length > 0){url += "&s1.match=" + _currentMatch; responseName = "requestedMatchTemplate";}
-			if(_currentName && _currentName.length > 0){url += "&s1.name=" + _currentName;}
-			$.ajax(url)
-			.success(function(response)
-			{
-				var template;
-				if(response.search(responseName) != -1)
-				{
-					var startIndex = response.indexOf("<" + responseName + ">") + responseName.length + 2;
-					var endIndex = response.indexOf("</" + responseName + ">");
-					template = response.substring(startIndex, endIndex);
-				}
-				else
-				{
-					return;
-				}
-			
-				_textEditor = $("<div>", {"id":"textEditor"});
-				_textEditor.css({"width":"100%", "height":"300px"});
-				_textEditor.val(template);
-				
-				if(_isVisualEditor)
-				{
-					_textEditor.hide();
-				}
-				
-				_editingDiv.empty();
-				_editingDiv.append($("<p>" + filepath + "</p>"));
-				_editingDiv.append(_textEditor);
-				
-				_vEditor = new visualXMLEditor(template);
-				_editingDiv.append(_vEditor.getMainDiv());
-				_vEditor.selectRootElement();
-				
-				if(!_isVisualEditor)
-				{
-					_vEditor.getMainDiv().hide();
-				}
-				
-				_editor = ace.edit("textEditor");
-				_editor.getSession().setMode("ace/mode/xml");
-				_editor.getSession().setUseSoftTabs(false);
-				_editor.setValue(template);
-				_editor.clearSelection();
-				var UndoManager = require("ace/undomanager").UndoManager;
-				_editor.getSession().setUndoManager(new UndoManager());
-				
-				_textEditor.css({"min-height":"200px", "border-top":"5px solid #444"});
-				_textEditor.resizable({handles: 'n', resize:function()
-				{
-					_textEditor.css({top:"0px"});
-					_editor.resize();
-				}});
-
-				_closeEditorButton.button("option", "disabled", false);
-				if(_closeEditorButton.button("option", "label") == "Open editor")
-				{
-					_closeEditorButton.button("option", "label", "Close editor");
-					_editingDiv.show();
-				}
-			})
-			.error(function()
-			{
-				console.log("ERROR");
-			});
+			_greenbug.changeCurrentTemplate(location, fileName, nodename, namespace, name, match);
 		});
 		infoContainer.mouseover(function()
 		{
-			$(this).data("background", $(this).css("background"));
-			$(this).css("background", "yellow");
+			$(this).removeClass("ui-state-default");
+			$(this).addClass("ui-state-active");
 		});
 		infoContainer.mouseout(function()
 		{
-			$(this).css("background", $(this).data("background"));
+			$(this).addClass("ui-state-default");
+			$(this).removeClass("ui-state-active");
 		});
 	}
 
@@ -489,6 +605,8 @@ function DebugWidget()
 		{
 			if(_debugOn && !_pauseSelector)
 			{
+				_fileSelector.find("select").val("none");
+			
 				var nodes = new Array();
 				if($(this).is("table, tr"))
 				{
@@ -517,7 +635,7 @@ function DebugWidget()
 				{
 					nodes.push(this);
 				}
-				
+
 				$(nodes).each(function()
 				{
 					var filepath = $(this).attr("filename");
@@ -527,32 +645,36 @@ function DebugWidget()
 					var nodename = fullNodename.substring(colonIndex + 1);
 					var name = $(this).attr("name");
 					var match = $(this).attr("match");
-					
-					var infoContainer = $("<div>");
-					infoContainer.addClass("gbTemplateContainer");
-					
-					_elements.push(infoContainer);
-					
-					addMouseEventsToInfoContainer(infoContainer, filepath, nodename, namespace, name, match);
-					
-					/*
-					var attrstr = "";
-					var illegalNames = ["nodename", "filename", "style", "debug", "id", "class"];
 
-					var attributes = ((this.tempAttrs) ? this.tempAttrs : this.attributes);
-					
-					$(attributes).each(function()
+					var location;
+					var fileName;
+					if(filepath.search(/[\/\\]interfaces[\/\\]/) != -1)
 					{
-						for(var i = 0; i < illegalNames.length; i++)
-						{
-							if(this.name == illegalNames[i]){return;}
-						}
-						attrstr += this.name + "=\"" + this.value + "\" ";
-					});
+						location = "interface";
+						fileName = filepath.replace(/.*[\/\\]transform[\/\\]/, "");
+					}
+					else if(filepath.search(/[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]etc[\/\\]/) != -1)
+					{
+						location = "collectionConfig";
+						fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]etc[\/\\]/, "");
+					}
+					else if(filepath.search(/[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]transform[\/\\]/) != -1)
+					{
+						location = "collection";
+						fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]transform[\/\\]/, "");
+					}
+					else if(filepath.search(/[\/\\]sites[\/\\].*[\/\\]transform[\/\\]/) != -1)
+					{
+						location = "site";
+						fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]transform[\/\\]/, "");
+					}
 
-					infoContainer.text("<" + fullNodename + " " + attrstr + ">");
-					*/
-					
+					var infoContainer = $("<div>", {"class":"gbTemplateContainer ui-state-default ui-corner-all"});
+
+					_elements.push(infoContainer);
+
+					addMouseEventsToInfoContainer(infoContainer, fileName, location, nodename, namespace, name, match);
+
 					if(name && name.length > 0)
 					{
 						infoContainer.text(name);
@@ -561,19 +683,21 @@ function DebugWidget()
 					{
 						infoContainer.text(match);
 					}
-					
+
 					if(_templateSelector.children("div").length > 0)
 					{
+						/*
 						var spacer = $("<div>&gt;&gt;</div>");
 						spacer.addClass("gbSpacer");
 
 						_templateSelector.prepend(spacer);
 						_elements.push(spacer);
+						*/
 					}
-					
+
 					_templateSelector.prepend(infoContainer);
-					
-					resizeContainers();
+
+					//resizeContainers();
 				});
 				
 				if(!_itemSelected)
@@ -625,13 +749,14 @@ function DebugWidget()
 			{
 				var url = document.URL;
 				url = url.replace("debug=0", "");
-				if(url.indexOf("?") != -1)
-				{
-					document.location.href = url += "&debug=1";
-				}
-				else if(url.indexOf("?") == url.length - 1)
+
+				if(url.indexOf("?") == url.length - 1)
 				{
 					document.location.href = url += "debug=1";
+				}
+				else if(url.indexOf("?") != -1)
+				{
+					document.location.href = url += "&debug=1";
 				}
 				else
 				{
