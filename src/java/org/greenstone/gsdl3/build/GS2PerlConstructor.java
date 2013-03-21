@@ -17,12 +17,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Vector;
 
+import org.apache.log4j.*;
+
 /**
  * CollectionConstructor class for greenstone 2 compatible building it uses the
  * perl scripts to do the building stuff
  */
 public class GS2PerlConstructor extends CollectionConstructor
 {
+	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.build.GS2PerlConstructor.class.getName());
+
 	public static final int NEW = 0;
 	public static final int IMPORT = 1;
 	public static final int BUILD = 2;
@@ -199,12 +203,15 @@ public class GS2PerlConstructor extends CollectionConstructor
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "Collection construction: activate collection."));
 
 		// first check that we have a building directory
+		// (don't want to bother running activate.pl otherwise)
 		File build_dir = new File(GSFile.collectionBuildDir(this.site_home, this.collection_name));
 		if (!build_dir.exists())
 		{
 			sendMessage(new ConstructionEvent(this, GSStatus.ERROR, "build dir doesn't exist!"));
 			return;
 		}
+
+	    /*
 
 		// move building to index
 		File index_dir = new File(GSFile.collectionIndexDir(this.site_home, this.collection_name));
@@ -227,6 +234,32 @@ public class GS2PerlConstructor extends CollectionConstructor
 
 		// success!!  - need to send the final completed message
 		sendProcessComplete(new ConstructionEvent(this, GSStatus.COMPLETED, ""));
+	    */
+
+		// Running activate.pl instead of making java move building to index as above
+		// circumvents the issue of the jdbm .lg log file (managed by TransactionManager) 
+		// in index dir not getting deleted at times. The perl code is able to delete this
+		// sucessfully consistently during testing, whereas java at times is unable to delete it.
+		Vector<String> command = new Vector<String>();
+		command.add(GlobalProperties.getProperty("perl.path", "perl") + "perl");
+		command.add("-S");
+		command.add(GlobalProperties.getGS2Build() + File.separator + "bin" + File.separator + "script" + File.separator + "activate.pl");
+		command.add("-site");
+		command.add(this.site_name);
+		command.add("-collectdir");
+		command.add(GSFile.collectDir(this.site_home));
+		command.addAll(extractParameters(this.process_params));
+		command.add(this.collection_name);
+
+		String[] command_str = {};
+		command_str = command.toArray(command_str);
+
+		if (runPerlCommand(command_str))
+		{
+			// success!! - need to send the final completed message
+			sendProcessComplete(new ConstructionEvent(this, GSStatus.COMPLETED, ""));
+		}// else an error message has already been sent, do nothing	    
+
 	}
 
 	/** extracts all the args from the xml and returns them in a Vector */
