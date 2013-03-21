@@ -3,6 +3,7 @@ package org.greenstone.gsdl3.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.xml.transform.Transformer;
@@ -28,12 +29,13 @@ public class DebugService extends ServiceRack
 	/**********************************************************
 	 * The list of services the utility service rack supports *
 	 *********************************************************/
-	protected static final String RETRIEVE_TEMPLATE_FROM_XML_FILE = "RetrieveXMLTemplateFromFile";
+	protected static final String GET_TEMPLATE_FROM_XML_FILE = "GetXMLTemplateFromFile";
 	protected static final String SAVE_TEMPLATE_TO_XML_FILE = "SaveXMLTemplateToFile";
-	protected static final String GET_GSLIB_ELEMENTS_FROM_FILE = "GetGSLIBElementsFromFile";
+	protected static final String GET_TEMPLATE_LIST_FROM_FILE = "GetTemplateListFromFile";
+	protected static final String GET_XSLT_FILES_FOR_COLLECTION = "GetXSLTFilesForCollection";
 	/*********************************************************/
 
-	String[] services = { RETRIEVE_TEMPLATE_FROM_XML_FILE, SAVE_TEMPLATE_TO_XML_FILE, GET_GSLIB_ELEMENTS_FROM_FILE };
+	String[] services = { GET_TEMPLATE_FROM_XML_FILE, SAVE_TEMPLATE_TO_XML_FILE, GET_TEMPLATE_LIST_FROM_FILE, GET_XSLT_FILES_FOR_COLLECTION };
 
 	public boolean configure(Element info, Element extra_info)
 	{
@@ -72,13 +74,13 @@ public class DebugService extends ServiceRack
 		return null;
 	}
 
-	protected Element processRetrieveXMLTemplateFromFile(Element request)
+	protected Element processGetXMLTemplateFromFile(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, RETRIEVE_TEMPLATE_FROM_XML_FILE);
+		Element result = GSXML.createBasicResponse(this.doc, GET_TEMPLATE_FROM_XML_FILE);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, RETRIEVE_TEMPLATE_FROM_XML_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(this.doc, result, GET_TEMPLATE_FROM_XML_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -103,13 +105,17 @@ public class DebugService extends ServiceRack
 
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, RETRIEVE_TEMPLATE_FROM_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(this.doc, result, GET_TEMPLATE_FROM_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
-		String filepath = (String) params.get("filePath");
+		String locationName = (String) params.get("locationName");
+		String interfaceName = (String) params.get("interfaceName");
+		String siteName = (String) params.get("siteName");
+		String collectionName = (String) params.get("collectionName");
+		String fileName = (String) params.get("fileName");
 		String namespace = (String) params.get("namespace");
 		String nodeName = (String) params.get("nodename");
 		String nameToGet = (String) params.get("name");
@@ -126,10 +132,11 @@ public class DebugService extends ServiceRack
 		}
 		else
 		{
+			GSXML.addError(this.doc, result, "A valid namespace was not specified.");
 			return result;
 		}
 
-		File xslFile = new File(filepath);
+		File xslFile = createFileFromLocation(locationName, fileName, interfaceName, siteName, collectionName);
 		if (xslFile.exists())
 		{
 			XMLConverter converter = new XMLConverter();
@@ -185,9 +192,9 @@ public class DebugService extends ServiceRack
 			{
 				Node currentAttr = attributes.item(k);
 				String value = currentAttr.getNodeValue();
-				if (value.contains("&") || value.contains("<") || value.contains(">"))
+				if (value.contains("&") || value.contains("<") || value.contains(">") || value.contains("\""))
 				{
-					currentAttr.setNodeValue(value.replace("&", "&amp;amp;").replace("<", "&lt;").replace(">", "&gt;"));
+					currentAttr.setNodeValue(value.replace("&", "&amp;amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;"));
 				}
 			}
 		}
@@ -230,7 +237,11 @@ public class DebugService extends ServiceRack
 
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
-		String filepath = (String) params.get("filePath");
+		String locationName = (String) params.get("locationName");
+		String fileName = (String) params.get("fileName");
+		String interfaceName = (String) params.get("interfaceName");
+		String siteName = (String) params.get("siteName");
+		String collectionName = (String) params.get("collectionName");
 		String namespace = (String) params.get("namespace");
 		String nodeName = (String) params.get("nodename");
 		String nameToSave = (String) params.get("name");
@@ -252,7 +263,7 @@ public class DebugService extends ServiceRack
 			return result;
 		}
 
-		File xslFile = new File(filepath);
+		File xslFile = createFileFromLocation(locationName, fileName, interfaceName, siteName, collectionName);
 		if (xslFile.exists())
 		{
 			XMLConverter converter = new XMLConverter();
@@ -319,17 +330,21 @@ public class DebugService extends ServiceRack
 
 			}
 		}
+		else
+		{
+			GSXML.addError(this.doc, result, SAVE_TEMPLATE_TO_XML_FILE + "File: " + xslFile.getAbsolutePath() + " does not exist", GSXML.ERROR_TYPE_SYNTAX);
+		}
 
 		return result;
 	}
 
-	protected Element processGetGSLIBElementsFromFile(Element request)
+	protected Element processGetTemplateListFromFile(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, GET_GSLIB_ELEMENTS_FROM_FILE);
+		Element result = GSXML.createBasicResponse(this.doc, GET_TEMPLATE_LIST_FROM_FILE);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, GET_GSLIB_ELEMENTS_FROM_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(this.doc, result, GET_TEMPLATE_LIST_FROM_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -354,16 +369,27 @@ public class DebugService extends ServiceRack
 
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, RETRIEVE_TEMPLATE_FROM_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(this.doc, result, GET_TEMPLATE_FROM_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
+		String locationName = (String) params.get("locationName");
+		String siteName = (String) params.get("siteName");
+		String collectionName = (String) params.get("collectionName");
 		String interfaceName = (String) params.get("interfaceName");
+		String fileName = (String) params.get("fileName");
 
-		String filePath = GlobalProperties.getGSDL3Home() + File.separator + "interfaces" + File.separator + interfaceName + File.separator + "transform" + File.separator + "gslib.xsl";
-		File xslFile = new File(filePath);
+		fileName.replace("/", File.separator);
+
+		if (locationName == null || locationName.length() == 0)
+		{
+			GSXML.addError(this.doc, result, "Parameter \"locationName\" was null or empty.");
+			return result;
+		}
+
+		File xslFile = createFileFromLocation(locationName, fileName, interfaceName, siteName, collectionName);
 
 		if (xslFile.exists())
 		{
@@ -371,26 +397,156 @@ public class DebugService extends ServiceRack
 			Document xslDoc = converter.getDOM(xslFile, "UTF-8");
 
 			Element templateList = this.doc.createElement("templateList");
-			String templateListString = "[";
+			StringBuilder templateListString = new StringBuilder("[");
 
-			NodeList templateElems = xslDoc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
-			for (int i = 0; i < templateElems.getLength(); i++)
+			NodeList xslTemplateElems = xslDoc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
+			NodeList gsfTemplateElems = xslDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "template");
+			for (int i = 0; i < xslTemplateElems.getLength() + gsfTemplateElems.getLength(); i++)
 			{
-				Element currentElem = (Element) templateElems.item(i);
+				Element currentElem = (i < xslTemplateElems.getLength()) ? (Element) xslTemplateElems.item(i) : (Element) gsfTemplateElems.item(i - xslTemplateElems.getLength());
+				if (!currentElem.hasAttribute(GSXML.NAME_ATT) && !currentElem.hasAttribute(GSXML.MATCH_ATT))
+				{
+					continue;
+				}
+
+				templateListString.append("{");
+				templateListString.append("\"namespace\":\"" + ((i < xslTemplateElems.getLength()) ? "xsl" : "gsf") + "\",");
 				if (currentElem.hasAttribute(GSXML.NAME_ATT))
 				{
-					templateListString += "\"" + currentElem.getAttribute(GSXML.NAME_ATT) + "\"";
-					if (i < templateElems.getLength() - 1)
-					{
-						templateListString += ",";
-					}
+					templateListString.append("\"name\":\"" + currentElem.getAttribute(GSXML.NAME_ATT) + "\",");
 				}
+				else if (currentElem.hasAttribute(GSXML.MATCH_ATT))
+				{
+					templateListString.append("\"match\":\"" + currentElem.getAttribute(GSXML.MATCH_ATT) + "\",");
+				}
+				templateListString.deleteCharAt(templateListString.length() - 1);
+				templateListString.append("},");
 			}
 
-			templateListString += "]";
+			templateListString.deleteCharAt(templateListString.length() - 1);
+			templateListString.append("]");
 
-			templateList.setTextContent(templateListString);
+			templateList.setTextContent(templateListString.toString());
 			result.appendChild(templateList);
+		}
+		else
+		{
+			GSXML.addError(this.doc, result, "File: " + xslFile.getAbsolutePath() + " does not exist");
+			return result;
+		}
+
+		return result;
+	}
+
+	protected Element processGetXSLTFilesForCollection(Element request)
+	{
+		Element result = GSXML.createBasicResponse(this.doc, GET_XSLT_FILES_FOR_COLLECTION);
+
+		if (request == null)
+		{
+			GSXML.addError(this.doc, result, GET_XSLT_FILES_FOR_COLLECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			return result;
+		}
+
+		UserContext context = new UserContext(request);
+		boolean found = false;
+		for (String group : context.getGroups())
+		{
+			if (group.equals("administrator"))
+			{
+				found = true;
+			}
+		}
+
+		if (!found)
+		{
+			GSXML.addError(this.doc, result, "This user does not have the required permissions to perform this action.");
+			return result;
+		}
+
+		// Get the parameters of the request
+		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+
+		if (param_list == null)
+		{
+			GSXML.addError(this.doc, result, GET_TEMPLATE_FROM_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
+			return result;
+		}
+
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
+
+		String interfaceName = (String) params.get("interfaceName");
+		String siteName = (String) params.get("siteName");
+		String collectionName = (String) params.get("collectionName");
+
+		Element fileList = this.doc.createElement("fileListJSON");
+		StringBuilder fileListString = new StringBuilder("[");
+
+		String[] placesToCheck = new String[] { GlobalProperties.getGSDL3Home() + File.separator + "interfaces" + File.separator + interfaceName + File.separator + "transform", //INTERFACE FILE PATH
+		GlobalProperties.getGSDL3Home() + File.separator + "sites" + File.separator + siteName + File.separator + "transform", //SITE FILE PATH
+		GlobalProperties.getGSDL3Home() + File.separator + "sites" + File.separator + siteName + File.separator + "collect" + File.separator + collectionName + File.separator + "transform", //COLLECTION FILE PATH
+		GlobalProperties.getGSDL3Home() + File.separator + "sites" + File.separator + siteName + File.separator + "collect" + File.separator + collectionName + File.separator + "etc" //COLLECTION CONFIG FILE PATH
+		};
+
+		String[] shortPlaceNames = new String[] { "interface", "site", "collection", "collectionConfig" };
+
+		for (int i = 0; i < placesToCheck.length; i++)
+		{
+			ArrayList<File> xslFiles = getXSLTFilesFromDirectoryRecursive(new File(placesToCheck[i]));
+			for (File f : xslFiles)
+			{
+				fileListString.append("{\"location\":\"" + shortPlaceNames[i] + "\",\"path\":\"" + f.getAbsolutePath().replace(placesToCheck[i] + File.separator, "") + "\"},");
+			}
+		}
+		fileListString.deleteCharAt(fileListString.length() - 1); //Remove the last , character
+		fileListString.append("]");
+
+		fileList.setTextContent(fileListString.toString());
+		result.appendChild(fileList);
+
+		return result;
+	}
+
+	protected File createFileFromLocation(String location, String filename, String interfaceName, String siteName, String collectionName)
+	{
+		String filePath = "";
+		if (location.equals("interface"))
+		{
+			filePath = GlobalProperties.getGSDL3Home() + File.separator + "interfaces" + File.separator + interfaceName + File.separator + "transform" + File.separator + filename;
+		}
+		else if (location.equals("site"))
+		{
+			filePath = GlobalProperties.getGSDL3Home() + File.separator + "sites" + File.separator + siteName + File.separator + "transform" + File.separator + filename;
+		}
+		else if (location.equals("collection"))
+		{
+			filePath = GlobalProperties.getGSDL3Home() + File.separator + "sites" + File.separator + siteName + File.separator + "collect" + File.separator + collectionName + File.separator + "transform" + File.separator + filename;
+		}
+		else if (location.equals("collectionConfig"))
+		{
+			filePath = GlobalProperties.getGSDL3Home() + File.separator + "sites" + File.separator + siteName + File.separator + "collect" + File.separator + collectionName + File.separator + "etc" + File.separator + filename;
+		}
+
+		return new File(filePath);
+	}
+
+	protected ArrayList<File> getXSLTFilesFromDirectoryRecursive(File dir)
+	{
+		ArrayList<File> result = new ArrayList<File>();
+
+		if (dir != null && dir.exists() && dir.isDirectory())
+		{
+			for (File f : dir.listFiles())
+			{
+				if (f.isDirectory())
+				{
+					result.addAll(getXSLTFilesFromDirectoryRecursive(f));
+				}
+				else if (f.getName().endsWith(".xsl") || f.getName().endsWith(".xml"))
+				{
+					result.add(f);
+				}
+			}
 		}
 
 		return result;
