@@ -748,7 +748,7 @@ function DebugWidget()
 			enableGBButtonHolder.click(function()
 			{
 				var url = document.URL;
-				url = url.replace("debug=0", "");
+				url = url.replace(/[\?&]debug=0/g, "").replace(/[\?&]debug=1/g, "");
 
 				if(url.indexOf("?") == url.length - 1)
 				{
