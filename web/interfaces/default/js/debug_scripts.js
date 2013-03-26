@@ -3,10 +3,10 @@ function DebugWidget()
 	//************************
 	//Private member variables
 	//************************
-	
+
 	//The this variable
 	var _greenbug = this;
-	
+
 	//Debugger state-keeping variables
 	var _debugOn = false;
 	var _pauseSelector = false;
@@ -14,24 +14,24 @@ function DebugWidget()
 	var _itemSelected = false; //Used to prevent multiple elements from being highlighted
 	var _editModeText = false;
 	var _selectedTemplate;
-	
+
 	//Page elements
 	var _mainDiv;
-	
+
 	var _textEditor;
 	var _vEditor;
-	
+
 	var _navArea;
 	var _fileSelector;
 	var _templateSelector;
 	var _editor;
 	var _editingDiv;
-	var _unpauseButton;
+	var _selectNewElementButton;
 	var _closeEditorButton;
 	var _xmlStatusBar;
 	var _saveButton;
 	var _swapEditorButton;
-	
+
 	//Editor state-keeping variables
 	var _currentFileName;
 	var _currentLocation;
@@ -40,9 +40,10 @@ function DebugWidget()
 	var _currentMatch;
 	var _currentNamespace;
 	var _isVisualEditor = true;
-	
+
 	var _styleFunctions = new Array();
-	
+
+	//Used to reload the page while keeping the state of the editor
 	var partialPageReload = function(callback)
 	{
 		$.ajax(document.URL)
@@ -52,21 +53,21 @@ function DebugWidget()
 			var bodyStartIndex = response.indexOf("<body");
 			var bodyEndIndex = response.indexOf("</body>");
 			var bodyText = response.substring(bodyStartIndex, bodyEndIndex + 7);
-			
+
 			//Get the current top area and container
 			var topLevelTopArea = $("#topArea");
 			var topLevelContainer = $("#container");
-			
+
 			//Create a temporary div and put the html into it
 			var tempDiv = $("<div>");
 			tempDiv.html(bodyText);
-			
+
 			//Replace the contents of the old elements with the new elements
 			var topArea = tempDiv.find("#topArea");
 			var container = tempDiv.find("#container");
 			topLevelTopArea.html(topArea.html());
 			topLevelContainer.html(container.html());
-			
+
 			//Update the events for the debug elements that currently don't have events associated with them
 			var debugElems = $('debug, [debug="true"]').filter(function(){return (!($.data(this, "events"))) ? true : false});
 			addMouseEventsToDebugElements(debugElems);
@@ -75,13 +76,14 @@ function DebugWidget()
 		{
 			alert("There was an error reloading the page, please reload manually.");
 		});
-		
+
 		if(callback)
 		{
 			callback();
 		}
 	}
-	
+
+	//Some functions need to be called after an element is added to the page. So we store them and call them later.
 	var callStyleFunctions = function()
 	{
 		for(var i = 0; i < _styleFunctions.length; i++)
@@ -90,15 +92,17 @@ function DebugWidget()
 			sFunction();
 		}
 	}
-	
+
+	//Create the area where the buttons are stored
 	var createButtonDiv = function(buttonDiv)
 	{
-		var pickElementButton = $("<button>Enable selector</button>");
-		pickElementButton.click(function()
+		//Used to enable the selector to get the templates of a particular area of the page
+		var enableSelectorButton = $("<button>Enable selector</button>");
+		enableSelectorButton.click(function()
 		{
 			if(!_debugOn)
 			{
-				pickElementButton.button("option", "label", "Disable selector");
+				enableSelectorButton.button("option", "label", "Disable selector");
 				$("a").click(function(e)
 				{
 					e.preventDefault();
@@ -107,27 +111,29 @@ function DebugWidget()
 			}
 			else
 			{
-				pickElementButton.button("option", "label", "Enable selector");
+				enableSelectorButton.button("option", "label", "Enable selector");
 				$("a").off("click");
 				clearAll();
-				_unpauseButton.button("option", "disabled", true);
+				_selectNewElementButton.button("option", "disabled", true);
 				_pauseSelector = false;
 				_debugOn = false;
 			}
 		});
-		_styleFunctions.push(function(){pickElementButton.button({icons:{primary:"ui-icon-power"}})});
+		_styleFunctions.push(function(){enableSelectorButton.button({icons:{primary:"ui-icon-power"}})});
 
-		_unpauseButton = $("<button>Select new element</button>");
-		_unpauseButton.click(function()
+		//Used to change what is currently selected
+		_selectNewElementButton = $("<button>Select new element</button>");
+		_selectNewElementButton.click(function()
 		{
 			if(_pauseSelector)
 			{
 				_pauseSelector = false;
-				_unpauseButton.button("option", "disabled", true);
+				_selectNewElementButton.button("option", "disabled", true);
 			}
 		});
-		_styleFunctions.push(function(){_unpauseButton.button({icons:{primary:"ui-icon-pencil"}, disabled:true})});
-		
+		_styleFunctions.push(function(){_selectNewElementButton.button({icons:{primary:"ui-icon-pencil"}, disabled:true})});
+
+		//Used to minimise/restore the editor
 		_closeEditorButton = $("<button>Close editor</button>");
 		_closeEditorButton.click(function()
 		{
@@ -144,7 +150,8 @@ function DebugWidget()
 		});
 		_closeEditorButton.css("float", "right");
 		_styleFunctions.push(function(){_closeEditorButton.button({icons:{secondary:"ui-icon-newwin"}, disabled:true})});
-		
+
+		//Used to save any changes that have been made to this template
 		_saveButton = $("<button>Save changes</button>");
 		_saveButton.click(function()
 		{
@@ -161,7 +168,7 @@ function DebugWidget()
 					xmlString = _editor.getValue();
 				}
 				xmlString = xmlString.replace(/&/g, "&amp;");
-				
+
 				try
 				{
 					var xml = $.parseXML('<testContainer xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
@@ -171,7 +178,7 @@ function DebugWidget()
 					alert("Could not save as there is a problem with the XML.");
 					return;
 				}
-				
+
 				var url = gs.xsltParams.library_name;
 				var parameters = {"a":"g", "rt":"r", "s":"SaveXMLTemplateToFile", "s1.locationName":_currentLocation, "s1.fileName":_currentFileName, "s1.interfaceName":gs.xsltParams.interface_name, "s1.siteName":gs.xsltParams.site_name, "s1.collectionName":gs.cgiParams.c, "s1.namespace":_currentNamespace, "s1.nodename":_currentNodename, "s1.xml":xmlString};
 
@@ -206,7 +213,8 @@ function DebugWidget()
 			}
 		});
 		_styleFunctions.push(function(){_saveButton.button({icons:{primary:"ui-icon-disk"}, disabled:true})});
-		
+
+		//Used to switch between the XML and Visual editors
 		_swapEditorButton = $("<button>Switch to XML editor</button>");
 		_swapEditorButton.button().click(function()
 		{
@@ -252,7 +260,7 @@ function DebugWidget()
 			}
 		});
 		_styleFunctions.push(function(){_swapEditorButton.button({icons:{primary:"ui-icon-refresh"}})});
-		
+
 		undoButton = $("<button>Undo</button>");
 		undoButton.click(function()
 		{
@@ -266,22 +274,23 @@ function DebugWidget()
 			}
 		});
 		_styleFunctions.push(function(){undoButton.button({icons:{primary:"ui-icon-arrowreturnthick-1-w"}})});
-		
-		buttonDiv.append(pickElementButton);
-		buttonDiv.append(_unpauseButton);
+
+		buttonDiv.append(enableSelectorButton);
+		buttonDiv.append(_selectNewElementButton);
 		buttonDiv.append(_closeEditorButton);
 		buttonDiv.append(_saveButton);
 		buttonDiv.append(_swapEditorButton);
 		buttonDiv.append(undoButton);
 	}
-	
+
+	//Used to monitor the state of the XML in the XML editor and will notify the user if there is an error
 	var createXMLStatusBar = function(buttonDiv)
 	{
 		_xmlStatusBar = $("<span>");
 		_xmlStatusBar.css("padding", "5px");
 		_xmlStatusBar.addClass("ui-corner-all");
 		_styleFunctions.push(function(){_xmlStatusBar.hide();});
-		
+
 		//Check the XML for errors every 2 seconds
 		setInterval(function()
 		{
@@ -303,7 +312,7 @@ function DebugWidget()
 					_swapEditorButton.button("option", "disabled", true);
 					return;
 				}
-				
+
 				_xmlStatusBar.text("XML OK!");
 				_xmlStatusBar.addClass("ui-state-active");
 				_xmlStatusBar.removeClass("ui-state-error");
@@ -317,11 +326,11 @@ function DebugWidget()
 					_swapEditorButton.button("option", "disabled", false);
 				}
 			}
-			
 		}, 2000);
 		buttonDiv.append(_xmlStatusBar);
 	}
-	
+
+	//Create the elements that allow 
 	var createFileAndTemplateSelectors = function(buttonDiv)
 	{
 		_templateSelector = $("<div>", {"id":"veTemplateSelector", "class":"ui-state-default ui-corner-all"});
@@ -337,11 +346,110 @@ function DebugWidget()
 			}
 		});
 		_templateSelector.append(templateSelectBox);
-		_fileSelector = $("<div>", {"id":"veFileSelector", "class":"ui-state-default ui-corner-all"});
+		_fileSelector = $("<div>", {"id":"veFileSelector"});
 		buttonDiv.append(_fileSelector);
 		buttonDiv.append(_templateSelector);
+
+		//Populate the file selector
+		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetXSLTFilesForCollection&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c;
+		$.ajax(url)
+		.success(function(response)
+		{
+			var listStartIndex = response.indexOf("<fileListJSON>") + "<fileListJSON>".length;
+			var listEndIndex = response.indexOf("</fileListJSON>");
+
+			var listString = response.substring(listStartIndex, listEndIndex).replace(/&quot;/g, "\"").replace(/\\/g, "/");
+			var list = eval(listString);
+
+			var selectBox = $("<select>");
+			selectBox.append($("<option>-- Select a file --</option>", {value:"none"}));
+			_fileSelector.addClass("ui-state-default");
+			_fileSelector.addClass("ui-corner-all");
+			_fileSelector.append("<span>Files: </span>");
+			_fileSelector.append(selectBox);
+			for(var i = 0; i < list.length; i++)
+			{
+				var item = list[i];
+				var option = $("<option>" + item.path + " (" + item.location + ")</option>", {value:item.path});
+				option.data("fileItem", item);
+				selectBox.append(option);
+			}
+
+			selectBox.change(function()
+			{
+				var selectedItem = selectBox.find(":selected");
+
+				if(!selectedItem.data("fileItem"))
+				{
+					return;
+				}
+
+				var getURL = gs.xsltParams.library_name + "?a=g&rt=r&s=GetTemplateListFromFile&s1.fileName=" + selectedItem.data("fileItem").path + "&s1.locationName=" + selectedItem.data("fileItem").location + "&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c;
+				$.ajax(getURL)
+				.success(function(templateResponse)
+				{
+					var templateListStart = templateResponse.indexOf("<templateList>") + "<templateList>".length;
+					var templateListEnd = templateResponse.indexOf("</templateList>");
+					var templateListString = templateResponse.substring(templateListStart, templateListEnd).replace(/&quot;/g, "\"");
+					var templateList = eval(templateListString);
+
+					clearAll();
+
+					_templateSelector.children("select").empty();
+					if(templateList.length == 0)
+					{
+						_templateSelector.children("select").append("<option>-- No templates --</option>");
+					}
+					else
+					{
+						_templateSelector.children("select").append("<option>-- Select a template --</option>");
+					}
+
+					for(var i = 0; i < templateList.length; i++)
+					{
+						var fileName = selectedItem.data("fileItem").path;
+						var location = selectedItem.data("fileItem").location;
+						var namespace = templateList[i].namespace;
+						var nodename = "template";
+						var name = templateList[i].name;
+						var match = templateList[i].match;
+
+						if(name)
+						{
+							name = templateList[i].name.replace(/&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
+						}
+						if(match)
+						{
+							match = templateList[i].match.replace(/&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
+						}
+
+						var infoContainer = $("<option>");
+
+						_elements.push(infoContainer);
+
+						addChangeEventToInfoContainer(infoContainer, fileName, location, nodename, namespace, name, match);
+
+						if(name && name.length > 0)
+						{
+							infoContainer.text(name);
+						}
+						if(match && match.length > 0)
+						{
+							infoContainer.text(match);
+						}
+
+						_templateSelector.children("select").append(infoContainer);
+					}
+				});
+			});
+		})
+		.error(function()
+		{
+			console.log("Error retrieving XSLT files");
+		});
 	}
-	
+
+	//The function that creates all the necessary elements for Greenbug
 	var createDebugDiv = function()
 	{
 		_mainDiv = $("<div>", {"id":"debugDiv"});
@@ -367,122 +475,15 @@ function DebugWidget()
 		createButtonDiv(buttonDiv);
 		createFileAndTemplateSelectors(buttonDiv);
 		createXMLStatusBar(buttonDiv);
-		
-		//Populate the file selector
-		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetXSLTFilesForCollection&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c;
-		$.ajax(url)
-		.success(function(response)
-		{
-			var listStartIndex = response.indexOf("<fileListJSON>") + "<fileListJSON>".length;
-			var listEndIndex = response.indexOf("</fileListJSON>");
-			
-			var listString = response.substring(listStartIndex, listEndIndex).replace(/&quot;/g, "\"").replace(/\\/g, "/");
-			var list = eval(listString);
-			
-			var selectBox = $("<select>");
-			selectBox.append($("<option>-- Select a file --</option>", {value:"none"}));
-			_fileSelector.append("<span>Files: </span>");
-			_fileSelector.append(selectBox);
-			for(var i = 0; i < list.length; i++)
-			{
-				var item = list[i];
-				var option = $("<option>" + item.path + " (" + item.location + ")</option>", {value:item.path});
-				option.data("fileItem", item);
-				selectBox.append(option);
-			}
 
-			selectBox.change(function()
-			{
-				var selectedItem = selectBox.find(":selected");
-				
-				if(!selectedItem.data("fileItem"))
-				{
-					return;
-				}
-				
-				var getURL = gs.xsltParams.library_name + "?a=g&rt=r&s=GetTemplateListFromFile&s1.fileName=" + selectedItem.data("fileItem").path + "&s1.locationName=" + selectedItem.data("fileItem").location + "&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c;
-				$.ajax(getURL)
-				.success(function(templateResponse)
-				{
-					var templateListStart = templateResponse.indexOf("<templateList>") + "<templateList>".length;
-					var templateListEnd = templateResponse.indexOf("</templateList>");
-					var templateListString = templateResponse.substring(templateListStart, templateListEnd).replace(/&quot;/g, "\"");
-					var templateList = eval(templateListString);
-					
-					clearAll();
-					
-					_templateSelector.children("select").empty();
-					if(templateList.length == 0)
-					{
-						_templateSelector.children("select").append("<option>-- No templates --</option>");
-					}
-					else
-					{
-						_templateSelector.children("select").append("<option>-- Select a template --</option>");
-					}
-					
-					for(var i = 0; i < templateList.length; i++)
-					{
-						var fileName = selectedItem.data("fileItem").path;
-						var location = selectedItem.data("fileItem").location;
-						var namespace = templateList[i].namespace;
-						var nodename = "template";
-						var name = templateList[i].name;
-						var match = templateList[i].match;
-						
-						if(name)
-						{
-							name = templateList[i].name.replace(/&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
-						}
-						if(match)
-						{
-							match = templateList[i].match.replace(/&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
-						}
-						
-						var infoContainer = $("<option>");
-						
-						_elements.push(infoContainer);
-						
-						addMouseEventsToInfoContainer(infoContainer, fileName, location, nodename, namespace, name, match);
-						
-						if(name && name.length > 0)
-						{
-							infoContainer.text(name);
-						}
-						if(match && match.length > 0)
-						{
-							infoContainer.text(match);
-						}
-						
-						if(_templateSelector.children("div").length > 0)
-						{/*
-							var spacer = $("<div>&gt;&gt;</div>");
-							spacer.addClass("gbSpacer");
-
-							_templateSelector.prepend(spacer);
-							_elements.push(spacer);
-							*/
-						}
-						
-						_templateSelector.children("select").append(infoContainer);
-						
-						//resizeContainers();
-					}
-				});
-			});
-		})
-		.error(function()
-		{
-			console.log("Error retrieving XSLT files");
-		});
-		
 		_styleFunctions.push(function(){$(".ui-button").css({"margin-right":"0.5em"});});
-		
+
 		_mainDiv.append(toolBarDiv);
 		_mainDiv.append(_editingDiv);
 		_mainDiv.append(_navArea);
 	}
-	
+
+	//Clear all selected elements on the page
 	var clearAll = function()
 	{
 		_itemSelected = false;
@@ -491,7 +492,8 @@ function DebugWidget()
 			$(this).remove();
 		});
 	}
-	
+
+	//Put a border around the given element
 	var highlightElement = function(e)
 	{
 		var topBorderDiv = $("<div>");
@@ -511,11 +513,12 @@ function DebugWidget()
 		_elements.push(leftBorderDiv);
 		_elements.push(rightBorderDiv);
 	}
-	
+
+	//Change the current template in the XML and Visual editor
 	this.changeCurrentTemplate = function(location, fileName, nodename, namespace, name, match)
 	{
 		var responseName = "requestedNameTemplate";
-		
+
 		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetXMLTemplateFromFile&s1.fileName=" + fileName + "&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c + "&s1.locationName=" + location + "&s1.namespace=" + namespace + "&s1.nodename=" + nodename;
 		if(match && match.length > 0){url += "&s1.match=" + match; responseName = "requestedMatchTemplate";}
 		if(name && name.length > 0){url += "&s1.name=" + name;}
@@ -534,30 +537,30 @@ function DebugWidget()
 			{
 				return;
 			}
-		
+
 			_textEditor = $("<div>", {"id":"textEditor"});
 			_textEditor.css({"width":"100%", "height":"300px"});
 			_textEditor.val(template);
-			
+
 			if(_isVisualEditor)
 			{
 				_textEditor.hide();
 			}
-			
+
 			_editingDiv.empty();
 			_editingDiv.append($("<p>Location: " + location + " <br/>Filename: " + fileName + "</p>"));
 			_editingDiv.append(_textEditor);
-			
+
 			_vEditor = new visualXMLEditor(template);
 			_editingDiv.append(_vEditor.getMainDiv());
 			_vEditor.setGreenbug(_greenbug);
 			_vEditor.selectRootElement();
-			
+
 			if(!_isVisualEditor)
 			{
 				_vEditor.getMainDiv().hide();
 			}
-			
+
 			_editor = ace.edit("textEditor");
 			_editor.getSession().setMode("ace/mode/xml");
 			_editor.getSession().setUseSoftTabs(false);
@@ -565,7 +568,7 @@ function DebugWidget()
 			_editor.clearSelection();
 			var UndoManager = require("ace/undomanager").UndoManager;
 			_editor.getSession().setUndoManager(new UndoManager());
-			
+
 			_textEditor.css({"min-height":"200px", "border-top":"5px solid #444"});
 			_textEditor.resizable({handles: 'n', resize:function()
 			{
@@ -582,11 +585,12 @@ function DebugWidget()
 		})
 		.error(function()
 		{
-			console.log("ERROR");
+			console.log("Error getting the XML template from the file");
 		});
 	}
-	
-	var addMouseEventsToInfoContainer = function(infoContainer, fileName, location, nodename, namespace, name, match)
+
+	//Store the function that is called when this template is selected from the list
+	var addChangeEventToInfoContainer = function(infoContainer, fileName, location, nodename, namespace, name, match)
 	{
 		infoContainer.data("changeFunction", function()
 		{
@@ -597,30 +601,19 @@ function DebugWidget()
 			_selectedTemplate = infoContainer;
 			_selectedTemplate.prevBorder = _selectedTemplate.css("border");
 			_selectedTemplate.css("border", "red 1px solid");
-		
+
 			_currentFileName = fileName;
 			_currentLocation = location;
 			_currentNodename = nodename;
 			_currentNamespace = namespace;
 			_currentName = name;
 			_currentMatch = match;
-		
+
 			_greenbug.changeCurrentTemplate(location, fileName, nodename, namespace, name, match);
 		});
-		/*
-		infoContainer.mouseover(function()
-		{
-			$(this).removeClass("ui-state-default");
-			$(this).addClass("ui-state-active");
-		});
-		infoContainer.mouseout(function()
-		{
-			$(this).addClass("ui-state-default");
-			$(this).removeClass("ui-state-active");
-		});
-		*/
 	}
 
+	//Add the mouse events to the <debug> elemetns that are called when the selector is anabled
 	var addMouseEventsToDebugElements = function(debugElems)
 	{
 		debugElems.click(function()
@@ -628,7 +621,7 @@ function DebugWidget()
 			if(_debugOn)
 			{
 				_pauseSelector = true;
-				_unpauseButton.button("option", "disabled", false);
+				_selectNewElementButton.button("option", "disabled", false);
 			}
 		});
 
@@ -679,6 +672,7 @@ function DebugWidget()
 
 					var location;
 					var fileName;
+					//Use the filepath to work out where this file is from
 					if(filepath.search(/[\/\\]interfaces[\/\\]/) != -1)
 					{
 						location = "interface";
@@ -704,7 +698,7 @@ function DebugWidget()
 
 					_elements.push(infoContainer);
 
-					addMouseEventsToInfoContainer(infoContainer, fileName, location, nodename, namespace, name, match);
+					addChangeEventToInfoContainer(infoContainer, fileName, location, nodename, namespace, name, match);
 
 					if(name && name.length > 0)
 					{
@@ -715,20 +709,7 @@ function DebugWidget()
 						infoContainer.text(match);
 					}
 
-					if(_templateSelector.children("div").length > 0)
-					{
-						/*
-						var spacer = $("<div>&gt;&gt;</div>");
-						spacer.addClass("gbSpacer");
-
-						_templateSelector.prepend(spacer);
-						_elements.push(spacer);
-						*/
-					}
-
 					_templateSelector.children("select").append(infoContainer);
-
-					//resizeContainers();
 				});
 				
 				if(!_itemSelected)
@@ -749,29 +730,14 @@ function DebugWidget()
 			}
 		});
 	}
-	
+
+	//Remove <debug> elements from the title
 	var fixTitle = function()
 	{
 		$("title").text($("title").text().replace(/<[^>]*>/g, ""));
 	}
-	
-	/*
-	var resizeContainers = function()
-	{
-		var templates = _templateSelector.children(".gbTemplateContainer");
-		var spacers = _templateSelector.children(".gbSpacer");
-		
-		var templateWidth = (79/templates.length) + "%";
-		templates.css("width", templateWidth);
-		
-		if(spacers.length > 0)
-		{
-			var spacersWidth = (19/spacers.length) + "%";
-			spacers.css("width", spacersWidth);
-		}
-	}
-	*/
-	
+
+	//Initialise Greenbug
 	this.init = function()
 	{
 		//We only want this on if we have debug elements in the page
@@ -804,15 +770,15 @@ function DebugWidget()
 		
 		createDebugDiv();
 		$("body").append(_mainDiv);
-		
+
 		callStyleFunctions();
 
 		addMouseEventsToDebugElements(debugElems);
 		fixTitle();
 	}
-	
 }
 
+//The code entry point
 $(window).load(function()
 {
 	var debugWidget = new DebugWidget();

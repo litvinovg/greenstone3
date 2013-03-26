@@ -2,40 +2,46 @@
 // Visual XML Editor                                                      //
 // This class represents an editor that allows you to modify XML visually //
 // ********************************************************************** //
-
 function visualXMLEditor(xmlString)
 {
+	//Variables that store the visual editor and a link to the DebugWidget
 	var _thisEditor = this;
 	var _greenbug;
 
+	//Stores what id we are up to (used to compare VEElements)
 	var _globalID = 0;
 
+	//Stores the current state of the XML
 	var _xml;
-	
+
+	//Elements of the editor
 	var _mainDiv = $("<div>", {"id":"veMainDiv"});
 	var _toolboxDiv = $("<div>", {"id":"veToolboxDiv"});
 	var _editorContainer = $("<div>", {"id":"veEditorContainer"});
 	var _editorDiv = $("<div>", {"id":"veEditorDiv"});
 	var _infoDiv = $("<div>", {"id":"veInfoDiv"});
+
+	//State-keeping variables
 	var _rootElement;
 	var _selectedElement;
-
 	var _overTrash = false;
-	
 	var _validDropSpot = false;
 	var _validDropType;
 	var _validDropElem;
-	
 	var _origDDParent;
 	var _origDDPosition;
-	
+
+	//Keep track of what is currently being edited
 	var _editingNodes = new Array();
-	
+
+	//Stores what elements we are currently over while dragging (necessary to find the deepest element)
 	var _overList = new Array();
 	_overList.freeSpaces = new Array();
-	
+
+	//Keep a list of what has been changed so that it can be undone
 	var _transactions = new Array();
-	
+
+	//A list of "ready-made" attributes for certain elements
 	var _validAttrList = 
 	{
 		gsf:
@@ -57,7 +63,8 @@ function visualXMLEditor(xmlString)
 			"switch":["preprocess", "test", "test-value"]
 		}
 	}
-	
+
+	//The list of elements that show up in the toolbox (gslib is added dynamically later)
 	var _elemList = 
 	{
 		html:["a", "br", "div", "li", "link", "p", "script", "span", "table", "td", "tr", "ul"],
@@ -79,7 +86,8 @@ function visualXMLEditor(xmlString)
 			"style", "switch", "template", "text", "variable"
 		]
 	};
-	
+
+	//Restricts what elements can be added to a given element
 	var _childRestrictions = 
 	{
 		gsf:
@@ -88,17 +96,20 @@ function visualXMLEditor(xmlString)
 			"metadata":[]
 		}
 	};
-	
+
+	//Get a connection to the DebugWidget
 	this.setGreenbug = function(gb)
 	{
 		_greenbug = gb;
 	}
-	
+
+	//Get the XML in its current state
 	this.getXML = function()
 	{
 		return _xml;
 	}
-	
+
+	//Undo a transation
 	this.undo = function()
 	{
 		if(_transactions.length > 0)
@@ -117,7 +128,7 @@ function visualXMLEditor(xmlString)
 				var parent = t.vElemParent;
 				var pos = t.vElemPos;
 				var elem = t.vElem;
-				
+
 				elem.detach();
 				if(pos == 0)
 				{
@@ -187,7 +198,8 @@ function visualXMLEditor(xmlString)
 			}
 		}
 	}
-	
+
+	//Check if an element is allowed as a child to another element
 	var checkRestricted = function(child, parent)
 	{
 		var pFullNodename = parent.tagName;
@@ -204,7 +216,7 @@ function visualXMLEditor(xmlString)
 			pNamespace = pFullNodename.substring(0, pFullNodename.indexOf(":"));
 			pNodeName = pFullNodename.substring(pFullNodename.indexOf(":") + 1);
 		}
-		
+
 		var namespaceList = _childRestrictions[pNamespace];
 		if(namespaceList)
 		{
@@ -221,10 +233,11 @@ function visualXMLEditor(xmlString)
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
+	//Add the trash bin to the editor
 	var placeTrashBin = function()
 	{
 		var binImage = $("<img src=\"" + gs.imageURLs.trashEmpty + "\"/>");
@@ -245,7 +258,8 @@ function visualXMLEditor(xmlString)
 		});
 		_editorContainer.append(bin);
 	}
-	
+
+	//Dynamically retrieve the gslib elements from the gslib.xsl file to put into the toolbox
 	var retrieveGSLIBTemplates = function(callback)
 	{
 		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetTemplateListFromFile&s1.locationName=interface&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.fileName=gslib.xsl";
@@ -255,11 +269,11 @@ function visualXMLEditor(xmlString)
 		{
 			startIndex = response.search("<templateList>") + "<templateList>".length;
 			endIndex = response.search("</templateList>");
-			
+
 			var listString = response.substring(startIndex, endIndex);
 			var list = eval(listString.replace(/&quot;/g, "\""));
 			var modifiedList = new Array();
-			
+
 			for(var i = 0; i < list.length; i++)
 			{
 				var current = list[i];
@@ -268,9 +282,9 @@ function visualXMLEditor(xmlString)
 					modifiedList.push(current.name);
 				}
 			}
-			
+
 			_elemList["gslib"] = modifiedList;
-			
+
 			if(callback)
 			{
 				callback();
@@ -281,7 +295,8 @@ function visualXMLEditor(xmlString)
 			console.log("Error retrieving GSLIB templates");
 		});
 	}
-	
+
+	//Create the toolbar
 	var populateToolbar = function()
 	{
 		var tabHolder = $("<ul>");
@@ -315,14 +330,14 @@ function visualXMLEditor(xmlString)
 
 			_toolboxDiv.append(tabDiv);
 		}
-		
+
 		var otherTab = $("<li>");
 		var otherTabLink = $("<a>", {"href":"#veother"});
 		otherTabLink.css({"font-size":"0.9em", "padding":"5px"});
 		otherTabLink.text("other");
 		otherTab.append(otherTabLink);
 		tabHolder.append(otherTab);
-		
+
 		var otherTabDiv = $("<div>", {"id":"veother"});
 		var textNode = _xml.createTextNode("text");
 		var textVEElement = new VEElement(textNode);
@@ -330,7 +345,7 @@ function visualXMLEditor(xmlString)
 		textDiv.css("float", "none");
 		textDiv.data("toolbar", true);
 		otherTabDiv.append(textDiv);
-		
+
 		var customInput = $("<input type=\"text\">");
 		var customElemHolder = $("<div>");
 		var customCreateButton = $("<button>Create element</button>");
@@ -351,14 +366,15 @@ function visualXMLEditor(xmlString)
 		otherTabDiv.append(customInput);
 		otherTabDiv.append(customCreateButton);
 		otherTabDiv.append(customElemHolder);
-		
+
 		_toolboxDiv.append(otherTabDiv);
 
 		_toolboxDiv.tabs();
-		
+
 		customCreateButton.button();
 	}
 
+	//Turns the given XML into the nice visual structure recursively
 	var constructDivsRecursive = function(currentDiv, currentParent, level)
 	{
 		if(!level)
@@ -369,7 +385,7 @@ function visualXMLEditor(xmlString)
 		var container = $("<div>");
 		container.addClass("veContainerElement");
 		currentDiv.append(container);
-		
+
 		var allowedList = new Array();
 		var counter = currentParent.firstChild;
 		while(counter)
@@ -393,7 +409,7 @@ function visualXMLEditor(xmlString)
 			var veElement = new VEElement(currentElement);
 			var elementDiv = veElement.getDiv();
 			veElement.setWidth(width);
-			
+
 			if(!_rootElement)
 			{
 				_rootElement = elementDiv;
@@ -410,22 +426,25 @@ function visualXMLEditor(xmlString)
 
 		container.append($("<div>", {"style":"clear:both;"}));
 	}
-	
+
+	//Fake a click on the root element
 	this.selectRootElement = function()
 	{
 		var height = _editorDiv.height() + 10;
 		if(height < 300){height = 300;}
-		
+
 		_editorContainer.css("height", height + "px");
 		_infoDiv.css("height", height + "px");
 		_rootElement.trigger("click");
 	}
-	
+
+	//Return the main visual editor div
 	this.getMainDiv = function()
 	{
 		return _mainDiv;
 	}
-	
+
+	//Save any unfinished edits
 	this.savePendingEdits = function()
 	{
 		while(_editingNodes && _editingNodes.length > 0)
@@ -434,27 +453,28 @@ function visualXMLEditor(xmlString)
 			attr.saveEdits();
 		}
 	}
-	
+
+	//Add the given VEElement to the list of VEElements we are currently dragging over
 	var addToOverList = function(veElement)
 	{
 		if(veElement.getDiv().data("toolbar"))
 		{
 			return;
 		}
-	
+
 		for(var i = 0; i < _overList.length; i++)
 		{
 			if(!_overList[i])
 			{
 				continue;
 			}
-		
+
 			if(_overList[i].getID() == veElement.getID())
 			{
 				return false;
 			}
 		}
-		
+
 		if(_overList.freeSpaces.length > 0)
 		{
 			_overList[_overList.freeSpaces.pop()] = veElement;
@@ -464,7 +484,8 @@ function visualXMLEditor(xmlString)
 			_overList.push(veElement);
 		}
 	}
-	
+
+	//Remove the given VEElement from the list of VElements we are currently dragging over
 	var removeFromOverList = function(veElement)
 	{
 		for(var i = 0; i < _overList.length; i++)
@@ -473,7 +494,7 @@ function visualXMLEditor(xmlString)
 			{
 				continue;
 			}
-		
+
 			if(_overList[i].getID() == veElement.getID())
 			{
 				delete _overList[i];
@@ -481,7 +502,8 @@ function visualXMLEditor(xmlString)
 			}
 		}
 	}
-	
+
+	//Get the deepest VEElement we are currently dragging over
 	var getDeepestOverElement = function()
 	{
 		if(_overList.length == 0)
@@ -511,22 +533,23 @@ function visualXMLEditor(xmlString)
 
 		return deepestElem;
 	}
-	
+
+	//Resize all the VEElements
 	var resizeAll = function()
 	{
 		var filterFunction = function()
 		{
 			var toolbarStatus = $(this).data("toolbar");
 			var beingDraggedStatus = $(this).data("dragging");
-			
+
 			if(beingDraggedStatus || !toolbarStatus)
 			{
 				return true;
 			}
-			
+
 			return false;
 		}
-	
+
 		var allElems = $(".veElement").filter(filterFunction).each(function()
 		{
 			if($(this).data("helper")){return;}
@@ -549,6 +572,7 @@ function visualXMLEditor(xmlString)
 		});
 	}
 
+	//Initialise the visual editor
 	var initVXE = function()
 	{
 		try
@@ -572,23 +596,23 @@ function visualXMLEditor(xmlString)
 		_mainDiv.append(_infoDiv);
 		_mainDiv.append($("<div>", {"style":"clear:both;"}));		
 	}
-	
+
 	// *********************************************************************** //
 	// Visual Editor Text                                                      //
 	// This inner class represents a single xml text node in the visual editor //
 	// *********************************************************************** //
-
 	var VEText = function(node)
 	{
+		//Constructor code
 		var _thisNode = this;
 		var _xmlNode = node;
-	
+
 		var _textEditor = $("<div>");
 		var _nodeText = $("<div>");
 		_nodeText.text(_xmlNode.nodeValue);
 
 		_textEditor.append(_nodeText);
-		
+
 		var _editButton = $("<button>Edit text</button>");
 		_editButton.click(function()
 		{
@@ -602,7 +626,8 @@ function visualXMLEditor(xmlString)
 			}
 		});
 		_textEditor.append(_editButton);
-		
+
+		//Enable editing of this text node
 		this.editMode = function()
 		{
 			_editingNodes.push(_thisNode);
@@ -614,6 +639,7 @@ function visualXMLEditor(xmlString)
 			_editButton.button("option", "label", "Done");
 		}
 
+		//Save edits to this text node
 		this.saveEdits = function()
 		{
 			for(var i = 0; i < _editingNodes.length; i++)
@@ -624,7 +650,7 @@ function visualXMLEditor(xmlString)
 					break;
 				}
 			}
-		
+
 			_transactions.push({type:"editText", elem:_xmlNode, vElem: _nodeText, value:_nodeText.data("prevTextValue")});
 			var textArea = _nodeText.find("textarea");
 			var newValue = textArea.val();
@@ -634,6 +660,7 @@ function visualXMLEditor(xmlString)
 			_editButton.button("option", "label", "Edit text");
 		}
 
+		//Create a text node editor
 		this.getDiv = function()
 		{
 			//A hack to make sure the edit text button is styled correctly
@@ -641,14 +668,14 @@ function visualXMLEditor(xmlString)
 			return _textEditor;
 		}
 	}
-	
+
 	// *********************************************************************** //
 	// Visual Editor Attribute                                                 //
 	// This inner class represents a single xml attribute in the visual editor //
 	// *********************************************************************** //
-
 	var VEAttribute = function(attrElem, xmlElem, name, value)
 	{
+		//Constructor code
 		var _name;
 		if(name)
 		{
@@ -658,7 +685,7 @@ function visualXMLEditor(xmlString)
 		{
 			_name = attrElem.name;
 		}
-		
+
 		var _value;
 		if(value)
 		{
@@ -672,17 +699,20 @@ function visualXMLEditor(xmlString)
 		var _row;
 
 		var _thisAttr = this;
-		
+
+		//Get the attribute name
 		this.getName = function()
 		{
 			return _name;
 		}
 
+		//Get the attribute value
 		this.getValue = function()
 		{
 			return _value;
 		}
 
+		//Get the name cell of the attribute table
 		var createNameCell = function()
 		{
 			var cell = $("<td>", {"class":"veNameCell"});
@@ -690,6 +720,7 @@ function visualXMLEditor(xmlString)
 			return cell;
 		}
 
+		//Get the value cell of the attribute table
 		var createValueCell = function()
 		{
 			var cell = $("<td>", {"class":"veValueCell"});
@@ -697,11 +728,12 @@ function visualXMLEditor(xmlString)
 			return cell;
 		}
 
+		//Get the edit cell of the attribute table
 		var createEditCell = function()
 		{
 			var cell = $("<td>", {"class":"veEditCell"});
 			var link = $("<a href=\"javascript:;\">edit</a>");
-			
+
 			link.click(function()
 			{
 				_thisAttr.editMode();
@@ -710,6 +742,7 @@ function visualXMLEditor(xmlString)
 			return cell;
 		}
 
+		//Get the delete cell of the attribute table
 		var createDeleteCell = function()
 		{
 			var cell = $("<td>", {"class":"veDeleteCell"});
@@ -724,6 +757,7 @@ function visualXMLEditor(xmlString)
 			return cell;
 		}
 
+		//Create a table row from this attribute
 		this.getAsTableRow = function()
 		{
 			var tableRow = $("<tr>");
@@ -744,11 +778,12 @@ function visualXMLEditor(xmlString)
 
 			return tableRow;
 		}
-		
+
+		//Enable editing of this attribute
 		this.editMode = function(editValue)
 		{
 			_editingNodes.push(_thisAttr);
-		
+
 			var nameCell = _row.children("td").eq(0);
 			var valueCell = _row.children("td").eq(1);
 			var editLink = _row.children("td").eq(2).find("a");
@@ -783,7 +818,8 @@ function visualXMLEditor(xmlString)
 				nameInput.focus();
 			}
 		}
-		
+
+		//Save edits to this attribute
 		this.saveEdits = function()
 		{
 			for(var i = 0; i < _editingNodes.length; i++)
@@ -798,7 +834,7 @@ function visualXMLEditor(xmlString)
 			var nameCell = _row.children("td").eq(0);
 			var valueCell = _row.children("td").eq(1);
 			var editLink = _row.children("td").eq(2).find("a");
-		
+
 			editLink.text("edit");
 			editLink.off("click");
 			editLink.click(function()
@@ -808,33 +844,33 @@ function visualXMLEditor(xmlString)
 
 			var nameInput = nameCell.children("input");
 			var valueInput = valueCell.children("input");
-			
+
 			nameInput.blur();
 			valueInput.blur();
 
 			var name = nameInput.val();
 			var value = valueInput.val();
-			
+
 			if(name.length == 0 || name.search(/\w/g) == -1)
 			{
 				_row.remove();
 				return;
 			}
-			
+
 			nameCell.empty();
 			nameCell.text(name);
 
 			valueCell.empty();
 			valueCell.text(value);
-			
+
 			if(nameCell.data("prevName") != "")
 			{
 				_xmlElem.removeAttribute(_name);
 			}
 			_xmlElem.setAttribute(name, value);
-			
+
 			_transactions.push({type:"editAttr", elem:_xmlElem, row:_row, newName:name, name:_name, value:_value});
-			
+
 			_name = name;
 			_value = value;
 		}
@@ -852,18 +888,20 @@ function visualXMLEditor(xmlString)
 
 		_div.data("parentVEElement", this);
 		_div.data("expanded", "normal");
-		
+
+		//Add the necessary functions to make this VEElement draggable
 		var makeDraggable = function()
 		{
 			_div.draggable(
 			{
+				"distance":"20",
 				"revert":"true", 
 				"helper":function()
 				{
 					//Make sure the cursor is put in the centre of the div
 					var height = _div.children(".veTitleElement").height();
 					_div.draggable("option", "cursorAt", {top:(height / 2), left:(_div.width() / 2)});
-				
+
 					var tempVEE = new VEElement(_xmlNode);
 					var tempDiv = tempVEE.getDiv();
 					tempDiv.css("border", "1px solid orangered");
@@ -951,7 +989,7 @@ function visualXMLEditor(xmlString)
 									posPercent = 1;
 								}
 								var pos = Math.floor(overChildrenLength * posPercent);
-								
+
 								if(pos < overChildrenLength - 1)
 								{
 									_validDropElem = overChildren.eq(pos);
@@ -981,7 +1019,7 @@ function visualXMLEditor(xmlString)
 				"stop":function(event)
 				{
 					var transactionType = (_div.data("toolbar")) ? "addElem" : "remMvElem";
-					
+
 					if(_div.data("toolbar"))
 					{
 						_div.data("parentVEElement").setShortName(false);
@@ -989,7 +1027,7 @@ function visualXMLEditor(xmlString)
 
 					_div.css("border", "1px solid black");
 					_div.css("background", _div.data("prevBackground"));
-					
+
 					//If the element was not dropped in a valid place then put it back
 					if(!_validDropSpot && !_div.data("toolbar"))
 					{
@@ -1006,7 +1044,7 @@ function visualXMLEditor(xmlString)
 						{
 							_origDDParent.children(".veElement").eq(_origDDPosition).before(_div);
 						}
-						
+
 						if(_overTrash)
 						{
 							_div.data("parentVEElement").remove();
@@ -1033,15 +1071,16 @@ function visualXMLEditor(xmlString)
 						}
 						_transactions.push({type:transactionType, vElemParent:_origDDParent, vElemPos:_origDDPosition, vElem:_div});
 					}
-					
+
 					_div.data("dragging", false);
 					_div.data("toolbar", false);
-					
+
 					_overList = new Array();
 					_overList.freeSpaces = new Array();
 				}
 			});
 
+			//Also make this element a drop-zone for other elements
 			_div.droppable(
 			{
 				"over":function(event, ui)
@@ -1056,29 +1095,26 @@ function visualXMLEditor(xmlString)
 				}
 			});
 		}
-		
+
+		//Get the underlying div
 		this.getDiv = function()
 		{
 			return _div;
 		}
-		
+
+		//Get the XML for this element
 		this.getXMLNode = function()
 		{
 			return _xmlNode;
 		}
-		
+
+		//Get the unique ID of this VEElement
 		this.getID = function()
 		{
 			return _id;
 		}
 
-		var createTableHeader = function()
-		{
-			var tableHeader = $("<tr>");
-			tableHeader.html("<td class=\"veNameCell\">Name</td><td class=\"veValueCell\">Value</td>");
-			return tableHeader;
-		}
-		
+		//Fill the information area with details about this element
 		this.populateInformationDiv = function()
 		{
 			_thisEditor.savePendingEdits();
@@ -1103,7 +1139,7 @@ function visualXMLEditor(xmlString)
 				var attributeTable = $("<table>");
 				attributeTable.addClass("veAttributeTableContainer");
 
-				attributeTable.append(createTableHeader());
+				attributeTable.append($("<tr>").html("<td class=\"veNameCell\">Name</td><td class=\"veValueCell\">Value</td>"));
 
 				$(_xmlNode.attributes).each(function()
 				{
@@ -1113,7 +1149,7 @@ function visualXMLEditor(xmlString)
 
 				_infoDiv.append(attributeTableTitle);
 				_infoDiv.append(attributeTable);
-				
+
 				var addDiv = $("<div>", {"class":"veInfoDivTitle"});
 				var addSelect = $("<select>");
 				addSelect.append("<option>[blank]</option>", {value:"[blank]"});
@@ -1143,7 +1179,7 @@ function visualXMLEditor(xmlString)
 						}
 					}
 				}
-				
+
 				var addButton = $("<button>Add attribute</button>");
 				addButton.click(function()
 				{
@@ -1169,7 +1205,7 @@ function visualXMLEditor(xmlString)
 				addDiv.append(addButton);
 				_infoDiv.append(addDiv);
 				addButton.button();
-				
+
 				/*
 				if(_xmlNode.tagName == "xsl:call-template" && _xmlNode.getAttribute("name").length > 0)
 				{
@@ -1245,6 +1281,7 @@ function visualXMLEditor(xmlString)
 			}
 		}
 
+		//Add mouseover/out and click events to this element
 		var addMouseEvents = function()
 		{
 			_div.mouseover(function(event)
@@ -1290,7 +1327,8 @@ function visualXMLEditor(xmlString)
 				event.stopPropagation();
 			});
 		}
-		
+
+		//Check if we need to expand an element before we do
 		var checkResizeNecessary = function()
 		{
 			var elemsToCheck = _div.find(".veTitleElement");
@@ -1314,7 +1352,8 @@ function visualXMLEditor(xmlString)
 			}
 			return false;
 		}
-		
+
+		//Remove this from the editor
 		this.remove = function()
 		{
 			var divParent = _div.parents(".veElement");
@@ -1323,15 +1362,16 @@ function visualXMLEditor(xmlString)
 			$(_xmlNode).remove();
 			_div.detach();
 			_infoDiv.empty();
-			
+
 			if(divParent.length)
 			{
 				divParent.first().trigger("click");
 			}
-			
+
 			$("#veTrash").children("img").attr("src", gs.imageURLs.trashFull);
 		}
 
+		//Expend this element horizontally
 		this.expand = function()
 		{
 			var siblings = _div.siblings(".veElement");
@@ -1343,12 +1383,13 @@ function visualXMLEditor(xmlString)
 					$(this).animate({width:sibWidth + "%"}, 900);
 					$(this).data("expanded", "small");
 				});
-				
+
 				_div.animate({width:"80%"}, 1000);
 				_div.data("expanded", "expanded");
 			}
 		}
 
+		//Evenly distribute the children of this node evenly
 		this.evenlyDistributeChildren = function()
 		{
 			var children = _div.find(".veElement")
@@ -1360,12 +1401,13 @@ function visualXMLEditor(xmlString)
 			});
 		}
 
+		//Expand this node and any parents and evenly distribute its children
 		this.focus = function()
 		{
 			if(checkResizeNecessary())
 			{
 				_div.data("parentVEElement").expand();
-				
+
 				var parents = _div.parents(".veElement");
 				parents.each(function()
 				{
@@ -1375,7 +1417,8 @@ function visualXMLEditor(xmlString)
 
 			_div.data("parentVEElement").evenlyDistributeChildren();
 		}
-		
+
+		//Set whether to use the short name for this element (i.e. without the namespace)
 		this.setShortName = function(short)
 		{
 			if(short && _xmlNode.nodeType == 1 && _xmlNode.tagName.indexOf(":") != -1)
@@ -1388,18 +1431,19 @@ function visualXMLEditor(xmlString)
 			}
 		}
 
+		//Set the width of this element
 		this.setWidth = function(width)
 		{
 			_div.css("width", width + "%");
 		}
-		
+
 		//Visual Editor Element constructor
 		var initVEE = function()
 		{
 			_div.addClass("veElement");
 			_div.addClass("ui-corner-all");
 			makeDraggable();
-			
+
 			var titleText;
 			if(_xmlNode.nodeType == 3 && _xmlNode.nodeValue.search(/\S/) != -1)
 			{
@@ -1426,15 +1470,15 @@ function visualXMLEditor(xmlString)
 				}
 				titleText = _xmlNode.tagName;
 			}
-			
+
 			addMouseEvents();
-			
+
 			_div.append("<div class=\"veTitleElement\">" + titleText + "</div>");
 		}
 
 		initVEE();
 	}
-	
+
 	//Call the constructor
 	initVXE();
 }
