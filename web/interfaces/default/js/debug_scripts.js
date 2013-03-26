@@ -322,6 +322,26 @@ function DebugWidget()
 		buttonDiv.append(_xmlStatusBar);
 	}
 	
+	var createFileAndTemplateSelectors = function(buttonDiv)
+	{
+		_templateSelector = $("<div>", {"id":"veTemplateSelector", "class":"ui-state-default ui-corner-all"});
+		_templateSelector.append($("<span>Templates: <span>"));
+		var templateSelectBox = $("<select>").append("<option>-- No templates --</option>");
+		templateSelectBox.change(function()
+		{
+			var selected = templateSelectBox.find(":selected");
+			var changeFunction = selected.data("changeFunction");
+			if(changeFunction)
+			{
+				changeFunction();
+			}
+		});
+		_templateSelector.append(templateSelectBox);
+		_fileSelector = $("<div>", {"id":"veFileSelector", "class":"ui-state-default ui-corner-all"});
+		buttonDiv.append(_fileSelector);
+		buttonDiv.append(_templateSelector);
+	}
+	
 	var createDebugDiv = function()
 	{
 		_mainDiv = $("<div>", {"id":"debugDiv"});
@@ -345,14 +365,8 @@ function DebugWidget()
 		var buttonDiv = $("<div>");
 		toolBarDiv.append(buttonDiv);
 		createButtonDiv(buttonDiv);
+		createFileAndTemplateSelectors(buttonDiv);
 		createXMLStatusBar(buttonDiv);
-		
-		_navArea = $("<div>", {"id":"veNavArea"});
-		_templateSelector = $("<div>", {"id":"veTemplateSelector"});
-		_fileSelector = $("<div>", {"id":"veFileSelector", "class":"ui-state-default ui-corner-all"});
-		_navArea.append(_fileSelector);
-		_navArea.append(_templateSelector);
-		_navArea.append("<div>", {style:"clear:both;"});
 		
 		//Populate the file selector
 		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetXSLTFilesForCollection&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c;
@@ -381,6 +395,11 @@ function DebugWidget()
 			{
 				var selectedItem = selectBox.find(":selected");
 				
+				if(!selectedItem.data("fileItem"))
+				{
+					return;
+				}
+				
 				var getURL = gs.xsltParams.library_name + "?a=g&rt=r&s=GetTemplateListFromFile&s1.fileName=" + selectedItem.data("fileItem").path + "&s1.locationName=" + selectedItem.data("fileItem").location + "&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c;
 				$.ajax(getURL)
 				.success(function(templateResponse)
@@ -391,6 +410,16 @@ function DebugWidget()
 					var templateList = eval(templateListString);
 					
 					clearAll();
+					
+					_templateSelector.children("select").empty();
+					if(templateList.length == 0)
+					{
+						_templateSelector.children("select").append("<option>-- No templates --</option>");
+					}
+					else
+					{
+						_templateSelector.children("select").append("<option>-- Select a template --</option>");
+					}
 					
 					for(var i = 0; i < templateList.length; i++)
 					{
@@ -410,7 +439,7 @@ function DebugWidget()
 							match = templateList[i].match.replace(/&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
 						}
 						
-						var infoContainer = $("<div>", {"class":"gbTemplateContainer ui-state-default ui-corner-all"});
+						var infoContainer = $("<option>");
 						
 						_elements.push(infoContainer);
 						
@@ -435,7 +464,7 @@ function DebugWidget()
 							*/
 						}
 						
-						_templateSelector.prepend(infoContainer);
+						_templateSelector.children("select").append(infoContainer);
 						
 						//resizeContainers();
 					}
@@ -559,7 +588,7 @@ function DebugWidget()
 	
 	var addMouseEventsToInfoContainer = function(infoContainer, fileName, location, nodename, namespace, name, match)
 	{
-		infoContainer.click(function()
+		infoContainer.data("changeFunction", function()
 		{
 			if(_selectedTemplate)
 			{
@@ -578,6 +607,7 @@ function DebugWidget()
 		
 			_greenbug.changeCurrentTemplate(location, fileName, nodename, namespace, name, match);
 		});
+		/*
 		infoContainer.mouseover(function()
 		{
 			$(this).removeClass("ui-state-default");
@@ -588,6 +618,7 @@ function DebugWidget()
 			$(this).addClass("ui-state-default");
 			$(this).removeClass("ui-state-active");
 		});
+		*/
 	}
 
 	var addMouseEventsToDebugElements = function(debugElems)
@@ -669,7 +700,7 @@ function DebugWidget()
 						fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]transform[\/\\]/, "");
 					}
 
-					var infoContainer = $("<div>", {"class":"gbTemplateContainer ui-state-default ui-corner-all"});
+					var infoContainer = $("<option>");
 
 					_elements.push(infoContainer);
 
@@ -695,7 +726,7 @@ function DebugWidget()
 						*/
 					}
 
-					_templateSelector.prepend(infoContainer);
+					_templateSelector.children("select").append(infoContainer);
 
 					//resizeContainers();
 				});
@@ -713,6 +744,8 @@ function DebugWidget()
 			if(_debugOn && !_pauseSelector)
 			{
 				clearAll();
+				_templateSelector.children("select").empty();
+				_templateSelector.children("select").append("<option>-- Select a template --</option>");
 			}
 		});
 	}
@@ -722,6 +755,7 @@ function DebugWidget()
 		$("title").text($("title").text().replace(/<[^>]*>/g, ""));
 	}
 	
+	/*
 	var resizeContainers = function()
 	{
 		var templates = _templateSelector.children(".gbTemplateContainer");
@@ -736,6 +770,7 @@ function DebugWidget()
 			spacers.css("width", spacersWidth);
 		}
 	}
+	*/
 	
 	this.init = function()
 	{
