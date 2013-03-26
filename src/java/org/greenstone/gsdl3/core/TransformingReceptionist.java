@@ -198,10 +198,11 @@ public class TransformingReceptionist extends Receptionist
 		for (File currentFile : xslFiles)
 		{
 			Document currentDoc = this.converter.getDOM(currentFile);
-			if (currentDoc == null) {
-			    // Can happen if an editor creates an auto-save temporary file 
-			    // (such as #header.xsl#) that is not well formed XML
-			    continue;
+			if (currentDoc == null)
+			{
+				// Can happen if an editor creates an auto-save temporary file 
+				// (such as #header.xsl#) that is not well formed XML
+				continue;
 			}
 
 			NodeList metadataElems = currentDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata"); //gsf:metadata
@@ -633,12 +634,12 @@ public class TransformingReceptionist extends Receptionist
 			root.appendChild(siteName);
 			root.appendChild(filepath);
 
-			if ((output.equals("xml")) || output.equals("json")) {
-			    // in the case of "json", calling method responsible for converting to JSON-string
-			    return theXML.getDocumentElement();
+			if ((output.equals("xml")) || output.equals("json"))
+			{
+				// in the case of "json", calling method responsible for converting to JSON-string
+				return theXML.getDocumentElement();
 			}
 		}
-
 
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		String collection = "";
@@ -655,9 +656,22 @@ public class TransformingReceptionist extends Receptionist
 
 			inlineTemplate = (String) params.get(GSParams.INLINE_TEMPLATE);
 
-			if (params.get(GSParams.DEBUG) != null && (((String) params.get(GSParams.DEBUG)).equals("on") || ((String) params.get(GSParams.DEBUG)).equals("1")))
+			if (params.get(GSParams.DEBUG) != null && (((String) params.get(GSParams.DEBUG)).equals("on") || ((String) params.get(GSParams.DEBUG)).equals("1") || ((String) params.get(GSParams.DEBUG)).equals("true")))
 			{
-				_debug = true;
+				String[] groups = new UserContext(request).getGroups();
+
+				boolean found = false;
+				for (String g : groups)
+				{
+					if (g.equals("administrator"))
+					{
+						found = true;
+					}
+				}
+				if (found)
+				{
+					_debug = true;
+				}
 			}
 		}
 
@@ -980,7 +994,6 @@ public class TransformingReceptionist extends Receptionist
 			return converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
 		}
 
-		
 		// The transformer will now work out the resulting doctype from any set in the (merged) stylesheets and
 		// will set this in the output document it creates. So don't pass in any docWithDocType to the transformer
 		//Node finalResult = this.transformer.transform(skinAndLibraryDoc, doc, config_params, docWithDoctype);
