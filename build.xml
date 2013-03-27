@@ -2064,11 +2064,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     depends="init,svnupdate-collection-building,gs2build-edit-setup-bat,configure-common-src,clean-common-src,compile-common-src,configure-collection-building,clean-collection-building,compile-collection-building"
     description="Update (SVN update, configure, compile etc) only the collection building components"/>
 
-  <target name="svnupdate-collection-building" if="collection.building.enabled" depends="init,svnupdate-gs2build,svnupdate-gli" unless="nosvn.mode"
+  <target name="svnupdate-collection-building" if="collection.building.enabled" depends="init,svnupdate-gs2build,svnupdate-cgi,svnupdate-gli" unless="nosvn.mode"
     description="SVN update the collection building components">
   </target>
 
-  <target name="prepare-collection-building" depends="init,prepare-gs2build,prepare-gli" if="collection.building.enabled">
+  <target name="prepare-collection-building" depends="init,prepare-gs2build,svnupdate-cgi,prepare-gli" if="collection.building.enabled">
   </target>
 
   <target name="configure-collection-building" depends="init,configure-build-src" if="collection.building.enabled"
@@ -2124,6 +2124,9 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
 
   <!-- ============== gli targets ================================= -->
+  
+  <!-- gliserver.pl, gsdlCGI.pm and metadata-server.pl updated are updated alongside 
+       this in target svnupdate-collection-building -->
   <target name="svnupdate-gli" if="collection.building.enabled" depends="init" unless="nosvn.mode">
 
     <exec executable="svn">
@@ -2132,19 +2135,10 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="-r"/><arg value="${branch.revision}"/>
     </exec>
 
-   <exec executable="svn" dir="web/WEB-INF/cgi">
-      <arg value="export"/>
-      <arg value="-r"/><arg value="${branch.revision}"/>
-      <arg value="${svn.root}/main/${branch.path}/greenstone2/common-src/cgi-bin/gliserver.pl"/>
-    </exec>
-    <exec executable="svn" dir="web/WEB-INF/cgi">
-      <arg value="export"/>
-      <arg value="-r"/><arg value="${branch.revision}"/>
-      <arg value="${svn.root}/main/${branch.path}/greenstone2/common-src/cgi-bin/gsdlCGI.pm"/>
-    </exec>
-
   </target>
 
+  <!-- gliserver.pl, gsdlCGI.pm and metadata-server.pl updated are updated 
+       alongside this prepare-gli target in target prepare-collection-building -->
   <target name="prepare-gli" depends="init" if="collection.building.enabled" unless="gli.present">
     <!-- checkout -->
     <if><bool><and><not><istrue value="${nosvn.mode}"/></not><isset property="with.gli.and.gems"/></and></bool>
@@ -2155,7 +2149,15 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="-r"/><arg value="${branch.revision}"/>
     </exec>
 
-   <exec executable="svn" dir="web/WEB-INF/cgi">
+    </if>
+  </target>
+
+  <!-- svn checkout gliserver.pl, gsdlCGI.pm for gli applet,
+       as well as gsdlCGI.pm-dependent metadata-server.pl 
+       (checksum.pl used only by GS2 for depositdspace.dm) -->
+  <target name="svnupdate-cgi">
+
+    <exec executable="svn" dir="web/WEB-INF/cgi">
       <arg value="export"/>
       <arg value="-r"/><arg value="${branch.revision}"/>
       <arg value="${svn.root}/main/${branch.path}/greenstone2/common-src/cgi-bin/gliserver.pl"/>
@@ -2165,9 +2167,13 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="-r"/><arg value="${branch.revision}"/>
       <arg value="${svn.root}/main/${branch.path}/greenstone2/common-src/cgi-bin/gsdlCGI.pm"/>
     </exec>
-
-    </if>
+    <exec executable="svn" dir="web/WEB-INF/cgi">
+      <arg value="export"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+      <arg value="${svn.root}/main/${branch.path}/greenstone2/common-src/cgi-bin/metadata-server.pl"/>
+    </exec>
   </target>
+
   
   <target name="clean-gli" depends="init" if="collection.building.enabled">
     <!-- gli -->

@@ -1,98 +1,184 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CollectionConfig xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-    <metadataList>
-        <metadata lang="en" name="creator"/>
-        <metadata lang="en" name="maintainer"/>
-        <metadata lang="en" name="public">true</metadata>
-    </metadataList>
-    <displayItemList>
-        <displayItem assigned="true" lang="en" name="description">This is a demonstration collection for the Greenstone3 digital library software. It contains a small subset (11 books) of the Humanitarian and Development Libraries. It is the Greenstone 3 equivalent of the Greenstone 2 demo collection, built with MG.</displayItem>
-		<!--
-        <displayItem assigned="true" lang="en" name="smallicon">gs2mgdemo_sm.gif</displayItem>
-        <displayItem assigned="true" lang="en" name="icon">gs2mgdemo.gif</displayItem>
-		-->
-        <displayItem assigned="true" lang="en" name="name">MG demo</displayItem>
-    </displayItemList>
-    <search type="mg">
-        <index name="section:text">
-            <displayItem lang="ru" name="name">Главы</displayItem>
-            <displayItem lang="en" name="name">chapters</displayItem>
-            <displayItem lang="es" name="name">capítulos</displayItem>
-            <displayItem lang="fr" name="name">chapitres</displayItem>
-        </index>
-        <index name="document:text">
-            <displayItem lang="ru" name="name">Полные документы</displayItem>
-            <displayItem lang="en" name="name">entire documents</displayItem>
-            <displayItem lang="es" name="name">documentos enteros</displayItem>
-            <displayItem lang="fr" name="name">documents entiers</displayItem>
-        </index>
-        <index name="section:Title">
-            <displayItem lang="ru" name="name">Названия разделов</displayItem>
-            <displayItem lang="en" name="name">section titles</displayItem>
-            <displayItem lang="es" name="name">títulos de las secciones</displayItem>
-            <displayItem lang="fr" name="name">titres des sections</displayItem>
-        </index>
-        <indexOption>
-            <option name="casefold"/>
-            <option name="stem"/>
-        </indexOption>
-        <searchType name="plain"/>
-        <searchType name="simpleform"/>
-        <searchType name="advancedform"/>
-        <format><gsf:template match="documentNode"><td valign="top"><gsf:link type="document"><gsf:icon type="document"/></gsf:link></td><td><gsf:switch><gsf:metadata name="Title" select="ancestors" separator=": "/><gsf:when test="exists"><gsf:metadata name="Title" select="ancestors" separator=": "/>:</gsf:when></gsf:switch><gsf:link type="document"><gsf:metadata name="Title"/></gsf:link></td></gsf:template></format>
-    </search>
-    <infodb type="gdbm"/>
-    <import>
-        <pluginList>
-            <plugin name="GreenstoneXMLPlugin"/>
-            <plugin name="HTMLPlugin">
-                <option name="-description_tags"/>
-            </plugin>
-            <plugin name="MetadataXMLPlugin"/>
-            <plugin name="ArchivesInfPlugin"/>
-            <plugin name="DirectoryPlugin"/>
-        </pluginList>
-    </import>
-    <browse>
-        <classifier name="List">
-            <option name="-metadata" value="dc.Title"/>
-            <option name="-partition_type_within_level" value="constant_size"/>
-        </classifier>
-        <classifier name="Hierarchy">
-            <option name="-metadata" value="dc.Subject"/>
-            <option name="-sort" value="dc.Title"/>
-        </classifier>
-        <classifier name="List">
-            <option name="-metadata" value="dls.Organization"/>
-            <option name="-sort_leaf_nodes_using" value="dc.Title"/>
-            <option name="-partition_type_within_level" value="constant_size"/>
-            <option name="-bookshelf_type" value="always"/>
-            <option name="-buttonname" value="Organization"/>
-        </classifier>
-        <classifier name="List">
-            <option name="-metadata" value="dls.Keyword"/>
-            <option name="-buttonname" value="Howto"/>
-            <option name="-partition_type_within_level" value="constant_size"/>
-            <format><gsf:template match="documentNode"><td><gsf:link type="document"><gsf:metadata name="dls.Keyword"/></gsf:link></td></gsf:template><gsf:template match="classifierNode"><td><gsf:link type="classifier"><gsf:metadata name="Title"/></gsf:link></td></gsf:template></format>
-        </classifier>
-        <format><gsf:template match="documentNode"><td valign="top"><gsf:link type="document"><gsf:icon type="document"/></gsf:link></td><td valign="top"><gsf:metadata name="srclink"/><gsf:choose-metadata><gsf:metadata name="thumbicon"/><gsf:metadata name="srcicon"/></gsf:choose-metadata><gsf:metadata name="/srclink"/></td><td valign="top"><gsf:choose-metadata><gsf:metadata name="dc.Title"/><gsf:metadata name="exp.Title"/><gsf:metadata name="Title"/><gsf:default>Untitled</gsf:default></gsf:choose-metadata><gsf:switch><gsf:metadata name="Source"/><gsf:when test="exists"><br/><i>(<gsf:metadata name="Source"/>)</i></gsf:when></gsf:switch></td></gsf:template><gsf:template match="classifierNode"><td valign="top"><gsf:link type="classifier"><gsf:icon type="classifier"/></gsf:link></td><td valign="top"><gsf:metadata name="Title"/></td></gsf:template><gsf:template match="classifierNode" mode="horizontal"><gsf:link type="horizontal"><gsf:metadata name="Title"/></gsf:link></gsf:template></format>
-    </browse>
-    <display>
-        <format><gsf:option name="TOC" value="true"/></format>
-    </display>
-    <replaceListRef id="gs2-standard"/>
-		<serviceRackList>
-		<!-- comment out the following serviceRack if you want to disable OAI for this collection -->
+	<metadataList>
+		<metadata lang="en" name="creator"/>
+		<metadata lang="en" name="maintainer"/>
+		<metadata lang="en" name="public">true</metadata>
+	</metadataList>
+	<displayItemList>
+		<displayItem assigned="true" lang="en" name="description">This is a demonstration collection for the Greenstone3 digital library software. It contains a small subset (11 books) of the Humanitarian and Development Libraries. It is the Greenstone 3 equivalent of the Greenstone 2 demo collection, built with MG.</displayItem>
+		<displayItem assigned="true" lang="en" name="name">MG demo</displayItem>
+		<displayItem assigned="true" lang="ru" name="section:text">Главы</displayItem>
+		<displayItem assigned="true" lang="en" name="section:text">chapters</displayItem>
+		<displayItem assigned="true" lang="es" name="section:text">capítulos</displayItem>
+		<displayItem assigned="true" lang="fr" name="section:text">chapitres</displayItem>
+		<displayItem assigned="true" lang="ru" name="document:text">Полные документы</displayItem>
+		<displayItem assigned="true" lang="en" name="document:text">entire documents</displayItem>
+		<displayItem assigned="true" lang="es" name="document:text">documentos enteros</displayItem>
+		<displayItem assigned="true" lang="fr" name="document:text">documents entiers</displayItem>
+		<displayItem assigned="true" lang="ru" name="section:Title">Названия разделов</displayItem>
+		<displayItem assigned="true" lang="en" name="section:Title">section titles</displayItem>
+		<displayItem assigned="true" lang="es" name="section:Title">títulos de las secciones</displayItem>
+		<displayItem assigned="true" lang="fr" name="section:Title">titres des sections</displayItem>
+		<displayItem assigned="true" lang="en" name="text">text</displayItem>
+		<displayItem assigned="true" lang="en" name="ex.Title">Title</displayItem>
+		<displayItem assigned="true" lang="en" name="ex.Source">Source</displayItem>
+	</displayItemList>
+	<format/>
+	<search type="mg">
+		<index name="section:text">
+			<displayItem lang="ru" name="name">Главы</displayItem>
+			<displayItem lang="en" name="name">chapters</displayItem>
+			<displayItem lang="es" name="name">capítulos</displayItem>
+			<displayItem lang="fr" name="name">chapitres</displayItem>
+		</index>
+		<index name="document:text">
+			<displayItem lang="ru" name="name">Полные документы</displayItem>
+			<displayItem lang="en" name="name">entire documents</displayItem>
+			<displayItem lang="es" name="name">documentos enteros</displayItem>
+			<displayItem lang="fr" name="name">documents entiers</displayItem>
+		</index>
+		<index name="section:Title">
+			<displayItem lang="ru" name="name">Названия разделов</displayItem>
+			<displayItem lang="en" name="name">section titles</displayItem>
+			<displayItem lang="es" name="name">títulos de las secciones</displayItem>
+			<displayItem lang="fr" name="name">titres des sections</displayItem>
+		</index>
+		<indexOption name=""/>
+		<searchType name="plain"/>
+		<searchType name="simpleform"/>
+		<searchType name="advancedform"/>
+		<format>
+			<gsf:template match="documentNode">
+				<td valign="top">
+					<gsf:link type="document">
+						<gsf:icon type="document"/>
+					</gsf:link>
+				</td>
+				<td>
+					<gsf:switch>
+						<gsf:metadata name="Title" select="ancestors" separator=": "/>
+						<gsf:when test="exists"><gsf:metadata name="Title" select="ancestors" separator=": "/>:</gsf:when>
+					</gsf:switch>
+					<gsf:link type="document">
+						<gsf:metadata name="Title"/>
+					</gsf:link>
+				</td>
+			</gsf:template>
+		</format>
+	</search>
+	<infodb type="gdbm"/>
+	<import>
+		<pluginList>
+			<plugin name="GreenstoneXMLPlugin"/>
+			<plugin name="HTMLPlugin">
+				<option name="-description_tags"/>
+			</plugin>
+			<plugin name="MetadataXMLPlugin"/>
+			<plugin name="ArchivesInfPlugin"/>
+			<plugin name="DirectoryPlugin"/>
+		</pluginList>
+	</import>
+	<browse>
+		<classifier name="List">
+			<option name="-metadata" value="dc.Title"/>
+			<option name="-partition_type_within_level" value="constant_size"/>
+		</classifier>
+		<classifier name="Hierarchy">
+			<option name="-metadata" value="dc.Subject"/>
+			<option name="-sort" value="dc.Title"/>
+		</classifier>
+		<classifier name="List">
+			<option name="-metadata" value="dls.Organization"/>
+			<option name="-sort_leaf_nodes_using" value="dc.Title"/>
+			<option name="-partition_type_within_level" value="constant_size"/>
+			<option name="-bookshelf_type" value="always"/>
+			<option name="-buttonname" value="Organization"/>
+		</classifier>
+		<classifier name="List">
+			<option name="-metadata" value="dls.Keyword"/>
+			<option name="-buttonname" value="Howto"/>
+			<option name="-partition_type_within_level" value="constant_size"/>
+			<format>
+			<gsf:template match="documentNode">
+				<td>
+					<gsf:link type="document">
+						<gsf:metadata name="dls.Keyword"/>
+					</gsf:link>
+				</td>
+			</gsf:template>
+			<gsf:template match="classifierNode">
+				<td>
+					<gsf:link type="classifier">
+						<gsf:metadata name="Title"/>
+					</gsf:link>
+				</td>
+			</gsf:template>
+		</format>
+		</classifier>
+		<format>
+			<gsf:template match="documentNode">
+				<td valign="top">
+					<gsf:link type="document">
+						<gsf:icon type="document"/>
+					</gsf:link>
+				</td>
+				<td valign="top">
+					<gsf:metadata name="srclink"/>
+					<gsf:choose-metadata>
+						<gsf:metadata name="thumbicon"/>
+						<gsf:metadata name="srcicon"/>
+					</gsf:choose-metadata>
+					<gsf:metadata name="/srclink"/>
+				</td>
+				<td valign="top">
+					<gsf:choose-metadata>
+						<gsf:metadata name="dc.Title"/>
+						<gsf:metadata name="exp.Title"/>
+						<gsf:metadata name="Title"/>
+						<gsf:default>Untitled</gsf:default>
+					</gsf:choose-metadata>
+					<gsf:switch>
+						<gsf:metadata name="Source"/>
+						<gsf:when test="exists">
+							<br/>
+							<i>(<gsf:metadata name="Source"/>)</i>
+						</gsf:when>
+					</gsf:switch>
+				</td>
+			</gsf:template>
+			<gsf:template match="classifierNode">
+				<td valign="top">
+					<gsf:link type="classifier">
+						<gsf:icon type="classifier"/>
+					</gsf:link>
+				</td>
+				<td valign="top">
+					<gsf:metadata name="Title"/>
+				</td>
+			</gsf:template>
+			<gsf:template match="classifierNode" mode="horizontal">
+				<gsf:link type="horizontal">
+					<gsf:metadata name="Title"/>
+				</gsf:link>
+			</gsf:template>
+		</format>
+	</browse>
+	<display>
+		<format>
+			<gsf:option name="TOC" value="true"/>
+		</format>
+	</display>
+	<replaceListRef id="gs2-standard"/>
+	<serviceRackList><!-- comment out the following serviceRack if you want to disable OAI for this collection -->
 		<serviceRack name="OAIPMH">
-			<ListMetadataFormats>
-			<!--What metadata sets to support is collection specific. To support other metadata schema, simply add a metadataFormat element here.
+			<ListMetadataFormats><!--What metadata sets to support is collection specific. To support other metadata schema, simply add a metadataFormat element here.
 			The support of unqualified Dublin Core metadata set is mendatory in the oai specification.
 			-->
 				<metadataFormat metadataPrefix="oai_dc">
 					<metadataPrefix>oai_dc</metadataPrefix>
 					<schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
-					<metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
-					<!--   a custom mapping as this collection doesn't have dc metadata -->
+					<metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace><!--   a custom mapping as this collection doesn't have dc metadata -->
 					<mappingList>
 						<mapping>dc:title,dc.Title</mapping>
 						<mapping>dc:subject,dc.Subject</mapping>
@@ -101,6 +187,6 @@
 					</mappingList>
 				</metadataFormat>
 			</ListMetadataFormats>
-		</serviceRack> 
+		</serviceRack>
 	</serviceRackList>
 </CollectionConfig>

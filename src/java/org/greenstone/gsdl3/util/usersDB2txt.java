@@ -28,6 +28,7 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.Properties;
 
+// Run as java org.greenstone.gsdl3.util.usersDB2txt <usersDB file>
 public class usersDB2txt
 {
     public static void main(String[] args) throws SQLException{
