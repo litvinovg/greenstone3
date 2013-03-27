@@ -165,9 +165,6 @@ public class GS2Construct extends ServiceRack
 
 	protected Element processBuildAndActivateCollection(Element request)
 	{
-
-	    logger.error("**** GS2Construct Build and Activate: " + GSXML.elementToString(request, true));
-
 		waitUntilReady(request);
 		Element buildResponse = processBuildCollection(request);
 		if (buildResponse.getElementsByTagName(GSXML.ERROR_ELEM).getLength() > 0)

@@ -435,13 +435,7 @@ public class GSFile
 
 		}
 		// delete the file or directory
-		boolean success = f.delete();
-		if(!success) {
-		    logger.error("***** Could not delete file: " + f);
-		}
-		return success;
-		//return f.delete();
-
+		return f.delete();
 	}
 
 	public static boolean copyFile(File source, File destination)
