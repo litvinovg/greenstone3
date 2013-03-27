@@ -2293,8 +2293,19 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 
 
   <target name="prepare-gnome-lib" depends="init" if="collection.building.enabled" unless="gnome-lib.present">
-    <antcall target="checkout-gnome-lib"/>
-    <antcall target="compile-gnome-lib"/>
+    <if>
+      <bool>
+	<istrue value="${use.support.lib}"/>
+      </bool>
+
+      <antcall target="checkout-gnome-lib"/>
+      <antcall target="compile-gnome-lib"/>
+
+      <else>
+	<echo>**** Not preparing gnome-lib:</echo>
+	<echo>property use.support.lib in build.properties was not set or was set to false</echo>
+      </else>
+    </if>
   </target>
 
   <target name="checkout-gnome-lib" depends="init" if="collection.building.enabled" unless="nosvn.mode">
