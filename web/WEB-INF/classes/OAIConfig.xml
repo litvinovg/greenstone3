@@ -7,7 +7,7 @@
   <!-- The base url to request metadata from this repository.
   TODO: this element should be determined and overriden dynamically given the osi request url in OAIServer.java. 
     WHAT'S DONE: when ant start is called, it writes out the default oaiserver URL to this file. -->
-  <baseURL>http://localhost:8383/greenstone3/oaiserver</baseURL>
+  <baseURL>http://your-domain-name/greenstone3/oaiserver</baseURL>
   <!-- The version of OAI specification this repository supports. Can be 2.0 or 1.0 -->
   <protocolVersion>2.0</protocolVersion>
   <!-- A UTC date time that is the guaranteed lower limit of all datestamps recording changes, midifications etc. in the repository
