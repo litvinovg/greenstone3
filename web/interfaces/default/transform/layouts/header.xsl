@@ -218,9 +218,14 @@
 	<!-- ***** HOME HELP PREFERENCES LOGIN ***** -->
 	<xsl:template name="home-help-preferences">
 		<ul id="bannerLinks">
-		  <xsl:if test="/page/pageResponse/collection/serviceList/service[@name='RSSFeed']">
+
+		  <!-- RSS feed link can appear in a global format statement (where it has no type attribute) 
+		       or in section specific format statements, such as browse, search, display. 
+		       If it's present in any format statement, display the RSS link in the bannerlinks section. -->
+		  <xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search' or not(@type)]/gsf:option[@name='RSS']/@value = 'true'">
 			<li><gsf:link type="rss"><gsf:icon file="rssicon.png"/></gsf:link></li>
 		  </xsl:if>
+
 			<!-- preferences -->
 			<li class="ui-state-default ui-corner-all">
 				<a href="{$library_name}/collection/{$collNameChecked}/page/pref">

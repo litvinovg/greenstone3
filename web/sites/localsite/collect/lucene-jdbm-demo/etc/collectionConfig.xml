@@ -23,6 +23,11 @@
 
 	<format>
 	  <!-- Define any global format statements here -->
+
+	  <!-- Setting the RSS option to true here will display a link to the collection's RSS feed on all
+	       pages of the collection. Can include the RSS feed link in section specific format statements
+	       too, such as search, if wishing to display the link only in particular sections.-->
+	  <gsf:option name="RSS" value="true"/>
 	</format>
 
 	<search type="lucene">
