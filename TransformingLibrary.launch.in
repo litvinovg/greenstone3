@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/greenstone3/src/java/org/greenstone/gsdl3/TransformingLibrary.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<mapAttribute key="org.eclipse.debug.core.environmentVariables">
+<mapEntry key="GSDL3HOME" value="@gsdl3home@"/>
+<mapEntry key="GSDL3SRCHOME" value="@gsdl3srchome@"/>
+<mapEntry key="GSDLHOME" value="@gsdlhome@"/>
+</mapAttribute>
+<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+<listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.greenstone.gsdl3.TransformingLibrary"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="localsite default data.xml stylesheet.xsl"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="greenstone3"/>
+</launchConfiguration>
