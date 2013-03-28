@@ -70,6 +70,7 @@
 	<classpathentry kind="lib" path="web/WEB-INF/lib/jdbm.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/je-4.1.10.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/js.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/JSON-java.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/junit.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/log4j-1.2.8.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/lucene-1.4.1.jar"/>
