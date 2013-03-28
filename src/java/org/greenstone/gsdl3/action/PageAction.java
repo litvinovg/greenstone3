@@ -142,6 +142,8 @@ public class PageAction extends Action
 			}
 		}
 
+		addSiteMetadata(info_response, userContext);
+		addInterfaceOptions(info_response);
 		// all the components have been merged into info_response
 		return info_response;
 
