@@ -69,6 +69,13 @@ public class QueryAction extends Action
 			to = GSPath.prependLink(to, collection);
 		}
 
+		// get the format info - there may be global format info in the collection that searching needs
+		Element format_elem = getFormatInfo(to, userContext);
+		// set the format type
+		format_elem.setAttribute(GSXML.TYPE_ATT, "search");
+		// for now just add to the response
+		page_response.appendChild(this.doc.importNode(format_elem, true));
+
 		if (request_type.indexOf("d") != -1)
 		{
 			// we have been asked for the service description
@@ -114,10 +121,6 @@ public class QueryAction extends Action
 		GSXML.addParametersToList(this.doc, query_param_list, service_params);
 		mr_query_request.appendChild(query_param_list);
 
-		// also get the format stuff now if there is some
-		Element format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, to, userContext);
-		mr_query_message.appendChild(format_request);
-
 		logger.debug(GSXML.xmlNodeToString(mr_query_message));
 
 		// do the query
@@ -132,10 +135,7 @@ public class QueryAction extends Action
 			return page_response;
 		}
 
-		NodeList responses = mr_query_response.getElementsByTagName(GSXML.RESPONSE_ELEM);
-		Element query_response = (Element) responses.item(0);
-		Element format_response = (Element) responses.item(1);
-
+		Element query_response = (Element) GSXML.getChildByTagName(mr_query_response, GSXML.RESPONSE_ELEM);
 		Element query_result_metadata_list = (Element) GSXML.getChildByTagName(query_response, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		if (query_result_metadata_list == null)
 		{
@@ -195,20 +195,10 @@ public class QueryAction extends Action
 		// get the metadata elements needed from the format statement if any
 		HashSet<String> metadata_names = new HashSet<String>();
 		metadata_names.add("Title");
-		// add in the format info to the stylesheet if there is any
-		Element format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.FORMAT_ELEM);
+		// we already got the format element earlier
 		if (format_elem != null)
 		{
-			Element global_format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.GLOBAL_FORMAT_ELEM);
-			if (global_format_elem != null)
-			{
-				GSXSLT.mergeFormatElements(format_elem, global_format_elem, false);
-			}
-			// set the format type
-			format_elem.setAttribute(GSXML.TYPE_ATT, "search");
-			// for now just add to the response
-			page_response.appendChild(this.doc.importNode(format_elem, true));
-			getRequiredMetadataNames(format_elem, metadata_names);
+		  getRequiredMetadataNames(format_elem, metadata_names);
 		}
 
 		// paging of the results is done here - we filter the list to remove unwanted entries before retrieving metadata
