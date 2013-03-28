@@ -9,6 +9,7 @@ import org.greenstone.gsdl3.core.ModuleInterface;
 import org.greenstone.gsdl3.util.GSConstants;
 import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
 import org.w3c.dom.Document;
@@ -270,4 +271,29 @@ abstract public class Action
 		}
 		elem.appendChild(elem.getOwnerDocument().importNode(documentOptionList, true));
 	}
+
+  protected Element getFormatInfo(String to, UserContext userContext) {
+    Element mr_format_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+    Element mr_format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, to, userContext);
+    mr_format_message.appendChild(mr_format_request);
+
+    // process the message
+    Element mr_response_message = (Element) this.mr.process(mr_format_message);
+    // the response
+    
+    Element format_response = (Element) GSXML.getChildByTagName(mr_response_message, GSXML.RESPONSE_ELEM);
+    
+    Element format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.FORMAT_ELEM);
+    if (format_elem!= null) {
+      Element global_format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.GLOBAL_FORMAT_ELEM);
+      if (global_format_elem != null)
+	{
+	  GSXSLT.mergeFormatElements(format_elem, global_format_elem, false);
+	}
+    }
+    return format_elem;
+  }
 }
+
+  
+
