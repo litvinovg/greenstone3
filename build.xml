@@ -557,7 +557,7 @@
   </target>
 
   <!-- install-common-src and install-collection-building are mutually exclusive and either one or the other will be done depending on whether collection building is enabled or not -->
-  <target name="install" depends="init,install-common-src,install-collection-building,install-runtime"
+  <target name="install" depends="init,install-common-src,install-collection-building,install-runtime,setup-for-eclipse"
     description="Install Greenstone 3. Use this when you first checkout the code: 'ant prepare new-install'."/>
 
   <target name="install-common-src" depends="init" 
@@ -681,7 +681,7 @@
     <!-- assuming that index.html is not needed here -->   
 
     <!--Now write out the url with oaiserver suffix as the baseURL property in OAIConfig.xml-->
-    <available file="${web.classes}/OAIConfig.xml" property="oaiconfig.present"/>
+    <available file="${web.classes}/OAIConfig.xml.in" property="oaiconfig.present"/>
     <antcall target="init-oaiconfig">
       <param name="url" value="${url}"/>
     </antcall>
@@ -689,6 +689,7 @@
 
   <target name="init-oaiconfig" if="oaiconfig.present">
     <echo>Writing out baseURL ${url}oaiserver to ${web.classes}/OAIConfig.xml</echo>
+    <copy file="${web.classes}/OAIConfig.xml.in" tofile="${web.classes}/OAIConfig.xml"/>
     <rsr file="${web.classes}/OAIConfig.xml" pattern="&lt;baseURL&gt;.*&lt;/baseURL&gt;" replacement="&lt;baseURL&gt;${url}oaiserver&lt;/baseURL&gt;" />   
   </target>
 
@@ -1774,6 +1775,25 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       </manifest>
     </jar>
     <copy file="${build.home}/server.jar" todir="${basedir}"/>
+  </target>
+
+  <!-- === Eclipse targets == -->
+  <target name="setup-for-eclipse">
+
+    <filter token="gsdlhome" value="${gs2build.home}"/>
+    <filter token="gsdl3srchome" value="${basedir}"/>
+    <filter token="gsdl3home" value="${basedir}/web"/>
+
+    <if>
+      <bool><not><available file="${basedir}/TransformingLibrary.launch"/></not></bool>      	
+      <copy file="${basedir}/TransformingLibrary.launch.in" tofile="${basedir}/TransformingLibrary.launch" filtering="true" overwrite="true"/>
+    </if>
+<!--
+    <if>
+      <bool><not><available file="${basedir}/LibraryCommandline.launch"/></not></bool>      	
+      <copy file="${basedir}/LibraryCommandline.launch.in" tofile="${basedir}/LibraryCommandline.launch" filtering="true" overwrite="true"/>
+    </if>
+-->
   </target>
   
   <!-- ================== Packages targets ================================ -->
