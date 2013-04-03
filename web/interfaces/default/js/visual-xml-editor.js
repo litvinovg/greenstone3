@@ -270,6 +270,12 @@ function visualXMLEditor(xmlString)
 			startIndex = response.search("<templateList>") + "<templateList>".length;
 			endIndex = response.search("</templateList>");
 
+			if(startIndex == "<templateList>".length - 1)
+			{
+				console.log("Error retrieving GSLIB templates");
+				return;
+			}
+
 			var listString = response.substring(startIndex, endIndex);
 			var list = eval(listString.replace(/&quot;/g, "\""));
 			var modifiedList = new Array();
@@ -577,7 +583,7 @@ function visualXMLEditor(xmlString)
 	{
 		try
 		{
-			_xml = $.parseXML('<testContainer xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
+			_xml = $.parseXML('<testContainer xmlns:xslt="http://www.w3.org/1999/XSL/Transform" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
 			constructDivsRecursive(_editorDiv, _xml.firstChild);
 		}
 		catch(error)

@@ -13,7 +13,9 @@ function DebugWidget()
 	var _elements = new Array();
 	var _itemSelected = false; //Used to prevent multiple elements from being highlighted
 	var _editModeText = false;
+	var _fromSelection = false;
 	var _selectedTemplate;
+	var _selectedInfoContainers = new Array();
 
 	//Page elements
 	var _mainDiv;
@@ -26,7 +28,7 @@ function DebugWidget()
 	var _templateSelector;
 	var _editor;
 	var _editingDiv;
-	var _selectNewElementButton;
+	var _enableSelectorButton;
 	var _closeEditorButton;
 	var _xmlStatusBar;
 	var _saveButton;
@@ -97,41 +99,19 @@ function DebugWidget()
 	var createButtonDiv = function(buttonDiv)
 	{
 		//Used to enable the selector to get the templates of a particular area of the page
-		var enableSelectorButton = $("<button>Enable selector</button>");
-		enableSelectorButton.click(function()
+		_enableSelectorButton = $("<button>Select an element</button>");
+		_enableSelectorButton.click(function()
 		{
-			if(!_debugOn)
+			_enableSelectorButton.button("option", "label", "Select new element");
+			$("a").click(function(e)
 			{
-				enableSelectorButton.button("option", "label", "Disable selector");
-				$("a").click(function(e)
-				{
-					e.preventDefault();
-				});
-				_debugOn = true;
-			}
-			else
-			{
-				enableSelectorButton.button("option", "label", "Enable selector");
-				$("a").off("click");
-				clearAll();
-				_selectNewElementButton.button("option", "disabled", true);
-				_pauseSelector = false;
-				_debugOn = false;
-			}
+				e.preventDefault();
+			});
+			_debugOn = true;
+			_pauseSelector = false;
+			_enableSelectorButton.button("option", "disabled", true);
 		});
-		_styleFunctions.push(function(){enableSelectorButton.button({icons:{primary:"ui-icon-power"}})});
-
-		//Used to change what is currently selected
-		_selectNewElementButton = $("<button>Select new element</button>");
-		_selectNewElementButton.click(function()
-		{
-			if(_pauseSelector)
-			{
-				_pauseSelector = false;
-				_selectNewElementButton.button("option", "disabled", true);
-			}
-		});
-		_styleFunctions.push(function(){_selectNewElementButton.button({icons:{primary:"ui-icon-pencil"}, disabled:true})});
+		_styleFunctions.push(function(){_enableSelectorButton.button({icons:{primary:"ui-icon-power"}})});
 
 		//Used to minimise/restore the editor
 		_closeEditorButton = $("<button>Close editor</button>");
@@ -171,7 +151,7 @@ function DebugWidget()
 
 				try
 				{
-					var xml = $.parseXML('<testContainer xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
+					var xml = $.parseXML('<testContainer xmlns:xslt="http://www.w3.org/1999/XSL/Transform" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:java="http://xml.apache.org/xslt/java" xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil" xmlns:gslib="http://www.greenstone.org/skinning" xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat">' + xmlString + "</testContainer>");
 				}
 				catch(error)
 				{
@@ -275,8 +255,7 @@ function DebugWidget()
 		});
 		_styleFunctions.push(function(){undoButton.button({icons:{primary:"ui-icon-arrowreturnthick-1-w"}})});
 
-		buttonDiv.append(enableSelectorButton);
-		buttonDiv.append(_selectNewElementButton);
+		buttonDiv.append(_enableSelectorButton);
 		buttonDiv.append(_closeEditorButton);
 		buttonDiv.append(_saveButton);
 		buttonDiv.append(_swapEditorButton);
@@ -367,6 +346,11 @@ function DebugWidget()
 			_fileSelector.addClass("ui-corner-all");
 			_fileSelector.append("<span>Files: </span>");
 			_fileSelector.append(selectBox);
+			
+			var currentSelectionOption = $("<option>[Current selection]</option>");
+			currentSelectionOption.val("currentSelection");
+			selectBox.append(currentSelectionOption);
+			
 			for(var i = 0; i < list.length; i++)
 			{
 				var item = list[i];
@@ -379,6 +363,18 @@ function DebugWidget()
 			{
 				var selectedItem = selectBox.find(":selected");
 
+				if(selectedItem.val() == "currentSelection")
+				{
+					_templateSelector.children("select").empty();
+					for(var i = 0; i < _selectedInfoContainers.length; i++)
+					{
+						var currentContainer = _selectedInfoContainers[i];
+						_templateSelector.children("select").append(currentContainer);
+					}
+					_templateSelector.children("select").children().first().trigger("change");
+					return;
+				}
+				
 				if(!selectedItem.data("fileItem"))
 				{
 					return;
@@ -393,16 +389,10 @@ function DebugWidget()
 					var templateListString = templateResponse.substring(templateListStart, templateListEnd).replace(/&quot;/g, "\"");
 					var templateList = eval(templateListString);
 
-					clearAll();
-
 					_templateSelector.children("select").empty();
 					if(templateList.length == 0)
 					{
 						_templateSelector.children("select").append("<option>-- No templates --</option>");
-					}
-					else
-					{
-						_templateSelector.children("select").append("<option>-- Select a template --</option>");
 					}
 
 					for(var i = 0; i < templateList.length; i++)
@@ -440,6 +430,8 @@ function DebugWidget()
 
 						_templateSelector.children("select").append(infoContainer);
 					}
+
+					_templateSelector.children("select").trigger("change");
 				});
 			});
 		})
@@ -616,12 +608,17 @@ function DebugWidget()
 	//Add the mouse events to the <debug> elemetns that are called when the selector is anabled
 	var addMouseEventsToDebugElements = function(debugElems)
 	{
-		debugElems.click(function()
+		debugElems.click(function(e)
 		{
 			if(_debugOn)
 			{
+				$("a").off("click");
+				_debugOn = false;
 				_pauseSelector = true;
-				_selectNewElementButton.button("option", "disabled", false);
+				_enableSelectorButton.button("option", "disabled", false);
+				_templateSelector.children("select").trigger("change");
+				_fileSelector.children("select").val("currentSelection");
+				e.stopPropagation();
 			}
 		});
 
@@ -708,6 +705,8 @@ function DebugWidget()
 					{
 						infoContainer.text(match);
 					}
+					
+					_selectedInfoContainers.push(infoContainer.clone(true));
 
 					_templateSelector.children("select").append(infoContainer);
 				});
@@ -726,7 +725,7 @@ function DebugWidget()
 			{
 				clearAll();
 				_templateSelector.children("select").empty();
-				_templateSelector.children("select").append("<option>-- Select a template --</option>");
+				_selectedInfoContainers = new Array();
 			}
 		});
 	}
