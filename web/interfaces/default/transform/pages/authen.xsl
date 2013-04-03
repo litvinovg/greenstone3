@@ -57,6 +57,13 @@
 							<tr><td><input type="submit" value="Login"/></td><td><xsl:text> </xsl:text></td></tr>
 						</table>
 					</form>
+					<script type="text/javascript">
+						<xsl:text disable-output-escaping="yes">
+						{
+							$("#loginTable input[name=\"username\"]").focus();
+						}
+						</xsl:text>
+					</script>
 				</xsl:when>
 
 				<!-- *************** -->

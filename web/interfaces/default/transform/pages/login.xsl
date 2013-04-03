@@ -24,12 +24,19 @@
 			</div>
 		<br/>
 		</xsl:if>
-		<form method="post" action="{/page/pageRequest/paramList/param[@name = 'redirectURL']/@value}">
+		<form method="POST" action="{/page/pageRequest/paramList/param[@name = 'redirectURL']/@value}">
 			<table id="loginTable">
-				<tr><td>Username: </td><td><input type="text" name="username"/></td></tr>
-				<tr><td>Password: </td><td><input type="password" name="password"/></td></tr>
+				<tr><td><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.username')"/>: </td><td><input type="text" name="username"/></td></tr>
+				<tr><td><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.password')"/>: </td><td><input type="password" name="password"/></td></tr>
 				<tr><td><input type="submit" value="Login"/></td><td><xsl:text> </xsl:text></td></tr>
 			</table>
 		</form>
+		<script type="text/javascript">
+			<xsl:text disable-output-escaping="yes">
+			{
+				$("#loginTable input[name=\"username\"]").focus();
+			}
+			</xsl:text>
+		</script>
 	</xsl:template>
 </xsl:stylesheet>
