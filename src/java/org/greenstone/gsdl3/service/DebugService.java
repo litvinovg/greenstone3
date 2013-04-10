@@ -13,6 +13,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
 import org.greenstone.util.GlobalProperties;
@@ -33,9 +34,10 @@ public class DebugService extends ServiceRack
 	protected static final String SAVE_TEMPLATE_TO_XML_FILE = "SaveXMLTemplateToFile";
 	protected static final String GET_TEMPLATE_LIST_FROM_FILE = "GetTemplateListFromFile";
 	protected static final String GET_XSLT_FILES_FOR_COLLECTION = "GetXSLTFilesForCollection";
+	protected static final String RESOLVE_CALL_TEMPLATE = "ResolveCallTemplate";
 	/*********************************************************/
 
-	String[] services = { GET_TEMPLATE_FROM_XML_FILE, SAVE_TEMPLATE_TO_XML_FILE, GET_TEMPLATE_LIST_FROM_FILE, GET_XSLT_FILES_FOR_COLLECTION };
+	String[] services = { GET_TEMPLATE_FROM_XML_FILE, SAVE_TEMPLATE_TO_XML_FILE, GET_TEMPLATE_LIST_FROM_FILE, GET_XSLT_FILES_FOR_COLLECTION, RESOLVE_CALL_TEMPLATE };
 
 	public boolean configure(Element info, Element extra_info)
 	{
@@ -72,6 +74,80 @@ public class DebugService extends ServiceRack
 		}
 
 		return null;
+	}
+
+	protected Element processResolveCallTemplate(Element request)
+	{
+		Element result = GSXML.createBasicResponse(this.doc, RESOLVE_CALL_TEMPLATE);
+
+		if (request == null)
+		{
+			GSXML.addError(this.doc, result, RESOLVE_CALL_TEMPLATE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			return result;
+		}
+
+		UserContext context = new UserContext(request);
+		boolean found = false;
+		for (String group : context.getGroups())
+		{
+			if (group.equals("administrator"))
+			{
+				found = true;
+			}
+		}
+
+		if (!found)
+		{
+			GSXML.addError(this.doc, result, "This user does not have the required permissions to perform this action.");
+			return result;
+		}
+
+		// Get the parameters of the request
+		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+
+		if (param_list == null)
+		{
+			GSXML.addError(this.doc, result, RESOLVE_CALL_TEMPLATE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
+			return result;
+		}
+
+		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
+
+		String interfaceName = (String) params.get("interfaceName");
+		String siteName = (String) params.get("siteName");
+		String collectionName = (String) params.get("collectionName");
+		String fileName = (String) params.get("fileName");
+		String nameToGet = (String) params.get("templateName");
+
+		fileName = fileName.replace("\\", "/");
+
+		Document xslDoc = GSXSLT.mergedXSLTDocumentCascade(fileName, siteName, collectionName, interfaceName, new ArrayList<String>(), true);
+
+		int sepIndex = fileName.lastIndexOf("/");
+		String pathExtra = null;
+		if (sepIndex != -1)
+		{
+			pathExtra = fileName.substring(0, sepIndex + 1);
+			fileName = fileName.substring(sepIndex + 1);
+		}
+
+		GSXSLT.inlineImportAndIncludeFilesDebug(xslDoc, pathExtra, true, fileName, siteName, collectionName, interfaceName, new ArrayList<String>());
+
+		NodeList templateList = xslDoc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
+		for (int i = 0; i < templateList.getLength(); i++)
+		{
+			Element current = (Element) templateList.item(i);
+			if (current.hasAttribute("name") && current.getAttribute("name").equals(nameToGet))
+			{
+				Element debugElement = (Element) current.getElementsByTagName("debug").item(0);
+
+				Element requestedTemplate = this.doc.createElement("requestedTemplate");
+				requestedTemplate.setTextContent(debugElement.getAttribute("filename"));
+				result.appendChild(requestedTemplate);
+			}
+		}
+
+		return result;
 	}
 
 	protected Element processGetXMLTemplateFromFile(Element request)
