@@ -16,6 +16,7 @@ import net.tanesha.recaptcha.ReCaptchaResponse;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.greenstone.gsdl3.util.DerbyWrapper;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.UserQueryResult;
 import org.greenstone.gsdl3.util.UserTermInfo;
 import org.w3c.dom.Element;
@@ -329,6 +330,23 @@ public class Authentication extends ServiceRack
 		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, AUTHENTICATION_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
+
+		String[] userGroups = (new UserContext(request)).getGroups();
+
+		boolean found = false;
+		for (String group : userGroups)
+		{
+			if (group.equals("administrator"))
+			{
+				found = true;
+			}
+		}
+
+		if (!found)
+		{
+			GSXML.addError(this.doc, result, "This user does not have the required permissions to perform this action.");
+			return result;
+		}
 
 		// Create an Authentication node put into the result
 		Element authenNode = this.doc.createElement(GSXML.AUTHEN_NODE_ELEM);
