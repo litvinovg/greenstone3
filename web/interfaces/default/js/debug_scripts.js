@@ -548,6 +548,9 @@ function DebugWidget()
 			_vEditor.setGreenbug(_greenbug);
 			_vEditor.selectRootElement();
 
+			_vEditor.setFileLocation(location);
+			_vEditor.setFileName(fileName);
+
 			if(!_isVisualEditor)
 			{
 				_vEditor.getMainDiv().hide();
@@ -603,6 +606,36 @@ function DebugWidget()
 
 			_greenbug.changeCurrentTemplate(location, fileName, nodename, namespace, name, match);
 		});
+	}
+	
+	//Turns a filename into it's location (i.e. interface/site/collection) and name
+	this.fileNameToLocationAndName = function(filepath)
+	{
+		var location;
+		var fileName;
+		//Use the filepath to work out where this file is from
+		if(filepath.search(/[\/\\]interfaces[\/\\]/) != -1)
+		{
+			location = "interface";
+			fileName = filepath.replace(/.*[\/\\]transform[\/\\]/, "");
+		}
+		else if(filepath.search(/[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]etc[\/\\]/) != -1)
+		{
+			location = "collectionConfig";
+			fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]etc[\/\\]/, "");
+		}
+		else if(filepath.search(/[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]transform[\/\\]/) != -1)
+		{
+			location = "collection";
+			fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]transform[\/\\]/, "");
+		}
+		else if(filepath.search(/[\/\\]sites[\/\\].*[\/\\]transform[\/\\]/) != -1)
+		{
+			location = "site";
+			fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]transform[\/\\]/, "");
+		}
+		
+		return {location:location, filename:fileName};
 	}
 
 	//Add the mouse events to the <debug> elemetns that are called when the selector is anabled
@@ -667,35 +700,13 @@ function DebugWidget()
 					var name = $(this).attr("name");
 					var match = $(this).attr("match");
 
-					var location;
-					var fileName;
-					//Use the filepath to work out where this file is from
-					if(filepath.search(/[\/\\]interfaces[\/\\]/) != -1)
-					{
-						location = "interface";
-						fileName = filepath.replace(/.*[\/\\]transform[\/\\]/, "");
-					}
-					else if(filepath.search(/[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]etc[\/\\]/) != -1)
-					{
-						location = "collectionConfig";
-						fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]etc[\/\\]/, "");
-					}
-					else if(filepath.search(/[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]transform[\/\\]/) != -1)
-					{
-						location = "collection";
-						fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]transform[\/\\]/, "");
-					}
-					else if(filepath.search(/[\/\\]sites[\/\\].*[\/\\]transform[\/\\]/) != -1)
-					{
-						location = "site";
-						fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]transform[\/\\]/, "");
-					}
+					var file = _greenbug.fileNameToLocationAndName(filepath);
 
 					var infoContainer = $("<option>");
 
 					_elements.push(infoContainer);
 
-					addChangeEventToInfoContainer(infoContainer, fileName, location, nodename, namespace, name, match);
+					addChangeEventToInfoContainer(infoContainer, file.filename, file.location, nodename, namespace, name, match);
 
 					if(name && name.length > 0)
 					{

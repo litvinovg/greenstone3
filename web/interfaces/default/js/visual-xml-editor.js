@@ -7,6 +7,10 @@ function visualXMLEditor(xmlString)
 	//Variables that store the visual editor and a link to the DebugWidget
 	var _thisEditor = this;
 	var _greenbug;
+	
+	//Store this file's location and name
+	var _fileLocation;
+	var _fileName;
 
 	//Stores what id we are up to (used to compare VEElements)
 	var _globalID = 0;
@@ -96,6 +100,16 @@ function visualXMLEditor(xmlString)
 			"metadata":[]
 		}
 	};
+
+	this.setFileLocation = function(fileLocation)
+	{
+		_fileLocation = fileLocation;
+	}
+	
+	this.setFileName = function(fileName)
+	{
+		_fileName = fileName;
+	}
 
 	//Get a connection to the DebugWidget
 	this.setGreenbug = function(gb)
@@ -1212,7 +1226,6 @@ function visualXMLEditor(xmlString)
 				_infoDiv.append(addDiv);
 				addButton.button();
 
-				/*
 				if(_xmlNode.tagName == "xsl:call-template" && _xmlNode.getAttribute("name").length > 0)
 				{
 					var extraOptionsTitle = $("<div>", {"class":"ui-state-default ui-corner-all veInfoDivTitle"}).text("Additional options:");
@@ -1224,60 +1237,26 @@ function visualXMLEditor(xmlString)
 					visitTemplateOption.button();
 					visitTemplateOption.click(function()
 					{
-						var template = "";
-						template += '<xsl:template match="/">';
-						template +=   '<calledTemplate>';
-						var params = $(_xmlNode).children("xsl\\:with-param");
-						if(!params.length)
-						{
-							template += '<xsl:call-template name="' + _xmlNode.getAttribute("name") + '"/>';
-						}
-						else
-						{
-							template += '<xsl:call-template name="' + _xmlNode.getAttribute("name") + '">';
-							for(var i = 0; i < params.length; i++)
-							{
-								var param = params.eq(i);
-								template += "<xsl:with-param";
-								for(var j = 0; j < param[0].attributes.length; j++)
-								{
-									var attr = param[0].attributes[j];
-									template += " " + attr.name + "=\"" + attr.value + "\"";
-								}
-								template += "/>";
-							}
-							template += '</xsl:call-template>';
-						}
-						template +=   '</calledTemplate>';
-						template += '</xsl:template>';
-						template = template.replace(" ", "%20");
-						
-						var url = document.URL;
-						if(url.indexOf("?") == url.length - 1)
-						{
-							url += "ilt=" + template;
-						}
-						else if(url.indexOf("?") != -1)
-						{
-							url += "&ilt=" + template;
-						}
-						else
-						{
-							url += "?ilt=" + template;
-						}
-						
+						var url = gs.xsltParams.library_name + "?a=g&rt=r&s=ResolveCallTemplate&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c + "&s1.fileName=" + _fileName + "&s1.templateName=" + _xmlNode.getAttribute("name");
 						$.ajax(url)
 						.success(function(response)
 						{
-							var xml = $.parseXML(response);
-							var debug = $(xml).find("calledTemplate debug");
-
-							_greenbug.changeCurrentTemplate(debug[0].getAttribute("filename"), "template", "xsl", debug[0].getAttribute("name"), null);
-							$(".gbTemplateContainer").css("border", "1px dashed #AAAAAA");
+							var startIndex = response.indexOf("<requestedTemplate>") + ("<requestedTemplate>").length;
+							var endIndex = response.indexOf("</requestedTemplate>");
+							
+							if(endIndex != -1)
+							{
+								var templateFileName = response.substring(startIndex, endIndex);
+								var file = _greenbug.fileNameToLocationAndName(templateFileName);
+								_greenbug.changeCurrentTemplate(file.location, file.filename, "template", "xsl", _xmlNode.getAttribute("name"), null);
+							}
+							else
+							{
+								_greenbug.changeCurrentTemplate("interface", "gslib.xsl", "template", "xsl", _xmlNode.getAttribute("name"), null);
+							}
 						});
 					});
 				}
-				*/
 			}
 
 			if(_xmlNode.nodeType == 3)
