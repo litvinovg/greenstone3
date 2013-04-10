@@ -547,6 +547,7 @@ function DebugWidget()
 			_editingDiv.append(_vEditor.getMainDiv());
 			_vEditor.setGreenbug(_greenbug);
 			_vEditor.selectRootElement();
+			$("#veToolboxDiv").height($("#veEditorContainer").height());
 
 			_vEditor.setFileLocation(location);
 			_vEditor.setFileName(fileName);
