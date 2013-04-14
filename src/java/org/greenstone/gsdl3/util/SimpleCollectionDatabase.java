@@ -41,6 +41,10 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable
 	public SimpleCollectionDatabase(String db_type)
 	{
 
+	    if (db_type.toLowerCase().endsWith("server")) {
+			db_type = db_type.substring(0, db_type.length() - 6);
+	       }
+
 		// Access databaseWrapper through reflection (forName) so code
 		// can be more dynamic as to the database backends that are
 		// supported for this installation of Greenstone
