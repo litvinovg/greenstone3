@@ -81,9 +81,16 @@ with.gli.and.gems=true
 # Same issue as 'with.jni' for how this gets used in ant 1.7.1 and before
 #compile.static=true
 
-## Uncomment this line to enable compilation with the gnome-lib extension
-## The gnome-lib extension should be in the [gsdl3home]/ext directory
-#use.support.lib=true
+# A flag used by the release-kit to compile with gnomelib
+# (Previously this flag was called use.support.lib but got conflated with
+# the property checkout.gnomelib.ext below)
+#use.gnomelib.ext=true
+
+## Uncomment these lines if enabling compilation with the gnome-lib extension
+## and if compiling imagemagick
+## These extensions should be in the [gsdl3home]/gs2build/ext directory
+checkout.gnomelib.ext=true
+#checkout.imagemagick.ext=true
 
 ## windows c++ compilation
 # The following property does not help in build.xml. 

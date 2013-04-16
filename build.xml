@@ -226,7 +226,7 @@
   </condition>
 
   <!-- If building a release then we want to adjust environment variables so that the support library can be see during compilation -->
-  <if><bool><isset property="use.support.lib"/></bool>
+  <if><bool><isset property="use.gnomelib.ext"/></bool>
 	<property name="gnome-lib-dir" value="${basedir}/ext/gnome-lib-minimal/${os.bin.dir}"/>
 
 	<if><bool><isset property="env.CFLAGS"/></bool>
@@ -535,20 +535,20 @@
     <chmod dir="${basedir}/bin/script" perm="ugo+rx" 
       includes="*.sh,*.pl"/>
 
-    <!-- if the user has set use.support.lib to true, and is using a compiled version of gnome-lib
+    <!-- if the user has set checkout.gnomelib.ext to true, and is using a compiled version of gnome-lib
 	 (it would have been compiled up by this stage), remind them to source devel.bash before compiling -->
     <condition property="run.source.devel">
       <available file="${basedir}/gs2build/ext/gnome-lib/${os.bin.dir}" type="dir"/>
     </condition>
     <if><bool>
 	<and>
-	  <istrue value="${use.support.lib}"/>
+	  <istrue value="${checkout.gnomelib.ext}"/>
 	  <istrue value="${run.source.devel}"/>
 	</and>
       </bool>
       <echo>
 	*********************************************
-	As you have set use.support.lib, 
+	As you have set checkout.gnomelib.ext, 
 	before running ant install next,
 	run source devel.bash from 
 	${basedir}/gs2build/ext/gnome-lib 
@@ -2273,9 +2273,9 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
 
 
-  <!-- Compile up gnome-lib src folder if: use.support.lib is turned on, and if not using the binary
+  <!-- Compile up gnome-lib src folder if: checkout.gnomelib.ext is turned on, and if not using the binary
        version (gnome-lib-minimal), and if the gnome-lib src folder is not already compiled up. -->
-  <target name="compile-gnome-lib" if="use.support.lib">
+  <target name="compile-gnome-lib" if="checkout.gnomelib.ext">
 
     <!-- http://stackoverflow.com/questions/3290307/sourcing-a-shell-profile-in-an-ant-build-file 
 	 TODO: CASCADE-MAKE already sources devel.bash, but we still want to source it more globally, 
@@ -2297,7 +2297,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <if>
       <bool>
 	<and>
-	  <!-- <istrue value="${use.support.lib}"/> make sure user wants gnome-lib -->
+	  <!-- <istrue value="${checkout.gnomelib.ext}"/> make sure user wants gnome-lib -->
 	  <not><isset property="${gnome.lib.min.present}"/></not> <!-- no gnome-lib-minimal binary present -->
 	  <istrue value="${gnome.src.lib.present}"/> <!-- gnome-lib folder for compilation is present-->
 	  <not><istrue value="${gnome.compiled.lib.present}"/></not> <!-- gnome-lib not yet compiled, so no gnome-lib/os subfolder yet -->
@@ -2315,7 +2315,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <target name="prepare-gnome-lib" depends="init" if="collection.building.enabled" unless="gnome-lib.present">
     <if>
       <bool>
-	<istrue value="${use.support.lib}"/>
+	<istrue value="${checkout.gnomelib.ext}"/>
       </bool>
 
       <antcall target="checkout-gnome-lib"/>
@@ -2323,7 +2323,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 
       <else>
 	<echo>**** Not preparing gnome-lib:</echo>
-	<echo>property use.support.lib in build.properties was not set or was set to false</echo>
+	<echo>property checkout.gnomelib.ext in build.properties was not set or was set to false</echo>
       </else>
     </if>
   </target>
