@@ -225,7 +225,7 @@
     <isset property="compile.static"/>
   </condition>
 
-  <!-- If building a release then we want to adjust environment variables so that the support library can be see during compilation -->
+  <!-- If building a release then we want to adjust environment variables so that the support library can be seen during compilation -->
   <if><bool><isset property="use.gnomelib.ext"/></bool>
 	<property name="gnome-lib-dir" value="${basedir}/ext/gnome-lib-minimal/${os.bin.dir}"/>
 
@@ -2256,6 +2256,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     
   <target name="prepare-gs2build" depends="init" if="collection.building.enabled" unless="gs2build.present">
     <antcall target="checkout-gs2build"/>
+    <antcall target="prepare-imagemagick"/> <!-- has to be done before calling prepare-gnome-lib -->
     <antcall target="prepare-gnome-lib"/>
     <antcall target="unzip-windows-packages"/>
     <antcall target="checkout-winbin"/>
@@ -2270,6 +2271,79 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="${svn.root}/main/${branch.path}/gs2build"/>
       <arg value="-r"/><arg value="${branch.revision}"/>
     </exec>
+  </target>
+
+
+  <target name="prepare-imagemagick" depends="init" if="collection.building.enabled">
+    <if>
+      <bool>
+	<istrue value="${checkout.imagemagick.ext}"/>
+      </bool>
+
+      <antcall target="checkout-imagemagick"/>
+      <antcall target="compile-imagemagick"/>
+
+      <else>
+	<echo>**** Not preparing imagemagick:</echo>
+	<echo>property checkout.imagemagick.ext in build.properties was not set or was set to false</echo>
+      </else>
+    </if>
+  </target>
+
+  <target name="checkout-imagemagick" depends="init" if="collection.building.enabled" unless="nosvn.mode">
+    
+    <property name="imagemagick.src.dir" value="${gs2build.home}/ext/imagemagick"/>
+    <condition property="imagemagick.src.present">
+      <available file="${imagemagick.src.dir}" type="dir" />
+    </condition>
+
+    <if>
+      <bool>
+	<not><istrue value="${imagemagick.src.present}"/></not>
+      </bool>
+      
+      <echo>checking out imagemagick source into the extension area</echo>
+
+      <exec executable="svn">
+	<arg value="checkout"/>
+	<arg value="${svn.root}/gs2-extensions/imagemagick/trunk/src"/>
+	<arg value="${imagemagick.src.dir}"/>
+      </exec>
+
+      <else>
+	<echo>imagemagick source code already exists at ${imagemagick.src.dir}</echo>
+      </else>
+    </if>
+  </target>
+
+ <!-- Compile up imagemagick src folder if: the checkout.imagemagick.ext flag is turned on, if the imagick source code exists and if hasn't already been compiled up, then compile it up. Later can check if a gs-specific binary version has been installed already, in which case compilation won't be necessary. -->
+  <target name="compile-imagemagick" if="checkout.imagemagick.ext">
+    
+    <property name="imagemagick.src.dir" value="${gs2build.home}/ext/imagemagick"/>
+    <property name="imagemagick.compiled.dir" value="${gs2build.home}/ext/imagemagick/${os.bin.dir}"/>
+
+    <condition property="imagemagick.src.present">
+      <available file="${imagemagick.src.dir}" type="dir" />
+    </condition>
+    <condition property="imagemagick.compiled.present">
+      <available file="${imagemagick.compiled.dir}" type="dir"/>
+    </condition>
+    <!--<condition property="imagemagick.bin.present">
+      <available file="${basedir}/wherever/the/imgmagick/binary/is/to/be/found" type="dir" />
+    </condition>-->
+
+    <if>
+      <bool>
+	<and>
+	  <istrue value="${imagemagick.src.present}"/> <!-- imagemagick src code is present -->
+	  <not><istrue value="${imagemagick.compiled.present}"/></not> <!-- imagemagick src not compiled yet, so no imagemagick/os subfolder yet -->
+	  </and>
+      </bool>
+      <!-- then compile it. Only necessary for mac/linux, since windows has a stable working binary of imagemagick -->
+      <exec executable="/bin/bash" dir="${imagemagick.src.dir}" failonerror="true">
+        <arg value="CASCADE-MAKE.sh"/>
+      </exec>  
+    </if>
   </target>
 
 
@@ -2328,13 +2402,31 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </if>
   </target>
 
+
   <target name="checkout-gnome-lib" depends="init" if="collection.building.enabled" unless="nosvn.mode">
-    <echo>checking out gnome-lib extension</echo>
-    <exec executable="svn">
-      <arg value="checkout"/>
-      <arg value="${svn.root}/gs2-extensions/gnome-lib/trunk/src"/>
-      <arg value="${gs2build.home}/ext/gnome-lib"/>
-    </exec>
+
+    <property name="gnomelib.src.dir" value="${basedir}/gs2build/ext/gnome-lib"/>
+    <condition property="gnome.src.present">
+      <available file="${gnomelib.src.dir}" type="dir" />
+    </condition>
+
+    <if>
+      <bool>
+	<not><istrue value="${gnome.src.present}"/></not>
+      </bool>
+
+      <echo>checking out gnome-lib extension</echo>
+      <exec executable="svn">
+	<arg value="checkout"/>
+	<arg value="${svn.root}/gs2-extensions/gnome-lib/trunk/src"/>
+	<arg value="${gs2build.home}/ext/gnome-lib"/>
+      </exec>
+
+      <else>
+	<echo>gnomelib source code already exists at ${gnomelib.src.dir}</echo>
+      </else>
+    </if>
+
   </target>
 
   <target name="checkout-winbin" depends="init" if="current.os.iswindows" 
