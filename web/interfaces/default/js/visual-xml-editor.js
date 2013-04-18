@@ -276,44 +276,57 @@ function visualXMLEditor(xmlString)
 	//Dynamically retrieve the gslib elements from the gslib.xsl file to put into the toolbox
 	var retrieveGSLIBTemplates = function(callback)
 	{
-		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetTemplateListFromFile&s1.locationName=interface&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.fileName=gslib.xsl";
-
-		$.ajax(url)
-		.success(function(response)
+		if($(document).data("gslibList"))
 		{
-			startIndex = response.search("<templateList>") + "<templateList>".length;
-			endIndex = response.search("</templateList>");
-
-			if(startIndex == "<templateList>".length - 1)
-			{
-				console.log("Error retrieving GSLIB templates");
-				return;
-			}
-
-			var listString = response.substring(startIndex, endIndex);
-			var list = eval(listString.replace(/&quot;/g, "\""));
-			var modifiedList = new Array();
-
-			for(var i = 0; i < list.length; i++)
-			{
-				var current = list[i];
-				if(current.name)
-				{
-					modifiedList.push(current.name);
-				}
-			}
-
-			_elemList["gslib"] = modifiedList;
-
+			_elemList["gslib"] = $(document).data("gslibList");
+			
 			if(callback)
 			{
 				callback();
 			}
-		})
-		.error(function()
+		}
+		else
 		{
-			console.log("Error retrieving GSLIB templates");
-		});
+			var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetTemplateListFromFile&s1.locationName=interface&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.fileName=gslib.xsl";
+
+			$.ajax(url)
+			.success(function(response)
+			{
+				startIndex = response.search("<templateList>") + "<templateList>".length;
+				endIndex = response.search("</templateList>");
+
+				if(startIndex == "<templateList>".length - 1)
+				{
+					console.log("Error retrieving GSLIB templates");
+					return;
+				}
+
+				var listString = response.substring(startIndex, endIndex);
+				var list = eval(listString.replace(/&quot;/g, "\""));
+				var modifiedList = new Array();
+
+				for(var i = 0; i < list.length; i++)
+				{
+					var current = list[i];
+					if(current.name)
+					{
+						modifiedList.push(current.name);
+					}
+				}
+				
+				_elemList["gslib"] = modifiedList;
+				$(document).data("gslibList", modifiedList);
+				
+				if(callback)
+				{
+					callback();
+				}
+			})
+			.error(function()
+			{
+				console.log("Error retrieving GSLIB templates");
+			});
+		}
 	}
 
 	//Create the toolbar
@@ -327,7 +340,7 @@ function visualXMLEditor(xmlString)
 			var currentList = _elemList[key];
 
 			var tab = $("<li>");
-			var tabLink = $("<a>", {"href":"#ve" + key});
+			var tabLink = $("<a>", {"href":document.URL + "#ve" + key});
 			tabLink.css({"font-size":"0.9em", "padding":"5px"});
 			tabLink.text(key);
 			tab.append(tabLink);
@@ -352,7 +365,7 @@ function visualXMLEditor(xmlString)
 		}
 
 		var otherTab = $("<li>");
-		var otherTabLink = $("<a>", {"href":"#veother"});
+		var otherTabLink = $("<a>", {"href":document.URL + "#veother"});
 		otherTabLink.css({"font-size":"0.9em", "padding":"5px"});
 		otherTabLink.text("other");
 		otherTab.append(otherTabLink);

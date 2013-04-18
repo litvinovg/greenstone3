@@ -6,6 +6,82 @@ function DebugWidget()
 
 	//The this variable
 	var _greenbug = this;
+	
+	//Template tracker class
+	var TemplateTracker = function()
+	{
+		var templates = new Array();
+		var currentIndex = -1;
+
+		this.push = function(object)
+		{
+			if(currentIndex < templates.length - 1 && templates.length > 0)
+			{
+				templates.splice(currentIndex + 1, templates.length - 1 - currentIndex);
+			}
+			templates[++currentIndex] = object;
+
+			_forwardButton.button("option", "disabled", true);
+			if(templates.length > 1)
+			{
+				_backButton.button("option", "disabled", false);
+			}
+		}
+
+		this.next = function()
+		{
+			if(currentIndex == templates.length - 1)
+			{
+				return;
+			}
+
+			if(currentIndex + 1 == templates.length - 1)
+			{
+				_forwardButton.button("option", "disabled", true);
+			}
+			_backButton.button("option", "disabled", false);
+
+			return templates[++currentIndex];
+		}
+
+		this.previous = function()
+		{
+			if(currentIndex == 0)
+			{
+				return;
+			}
+
+			if(currentIndex - 1 == 0)
+			{
+				_backButton.button("option", "disabled", true);
+			}
+			_forwardButton.button("option", "disabled", false);
+
+			return templates[--currentIndex];
+		}
+		
+		this.peekPrevious = function()
+		{
+			if(currentIndex == 0)
+			{
+				return;
+			}
+
+			return templates[currentIndex - 1];
+		}
+
+		this.peekNext = function()
+		{
+			if(currentIndex == templates.length - 1)
+			{
+				return;
+			}
+
+			return templates[currentIndex + 1];
+		}
+	}
+
+	var _templateTracker = new TemplateTracker();
 
 	//Debugger state-keeping variables
 	var _debugOn = false;
@@ -14,7 +90,6 @@ function DebugWidget()
 	var _itemSelected = false; //Used to prevent multiple elements from being highlighted
 	var _editModeText = false;
 	var _fromSelection = false;
-	var _selectedTemplate;
 	var _selectedInfoContainers = new Array();
 
 	//Page elements
@@ -28,9 +103,14 @@ function DebugWidget()
 	var _templateSelector;
 	var _editor;
 	var _editingDiv;
+	var _xmlStatusBar;
+	
+	//Buttons
+	var _backButton;
+	var _forwardButton;
+	var _currentSelectionButton;
 	var _enableSelectorButton;
 	var _closeEditorButton;
-	var _xmlStatusBar;
 	var _saveButton;
 	var _swapEditorButton;
 
@@ -94,9 +174,86 @@ function DebugWidget()
 			sFunction();
 		}
 	}
+	
+	var changeToSelectedElement = function(templateIndex, templateList)
+	{
+		_templateSelector.children("select").empty();
+		
+		for(var i = 0; i < templateList.length; i++)
+		{
+			_templateSelector.children("select").append($(templateList[i]).clone(true));
+		}
+
+		if(templateIndex === undefined)
+		{
+			_templateSelector.find("option").first().trigger("change", [true]);
+		}
+		else
+		{
+			_templateSelector.find("option").filter(function(){return $(this).data("index") == templateIndex}).first().trigger("change", [true]);
+		}
+		return;
+	}
+	
+	var createNavButtons = function(buttonDiv)
+	{
+		var navButtonHolder = $("<div>").css("float", "left");
+
+		var backForwardFunction = function(e)
+		{
+			var template;
+			if($(e.target).attr("id") == "veBack")
+			{
+				template = _templateTracker.previous();
+			}
+			else
+			{
+				template = _templateTracker.next();
+			}
+			
+			if(!template)
+			{
+				return;
+			}
+
+			_fileSelector.find("option").filter(function(){return $(this).data("index") == template.fileIndex}).prop("selected", true);
+
+			changeToSelectedElement(template.templateIndex, template.list);
+		}
+		
+		_backButton = $("<button>Back button</button>").attr("id", "veBack");
+		_backButton.click(backForwardFunction);
+		_styleFunctions.push(function(){_backButton.button({icons:{primary:"ui-icon-triangle-1-w"}, text:false, disabled:true})});
+	
+		_forwardButton = $("<button>Forward button</button>").attr("id", "veForwards");
+		_forwardButton.click(backForwardFunction);
+		_styleFunctions.push(function(){_forwardButton.button({icons:{primary:"ui-icon-triangle-1-e"}, text:false, disabled:true})});
+
+		//Changes the template list to what is currently selected
+		_currentSelectionButton = $("<button>Current selection button</button>");
+		_currentSelectionButton.click(function()
+		{
+			_fileSelector.find("option").eq(0).prop("selected", true);
+			changeToSelectedElement(undefined, _selectedInfoContainers);
+			
+			var selectedCopy = new Array();
+			for(var i = 0; i < _selectedInfoContainers.length; i++)
+			{
+				selectedCopy[i] = _selectedInfoContainers[i];
+			}
+			
+			_templateTracker.push({fileIndex:-1, templateIndex:0, list:selectedCopy});
+		});
+		_styleFunctions.push(function(){_currentSelectionButton.button({icons:{primary:"ui-icon-pencil"}, text:false, disabled:true})});
+		
+		navButtonHolder.append(_backButton);
+		navButtonHolder.append(_forwardButton);
+		navButtonHolder.append(_currentSelectionButton);
+		buttonDiv.append(navButtonHolder);
+	}
 
 	//Create the area where the buttons are stored
-	var createButtonDiv = function(buttonDiv)
+	var createControlButtons = function(buttonDiv)
 	{
 		//Used to enable the selector to get the templates of a particular area of the page
 		_enableSelectorButton = $("<button>Select an element</button>");
@@ -111,7 +268,7 @@ function DebugWidget()
 			_pauseSelector = false;
 			_enableSelectorButton.button("option", "disabled", true);
 		});
-		_styleFunctions.push(function(){_enableSelectorButton.button({icons:{primary:"ui-icon-power"}})});
+		_styleFunctions.push(function(){_enableSelectorButton.button({icons:{primary:"ui-icon-pencil"}})});
 
 		//Used to minimise/restore the editor
 		_closeEditorButton = $("<button>Close editor</button>");
@@ -315,13 +472,18 @@ function DebugWidget()
 		_templateSelector = $("<div>", {"id":"veTemplateSelector", "class":"ui-state-default ui-corner-all"});
 		_templateSelector.append($("<span>Templates: <span>"));
 		var templateSelectBox = $("<select>").append("<option>-- No templates --</option>");
-		templateSelectBox.change(function()
+		templateSelectBox.change(function(e, triggered)
 		{
 			var selected = templateSelectBox.find(":selected");
 			var changeFunction = selected.data("changeFunction");
 			if(changeFunction)
 			{
 				changeFunction();
+			}
+
+			if(!triggered)
+			{
+				_templateTracker.push({fileIndex:_fileSelector.find(":selected").data("index"), templateIndex:selected.data("index"), list:templateSelectBox.children("option").clone(true)});
 			}
 		});
 		_templateSelector.append(templateSelectBox);
@@ -340,40 +502,24 @@ function DebugWidget()
 			var listString = response.substring(listStartIndex, listEndIndex).replace(/&quot;/g, "\"").replace(/\\/g, "/");
 			var list = eval(listString);
 
-			var selectBox = $("<select>");
-			selectBox.append($("<option>-- Select a file --</option>", {value:"none"}));
+			var fileSelectBox = $("<select>");
+			fileSelectBox.append($("<option>-- Select a file --</option>").data("index", -1));
 			_fileSelector.addClass("ui-state-default");
 			_fileSelector.addClass("ui-corner-all");
 			_fileSelector.append("<span>Files: </span>");
-			_fileSelector.append(selectBox);
-			
-			var currentSelectionOption = $("<option>[Current selection]</option>");
-			currentSelectionOption.val("currentSelection");
-			selectBox.append(currentSelectionOption);
+			_fileSelector.append(fileSelectBox);
 			
 			for(var i = 0; i < list.length; i++)
 			{
 				var item = list[i];
-				var option = $("<option>" + item.path + " (" + item.location + ")</option>", {value:item.path});
+				var option = $("<option>" + item.path + " (" + item.location + ")</option>").data("index", i);
 				option.data("fileItem", item);
-				selectBox.append(option);
+				fileSelectBox.append(option);
 			}
 
-			selectBox.change(function()
+			fileSelectBox.change(function()
 			{
-				var selectedItem = selectBox.find(":selected");
-
-				if(selectedItem.val() == "currentSelection")
-				{
-					_templateSelector.children("select").empty();
-					for(var i = 0; i < _selectedInfoContainers.length; i++)
-					{
-						var currentContainer = _selectedInfoContainers[i];
-						_templateSelector.children("select").append(currentContainer);
-					}
-					_templateSelector.children("select").children().first().trigger("change");
-					return;
-				}
+				var selectedItem = fileSelectBox.find(":selected");
 				
 				if(!selectedItem.data("fileItem"))
 				{
@@ -392,12 +538,12 @@ function DebugWidget()
 					_templateSelector.children("select").empty();
 					if(templateList.length == 0)
 					{
-						_templateSelector.children("select").append("<option>-- No templates --</option>");
+						_templateSelector.children("select").append($("<option>-- No templates --</option>").data("index", -1));
 					}
 
 					for(var i = 0; i < templateList.length; i++)
 					{
-						var fileName = selectedItem.data("fileItem").path;
+						var filename = selectedItem.data("fileItem").path;
 						var location = selectedItem.data("fileItem").location;
 						var namespace = templateList[i].namespace;
 						var nodename = "template";
@@ -417,7 +563,7 @@ function DebugWidget()
 
 						_elements.push(infoContainer);
 
-						addChangeEventToInfoContainer(infoContainer, fileName, location, nodename, namespace, name, match);
+						addChangeEventToInfoContainer(infoContainer, filename, location, nodename, namespace, name, match);
 
 						if(name && name.length > 0)
 						{
@@ -428,6 +574,7 @@ function DebugWidget()
 							infoContainer.text(match);
 						}
 
+						infoContainer.data("index", i);
 						_templateSelector.children("select").append(infoContainer);
 					}
 
@@ -464,7 +611,8 @@ function DebugWidget()
 
 		var buttonDiv = $("<div>");
 		toolBarDiv.append(buttonDiv);
-		createButtonDiv(buttonDiv);
+		createNavButtons(buttonDiv);
+		createControlButtons(buttonDiv);
 		createFileAndTemplateSelectors(buttonDiv);
 		createXMLStatusBar(buttonDiv);
 
@@ -507,11 +655,18 @@ function DebugWidget()
 	}
 
 	//Change the current template in the XML and Visual editor
-	this.changeCurrentTemplate = function(location, fileName, nodename, namespace, name, match)
+	this.changeCurrentTemplate = function(location, filename, nodename, namespace, name, match)
 	{
+		_currentFileName = filename;
+		_currentLocation = location;
+		_currentNodename = nodename;
+		_currentNamespace = namespace;
+		_currentName = name;
+		_currentMatch = match;
+	
 		var responseName = "requestedNameTemplate";
 
-		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetXMLTemplateFromFile&s1.fileName=" + fileName + "&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c + "&s1.locationName=" + location + "&s1.namespace=" + namespace + "&s1.nodename=" + nodename;
+		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetXMLTemplateFromFile&s1.fileName=" + filename + "&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c + "&s1.locationName=" + location + "&s1.namespace=" + namespace + "&s1.nodename=" + nodename;
 		if(match && match.length > 0){url += "&s1.match=" + match; responseName = "requestedMatchTemplate";}
 		if(name && name.length > 0){url += "&s1.name=" + name;}
 
@@ -540,7 +695,7 @@ function DebugWidget()
 			}
 
 			_editingDiv.empty();
-			_editingDiv.append($("<p>Location: " + location + " <br/>Filename: " + fileName + "</p>"));
+			_editingDiv.append($("<p>Location: " + location + " <br/>Filename: " + filename + "</p>"));
 			_editingDiv.append(_textEditor);
 
 			_vEditor = new visualXMLEditor(template);
@@ -550,7 +705,7 @@ function DebugWidget()
 			$("#veToolboxDiv").height($("#veEditorContainer").height());
 
 			_vEditor.setFileLocation(location);
-			_vEditor.setFileName(fileName);
+			_vEditor.setFileName(filename);
 
 			if(!_isVisualEditor)
 			{
@@ -586,26 +741,11 @@ function DebugWidget()
 	}
 
 	//Store the function that is called when this template is selected from the list
-	var addChangeEventToInfoContainer = function(infoContainer, fileName, location, nodename, namespace, name, match)
+	var addChangeEventToInfoContainer = function(infoContainer, filename, location, nodename, namespace, name, match)
 	{
 		infoContainer.data("changeFunction", function()
 		{
-			if(_selectedTemplate)
-			{
-				_selectedTemplate.css("border", _selectedTemplate.prevBorder);
-			}
-			_selectedTemplate = infoContainer;
-			_selectedTemplate.prevBorder = _selectedTemplate.css("border");
-			_selectedTemplate.css("border", "red 1px solid");
-
-			_currentFileName = fileName;
-			_currentLocation = location;
-			_currentNodename = nodename;
-			_currentNamespace = namespace;
-			_currentName = name;
-			_currentMatch = match;
-
-			_greenbug.changeCurrentTemplate(location, fileName, nodename, namespace, name, match);
+			_greenbug.changeCurrentTemplate(location, filename, nodename, namespace, name, match);
 		});
 	}
 	
@@ -613,30 +753,30 @@ function DebugWidget()
 	this.fileNameToLocationAndName = function(filepath)
 	{
 		var location;
-		var fileName;
+		var filename;
 		//Use the filepath to work out where this file is from
 		if(filepath.search(/[\/\\]interfaces[\/\\]/) != -1)
 		{
 			location = "interface";
-			fileName = filepath.replace(/.*[\/\\]transform[\/\\]/, "");
+			filename = filepath.replace(/.*[\/\\]transform[\/\\]/, "");
 		}
 		else if(filepath.search(/[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]etc[\/\\]/) != -1)
 		{
 			location = "collectionConfig";
-			fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]etc[\/\\]/, "");
+			filename = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]etc[\/\\]/, "");
 		}
 		else if(filepath.search(/[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]transform[\/\\]/) != -1)
 		{
 			location = "collection";
-			fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]transform[\/\\]/, "");
+			filename = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]collect[\/\\].*[\/\\]transform[\/\\]/, "");
 		}
 		else if(filepath.search(/[\/\\]sites[\/\\].*[\/\\]transform[\/\\]/) != -1)
 		{
 			location = "site";
-			fileName = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]transform[\/\\]/, "");
+			filename = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]transform[\/\\]/, "");
 		}
 		
-		return {location:location, filename:fileName};
+		return {location:location, filename:filename};
 	}
 
 	//Add the mouse events to the <debug> elemetns that are called when the selector is anabled
@@ -646,13 +786,23 @@ function DebugWidget()
 		{
 			if(_debugOn)
 			{
+				e.stopPropagation();
 				$("a").off("click");
 				_debugOn = false;
 				_pauseSelector = true;
 				_enableSelectorButton.button("option", "disabled", false);
-				_templateSelector.children("select").trigger("change");
-				_fileSelector.children("select").val("currentSelection");
-				e.stopPropagation();
+				_templateSelector.children("select").trigger("change", [true]);
+				_fileSelector.children("select").val("none");
+				
+				var selectedCopy = new Array();
+				for(var i = 0; i < _selectedInfoContainers.length; i++)
+				{
+					selectedCopy[i] = _selectedInfoContainers[i];
+				}
+				
+				_currentSelectionButton.button("option", "disabled", false);
+				
+				_templateTracker.push({fileIndex:-1, list:selectedCopy, templateIndex:0});
 			}
 		});
 
@@ -717,10 +867,10 @@ function DebugWidget()
 					{
 						infoContainer.text(match);
 					}
-					
-					_selectedInfoContainers.push(infoContainer.clone(true));
 
 					_templateSelector.children("select").append(infoContainer);
+					infoContainer.data("index", infoContainer.index());
+					_selectedInfoContainers.push(infoContainer.clone(true));
 				});
 				
 				if(!_itemSelected)
