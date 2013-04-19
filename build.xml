@@ -1270,7 +1270,8 @@
        fail sooner if the server has indeed been stopped. -->
   <target name="check-tomcat-running">
     <condition property="tomcat.isrunning">
-      <http url="http://${tomcat.server}:${tomcat.port}${app.path}"/>
+      <!--<http url="http://${tomcat.server}:${tomcat.port}${app.path}"/>-->
+      <http url="http://${tomcat.server}:${tomcat.port}"/>
     </condition>
   </target>
 
