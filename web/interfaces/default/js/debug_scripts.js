@@ -526,60 +526,7 @@ function DebugWidget()
 					return;
 				}
 
-				var getURL = gs.xsltParams.library_name + "?a=g&rt=r&s=GetTemplateListFromFile&s1.fileName=" + selectedItem.data("fileItem").path + "&s1.locationName=" + selectedItem.data("fileItem").location + "&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c;
-				$.ajax(getURL)
-				.success(function(templateResponse)
-				{
-					var templateListStart = templateResponse.indexOf("<templateList>") + "<templateList>".length;
-					var templateListEnd = templateResponse.indexOf("</templateList>");
-					var templateListString = templateResponse.substring(templateListStart, templateListEnd).replace(/&quot;/g, "\"");
-					var templateList = eval(templateListString);
-
-					_templateSelector.children("select").empty();
-					if(templateList.length == 0)
-					{
-						_templateSelector.children("select").append($("<option>-- No templates --</option>").data("index", -1));
-					}
-
-					for(var i = 0; i < templateList.length; i++)
-					{
-						var filename = selectedItem.data("fileItem").path;
-						var location = selectedItem.data("fileItem").location;
-						var namespace = templateList[i].namespace;
-						var nodename = "template";
-						var name = templateList[i].name;
-						var match = templateList[i].match;
-
-						if(name)
-						{
-							name = templateList[i].name.replace(/&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
-						}
-						if(match)
-						{
-							match = templateList[i].match.replace(/&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
-						}
-
-						var infoContainer = $("<option>");
-
-						_elements.push(infoContainer);
-
-						addChangeEventToInfoContainer(infoContainer, filename, location, nodename, namespace, name, match);
-
-						if(name && name.length > 0)
-						{
-							infoContainer.text(name);
-						}
-						if(match && match.length > 0)
-						{
-							infoContainer.text(match);
-						}
-
-						infoContainer.data("index", i);
-						_templateSelector.children("select").append(infoContainer);
-					}
-
-					_templateSelector.children("select").trigger("change");
-				});
+				_greenbug.populateTemplateSelectorFromFile(selectedItem.data("fileItem").path, selectedItem.data("fileItem").location, function(){_templateSelector.children("select").trigger("change")});
 			});
 		})
 		.error(function()
@@ -652,6 +599,65 @@ function DebugWidget()
 		_elements.push(bottomBorderDiv);
 		_elements.push(leftBorderDiv);
 		_elements.push(rightBorderDiv);
+	}
+	
+	this.populateTemplateSelectorFromFile = function(filename, location, callback)
+	{
+		var getURL = gs.xsltParams.library_name + "?a=g&rt=r&s=GetTemplateListFromFile&s1.fileName=" + filename + "&s1.locationName=" + location + "&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c;
+		$.ajax(getURL)
+		.success(function(templateResponse)
+		{
+			var templateListStart = templateResponse.indexOf("<templateList>") + "<templateList>".length;
+			var templateListEnd = templateResponse.indexOf("</templateList>");
+			var templateListString = templateResponse.substring(templateListStart, templateListEnd).replace(/&quot;/g, "\"");
+			var templateList = eval(templateListString);
+
+			_templateSelector.children("select").empty();
+			if(templateList.length == 0)
+			{
+				_templateSelector.children("select").append($("<option>-- No templates --</option>").data("index", -1));
+			}
+
+			for(var i = 0; i < templateList.length; i++)
+			{
+				var namespace = templateList[i].namespace;
+				var nodename = "template";
+				var name = templateList[i].name;
+				var match = templateList[i].match;
+
+				if(name)
+				{
+					name = templateList[i].name.replace(/&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
+				}
+				if(match)
+				{
+					match = templateList[i].match.replace(/&apos;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
+				}
+
+				var infoContainer = $("<option>");
+
+				_elements.push(infoContainer);
+
+				addChangeEventToInfoContainer(infoContainer, filename, location, nodename, namespace, name, match);
+
+				if(name && name.length > 0)
+				{
+					infoContainer.text(name);
+				}
+				if(match && match.length > 0)
+				{
+					infoContainer.text(match);
+				}
+
+				infoContainer.data("index", i);
+				_templateSelector.children("select").append(infoContainer);
+			}
+			
+			if(callback)
+			{
+				callback();
+			}
+		});
 	}
 
 	//Change the current template in the XML and Visual editor
@@ -749,6 +755,11 @@ function DebugWidget()
 		});
 	}
 	
+	this.getTemplateTracker = function()
+	{
+		return _templateTracker;
+	}
+	
 	//Turns a filename into it's location (i.e. interface/site/collection) and name
 	this.fileNameToLocationAndName = function(filepath)
 	{
@@ -775,6 +786,8 @@ function DebugWidget()
 			location = "site";
 			filename = filepath.replace(/.*[\/\\]sites[\/\\].*[\/\\]transform[\/\\]/, "");
 		}
+		
+		filename = filename.replace(/\\/g, "/");
 		
 		return {location:location, filename:filename};
 	}

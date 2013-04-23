@@ -1146,6 +1146,32 @@ function visualXMLEditor(xmlString)
 		{
 			return _id;
 		}
+		
+		var visitCalledTemplate = function()
+		{
+			var url = gs.xsltParams.library_name + "?a=g&rt=r&s=ResolveCallTemplate&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c + "&s1.fileName=" + _fileName + "&s1.templateName=" + _xmlNode.getAttribute("name");
+			$.ajax(url)
+			.success(function(response)
+			{
+				var startIndex = response.indexOf("<requestedTemplate>") + ("<requestedTemplate>").length;
+				var endIndex = response.indexOf("</requestedTemplate>");
+				
+				if(endIndex != -1)
+				{
+					var templateFileName = response.substring(startIndex, endIndex);
+					var file = _greenbug.fileNameToLocationAndName(templateFileName);
+					
+					var fileTemplateName = file.filename.replace(/\\/g, "/") + " (" + file.location + ")";
+					$("#veFileSelector").find("option").filter(function(){return $(this).text() == fileTemplateName}).prop("selected", true);
+					_greenbug.populateTemplateSelectorFromFile(file.filename, file.location);
+					_greenbug.changeCurrentTemplate(file.location, file.filename, "template", "xsl", _xmlNode.getAttribute("name"), null);
+				}
+				else
+				{
+					_greenbug.changeCurrentTemplate("interface", "gslib.xsl", "template", "xsl", _xmlNode.getAttribute("name"), null);
+				}
+			});
+		}
 
 		//Fill the information area with details about this element
 		this.populateInformationDiv = function()
@@ -1248,27 +1274,7 @@ function visualXMLEditor(xmlString)
 					_infoDiv.append(visitTemplateOption);
 					
 					visitTemplateOption.button();
-					visitTemplateOption.click(function()
-					{
-						var url = gs.xsltParams.library_name + "?a=g&rt=r&s=ResolveCallTemplate&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c + "&s1.fileName=" + _fileName + "&s1.templateName=" + _xmlNode.getAttribute("name");
-						$.ajax(url)
-						.success(function(response)
-						{
-							var startIndex = response.indexOf("<requestedTemplate>") + ("<requestedTemplate>").length;
-							var endIndex = response.indexOf("</requestedTemplate>");
-							
-							if(endIndex != -1)
-							{
-								var templateFileName = response.substring(startIndex, endIndex);
-								var file = _greenbug.fileNameToLocationAndName(templateFileName);
-								_greenbug.changeCurrentTemplate(file.location, file.filename, "template", "xsl", _xmlNode.getAttribute("name"), null);
-							}
-							else
-							{
-								_greenbug.changeCurrentTemplate("interface", "gslib.xsl", "template", "xsl", _xmlNode.getAttribute("name"), null);
-							}
-						});
-					});
+					visitTemplateOption.click(visitCalledTemplate);
 				}
 			}
 
@@ -1285,7 +1291,11 @@ function visualXMLEditor(xmlString)
 			_div.mouseover(function(event)
 			{
 				event.stopPropagation();
-				_div.css("border", "1px solid orange");
+				if(!_selectedElement || _id != _selectedElement.data("parentVEElement").getID())
+				{
+					_div.css("border", "1px solid orange");
+				}
+
 				var titleString = " ";
 				if(_xmlNode.nodeType == 1)
 				{
@@ -1306,14 +1316,22 @@ function visualXMLEditor(xmlString)
 			});
 			_div.mouseout(function(event)
 			{
-				_div.css("border", "1px solid black");
+				if(!_selectedElement || _id != _selectedElement.data("parentVEElement").getID())
+				{
+					_div.css("border", "1px solid black");
+				}
 				event.stopPropagation();
 			});
 			_div.click(function(event)
 			{
+				event.stopPropagation();
 				if(_selectedElement)
 				{
 					_selectedElement.css("border", _selectedElement.prevBorder);
+					if(_selectedElement.children("a").length)
+					{
+						_selectedElement.children("a").replaceWith(_selectedElement.children("a").children(".veTitleElement"));
+					}
 				}
 				_selectedElement = _div;
 				_div.prevBorder = _div.css("border");
@@ -1321,8 +1339,15 @@ function visualXMLEditor(xmlString)
 
 				_div.data("parentVEElement").focus();
 				_div.data("parentVEElement").populateInformationDiv();
-
-				event.stopPropagation();
+				
+				if(_xmlNode.tagName == "xsl:call-template" && _xmlNode.getAttribute("name").length > 0)
+				{
+					var link = $("<a>");
+					link.attr("href", "javascript:;");
+					link.click(visitCalledTemplate);
+					link.append(_div.children(".veTitleElement"));
+					_div.append(link);
+				}
 			});
 		}
 
