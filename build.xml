@@ -523,6 +523,21 @@
     <echo>is windows : ${current.os.iswindows}</echo>
     <echo>os.unix: ${os.unix}</echo>
   </target>
+
+  <!-- Appends the current env to the file environment.txt. For debugging env vars used by the release-kit. -->
+  <target name="write-env">
+    <echo message="*****************ENVIRONMENT OUTPUT:****************${line.separator}" file="environment.txt" append="true" />
+
+    <if><bool><istrue value="${current.os.iswindows}"/></bool>
+      <exec executable="set" dir="${basedir}" failonerror="false" output="environment.txt" append="true" />      
+      <else>
+	<exec executable="env" dir="${basedir}" failonerror="false" output="environment.txt" append="true" />
+      </else>
+    </if>
+
+    <echo message="${line.separator}" file="environment.txt" append="true" />
+  </target>
+
   
   <!-- ==================== Primary and Global Targets ============================= -->
 
