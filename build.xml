@@ -2750,6 +2750,16 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </chmod>
   </target>
 
+  <!-- for macs, set up the .app shortcuts to gsi, gli, client-gli and gems -->
+  <target name="gen-mac-shortcuts">    
+    <if><bool><istrue value="${current.os.ismac}"/></bool>
+      <filter token="gsdl3srchome" value="${basedir}"/>
+      <copy file="${basedir}/gs3-server.app/Contents/document.wflow.in" tofile="${basedir}/gs3-server.app/Contents/document.wflow" filtering="true" overwrite="true"/>
+      <copy file="${basedir}/gli.app/Contents/document.wflow.in" tofile="${basedir}/gli.app/Contents/document.wflow" filtering="true" overwrite="true"/>
+      <copy file="${basedir}/client-gli.app/Contents/document.wflow.in" tofile="${basedir}/client-gli.app/Contents/document.wflow" filtering="true" overwrite="true"/>
+      <copy file="${basedir}/gems.app/Contents/document.wflow.in" tofile="${basedir}/gems.app/Contents/document.wflow" filtering="true" overwrite="true"/>
+    </if>
+  </target>
 
   <!-- ============= tweaks for making compilation static ========== -->  
   <target name="tweak-makefiles" depends="init" if="compile.static">
