@@ -974,9 +974,9 @@
       </bool>
 
       <if><bool><istrue value="${current.os.iswindows}"/></bool>
-	<property name="perl.exec" value="${escaped.perl.path}perl.exe"/>
+	<property name="perl.exec" value="${perl.path}perl.exe"/>
 	<else>
-	  <property name="perl.exec" value="${escaped.perl.path}perl"/>	  
+	  <property name="perl.exec" value="${perl.path}perl"/>	  
 	</else>
       </if>
 
