@@ -635,23 +635,22 @@
               <arg value="perl" />
             </exec>
 
-			<exec executable="${gs2build.home}/bin/windows/which" os="${os.windows}" spawn="false" outputproperty="full.perl.path">
+	    <exec executable="${gs2build.home}/bin/windows/which" os="${os.windows}" spawn="false" outputproperty="full.perl.path">
               <arg value="perl" />
             </exec>
 
             <stringutil string="${full.perl.path}" property="partial.perl.path">
                 <replace regex="\/[^\/]*$" replacement="/" />
             </stringutil>
-			<stringutil string="${partial.perl.path}" property="perl.path">
+	    <stringutil string="${partial.perl.path}" property="perl.path">
                 <replace regex="\\[^\\]*$" replacement="\\" />
             </stringutil>
             <if><bool><istrue value="${current.os.isunix}"/></bool>
-
               <if><bool><not><equals arg1="${full.perl.path}" arg2="/usr/bin/perl"/></not></bool>
                 <echo>
     Non-standard location of Perl found: ${full.perl.path}
     Set the environment variable PERLPATH or the perl.path property in
-      build.properties to explicitly control the version of Perl used.
+    build.properties to explicitly control the version of Perl used.
                 </echo>
               </if>
             </if>
@@ -672,6 +671,9 @@
 	<property name="perl.path" value=""/>
       </else>
     </if>
+    <stringutil string="${perl.path}" property="escaped.perl.path">
+      <replace regex="\\" replacement="\\\\" />
+    </stringutil>
   </target>
 
   <target name="get-default-servlet-url">
@@ -963,15 +965,42 @@
     <echo>collection lucene-jdbm-demo installed</echo>
   </target>
 
+  <target name="set-perl-shebangs" depends="perl-for-building">
+    <if>
+      <bool>
+        <and><isset property="perl.path"/>
+          <not><equals arg1="${perl.path}" arg2=""/></not>
+        </and>
+      </bool>
+
+      <if><bool><istrue value="${current.os.iswindows}"/></bool>
+	<property name="perl.exec" value="${escaped.perl.path}perl.exe"/>
+	<else>
+	  <property name="perl.exec" value="${escaped.perl.path}perl"/>	  
+	</else>
+      </if>
+
+      <!--<echo>**** PERLPATH: ${perl.path}</echo>-->
+      <echo>**** Setting perl shebangs to Perl Exec: ${perl.exec}</echo>
+
+      <!-- set the shebangs in the cgi files to point to the correct perlpath -->
+      <rsr file="${web.home}/WEB-INF/cgi/gliserver.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/>
+      <rsr file="${web.home}/WEB-INF/cgi/metadata-server.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/> 
+      <rsr file="${web.home}/WEB-INF/cgi/checksum.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/> 	
+      <else>
+	<echo>WARNING: perl.path is empty. Unable to set the shebangs in the perl files in ${web.home}/WEB-INF/cgi</echo>
+      </else>
+    </if>
+  </target>
+
   <target name="configure-web" depends="init,perl-for-building"
     description="Configure only the web app config files">
     <!-- we want a unix path in the global.properties file -->
     <pathconvert targetos="unix" property="src.gsdl3.home.unix">
       <path path="${web.home}"/>
     </pathconvert>
-	<stringutil string="${perl.path}" property="escaped.perl.path">
-                <replace regex="\\" replacement="\\\\" />
-    </stringutil>
+
+    <antcall target="set-perl-shebangs" inheritAll="true" />
 	
     <filter token="gsdlhome" value="${gs2build.home}"/>
     <filter token="gsdl3srchome" value="${basedir}"/>
@@ -980,8 +1009,8 @@
     <filter token="tomcat.server" value="${tomcat.server}"/>
     <filter token="tomcat.port" value="${tomcat.port}"/>
     <filter token="perlpath" value="${escaped.perl.path}"/>
-	<filter token="disable.collection.building" value="${disable.collection.building}"/>
-    <copy file="${basedir}/web/WEB-INF/cgi/gsdl3site.cfg.in" tofile="${basedir}/web/WEB-INF/cgi/gsdl3site.cfg" filtering="true" overwrite="true"/>
+    <filter token="disable.collection.building" value="${disable.collection.building}"/>
+    <copy file="${web.home}/WEB-INF/cgi/gsdl3site.cfg.in" tofile="${web.home}/WEB-INF/cgi/gsdl3site.cfg" filtering="true" overwrite="true"/>
     <copy file="${basedir}/resources/java/global.properties.in" tofile="${web.classes}/global.properties" filtering="true" overwrite="true"/>
     <copy file="${basedir}/resources/java/log4j.properties.in" tofile="${web.classes}/log4j.properties" filtering="true" overwrite="true"/>
     <chmod file="${web.classes}/global.properties" perm="600"/>
@@ -2161,7 +2190,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 
   <!-- ============== gli targets ================================= -->
   
-  <!-- gliserver.pl, gsdlCGI.pm and metadata-server.pl updated are updated alongside 
+  <!-- gliserver.pl, gsdlCGI.pm, metadata-server.pl and checksum.pl are updated alongside 
        this in target svnupdate-collection-building -->
   <target name="svnupdate-gli" if="collection.building.enabled" depends="init" unless="nosvn.mode">
 
@@ -2173,7 +2202,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 
   </target>
 
-  <!-- gliserver.pl, gsdlCGI.pm and metadata-server.pl updated are updated 
+  <!-- gliserver.pl, gsdlCGI.pm, metadata-server.pl and checksum.pl are updated 
        alongside this prepare-gli target in target prepare-collection-building -->
   <target name="prepare-gli" depends="init" if="collection.building.enabled" unless="gli.present">
     <!-- checkout -->
@@ -2188,9 +2217,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </if>
   </target>
 
-  <!-- svn checkout gliserver.pl, gsdlCGI.pm for gli applet,
-       as well as gsdlCGI.pm-dependent metadata-server.pl 
-       (checksum.pl used only by GS2 for depositdspace.dm) -->
+  <!-- svn checkout gliserver.pl, gsdlCGI.pm for gli applet, as well as gsdlCGI.pm-dependent metadata-server.pl 
+       (checksum.pl is used by GS2 for depositdspace.dm and may eventually be used by GS3 too) -->
   <target name="svnupdate-cgi">
 
     <exec executable="svn" dir="web/WEB-INF/cgi">
@@ -2207,6 +2235,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="export"/>
       <arg value="-r"/><arg value="${branch.revision}"/>
       <arg value="${svn.root}/main/${branch.path}/greenstone2/common-src/cgi-bin/metadata-server.pl"/>
+    </exec>
+    <exec executable="svn" dir="web/WEB-INF/cgi">
+      <arg value="export"/>
+      <arg value="-r"/><arg value="${branch.revision}"/>
+      <arg value="${svn.root}/main/${branch.path}/greenstone2/common-src/cgi-bin/checksum.pl"/>
     </exec>
   </target>
 
