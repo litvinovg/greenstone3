@@ -1,10 +1,15 @@
 package org.greenstone.gsdl3;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -20,7 +25,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.Part;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.action.PageAction;
@@ -35,6 +44,7 @@ import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
+import org.greenstone.util.GlobalProperties;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -168,7 +178,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 			this.default_lang = DEFAULT_LANG;
 		}
 
-		HashMap<String, Comparable> config_params = new HashMap<String, Comparable>();
+		HashMap<String, Object> config_params = new HashMap<String, Object>();
 
 		config_params.put(GSConstants.LIBRARY_NAME, library_name);
 		config_params.put(GSConstants.INTERFACE_NAME, interface_name);
@@ -314,7 +324,6 @@ public class LibraryServlet extends BaseGreenstoneServlet
 
 	public class UserSessionCache implements HttpSessionBindingListener
 	{
-
 		String session_id = "";
 
 		/**
@@ -367,11 +376,10 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		recept.cleanUp();
 	}
 
-	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	public void doGetOrPost(HttpServletRequest request, HttpServletResponse response, Map<String, String[]> queryMap) throws ServletException, IOException
 	{
 		logUsageInfo(request);
 
-		Map<String, String[]> queryMap = request.getParameterMap();
 		if (queryMap != null)
 		{
 			Iterator<String> queryIter = queryMap.keySet().iterator();
@@ -379,6 +387,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 			String href = null;
 			String rl = null;
 			String el = null;
+
 			while (queryIter.hasNext())
 			{
 				String q = queryIter.next();
@@ -436,7 +445,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		response.setContentType("text/html;charset=UTF-8");
 		PrintWriter out = response.getWriter();
 
-		String lang = request.getParameter(GSParams.LANGUAGE);
+		String lang = getFirstParam(GSParams.LANGUAGE, queryMap);
 		if (lang == null || lang.equals(""))
 		{
 			// try the session cached lang
@@ -453,6 +462,9 @@ public class LibraryServlet extends BaseGreenstoneServlet
 
 		if (request.getAuthType() != null)
 		{
+			//Get the username
+			userContext.setUsername(request.getUserPrincipal().getName());
+
 			//Get the groups for the user
 			Element acquireGroupMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
 			Element acquireGroupRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, "GetUserInformation", userContext);
@@ -460,7 +472,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 
 			Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			acquireGroupRequest.appendChild(paramList);
-			paramList.appendChild(GSXML.createParameter(this.doc, "username", request.getUserPrincipal().getName()));
+			paramList.appendChild(GSXML.createParameter(this.doc, GSXML.USERNAME_ATT, request.getUserPrincipal().getName()));
 
 			Element aquireGroupsResponseMessage = (Element) this.recept.process(acquireGroupMessage);
 			Element aquireGroupsResponse = (Element) GSXML.getChildByTagName(aquireGroupsResponseMessage, GSXML.RESPONSE_ELEM);
@@ -477,7 +489,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		// set the lang in the session
 		session.setAttribute(GSParams.LANGUAGE, lang);
 
-		String output = request.getParameter(GSParams.OUTPUT);
+		String output = getFirstParam(GSParams.OUTPUT, queryMap);
 		if (output == null || output.equals(""))
 		{
 			output = "html"; // uses html by default
@@ -516,11 +528,11 @@ public class LibraryServlet extends BaseGreenstoneServlet
 
 		xml_message.appendChild(xml_request);
 
-		String action = request.getParameter(GSParams.ACTION);
-		String subaction = request.getParameter(GSParams.SUBACTION);
-		String collection = request.getParameter(GSParams.COLLECTION);
-		String document = request.getParameter(GSParams.DOCUMENT);
-		String service = request.getParameter(GSParams.SERVICE);
+		String action = getFirstParam(GSParams.ACTION, queryMap);
+		String subaction = getFirstParam(GSParams.SUBACTION, queryMap);
+		String collection = getFirstParam(GSParams.COLLECTION, queryMap);
+		String document = getFirstParam(GSParams.DOCUMENT, queryMap);
+		String service = getFirstParam(GSParams.SERVICE, queryMap);
 
 		// We clean up the cache session_ids_table if system
 		// commands are issued (and also don't need to do caching for this request)
@@ -535,7 +547,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 			// system commands are to activate/deactivate stuff
 			// collection param is in the sc parameter.
 			// don't like the fact that it is hard coded here
-			String coll = request.getParameter(GSParams.SYSTEM_CLUSTER);
+			String coll = getFirstParam(GSParams.SYSTEM_CLUSTER, queryMap);
 			if (coll != null && !coll.equals(""))
 			{
 				clean_all = false;
@@ -546,7 +558,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 				// check other system types
 				if (subaction.equals("a") || subaction.equals("d"))
 				{
-					String module_name = request.getParameter("sn");
+					String module_name = getFirstParam("sn", queryMap);
 					if (module_name != null && !module_name.equals(""))
 					{
 						clean_all = false;
@@ -654,7 +666,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 				{// we have already dealt with these
 
 					String value = "";
-					String[] values = request.getParameterValues(name);
+					String[] values = queryMap.get(name);
 					value = values[0];
 					if (values.length > 1)
 					{
@@ -721,7 +733,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		}
 
 		//Add custom HTTP headers if requested
-		String httpHeadersParam = request.getParameter(GSParams.HTTP_HEADER_FIELDS);
+		String httpHeadersParam = getFirstParam(GSParams.HTTP_HEADER_FIELDS, queryMap);
 		if (httpHeadersParam != null && httpHeadersParam.length() > 0)
 		{
 			Gson gson = new Gson();
@@ -767,7 +779,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		xml_request.setAttribute("remoteAddress", request.getRemoteAddr());
 		xml_request.setAttribute("fullURL", fullURL.replace("&", "&amp;"));
 
-		if (!runSecurityChecks(request, xml_request, userContext, out, baseURL, collection, document))
+		if (!runSecurityChecks(request, xml_request, userContext, out, baseURL, collection, document, queryMap))
 		{
 			return;
 		}
@@ -797,16 +809,19 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		}
 
 		displaySize(session_ids_table);
+	}
 
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	{
+		doGetOrPost(request, response, request.getParameterMap());
 	} //end of doGet(HttpServletRequest, HttpServletResponse)
 
-	private boolean runSecurityChecks(HttpServletRequest request, Element xml_request, UserContext userContext, PrintWriter out, String baseURL, String collection, String document) throws ServletException
+	private boolean runSecurityChecks(HttpServletRequest request, Element xml_request, UserContext userContext, PrintWriter out, String baseURL, String collection, String document, Map<String, String[]> queryMap) throws ServletException
 	{
 		//Check if we need to login or logout
-		Map<String, String[]> params = request.getParameterMap();
-		String[] username = params.get("username");
-		String[] password = params.get("password");
-		String[] logout = params.get("logout");
+		String username = getFirstParam("username", queryMap);
+		String password = getFirstParam("password", queryMap);
+		String logout = getFirstParam("logout", queryMap);
 
 		if (logout != null)
 		{
@@ -821,44 +836,55 @@ public class LibraryServlet extends BaseGreenstoneServlet
 				request.logout();
 			}
 
+			//This try/catch block catches when the login request fails (e.g. The user enters an incorrect password).
 			try
 			{
-				password[0] = Authentication.hashPassword(password[0]);
-				request.login(username[0], password[0]);
+				//Try a global login first
+				password = Authentication.hashPassword(password);
+				request.login(username, password);
 			}
 			catch (Exception ex)
 			{
-				//The user entered in either the wrong username or the wrong password
-				Element loginPageMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-				Element loginPageRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PAGE, "", userContext);
-				loginPageRequest.setAttribute(GSXML.ACTION_ATT, "p");
-				loginPageRequest.setAttribute(GSXML.SUBACTION_ATT, "login");
-				loginPageRequest.setAttribute(GSXML.OUTPUT_ATT, "html");
-				loginPageRequest.setAttribute(GSXML.BASE_URL, baseURL);
-				loginPageMessage.appendChild(loginPageRequest);
-
-				Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-				loginPageRequest.appendChild(paramList);
-
-				Element messageParam = this.doc.createElement(GSXML.PARAM_ELEM);
-				messageParam.setAttribute(GSXML.NAME_ATT, "loginMessage");
-				messageParam.setAttribute(GSXML.VALUE_ATT, "Either your username or password was incorrect, please try again.");
-				paramList.appendChild(messageParam);
-
-				Element urlParam = this.doc.createElement(GSXML.PARAM_ELEM);
-				urlParam.setAttribute(GSXML.NAME_ATT, "redirectURL");
-				String queryString = "";
-				if (request.getQueryString() != null)
+				try
 				{
-					queryString = "?" + request.getQueryString().replace("&", "&amp;");
+					//If the global login fails then try a site-level login
+					String siteName = (String) this.recept.getConfigParams().get(GSConstants.SITE_NAME);
+					request.login(siteName + "-" + username, password);
 				}
-				urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName() + queryString);
-				paramList.appendChild(urlParam);
+				catch (Exception exc)
+				{
+					//The user entered in either the wrong username or the wrong password
+					Element loginPageMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
+					Element loginPageRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PAGE, "", userContext);
+					loginPageRequest.setAttribute(GSXML.ACTION_ATT, "p");
+					loginPageRequest.setAttribute(GSXML.SUBACTION_ATT, "login");
+					loginPageRequest.setAttribute(GSXML.OUTPUT_ATT, "html");
+					loginPageRequest.setAttribute(GSXML.BASE_URL, baseURL);
+					loginPageMessage.appendChild(loginPageRequest);
 
-				Node loginPageResponse = this.recept.process(loginPageMessage);
-				out.println(this.converter.getPrettyString(loginPageResponse));
+					Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+					loginPageRequest.appendChild(paramList);
 
-				return false;
+					Element messageParam = this.doc.createElement(GSXML.PARAM_ELEM);
+					messageParam.setAttribute(GSXML.NAME_ATT, "loginMessage");
+					messageParam.setAttribute(GSXML.VALUE_ATT, "Either your username or password was incorrect, please try again.");
+					paramList.appendChild(messageParam);
+
+					Element urlParam = this.doc.createElement(GSXML.PARAM_ELEM);
+					urlParam.setAttribute(GSXML.NAME_ATT, "redirectURL");
+					String queryString = "";
+					if (request.getQueryString() != null)
+					{
+						queryString = "?" + request.getQueryString().replace("&", "&amp;");
+					}
+					urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName() + queryString);
+					paramList.appendChild(urlParam);
+
+					Node loginPageResponse = this.recept.process(loginPageMessage);
+					out.println(this.converter.getPrettyString(loginPageResponse));
+
+					return false;
+				}
 			}
 		}
 
@@ -866,7 +892,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		if (request.getAuthType() != null)
 		{
 			Element userInformation = this.doc.createElement(GSXML.USER_INFORMATION_ELEM);
-			userInformation.setAttribute("username", request.getUserPrincipal().getName());
+			userInformation.setAttribute(GSXML.USERNAME_ATT, request.getUserPrincipal().getName());
 
 			Element userInfoMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
 			Element userInfoRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_SECURITY, "GetUserInformation", userContext);
@@ -1019,7 +1045,6 @@ public class LibraryServlet extends BaseGreenstoneServlet
 	 */
 	protected void encodeURLs(Node dataNode, HttpServletResponse response)
 	{
-
 		if (dataNode == null)
 		{
 			return;
@@ -1086,6 +1111,17 @@ public class LibraryServlet extends BaseGreenstoneServlet
 
 	}
 
+	protected String getFirstParam(String name, Map<String, String[]> map)
+	{
+		String[] val = map.get(name);
+		if (val == null || val.length == 0)
+		{
+			return null;
+		}
+
+		return val[0];
+	}
+
 	synchronized protected int getNextUserId()
 	{
 		next_user_id++;
@@ -1094,6 +1130,55 @@ public class LibraryServlet extends BaseGreenstoneServlet
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		doGet(request, response);
+		//Check if we need to process a file upload
+		if (ServletFileUpload.isMultipartContent(request))
+		{
+			DiskFileItemFactory fileItemFactory = new DiskFileItemFactory();
+
+			int sizeLimit = System.getProperties().containsKey("servlet.upload.filesize.limit") ? Integer.parseInt(System.getProperty("servlet.upload.filesize.limit")) : 100 * 1024 * 1024;
+
+			File tempDir = new File(GlobalProperties.getGSDL3Home() + File.separator + "tmp");
+			if (!tempDir.exists())
+			{
+				tempDir.mkdirs();
+			}
+
+			//We want all files to be stored on disk (hence the 0)
+			fileItemFactory.setSizeThreshold(0);
+			fileItemFactory.setRepository(tempDir);
+
+			ServletFileUpload uploadHandler = new ServletFileUpload(fileItemFactory);
+			uploadHandler.setFileSizeMax(sizeLimit);
+
+			HashMap<String, String[]> queryMap = new HashMap<String, String[]>();
+			try
+			{
+				List items = uploadHandler.parseRequest(request);
+				Iterator iter = items.iterator();
+				while (iter.hasNext())
+				{
+					FileItem current = (FileItem) iter.next();
+					if (current.isFormField())
+					{
+						queryMap.put(current.getFieldName(), new String[] { current.getString() });
+					}
+					else if (current.getName() != null && !current.getName().equals(""))
+					{
+						File file = new File(tempDir, current.getName());
+						current.write(file);
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+
+			doGetOrPost(request, response, queryMap);
+		}
+		else
+		{
+			doGetOrPost(request, response, request.getParameterMap());
+		}
 	}
 }

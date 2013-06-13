@@ -20,6 +20,7 @@ package org.greenstone.gsdl3.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -35,6 +36,7 @@ public class DerbyWrapper
 	static final String USERSDB = "usersDB";
 	static final String USERS = "users";
 	static final String ROLES = "roles";
+	static final String DATA = "data";
 	private Connection conn = null;
 	private Statement state = null;
 	private String protocol_str;
@@ -141,6 +143,7 @@ public class DerbyWrapper
 			conn.setAutoCommit(false);
 			state.execute("create table users (username varchar(40) not null, password varchar(40) not null, accountstatus varchar(10), comment varchar(100), email varchar(40), primary key(username))");
 			state.execute("create table roles (username varchar(40) not null, role varchar(40) not null, primary key (username, role))");
+			state.execute("create table data (username varchar(40) not null, name varchar(128) not null, value clob, primary key (username, name))");
 			state.execute("insert into " + USERS + " values ('admin', '" + Authentication.hashPassword("admin") + "', 'true', 'change the password for this account as soon as possible', '')");
 			state.execute("insert into " + ROLES + " values ('admin', 'administrator')");
 			state.execute("insert into " + ROLES + " values ('admin', 'all-collections-editor')");
@@ -173,7 +176,7 @@ public class DerbyWrapper
 
 		for (HashMap<String, String> user : users)
 		{
-			ResultSet gs = state.executeQuery("SELECT role FROM roles WHERE username = '" + user.get("username") + "'");
+			ResultSet gs = state.executeQuery("SELECT role FROM " + ROLES + " WHERE username = '" + user.get("username") + "'");
 			String group = "";
 			while (gs.next())
 			{
@@ -195,6 +198,104 @@ public class DerbyWrapper
 		{
 			return userQueryResult;
 		}
+	}
+
+	public boolean addUserData(String username, String name, String value)
+	{
+		//Check if we already have a value under this name
+		boolean found = false;
+		try
+		{
+			ResultSet rs = state.executeQuery("SELECT * FROM " + DATA + " WHERE username='" + username + "' AND name='" + name + "'");
+			if (rs.next())
+			{
+				found = true;
+			}
+			else
+			{
+				found = false;
+			}
+		}
+		catch (Exception ex)
+		{
+			System.out.println("exception thrown:");
+			if (ex instanceof SQLException)
+			{
+				printSQLError((SQLException) ex);
+			}
+			else
+			{
+				ex.printStackTrace();
+			}
+			closeDatabase();
+			System.out.println("Error:" + ex.getMessage());
+			return false;
+		}
+
+		try
+		{
+			if (!found)
+			{
+				PreparedStatement stmt = null;
+				stmt = conn.prepareStatement("INSERT INTO " + DATA + " VALUES (?, ?, ?)");
+				stmt.setString(1, username);
+				stmt.setString(2, name);
+				stmt.setString(3, value);
+				stmt.executeUpdate();
+			}
+			else
+			{
+				PreparedStatement stmt = null;
+				stmt = conn.prepareStatement("UPDATE " + DATA + " SET value=? WHERE username=? AND name=?");
+				stmt.setString(1, value);
+				stmt.setString(2, username);
+				stmt.setString(3, name);
+				stmt.executeUpdate();
+			}
+		}
+		catch (Exception ex)
+		{
+			System.out.println("exception thrown:");
+			if (ex instanceof SQLException)
+			{
+				printSQLError((SQLException) ex);
+			}
+			else
+			{
+				ex.printStackTrace();
+			}
+			closeDatabase();
+			System.out.println("Error:" + ex.getMessage());
+			return false;
+		}
+		return true;
+	}
+
+	public String getUserData(String username, String name)
+	{
+		try
+		{
+			ResultSet rs = state.executeQuery("SELECT * FROM " + DATA + " WHERE username='" + username + "' AND name='" + name + "'");
+			if (rs.next())
+			{
+				return rs.getString("value");
+			}
+		}
+		catch (Exception ex)
+		{
+			System.out.println("exception thrown:");
+			if (ex instanceof SQLException)
+			{
+				printSQLError((SQLException) ex);
+			}
+			else
+			{
+				ex.printStackTrace();
+			}
+			closeDatabase();
+			System.out.println("Error:" + ex.getMessage());
+		}
+		return null;
 	}
 
 	public boolean addUser(String username, String password, String groups, String accountstatus, String comment, String email)

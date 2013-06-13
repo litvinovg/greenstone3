@@ -787,28 +787,33 @@ public class GSXML
 	public static Element createBasicRequest(Document owner, String request_type, String to, UserContext userContext)
 	{
 		Element request = owner.createElement(REQUEST_ELEM);
-		request.setAttribute(TYPE_ATT, request_type);
-		request.setAttribute(LANG_ATT, userContext._lang);
 		request.setAttribute(TO_ATT, to);
-		request.setAttribute(USER_ID_ATT, userContext._userID);
-		
-		if(userContext._groups != null)
+		request.setAttribute(TYPE_ATT, request_type);
+
+		Element userContextElem = owner.createElement("userContext");
+		request.appendChild(userContextElem);
+		userContextElem.setAttribute(LANG_ATT, userContext._lang);
+		userContextElem.setAttribute(USERNAME_ATT, userContext._username);
+		userContextElem.setAttribute(USER_ID_ATT, userContext._userID);
+
+		if (userContext._groups != null)
 		{
 			String groupString = "";
-			for(int i = 0; i < userContext._groups.length; i++)
+			for (int i = 0; i < userContext._groups.length; i++)
 			{
 				groupString += userContext._groups[i];
-				if(i != userContext._groups.length - 1)
+				if (i != userContext._groups.length - 1)
 				{
 					groupString += ",";
 				}
 			}
-			
-			if(groupString.length() > 0)
+
+			if (groupString.length() > 0)
 			{
-				request.setAttribute(GROUPS_ATT, groupString);
+				userContextElem.setAttribute(GROUPS_ATT, groupString);
 			}
 		}
+
 		return request;
 	}
 

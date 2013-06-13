@@ -22,7 +22,7 @@ abstract public class Action
 {
 
 	/** the system set up variables */
-	protected HashMap<String, Comparable> config_params = null;
+	protected HashMap<String, Object> config_params = null;
 	/** container Document to create XML Nodes */
 	protected Document doc = null;
 	/** a converter class to parse XML and create Docs */
@@ -42,7 +42,7 @@ abstract public class Action
 	}
 
 	/** the config variables must be set before configure is called */
-	public void setConfigParams(HashMap<String, Comparable> params)
+	public void setConfigParams(HashMap<String, Object> params)
 	{
 		this.config_params = params;
 	}

@@ -317,6 +317,11 @@ public class TransformingReceptionist extends Receptionist
 
 				//Add the names from this file
 				ArrayList<String> currentNames = metaNames.get(currentFileTemp.getAbsolutePath());
+				if (currentNames == null)
+				{
+					continue;
+				}
+
 				fullNameList.addAll(currentNames);
 
 				ArrayList<String> includedHrefs = includes.get(currentFileTemp.getAbsolutePath());

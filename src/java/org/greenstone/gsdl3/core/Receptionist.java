@@ -30,7 +30,7 @@ public class Receptionist implements ModuleInterface
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.core.Receptionist.class.getName());
 
 	/** the set up variables */
-	protected HashMap<String, Comparable> config_params = null;
+	protected HashMap<String, Object> config_params = null;
 	/** container Document to create XML Nodes */
 	protected Document doc = null;
 
@@ -70,12 +70,12 @@ public class Receptionist implements ModuleInterface
 		this.params = params;
 	}
 
-	public void setConfigParams(HashMap<String, Comparable> params)
+	public void setConfigParams(HashMap<String, Object> params)
 	{
 		this.config_params = params;
 	}
 
-	public HashMap<String, Comparable> getConfigParams()
+	public HashMap<String, Object> getConfigParams()
 	{
 		return this.config_params;
 	}
@@ -315,6 +315,7 @@ public class Receptionist implements ModuleInterface
 				base_interfaces = new ArrayList<String>();
 			}
 			base_interfaces.add(base_interface);
+			this.config_params.put(GSConstants.BASE_INTERFACES, base_interfaces);
 			// now see if this has a base interface
 			Document config_doc = this.converter.getDOM(base_interface_config_file);
 			if (config_doc == null)

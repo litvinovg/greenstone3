@@ -1,19 +1,17 @@
 package org.greenstone.gsdl3.action;
 
+import java.io.Serializable;
+import java.util.HashMap;
+
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.util.GSParams;
+import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.util.GlobalProperties;
-import org.greenstone.gsdl3.core.ModuleInterface;
-import org.greenstone.gsdl3.util.*;
-//XML classes
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import java.util.HashMap;
-import java.io.File;
-import java.io.Serializable;
-
-import org.apache.log4j.*;
 
 public class PageAction extends Action
 {
@@ -30,7 +28,7 @@ public class PageAction extends Action
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 		Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		String collection = "";
-		if(paramList != null)
+		if (paramList != null)
 		{
 			HashMap<String, Serializable> params = GSXML.extractParams(paramList, false);
 			if (params != null && params.get(GSParams.COLLECTION) != null)
@@ -64,8 +62,6 @@ public class PageAction extends Action
 		}
 		else
 		{ // unknown page
-
-			logger.error("unknown page specified!");
 			response = unknownPage(request);
 		}
 
@@ -83,6 +79,7 @@ public class PageAction extends Action
 
 		result.appendChild(this.doc.importNode(response, true));
 		logger.debug("page action result: " + this.converter.getPrettyString(result));
+
 		return result;
 	}
 

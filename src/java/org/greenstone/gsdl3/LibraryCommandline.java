@@ -63,7 +63,7 @@ final public class LibraryCommandline
 	public void configure(String site_name, String interface_name)
 	{
 
-		HashMap<String, Comparable> config_params = new HashMap<String, Comparable>();
+		HashMap<String, Object> config_params = new HashMap<String, Object>();
 		//config_params.put(GSConstants.GSDL3_HOME, gsdl_home);
 		config_params.put(GSConstants.SITE_NAME, site_name);
 		config_params.put(GSConstants.INTERFACE_NAME, interface_name);

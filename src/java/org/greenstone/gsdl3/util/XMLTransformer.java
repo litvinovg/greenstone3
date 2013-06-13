@@ -216,19 +216,19 @@ public class XMLTransformer
 		return transform(stylesheet, source, null, null, null);
 	}
 
-	public Node transform(Document stylesheet, Document source, HashMap<String, Comparable> parameters)
+	public Node transform(Document stylesheet, Document source, HashMap<String, Object> parameters)
 	{
 		return transform(stylesheet, source, parameters, null, null);
 	}
 
-	public Node transform(Document stylesheet, Document source, HashMap<String, Comparable> parameters, Document docDocType)
+	public Node transform(Document stylesheet, Document source, HashMap<String, Object> parameters, Document docDocType)
 	{
 		return transform(stylesheet, source, parameters, docDocType, null);
 	}
 
 	// This method will now set the docType in the new document created and returned, if any are specified in the
 	// (merged) stylesheet being applied. The docDocType parameter is therefore no longer necessary nor used by default.
-	protected Node transform(Document stylesheet, Document source, HashMap<String, Comparable> parameters, Document docDocType, Document resultNode)
+	protected Node transform(Document stylesheet, Document source, HashMap<String, Object> parameters, Document docDocType, Document resultNode)
 	{
 		try
 		{

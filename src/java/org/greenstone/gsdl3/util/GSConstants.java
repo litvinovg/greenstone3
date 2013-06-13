@@ -19,19 +19,20 @@
 package org.greenstone.gsdl3.util;
 
 /** these constants are used for servlet args, and config variables */
-public class GSConstants {
+public class GSConstants
+{
+	public static final String GSDL3_HOME = "gsdl3_home";
+	public static final String INTERFACE_NAME = "interface_name";
+	public static final String SITE_NAME = "site_name";
+	public static final String LIBRARY_NAME = "library_name";
+	public static final String BASE_INTERFACES = "base_interfaces";
+	public static final String DEFAULT_LANG = "default_lang";
+	public static final String ALLOW_CLIENT_SIDE_XSLT = "allow_client_side_xslt";
+	public static final String CLIENT_SIDE_XSLT_INTERFACE_SUFFIX = "-client-xslt";
 
-    public static final String GSDL3_HOME = "gsdl3_home";
-    public static final String INTERFACE_NAME = "interface_name";
-    public static final String SITE_NAME = "site_name";
-    public static final String LIBRARY_NAME = "library_name";
-    public static final String DEFAULT_LANG = "default_lang";
-    public static final String ALLOW_CLIENT_SIDE_XSLT = "allow_client_side_xslt";
-    public static final String CLIENT_SIDE_XSLT_INTERFACE_SUFFIX = "-client-xslt";
-
-    public static final String META_RELATION_SEP = "_";
-    public static final String META_SEPARATOR_SEP = "*";
-    public static final String META_FIRST = "first";
-    public static final String META_LAST = "last";
-    public static final String META_POS = "pos";
+	public static final String META_RELATION_SEP = "_";
+	public static final String META_SEPARATOR_SEP = "*";
+	public static final String META_FIRST = "first";
+	public static final String META_LAST = "last";
+	public static final String META_POS = "pos";
 }
