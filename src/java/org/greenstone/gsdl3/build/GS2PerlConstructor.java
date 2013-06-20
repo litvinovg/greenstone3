@@ -149,7 +149,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 	{
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "Collection construction: import collection."));
 		Vector<String> command = new Vector<String>();
-		command.add(GlobalProperties.getProperty("perl.path", "perl"));
+		command.add(GlobalProperties.getProperty("perl.path", "perl") + "perl");
 		command.add("-S");
 		command.add(GlobalProperties.getGS2Build() + File.separator + "bin" + File.separator + "script" + File.separator + "import.pl");
 		if (this.manifest_file != null)
@@ -211,7 +211,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 			return;
 		}
 
-	    /*
+		/*
 
 		// move building to index
 		File index_dir = new File(GSFile.collectionIndexDir(this.site_home, this.collection_name));
@@ -234,7 +234,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 
 		// success!!  - need to send the final completed message
 		sendProcessComplete(new ConstructionEvent(this, GSStatus.COMPLETED, ""));
-	    */
+		*/
 
 		// Running activate.pl instead of making java move building to index as above
 		// circumvents the issue of the jdbm .lg log file (managed by TransactionManager) 
@@ -294,12 +294,13 @@ public class GS2PerlConstructor extends CollectionConstructor
 	/** returns true if completed correctly, false otherwise */
 	protected boolean runPerlCommand(String[] command)
 	{
-		String msg;
-		ConstructionEvent evt;
+		int sepIndex = this.gsdl3home.lastIndexOf(File.separator);
+		String srcHome = this.gsdl3home.substring(0, sepIndex);
 
 		ArrayList<String> args = new ArrayList<String>();
 		args.add("GSDLHOME=" + this.gsdl2home);
 		args.add("GSDL3HOME=" + this.gsdl3home);
+		args.add("GSDL3SRCHOME=" + srcHome);
 		args.add("GSDLOS=" + this.gsdlos);
 		args.add("GSDL-RUN-SETUP=true");
 
@@ -327,15 +328,15 @@ public class GS2PerlConstructor extends CollectionConstructor
 			BufferedReader stdinbr = new BufferedReader(stdinisr);
 			// Captures the std err of a program and pipes it into
 			// std in of java
-			
+
 			File logDir = new File(GSFile.collectDir(this.site_home) + File.separator + this.collection_name + File.separator + "log");
-			if(!logDir.exists())
+			if (!logDir.exists())
 			{
 				logDir.mkdir();
 			}
 
 			BufferedWriter bw = new BufferedWriter(new FileWriter(GSFile.collectDir(this.site_home) + File.separator + this.collection_name + File.separator + "log" + File.separator + "build_log." + (System.currentTimeMillis()) + ".txt"));
-			bw.write("Document Editor Build\n");
+			bw.write("Document Editor Build \n");
 
 			String eline = null;
 			String stdinline = null;
@@ -385,10 +386,10 @@ public class GS2PerlConstructor extends CollectionConstructor
 				//status = ERROR;
 				return false;
 			}
-
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Exception occurred " + e.toString()));
 		}
 
