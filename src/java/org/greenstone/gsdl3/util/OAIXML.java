@@ -77,7 +77,8 @@ public class OAIXML {
 
     public static final String USE_STYLESHEET = "useOAIStylesheet";
     public static final String STYLESHEET = "OAIStylesheet";
-    // words used to compose oai responses
+  
+    // words used to compose oai responses and read in OAIConfig.xml
     public static final String ADMIN_EMAIL = "adminEmail";
     public static final String BAD_ARGUMENT = "badArgument";
     public static final String BAD_RESUMPTION_TOKEN = "badResumptionToken";
@@ -103,6 +104,7 @@ public class OAIXML {
     public static final String HEADER = "header";
     public static final String ILLEGAL_OAI_VERB = "Illegal OAI verb";
     public static final String INDEX_STEM = "indexStem";
+  public static final String INFO_METADATA = "Metadata"; // this has capital M
     public static final String LASTMODIFIED = "lastmodified";
     public static final String MAPPING = "mapping";
     public static final String MAPPING_LIST = "mappingList";
@@ -116,6 +118,7 @@ public class OAIXML {
     public static final String OAI_LASTMODIFIED = "oailastmodified";
     public static final String OAIPMH = "OAIPMH";
     public static final String OAI_RESUMPTION_TOKENS = "OAIResumptionTokens";
+    public static final String OAI_INFO = "oaiInfo";
     public static final String OAI_SERVICE = "oaiService";
     public static final String OAI_SET_LIST = "oaiSetList";
     public static final String OAI_SERVICE_UNAVAILABLE = "OAI service unavailable";
@@ -126,6 +129,7 @@ public class OAIXML {
     public static final String RECORD = "record";
     public static final String REQUEST = "request";
     public static final String REPOSITORY_NAME = "repositoryName";
+    public static final String REPOSITORY_ID = "repositoryId";
     public static final String RESPONSE = "response";
     public static final String RESPONSE_DATE = "responseDate";
     public static final String RESUME_AFTER = "resumeAfter";
@@ -619,7 +623,7 @@ public class OAIXML {
         
         return duplicate;
     }
-    
+
     public static void copyElement(Element to, Element from, String elem_name) {
       
       Document to_doc = to.getOwnerDocument();
@@ -632,6 +636,7 @@ public class OAIXML {
         child = child.getNextSibling();
       }
     }
+
     public static HashMap<String, String> getParamMap(NodeList params) {
       HashMap<String, String> map = new HashMap<String, String>();
       for(int i=0; i<params.getLength(); i++) {
@@ -642,6 +647,8 @@ public class OAIXML {
       }
       return map;
     }
+
+
     /** Parse an XML document from a given file */
     static public Document parseXMLFile (File xml_file) {
         // No file? No point trying!
@@ -677,7 +684,7 @@ public class OAIXML {
         
         return document;
     }
-    
+
     /** Parse an XML document from a given reader */
     static public Document parseXML (Reader xml_reader) {
         Document document = null;
@@ -732,6 +739,22 @@ public class OAIXML {
     }
     
 
+  public static Element createOAIIdentifierXML(String repository_id, String sample_collection, String sample_doc_id) {
+    String xml = "<oai-identifier xmlns=\"http://www.openarchives.org/OAI/2.0/oai-identifier\"\n xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n xsi:schemaLocation=\"http://www.openarchives.org/OAI/2.0/oai-identifier\n http://www.openarchives.org/OAI/2.0/oai-identifier.xsd\">\n <scheme>oai</scheme>\n<repositoryIdentifier>" + repository_id + "</repositoryIdentifier>\n<delimiter>:</delimiter>\n<sampleIdentifier>oai:"+repository_id+":"+sample_collection+":"+sample_doc_id+"</sampleIdentifier>\n</oai-identifier>";
+
+    Document xml_doc = new XMLConverter().getDOM(xml);
+    return (Element)response_doc.importNode(xml_doc.getDocumentElement(), true);
+    
+
+  }
+
+  public static Element createGSDLElement() {
+    String xml = "<gsdl xmlns=\"http://www.greenstone.org/namespace/gsdl_oaiinfo/1.0/gsdl_oaiinfo\"\n xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n xsi:schemaLocation=\"http://www.greenstone.org/namespace/gsdl_oaiinfo/1.0/gsdl_oaiinfo\n   http://www.greenstone.org/namespace/gsdl_oaiinfo/1.0/gsdl_oaiinfo.xsd\"></gsdl>";
+    Document xml_doc = new XMLConverter().getDOM(xml);
+    return (Element)response_doc.importNode(xml_doc.getDocumentElement(), true);
+    
+
+  }
 }
 
 
