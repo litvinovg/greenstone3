@@ -4,6 +4,8 @@
 <OAIConfig>       
   <!-- The name of this oai repository, which is human readable. -->
   <repositoryName>Greenstone3 OAI repository</repositoryName>
+  <!-- The unique id of this repository - if using version 2.0 should correspond to your domaine name -->
+  <repositoryId></repositoryId>
   <!-- The base url to request metadata from this repository.
   TODO: this element should be determined and overriden dynamically given the osi request url in OAIServer.java. 
     WHAT'S DONE: when ant start is called, it writes out the default oaiserver URL to this file. -->
@@ -18,8 +20,12 @@
   <deletedRecord>no</deletedRecord>
   <!-- The granularity of the datestamp -->
   <granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
-  <!-- The repository maintainer email address -->
+  <!-- The repository maintainer email address. There can be more than one. -->
   <adminEmail></adminEmail>
+  <!-- Metadata describing the repository. Any metadata can go here -->
+  <oaiInfo>
+    <!-- <Metadata name="meta-name">meta-value</Metadata>-->
+  </oaiInfo>
   <!-- Information above this line goes into the response to the Identify request -->
   <!-- set the following to no if you don't want a stylesheet to be specified in the OAI output -->
   <useOAIStylesheet>yes</useOAIStylesheet>
