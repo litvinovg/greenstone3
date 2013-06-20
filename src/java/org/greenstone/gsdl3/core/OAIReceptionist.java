@@ -25,6 +25,9 @@ public class OAIReceptionist implements ModuleInterface {
   
   /** Instead of a config_params object, only a site_name is needed by oai receptionist. */
   protected String site_name = null;
+  /** The unique  repository identifier */
+  protected String repository_id = null;
+  
   /** container Document to create XML Nodes for requests sent to message router
    *  Not used for response 
    */
@@ -41,6 +44,16 @@ public class OAIReceptionist implements ModuleInterface {
   
   /** the message router that the Receptionist and Actions will talk to */
   protected ModuleInterface mr = null;
+  
+
+  // Some of the data/responses will not change while the servlet is running, so
+  // we can cache them
+  
+  /** A list of all the collections available to this OAI server */
+  protected NodeList collection_list = null;
+
+  /** The identify response */
+  protected Element identify_response = null;
   
   public OAIReceptionist() {
     this.converter = new XMLConverter();
@@ -73,6 +86,9 @@ public class OAIReceptionist implements ModuleInterface {
     oai_config = config;
     resume_after = getResumeAfter();
     
+    repository_id = getRepositoryId(); 
+    collection_list = getOAICollectionList();
+
     //clear out expired resumption tokens stored in OAIResumptionToken.xml
     OAIXML.init();
     OAIXML.clearExpiredTokens();
@@ -189,6 +205,13 @@ public class OAIReceptionist implements ModuleInterface {
     if(resume_after != null) return Integer.parseInt(GSXML.getNodeText(resume_after));
     return -1;
   }
+  private String getRepositoryId() {
+    Element ri = (Element)GSXML.getChildByTagName(oai_config, OAIXML.REPOSITORY_ID);
+    if (ri != null) { 
+      return GSXML.getNodeText(ri);
+    }
+    return "";
+  }
   /** method to compose a set element
    */
   private Element doListSets(Element msg){
@@ -197,9 +220,7 @@ public class OAIReceptionist implements ModuleInterface {
     // exceptions: badArgument, badResumptionToken, noSetHierarchy
     Element list_sets_elem = OAIXML.createElement(OAIXML.LIST_SETS);
 
-    //ask the message router for a list of oai collections
-    NodeList oai_coll = getOAICollectionList();
-    int oai_coll_size = oai_coll.getLength();
+    int oai_coll_size = collection_list.getLength(); 
     if (oai_coll_size == 0) {
       return getMessage(list_sets_elem);
     }
@@ -228,12 +249,12 @@ public class OAIReceptionist implements ModuleInterface {
         //all data are sent on the first request. Therefore there should be
         //no resumeptionToken stored in OAIConfig.xml.
         //As long as the verb is 'ListSets', we ignore the rest of the parameters
-        getSets(list_sets_elem, oai_coll, 0, oai_coll_size);
+        getSets(list_sets_elem, collection_list, 0, oai_coll_size);
         return getMessage(list_sets_elem);
       }
       
       //append required sets to list_sets_elem (may be a complete or incomplete list)
-      getSets(list_sets_elem, oai_coll, 0, smaller);
+      getSets(list_sets_elem, collection_list, 0, smaller);
       
       if(oai_coll_size > resume_after) {
         //An incomplete list is sent; append a resumptionToken element
@@ -271,14 +292,14 @@ public class OAIReceptionist implements ModuleInterface {
     if(cursor + resume_after >= oai_coll_size) {
       //Yes, we are.
       //append required sets to list_sets_elem (list is complete)
-      getSets(list_sets_elem, oai_coll, cursor, oai_coll_size);
+      getSets(list_sets_elem, collection_list, cursor, oai_coll_size);
       //An incomplete list is sent; append a resumptionToken element
       token_elem = createResumptionTokenElement(oai_coll_size, cursor, -1, false);
       list_sets_elem.appendChild(token_elem); 
     } else {
       //No, we are not.
       //append required sets to list_sets_elem (list is incomplete)
-      getSets(list_sets_elem, oai_coll, cursor, cursor + resume_after);
+      getSets(list_sets_elem, collection_list, cursor, cursor + resume_after);
       token_elem = createResumptionTokenElement(oai_coll_size, cursor, cursor + resume_after, true);
       //store this token
       OAIXML.addToken(token_elem);
@@ -376,8 +397,8 @@ public class OAIReceptionist implements ModuleInterface {
     }
 
     //ask the message router for a list of oai collections
-    NodeList oai_coll = getOAICollectionList();
-    int oai_coll_size = oai_coll.getLength();
+    //NodeList oai_coll = collection_list; //getOAICollectionList();
+    int oai_coll_size = collection_list.getLength();
     if (oai_coll_size == 0) {
       logger.info("returned oai collection list is empty");
       return getMessage(OAIXML.createErrorElement(OAIXML.NO_RECORDS_MATCH, ""));
@@ -395,7 +416,7 @@ public class OAIReceptionist implements ModuleInterface {
       coll_name = strs[1];
 
       for(int i=0; i<oai_coll_size; i++) {
-        if(set_spec_str.equals(((Element)oai_coll.item(i)).getAttribute(OAIXML.NAME))) {
+        if(set_spec_str.equals(((Element)collection_list.item(i)).getAttribute(OAIXML.NAME))) {
           set_supported = true;
         }
       }
@@ -451,7 +472,7 @@ public class OAIReceptionist implements ModuleInterface {
             req.appendChild(retain_param_list.get(j));
           }
         }
-        String full_name = ((Element)oai_coll.item(i)).getAttribute(OAIXML.NAME);
+        String full_name = ((Element)collection_list.item(i)).getAttribute(OAIXML.NAME);
         coll_name = full_name.substring(full_name.indexOf(":") + 1);
         req.setAttribute(OAIXML.TO, coll_name + "/" + verb);
         Node n = mr.process(msg);
@@ -588,8 +609,8 @@ public class OAIReceptionist implements ModuleInterface {
     }
     
     //ask the message router for a list of oai collections
-    NodeList oai_coll = getOAICollectionList();
-    int oai_coll_size = oai_coll.getLength();
+    //NodeList oai_coll = getOAICollectionList();
+    int oai_coll_size = collection_list.getLength();
     if (oai_coll_size == 0) {
       logger.info("returned oai collection list is empty");
       return getMessage(OAIXML.createErrorElement(OAIXML.NO_RECORDS_MATCH, ""));
@@ -609,7 +630,7 @@ public class OAIReceptionist implements ModuleInterface {
       //logger.info("param contains set: "+coll_name);
 
       for(int i=0; i<oai_coll_size; i++) {
-        if(set_spec_str.equals(((Element)oai_coll.item(i)).getAttribute(OAIXML.NAME))) {
+        if(set_spec_str.equals(((Element)collection_list.item(i)).getAttribute(OAIXML.NAME))) {
           set_supported = true;
         }
       }
@@ -700,7 +721,7 @@ public class OAIReceptionist implements ModuleInterface {
             req.appendChild(retain_param_list.get(j));
           }
         }
-        String full_name = ((Element)oai_coll.item(i)).getAttribute(OAIXML.NAME);
+        String full_name = ((Element)collection_list.item(i)).getAttribute(OAIXML.NAME);
         coll_name = full_name.substring(full_name.indexOf(":") + 1);
         req.setAttribute(OAIXML.TO, coll_name + "/" + verb);
         //logger.info(GSXML.xmlNodeToString(req));
@@ -831,33 +852,32 @@ public class OAIReceptionist implements ModuleInterface {
     if(params.getLength() == 0) {
       //this is requesting metadata formats for the whole repository
       //read the oaiConfig.xml file, return the metadata formats specified there.
-      Element oai_config = OAIXML.getOAIConfigXML();
-      if (oai_config == null) {
-        return getMessage(OAIXML.createErrorElement(OAIXML.ERROR, OAIXML.SERVICE_UNAVAILABLE));
-      } else {
-        Element format_list = (Element)GSXML.getChildByTagName(oai_config, OAIXML.LIST_METADATA_FORMATS);
-        if(format_list == null) {
-          logger.error("OAIConfig.xml must contain the supported metadata formats");
-          return getMessage(list_metadata_formats);
-        }
-        NodeList formats = format_list.getElementsByTagName(OAIXML.METADATA_FORMAT);
-        for(int i=0; i<formats.getLength(); i++) {
-          Element meta_fmt = OAIXML.createElement(OAIXML.METADATA_FORMAT);
-          Element first_meta_format = (Element)formats.item(i);
-          //the element also contains mappings, but we don't want them
-          meta_fmt.appendChild(meta_fmt.getOwnerDocument().importNode(GSXML.getChildByTagName(first_meta_format, OAIXML.METADATA_PREFIX), true));
-          meta_fmt.appendChild(meta_fmt.getOwnerDocument().importNode(GSXML.getChildByTagName(first_meta_format, OAIXML.SCHEMA), true));
-          meta_fmt.appendChild(meta_fmt.getOwnerDocument().importNode(GSXML.getChildByTagName(first_meta_format, OAIXML.METADATA_NAMESPACE), true));
-          list_metadata_formats.appendChild(meta_fmt);
-        }
-        return getMessage(list_metadata_formats);
+      Element format_list = (Element)GSXML.getChildByTagName(oai_config, OAIXML.LIST_METADATA_FORMATS);
+      if(format_list == null) {
+	logger.error("OAIConfig.xml must contain the supported metadata formats");
+	return getMessage(list_metadata_formats);
       }
+      NodeList formats = format_list.getElementsByTagName(OAIXML.METADATA_FORMAT);
+      for(int i=0; i<formats.getLength(); i++) {
+	Element meta_fmt = OAIXML.createElement(OAIXML.METADATA_FORMAT);
+	Element first_meta_format = (Element)formats.item(i);
+	//the element also contains mappings, but we don't want them
+	meta_fmt.appendChild(meta_fmt.getOwnerDocument().importNode(GSXML.getChildByTagName(first_meta_format, OAIXML.METADATA_PREFIX), true));
+	meta_fmt.appendChild(meta_fmt.getOwnerDocument().importNode(GSXML.getChildByTagName(first_meta_format, OAIXML.SCHEMA), true));
+	meta_fmt.appendChild(meta_fmt.getOwnerDocument().importNode(GSXML.getChildByTagName(first_meta_format, OAIXML.METADATA_NAMESPACE), true));
+	list_metadata_formats.appendChild(meta_fmt);
+        }
+      return getMessage(list_metadata_formats);
       
-    } else if (params.getLength() > 1) {
+      
+    } 
+
+    if (params.getLength() > 1) {
       //Bad argument. Can't be more than one parameters for ListMetadataFormats verb
       return getMessage(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
-    } else {
-      // This is a request for the metadata of a particular item with an identifier
+    } 
+    
+    // This is a request for the metadata of a particular item with an identifier
       /**the request xml is in the form: <request>
        *                                   <param name=.../>
        *                                 </request>
@@ -903,34 +923,44 @@ public class OAIReceptionist implements ModuleInterface {
 	Node result_node = mr.process(msg);
 	return converter.nodeToElement(result_node);
       }
-    }
+  
     
   }
+
+
   private void appendParam(Element req, String name, String value) {    
         Element param = req.getOwnerDocument().createElement(OAIXML.PARAM);
         param.setAttribute(OAIXML.NAME, name);
         param.setAttribute(OAIXML.VALUE, value);
         req.appendChild(param);
   }
-  private void copyElement(Element identify, String tag_name) {
-    Element from_repository_name = (Element)GSXML.getChildByTagName(oai_config, tag_name);
-    if(from_repository_name != null) {
-      Element this_repository_name = OAIXML.createElement(tag_name);
-      GSXML.setNodeText(this_repository_name, GSXML.getNodeText(from_repository_name));
-      identify.appendChild(this_repository_name);
+  private void copyNamedElementfromConfig(Element to_elem, String element_name) {
+    Element original_element = (Element)GSXML.getChildByTagName(oai_config, element_name);
+    if(original_element != null) {
+      copyNode(to_elem, original_element);
     }
   }
+
+  private void copyNode(Element to_elem, Node original_element) {
+    to_elem.appendChild(to_elem.getOwnerDocument().importNode(original_element, true));
+
+  }
+
   private Element doIdentify() {
     //The validation for this verb has been done in OAIServer.validate(). So no bother here.
     logger.info("");
+    if (this.identify_response != null) {
+      // we have already created it
+      return getMessage(this.identify_response);
+    }
     
     Element identify = OAIXML.createElement(OAIXML.IDENTIFY);
     //do the repository name
-    copyElement(identify, OAIXML.REPOSITORY_NAME);
+    copyNamedElementfromConfig(identify, OAIXML.REPOSITORY_NAME);
     //do the baseurl
-    copyElement(identify, OAIXML.BASE_URL);
+    copyNamedElementfromConfig(identify, OAIXML.BASE_URL);
     //do the protocol version
-    copyElement(identify, OAIXML.PROTOCOL_VERSION);
+    copyNamedElementfromConfig(identify, OAIXML.PROTOCOL_VERSION);
         
     //There can be more than one admin email according to the OAI specification
     NodeList admin_emails = GSXML.getChildrenByTagName(oai_config, OAIXML.ADMIN_EMAIL);
@@ -940,24 +970,44 @@ public class OAIReceptionist implements ModuleInterface {
       num_admin = admin_emails.getLength();
     }
     for (int i=0; i<num_admin; i++) {
-      copyElement(identify, OAIXML.ADMIN_EMAIL);
+      copyNode(identify, admin_emails.item(i));
     }
 
     //do the earliestDatestamp
     //send request to mr to search through the earliest datestamp amongst all oai collections in the repository.
     //ask the message router for a list of oai collections
-    NodeList oai_coll = getOAICollectionList();
-    long earliestDatestamp = getEarliestDateStamp(oai_coll);
+    //NodeList oai_coll = getOAICollectionList();
+    long earliestDatestamp = getEarliestDateStamp(collection_list);
     String earliestDatestamp_str = OAIXML.getTime(earliestDatestamp);
     Element earliestDatestamp_elem = OAIXML.createElement(OAIXML.EARLIEST_DATESTAMP);
     GSXML.setNodeText(earliestDatestamp_elem, earliestDatestamp_str);
     identify.appendChild(earliestDatestamp_elem);
 
     //do the deletedRecord
-    copyElement(identify, OAIXML.DELETED_RECORD);
+    copyNamedElementfromConfig(identify, OAIXML.DELETED_RECORD);
     //do the granularity
-    copyElement(identify, OAIXML.GRANULARITY);
-        
+    copyNamedElementfromConfig(identify, OAIXML.GRANULARITY);
+     
+    // output the oai identifier
+    Element description = OAIXML.createElement(OAIXML.DESCRIPTION);
+    identify.appendChild(description);
+    Element oaiIdentifier = OAIXML.createOAIIdentifierXML(repository_id, "lucene-jdbm-demo", "ec159e");
+    description.appendChild(oaiIdentifier);
+
+    // if there are any oaiInfo metadata, add them in too.
+    Element info = (Element)GSXML.getChildByTagName(oai_config, OAIXML.OAI_INFO);
+    if (info != null) {
+      NodeList meta = GSXML.getChildrenByTagName(info, OAIXML.INFO_METADATA);
+      if (meta != null && meta.getLength() > 0) {
+	Element gsdl = OAIXML.createGSDLElement();
+	description.appendChild(gsdl);
+	for (int m = 0; m<meta.getLength(); m++) {
+	  copyNode(gsdl, meta.item(m));
+	}
+	
+      }
+    }
+    this.identify_response = identify;
     return getMessage(identify);
   }
   //split setSpec (site_name:coll_name) into an array of strings
