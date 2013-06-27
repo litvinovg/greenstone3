@@ -18,32 +18,26 @@
  */
 package org.greenstone.gsdl3.service;
 
-import org.greenstone.gsdl3.util.*;
-import org.greenstone.gsdl3.build.*;
-import org.greenstone.util.GlobalProperties;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.Text;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Serializable;
-import java.lang.Thread.State;
-import java.util.Locale;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
+import org.greenstone.gsdl3.build.GS2PerlConstructor;
+import org.greenstone.gsdl3.build.GS2PerlListener;
+import org.greenstone.gsdl3.util.GSFile;
+import org.greenstone.gsdl3.util.GSParams;
+import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSStatus;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserContext;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 /**
  * A Services class for building collections provides a wrapper around the old
@@ -83,7 +77,7 @@ public class GS2Construct extends ServiceRack
 
 	// set of listeners for any construction commands
 	protected Map<String, GS2PerlListener> listeners = null;
-	protected HashMap<String, Boolean> collectionOperationMap = new HashMap<String, Boolean>(); 
+	protected HashMap<String, Boolean> collectionOperationMap = new HashMap<String, Boolean>();
 
 	public GS2Construct()
 	{
@@ -200,6 +194,11 @@ public class GS2Construct extends ServiceRack
 	{
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
+
+		if (params == null)
+		{
+			return null;
+		}
 
 		//If we have been requested to only build certain documents then we need to create a manifest file
 		String documentsParam = (String) params.get("documents");
@@ -759,8 +758,8 @@ public class GS2Construct extends ServiceRack
 	{
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
-		
-		String collection = (String)params.get(COL_PARAM);
+
+		String collection = (String) params.get(COL_PARAM);
 
 		if (checkCollectionIsNotBusy(collection))
 		{
@@ -784,8 +783,8 @@ public class GS2Construct extends ServiceRack
 	{
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
-		
-		String collection = (String)params.get(COL_PARAM);
+
+		String collection = (String) params.get(COL_PARAM);
 
 		collectionOperationMap.remove(collection);
 	}
