@@ -1150,8 +1150,8 @@ function visualXMLEditor(xmlString)
 		var visitCalledTemplate = function()
 		{
 			var url = gs.xsltParams.library_name + "?a=g&rt=r&s=ResolveCallTemplate&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c + "&s1.fileName=" + _fileName + "&s1.templateName=" + _xmlNode.getAttribute("name");
-			$.ajax(url)
-			.success(function(response)
+		
+			var successFunction = function(response)
 			{
 				var startIndex = response.indexOf("<requestedTemplate>") + ("<requestedTemplate>").length;
 				var endIndex = response.indexOf("</requestedTemplate>");
@@ -1170,7 +1170,14 @@ function visualXMLEditor(xmlString)
 				{
 					_greenbug.changeCurrentTemplate("interface", "gslib.xsl", "template", "xsl", _xmlNode.getAttribute("name"), null);
 				}
-			});
+			}
+			
+			var errorFunction = function()
+			{
+				$.ajax(url).success(successFunction).error(errorFunction);
+			}
+			
+			$.ajax(url).success(successFunction).error(errorFunction);
 		}
 
 		//Fill the information area with details about this element

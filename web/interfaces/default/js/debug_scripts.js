@@ -121,6 +121,7 @@ function DebugWidget()
 	var _currentName;
 	var _currentMatch;
 	var _currentNamespace;
+	var _currentXPath;
 	var _isVisualEditor = true;
 
 	var _styleFunctions = new Array();
@@ -321,6 +322,7 @@ function DebugWidget()
 
 				if(_currentName && _currentName.length > 0){parameters["s1.name"] = _currentName;}
 				if(_currentMatch && _currentMatch.length > 0){parameters["s1.match"] = _currentMatch;}
+				if(_currentXPath && _currentXPath.length > 0){parameters["s1.xpath"] = _currentXPath}
 
 				_saveButton.button("option", "disabled", true);
 				$.blockUI({message:'<div class="ui-state-active">Saving, please wait...</div>'});
@@ -609,6 +611,12 @@ function DebugWidget()
 		{
 			var templateListStart = templateResponse.indexOf("<templateList>") + "<templateList>".length;
 			var templateListEnd = templateResponse.indexOf("</templateList>");
+			
+			if(templateListStart == "<templateList>".length - 1)
+			{
+				return;
+			}
+			
 			var templateListString = templateResponse.substring(templateListStart, templateListEnd).replace(/&quot;/g, "\"");
 			var templateList = eval(templateListString);
 
@@ -624,6 +632,7 @@ function DebugWidget()
 				var nodename = "template";
 				var name = templateList[i].name;
 				var match = templateList[i].match;
+				var xpath = templateList[i].xpath;
 
 				if(name)
 				{
@@ -638,15 +647,15 @@ function DebugWidget()
 
 				_elements.push(infoContainer);
 
-				addChangeEventToInfoContainer(infoContainer, filename, location, nodename, namespace, name, match);
+				addChangeEventToInfoContainer(infoContainer, filename, location, nodename, namespace, name, match, xpath);
 
 				if(name && name.length > 0)
 				{
-					infoContainer.text(name);
+					infoContainer.text(name + ((xpath) ? (" (" + xpath + ")") : ""));
 				}
 				if(match && match.length > 0)
 				{
-					infoContainer.text(match);
+					infoContainer.text(match + ((xpath) ? (" (" + xpath + ")") : ""));
 				}
 
 				infoContainer.data("index", i);
@@ -661,7 +670,7 @@ function DebugWidget()
 	}
 
 	//Change the current template in the XML and Visual editor
-	this.changeCurrentTemplate = function(location, filename, nodename, namespace, name, match)
+	this.changeCurrentTemplate = function(location, filename, nodename, namespace, name, match, xpath)
 	{
 		_currentFileName = filename;
 		_currentLocation = location;
@@ -669,14 +678,18 @@ function DebugWidget()
 		_currentNamespace = namespace;
 		_currentName = name;
 		_currentMatch = match;
-	
+		_currentXPath = xpath;
+
 		var responseName = "requestedNameTemplate";
 
-		var url = gs.xsltParams.library_name + "?a=g&rt=r&s=GetXMLTemplateFromFile&s1.fileName=" + filename + "&s1.interfaceName=" + gs.xsltParams.interface_name + "&s1.siteName=" + gs.xsltParams.site_name + "&s1.collectionName=" + gs.cgiParams.c + "&s1.locationName=" + location + "&s1.namespace=" + namespace + "&s1.nodename=" + nodename;
-		if(match && match.length > 0){url += "&s1.match=" + match; responseName = "requestedMatchTemplate";}
-		if(name && name.length > 0){url += "&s1.name=" + name;}
+		var url = gs.xsltParams.library_name;
+		var params = {"a":"g", "rt":"r", "s":"GetXMLTemplateFromFile", "s1.fileName":filename, "s1.interfaceName":gs.xsltParams.interface_name, "s1.siteName":gs.xsltParams.site_name, "s1.collectionName":gs.cgiParams.c, "s1.locationName":location, "s1.namespace":namespace, "s1.nodename":nodename};
 
-		$.ajax(url)
+		if(match && match.length > 0){params["s1.match"] = match; responseName = "requestedMatchTemplate";}
+		if(name && name.length > 0){params["s1.name"] = name;}
+		if(xpath && xpath.length > 0){params["s1.xpath"] = xpath}
+
+		$.post(url, params)
 		.success(function(response)
 		{
 			var template;
@@ -747,11 +760,11 @@ function DebugWidget()
 	}
 
 	//Store the function that is called when this template is selected from the list
-	var addChangeEventToInfoContainer = function(infoContainer, filename, location, nodename, namespace, name, match)
+	var addChangeEventToInfoContainer = function(infoContainer, filename, location, nodename, namespace, name, match, xpath)
 	{
 		infoContainer.data("changeFunction", function()
 		{
-			_greenbug.changeCurrentTemplate(location, filename, nodename, namespace, name, match);
+			_greenbug.changeCurrentTemplate(location, filename, nodename, namespace, name, match, xpath);
 		});
 	}
 	
@@ -863,6 +876,7 @@ function DebugWidget()
 					var nodename = fullNodename.substring(colonIndex + 1);
 					var name = $(this).attr("name");
 					var match = $(this).attr("match");
+					var xpath = $(this).attr("xpath");
 
 					var file = _greenbug.fileNameToLocationAndName(filepath);
 
@@ -870,15 +884,15 @@ function DebugWidget()
 
 					_elements.push(infoContainer);
 
-					addChangeEventToInfoContainer(infoContainer, file.filename, file.location, nodename, namespace, name, match);
+					addChangeEventToInfoContainer(infoContainer, file.filename, file.location, nodename, namespace, name, match, xpath);
 
 					if(name && name.length > 0)
 					{
-						infoContainer.text(name);
+						infoContainer.text(name + ((xpath) ? (" (" + xpath + ")") : ""));
 					}
 					if(match && match.length > 0)
 					{
-						infoContainer.text(match);
+						infoContainer.text(match + ((xpath) ? (" (" + xpath + ")") : ""));
 					}
 
 					_templateSelector.children("select").append(infoContainer);

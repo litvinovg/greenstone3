@@ -1,3 +1,10 @@
+var SUCCESS = 1;
+var ACCEPTED = 2;
+var ERROR = 3;
+var CONTINUING = 10;
+var COMPLETED = 11;
+var HALTED = 12;
+
 gs.functions = new Array();
 
 gs.jqGet = function(id)
@@ -92,6 +99,64 @@ gs.functions.makeToggle = function(buttons, divs)
 	}
 }
 
+gs.functions.checkForErrors = function(xml)
+{
+	var errorElems = xml.getElementsByTagName("error");
+	
+	if(errorElems && errorElems.length > 0)
+	{
+		var errorString = gs.text.dse.error_saving_changes + ": ";
+		for(var i = 0; i < errorElems.length; i++)
+		{
+			errorString += " " + errorElems.item(i).firstChild.nodeValue;
+		}
+		alert(errorString);
+		return true;
+	}
+	return false; //No errors
+}
+
+gs.functions.validateXML = function(txt)
+{
+	// code for IE
+	if (window.ActiveXObject)
+	{
+		var xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+		xmlDoc.async = "false";
+		xmlDoc.loadXML(document.all(txt).value);
+
+		if(xmlDoc.parseError.errorCode!=0)
+		{
+			txt = dse.error_code + ": " + xmlDoc.parseError.errorCode + "\n";
+			txt = txt + dse.error_reason + ": " + xmlDoc.parseError.reason;
+			txt = txt + dse.error_line + ": " + xmlDoc.parseError.line;
+			console.log(txt);
+			return null;
+		}
+		
+		return xmlDoc;
+	}
+	// code for Mozilla, Firefox, Opera, etc.
+	else if (document.implementation.createDocument)
+	{
+		var parser = new DOMParser();
+		var xmlDoc = parser.parseFromString(txt,"text/xml");
+
+		if (xmlDoc.getElementsByTagName("parsererror").length > 0)
+		{
+			console.log(gs.text.dse.xml_error);
+			return null;
+		}
+		
+		return xmlDoc;
+	}
+	else
+	{
+		console.log(gs.text.dse.browse_cannot_validate_xml);
+	}
+	return null;
+}
+
 gs.functions.buildCollections = function(collections, finalFunction)
 {
 	if(!collections || collections.length == 0)
@@ -104,15 +169,15 @@ gs.functions.buildCollections = function(collections, finalFunction)
 	var buildFunction = function()
 	{
 		var ajax = new gs.functions.ajaxRequest();
-		ajax.open("GET", _baseURL + "?a=g&rt=r&ro=1&s=BuildCollection&s1.collection=" + collections[counter]);
+		ajax.open("GET", gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=BuildCollection&s1.collection=" + collections[counter]);
 		ajax.onreadystatechange = function()
 		{
 			if(ajax.readyState == 4 && ajax.status == 200)
 			{
 				var text = ajax.responseText;
-				var xml = validateXML(text);
+				var xml = gs.functions.validateXML(text);
 
-				if(!xml || checkForErrors(xml))
+				if(!xml || gs.functions.checkForErrors(xml))
 				{
 					console.log("Could not build collection -> " + collections[counter] + ", aborting");
 					return;
@@ -121,18 +186,18 @@ gs.functions.buildCollections = function(collections, finalFunction)
 				var status = xml.getElementsByTagName("status")[0];
 				var pid = status.getAttribute("pid");
 
-				startCheckLoop(pid, "BuildCollection", function()
+				gs.functions.startCheckLoop(pid, "BuildCollection", function()
 				{
 					var localAjax = new gs.functions.ajaxRequest();
-					localAjax.open("GET", _baseURL + "?a=g&rt=r&ro=1&s=ActivateCollection&s1.collection=" + collections[counter], true);
+					localAjax.open("GET", gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=ActivateCollection&s1.collection=" + collections[counter], true);
 					localAjax.onreadystatechange = function()
 					{
 						if(localAjax.readyState == 4 && localAjax.status == 200)
 						{
 							var localText = localAjax.responseText;
-							var localXML = validateXML(localText);
+							var localXML = gs.functions.validateXML(localText);
 							
-							if(!xml || checkForErrors(xml))
+							if(!xml || gs.functions.checkForErrors(xml))
 							{
 								console.log("Could not activate collection -> " + collections[counter] + ", aborting");
 								return;
@@ -142,9 +207,9 @@ gs.functions.buildCollections = function(collections, finalFunction)
 							if(localStatus)
 							{
 								var localPID = localStatus.getAttribute("pid");
-								startCheckLoop(localPID, "ActivateCollection", function()
+								gs.functions.startCheckLoop(localPID, "ActivateCollection", function()
 								{
-									if (++counter == _collections.length)
+									if (++counter == collections.length)
 									{
 										//Run this function once we are done building all the collections
 										if(finalFunction){finalFunction();}
@@ -166,20 +231,20 @@ gs.functions.buildCollections = function(collections, finalFunction)
 	buildFunction();
 }
 
-function startCheckLoop(pid, serverFunction, callbackFunction)
+gs.functions.startCheckLoop = function(pid, serverFunction, callbackFunction)
 {
 	var ajaxFunction = function()
 	{
 		var ajax = new gs.functions.ajaxRequest();
-		ajax.open("GET", _baseURL + "?a=g&rt=s&ro=1&s=" + serverFunction + "&s1.pid=" + pid, true);
+		ajax.open("GET", gs.xsltParams.library_name + "?a=g&rt=s&ro=1&s=" + serverFunction + "&s1.pid=" + pid, true);
 		ajax.onreadystatechange = function()
 		{
 			if(ajax.readyState == 4 && ajax.status == 200)
 			{
 				var text = ajax.responseText;
-				var xml = validateXML(text);
+				var xml = gs.functions.validateXML(text);
 				
-				if(!xml || checkForErrors(xml))
+				if(!xml || gs.functions.checkForErrors(xml))
 				{
 					console.log("Could not check status of " + serverFunction + ", there was an error in the XML, aborting");		
 					return;
