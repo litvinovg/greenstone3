@@ -1166,6 +1166,9 @@ public class LibraryServlet extends BaseGreenstoneServlet
 					{
 						File file = new File(tempDir, current.getName());
 						current.write(file);
+
+						queryMap.put("md___ex.Filesize", new String[] { "" + file.length() });
+						queryMap.put("md___ex.Filename", new String[] { "" + current.getName() });
 					}
 				}
 			}

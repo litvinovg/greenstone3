@@ -328,6 +328,10 @@ public class GSXML
 	 */
 	public static HashMap<String, Serializable> extractParams(Element xml, boolean deep, String toFind)
 	{
+		if (xml == null)
+		{
+			return null;
+		}
 
 		if (!xml.getNodeName().equals(PARAM_ELEM + LIST_MODIFIER))
 		{
@@ -749,6 +753,7 @@ public class GSXML
 		{
 			duplicate = owner.createElementNS(namespace_uri, element_name);
 		}
+
 		// Copy element attributes
 		if (with_attributes)
 		{
@@ -1293,8 +1298,11 @@ public class GSXML
 			if (e.getNodeValue() != "")
 			{
 				String text = e.getNodeValue();
-				text = text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("^[\\n\\r\\t\\s]*", "").replaceAll("[\\n\\r\\t\\s]*$", "");
-				sb.append(text);
+				if (text != null)
+				{
+					text = text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("^[\\n\\r\\t\\s]*", "").replaceAll("[\\n\\r\\t\\s]*$", "");
+					sb.append(text);
+				}
 			}
 			return;
 		}
@@ -1343,7 +1351,7 @@ public class GSXML
 			}
 			if (children.item(i).getNodeType() == Node.TEXT_NODE && indent)
 			{
-				if (children.item(i).getNodeValue().trim().length() > 0)
+				if (children.item(i).getNodeValue() != null && children.item(i).getNodeValue().trim().length() > 0)
 				{
 					indentSwapped = true;
 					indent = false;

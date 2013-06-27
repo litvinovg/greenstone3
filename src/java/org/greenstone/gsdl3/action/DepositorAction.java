@@ -1,7 +1,9 @@
 package org.greenstone.gsdl3.action;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +15,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.io.FileUtils;
 import org.greenstone.gsdl3.util.DerbyWrapper;
 import org.greenstone.gsdl3.util.GSConstants;
 import org.greenstone.gsdl3.util.GSXML;
@@ -27,6 +30,7 @@ public class DepositorAction extends Action
 {
 	//Sub actions
 	private final String DE_RETRIEVE_WIZARD = "getWizard";
+	private final String DE_DEPOSIT_FILE = "depositFile";
 
 	public Node process(Node message)
 	{
@@ -45,20 +49,30 @@ public class DepositorAction extends Action
 		String collection = (String) params.get("c");
 
 		int pageNum = -1;
-		boolean parseFail = false;
+		boolean pageNumParseFail = false;
 		try
 		{
 			pageNum = Integer.parseInt(((String) params.get("dePage")));
 		}
 		catch (Exception ex)
 		{
-			parseFail = true;
-			ex.printStackTrace();
+			pageNumParseFail = true;
+		}
+
+		int prevPageNum = -1;
+		boolean prevPageNumFail = false;
+		try
+		{
+			prevPageNum = Integer.parseInt(((String) params.get("currentPage")));
+		}
+		catch (Exception ex)
+		{
+			prevPageNumFail = true;
 		}
 
 		DerbyWrapper database = new DerbyWrapper();
 		database.connectDatabase(GlobalProperties.getGSDL3Home() + File.separator + "sites" + File.separator + this.config_params.get(GSConstants.SITE_NAME) + File.separatorChar + "etc" + File.separatorChar + "usersDB", false);
-		if (parseFail)
+		if (pageNumParseFail)
 		{
 			try
 			{
@@ -104,7 +118,10 @@ public class DepositorAction extends Action
 				saveString.deleteCharAt(saveString.length() - 1);
 				saveString.append("]");
 
-				database.addUserData(currentUsername, "DE___" + collection + "___" + pageNum + "___CACHED_VALUES", saveString.toString());
+				if (!prevPageNumFail)
+				{
+					database.addUserData(currentUsername, "DE___" + collection + "___" + prevPageNum + "___CACHED_VALUES", saveString.toString());
+				}
 			}
 
 			//Construct the xsl
@@ -181,10 +198,13 @@ public class DepositorAction extends Action
 				for (int i = pageNum; i > 0; i--)
 				{
 					Element page = this.doc.createElement("pageCache");
-					page.setAttribute("pageNum", "" + pageNum);
+					page.setAttribute("pageNum", "" + i);
 					String cachedValues = database.getUserData(currentUsername, "DE___" + collection + "___" + i + "___CACHED_VALUES");
-					page.appendChild(this.doc.createTextNode(cachedValues));
-					cachedValueElement.appendChild(page);
+					if (cachedValues != null)
+					{
+						page.appendChild(this.doc.createTextNode(cachedValues));
+						cachedValueElement.appendChild(page);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -211,6 +231,103 @@ public class DepositorAction extends Action
 				ex.printStackTrace();
 			}
 			database.closeDatabase();
+		}
+		else if (subaction.equals(DE_DEPOSIT_FILE))
+		{
+			String fileToAdd = (String) params.get("fileToAdd");
+			File tempFile = new File(GlobalProperties.getGSDL3Home() + File.separator + "tmp" + File.separator + fileToAdd);
+			if (tempFile.exists())
+			{
+				File newFileLocationDir = new File(GlobalProperties.getGSDL3Home() + File.separator + "sites" + File.separator + this.config_params.get(GSConstants.SITE_NAME) + File.separator + "collect" + File.separator + collection + File.separator + "import" + File.separator + fileToAdd);
+				if (!newFileLocationDir.exists())
+				{
+					newFileLocationDir.mkdir();
+				}
+				File newFileLocation = new File(newFileLocationDir, fileToAdd);
+
+				try
+				{
+					FileUtils.copyFile(tempFile, newFileLocation);
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+					GSXML.addError(this.doc, responseMessage, "Failed to copy the deposited file into the collection.");
+					return responseMessage;
+				}
+
+				String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><!DOCTYPE DirectoryMetadata SYSTEM \"http://greenstone.org/dtd/DirectoryMetadata/1.0/DirectoryMetadata.dtd\"><DirectoryMetadata><FileSet>";
+				xmlString += "<FileName>" + fileToAdd + "</FileName><Description>";
+				Iterator<String> paramIter = params.keySet().iterator();
+				while (paramIter.hasNext())
+				{
+					String paramName = paramIter.next();
+					if (paramName.startsWith("md___"))
+					{
+						Object paramValue = params.get(paramName);
+
+						if (paramValue instanceof String)
+						{
+							xmlString += "<Metadata name=\"" + paramName.substring(5) + "\" mode=\"accumulate\">" + (String) paramValue + "</Metadata>";
+						}
+						else if (paramValue instanceof HashMap)
+						{
+							HashMap<String, String> subMap = (HashMap<String, String>) paramValue;
+							Iterator<String> subKeyIter = subMap.keySet().iterator();
+							while (subKeyIter.hasNext())
+							{
+								String subName = subKeyIter.next();
+								xmlString += "<Metadata name=\"" + paramName.substring(5) + "." + subName + "\" mode=\"accumulate\">" + subMap.get(subName) + "</Metadata>";
+							}
+						}
+					}
+				}
+				xmlString += "</Description></FileSet><DirectoryMetadata>";
+
+				File metadataFile = new File(GlobalProperties.getGSDL3Home() + File.separator + "sites" + File.separator + this.config_params.get(GSConstants.SITE_NAME) + File.separator + "collect" + File.separator + collection + File.separator + "import" + File.separator + fileToAdd + File.separator + "metadata.xml");
+
+				try
+				{
+					BufferedWriter bw = new BufferedWriter(new FileWriter(metadataFile));
+					bw.write(xmlString);
+					bw.close();
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
+
+				Element buildMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
+				Element buildRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, "ImportCollection", uc);
+				buildMessage.appendChild(buildRequest);
+
+				Element paramListElem = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+				buildRequest.appendChild(paramListElem);
+
+				Element collectionParam = this.doc.createElement(GSXML.PARAM_ELEM);
+				paramListElem.appendChild(collectionParam);
+				collectionParam.setAttribute(GSXML.NAME_ATT, GSXML.COLLECTION_ATT);
+				collectionParam.setAttribute(GSXML.VALUE_ATT, collection);
+
+				Element documentsParam = this.doc.createElement(GSXML.PARAM_ELEM);
+				paramListElem.appendChild(documentsParam);
+				documentsParam.setAttribute(GSXML.NAME_ATT, "documents");
+				documentsParam.setAttribute(GSXML.VALUE_ATT, fileToAdd);
+
+				Element buildResponseMessage = (Element) this.mr.process(buildMessage);
+
+				System.err.println("RESPONSE = " + GSXML.xmlNodeToString(buildResponseMessage));
+				
+				response.appendChild(this.doc.importNode(buildResponseMessage, true));
+			}
+		}
+		else
+		{
+			Element depositorPage = this.doc.createElement("depositorPage");
+			response.appendChild(depositorPage);
+
+			Element collList = getCollectionsInSite();
+			depositorPage.appendChild(this.doc.importNode(collList, true));
 		}
 
 		return responseMessage;

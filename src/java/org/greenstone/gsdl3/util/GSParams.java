@@ -164,7 +164,7 @@ public class GSParams
 	public boolean shouldSave(String name)
 	{
 		// p. is used to store previous settings
-		if (name.startsWith("p."))
+		if (name.startsWith("p.") || name.startsWith("md___"))
 			return false;
 		Param p = this.param_map.get(name);
 		if (p == null)
