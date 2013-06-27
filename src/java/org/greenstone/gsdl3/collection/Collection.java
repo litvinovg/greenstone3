@@ -34,7 +34,9 @@ import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.core.ModuleInterface;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.OAIXML;
+import org.greenstone.gsdl3.util.SimpleMacroResolver;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLTransformer;
 import org.w3c.dom.Document;
@@ -116,6 +118,7 @@ public class Collection extends ServiceCluster
 		macro_resolver.addMacro("_httpcollection_", this.site_http_address + "/collect/" + this.cluster_name);
 
 		Element coll_config_xml = loadCollConfigFile();
+		GSXSLT.modifyCollectionConfigForDebug(coll_config_xml);
 		Element build_config_xml = loadBuildConfigFile();
 
 		if (coll_config_xml == null || build_config_xml == null)

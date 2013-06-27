@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.UserDataHandler;
 
 /** various functions for manipulating Greenstone xslt */
 public class GSXSLT
@@ -242,6 +243,11 @@ public class GSXSLT
 			if (currentTemplate.getAttribute("name").length() > 0)
 			{
 				debugElement.setAttribute("name", currentTemplate.getAttribute("name"));
+			}
+
+			if (currentTemplate.getUserData("xpath") != null)
+			{
+				debugElement.setAttribute("xpath", (String) currentTemplate.getUserData("xpath"));
 			}
 
 			if (childNodes.getLength() > 0)
@@ -602,5 +608,50 @@ public class GSXSLT
 			return (Element) parent;
 		}
 		return null;
+	}
+
+	public static void modifyCollectionConfigForDebug(Element coll_config_xml)
+	{
+		NodeList xslTemplates = coll_config_xml.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
+		NodeList gsfTemplates = coll_config_xml.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "template");
+
+		for (int i = 0; i < xslTemplates.getLength() + gsfTemplates.getLength(); i++)
+		{
+			Element currentTemplate = (Element) ((i < xslTemplates.getLength()) ? xslTemplates.item(i) : gsfTemplates.item(i - xslTemplates.getLength()));
+			Element temp = currentTemplate;
+			String xPath = "";
+			while (!temp.getNodeName().toLowerCase().equals("collectionconfig"))
+			{
+				temp = (Element) temp.getParentNode();
+				String nodeName = temp.getNodeName();
+
+				int count = 1;
+				Node counter = temp.getPreviousSibling();
+				while (counter != null)
+				{
+					if (counter.getNodeType() == Node.ELEMENT_NODE && ((Element) counter).getNodeName().equals(nodeName))
+					{
+						count++;
+					}
+					counter = counter.getPreviousSibling();
+				}
+				xPath = nodeName + ((count > 1) ? ("[" + count + "]") : "") + "/" + xPath;
+			}
+
+			xPath = xPath.substring(0, xPath.length() - 1);
+			currentTemplate.setUserData("xpath", xPath, new DataTransferHandler());
+		}
+	}
+
+	static class DataTransferHandler implements UserDataHandler
+	{
+		public void handle(short operation, String key, Object data, Node src, Node dst)
+		{
+			if (operation == NODE_IMPORTED || operation == NODE_CLONED)
+			{
+				//Thread.dumpStack();
+				dst.setUserData(key, data, new DataTransferHandler());
+			}
+		}
 	}
 }
