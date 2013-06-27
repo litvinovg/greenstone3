@@ -149,7 +149,14 @@ public class GS2PerlConstructor extends CollectionConstructor
 	{
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "Collection construction: import collection."));
 		Vector<String> command = new Vector<String>();
-		command.add(GlobalProperties.getProperty("perl.path", "perl") + "perl");
+
+		String perlPath = GlobalProperties.getProperty("perl.path", "perl");
+		if (perlPath.charAt(perlPath.length() - 1) != File.separatorChar)
+		{
+			perlPath = perlPath + File.separator;
+		}
+
+		command.add(perlPath + "perl");
 		command.add("-S");
 		command.add(GlobalProperties.getGS2Build() + File.separator + "bin" + File.separator + "script" + File.separator + "import.pl");
 		if (this.manifest_file != null)
@@ -178,7 +185,14 @@ public class GS2PerlConstructor extends CollectionConstructor
 	{
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "Collection construction: build collection."));
 		Vector<String> command = new Vector<String>();
-		command.add(GlobalProperties.getProperty("perl.path", "perl") + "perl");
+
+		String perlPath = GlobalProperties.getProperty("perl.path", "perl");
+		if (perlPath.charAt(perlPath.length() - 1) != File.separatorChar)
+		{
+			perlPath = perlPath + File.separator;
+		}
+
+		command.add(perlPath + "perl");
 		command.add("-S");
 		command.add(GlobalProperties.getGS2Build() + File.separator + "bin" + File.separator + "script" + File.separator + "buildcol.pl");
 		command.add("-site");
@@ -241,7 +255,14 @@ public class GS2PerlConstructor extends CollectionConstructor
 		// in index dir not getting deleted at times. The perl code is able to delete this
 		// sucessfully consistently during testing, whereas java at times is unable to delete it.
 		Vector<String> command = new Vector<String>();
-		command.add(GlobalProperties.getProperty("perl.path", "perl") + "perl");
+
+		String perlPath = GlobalProperties.getProperty("perl.path", "perl");
+		if (perlPath.charAt(perlPath.length() - 1) != File.separatorChar)
+		{
+			perlPath = perlPath + File.separator;
+		}
+
+		command.add(perlPath + "perl");
 		command.add("-S");
 		command.add(GlobalProperties.getGS2Build() + File.separator + "bin" + File.separator + "script" + File.separator + "activate.pl");
 		command.add("-site");
