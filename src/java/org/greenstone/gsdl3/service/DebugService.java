@@ -196,6 +196,7 @@ public class DebugService extends ServiceRack
 		String nodeName = (String) params.get("nodename");
 		String nameToGet = (String) params.get("name");
 		String matchToGet = (String) params.get("match");
+		String xPath = (String) params.get("xpath");
 
 		String fullNamespace;
 		if (namespace.toLowerCase().equals("gsf"))
@@ -217,8 +218,34 @@ public class DebugService extends ServiceRack
 		{
 			XMLConverter converter = new XMLConverter();
 			Document xslDoc = converter.getDOM(xslFile, "UTF-8");
+			Element rootElem = xslDoc.getDocumentElement();
 
-			NodeList templateElems = xslDoc.getElementsByTagNameNS(fullNamespace, nodeName);
+			if (xPath != null && xPath.length() > 0)
+			{
+				String[] pathSegments = xPath.split("/");
+				for (int i = 1; i < pathSegments.length; i++)
+				{
+					String currentSegment = pathSegments[i];
+					int count = 1;
+					if (currentSegment.contains("["))
+					{
+						count = Integer.parseInt(currentSegment.substring(currentSegment.indexOf("[") + 1, currentSegment.indexOf("]")));
+						currentSegment = currentSegment.substring(0, currentSegment.indexOf("["));
+					}
+					Node child = rootElem.getFirstChild();
+					while (count > 0)
+					{
+						if (child.getNodeType() == Node.ELEMENT_NODE && ((Element) child).getNodeName().equals(currentSegment))
+						{
+							rootElem = (Element) child;
+							count--;
+						}
+						child = child.getNextSibling();
+					}
+				}
+			}
+
+			NodeList templateElems = rootElem.getElementsByTagNameNS(fullNamespace, nodeName);
 
 			if (nameToGet != null && nameToGet.length() != 0)
 			{
@@ -322,6 +349,7 @@ public class DebugService extends ServiceRack
 		String nodeName = (String) params.get("nodename");
 		String nameToSave = (String) params.get("name");
 		String matchToSave = (String) params.get("match");
+		String xPath = (String) params.get("xpath");
 		String xml = (String) params.get("xml");
 
 		String fullNamespace;
@@ -344,6 +372,33 @@ public class DebugService extends ServiceRack
 		{
 			XMLConverter converter = new XMLConverter();
 			Document xslDoc = converter.getDOM(xslFile, "UTF-8");
+
+			Element rootElem = xslDoc.getDocumentElement();
+
+			if (xPath != null && xPath.length() > 0)
+			{
+				String[] pathSegments = xPath.split("/");
+				for (int i = 1; i < pathSegments.length; i++)
+				{
+					String currentSegment = pathSegments[i];
+					int count = 1;
+					if (currentSegment.contains("["))
+					{
+						count = Integer.parseInt(currentSegment.substring(currentSegment.indexOf("[") + 1, currentSegment.indexOf("]")));
+						currentSegment = currentSegment.substring(0, currentSegment.indexOf("["));
+					}
+					Node child = rootElem.getFirstChild();
+					while (count > 0)
+					{
+						if (child.getNodeType() == Node.ELEMENT_NODE && ((Element) child).getNodeName().equals(currentSegment))
+						{
+							rootElem = (Element) child;
+							count--;
+						}
+						child = child.getNextSibling();
+					}
+				}
+			}
 
 			NodeList templateElems = xslDoc.getElementsByTagNameNS(fullNamespace, nodeName);
 
@@ -471,12 +526,18 @@ public class DebugService extends ServiceRack
 		{
 			XMLConverter converter = new XMLConverter();
 			Document xslDoc = converter.getDOM(xslFile, "UTF-8");
+			Element xslDocElem = xslDoc.getDocumentElement();
+
+			if (locationName.equals("collectionConfig"))
+			{
+				GSXSLT.modifyCollectionConfigForDebug(xslDocElem);
+			}
 
 			Element templateList = this.doc.createElement("templateList");
 			StringBuilder templateListString = new StringBuilder("[");
 
-			NodeList xslTemplateElems = xslDoc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
-			NodeList gsfTemplateElems = xslDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "template");
+			NodeList xslTemplateElems = xslDocElem.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
+			NodeList gsfTemplateElems = xslDocElem.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "template");
 			for (int i = 0; i < xslTemplateElems.getLength() + gsfTemplateElems.getLength(); i++)
 			{
 				Element currentElem = (i < xslTemplateElems.getLength()) ? (Element) xslTemplateElems.item(i) : (Element) gsfTemplateElems.item(i - xslTemplateElems.getLength());
@@ -494,6 +555,11 @@ public class DebugService extends ServiceRack
 				else if (currentElem.hasAttribute(GSXML.MATCH_ATT))
 				{
 					templateListString.append("\"match\":\"" + currentElem.getAttribute(GSXML.MATCH_ATT) + "\",");
+				}
+
+				if (currentElem.getUserData("xpath") != null)
+				{
+					templateListString.append("\"xpath\":\"" + currentElem.getUserData("xpath") + "\",");
 				}
 				templateListString.deleteCharAt(templateListString.length() - 1);
 				templateListString.append("},");
