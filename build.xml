@@ -680,7 +680,7 @@
 	<echo>http://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet}</echo>
   </target>	
   
-  <target name="start" depends="init,configure-web,start-tomcat"
+  <target name="start" depends="init,configure-tomcat,configure-web,start-tomcat"
     description="Startup the Tomcat server." >
     <echo>${app.name} (${app.version}) server running using Apache Tomcat and Java</echo> 
     <echo>Tomcat: ${catalina.home}</echo> 
