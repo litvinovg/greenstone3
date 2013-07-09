@@ -216,6 +216,8 @@ function save()
 	{
 		var changedElem = changes[i];
 
+		var metadataChanges = new Array();
+		
 		//Save metadata 
 		if(gs.functions.hasClass(changedElem, "metaTableCell")) 
 		{
@@ -233,14 +235,8 @@ function save()
 			value = value.replace(/&nbsp;/g, " ");
 			value = escape(value);
 
-			if(changedElem.originalValue)
-			{
-				gs.functions.setArchivesMetadata(collection, gs.xsltParams.site_name, docID, name, null, value, changedElem.originalValue, "override", function(){console.log("SAVED ARCHIVES");});
-			}
-			else
-			{
-				gs.functions.setArchivesMetadata(collection, gs.xsltParams.site_name, docID, name, null, value, null, "accumulate", function(){console.log("SAVED ARCHIVES");});
-			}
+			metadataChanges.push({collection:collection, docID:docID, name:name, value:value, orig:changedElem.originalValue});
+
 			changedElem.originalValue = changedElem.innerHTML;
 			addCollectionToBuild(collection);
 		}
@@ -259,56 +255,84 @@ function save()
 			addCollectionToBuild(gs.cgiParams.c);
 		}
 	}
-
-	var request = "[";
-	for(var i = 0; i < _transactions.length; i++)
+	
+	var sendBuildRequest = function()
 	{
-		request += _transactions[i];
-		if(i != _transactions.length - 1)
+		var request = "[";
+		for(var i = 0; i < _transactions.length; i++)
 		{
-			request += ",";
-		}
-	}
-	request += "]";
-
-	var statusID;
-	var ajax = new gs.functions.ajaxRequest();
-	ajax.open("POST", gs.xsltParams.library_name, true);
-	ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	ajax.onreadystatechange = function()
-	{
-		if(ajax.readyState == 4 && ajax.status == 200)
-		{
-			var text = ajax.responseText;
-			var xml = validateXML(text);
-			
-			var errorElems;
-			if(!xml || checkForErrors(xml))
+			request += _transactions[i];
+			if(i != _transactions.length - 1)
 			{
-				alert(gs.text.dse.error_saving);
-			
-				var saveButton = document.getElementById("saveButton");
-				saveButton.innerHTML = gs.text.dse.save_changes;
-				saveButton.disabled = false;
-				
-				_statusBar.removeStatus(statusID);
-				return;
+				request += ",";
 			}
+		}
+		request += "]";
 
-			_statusBar.removeStatus(statusID);
-			buildCollections(_collectionsToBuild);
+		var statusID;
+		var ajax = new gs.functions.ajaxRequest();
+		ajax.open("POST", gs.xsltParams.library_name, true);
+		ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		ajax.onreadystatechange = function()
+		{
+			if(ajax.readyState == 4 && ajax.status == 200)
+			{
+				var text = ajax.responseText;
+				var xml = validateXML(text);
+				
+				var errorElems;
+				if(!xml || checkForErrors(xml))
+				{
+					alert(gs.text.dse.error_saving);
+				
+					var saveButton = document.getElementById("saveButton");
+					saveButton.innerHTML = gs.text.dse.save_changes;
+					saveButton.disabled = false;
+					
+					_statusBar.removeStatus(statusID);
+					return;
+				}
+
+				_statusBar.removeStatus(statusID);
+				buildCollections(_collectionsToBuild);
+			}
+		}
+
+		if(_collectionsToBuild.length > 0)
+		{
+			var saveButton = document.getElementById("saveButton");
+			saveButton.innerHTML = gs.text.dse.saving + "...";
+			saveButton.disabled = true;
+
+			statusID = _statusBar.addStatus(gs.text.dse.modifying_archives + "...");
+			ajax.send("a=g&rt=r&s=DocumentExecuteTransaction&s1.transactions=" + request);
 		}
 	}
-
-	if(_collectionsToBuild.length > 0)
+	
+	var setMetadataLoop = function(index)
 	{
-		var saveButton = document.getElementById("saveButton");
-		saveButton.innerHTML = gs.text.dse.saving + "...";
-		saveButton.disabled = true;
-
-		statusID = _statusBar.addStatus(gs.text.dse.modifying_archives + "...");
-		ajax.send("a=g&rt=r&s=DocumentExecuteTransaction&s1.transactions=" + request);
+		var change = metadataChanges[index];
+		
+		var callbackFunction;
+		if(index + 1 == metadataChanges.length)
+		{
+			callbackFunction = sendBuildRequest;
+		}
+		else
+		{
+			callbackFunction = function(){setMetadataLoop(index + 1)};
+		}
+		
+		if(change.orig)
+		{
+			gs.functions.setArchivesMetadata(change.collection, gs.xsltParams.site_name, change.docID, change.name, null, change.value, change.orig, "override", function(){callbackFunction();});
+		}
+		else
+		{
+			gs.functions.setArchivesMetadata(change.collection, gs.xsltParams.site_name, change.docID, change.name, null, change.value, null, "accumulate", function(){callbackFunction();});
+		}
 	}
+	setMetadataLoop(0);
 }
 
 function buildCollections(collections, documents, callback)
