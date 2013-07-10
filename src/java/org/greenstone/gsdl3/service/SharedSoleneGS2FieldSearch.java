@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import org.greenstone.LuceneWrapper3.SharedSoleneQuery;
 import org.greenstone.gsdl3.util.GSXML;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -32,6 +33,7 @@ import org.w3c.dom.NodeList;
 public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 {
 	protected static final String RANK_PARAM_RANK_VALUE = "rank";
+  protected static final String SORT_ELEM = "sort";
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.SharedSoleneGS2FieldSearch.class.getName());
 
@@ -55,6 +57,34 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 			return false;
 		}
 
+		// the search element
+		Element config_search = (Element) GSXML.getChildByTagName(extra_info, GSXML.SEARCH_ELEM);
+		Document owner = info.getOwnerDocument();
+		// get out the sort fields
+		NodeList sort_nodes = info.getElementsByTagName(SORT_ELEM);
+
+		for (int i = 0; i < sort_nodes.getLength(); i++)
+		  {
+		    Element sort = (Element) sort_nodes.item(i);
+		    String name = sort.getAttribute(GSXML.NAME_ATT);
+		    Element node_extra = GSXML.getNamedElement(config_search, SORT_ELEM, GSXML.NAME_ATT, name);
+		    if (node_extra == null)
+		      {
+			logger.error("haven't found extra info for sort field named " + name);
+			continue;
+		      }
+		    
+		    // get the display elements if any - displayName
+		    NodeList display_names = node_extra.getElementsByTagName(GSXML.DISPLAY_TEXT_ELEM);
+		    if (display_names != null)
+		      {
+			for (int j = 0; j < display_names.getLength(); j++)
+			  {
+			    Element e = (Element) display_names.item(j);
+			    sort.appendChild(owner.importNode(e, true));
+			  }
+		      }
+		  } // for each sortfield
 		// Lucene/Solr doesn't do case folding or stemming or accent folding at the 
 		// moment
 		does_case = false;
@@ -68,7 +98,7 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 	protected void addCustomQueryParams(Element param_list, String lang)
 	{
 		super.addCustomQueryParams(param_list, lang);
-		/** Lucene's/Solr's rank param is based on index fields, not ranked/not */
+		/** Lucene's/Solr's rank (sort) param is based on sort fields, not ranked/not */
 		createParameter(RANK_PARAM, param_list, lang);
 	}
 
@@ -81,10 +111,10 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 		{
 			// get the fields
 			ArrayList<String> fields = new ArrayList<String>();
-			fields.add(RANK_PARAM_RANK_VALUE);
+			//fields.add(RANK_PARAM_RANK_VALUE);
 			ArrayList<String> field_names = new ArrayList<String>();
-			field_names.add(getTextString("param.sortBy.rank", lang));
-			getSortByIndexData(fields, field_names, lang);
+			//field_names.add(getTextString("param.sortBy.rank", lang));
+			getSortData(fields, field_names, lang);
 
 			param = GSXML.createParameterDescription2(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, fields.get(0), fields, field_names);
 		}
@@ -96,8 +126,33 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 		{
 			super.createParameter(name, param_list, lang);
 		}
+
 	}
 
+  protected void getSortData(ArrayList<String> sort_ids, ArrayList<String> sort_names, String lang) {
+
+    	Element sort_list = (Element) GSXML.getChildByTagName(this.config_info, SORT_ELEM + GSXML.LIST_MODIFIER);
+	NodeList sorts = sort_list.getElementsByTagName(SORT_ELEM);
+	int len = sorts.getLength();
+	for (int i = 0; i < len; i++)
+	  {
+	    Element sort = (Element) sorts.item(i);
+	    String shortname = sort.getAttribute(GSXML.SHORTNAME_ATT);
+	    sort_ids.add(shortname);
+	    String display_name = GSXML.getDisplayText(sort, GSXML.DISPLAY_TEXT_NAME, lang, "en");
+	    if (display_name.equals(""))
+	      {
+		display_name = sort.getAttribute(GSXML.NAME_ATT);
+		if (display_name.equals(""))
+		  {
+		    display_name = shortname;
+		  }
+	      }
+	    sort_names.add(display_name);
+	    
+	  }
+	
+  }
 	protected void getSortByIndexData(ArrayList<String> index_ids, ArrayList<String> index_names, String lang)
 	{
 		// the index info -
