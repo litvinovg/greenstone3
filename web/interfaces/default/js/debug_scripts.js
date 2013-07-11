@@ -686,8 +686,8 @@ function DebugWidget()
 		var params = {"a":"g", "rt":"r", "s":"GetXMLTemplateFromFile", "s1.fileName":filename, "s1.interfaceName":gs.xsltParams.interface_name, "s1.siteName":gs.xsltParams.site_name, "s1.collectionName":gs.cgiParams.c, "s1.locationName":location, "s1.namespace":namespace, "s1.nodename":nodename};
 
 		if(match && match.length > 0){params["s1.match"] = match; responseName = "requestedMatchTemplate";}
-		if(name && name.length > 0){params["s1.name"] = name;}
 		if(xpath && xpath.length > 0){params["s1.xpath"] = xpath}
+		if(name && name.length > 0){params["s1.name"] = name;}
 
 		$.post(url, params)
 		.success(function(response)
