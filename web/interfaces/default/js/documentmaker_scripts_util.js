@@ -211,12 +211,11 @@ function save()
 	}
 
 	var changes = de.Changes.getChangedEditableSections();
+	var metadataChanges = new Array();
 	
 	for(var i = 0; i < changes.length; i++)
 	{
 		var changedElem = changes[i];
-
-		var metadataChanges = new Array();
 		
 		//Save metadata 
 		if(gs.functions.hasClass(changedElem, "metaTableCell")) 
