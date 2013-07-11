@@ -1074,6 +1074,29 @@ table#classifiernodelist {
     text-transform: capitalize;
 }
 
+/* DEPOSITOR STYLES */
+
+#wizardBar {
+	display: table;
+	margin: 0 auto;
+}
+
+#wizardBar li {
+	display: inline;
+	list-style-type: none;
+	padding: 0 10px;
+	margin: 0 5px;
+}
+
+#wizardContainer {
+	display: table;
+	margin: 0 auto;
+}
+
+#depositorform {
+	min-height: 300px;
+}
+
 /*
 ul.childrenlist li {
 list-style-type:none;
