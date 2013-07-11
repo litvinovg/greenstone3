@@ -133,7 +133,21 @@ public class DerbyWrapper
 		{
 			System.err.println("Warning: Derby did not shut down normally");
 		}
+	}
 
+	public void clearUserData()
+	{
+		try
+		{
+			conn.setAutoCommit(false);
+			state.execute("drop table data");
+			state.execute("create table data (username varchar(40) not null, name varchar(128) not null, value clob, primary key (username, name))");
+			conn.commit();
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public void createDatabase()
