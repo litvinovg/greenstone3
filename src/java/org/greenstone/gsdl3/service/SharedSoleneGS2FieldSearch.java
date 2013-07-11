@@ -114,9 +114,10 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 			//fields.add(RANK_PARAM_RANK_VALUE);
 			ArrayList<String> field_names = new ArrayList<String>();
 			//field_names.add(getTextString("param.sortBy.rank", lang));
-			getSortData(fields, field_names, lang);
+			if (getSortData(fields, field_names, lang)) {
 
-			param = GSXML.createParameterDescription2(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, fields.get(0), fields, field_names);
+			  param = GSXML.createParameterDescription2(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, fields.get(0), fields, field_names);
+			}
 		}
 		if (param != null)
 		{
@@ -129,11 +130,13 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 
 	}
 
-  protected void getSortData(ArrayList<String> sort_ids, ArrayList<String> sort_names, String lang) {
+  protected boolean getSortData(ArrayList<String> sort_ids, ArrayList<String> sort_names, String lang) {
 
     	Element sort_list = (Element) GSXML.getChildByTagName(this.config_info, SORT_ELEM + GSXML.LIST_MODIFIER);
+	if (sort_list == null) return false;
 	NodeList sorts = sort_list.getElementsByTagName(SORT_ELEM);
 	int len = sorts.getLength();
+	if (len == 0) return false;
 	for (int i = 0; i < len; i++)
 	  {
 	    Element sort = (Element) sorts.item(i);
@@ -151,7 +154,7 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 	    sort_names.add(display_name);
 	    
 	  }
-	
+	return true;
   }
 	protected void getSortByIndexData(ArrayList<String> index_ids, ArrayList<String> index_names, String lang)
 	{
