@@ -423,25 +423,23 @@ gs.functions.hashString = function(str)
 
 function callMetadataServer(callingFunction, url, responseFunction)
 {
-	var ajax = new gs.functions.ajaxRequest();
-	ajax.open("GET", url, true);
-	ajax.onreadystatechange = function()
+	$.ajax(url)
+	.success(function(response)
 	{
-		if(ajax.readyState == 4 && ajax.status == 200)
+		console.log("(" + callingFunction + ") Response received from server: " + response);
+
+		//var xml = $.parseXML(response);
+		//console.log(xml);
+		
+		if(responseFunction != null)
 		{
-			console.log("(" + callingFunction + ") Response received from server: " + ajax.responseText);
-			
-			if(responseFunction != null)
-			{
-				responseFunction(ajax.responseText);
-			}
+			responseFunction(response);
 		}
-		else if(ajax.readyState == 4)
-		{
-			console.log("(" + callingFunction + ") Failed");
-		}
-	}
-	ajax.send();
+	})
+	.error(function()
+	{
+		console.log("(" + callingFunction + ") Failed");
+	});
 }
 
 /*************************
