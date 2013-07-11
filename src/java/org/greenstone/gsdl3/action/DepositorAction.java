@@ -3,11 +3,13 @@ package org.greenstone.gsdl3.action;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -26,11 +28,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 public class DepositorAction extends Action
 {
 	//Sub actions
-	private final String DE_RETRIEVE_WIZARD = "getWizard";
-	private final String DE_DEPOSIT_FILE = "depositFile";
+	private final String DE_RETRIEVE_WIZARD = "getwizard";
+	private final String DE_DEPOSIT_FILE = "depositfile";
+	private final String DE_CLEAR_DATABASE = "cleardatabase";
 
 	public Node process(Node message)
 	{
@@ -84,8 +90,32 @@ public class DepositorAction extends Action
 			}
 		}
 
+		int highestVisitedPage = -1;
+		String result = "";
+		int counter = 1;
+		while (result != null)
+		{
+			result = database.getUserData(currentUsername, "DE___" + collection + "___" + counter + "___VISITED_PAGE");
+			if (result != null)
+			{
+				counter++;
+			}
+		}
+		highestVisitedPage = counter - 1;
+		if (highestVisitedPage == 0)
+		{
+			highestVisitedPage = 1;
+		}
+
+		if (pageNum > highestVisitedPage + 1)
+		{
+			pageNum = highestVisitedPage + 1;
+		}
+
+		database.addUserData(currentUsername, "DE___" + collection + "___" + pageNum + "___VISITED_PAGE", "VISITED");
+
 		String subaction = ((Element) request).getAttribute(GSXML.SUBACTION_ATT);
-		if (subaction.equals(DE_RETRIEVE_WIZARD))
+		if (subaction.toLowerCase().equals(DE_RETRIEVE_WIZARD))
 		{
 			//Save given metadata
 			StringBuilder saveString = new StringBuilder("[");
@@ -170,6 +200,10 @@ public class DepositorAction extends Action
 				{
 					pageLi.setAttribute("class", "wizardStepLink ui-state-active ui-corner-all");
 				}
+				else if (i + 1 > highestVisitedPage + 1 && i + 1 > pageNum + 1)
+				{
+					pageLi.setAttribute("class", "wizardStepLink ui-state-disabled ui-corner-all");
+				}
 				else
 				{
 					pageLi.setAttribute("class", "wizardStepLink ui-state-default ui-corner-all");
@@ -232,7 +266,7 @@ public class DepositorAction extends Action
 			}
 			database.closeDatabase();
 		}
-		else if (subaction.equals(DE_DEPOSIT_FILE))
+		else if (subaction.toLowerCase().equals(DE_DEPOSIT_FILE))
 		{
 			String fileToAdd = (String) params.get("fileToAdd");
 			File tempFile = new File(GlobalProperties.getGSDL3Home() + File.separator + "tmp" + File.separator + fileToAdd);
@@ -256,33 +290,32 @@ public class DepositorAction extends Action
 					return responseMessage;
 				}
 
-				String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><!DOCTYPE DirectoryMetadata SYSTEM \"http://greenstone.org/dtd/DirectoryMetadata/1.0/DirectoryMetadata.dtd\"><DirectoryMetadata><FileSet>";
-				xmlString += "<FileName>" + fileToAdd + "</FileName><Description>";
-				Iterator<String> paramIter = params.keySet().iterator();
-				while (paramIter.hasNext())
+				HashMap<String, String> metadataMap = new HashMap<String, String>();
+				for (int i = pageNum; i > 0; i--)
 				{
-					String paramName = paramIter.next();
-					if (paramName.startsWith("md___"))
+					String cachedValues = database.getUserData(currentUsername, "DE___" + collection + "___" + i + "___CACHED_VALUES");
+					if (cachedValues != null)
 					{
-						Object paramValue = params.get(paramName);
+						Type type = new TypeToken<List<Map<String, String>>>()
+						{
+						}.getType();
 
-						if (paramValue instanceof String)
+						Gson gson = new Gson();
+						List<Map<String, String>> metadataList = gson.fromJson(cachedValues, type);
+						for (Map<String, String> metadata : metadataList)
 						{
-							xmlString += "<Metadata name=\"" + paramName.substring(5) + "\" mode=\"accumulate\">" + (String) paramValue + "</Metadata>";
-						}
-						else if (paramValue instanceof HashMap)
-						{
-							HashMap<String, String> subMap = (HashMap<String, String>) paramValue;
-							Iterator<String> subKeyIter = subMap.keySet().iterator();
-							while (subKeyIter.hasNext())
-							{
-								String subName = subKeyIter.next();
-								xmlString += "<Metadata name=\"" + paramName.substring(5) + "." + subName + "\" mode=\"accumulate\">" + subMap.get(subName) + "</Metadata>";
-							}
+							metadataMap.put(metadata.get("name"), metadata.get("value"));
 						}
 					}
 				}
-				xmlString += "</Description></FileSet><DirectoryMetadata>";
+
+				String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><!DOCTYPE DirectoryMetadata SYSTEM \"http://greenstone.org/dtd/DirectoryMetadata/1.0/DirectoryMetadata.dtd\"><DirectoryMetadata><FileSet>";
+				xmlString += "<FileName>.*</FileName><Description>";
+				for (String key : metadataMap.keySet())
+				{
+					xmlString += "<Metadata name=\"" + key.substring("MD___".length()) + "\" mode=\"accumulate\">" + metadataMap.get(key) + "</Metadata>";
+				}
+				xmlString += "</Description></FileSet></DirectoryMetadata>";
 
 				File metadataFile = new File(GlobalProperties.getGSDL3Home() + File.separator + "sites" + File.separator + this.config_params.get(GSConstants.SITE_NAME) + File.separator + "collect" + File.separator + collection + File.separator + "import" + File.separator + fileToAdd + File.separator + "metadata.xml");
 
@@ -316,10 +349,13 @@ public class DepositorAction extends Action
 
 				Element buildResponseMessage = (Element) this.mr.process(buildMessage);
 
-				System.err.println("RESPONSE = " + GSXML.xmlNodeToString(buildResponseMessage));
-				
 				response.appendChild(this.doc.importNode(buildResponseMessage, true));
 			}
+		}
+		else if (subaction.toLowerCase().equals(DE_CLEAR_DATABASE))
+		{
+			database.clearUserData();
+			System.err.println("\n\nCLEARED\n\n");
 		}
 		else
 		{
