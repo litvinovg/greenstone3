@@ -52,6 +52,34 @@
 
   -->
 
+  <property name="os.linux" value="Linux"/> 
+  <property name="os.mac" value="Mac OS X"/>
+  <property name="os.solaris" value="SunOS"/>
+  <property name="os.unix" value="${os.linux},${os.mac},${os.solaris}"/>
+  <property name="os.windows" value="Windows 95,Windows 98,Windows 2000,Windows 2003,Windows XP,Windows NT,Windows ME,Windows Vista,Windows 7"/> <!-- check this!!!-->
+
+  <!-- this is true for linux and macs -->
+  <condition property="current.os.isunix">
+    <os family="unix"/>
+  </condition>
+  
+  <condition property="current.os.isunixnotmac">
+    <and>
+      <os family="unix"/>
+      <not>
+	<os family="mac"/>
+      </not>
+    </and>
+  </condition>
+  
+  <condition property="current.os.ismac">
+    <os family="mac"/>
+  </condition>
+  
+  <condition property="current.os.iswindows">
+    <os family="windows"/>
+  </condition>
+
   <!-- create build.properties if it has not been created yet -->
   <if>
     <bool><not><available file="build.properties"/></not></bool>
@@ -150,7 +178,7 @@
       <!-- copy over packages tomcat folder -->
 
       <if>
-	<bool><equals arg1="${os.bin.dir}" arg2="windows"/></bool>
+	<bool><istrue value="${current.os.iswindows}"/></bool>
 	<copy todir="${gsdl3.writablehome}/packages/tomcat" 
 	      preservelastmodified="true"
 	      failonerror="true" >  
@@ -223,33 +251,6 @@
     </and>
   </condition>
  
-  <property name="os.linux" value="Linux"/> 
-  <property name="os.mac" value="Mac OS X"/>
-  <property name="os.solaris" value="SunOS"/>
-  <property name="os.unix" value="${os.linux},${os.mac},${os.solaris}"/>
-  <property name="os.windows" value="Windows 95,Windows 98,Windows 2000,Windows 2003,Windows XP,Windows NT,Windows ME,Windows Vista,Windows 7"/> <!-- check this!!!-->
-
-  <!-- this is true for linux and macs -->
-  <condition property="current.os.isunix">
-    <os family="unix"/>
-  </condition>
-  
-  <condition property="current.os.isunixnotmac">
-    <and>
-      <os family="unix"/>
-      <not>
-	<os family="mac"/>
-      </not>
-    </and>
-  </condition>
-  
-  <condition property="current.os.ismac">
-    <os family="mac"/>
-  </condition>
-  
-  <condition property="current.os.iswindows">
-    <os family="windows"/>
-  </condition>
 
   <!-- is there a better way to do this?? what about solaris?? -->
   <condition property="os.bin.dir" value="${cross.os}">
