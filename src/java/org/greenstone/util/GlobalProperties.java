@@ -34,6 +34,7 @@ public class GlobalProperties
 	private static Properties properties = new Properties();
 	private static String properties_filename = "global.properties";
 	private static String gsdl3_home = null;
+	private static String gsdl3_writablehome = null;
 	private static String gsdl3_web_address = null;
 	private static String full_gsdl3_web_address = null;
 
@@ -55,6 +56,11 @@ public class GlobalProperties
 	public static String getGSDL3Home()
 	{
 		return gsdl3_home;
+	}
+
+	public static String getGSDL3WritableHome()
+	{
+		return gsdl3_writablehome;
 	}
 
 	public static String getGS2Build()
@@ -79,17 +85,18 @@ public class GlobalProperties
 			InputStream in = Class.forName("org.greenstone.util.GlobalProperties").getClassLoader().getResourceAsStream(properties_filename);
 			if (in != null)
 			{
-				logger.debug("loading global properties");
+				logger.debug("Loading global properties");
 				properties.load(in);
 				in.close();
 			}
 			else
 			{
-				logger.error("couldn't load global properties!");
+				logger.error("Couldn't load global properties: " + properties_filename);
 			}
 
 			gsdl3_home = properties.getProperty("gsdl3.home");
-			if ((gsdl3_home == null || gsdl3_home.length() == 0) && optionalGS3Home != null && optionalGS3Home.length() > 0)
+			if ((gsdl3_home == null || gsdl3_home.length() == 0) 
+			    && optionalGS3Home != null && optionalGS3Home.length() > 0)
 			{
 				gsdl3_home = optionalGS3Home;
 			}
@@ -101,12 +108,19 @@ public class GlobalProperties
 			}
 
 			// make sure the path separators are correct
-			// gsdl3_home may be null, eg when we are loading properties from Server3
+			// gsdl3_home may be null, e.g., when we are loading properties from Server3
 			if (gsdl3_home != null)
 			{
 				File gs3_file = new File(gsdl3_home);
 				gsdl3_home = gs3_file.getPath();
 			}
+
+			gsdl3_writablehome = properties.getProperty("gsdl3.writablehome");
+			// if gsdl3_writablehome is null, then defaults to gsdl3_home
+			if (gsdl3_writablehome == null) { 
+			    gsdl3_writablehome = gsdl3_home;
+			}
+
 			//build the gsdl3 web address, in a way resilient to errors and ommisions in global.properties, simplifying where possible
 			//aiming for a string with no trailing slash, eg "http://localhost:8080/greenstone3" or "http://www.mygreenstonelibrary.com"
 			String protocolSpecifier = null, hostSpecifier = null, portSpecifier = null, contextSpecifier = null;
