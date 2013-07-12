@@ -100,17 +100,93 @@
 
   <property name="build.home" value="${basedir}/build"/>
   <property name="src.home" value="${basedir}/src/java"/>
-  <property name="packages.home" value="${basedir}/packages"/>
-  <!-- this may be set in build.properties, eg if you move the web dir to 
-  tomcats webapps directory -->
+
+  <if><bool><istrue value="${gsdl3home.isreadonly}"/></bool>
+    <property name="readonly-packages.home" value="${basedir}/packages"/>
+    <property name="packages.home" value="${gsdl3.writablehome}/packages"/>
+  <else>
+    <property name="packages.home" value="${basedir}/packages"/>
+  </else>
+  </if>
+
+  <!-- this may be set in build.properties, e.g. if you move the web dir to 
+       tomcats webapps directory -->
   <property name="web.home" value="${basedir}/web"/>
+  <property name="web.writablehome" value="${gsdl3.writablehome}"/>
+
   <!-- jar files needed by applets go here -->
   <property name="web.applet" value="${web.home}/applet"/>
 
   <!-- jar files needed by the servlet (and extra ones) go here -->
   <property name="web.lib" value="${web.home}/WEB-INF/lib"/>
+  <property name="web.writablelib" value="${web.writablehome}/WEB-INF/lib"/>
   <!-- other files needed by the servlet go here -->
   <property name="web.classes" value="${web.home}/WEB-INF/classes"/>
+  <property name="web.writableclasses" value="${web.writablehome}/WEB-INF/classes"/>
+
+  <if>
+    <bool><istrue value="${gsdl3home.isreadonly}"/></bool>
+    <echo>Greenstone3 home directory is read-only</echo>
+    <echo>  => Writable area is: ${gsdl3.writablehome}</echo>
+
+    <condition property="gsdl3.writablehome.already-exists">
+      <available file="${gsdl3.writablehome}" type="dir"/>
+    </condition>
+
+    <if>
+      <bool><not><istrue value="${gsdl3.writablehome.already-exists}"/></not></bool>
+
+      <!-- set up writable area -->
+      <echo>No previous Greenstone home writable area detected</echo>
+      <echo>  => Setting up area</echo>
+      <mkdir dir="${gsdl3.writablehome}"/>
+      <mkdir dir="${gsdl3.writablehome}/packages"/> 
+      <mkdir dir="${gsdl3.writablehome}/logs"/>
+
+      <chmod perm="a+rwx" dir="${gsdl3.writablehome}"/>
+      <chmod perm="a+rwx" dir="${gsdl3.writablehome}/packages"/>
+      <chmod perm="a+rwx" dir="${gsdl3.writablehome}/logs"/> 
+
+      <!-- copy over packages tomcat folder -->
+
+      <if>
+	<bool><equals arg1="${os.bin.dir}" arg2="windows"/></bool>
+	<copy todir="${gsdl3.writablehome}/packages/tomcat" 
+	      preservelastmodified="true"
+	      failonerror="true" >  
+	  <fileset dir="${readonly-packages.home}/tomcat" includes="**"/>  
+	</copy>
+      
+	<else>
+	  <!-- else assume Unix -->
+	  <!-- Can't go through the OS-independant <copy> task as it fails to preserve exec permissions -->
+	  <echo>Copying to ${gsdl3.writablehome}/packages/tomcat</echo>
+	  <exec executable="cp" output="/dev/null" spawn="false">
+            <arg value="-r"/>
+            <arg value="${readonly-packages.home}/tomcat"/>
+            <arg value="${gsdl3.writablehome}/packages/."/>
+	  </exec>
+	  
+	</else>
+      </if>
+      
+      <echo>  => Copying Greenstone's web/WEB-INF to writable area</echo>
+      <copy todir="${gsdl3.writablehome}/WEB-INF" 
+	    preservelastmodified="true"
+	    failonerror="true" >  
+	<fileset dir="${web.home}/WEB-INF" includes="**"/>  
+      </copy>
+
+      <copy todir="${gsdl3.writablehome}" 
+	    preservelastmodified="true"
+	    failonerror="true" >  
+	<fileset dir="${web.home}" includes="index.html"/>  
+      </copy>
+
+    </if>
+  </if>
+
+
   <!--- flax: the WordNet home -->
   <property name="wn.home" value="${web.home}/WEB-INF/classes/flax/WordNet"/>
 
@@ -127,7 +203,8 @@
 
    <property name="admin.dir"      value="${basedir}/admin"/>
 
-  <!-- defaults - set these on the command line or in build.properties or they will take these default values-->
+  <!-- defaults - set these on the command line or in build.properties or 
+       they will take these default values-->
   <property name="app.version" value="trunk"/>
   <property name="branch.path" value="trunk"/>
   <property name="branch.revision" value="HEAD"/>
@@ -136,12 +213,12 @@
   <property name="svn.root" value="http://svn.greenstone.org"/>
 
   <!-- catalina home is set to tomcat basedir if already installed, otherwise
-  use greenstone's tomcat -->
+       use greenstone's tomcat -->
   <condition property="catalina.home" value="${tomcat.installed.path}" else="${packages.home}/tomcat"> 
     <and>
       <isset property="tomcat.installed.path"/>
       <not>
-      <equals arg1="" arg2="${tomcat.installed.path}"/>
+	<equals arg1="" arg2="${tomcat.installed.path}"/>
       </not>
     </and>
   </condition>
@@ -500,8 +577,8 @@
       <include name="*.jar"/>
     </fileset>
 	
-	<pathelement location="${web.lib}"/>
-    <fileset dir="${web.lib}">
+    <pathelement location="${web.writablelib}"/>
+    <fileset dir="${web.writablelib}">
       <include name="derby.jar"/>
     </fileset>
   </path>
@@ -705,16 +782,15 @@
   </target>
 
   <target name="init-oaiconfig" if="oaiconfig.present">
-    <echo>Writing out baseURL ${url}oaiserver to ${web.classes}/OAIConfig.xml</echo>
-    <copy file="${web.classes}/OAIConfig.xml.in" tofile="${web.classes}/OAIConfig.xml"/>
-    <rsr file="${web.classes}/OAIConfig.xml" pattern="&lt;baseURL&gt;.*&lt;/baseURL&gt;" replacement="&lt;baseURL&gt;${url}oaiserver&lt;/baseURL&gt;" />   
+    <echo>Writing out baseURL ${url}oaiserver to ${web.writableclasses}/OAIConfig.xml</echo>
+    <copy file="${web.classes}/OAIConfig.xml.in" tofile="${web.writableclasses}/OAIConfig.xml"/>
+    <rsr file="${web.writableclasses}/OAIConfig.xml" pattern="&lt;baseURL&gt;.*&lt;/baseURL&gt;" replacement="&lt;baseURL&gt;${url}oaiserver&lt;/baseURL&gt;" />   
   </target>
 
   <target name="stop" depends="init,stop-tomcat" 
     description="Shutdown the Tomcat server."/>
   
   <target name="restart" description="Shutdown and restart Tomcat"  depends="init,stop,start"/>
-
 
   <!-- =========== Help targets ===================================  -->
   
@@ -841,9 +917,9 @@
   <!-- ========== Web app Targets ================================ -->
   
   <target name="prepare-web" depends="init">
-    <mkdir dir="${web.home}/applet"/>
-    <mkdir dir="${web.home}/logs"/>
-    <mkdir dir="${web.home}/logs/tmp"/>
+    <mkdir dir="${web.writablehome}/applet"/>
+    <mkdir dir="${web.writablehome}/logs"/>
+    <mkdir dir="${web.writablehome}/logs/tmp"/>
   </target>
   
   <!-- if we are using java 1.5+, we need the xalan.jar file in web/WEB-INF/lib,  but if we are using java 1.4, we can't have it there.
@@ -984,11 +1060,19 @@
       <echo>**** Setting perl shebangs to Perl Exec: ${perl.exec}</echo>
 
       <!-- set the shebangs in the cgi files to point to the correct perlpath -->
-      <rsr file="${web.home}/WEB-INF/cgi/gliserver.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/>
-      <rsr file="${web.home}/WEB-INF/cgi/metadata-server.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/> 
-      <rsr file="${web.home}/WEB-INF/cgi/checksum.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/> 	
+      <if>
+	<bool><not><equals arg1="${web.home}" arg2="${web.writablehome}"></equals></not></bool>
+	<mkdir dir="${web.writablehome}"/>
+	<copy file="${web.home}/WEB-INF/cgi/gliserver.pl"       tofile="${web.writablehome}/WEB-INF/cgi/gliserver.pl"       overwrite="true"/>
+	<copy file="${web.home}/WEB-INF/cgi/metadata-server.pl" tofile="${web.writablehome}/WEB-INF/cgi/metadata-server.pl" overwrite="true"/>
+	<copy file="${web.home}/WEB-INF/cgi/checksum.pl"        tofile="${web.writablehome}/WEB-INF/cgi/checksum.pl"        overwrite="true"/>
+      </if>
+
+      <rsr file="${web.writablehome}/WEB-INF/cgi/gliserver.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/>
+      <rsr file="${web.writablehome}/WEB-INF/cgi/metadata-server.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/> 
+      <rsr file="${web.writablehome}/WEB-INF/cgi/checksum.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/> 	
       <else>
-	<echo>WARNING: perl.path is empty. Unable to set the shebangs in the perl files in ${web.home}/WEB-INF/cgi</echo>
+	<echo>WARNING: perl.path is empty. Unable to set the shebangs in the perl files in ${web.writablehome}/WEB-INF/cgi</echo>
       </else>
     </if>
   </target>
@@ -999,22 +1083,31 @@
     <pathconvert targetos="unix" property="src.gsdl3.home.unix">
       <path path="${web.home}"/>
     </pathconvert>
+    <pathconvert targetos="unix" property="src.gsdl3.writablehome.unix">
+      <path path="${web.writablehome}"/>
+    </pathconvert>
 
     <antcall target="set-perl-shebangs" inheritAll="true" />
 	
     <filter token="gsdlhome" value="${gs2build.home}"/>
     <filter token="gsdl3srchome" value="${basedir}"/>
     <filter token="gsdl3home" value="${src.gsdl3.home.unix}"/>
+    <filter token="gsdl3writablehome" value="${src.gsdl3.writablehome.unix}"/>
     <filter token="gsdl3version" value="${app.version}"/>
     <filter token="tomcat.server" value="${tomcat.server}"/>
     <filter token="tomcat.port" value="${tomcat.port}"/>
     <filter token="perlpath" value="${escaped.perl.path}"/>
     <filter token="disable.collection.building" value="${disable.collection.building}"/>
-    <copy file="${web.home}/WEB-INF/cgi/gsdl3site.cfg.in" tofile="${web.home}/WEB-INF/cgi/gsdl3site.cfg" filtering="true" overwrite="true"/>
-    <copy file="${basedir}/resources/java/global.properties.in" tofile="${web.classes}/global.properties" filtering="true" overwrite="true"/>
-    <copy file="${basedir}/resources/java/log4j.properties.in" tofile="${web.classes}/log4j.properties" filtering="true" overwrite="true"/>
-    <chmod file="${web.classes}/global.properties" perm="600"/>
-    <chmod file="${web.classes}/log4j.properties" perm="600"/>
+    <copy file="${web.home}/WEB-INF/cgi/gsdl3site.cfg.in" tofile="${web.writablehome}/WEB-INF/cgi/gsdl3site.cfg" filtering="true" overwrite="true"/>
+
+    <copy file="${basedir}/resources/java/global.properties.in" tofile="${web.writableclasses}/global.properties" filtering="true" overwrite="true"/>
+    <copy file="${basedir}/resources/java/log4j.properties.in" tofile="${web.writableclasses}/log4j.properties" filtering="true" overwrite="true"/>
+    <if><bool><istrue value="${gsdl3home.isreadonly}"/></bool>
+      <!-- uncomment the writablehome properties -->
+      <rsr file="${web.writableclasses}/global.properties" pattern="^#gsdl3\.(writable{1})?home" replacement="gsdl3.$1home" />
+    </if>
+    <chmod file="${web.writableclasses}/global.properties" perm="644"/>
+    <chmod file="${web.writableclasses}/log4j.properties" perm="644"/>
   </target>
 
   <target name="compile-web" depends="init">
@@ -1059,7 +1152,7 @@
   <target name="svnupdate-web" unless="nosvn.mode">
     <exec executable="svn">
       <arg value="update"/>
-      <arg value="${web.home}"/>
+      <arg value="${web.writablehome}"/>
       <arg value="-r"/><arg value="${branch.revision}"/>
     </exec>
   </target>
@@ -1147,6 +1240,7 @@
     <copy file="${basedir}/resources/tomcat/greenstone3.xml" tofile="${packages.home}/tomcat/conf/Catalina/localhost/greenstone3.xml" overwrite="true">
       <filterset>
         <filter token="gsdl3webhome" value="${web.home}"/>
+        <filter token="gsdl3webwritablehome" value="${web.writablehome}"/>
 	<filter token="privilegedattribute" value ="${privileged.attribute}"/>
       </filterset>
     </copy>
@@ -1182,8 +1276,8 @@
       </else>
     </if>
 
-	<echo file="${catalina.home}/bin/setenv.bat">set CLASSPATH=${tomcat.classpath}</echo>
-	<echo file="${catalina.home}/bin/setenv.sh">export CLASSPATH=${tomcat.classpath}</echo>
+    <echo file="${catalina.home}/bin/setenv.bat">set CLASSPATH=${tomcat.classpath}</echo>
+    <echo file="${catalina.home}/bin/setenv.sh">export CLASSPATH=${tomcat.classpath}</echo>
 	
     <exec executable="${catalina.home}/bin/catalina.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
       <arg value="jpda" />
@@ -1224,7 +1318,7 @@
   </target>  
   
 
-<!-- Another way: http://ptrthomas.wordpress.com/2006/03/25/how-to-start-and-stop-tomcat-from-ant/ -->
+  <!-- Another way: http://ptrthomas.wordpress.com/2006/03/25/how-to-start-and-stop-tomcat-from-ant/ -->
   <target name="start-tomcat" description="Startup only Tomcat" depends="init" if="tomcat.islocal">
     <property name="tomcat.classpath" refid="local.tomcat.classpath"/>
     <property name="tomcat.path" refid="local.tomcat.path"/>
@@ -1237,8 +1331,8 @@
       </else>
     </if>
 
-	<echo file="${catalina.home}/bin/setenv.bat">set CLASSPATH=${tomcat.classpath}</echo>
-	<echo file="${catalina.home}/bin/setenv.sh">export CLASSPATH=${tomcat.classpath}</echo>
+    <echo file="${catalina.home}/bin/setenv.bat">set CLASSPATH=${tomcat.classpath}</echo>
+    <echo file="${catalina.home}/bin/setenv.sh">export CLASSPATH=${tomcat.classpath}</echo>
 	
     <exec executable="${catalina.home}/bin/startup.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
       <!--<env key="GSDLOS" value="linux"/> do we need this?? -->
@@ -1372,16 +1466,16 @@
     Doing "cat </dev/null > packages/tomcat/logs/catalina.out" doesn't work as an ant target.
     It seems to have a problem with cat or </dev/null, with or without the < sign. -->
   <target name="reset-logs" description="Empties catalina.out, greenstone.log and contents of web/logs/tmp">
-    <echo>Truncating catalina.out, greenstone.log and server.log, and emptying ${web.home}/logs/tmp</echo>    
+    <echo>Truncating catalina.out, greenstone.log and server.log, and emptying ${web.writablehome}/logs/tmp</echo>    
     <exec executable="rm" os="${os.unix}" dir="${catalina.home}/logs" spawn="false">
       <arg value="-f"/>
       <arg value="catalina.out"/>
     </exec>
-    <exec executable="rm" os="${os.unix}" dir="${web.home}/logs" spawn="false">
+    <exec executable="rm" os="${os.unix}" dir="${web.writablehome}/logs" spawn="false">
       <arg value="-f"/>
       <arg value="greenstone.log"/>
     </exec>
-    <exec executable="rm" os="${os.unix}" dir="${web.home}/logs" spawn="false">
+    <exec executable="rm" os="${os.unix}" dir="${web.writablehome}/logs" spawn="false">
       <arg value="-f"/>
       <arg value="server.log"/>
     </exec>
@@ -1390,11 +1484,11 @@
     spawn="false">
       <arg value="catalina.out"/>
     </exec>
-    <exec executable="touch" os="${os.unix}" dir="${web.home}/logs"
+    <exec executable="touch" os="${os.unix}" dir="${web.writablehome}/logs"
       spawn="false">
       <arg value="greenstone.log"/>
     </exec>
-    <exec executable="touch" os="${os.unix}" dir="${web.home}/logs"
+    <exec executable="touch" os="${os.unix}" dir="${web.writablehome}/logs"
       spawn="false">
       <arg value="server.log"/>
     </exec>
@@ -1402,17 +1496,17 @@
     <exec executable="cmd" os="${os.windows}" dir="${catalina.home}/logs" spawn="false">
       <arg line="/c echo. > catalina.out"/>
     </exec>
-    <exec executable="cmd" os="${os.windows}" dir="${web.home}/logs" spawn="false">
+    <exec executable="cmd" os="${os.windows}" dir="${web.writablehome}/logs" spawn="false">
       <arg line="/c echo. > greenstone.log"/>
     </exec>
-    <exec executable="cmd" os="${os.windows}" dir="${web.home}/logs" spawn="false">
+    <exec executable="cmd" os="${os.windows}" dir="${web.writablehome}/logs" spawn="false">
       <arg line="/c echo. > server.log"/>
     </exec>
 
     <if>
-      <bool><available file="${web.home}/logs/tmp" type="dir"/></bool>
+      <bool><available file="${web.writablehome}/logs/tmp" type="dir"/></bool>
       <delete>
-	<fileset dir="${web.home}/logs/tmp" includes="**/*"/>
+	<fileset dir="${web.writablehome}/logs/tmp" includes="**/*"/>
       </delete>
     </if>
   </target>
@@ -2738,9 +2832,9 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <antcall target="remove-source"/>
 
     <!-- create empty directories -->
-    <mkdir dir="${web.home}/applet"/>
-    <mkdir dir="${web.home}/logs"/>
-    <mkdir dir="${web.home}/logs/tmp"/>
+    <mkdir dir="${web.writablehome}/applet"/>
+    <mkdir dir="${web.writablehome}/logs"/>
+    <mkdir dir="${web.writablehome}/logs/tmp"/>
 
     <!-- os specific tidy-ups -->
     <!-- linux, mac -->
