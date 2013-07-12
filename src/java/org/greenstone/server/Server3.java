@@ -61,7 +61,9 @@ public class Server3 extends BaseServer
 
 	public void reload()
 	{
-		GlobalProperties.loadGlobalProperties(fallbackGSDL3Home()); // properties file may have changed, so reload it
+	        String gsdl3_writablehome = System.getProperty("gsdl3.writablehome",fallbackGSDL3Home());
+
+		GlobalProperties.loadGlobalProperties(gsdl3_writablehome); // properties file may have changed, so reload it
 	}
 
 	public static void main(String[] args)
