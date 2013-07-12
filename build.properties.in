@@ -92,6 +92,21 @@ with.gli.and.gems=true
 #checkout.gnomelib.ext=true
 #checkout.imagemagick.ext=true
 
+# The following two properties are automatically overridden by gs3-server
+# when running off a read-only medium such as a DVD ...
+#
+# The 'writable' home default is to be the same location as gsdl3.home
+gsdl3home.isreadonly=false
+gsdl3.writablehome=${basedir}/web
+
+# ... alternative the above can be changed to
+#
+#  gsdl3home.isreadonly=true
+#  gsdl3.writablehome=${java.io.tmpdir}/greenstone/web
+#
+# ... or else provided on the command line, e.g.:
+#   ant -Dgsdl3home.isreadonly=true gsdl3.writablehome=/tmp/greenstone/web start
+
 ## windows c++ compilation
 # The following property does not help in build.xml. 
 # The user needs to run Visual Studio's vcvars32.bat script from the
