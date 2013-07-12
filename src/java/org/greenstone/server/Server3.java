@@ -14,6 +14,7 @@ import org.greenstone.util.RunAnt;
 
 public class Server3 extends BaseServer
 {
+        String opt_ant_properties = null;
 
 	public Server3(String gsdl3_src_home, String lang)
 	{
@@ -30,12 +31,19 @@ public class Server3 extends BaseServer
 		CONFIGURE_CMD = "configure";
 		STOP_CMD = "force-stop-tomcat";
 
+		String is_read_only = System.getProperty("gsdl3home.isreadonly","false");
+		if (is_read_only.equals("true")) {
+		    String default_gsdl3_home = gsdl3_src_home + File.separatorChar + "web";
+		    String gsdl3_writablehome = System.getProperty("gsdl3.writablehome",default_gsdl3_home);
+		    opt_ant_properties = "-Dgsdl3home.isreadonly=true -Dgsdl3.writablehome="+gsdl3_writablehome;
+		}
+		
 		autoStart();
 	}
 
 	protected int runTarget(String cmd)
 	{
-		RunAnt runAnt = new RunAnt();
+		RunAnt runAnt = new RunAnt(opt_ant_properties);
 		runAnt.setTargetCmd(cmd);
 		runAnt.run();
 		return runAnt.getTargetState();
@@ -83,11 +91,16 @@ public class Server3 extends BaseServer
 	if(gsdl3_home == null) { // use gsdl_home/web
 	    gsdl3_home = fallbackGSDL3Home();
 	}
-	String propsFolder = gsdl3_home + File.separator + "WEB-INF" + File.separator + "classes" + File.separator;
+
+	String gsdl3_writablehome = System.getProperty("gsdl3.writablehome",gsdl3_home);
+
+	String propsFolder = gsdl3_writablehome + File.separator + "WEB-INF" + File.separator + "classes" + File.separator;
 	File propsFile = new File(propsFolder+"log4j.properties");
 
 	// create it from the template file GS3/resources/java/log4j.properties.in
-	if(!propsFile.exists()) {
+	// Always do this => helps make Greenstone3 portable
+
+
 	    try {
 		// need to set gsdl3.home property's value to be gsdl_home/web,
 		// so that the location  of the log files gets resolved correctly
@@ -101,6 +114,7 @@ public class Server3 extends BaseServer
 
 		    // set gsdl3.home to web home
 		    logProps.setProperty("gsdl3.home", gsdl3_home);
+		    logProps.setProperty("gsdl3.writablehome", gsdl3_writablehome);
 		    
 		    // write the customised properties out to a custom log4j.properties file
 		    FileOutputStream outfile = new FileOutputStream(propsFile);
@@ -115,7 +129,6 @@ public class Server3 extends BaseServer
 		System.err.println("Exception occurred when custom-configuring the logger for Server3.\n" + e);
 		e.printStackTrace();
 	    }
-	}
 
 	// now configure the logger with the custom log4j.properties file
 	if(propsFile.exists()) {
