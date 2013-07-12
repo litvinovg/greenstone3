@@ -17,7 +17,7 @@ public abstract class BaseServerControl extends JFrame {
     static Logger logger = Logger.getLogger(BaseServerControl.class.getName());
  
     /** The dimension of the frame */
-    static final private Dimension FRAME_SIZE = new Dimension(350, 250);
+    static final private Dimension FRAME_SIZE = new Dimension(430, 310);
 
     Color bg_color = Color.white;    
     
