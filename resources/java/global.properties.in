@@ -6,6 +6,7 @@
 #in resources/java/global.properties.in, not global.properties since
 #the latter is repeatedly re-generated from global.properties.in
 #gsdl3.home=@gsdl3home@
+#gsdl3.writablehome=@gsdl3writablehome@
 gsdl3.version=@gsdl3version@
 
 disable.collection.building=@disable.collection.building@

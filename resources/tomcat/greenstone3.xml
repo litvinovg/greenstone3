@@ -3,7 +3,8 @@
 <!-- see http://tomcat.apache.org/tomcat-5.5-doc/config/context.html for more Context attributes -->
 		
 <Context path="/greenstone3" 
-	docBase="@gsdl3webhome@" 
+	docBase="@gsdl3webwritablehome@" 
+	aliases="/interfaces=@gsdl3webhome@/interfaces,/sites=@gsdl3webhome@/sites"
 	debug="1" reloadable="true" 
 	@privilegedattribute@
 	allowLinking="false">

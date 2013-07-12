@@ -1,5 +1,6 @@
 ## greenstone home 
 gsdl3.home=@gsdl3home@
+gsdl3.writablehome=@gsdl3writablehome@
 
 ##Configure log4j's operation at the meta level                              
 ##Observe log4j parsing this file
@@ -29,7 +30,7 @@ log4j.additivity.org.greenstone.server=false
 #####configure appenders and their oprions####                                  
 ##general logger
 log4j.appender.infolog=org.apache.log4j.RollingFileAppender
-log4j.appender.infolog.File=${gsdl3.home}/logs/greenstone.log
+log4j.appender.infolog.File=${gsdl3.writablehome}/logs/greenstone.log
 #Control the maximum log file size
 log4j.appender.infolog.MaxFileSize=10000KB
 #Keep backup file(s) (backups will be in filename.1, .2, .3 etc.)
@@ -37,13 +38,13 @@ log4j.appender.infolog.MaxBackupIndex=3
 
 ##usage logger
 log4j.appender.usagelog=org.apache.log4j.RollingFileAppender
-log4j.appender.usagelog.File=${gsdl3.home}/logs/usage.log
+log4j.appender.usagelog.File=${gsdl3.writablehome}/logs/usage.log
 #Control the maximum log file size
 log4j.appender.usagelog.MaxFileSize=10000KB
 
 ##Server's logger
 log4j.appender.serverlog=org.apache.log4j.RollingFileAppender
-log4j.appender.serverlog.File=${gsdl3.home}/logs/server.log
+log4j.appender.serverlog.File=${gsdl3.writablehome}/logs/server.log
 
 
 #####Configure appender layouts and their options#### 
