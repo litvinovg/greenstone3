@@ -65,6 +65,7 @@ public class JDBMWrapper implements FlatDatabaseWrapper
 	/** open database named filename, using mode */
 	public boolean openDatabase(String db_filename, int mode)
 	{
+	        String db_filename_with_ext = db_filename;
 
 		if (db_filename.endsWith(".jdb"))
 		{
@@ -104,7 +105,6 @@ public class JDBMWrapper implements FlatDatabaseWrapper
 			}
 			else
 			{
-
 				if (must_exist)
 				{
 					recman_.close();
@@ -124,7 +124,9 @@ public class JDBMWrapper implements FlatDatabaseWrapper
 		}
 		catch (IOException e)
 		{
-			logger.error("couldn't open database " + db_filename);
+		    e.printStackTrace();
+
+			logger.error("couldn't open database " + db_filename_with_ext);
 			return false;
 		}
 
