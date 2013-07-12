@@ -4,9 +4,19 @@ setlocal enabledelayedexpansion
 
 set java_min_version=1.5.0_00
 
-if exist gs3-setup.bat goto start
+if exist gs3-setup.bat goto prelim
   echo This script must be run from within the Greenstone 3 home directory
-  goto exit
+  goto done
+
+:prelim
+if "!GSDL3SRCHOME!" == "" goto start
+if "!GSDL3SRCHOME!" == "!CD!" (
+	echo Your environment is already set up for Greenstone3
+	goto done
+) else (
+    echo Your environment was set up for Greenstone 3 in !GSDL3SRCHOME!.
+    echo Overwriting that set up for the current Greenstone 3 in !CD!.
+)
 
 :start
 :: ---- Set some relevant environment variables ----
@@ -167,6 +177,7 @@ if "!ANT_HOME!" == "" (
 )
 echo.
 
+:done
 :: End localisation of variables that started with the set local/set enabledelayedexpansion command
 :: Restore global variables that would otherwise be lost at script's end due to their having been initialised in a 
 :: set local/set enabledelayedexpansion section. See http://ss64.com/nt/endlocal.html
