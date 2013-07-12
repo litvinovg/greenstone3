@@ -37,6 +37,27 @@ check_gsdl3home_writable() {
 
 	echo " ... no."
 	echo "Setting Greenstone3 web home writable area to be: $gsdl3_writablehome"
+
+	if [ ! -d "$gsdl3_writablehome" ] ; then
+	    echo "Creating the directory: $gsdl3_writablehome"
+
+	    mkdir -p "$gsdl3_writablehome" 
+	    mkdir -p "$gsdl3_writablehome/packages" 
+	    mkdir -p "$gsdl3_writablehome/logs" 
+
+	    chmod a+rwx "$gsdl3_writablehome" 
+	    chmod a+rwx "$gsdl3_writablehome/packages" 
+	    chmod a+rwx "$gsdl3_writablehome/logs" 
+
+	    echo "Copying to $gsdl3_writablehome/packages/tomcat"
+    	    /bin/cp -r "$GSDL3SRCHOME/packages/tomcat" "$gsdl3_writablehome/packages/."
+
+            echo "=> Copying Greenstone's web/WEB-INF to writable area"
+	    
+	    gsdl3_home=$GSDL3HOME
+	    /bin/cp -r "$gsdl3_home/WEB-INF" "$gsdl3_writablehome/."
+	    /bin/cp -r "$gsdl3_home/index.html" "$gsdl3_writablehome/."
+	fi
     fi
 }
 
