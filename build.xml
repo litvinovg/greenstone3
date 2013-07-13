@@ -1049,7 +1049,10 @@
   
   <target name="prepare-solr-ext" depends="init" >
     <property name="solr-ext.home" value="${basedir}/ext/solr"/>
-    <exec executable="ant" dir="${solr-ext.home}" spawn="false">
+    <exec executable="ant.bat" os="${os.windows}" dir="${solr-ext.home}" spawn="false">
+      <arg value="add-service"/>
+    </exec>
+    <exec executable="ant" os="${os.unix}" dir="${solr-ext.home}" spawn="false">
       <arg value="add-service"/>
     </exec>
     <antcall target="solr-jdbm-demo-install"/>
