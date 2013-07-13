@@ -639,6 +639,9 @@
 	  <istrue value="${run.source.devel}"/>
 	</and>
       </bool>
+<!-- This is automatically done now in the gs2build/common-src/packages/configure script if the
+     gnomelib.ext directory is detected 
+
       <echo>
 	*********************************************
 	As you have set checkout.gnomelib.ext, 
@@ -646,6 +649,7 @@
 	run source devel.bash from 
 	${basedir}/gs2build/ext/gnome-lib 
 	*********************************************</echo>
+-->
     </if>
   </target>
 
@@ -1044,6 +1048,7 @@
 
   
   <target name="prepare-solr-ext" depends="init" >
+    <property name="solr-ext.home" value="${basedir}/ext/solr"/>
     <exec executable="ant" dir="${solr-ext.home}" spawn="false">
       <arg value="add-service"/>
     </exec>
