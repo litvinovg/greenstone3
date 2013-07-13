@@ -619,7 +619,7 @@
   
   <!-- ==================== Primary and Global Targets ============================= -->
 
-  <target name="prepare" depends="accept-properties,init,prepare-core,prepare-packages,prepare-common-src,prepare-collection-building,prepare-tomcat,prepare-axis,prepare-web,prepare-collections, prepare-flax"
+  <target name="prepare" depends="accept-properties,init,prepare-core,prepare-packages,prepare-common-src,prepare-collection-building,prepare-tomcat,prepare-axis,prepare-web,prepare-collections,prepare-solr-ext, prepare-flax"
     description="Use this when you first checkout the code: 'ant prepare install'. This will do some additional subversion checkouts and downloads, so you need to be online to run this.">
 
     <!-- make sure .sh files are executable -->
@@ -1041,6 +1041,25 @@
     <unzip dest="${lucene-jdbm-demo.dir}" src="${lucene-jdbm-demo.dir}/${index.zip}"/>
     <echo>collection lucene-jdbm-demo installed</echo>
   </target>
+
+  
+  <target name="prepare-solr-ext" depends="init" >
+    <exec executable="ant" dir="${solr-ext.home}" spawn="false">
+      <arg value="add-service"/>
+    </exec>
+    <antcall target="solr-jdbm-demo-install"/>
+  </target>
+
+  <target name="solr-jdbm-demo-prepare" if="collect.dir">
+    <property name="solr-jdbm-demo.dir" value="${collect.dir}/solr-jdbm-demo"/>
+    <available file="${solr-jdbm-demo.dir}/${index.zip}" property="solr-jdbm-demo.present"/>
+  </target>
+
+  <target name="solr-jdbm-demo-install" if="solr-jdbm-demo.present" depends="solr-jdbm-demo-prepare">
+    <unzip dest="${solr-jdbm-demo.dir}" src="${solr-jdbm-demo.dir}/${index.zip}"/>
+    <echo>collection solr-jdbm-demo installed</echo>
+  </target>
+
 
   <target name="set-perl-shebangs" depends="perl-for-building">
     <if>
