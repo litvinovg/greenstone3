@@ -19,8 +19,8 @@ if "%GSDL3SRCHOME%" == "" call "%GSDL3PATH%\gs3-setup.bat" SetEnv > nul
 :: See if Greenstone3 web folder is writable
   echo.
   echo Checking if the Greenstone3 web directory is writable ...
-  (echo This is a temporary file. It is safe to delete it. > "!GSDL3HOME!\testing.tmp" ) 2>nul
-  if exist "!GSDL3HOME!\testing.tmp" goto isWritable
+  (echo This is a temporary file. It is safe to delete it. > "%GSDL3HOME%\testing.tmp" ) 2>nul
+  if exist "%GSDL3HOME%\testing.tmp" goto isWritable
 
 :: Is read-only
   set gsdl3_writablehome=%TMP%\greenstone\web
@@ -30,7 +30,7 @@ if "%GSDL3SRCHOME%" == "" call "%GSDL3PATH%\gs3-setup.bat" SetEnv > nul
   goto runJava
 
 :isWritable
-  del "!GSDL3HOME!\testing.tmp"
+  del "%GSDL3HOME%\testing.tmp"
   set opt_properties=
   echo  ... yes.
 
