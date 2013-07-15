@@ -91,13 +91,15 @@ check_gsdl3home_writable
 opt_properties=
 if [ $gsdl3home_isreadonly = 1 ] ; then
     opt_properties="-Dgsdl3home.isreadonly=true -Dgsdl3.writablehome=$gsdl3_writablehome"
-
-    # Calling ant target to initialize the gsdl3-writablehome area
-    # ... including the all important global.properties.
-
-    ant $opt_properties configure-web
-
+else
+    opt_properties="-Dgsdl3.writablehome=$GSDL3HOME"
 fi
+
+# Calling ant target to initialize the gsdl3-writablehome area (if it doesn't already exist)
+# ... including the all important global.properties.
+
+ant $opt_properties configure-web
+
 
 # JRE_HOME or JAVA_HOME must be set correctly to run this program
 HINT="`pwd`/packages/jre"

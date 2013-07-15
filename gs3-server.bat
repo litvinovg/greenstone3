@@ -28,18 +28,21 @@ if "%GSDL3SRCHOME%" == "" call "%GSDL3PATH%\gs3-setup.bat" SetEnv > nul
   echo ... no.
   echo Setting Greenstone3 web home writable area to be: %gsdl3_writablehome%
 
-  :: Calling ant target to initialize the gsdl3-writablehome area
-  :: ... including the all important global.properties.
-  ant.bat %opt_properties% configure-web
-
   goto runJava
 
 :isWritable
   del "%GSDL3HOME%\testing.tmp"
-  set opt_properties=
+  set opt_properties=-Dgsdl3.writablehome=%GSDL3HOME%
   echo  ... yes.
 
 :runJava
+
+:: Before running the Java program, 
+:: call ant target to initialize the gsdl3-writablehome area (if it doesn't already exist)
+:: ... including the all important global.properties.
+
+ant.bat %opt_properties% configure-web
+
 
 set GSDL3PATH=
 
