@@ -155,7 +155,22 @@
 			<xsl:for-each select="//documentNode">
 				<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
 					<xsl:text>{</xsl:text>
-					<xsl:text disable-output-escaping="yes">"nodeID":"</xsl:text><xsl:value-of select="@nodeID"/><xsl:text disable-output-escaping="yes">",</xsl:text>
+					<xsl:text disable-output-escaping="yes">"nodeID":"</xsl:text>
+					<xsl:value-of select="@nodeID"/>
+					<xsl:text disable-output-escaping="yes">",</xsl:text>
+
+					<xsl:text disable-output-escaping="yes">"title":"</xsl:text>
+					<xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Title']"/>
+					<xsl:text disable-output-escaping="yes">",</xsl:text> 
+
+					<xsl:text disable-output-escaping="yes">"lat":</xsl:text>
+					<xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Latitude']"/>
+					<xsl:text>,</xsl:text> 
+
+					<xsl:text disable-output-escaping="yes">"lng":</xsl:text>
+					<xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name = 'Longitude']"/> 
+
+
 					<xsl:text>}</xsl:text>
 					<xsl:if test="not(position() = count(//documentNode))">
 						<xsl:text>,</xsl:text>
