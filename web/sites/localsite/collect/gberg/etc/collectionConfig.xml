@@ -7,7 +7,7 @@
 	<metadata name="public">true</metadata>
   </metadataList>
   <displayItemList>
-    <displayItem name='name' lang='en'>Sample XML Texts Collection</displayItem>
+    <displayItem name='name' lang='en'>Gutenberg XML Texts</displayItem>
     <!--<displayItem name='icon' lang='en'>gberg.gif</displayItem>
     <displayItem name='smallicon' lang='en'>gbergsm.gif</displayItem>-->
     <displayItem name='description' lang='en'>
