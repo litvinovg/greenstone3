@@ -71,13 +71,11 @@ public class GlobalProperties
 
 	public static String getGSDL3WebAddress()
 	{
-    	        logger.info("**** Asked for Web Address");
 		return gsdl3_web_address;
 	}
 
 	public static String getFullGSDL3WebAddress()
 	{
-    	        logger.info("**** Asked for FULL Web Address");
 		return full_gsdl3_web_address;
 	}
 
