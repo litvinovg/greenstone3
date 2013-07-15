@@ -51,14 +51,14 @@ check_gsdl3home_writable() {
 	    chmod a+rwx "$gsdl3_writablehome/logs" 
 	    chmod a+rwx "$gsdl3_writablehome/ext/solr" 
 
-	    echo "Copying to $gsdl3_writablehome/packages/tomcat"
-    	    /bin/cp -r "$GSDL3SRCHOME/packages/tomcat" "$gsdl3_writablehome/packages/."
+#	    echo "Copying to $gsdl3_writablehome/packages/tomcat"
+#    	    /bin/cp -r "$GSDL3SRCHOME/packages/tomcat" "$gsdl3_writablehome/packages/."
 
-            echo "=> Copying Greenstone's web/WEB-INF to writable area"
+#            echo "=> Copying Greenstone's web/WEB-INF to writable area"
 	    
-	    gsdl3_home=$GSDL3HOME
-	    /bin/cp -r "$gsdl3_home/WEB-INF" "$gsdl3_writablehome/."
-	    /bin/cp -r "$gsdl3_home/index.html" "$gsdl3_writablehome/."
+#	    gsdl3_home=$GSDL3HOME
+#	    /bin/cp -r "$gsdl3_home/WEB-INF" "$gsdl3_writablehome/."
+#	    /bin/cp -r "$gsdl3_home/index.html" "$gsdl3_writablehome/."
 	fi
     fi
 }
