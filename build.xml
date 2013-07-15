@@ -708,7 +708,22 @@
               <not><equals arg1="${env.PERLPATH}" arg2=""/></not>
             </and>
           </bool>
-          <property name="perl.path" value="${env.PERLPATH}"/>
+		  <!-- set perlpath to env.PERLPATH. 
+		    This is the path to perl\bin that's found by findperl.bat when the server is launched 
+			through GLI instead of the console.
+			For windows, this env.PERLPATH is the bin folder and needs a backslash at end, since it 
+			will appear suffixed with "perl.exe" in the perl setting in packages\tomcat\config\web.xml. 
+			This web.xml's path to perl is then used to find perl when running the perl scripts in the 
+			cgi folder, so without a slash appended at this point it becomes "binperl" in web.xml, and 
+			things will break when GLI launches the server on Windows and the online GS3 metadata editor 
+			is used	to save user-edited metadata. -->
+		  <if><bool><istrue value="${current.os.iswindows}"/></bool>
+			<property name="perl.path" value="${env.PERLPATH}\"/>
+		  <else>
+			<property name="perl.path" value="${env.PERLPATH}"/>
+		  </else>	
+		  </if>
+		  
           <else>
             <echo>
   Using PATH environment variable to locate Perl.
