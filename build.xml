@@ -1304,11 +1304,10 @@
     <!-- need to edit the config file, or do we get the user to do this???-->
   </target>
 
-
   <target name="configure-solr-ext" depends="init" >
     <!-- re-setup the web/ext/solr/solr.xml file -->
     <copy file="${solr-ext.home}/solr.xml.in"
-	  tofile="${gsdl3.writablehome}/solr/ext/solr.xml" overwrite="true">
+	  tofile="${gsdl3.writablehome}/ext/solr/solr.xml" filtering="true" overwrite="true">
       <filterset>
         <filter token="gsdl3.home" value="${src.gsdl3.home.unix}"/>
         <filter token="gsdl3.writablehome" value="${src.gsdl3.writablehome.unix}"/>
