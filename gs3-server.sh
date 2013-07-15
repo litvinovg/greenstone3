@@ -44,10 +44,12 @@ check_gsdl3home_writable() {
 	    mkdir -p "$gsdl3_writablehome" 
 	    mkdir -p "$gsdl3_writablehome/packages" 
 	    mkdir -p "$gsdl3_writablehome/logs" 
+	    mkdir -p "$gsdl3_writablehome/ext/solr" 
 
 	    chmod a+rwx "$gsdl3_writablehome" 
 	    chmod a+rwx "$gsdl3_writablehome/packages" 
 	    chmod a+rwx "$gsdl3_writablehome/logs" 
+	    chmod a+rwx "$gsdl3_writablehome/ext/solr" 
 
 	    echo "Copying to $gsdl3_writablehome/packages/tomcat"
     	    /bin/cp -r "$GSDL3SRCHOME/packages/tomcat" "$gsdl3_writablehome/packages/."

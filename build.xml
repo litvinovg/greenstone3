@@ -94,6 +94,8 @@
   <property name="src.packages.home" value="${basedir}/src/packages"/>
   <property name="flax.svn.root" value="http://svn.greenstone.org/flax"/>
 
+  <property name="solr-ext.home" value="${basedir}/ext/solr"/>
+
   <property file="build.properties"/>
   <if><bool><available file="${user.home}/build.properties"/></bool>
     <property file="${user.home}/build.properties"/>
@@ -170,10 +172,12 @@
       <mkdir dir="${gsdl3.writablehome}"/>
       <mkdir dir="${gsdl3.writablehome}/packages"/> 
       <mkdir dir="${gsdl3.writablehome}/logs"/>
+      <mkdir dir="${gsdl3.writablehome}/ext/solr"/>
 
       <chmod perm="a+rwx" dir="${gsdl3.writablehome}"/>
       <chmod perm="a+rwx" dir="${gsdl3.writablehome}/packages"/>
       <chmod perm="a+rwx" dir="${gsdl3.writablehome}/logs"/> 
+      <chmod perm="a+rwx" dir="${gsdl3.writablehome}/ext/solr"/> 
 
       <!-- copy over packages tomcat folder -->
 
@@ -777,7 +781,7 @@
 	<echo>http://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet}</echo>
   </target>	
   
-  <target name="start" depends="init,configure-tomcat,configure-web,start-tomcat"
+  <target name="start" depends="init,configure-tomcat,configure-web,configure-solr-ext,start-tomcat"
     description="Startup the Tomcat server." >
     <echo>${app.name} (${app.version}) server running using Apache Tomcat and Java</echo> 
     <echo>Tomcat: ${catalina.home}</echo> 
@@ -1063,7 +1067,6 @@
 
   
   <target name="prepare-solr-ext" depends="init" >
-    <property name="solr-ext.home" value="${basedir}/ext/solr"/>
     <exec executable="ant.bat" os="${os.windows}" dir="${solr-ext.home}" spawn="false">
       <arg value="add-service"/>
     </exec>
@@ -1288,12 +1291,12 @@
       </filterset>
     </copy>
 	
-	<!-- set up the greenstone3 web.xml file -->
-	<copy file="${basedir}/resources/tomcat/web.xml" tofile="${packages.home}/tomcat/conf/web.xml" overwrite="true">
-		<filterset>
-			<filter token="perlpath" value="${perl.path}"/>
-		</filterset>
-	</copy>
+    <!-- set up the greenstone3 web.xml file -->
+    <copy file="${basedir}/resources/tomcat/web.xml" tofile="${packages.home}/tomcat/conf/web.xml" overwrite="true">
+      <filterset>
+	<filter token="perlpath" value="${perl.path}"/>
+      </filterset>
+    </copy>
   </target>
 
   <target name="configure-tomcat-external" depends="init" unless="tomcat.islocal">
@@ -1301,6 +1304,17 @@
     <!-- need to edit the config file, or do we get the user to do this???-->
   </target>
 
+
+  <target name="configure-solr-ext" depends="init" >
+    <!-- re-setup the web/ext/solr/solr.xml file -->
+    <copy file="${solr-ext.home}/solr.xml.in"
+	  tofile="${gsdl3.writablehome}/solr/ext/solr.xml" overwrite="true">
+      <filterset>
+        <filter token="gsdl3.home" value="${src.gsdl3.home.unix}"/>
+        <filter token="gsdl3.writablehome" value="${src.gsdl3.writablehome.unix}"/>
+      </filterset>
+    </copy>
+  </target>
  
   <!-- This target runs tomcat's "bin/catalina.bat(.sh) jpda start" 
        to allow debugging the running GS3 server in Eclipse. See the instructions at 
