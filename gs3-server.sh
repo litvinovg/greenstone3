@@ -38,28 +38,29 @@ check_gsdl3home_writable() {
 	echo " ... no."
 	echo "Setting Greenstone3 web home writable area to be: $gsdl3_writablehome"
 
-	if [ ! -d "$gsdl3_writablehome" ] ; then
-	    echo "Creating the directory: $gsdl3_writablehome"
 
-	    mkdir -p "$gsdl3_writablehome" 
-	    mkdir -p "$gsdl3_writablehome/packages" 
-	    mkdir -p "$gsdl3_writablehome/logs" 
-	    mkdir -p "$gsdl3_writablehome/ext/solr" 
+#	if [ ! -d "$gsdl3_writablehome" ] ; then
+#	    echo "Creating the directory: $gsdl3_writablehome"
 
-	    chmod a+rwx "$gsdl3_writablehome" 
-	    chmod a+rwx "$gsdl3_writablehome/packages" 
-	    chmod a+rwx "$gsdl3_writablehome/logs" 
-	    chmod a+rwx "$gsdl3_writablehome/ext/solr" 
+#	    mkdir -p "$gsdl3_writablehome" 
+#	    mkdir -p "$gsdl3_writablehome/packages" 
+#	    mkdir -p "$gsdl3_writablehome/logs" 
+#	    mkdir -p "$gsdl3_writablehome/ext/solr" 
 
-#	    echo "Copying to $gsdl3_writablehome/packages/tomcat"
-#    	    /bin/cp -r "$GSDL3SRCHOME/packages/tomcat" "$gsdl3_writablehome/packages/."
+#	    chmod a+rwx "$gsdl3_writablehome" 
+#	    chmod a+rwx "$gsdl3_writablehome/packages" 
+#	    chmod a+rwx "$gsdl3_writablehome/logs" 
+#	    chmod a+rwx "$gsdl3_writablehome/ext/solr" 
 
-#            echo "=> Copying Greenstone's web/WEB-INF to writable area"
+##	    echo "Copying to $gsdl3_writablehome/packages/tomcat"
+##    	    /bin/cp -r "$GSDL3SRCHOME/packages/tomcat" "$gsdl3_writablehome/packages/."
+
+##            echo "=> Copying Greenstone's web/WEB-INF to writable area"
 	    
-#	    gsdl3_home=$GSDL3HOME
-#	    /bin/cp -r "$gsdl3_home/WEB-INF" "$gsdl3_writablehome/."
-#	    /bin/cp -r "$gsdl3_home/index.html" "$gsdl3_writablehome/."
-	fi
+##	    gsdl3_home=$GSDL3HOME
+##	    /bin/cp -r "$gsdl3_home/WEB-INF" "$gsdl3_writablehome/."
+##	    /bin/cp -r "$gsdl3_home/index.html" "$gsdl3_writablehome/."
+##	fi
     fi
 }
 
@@ -84,11 +85,18 @@ pushd $gsdl3path > /dev/null
 source ./gs3-setup.sh
 popd > /dev/null
 
+
 check_gsdl3home_writable
 
 opt_properties=
 if [ $gsdl3home_isreadonly = 1 ] ; then
     opt_properties="-Dgsdl3home.isreadonly=true -Dgsdl3.writablehome=$gsdl3_writablehome"
+
+    # Calling ant target to initialize the gsdl3-writablehome area
+    # ... including the all important global.properties.
+
+    ant $opt_properties configure-web
+
 fi
 
 # JRE_HOME or JAVA_HOME must be set correctly to run this program
