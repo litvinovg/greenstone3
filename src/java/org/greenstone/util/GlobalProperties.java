@@ -20,6 +20,7 @@ package org.greenstone.util;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.FileInputStream;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -70,11 +71,13 @@ public class GlobalProperties
 
 	public static String getGSDL3WebAddress()
 	{
+    	        logger.info("**** Asked for Web Address");
 		return gsdl3_web_address;
 	}
 
 	public static String getFullGSDL3WebAddress()
 	{
+    	        logger.info("**** Asked for FULL Web Address");
 		return full_gsdl3_web_address;
 	}
 
@@ -83,16 +86,41 @@ public class GlobalProperties
 		try
 		{
 			InputStream in = Class.forName("org.greenstone.util.GlobalProperties").getClassLoader().getResourceAsStream(properties_filename);
+
+			if (in==null)
+			{
+			        // Try to find it through gsdl3.writablehome
+			        logger.info("Couldn't find '" + properties_filename + "' through ClassLoader");
+			        logger.info("Trying alternative path through System property gsdl3.writablehome");
+				gsdl3_writablehome = System.getProperty("gsdl3.writablehome");
+				if (gsdl3_writablehome!=null) {
+
+				    String gp_full_filename = gsdl3_writablehome + File.separator + "WEB-INF"
+					+ File.separator + "classes" 
+					+ File.separator + properties_filename; 
+
+				    try {
+					in = new FileInputStream(gp_full_filename);
+					logger.info("Found '" + properties_filename + "'");
+				    }
+				    catch (Exception e) {
+					logger.info("Unable to locate '" + gp_full_filename + "'");
+				    }
+				}
+				else {
+				    logger.info("Java property gsdl3.writablehome was not set");
+				}
+			}
+
 			if (in != null)
 			{
 				logger.debug("Loading global properties");
 				properties.load(in);
 				in.close();
 			}
-			else
-			{
-				logger.error("Couldn't load global properties: " + properties_filename);
-			}
+			else {
+			        logger.error("Failed to find '" + properties_filename + "'");
+			}    
 
 			gsdl3_home = properties.getProperty("gsdl3.home");
 			if ((gsdl3_home == null || gsdl3_home.length() == 0) 
