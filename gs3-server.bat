@@ -41,7 +41,7 @@ if "%GSDL3SRCHOME%" == "" call "%GSDL3PATH%\gs3-setup.bat" SetEnv > nul
 :: call ant target to initialize the gsdl3-writablehome area (if it doesn't already exist)
 :: ... including the all important global.properties.
 
-ant.bat %opt_properties% configure-web
+cmd /c ant.bat %opt_properties% configure-web
 
 
 set GSDL3PATH=
