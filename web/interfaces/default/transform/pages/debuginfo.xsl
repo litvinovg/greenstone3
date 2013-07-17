@@ -71,7 +71,7 @@
 			</dd>
 		</dl>
 
-		<a href="{$library_name}?a=de&amp;c={/page/pageResponse/collection/@name}">Despositor</a>
+		<a href="{$library_name}?a=de&amp;c={/page/pageResponse/collection/@name}">Depositor</a>
 
 	</xsl:template>
 </xsl:stylesheet>  
