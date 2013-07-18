@@ -24,7 +24,7 @@ if "%GSDL3SRCHOME%" == "" call "%GSDL3PATH%\gs3-setup.bat" SetEnv > nul
 
 :: Is read-only
   set gsdl3_writablehome=%TMP%\greenstone\web
-  set opt_properties=-Dgsdl3home.isreadonly=true -Dgsdl3.writablehome=%gsdl3_writablehome%
+  set opt_properties="-Dgsdl3home.isreadonly=true" -Dgsdl3.writablehome="%gsdl3_writablehome%"
   echo ... no.
   echo Setting Greenstone3 web home writable area to be: %gsdl3_writablehome%
 
@@ -32,7 +32,7 @@ if "%GSDL3SRCHOME%" == "" call "%GSDL3PATH%\gs3-setup.bat" SetEnv > nul
 
 :isWritable
   del "%GSDL3HOME%\testing.tmp"
-  set opt_properties=-Dgsdl3.writablehome=%GSDL3HOME%
+  set opt_properties="-Dgsdl3.writablehome=%GSDL3HOME%"
   echo  ... yes.
 
 :runJava
