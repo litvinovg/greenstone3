@@ -2892,15 +2892,17 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <mkdir dir="${web.writablehome}/logs"/>
     <mkdir dir="${web.writablehome}/logs/tmp"/>
 
+	<!-- Lines with ***** are commented out because these files are useful if we want hybrid installations -->
+	
     <!-- os specific tidy-ups -->
     <!-- linux, mac -->
     <if><bool><istrue value="${current.os.isunix}"/></bool>
-      <delete><fileset dir="." includes="*.bat"/></delete>
+      <!--*****<delete><fileset dir="." includes="*.bat"/></delete>-->
       <if><bool><isset property="with.gli.and.gems"/></bool>
-	<delete><fileset dir="gli" includes="*.bat"/></delete>
+		<!--*****<delete><fileset dir="gli" includes="*.bat"/></delete>-->
       </if>
-      <delete><fileset dir="gs2build" includes="*.bat"/></delete>
-      <delete><fileset dir="bin/script" includes="*.bat"/></delete>
+      <!--*****<delete><fileset dir="gs2build" includes="*.bat"/></delete>-->
+      <!--*****<delete><fileset dir="bin/script" includes="*.bat"/></delete>-->
       <delete file="${basedir}/gs2build/win32cfg.h"/>
       <delete file="${basedir}/gs2build/win32.mak"/>
       <delete dir="${basedir}/winutil"/>
@@ -2908,12 +2910,12 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 
     <!-- windows -->
     <else><if><bool><istrue value="${current.os.iswindows}"/></bool>
-      <delete><fileset dir="." includes="*.sh,*.bash,*.csh"/></delete>
+      <!--*****<delete><fileset dir="." includes="*.sh,*.bash,*.csh"/></delete>-->
       <if><bool><isset property="with.gli.and.gems"/></bool>
-	<delete><fileset dir="gli" includes="*.sh,*.bash,*.csh"/></delete>
+	<!--*****<delete><fileset dir="gli" includes="*.sh,*.bash,*.csh"/></delete>-->
       </if>
-      <delete><fileset dir="gs2build" includes="*.sh,*.bash,*.csh"/></delete>
-      <delete><fileset dir="bin/script" includes="*.sh,*.bash,*.csh"/></delete>
+      <!--*****<delete><fileset dir="gs2build" includes="*.sh,*.bash,*.csh"/></delete>-->
+      <!--*****<delete><fileset dir="bin/script" includes="*.sh,*.bash,*.csh"/></delete>-->
     </if></else></if>
 
   </target>
