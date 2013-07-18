@@ -69,7 +69,7 @@ public class DepositorAction extends Action
 		boolean prevPageNumFail = false;
 		try
 		{
-			prevPageNum = Integer.parseInt(((String) params.get("currentPage")));
+			prevPageNum = Integer.parseInt((String) params.get("currentPage"));
 		}
 		catch (Exception ex)
 		{
