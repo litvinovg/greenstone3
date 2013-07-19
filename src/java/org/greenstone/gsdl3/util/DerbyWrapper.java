@@ -687,4 +687,18 @@ public class DerbyWrapper
 			e = e.getNextException();
 		}
 	}
+
+	public void clearUserDataWithPrefix(String username, String prefix)
+	{
+		try
+		{
+			conn.setAutoCommit(false);
+			state.execute("DELETE FROM data WHERE username = '" + username + "' AND SUBSTR(name, 1, " + prefix.length() + ") = '" + prefix + "'");
+			conn.commit();
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
 }

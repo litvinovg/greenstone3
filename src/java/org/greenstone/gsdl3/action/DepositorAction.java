@@ -36,6 +36,7 @@ public class DepositorAction extends Action
 	//Sub actions
 	private final String DE_RETRIEVE_WIZARD = "getwizard";
 	private final String DE_DEPOSIT_FILE = "depositfile";
+	private final String DE_CLEAR_CACHE = "clearcache";
 	private final String DE_CLEAR_DATABASE = "cleardatabase";
 
 	public Node process(Node message)
@@ -352,10 +353,13 @@ public class DepositorAction extends Action
 				response.appendChild(this.doc.importNode(buildResponseMessage, true));
 			}
 		}
+		else if (subaction.toLowerCase().equals(DE_CLEAR_CACHE))
+		{
+			database.clearUserDataWithPrefix(currentUsername, "DE___");
+		}
 		else if (subaction.toLowerCase().equals(DE_CLEAR_DATABASE))
 		{
 			database.clearUserData();
-			System.err.println("\n\nCLEARED\n\n");
 		}
 		else
 		{
