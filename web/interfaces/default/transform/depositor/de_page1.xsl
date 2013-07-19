@@ -22,6 +22,22 @@
 			<tr>
 				<td>Description:</td><td><textarea cols="40" rows="5" name="md___dc.Description"><xsl:text> </xsl:text></textarea></td>
 			</tr>
+			<tr>
+				<td><div id="clearSaved" style="padding:0 10px; cursor:pointer;" class="ui-state-default ui-corner-all">Clear all saved data</div></td>
+				<script type="text/javascript">
+					<xsl:text disable-output-escaping="yes">
+						$("#clearSaved").click(function()
+						{
+							$.ajax(gs.xsltParams.library_name + "?a=de&amp;sa=clearcache")
+							.success(function()
+							{
+								console.log("CLEARED CACHE");
+								document.location.href = gs.xsltParams.library_name + "?a=de&amp;sa=getwizard&amp;depage=1&amp;c=" + gs.cgiParams.c;
+							});
+						});
+					</xsl:text>
+				</script>
+			</tr>
 		</table>
 	</xsl:template>
 </xsl:stylesheet>  
