@@ -23,7 +23,34 @@
 				<td>Description:</td><td><textarea cols="40" rows="5" name="md___dc.Description"><xsl:text> </xsl:text></textarea></td>
 			</tr>
 			<tr>
-				<td><div id="clearSaved" style="padding:0 10px; cursor:pointer;" class="ui-state-default ui-corner-all">Clear all saved data</div></td>
+				<td><span id="addNewMD" style="padding:0 10px; cursor:pointer;" class="ui-state-default ui-corner-all">Add new field</span></td><td><input id="newMDName"/></td>
+				<script type="text/javascript">
+					<xsl:text disable-output-escaping="yes">
+						$("#addNewMD").click(function()
+						{
+							var val = $("#newMDName").val();
+							if(val &amp;&amp; val.search(/\S/g) != -1)
+							{
+								val = val.replace(/\s/g, "");
+								var newRow = $("&lt;tr&gt;");
+								newRow.append("&lt;td&gt;" + val + ": &lt;/td&gt;");
+								
+								var inputElem = $("&lt;input&gt;");
+								inputElem.attr("type", "text");
+								inputElem.attr("name", "md___" + val);
+								newRow.append(inputElem)
+								$("#addNewMD").parents("tr").before(newRow);
+							}
+							else
+							{
+								console.log("fail");
+							}
+						});
+					</xsl:text>
+				</script>
+			</tr>
+			<tr>
+				<td><span id="clearSaved" style="padding:0 10px; cursor:pointer;" class="ui-state-default ui-corner-all">Clear all saved data</span></td>
 				<script type="text/javascript">
 					<xsl:text disable-output-escaping="yes">
 						$("#clearSaved").click(function()
@@ -31,7 +58,6 @@
 							$.ajax(gs.xsltParams.library_name + "?a=de&amp;sa=clearcache")
 							.success(function()
 							{
-								console.log("CLEARED CACHE");
 								document.location.href = gs.xsltParams.library_name + "?a=de&amp;sa=getwizard&amp;depage=1&amp;c=" + gs.cgiParams.c;
 							});
 						});
