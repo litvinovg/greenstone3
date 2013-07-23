@@ -38,12 +38,8 @@
 								var inputElem = $("&lt;input&gt;");
 								inputElem.attr("type", "text");
 								inputElem.attr("name", "md___" + val);
-								newRow.append(inputElem)
+								newRow.append($("td").append(inputElem));
 								$("#addNewMD").parents("tr").before(newRow);
-							}
-							else
-							{
-								console.log("fail");
 							}
 						});
 					</xsl:text>

@@ -73,7 +73,25 @@
 							for(var i = 0; i &lt; currentPageCache.length; i++)
 							{
 								gs.deSavedMetadata[currentPageCache[i].name] = currentPageCache[i].value;
-								$('form [name="' + currentPageCache[i].name + '"]').val(currentPageCache[i].value);
+								
+								var inputElem = $('form [name="' + currentPageCache[i].name + '"]');
+								if(inputElem.length)
+								{
+									inputElem.val(currentPageCache[i].value);
+								}
+								else if(currentPageCache[i].name.search(/\bex\./g) == -1)
+								{
+									var newInput = $("&lt;input&gt;");
+									newInput.attr("type", "text");
+									newInput.attr("name", currentPageCache[i].name);
+									newInput.val(currentPageCache[i].value);
+									
+									var newRow = $("&lt;tr&gt;");
+									newRow.append("&lt;td&gt;" + currentPageCache[i].name.replace("md___", "") + ": &lt;/td&gt;");
+									newRow.append($("&lt;td&gt;").append(newInput));
+									
+									$("form table").prepend(newRow);
+								}
 							}
 						}
 
