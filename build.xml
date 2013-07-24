@@ -1646,7 +1646,7 @@
     <!--<echo>${admin.password}</echo>--> <!-- for testing -->
     <java classname="org.greenstone.gsdl3.util.ModifyUsersDB">
       <classpath refid="compile.classpath"/> <!--for ${web.lib}/gsdl3.jar and supporting files-->
-      <arg file="${web.home}/sites/localsite/etc/usersDB"/>
+      <arg file="${web.home}/etc/usersDB"/>
       <arg value="${user.username}"/>
       <arg value="password=${user.password}"/>
       <arg value="groups=${user.groups}"/>
