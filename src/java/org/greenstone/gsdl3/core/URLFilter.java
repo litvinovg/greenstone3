@@ -29,7 +29,7 @@ public class URLFilter implements Filter
 
 	//Restricted URLs
 	protected static final String SITECONFIG_URL = "sites/[^/]+/siteConfig.xml";
-	protected static final String USERS_DB_URL = "sites/[^/]+/etc/usersDB/.*";
+	protected static final String USERS_DB_URL = "etc/usersDB/.*";
 	protected static final ArrayList<String> _restrictedURLs;
 	static
 	{
