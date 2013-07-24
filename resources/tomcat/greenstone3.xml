@@ -11,7 +11,7 @@
   
 	<Realm className="org.apache.catalina.realm.JDBCRealm" 
 		driverName="org.apache.derby.jdbc.EmbeddedDriver"
-		connectionURL="jdbc:derby:@gsdl3webhome@/sites/localsite/etc/usersDB"
+		connectionURL="jdbc:derby:@gsdl3webhome@/etc/usersDB"
 		userTable="users" userNameCol="username" userCredCol="password"
 		userRoleTable="roles" roleNameCol="role"
 		/>
