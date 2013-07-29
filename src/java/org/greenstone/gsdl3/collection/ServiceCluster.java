@@ -769,7 +769,7 @@ public class ServiceCluster implements ModuleInterface
 		}
 		else
 		{ // unknown type
-			logger.error("cant handle request of type " + type);
+			logger.error("Can't handle request of type " + type);
 
 		}
 		return response;
@@ -843,14 +843,14 @@ public class ServiceCluster implements ModuleInterface
 				}
 				else
 				{
-					message = "can't deactivate " + module_type + " type modules!";
+					message = "Can't deactivate " + module_type + " type modules!";
 				}
 				Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, message);
 				response.appendChild(s);
 			}
 			else
 			{
-				logger.error("cant process system request, action " + action);
+				logger.error("Can't process system request, action " + action);
 				continue;
 			}
 		} // for each command
