@@ -37,31 +37,55 @@
  */
 package org.greenstone.admin.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Enumeration;
-import java.lang.Object;
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
-import javax.swing.table.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.*;
-import java.sql.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeSelectionModel;
 
 import org.greenstone.admin.GAI;
-import org.greenstone.admin.GAIManager;
-import org.greenstone.admin.gui.ThreadControl;
-//import org.greenstone.admin.gui.ConfSettingTableModel;
-import org.greenstone.admin.gui.SiteConfSetting;
-import org.greenstone.admin.gui.ParsingProgress;
-
-import org.greenstone.util.Configuration;
 import org.greenstone.gsdl3.util.GSFile;
+import org.greenstone.util.Configuration;
 
 /**
  * The Configuration pane is to view the status of relevant configure files in
@@ -147,14 +171,19 @@ public class ConfPane extends JPanel implements ActionListener
 
 	private JTable conf_setting_table = null;
 
-	private int num_of_setting;
-
 	//The details display in the table
 	int display_row_count = 5;
-	int rowLength = 20;
-	int colLength = 3;
-	private Object[][] conf_display = new Object[rowLength][colLength];
-	private Object[][] conf_setting;
+	//int rowLength = 20;
+	//int colLength = 3;
+	//private Object[][] conf_display = new Object[rowLength][colLength];
+	//private Object[][] conf_setting;
+
+	private final String ONE = "1";
+	private final String TWO = "2";
+	private final String THREE = "3";
+
+	private ArrayList<ArrayList<Object>> conf_display = new ArrayList<ArrayList<Object>>();
+	private ArrayList<HashMap<String, Object>> conf_setting = new ArrayList<HashMap<String, Object>>();
 
 	//An array to store all the details in the build.properties file
 	private ArrayList<String> conf_array;
@@ -344,7 +373,7 @@ public class ConfPane extends JPanel implements ActionListener
 				int realColumnIndex = convertColumnIndexToModel(colIndex);
 				if (realColumnIndex == 0)
 				{
-					tip = conf_display[rowIndex][realColumnIndex].toString();
+					tip = conf_display.get(rowIndex).get(realColumnIndex).toString();
 				}
 				else
 				{
@@ -712,6 +741,7 @@ public class ConfPane extends JPanel implements ActionListener
 	 */
 	public void readProjectConf(String filename)
 	{
+		System.err.println("FILENAME = " + filename);
 		String fileLine;
 		/*
 		 * inside the array will store, the conf_setting[i][0]:Comment,
@@ -719,13 +749,14 @@ public class ConfPane extends JPanel implements ActionListener
 		 * store all the details from the build.properties
 		 */
 		conf_array = new ArrayList<String>();
-		conf_setting = new Object[rowLength][colLength];
+		conf_setting.clear();
+
 		try
 		{
 			BufferedReader conf_in = new BufferedReader(new FileReader(filename));
-			int i = 0;
 			while ((fileLine = conf_in.readLine()) != null)
 			{
+				HashMap<String, Object> map = new HashMap<String, Object>();
 				// This is an empty line
 				if (fileLine.matches("^\\s*$"))
 				{
@@ -740,19 +771,43 @@ public class ConfPane extends JPanel implements ActionListener
 				{
 					//This line is Configuration Comment line
 					conf_array.add(fileLine);
-					conf_setting[i][0] = fileLine.substring(1); // use 1 to get rid of the # symbol.
+					map.put(ONE, fileLine.substring(1));
+					conf_setting.add(map);
 				}
 				else if (!fileLine.matches("#.+") && !fileLine.matches("^\\s*$"))
 				{
 					//This line is Setting line
 					int end_index = fileLine.indexOf("=");
-					if(end_index != -1)
+					if (end_index != -1)
 					{
-						conf_setting[i][1] = fileLine.substring(0, end_index).toUpperCase();
-						conf_setting[i][2] = fileLine.substring(end_index + 1);
-						conf_table.put(conf_setting[i][1], conf_setting[i][2]);
-						i++; //calculat the number of settings
+						map.put(TWO, fileLine.substring(0, end_index).toUpperCase());
+						map.put(THREE, fileLine.substring(end_index + 1));
+						conf_table.put(map.get(TWO), map.get(THREE));
+
 						conf_array.add(fileLine);
+
+						if (map.get(TWO).toString().matches("TOMCAT.SERVER"))
+						{
+							tomcat_server = map.get(THREE).toString();
+						}
+						if (map.get(TWO).toString().matches("TOMCAT.PORT"))
+						{
+							tomcat_port = map.get(THREE).toString();
+						}
+						if (map.get(TWO).toString().matches("MYSQL.ADMIN.USER"))
+						{
+							mysql_adminuser = map.get(THREE).toString();
+						}
+						if (map.get(TWO).toString().matches("MYSQL.SERVER"))
+						{
+							mysql_server = map.get(THREE).toString();
+						}
+						if (map.get(TWO).toString().matches("MYSQL.PORT"))
+						{
+							mysql_port = map.get(THREE).toString();
+						}
+
+						conf_setting.add(map);
 					}
 				}
 				else
@@ -760,30 +815,7 @@ public class ConfPane extends JPanel implements ActionListener
 					// Wrong character in the line
 				}
 			}
-			num_of_setting = i;
-			for (int j = 0; j < num_of_setting; j++)
-			{
-				if (conf_setting[j][1].toString().matches("TOMCAT.SERVER"))
-				{
-					tomcat_server = conf_setting[j][2].toString();
-				}
-				if (conf_setting[j][1].toString().matches("TOMCAT.PORT"))
-				{
-					tomcat_port = conf_setting[j][2].toString();
-				}
-				if (conf_setting[j][1].toString().matches("MYSQL.ADMIN.USER"))
-				{
-					mysql_adminuser = conf_setting[j][2].toString();
-				}
-				if (conf_setting[j][1].toString().matches("MYSQL.SERVER"))
-				{
-					mysql_server = conf_setting[j][2].toString();
-				}
-				if (conf_setting[j][1].toString().matches("MYSQL.PORT"))
-				{
-					mysql_port = conf_setting[j][2].toString();
-				}
-			}
+
 			conf_in.close();
 		}
 		catch (Exception e)
@@ -794,12 +826,7 @@ public class ConfPane extends JPanel implements ActionListener
 
 	public void clearTable()
 	{
-		for (int i = 0; i < rowLength; i++)
-		{
-			conf_display[i][0] = "";
-			conf_display[i][1] = "";
-			conf_display[i][2] = "";
-		}
+		conf_display.clear();
 	}
 
 	private boolean checkTomcatServer()
@@ -888,7 +915,14 @@ public class ConfPane extends JPanel implements ActionListener
 
 		public Object getValueAt(int row, int col)
 		{
-			return conf_display[row][col + 1];
+			try
+			{
+				return conf_display.get(row).get(col + 1);
+			}
+			catch (Exception ex)
+			{
+				return "";
+			}
 		}
 
 		public boolean isCellEditable(int row, int col)
@@ -897,7 +931,7 @@ public class ConfPane extends JPanel implements ActionListener
 			{
 				return false;
 			}
-			else if (conf_display[row][col].toString().matches("MYSQL.+"))
+			else if (conf_display.get(row).get(col).toString().matches("MYSQL.+"))
 			{
 				mysql_server_up = checkMysqlServer();
 				if (mysql_server_up)
@@ -905,7 +939,7 @@ public class ConfPane extends JPanel implements ActionListener
 					return false;
 				}
 			}
-			else if (conf_display[row][col].toString().matches("TOMCAT.+"))
+			else if (conf_display.get(row).get(col).toString().matches("TOMCAT.+"))
 			{
 				tomcat_server_up = checkTomcatServer();
 				if (tomcat_server_up)
@@ -920,10 +954,19 @@ public class ConfPane extends JPanel implements ActionListener
 		{
 			if (!isCellEditable(row, col))
 				return;
-			conf_display[row][col + 1] = value;
+			if (conf_display.get(row) == null)
+			{
+				ArrayList<Object> list = new ArrayList<Object>();
+				list.add(col + 1, value);
+				conf_display.add(row, list);
+			}
+			else
+			{
+				conf_display.get(row).add(col + 1, value);
+			}
 			project_conf_changed = true;
 			//System.err.println("**ConfDisplay:" + conf_display[row][col].toString());
-			conf_table.put(conf_display[row][col].toString(), value);
+			conf_table.put(conf_display.get(row).get(col).toString(), value);
 			fireTableCellUpdated(row, col + 1);
 			updateUI();
 		}
@@ -936,17 +979,19 @@ public class ConfPane extends JPanel implements ActionListener
 		confContent_pane.add(conf_table_pane, BorderLayout.CENTER);
 		confContent_pane.revalidate();
 		clearTable();
-		int j = 0;
+
 		int row_count = 0;
-		for (int i = 0; i < num_of_setting; i++)
+		for (int i = 0; i < conf_setting.size(); i++)
 		{
-			if (conf_setting[i][1].toString().matches("^(" + conf_param + ").+"))
+			if (conf_setting.get(i).get(TWO) != null && conf_setting.get(i).get(TWO).toString().matches("^(" + conf_param + ").+"))
 			{
 				row_count = row_count + 1;
-				conf_display[j][0] = conf_setting[i][0];
-				conf_display[j][1] = conf_setting[i][1];
-				conf_display[j][2] = conf_table.get(conf_setting[i][1]);
-				j++;
+
+				ArrayList<Object> list = new ArrayList<Object>();
+				list.add(conf_setting.get(i).get(ONE));
+				list.add(conf_setting.get(i).get(TWO));
+				list.add(conf_table.get(conf_setting.get(i).get(TWO)));
+				conf_display.add(list);
 			}
 		}
 		return row_count;
