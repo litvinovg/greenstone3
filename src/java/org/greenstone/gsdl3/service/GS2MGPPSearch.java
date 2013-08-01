@@ -100,10 +100,15 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 		// set up the defaults that may be changed by query params
 		mgpp_src.setQueryLevel(this.default_level);
 		// we have case folding on by default
-		mgpp_src.setCase(case_default.equals(BOOLEAN_PARAM_ON) ? true : false);
-		mgpp_src.setStem(stem_default.equals(BOOLEAN_PARAM_ON) ? true : false);
-		mgpp_src.setAccentFold(accent_default.equals(BOOLEAN_PARAM_ON) ? true : false);
-
+		if (this.does_case) {
+		  mgpp_src.setCase(case_default.equals(BOOLEAN_PARAM_ON) ? true : false);
+		}
+		if (this.does_stem) {
+		  mgpp_src.setStem(stem_default.equals(BOOLEAN_PARAM_ON) ? true : false);
+		}
+		if (this.does_accent) {
+		  mgpp_src.setAccentFold(accent_default.equals(BOOLEAN_PARAM_ON) ? true : false);
+		}
 		// set up the query params
 		Set entries = params.entrySet();
 		Iterator i = entries.iterator();
@@ -116,17 +121,17 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 			String name = (String) m.getKey();
 			String value = (String) m.getValue();
 
-			if (name.equals(CASE_PARAM))
+			if (name.equals(CASE_PARAM) && this.does_case)
 			{
 				boolean val = (value.equals(BOOLEAN_PARAM_ON) ? true : false);
 				mgpp_src.setCase(val);
 			}
-			else if (name.equals(STEM_PARAM))
+			else if (name.equals(STEM_PARAM) && this.does_stem)
 			{
 				boolean val = (value.equals(BOOLEAN_PARAM_ON) ? true : false);
 				mgpp_src.setStem(val);
 			}
-			else if (name.equals(ACCENT_PARAM))
+			else if (name.equals(ACCENT_PARAM) && this.does_accent)
 			{
 				boolean val = (value.equals(BOOLEAN_PARAM_ON) ? true : false);
 				mgpp_src.setAccentFold(val);
