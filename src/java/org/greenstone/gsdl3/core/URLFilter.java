@@ -78,7 +78,6 @@ public class URLFilter implements Filter
 			GSHttpServletRequestWrapper gRequest = new GSHttpServletRequestWrapper(hRequest);
 
 			String url = hRequest.getRequestURI().toString();
-			System.err.println("URL = " + url);
 
 			if (isURLRestricted(url))
 			{
