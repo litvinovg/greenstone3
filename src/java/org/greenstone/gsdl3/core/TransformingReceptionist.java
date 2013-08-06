@@ -807,20 +807,7 @@ public class TransformingReceptionist extends Receptionist
 		Document libraryXsl = null;
 		try
 		{
-			String gsLibFile = this.getGSLibXSLFilename();
-			if (new File(gsLibFile).exists())
-			{
-				libraryXsl = getDoc(gsLibFile);
-				String errMsg = ((XMLConverter.ParseErrorHandler) parser.getErrorHandler()).getErrorMessage();
-				if (errMsg != null)
-				{
-					return XMLTransformer.constructErrorXHTMLPage("Error loading xslt file: " + this.getGSLibXSLFilename() + "\n" + errMsg);
-				}
-			}
-		}
-		catch (java.io.FileNotFoundException e)
-		{
-			return fileNotFoundErrorPage(e.getMessage());
+			libraryXsl = GSXSLT.mergedXSLTDocumentCascade("gslib.xsl", (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, _debug);
 		}
 		catch (Exception e)
 		{
