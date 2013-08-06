@@ -223,8 +223,8 @@ public class URLFilter implements Filter
 							{
 								ServletOutputStream out = response.getOutputStream();
 								out.write(Files.readAllBytes(Paths.get(baseInterfaceFile.getAbsolutePath())));
+								return;
 							}
-							return;
 						}
 					}
 				}
