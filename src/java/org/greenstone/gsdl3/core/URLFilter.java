@@ -1,6 +1,9 @@
 package org.greenstone.gsdl3.core;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +12,7 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -48,6 +53,7 @@ public class URLFilter implements Filter
 	protected static final String METADATA_RETRIEVAL_SERVICE = "DocumentMetadataRetrieve";
 	protected static final String ASSOCIATED_FILE_PATH = "/index/assoc/";
 	protected static final String COLLECTION_FILE_PATH = "/collect/";
+	protected static final String INTERFACE_PATH = "/interfaces/";
 
 	protected static final String SYSTEM_SUBACTION_CONFIGURE = "configure";
 	protected static final String SYSTEM_SUBACTION_RECONFIGURE = "reconfigure";
@@ -72,6 +78,7 @@ public class URLFilter implements Filter
 			GSHttpServletRequestWrapper gRequest = new GSHttpServletRequestWrapper(hRequest);
 
 			String url = hRequest.getRequestURI().toString();
+			System.err.println("URL = " + url);
 
 			if (isURLRestricted(url))
 			{
@@ -187,6 +194,37 @@ public class URLFilter implements Filter
 
 						if (!found)
 						{
+							return;
+						}
+					}
+				}
+			}
+			else if (url.contains(INTERFACE_PATH))
+			{
+				String fileURL = url.replace(request.getServletContext().getContextPath(), "");
+				File requestedFile = new File(request.getServletContext().getRealPath(fileURL));
+				if (!requestedFile.exists())
+				{
+					int interfaceNameStart = fileURL.indexOf(INTERFACE_PATH) + INTERFACE_PATH.length();
+					int interfaceNameEnd = fileURL.indexOf("/", interfaceNameStart);
+					String interfaceName = fileURL.substring(interfaceNameStart, interfaceNameEnd);
+					String interfacesDir = fileURL.substring(0, interfaceNameStart);
+					File interfaceConfigFile = new File(request.getServletContext().getRealPath(interfacesDir + interfaceName + "/interfaceConfig.xml"));
+
+					if (interfaceConfigFile.exists())
+					{
+						XMLConverter xmlC = new XMLConverter();
+						Document interfaceConfigDoc = xmlC.getDOM(interfaceConfigFile);
+
+						String baseInterface = interfaceConfigDoc.getDocumentElement().getAttribute("baseInterface");
+						if (baseInterface.length() > 0)
+						{
+							File baseInterfaceFile = new File(request.getServletContext().getRealPath(fileURL.replace("/" + interfaceName + "/", "/" + baseInterface + "/")));
+							if (baseInterfaceFile.exists())
+							{
+								ServletOutputStream out = response.getOutputStream();
+								out.write(Files.readAllBytes(Paths.get(baseInterfaceFile.getAbsolutePath())));
+							}
 							return;
 						}
 					}
