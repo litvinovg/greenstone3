@@ -2,8 +2,6 @@ package org.greenstone.gsdl3.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +16,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSXML;
@@ -222,7 +221,7 @@ public class URLFilter implements Filter
 							if (baseInterfaceFile.exists())
 							{
 								ServletOutputStream out = response.getOutputStream();
-								out.write(Files.readAllBytes(Paths.get(baseInterfaceFile.getAbsolutePath())));
+								out.write(FileUtils.readFileToByteArray(baseInterfaceFile));
 								return;
 							}
 						}
