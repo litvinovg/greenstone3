@@ -530,7 +530,7 @@ public class GSFile
 		return true;
 	}
 
-	public static ArrayList<File> getAllXSLFiles(String interfaceName, String siteName)
+	public static ArrayList<File> getAllXSLFiles(String siteName)
 	{
 		ArrayList<File> filesToReturn = new ArrayList<File>();
 
@@ -563,10 +563,10 @@ public class GSFile
 		}
 
 		//Add XSL files from the interface transform directory
-		File interfaceTransformDir = new File(GSFile.interfaceHome(GlobalProperties.getGSDL3Home(), interfaceName) + File.separator + "transform");
-		if (interfaceTransformDir.exists() && interfaceTransformDir.isDirectory())
+		File interfaceDir = new File(GlobalProperties.getGSDL3Home() + File.separator + "interfaces");
+		if (interfaceDir.exists() && interfaceDir.isDirectory())
 		{
-			filesToReturn.addAll(getXSLFilesFromDirectoryRecursive(interfaceTransformDir));
+			filesToReturn.addAll(getXSLFilesFromDirectoryRecursive(interfaceDir));
 		}
 
 		return filesToReturn;

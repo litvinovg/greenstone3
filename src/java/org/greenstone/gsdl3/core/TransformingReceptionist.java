@@ -188,7 +188,7 @@ public class TransformingReceptionist extends Receptionist
 
 	protected void getRequiredMetadataNamesFromXSLFiles()
 	{
-		ArrayList<File> xslFiles = GSFile.getAllXSLFiles((String) this.config_params.get(GSConstants.INTERFACE_NAME), (String) this.config_params.get(GSConstants.SITE_NAME));
+		ArrayList<File> xslFiles = GSFile.getAllXSLFiles((String) this.config_params.get((String) this.config_params.get(GSConstants.SITE_NAME)));
 
 		HashMap<String, ArrayList<String>> includes = new HashMap<String, ArrayList<String>>();
 		HashMap<String, ArrayList<File>> files = new HashMap<String, ArrayList<File>>();
@@ -363,23 +363,38 @@ public class TransformingReceptionist extends Receptionist
 			name = this.xslt_map.get(action);
 		}
 
-		String stylesheetFile = GSFile.interfaceStylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.INTERFACE_NAME), name);
-		stylesheetFile = stylesheetFile.replace("/", File.separator);
+		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		String collection = "";
 
-		ArrayList<String> requiredMetadata = _metadataRequiredMap.get(stylesheetFile);
-
-		if (requiredMetadata != null)
+		if (cgi_param_list != null)
 		{
-			Element extraMetadataList = this.doc.createElement(GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
-
-			for (String metadataString : requiredMetadata)
+			// Don't waste time getting all the parameters
+			HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
+			collection = (String) params.get(GSParams.COLLECTION);
+			if (collection == null)
 			{
-				Element metadataElem = this.doc.createElement(GSXML.EXTRA_METADATA);
-				metadataElem.setAttribute(GSXML.NAME_ATT, metadataString);
-				extraMetadataList.appendChild(metadataElem);
+				collection = "";
 			}
-			request.appendChild(request.getOwnerDocument().importNode(extraMetadataList, true));
 		}
+
+		ArrayList<File> stylesheets = GSFile.getStylesheetFiles(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, name);
+
+		Element extraMetadataList = this.doc.createElement(GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
+		for (File stylesheet : stylesheets)
+		{
+			ArrayList<String> requiredMetadata = _metadataRequiredMap.get(stylesheet.getAbsolutePath());
+
+			if (requiredMetadata != null)
+			{
+				for (String metadataString : requiredMetadata)
+				{
+					Element metadataElem = this.doc.createElement(GSXML.EXTRA_METADATA);
+					metadataElem.setAttribute(GSXML.NAME_ATT, metadataString);
+					extraMetadataList.appendChild(metadataElem);
+				}
+			}
+		}
+		request.appendChild(request.getOwnerDocument().importNode(extraMetadataList, true));
 	}
 
 	protected Node postProcessPage(Element page)
