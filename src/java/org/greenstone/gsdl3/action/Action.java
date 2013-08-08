@@ -97,36 +97,37 @@ abstract public class Action
 		addLinkMetadataNames(format, meta_names);
 	}
 
-  // should change to metadataList?? and use attributes for select rather than
-  // prepending parent_ etc
-  protected void extractMetadataNames(Element format, HashSet<String> meta_names)
+	// should change to metadataList?? and use attributes for select rather than
+	// prepending parent_ etc
+	protected void extractMetadataNames(Element format, HashSet<String> meta_names)
 	{
-	    
-	  NodeList metadata_nodes = format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata"); // gsf:metadata
-	  for (int i = 0; i < metadata_nodes.getLength(); i++)
-	    {
-	      Element elem = (Element) metadata_nodes.item(i);
-	      String name = elem.getAttribute("name");
-	      String select = elem.getAttribute("select");
+		NodeList metadata_nodes = format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata"); // gsf:metadata
+		for (int i = 0; i < metadata_nodes.getLength(); i++)
+		{
+			Element elem = (Element) metadata_nodes.item(i);
+			String name = elem.getAttribute("name");
+			String select = elem.getAttribute("select");
 
-	      if (!select.equals("")) {
-		name = select+GSConstants.META_RELATION_SEP+name;
-	      }
-	      meta_names.add(name);
-	    }
-	      
-	  NodeList foreach_metadata_nodes = format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "foreach-metadata"); // gsf:foreach-metadata
-	  for (int i = 0; i < foreach_metadata_nodes.getLength(); i++)
-	    {
-	      Element elem = (Element) foreach_metadata_nodes.item(i);
-	      String name = elem.getAttribute("name");
-	      String select = elem.getAttribute("select");
+			if (!select.equals(""))
+			{
+				name = select + GSConstants.META_RELATION_SEP + name;
+			}
+			meta_names.add(name);
+		}
 
-	      if (!select.equals("")) {
-		name = select+GSConstants.META_RELATION_SEP+name;
-	      }
-	      meta_names.add(name);
-	    }	      
+		NodeList foreach_metadata_nodes = format.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "foreach-metadata"); // gsf:foreach-metadata
+		for (int i = 0; i < foreach_metadata_nodes.getLength(); i++)
+		{
+			Element elem = (Element) foreach_metadata_nodes.item(i);
+			String name = elem.getAttribute("name");
+			String select = elem.getAttribute("select");
+
+			if (!select.equals(""))
+			{
+				name = select + GSConstants.META_RELATION_SEP + name;
+			}
+			meta_names.add(name);
+		}
 	}
 
 	protected void addLinkMetadataNames(Element format, HashSet<String> meta_names)
@@ -272,28 +273,27 @@ abstract public class Action
 		elem.appendChild(elem.getOwnerDocument().importNode(documentOptionList, true));
 	}
 
-  protected Element getFormatInfo(String to, UserContext userContext) {
-    Element mr_format_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-    Element mr_format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, to, userContext);
-    mr_format_message.appendChild(mr_format_request);
-
-    // process the message
-    Element mr_response_message = (Element) this.mr.process(mr_format_message);
-    // the response
-    
-    Element format_response = (Element) GSXML.getChildByTagName(mr_response_message, GSXML.RESPONSE_ELEM);
-    
-    Element format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.FORMAT_ELEM);
-    if (format_elem!= null) {
-      Element global_format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.GLOBAL_FORMAT_ELEM);
-      if (global_format_elem != null)
+	protected Element getFormatInfo(String to, UserContext userContext)
 	{
-	  GSXSLT.mergeFormatElements(format_elem, global_format_elem, false);
+		Element mr_format_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, to, userContext);
+		mr_format_message.appendChild(mr_format_request);
+
+		// process the message
+		Element mr_response_message = (Element) this.mr.process(mr_format_message);
+		// the response
+
+		Element format_response = (Element) GSXML.getChildByTagName(mr_response_message, GSXML.RESPONSE_ELEM);
+
+		Element format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.FORMAT_ELEM);
+		if (format_elem != null)
+		{
+			Element global_format_elem = (Element) GSXML.getChildByTagName(format_response, GSXML.GLOBAL_FORMAT_ELEM);
+			if (global_format_elem != null)
+			{
+				GSXSLT.mergeFormatElements(format_elem, global_format_elem, false);
+			}
+		}
+		return format_elem;
 	}
-    }
-    return format_elem;
-  }
 }
-
-  
-
