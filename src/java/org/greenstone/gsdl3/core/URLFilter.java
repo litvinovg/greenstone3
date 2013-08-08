@@ -199,7 +199,7 @@ public class URLFilter implements Filter
 			}
 			else if (url.contains(INTERFACE_PATH))
 			{
-				String fileURL = url.replace(request.getServletContext().getContextPath(), "");
+				String fileURL = url.replaceFirst(request.getServletContext().getContextPath(), "");
 				File requestedFile = new File(request.getServletContext().getRealPath(fileURL));
 				if (!requestedFile.exists())
 				{
