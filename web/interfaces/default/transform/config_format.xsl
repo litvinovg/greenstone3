@@ -282,7 +282,13 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-
+  
+  <xsl:template match="gsf:OID">
+    <xslt:value-of select="@nodeID"/>
+  </xsl:template>
+  <xsl:template match="gsf:rank">
+    <xslt:value-of select="@rank"/>
+  </xsl:template>
 	<xsl:template match="gsf:icon">
 		<xsl:choose>
 			<xsl:when test="@type='classifier'">
