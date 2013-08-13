@@ -32,8 +32,11 @@ import org.w3c.dom.NodeList;
 
 public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 {
-	protected static final String RANK_PARAM_RANK_VALUE = "rank";
+  //  protected static final String RANK_PARAM_RANK_VALUE = "rank";
   protected static final String SORT_ELEM = "sort";
+  protected static final String SORT_ORDER_PARAM = "sortOrder";
+  protected static final String SORT_ORDER_DESCENDING = "1";
+  protected static final String SORT_ORDER_ASCENDING = "0";
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.SharedSoleneGS2FieldSearch.class.getName());
 
@@ -100,6 +103,7 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 		super.addCustomQueryParams(param_list, lang);
 		/** Lucene's/Solr's rank (sort) param is based on sort fields, not ranked/not */
 		createParameter(RANK_PARAM, param_list, lang);
+		createParameter(SORT_ORDER_PARAM, param_list, lang);
 	}
 
 	/** create a param and add to the list */
@@ -111,14 +115,18 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 		{
 			// get the fields
 			ArrayList<String> fields = new ArrayList<String>();
-			//fields.add(RANK_PARAM_RANK_VALUE);
 			ArrayList<String> field_names = new ArrayList<String>();
-			//field_names.add(getTextString("param.sortBy.rank", lang));
 			if (getSortData(fields, field_names, lang)) {
 
 			  param = GSXML.createParameterDescription2(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, fields.get(0), fields, field_names);
 			}
-		}
+		} else if (name.equals(SORT_ORDER_PARAM)) {
+	    String[] vals = { SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING };
+	    String[] vals_texts = { getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_ASCENDING, lang), getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_DESCENDING, lang) };
+
+	    param = GSXML.createParameterDescription(this.doc, SORT_ORDER_PARAM, getTextString("param." + SORT_ORDER_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, SORT_ORDER_ASCENDING, vals, vals_texts);
+	  }
+
 		if (param != null)
 		{
 			param_list.appendChild(param);
@@ -156,36 +164,6 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 	  }
 	return true;
   }
-	protected void getSortByIndexData(ArrayList<String> index_ids, ArrayList<String> index_names, String lang)
-	{
-		// the index info -
-		Element index_list = (Element) GSXML.getChildByTagName(this.config_info, INDEX_ELEM + GSXML.LIST_MODIFIER);
-		NodeList indexes = index_list.getElementsByTagName(INDEX_ELEM);
-		int len = indexes.getLength();
-		// now add even if there is only one
-		for (int i = 0; i < len; i++)
-		{
-			Element index = (Element) indexes.item(i);
-			String shortname = index.getAttribute(GSXML.SHORTNAME_ATT);
-			if (shortname.equals("") || shortname.equals("ZZ") || shortname.equals("TX"))
-			{
-				continue;
-			}
-			index_ids.add("by" + shortname);
-			String display_name = GSXML.getDisplayText(index, GSXML.DISPLAY_TEXT_NAME, lang, "en");
-			if (display_name.equals(""))
-			{
-				display_name = index.getAttribute(GSXML.NAME_ATT);
-				if (display_name.equals(""))
-				{
-					display_name = shortname;
-				}
-			}
-			index_names.add(display_name);
-
-		}
-
-	}
 
 	protected String addFieldInfo(String query, String field)
 	{
