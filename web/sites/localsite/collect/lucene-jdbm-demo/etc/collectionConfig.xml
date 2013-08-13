@@ -53,12 +53,20 @@
 		<index name="dls.Organization">
 			<displayItem lang="en" name="name">organisations</displayItem>
 		</index>
-		<indexOption>
-			<option name="accentfold"/>
-			<option name="casefold"/>
-			<option name="stem"/>
-		</indexOption>
-		<searchType name="plain"/>
+
+    <sort name="rank">
+      <displayItem lang="en" name="name">ranks</displayItem>
+    </sort>    
+    <sort name="dls.Organization">
+      <displayItem lang="en" name="name">organisation</displayItem>
+    </sort>
+    <sort name="FileSize">
+      <displayItem lang="en" name="name">filesize</displayItem>
+    </sort>
+    <sort name="none">
+      <displayItem lang="en" name="name">natural (build) order</displayItem>
+    </sort>
+    <searchType name="plain"/>
 		<searchType name="simpleform"/>
 		<searchType name="advancedform"/>
 		<format>
@@ -79,6 +87,10 @@
 						</gsf:choose-metadata>
 					</gsf:link>
 				</td>
+	<td>
+	  <gsf:choose-metadata><gsf:metadata name="dls.Organization" select="root"/><gsf:metadata name="dls.Organization"/></gsf:choose-metadata></td>
+	<td><gsf:choose-metadata><gsf:metadata name="FileSize" select="root"/><gsf:metadata name="FileSize"/></gsf:choose-metadata>(rank <gsf:rank/>)
+	</td>
 			</gsf:template>
 		</format>
 	</search>
@@ -94,6 +106,9 @@
 			<plugin name="DirectoryPlugin"/>
 		</pluginList>
 	</import>
+  <importOption name="OIDtype" value="dirname"/>
+  <buildOption name="sections_sort_on_document_metadata" value="unless_section_metadata_exists"/>
+
 	<browse>
 		<classifier name="List">
 			<option name="-metadata" value="dc.Title"/>
