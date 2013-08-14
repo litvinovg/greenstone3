@@ -736,7 +736,7 @@
               <arg value="perl" />
             </exec>
 
-	    <exec executable="${gs2build.home}/bin/windows/which" os="${os.windows}" spawn="false" outputproperty="full.perl.path">
+	    <exec executable="${gs2build.home}/bin/windows/which" osfamily="windows" spawn="false" outputproperty="full.perl.path">
               <arg value="perl" />
             </exec>
 
@@ -1067,7 +1067,7 @@
 
   
   <target name="prepare-solr-ext" depends="init" >
-    <exec executable="ant.bat" os="${os.windows}" dir="${solr-ext.home}" spawn="false">
+    <exec executable="ant.bat" osfamily="windows" dir="${solr-ext.home}" spawn="false">
       <arg value="add-service"/>
     </exec>
     <exec executable="ant" os="${os.unix}" dir="${solr-ext.home}" spawn="false">
@@ -1350,7 +1350,7 @@
       <env key="WNHOME" path="${wn.home}"/>
       <env key="FEDORA_HOME" path="${fedora.home}"/>
     </exec>
-    <exec executable="${catalina.home}/bin/catalina.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="true">
+    <exec executable="${catalina.home}/bin/catalina.bat" osfamily="windows" dir="${catalina.home}/bin" spawn="true">
       <arg value="jpda" />
       <arg value="start" />
       <env key="JPDA_ADDRESS" value="8000"/> <!-- for debugging Tomcat in Eclipse -->
@@ -1391,7 +1391,9 @@
     <echo file="${catalina.home}/bin/setenv.sh">export CLASSPATH=${tomcat.classpath}</echo>
 
     <!-- using osfamily instead of testing os against os.windows list of recognised windows versions
-	 so that future windows versions are included. See http://simonharrer.wordpress.com/tag/osfamily/ -->
+	 so that future windows versions are included. See http://simonharrer.wordpress.com/tag/osfamily/ 
+	Can't use the osfamily test for linux-type machines as a group since osfamily=unix is separate from osfamily=mac,
+	see http://ant-contrib.sourceforge.net/tasks/tasks/osfamily.html -->
 
     <exec executable="${catalina.home}/bin/startup.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
       <!--<env key="GSDLOS" value="linux"/> do we need this?? -->
@@ -1552,13 +1554,13 @@
       <arg value="server.log"/>
     </exec>
 
-    <exec executable="cmd" os="${os.windows}" dir="${catalina.home}/logs" spawn="false">
+    <exec executable="cmd" osfamily="windows" dir="${catalina.home}/logs" spawn="false">
       <arg line="/c echo. > catalina.out"/>
     </exec>
-    <exec executable="cmd" os="${os.windows}" dir="${web.writablehome}/logs" spawn="false">
+    <exec executable="cmd" osfamily="windows" dir="${web.writablehome}/logs" spawn="false">
       <arg line="/c echo. > greenstone.log"/>
     </exec>
-    <exec executable="cmd" os="${os.windows}" dir="${web.writablehome}/logs" spawn="false">
+    <exec executable="cmd" osfamily="windows" dir="${web.writablehome}/logs" spawn="false">
       <arg line="/c echo. > server.log"/>
     </exec>
 
@@ -2070,10 +2072,10 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
          (thereby also generating gdbmjava.dll). Then we run the same command with 
          the "install" argument to copy the gdbmjava.dll into the correct location. -->
     <echo>Windows: compile javagdbm</echo>
-    <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true">	  
+    <exec executable="${javagdbm.home}/winMake.bat" osfamily="windows" dir="${javagdbm.home}" failonerror="true">	  
       <env key="GSDL3SRCHOME" path="${basedir}"/>
     </exec>
-    <exec executable="${javagdbm.home}/winMake.bat" os="${os.windows}" dir="${javagdbm.home}" failonerror="true">
+    <exec executable="${javagdbm.home}/winMake.bat" osfamily="windows" dir="${javagdbm.home}" failonerror="true">
       <env key="GSDL3SRCHOME" path="${basedir}"/>
       <arg value="install"/>
     </exec>
@@ -2236,7 +2238,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </exec>
     </if>
     <!-- windows: -->    
-    <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
+    <exec executable="nmake" dir="${common.src.home}" osfamily="windows" failonerror="true">
       <arg value="/f"/>
       <arg value="win32.mak"/>
       <arg value="clean"/>
@@ -2251,7 +2253,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </exec>
     </if>
     <!-- windows: distclean = clean + remove configure products (remove makefiles). But on Windows there is no removing makefiles, so we just call clean -->    
-    <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
+    <exec executable="nmake" dir="${common.src.home}" osfamily="windows" failonerror="true">
       <arg value="/f"/>
       <arg value="win32.mak"/>
       <arg value="clean"/>
@@ -2264,7 +2266,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="${gs2.compile.target}"/>
     </exec>
     <!-- windows: -->
-    <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
+    <exec executable="nmake" dir="${common.src.home}" osfamily="windows" failonerror="true">
       <arg value="/f"/>
       <arg value="win32.mak"/>
       <arg value="GSDLHOME=${gs2build.home}"/>
@@ -2310,7 +2312,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </exec>
       
     <!-- windows: -->
-    <exec executable="nmake" dir="${common.src.home}" os="${os.windows}" failonerror="true">
+    <exec executable="nmake" dir="${common.src.home}" osfamily="windows" failonerror="true">
       <arg value="/f"/>
       <arg value="win32.mak"/>
       <arg value="install"/>
@@ -2404,7 +2406,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <exec executable="clean.sh" os="${os.unix}" dir="${gli.home}"
       resolveExecutable="true" failonerror="true"/>
     <!-- windows -->
-    <exec executable="clean.bat" os="${os.windows}" dir="${gli.home}"
+    <exec executable="clean.bat" osfamily="windows" dir="${gli.home}"
       resolveExecutable="true" failonerror="true"/>
   </target>
  
@@ -2419,9 +2421,9 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <exec executable="makejar.sh" os="${os.unix}" dir="${gli.home}"
 	    resolveExecutable="true" failonerror="true"/>
       <!-- windows -->
-      <exec executable="makegli.bat" os="${os.windows}" dir="${gli.home}" resolveExecutable="true" failonerror="true"/>
+      <exec executable="makegli.bat" osfamily="windows" dir="${gli.home}" resolveExecutable="true" failonerror="true"/>
       <!--remote gli-->
-      <exec executable="makejar.bat" os="${os.windows}" dir="${gli.home}"
+      <exec executable="makejar.bat" osfamily="windows" dir="${gli.home}"
 	    resolveExecutable="true" failonerror="true"/> 
       <copy file="${gli.home}/GLIServer.jar" todir="${gs2build.home}/bin/java" />
     </if>
@@ -2437,7 +2439,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <env key="gsdlpath" path="${gs2build.home}"/>
       <env key="DYLD_LIBRARY_PATH" path="${env.DYLD_LIBRARY_PATH}:${gdbm.home}/lib"/>
     </exec>
-    <exec executable="${basedir}/gli/gli.bat" os="${os.windows}" dir="${basedir}/gli" spawn="true">
+    <exec executable="${basedir}/gli/gli.bat" osfamily="windows" dir="${basedir}/gli" spawn="true">
       <env key="GSDL3PATH" path="${basedir}"/>
       <env key="GSDLPATH" path="${gs2build.home}"/>
     </exec>
@@ -2694,7 +2696,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </exec>
     </if>
     <!-- windows: -->    
-    <exec executable="nmake" dir="${build.src.home}" os="${os.windows}" failonerror="true">
+    <exec executable="nmake" dir="${build.src.home}" osfamily="windows" failonerror="true">
       <arg value="/f"/>
       <arg value="win32.mak"/>
       <arg value="clean"/>
@@ -2711,7 +2713,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </exec>
     </if>
     <!-- windows: distclean = clean + remove configure products (remove makefiles). But on Windows there is no removing makefiles, so we just call clean -->    
-    <exec executable="nmake" dir="${build.src.home}" os="${os.windows}" failonerror="true">
+    <exec executable="nmake" dir="${build.src.home}" osfamily="windows" failonerror="true">
       <arg value="/f"/>
       <arg value="win32.mak"/>
       <arg value="clean"/>
@@ -2740,14 +2742,14 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </exec>
 
     <!-- run the setup script -->
-    <!-- <exec executable="${compile.windows.c++.setup}" os="${os.windows}" failonerror="true"/>-->
+    <!-- <exec executable="${compile.windows.c++.setup}" osfamily="windows" failonerror="true"/>-->
       <!--Above does not work: even though vcvars.bat executes, the env changes it makes don't get saved. Need user to run vcvars.bat first before calling ant--> 
-      <exec executable="nmake" dir="${build.src.home}" os="${os.windows}" failonerror="true">
+      <exec executable="nmake" dir="${build.src.home}" osfamily="windows" failonerror="true">
         <arg value="/f"/>
         <arg value="win32.mak"/>
 	<arg value="GSDLHOME=${gs2build.home}"/>
       </exec>
-      <exec executable="nmake" dir="${build.src.home}" os="${os.windows}" failonerror="true">
+      <exec executable="nmake" dir="${build.src.home}" osfamily="windows" failonerror="true">
         <arg value="/f"/>
         <arg value="win32.mak"/>
         <arg value="install"/>
