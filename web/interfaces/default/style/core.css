@@ -249,6 +249,7 @@ pre {
 	position: relative;
 }
 
+/*
 #collectionLinks a div{
 	display: block;
 	float: left;
@@ -260,7 +261,9 @@ pre {
 	background: url(../images/collectionIconStripe.gif) scroll no-repeat 0 0;
 	padding: 20px;
 	min-width: 200px;
+	text-align:center;
 }
+*/
 
 #collectionLinks a img{
 	display: block;
@@ -273,7 +276,6 @@ pre {
 	height:60px;
 }
 
-/*
 .collectionLink {
 	display: block;
 	float: left;
@@ -282,10 +284,13 @@ pre {
 	font-size: 150%;
 	color: #444;
 	text-decoration: none;
-	background: url(../images/collectionIconStripe.gif) scroll no-repeat 0 0;
-	padding: 20px;
+	min-width: 200px;
+	text-align:center;
 }
-*/
+
+.collectionLinkText {
+	padding: 15px 15px 10px;
+}
 
 /* some text should not be rendered as it is just there for search engines */
 #collectionLinks a b {
@@ -363,7 +368,6 @@ body.dAction #gs_banner h2 {
 #bannerLinks li {
 	/*display: inline;*/
 	float:right;
-	margin-left: 5px;
 	padding: 1px 4px 1px 0px;
 }
 

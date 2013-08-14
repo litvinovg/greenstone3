@@ -227,29 +227,35 @@
 		  </xsl:if>
 
 			<!-- preferences -->
-			<li class="ui-state-default ui-corner-all">
+			<li>
 				<a href="{$library_name}/collection/{$collNameChecked}/page/pref">
 					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_tip')"/></xsl:attribute>
-					<ul>
-						<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/></span></li>
-						<li><span class="ui-icon ui-icon-wrench"><xsl:text> </xsl:text></span></li>
-					</ul>
+					<span id="preferencesButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/></span>
+					<script type="text/javascript">
+						<xsl:text disable-output-escaping="yes">
+							$("#preferencesButton").button({icons:{primary:"ui-icon-wrench"}});
+							$("#preferencesButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+						</xsl:text>
+					</script>
 				</a>
 			</li>
 
 			<!-- help -->
-			<li class="ui-state-default ui-corner-all">
+			<li>
 				<a href="{$library_name}/collection/{$collNameChecked}/page/help">
 					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_tip')"/></xsl:attribute>
-					<ul>
-						<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></span></li>
-						<li><span class="ui-icon ui-icon-help"><xsl:text> </xsl:text></span></li>
-					</ul>
+					<span id="helpButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></span>
+					<script type="text/javascript">
+						<xsl:text disable-output-escaping="yes">
+							$("#helpButton").button({icons:{primary:"ui-icon-help"}});
+							$("#helpButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+						</xsl:text>
+					</script>
 				</a>
 			</li>
 			
 			<!-- login/logout -->
-			<li class="ui-state-default ui-corner-all" id="userMenuButton">
+			<li id="userMenuButton">
 				<xsl:choose>
 					<xsl:when test="/page/pageRequest/userInformation/@username">
 						<a>
@@ -328,10 +334,13 @@
 									}
 								</xsl:text>
 							</script>
-							<ul>
-								<li><span><xsl:value-of select="/page/pageRequest/userInformation/@username"/></span></li>
-								<li><span class="ui-icon ui-icon-unlocked"><xsl:text> </xsl:text></span></li>
-							</ul>
+							<span id="loginButton"><xsl:value-of select="/page/pageRequest/userInformation/@username"/></span>
+							<script type="text/javascript">
+								<xsl:text disable-output-escaping="yes">
+									$("#loginButton").button({icons:{primary:"ui-icon-unlocked"}});
+									$("#loginButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+								</xsl:text>
+							</script>
 						</a>
 					</xsl:when>
 					<xsl:otherwise>
@@ -359,25 +368,31 @@
 								</xsl:for-each>
 							</xsl:attribute>
 							<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_tip')"/></xsl:attribute>
-							<ul>
-								<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_b')"/></span></li>
-								<li><span class="ui-icon ui-icon-locked"><xsl:text> </xsl:text></span></li>
-							</ul>
+							<span id="loginButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_b')"/></span>
+							<script type="text/javascript">
+								<xsl:text disable-output-escaping="yes">
+									$("#loginButton").button({icons:{primary:"ui-icon-locked"}});
+									$("#loginButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+								</xsl:text>
+							</script>
 						</a>
 					</xsl:otherwise>
 				</xsl:choose>
 			</li>
 			<!-- debuginfo (doesn't use class="ui-state-error" since the text is not legible due to inherited text-colour) -->
 			<xsl:if test="/page/pageRequest/paramList/param[(@name='debug') and (@value='on' or @value='true' or @value='1')]">
-			  <li class="ui-state-default ui-corner-all">
-			    <a href="{$library_name}/collection/{$collNameChecked}/page/debug">
-			      <xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo_tip')"/></xsl:attribute>
-			      <ul>
-				<li><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo_b')"/></span></li>
-				<li><span class="ui-icon ui-icon-info"><xsl:text> </xsl:text></span></li>
-			      </ul>
-			    </a>
-			  </li>
+				<li>
+					<a href="{$library_name}/collection/{$collNameChecked}/page/debug">
+						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo_tip')"/></xsl:attribute>
+						<span id="debugButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo_b')"/></span>
+						<script type="text/javascript">
+							<xsl:text disable-output-escaping="yes">
+								$("#debugButton").button({icons:{primary:"ui-icon-info"}});
+								$("#debugButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+							</xsl:text>
+						</script>
+					</a>
+				</li>
 			</xsl:if>
 		</ul>
 	</xsl:template>
