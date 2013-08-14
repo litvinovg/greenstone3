@@ -213,8 +213,11 @@
       </xsl:when>
       <xsl:otherwise>
         <a href="{$coll_href}" title="{$desc}">
-          <div class="collectionLink">
-            <xsl:value-of select="displayItem[@name='name']"/>
+          <div class="collectionLink ui-corner-all">
+			<div class="collectionLinkText ui-widget-content ui-corner-top">
+				<xsl:value-of select="displayItem[@name='name']"/>
+			</div>
+			<div style="height:15px;" class="ui-state-default ui-corner-bottom"><xsl:text> </xsl:text></div>
           </div>
         </a>
       </xsl:otherwise>
