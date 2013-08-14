@@ -1389,7 +1389,10 @@
 
     <echo file="${catalina.home}/bin/setenv.bat">set CLASSPATH=${tomcat.classpath}</echo>
     <echo file="${catalina.home}/bin/setenv.sh">export CLASSPATH=${tomcat.classpath}</echo>
-	
+
+    <!-- using osfamily instead of testing os against os.windows list of recognised windows versions
+	 so that future windows versions are included. See http://simonharrer.wordpress.com/tag/osfamily/ -->
+
     <exec executable="${catalina.home}/bin/startup.sh" os="${os.unix}" dir="${catalina.home}/bin" spawn="false">
       <!--<env key="GSDLOS" value="linux"/> do we need this?? -->
       <env key="GSDL3HOME" value="${basedir}"/>
@@ -1402,7 +1405,7 @@
       <env key="WNHOME" path="${wn.home}"/>
       <env key="FEDORA_HOME" path="${fedora.home}"/>
     </exec>
-    <exec executable="${catalina.home}/bin/startup.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="true">
+    <exec executable="${catalina.home}/bin/startup.bat" osfamily="windows" dir="${catalina.home}/bin" spawn="true">
       <env key="GSDLOS" value="windows"/>
       <env key="GSDL3HOME" value="${basedir}"/>
       <env key="Path" path="${tomcat.path}"/>
@@ -1448,7 +1451,7 @@
       <env key="CATALINA_HOME" value="${catalina.home}"/>
       <arg line=">/dev/null 2>&amp;1"/>
     </exec>
-    <exec executable="${catalina.home}/bin/shutdown.bat" os="${os.windows}" dir="${catalina.home}/bin" spawn="false">
+    <exec executable="${catalina.home}/bin/shutdown.bat" osfamily="windows" dir="${catalina.home}/bin" spawn="false">
       <env key="FEDORA_HOME" path="${fedora.home}"/>
       <env key="CATALINA_HOME" value="${catalina.home}"/>
       <arg line=">nul 2>&amp;1"/>
