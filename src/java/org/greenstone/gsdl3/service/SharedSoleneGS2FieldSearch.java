@@ -32,7 +32,10 @@ import org.w3c.dom.NodeList;
 
 public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 {
-  //  protected static final String RANK_PARAM_RANK_VALUE = "rank";
+
+  protected static String RANK_PARAM_RANK = "rank";
+  protected static String RANK_PARAM_NONE = "none";
+
   protected static final String SORT_ELEM = "sort";
   protected static final String SORT_ORDER_PARAM = "sortOrder";
   protected static final String SORT_ORDER_DESCENDING = "1";
