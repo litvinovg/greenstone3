@@ -623,7 +623,7 @@
   
   <!-- ==================== Primary and Global Targets ============================= -->
 
-  <target name="prepare" depends="accept-properties,init,prepare-core,prepare-packages,prepare-common-src,prepare-collection-building,prepare-tomcat,prepare-axis,prepare-web,prepare-collections,prepare-solr-ext, prepare-flax"
+  <target name="prepare" depends="accept-properties,init,prepare-core,prepare-packages,prepare-common-src,prepare-collection-building,prepare-tomcat,prepare-axis,prepare-web,prepare-collections, prepare-flax"
     description="Use this when you first checkout the code: 'ant prepare install'. This will do some additional subversion checkouts and downloads, so you need to be online to run this.">
 
     <!-- make sure .sh files are executable -->
@@ -658,7 +658,7 @@
   </target>
 
   <!-- install-common-src and install-collection-building are mutually exclusive and either one or the other will be done depending on whether collection building is enabled or not -->
-  <target name="install" depends="init,install-common-src,install-collection-building,install-runtime,setup-for-eclipse"
+  <target name="install" depends="init,install-common-src,install-collection-building,install-runtime,install-solr-ext,setup-for-eclipse"
     description="Install Greenstone 3. Use this when you first checkout the code: 'ant prepare new-install'."/>
 
   <target name="install-common-src" depends="init" 
@@ -1066,7 +1066,7 @@
   </target>
 
   
-  <target name="prepare-solr-ext" depends="init" >
+  <target name="install-solr-ext" depends="init" >
     <exec executable="ant.bat" osfamily="windows" dir="${solr-ext.home}" spawn="false">
       <arg value="add-service"/>
     </exec>
