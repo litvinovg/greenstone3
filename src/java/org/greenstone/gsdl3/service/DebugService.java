@@ -400,7 +400,7 @@ public class DebugService extends ServiceRack
 				}
 			}
 
-			NodeList templateElems = xslDoc.getElementsByTagNameNS(fullNamespace, nodeName);
+			NodeList templateElems = rootElem.getElementsByTagNameNS(fullNamespace, nodeName);
 
 			boolean found = false;
 			if (nameToSave != null && nameToSave.length() != 0)
