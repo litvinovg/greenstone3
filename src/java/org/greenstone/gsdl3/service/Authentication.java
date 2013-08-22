@@ -19,6 +19,7 @@ import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.UserQueryResult;
 import org.greenstone.gsdl3.util.UserTermInfo;
+import org.greenstone.util.GlobalProperties;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -879,18 +880,18 @@ public class Authentication extends ServiceRack
 			_derbyWrapper = new DerbyWrapper();
 
 			// check the usersDb database, if it isn't existing, check the etc dir, create the etc dir if it isn't existing, then create the  user database and add a "admin" user
-			String usersDB_dir = this.site_home + File.separatorChar + "etc" + File.separatorChar + "usersDB";
+			String usersDB_dir = GlobalProperties.getGSDL3Home() + File.separatorChar + "etc" + File.separatorChar + "usersDB";
 			File usersDB_file = new File(usersDB_dir);
 			if (!usersDB_file.exists())
 			{
-				String etc_dir = this.site_home + File.separatorChar + "etc";
+				String etc_dir = GlobalProperties.getGSDL3Home() + File.separatorChar + "etc";
 				File etc_file = new File(etc_dir);
 				if (!etc_file.exists())
 				{
 					boolean success = etc_file.mkdir();
 					if (!success)
 					{
-						logger.error("Couldn't create the etc dir under " + this.site_home + ".");
+						logger.error("Couldn't create the etc dir under " + GlobalProperties.getGSDL3Home() + ".");
 						return false;
 					}
 				}
