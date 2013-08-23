@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <collectionConfig xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" >
-  <metadataList/>
+  <metadataList>
+    <metadata name="creator">greenstone@cs.waikato.ac.nz</metadata>
+    <metadata name="public">true</metadata>
+  </metadataList>
   <displayItemList>
     <displayItem name='name' lang=''>Infomine proxy demo</displayItem>
     <displayItem name='description' lang='en'>&lt;p&gt;This is a demonstration collection that acts as a proxy to the iVia database at &lt;a href="http://infomine.ucr.edu/"&gt;INFOMINE&lt;/a&gt;, Riverside, California. No data is stored locally; instead, the search and retrieval services invoke cgi scripts at infomine to query the database, and retrieve records and metadata.&lt;/p&gt;
