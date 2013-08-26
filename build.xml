@@ -511,6 +511,7 @@
   <property name="compile.debug"       value="true"/>
   <property name="compile.deprecation" value="true"/>
   <property name="compile.optimize"    value="true"/>
+  <property name="compile.includeantruntime" value="false"/> <!-- to get rid of annoying 'ant' warning -->
 
   <!--
 
@@ -1159,6 +1160,7 @@
   <target name="compile-web" depends="init">
     <javac srcdir="${web.classes}"
       destdir="${web.classes}"
+      includeantruntime="${compile.includeantruntime}"
       debug="${compile.debug}"
       deprecation="${compile.deprecation}"
       optimize="${compile.optimize}">
@@ -1820,6 +1822,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <mkdir dir="${build.home}"/>
     <javac srcdir="${src.home}"
       destdir="${build.home}" 
+      includeantruntime="${compile.includeantruntime}"
       debug="${compile.debug}"
       deprecation="${compile.deprecation}"
       optimize="${compile.optimize}">
@@ -1864,6 +1867,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <if><bool><isset property="with.jni"/></bool>
 	<javac srcdir="${src.home}"
 	       destdir="${build.home}"
+	       includeantruntime="${compile.includeantruntime}"
 	       debug="${compile.debug}"
 	       deprecation="${compile.deprecation}"
 	       optimize="${compile.optimize}">
@@ -1874,10 +1878,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 	<else>
 	  <property name="gsprefix" value=""/>	  
 	  <javac srcdir="${src.home}"
-	       destdir="${build.home}"
-	       debug="${compile.debug}"
-	       deprecation="${compile.deprecation}"
-	       optimize="${compile.optimize}">
+		 destdir="${build.home}"
+		 includeantruntime="${compile.includeantruntime}"
+		 debug="${compile.debug}"
+		 deprecation="${compile.deprecation}"
+		 optimize="${compile.optimize}">
 	    <classpath>
               <path refid="compile.classpath"/>
 	    </classpath>
@@ -3000,6 +3005,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 				<javac 
 					srcdir="@{compiledir}" 
 					destdir="@{compiledir}/../build" 
+				        includeantruntime="${compile.includeantruntime}"
 					debug="${compile.debug}" 
 					deprecation="${compile.deprecation}" 
 					optimize="${compile.optimize}">
