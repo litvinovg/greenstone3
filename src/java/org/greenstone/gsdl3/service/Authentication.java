@@ -141,7 +141,6 @@ public class Authentication extends ServiceRack
 
 	public void cleanUp()
 	{
-
 		super.cleanUp();
 
 		if (!_derbyWrapperDoneForcedShutdown)
@@ -161,7 +160,6 @@ public class Authentication extends ServiceRack
 			_derbyWrapper = null;
 			_derbyWrapperDoneForcedShutdown = true;
 		}
-
 	}
 
 	public boolean configure(Element info, Element extra_info)
@@ -248,14 +246,6 @@ public class Authentication extends ServiceRack
 		return getTextString(service_id + ".description", lang);
 	}
 
-	protected void addCustomParams(String service, Element param_list, String lang)
-	{
-	}
-
-	protected void createParameter(String name, Element param_list, String lang)
-	{
-	}
-
 	protected Element processGetUserInformation(Element request)
 	{
 		// Create a new (empty) result message
@@ -331,23 +321,6 @@ public class Authentication extends ServiceRack
 		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, AUTHENTICATION_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
-
-		String[] userGroups = (new UserContext(request)).getGroups();
-
-		boolean found = false;
-		for (String group : userGroups)
-		{
-			if (group.equals("administrator"))
-			{
-				found = true;
-			}
-		}
-
-		if (!found)
-		{
-			GSXML.addError(this.doc, result, "This user does not have the required permissions to perform this action.");
-			return result;
-		}
 
 		// Create an Authentication node put into the result
 		Element authenNode = this.doc.createElement(GSXML.AUTHEN_NODE_ELEM);
