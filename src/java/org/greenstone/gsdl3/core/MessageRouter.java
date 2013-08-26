@@ -1329,8 +1329,10 @@ public class MessageRouter implements ModuleInterface
 		} // system type request
 
 		// if get here something has gone wrong
-		logger.error(" cant process request:");
-		logger.error(this.converter.getString(req));
+		String eol = System.getProperty("line.separator");
+
+		String mess = "Can't process request:" + eol + "  " + this.converter.getString(req);
+		logger.error(mess);
 		return null;
 
 	}
