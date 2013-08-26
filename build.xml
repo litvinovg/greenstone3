@@ -808,7 +808,7 @@
   <target name="init-oaiconfig" if="oaiconfig.present">
     <echo>Writing out baseURL ${url}oaiserver to ${web.writableclasses}/OAIConfig.xml</echo>
     <copy file="${web.classes}/OAIConfig.xml.in" tofile="${web.writableclasses}/OAIConfig.xml"/>
-    <rsr file="${web.writableclasses}/OAIConfig.xml" pattern="&lt;baseURL&gt;.*&lt;/baseURL&gt;" replacement="&lt;baseURL&gt;${url}oaiserver&lt;/baseURL&gt;" />   
+    <rsr verbosity="1" file="${web.writableclasses}/OAIConfig.xml" pattern="&lt;baseURL&gt;.*&lt;/baseURL&gt;" replacement="&lt;baseURL&gt;${url}oaiserver&lt;/baseURL&gt;" />   
   </target>
 
   <target name="stop" depends="init,stop-tomcat" 
@@ -1114,9 +1114,9 @@
 	<copy file="${web.home}/WEB-INF/cgi/checksum.pl"        tofile="${web.writablehome}/WEB-INF/cgi/checksum.pl"        overwrite="true"/>
       </if>
 
-      <rsr file="${web.writablehome}/WEB-INF/cgi/gliserver.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/>
-      <rsr file="${web.writablehome}/WEB-INF/cgi/metadata-server.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/> 
-      <rsr file="${web.writablehome}/WEB-INF/cgi/checksum.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/> 	
+      <rsr verbosity="1" file="${web.writablehome}/WEB-INF/cgi/gliserver.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/>
+      <rsr verbosity="1" file="${web.writablehome}/WEB-INF/cgi/metadata-server.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/> 
+      <rsr verbosity="1" file="${web.writablehome}/WEB-INF/cgi/checksum.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/> 	
       <else>
 	<echo>WARNING: perl.path is empty. Unable to set the shebangs in the perl files in ${web.writablehome}/WEB-INF/cgi</echo>
       </else>
@@ -1150,7 +1150,7 @@
     <copy file="${basedir}/resources/java/log4j.properties.in" tofile="${web.writableclasses}/log4j.properties" filtering="true" overwrite="true"/>
     <if><bool><istrue value="${gsdl3home.isreadonly}"/></bool>
       <!-- uncomment the writablehome properties -->
-      <rsr file="${web.writableclasses}/global.properties" pattern="^#gsdl3\.(writable{1})?home" replacement="gsdl3.$1home" />
+      <rsr verbosity="1" file="${web.writableclasses}/global.properties" pattern="^#gsdl3\.(writable{1})?home" replacement="gsdl3.$1home" />
     </if>
     <chmod file="${web.writableclasses}/global.properties" perm="644"/>
     <chmod file="${web.writableclasses}/log4j.properties" perm="644"/>
@@ -2957,7 +2957,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
     
   <target name="rtftohtml-add-static" depends="init" if="collection.building.enabled">
-    <rsr file="${gs2build.home}/build-src/packages/rtftohtml/rtftohtml_src/Makefile" pattern="-o rtftohtml(.{2})EXEEXT(.{1})" replacement="-o rtftohtml$1EXEEXT$2 -static" />
+    <rsr verbosity="1" file="${gs2build.home}/build-src/packages/rtftohtml/rtftohtml_src/Makefile" pattern="-o rtftohtml(.{2})EXEEXT(.{1})" replacement="-o rtftohtml$1EXEEXT$2 -static" />
   </target>
     
 	<target name="run-collection-tests">
