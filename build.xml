@@ -1104,7 +1104,7 @@
       </if>
 
       <!--<echo>**** PERLPATH: ${perl.path}</echo>-->
-      <echo>**** Setting perl shebangs to Perl Exec: ${perl.exec}</echo>
+      <echo>Setting perl shebangs to Perl Exec: ${perl.exec}</echo>
 
       <!-- set the shebangs in the cgi files to point to the correct perlpath -->
       <if>
