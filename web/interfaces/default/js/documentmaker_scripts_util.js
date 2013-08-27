@@ -234,9 +234,9 @@ function save()
 			value = value.replace(/&nbsp;/g, " ");
 			value = escape(value);
 
-			metadataChanges.push({collection:collection, docID:docID, name:name, value:value, orig:changedElem.originalValue});
-
 			changedElem.originalValue = changedElem.innerHTML;
+			
+			metadataChanges.push({collection:collection, docID:docID, name:name, value:value, orig:changedElem.originalValue});
 			addCollectionToBuild(collection);
 		}
 		//Save content
@@ -284,26 +284,33 @@ function save()
 				{
 					alert(gs.text.dse.error_saving);
 				
-					var saveButton = document.getElementById("saveButton");
-					saveButton.innerHTML = gs.text.dse.save_changes;
-					saveButton.disabled = false;
+					$("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
+					$("#saveButton, #quickSaveButton").removeAttr("disabled");
 					
-					_statusBar.removeStatus(statusID);
+					if(_statusBar)
+					{
+						_statusBar.removeStatus(statusID);
+					}
 					return;
 				}
 
-				_statusBar.removeStatus(statusID);
+				if(_statusBar)
+				{
+					_statusBar.removeStatus(statusID);
+				}
 				buildCollections(_collectionsToBuild);
 			}
 		}
 
 		if(_collectionsToBuild.length > 0)
 		{
-			var saveButton = document.getElementById("saveButton");
-			saveButton.innerHTML = gs.text.dse.saving + "...";
-			saveButton.disabled = true;
+			$("#saveButton, #quickSaveButton").html(gs.text.dse.saving + "...");
+			$("#saveButton, #quickSaveButton").attr("disabled", "disabled");
 
-			statusID = _statusBar.addStatus(gs.text.dse.modifying_archives + "...");
+			if(_statusBar)
+			{
+				statusID = _statusBar.addStatus(gs.text.dse.modifying_archives + "...");
+			}
 			ajax.send("a=g&rt=r&s=DocumentExecuteTransaction&s1.transactions=" + request);
 		}
 	}
@@ -336,12 +343,11 @@ function save()
 
 function buildCollections(collections, documents, callback)
 {
-	var saveButton = document.getElementById("saveButton");
 	if(!collections || collections.length == 0)
 	{
 		console.log(gs.text.dse.empty_collection_list);
-		saveButton.innerHTML = gs.text.save_changes;
-		saveButton.disabled = false;
+		$("#saveButton, #quickSaveButton").html(gs.text.save_changes);
+		$("#saveButton, #quickSaveButton").removeAttr("disabled");
 		return;
 	}
 	
@@ -370,7 +376,7 @@ function buildCollections(collections, documents, callback)
 	var buildFunction = function()
 	{
 		var ajax = new gs.functions.ajaxRequest();
-		ajax.open("GET", _baseURL + "?a=g&rt=r&ro=1&s=" + buildOperation + "&s1.collection=" + collections[counter] + docs);
+		ajax.open("GET", gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=" + buildOperation + "&s1.collection=" + collections[counter] + docs);
 		ajax.onreadystatechange = function()
 		{
 			if(ajax.readyState == 4 && ajax.status == 200)
@@ -382,9 +388,12 @@ function buildCollections(collections, documents, callback)
 				{
 					alert(gs.text.dse.could_not_build_p1 + " " + collections[counter] + gs.text.dse.could_not_build_p2);
 					
-					_statusBar.removeStatus(statusID);
-					saveButton.innerHTML = gs.text.dse.save_changes;
-					saveButton.disabled = false;
+					if(_statusBar)
+					{
+						_statusBar.removeStatus(statusID);
+					}
+					$("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
+					$("#saveButton, #quickSaveButton").removeAttr("disabled");
 					
 					return;
 				}
@@ -396,7 +405,7 @@ function buildCollections(collections, documents, callback)
 				{
 					/*
 					var localAjax = new gs.functions.ajaxRequest();
-					localAjax.open("GET", _baseURL + "?a=g&rt=r&ro=1&s=ActivateCollection&s1.collection=" + collections[counter], true);
+					localAjax.open("GET", gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=ActivateCollection&s1.collection=" + collections[counter], true);
 					localAjax.onreadystatechange = function()
 					{
 						if(localAjax.readyState == 4 && localAjax.status == 200)
@@ -408,9 +417,12 @@ function buildCollections(collections, documents, callback)
 							{
 								alert(gs.text.dse.could_not_activate_p1 + " " + collections[counter] + gs.text.dse.could_not_activate_p2);
 								
-								_statusBar.removeStatus(statusID);
-								saveButton.innerHTML = gs.text.dse.save_changes;
-								saveButton.disabled = false;
+								if(_statusBar)
+								{
+									_statusBar.removeStatus(statusID);
+								}
+								$("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
+								$("#saveButton, #quickSaveButton").removeAttr("disabled");
 								
 								return;
 							}
@@ -438,21 +450,30 @@ function buildCollections(collections, documents, callback)
 
 									_transactions = new Array();
 
-									_statusBar.removeStatus(statusID);
-									saveButton.innerHTML = gs.text.dse.save_changes;
-									saveButton.disabled = false;
+									if(_statusBar)
+									{
+										_statusBar.removeStatus(statusID);
+									}
+									$("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
+									$("#saveButton, #quickSaveButton").removeAttr("disabled");
 								/*
 								});
 							}
 						}
 					}
-					_statusBar.changeStatus(statusID, gs.text.dse.activating + " " + collections[counter] + "...");
+					if(_statusBar)
+					{
+						_statusBar.changeStatus(statusID, gs.text.dse.activating + " " + collections[counter] + "...");
+					}
 					localAjax.send();
 					*/
 				});
 			}
 		}
-		statusID = _statusBar.addStatus(gs.text.dse.building + " " + collections[counter] + "...");
+		if(_statusBar)
+		{
+			statusID = _statusBar.addStatus(gs.text.dse.building + " " + collections[counter] + "...");
+		}
 		ajax.send();
 	}
 	buildFunction();
@@ -462,10 +483,8 @@ function startCheckLoop(pid, serverFunction, statusID, callbackFunction)
 {
 	var ajaxFunction = function()
 	{
-		var saveButton = document.getElementById("saveButton");
-		
 		var ajax = new gs.functions.ajaxRequest();
-		ajax.open("GET", _baseURL + "?a=g&rt=s&ro=1&s=" + serverFunction + "&s1.pid=" + pid, true);
+		ajax.open("GET", gs.xsltParams.library_name + "?a=g&rt=s&ro=1&s=" + serverFunction + "&s1.pid=" + pid, true);
 		ajax.onreadystatechange = function()
 		{
 			if(ajax.readyState == 4 && ajax.status == 200)
@@ -477,9 +496,12 @@ function startCheckLoop(pid, serverFunction, statusID, callbackFunction)
 				{
 					alert(gs.text.dse.could_not_check_status_p1 + " " + serverFunction + gs.text.dse.could_not_check_status_p2a);
 					
-					_statusBar.removeStatus(statusID);
-					saveButton.innerHTML = gs.text.dse.save_changes;
-					saveButton.disabled = false;
+					if(_statusBar)
+					{
+						_statusBar.removeStatus(statusID);
+					}
+					$("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
+					$("#saveButton, #quickSaveButton").removeAttr("disabled");
 					
 					return;
 				}
@@ -495,9 +517,12 @@ function startCheckLoop(pid, serverFunction, statusID, callbackFunction)
 				{
 					alert(gs.text.dse.could_not_check_status_p1 + " " + serverFunction + gs.text.dse.could_not_check_status_p2b);
 					
-					_statusBar.removeStatus(statusID);
-					saveButton.innerHTML = gs.text.dse.save_changes;
-					saveButton.disabled = false;
+					if(_statusBar)
+					{
+						_statusBar.removeStatus(statusID);
+					}
+					$("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
+					$("#saveButton, #quickSaveButton").removeAttr("disabled");
 				}
 				else
 				{
