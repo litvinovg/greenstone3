@@ -23,6 +23,7 @@
 		<xsl:call-template name="populate-image-url-values"/>
 		<xsl:call-template name="populate-metadata-values"/>
 		<xsl:call-template name="populate-request-information-values"/>
+		<xsl:call-template name="populate-user-information-values"/>
 		<xsl:call-template name="include-global-javascript-functions"/>
 	</xsl:template>
 	
@@ -139,6 +140,18 @@
 				gs.requestInformation.fullURL = "</xsl:text><xsl:value-of select="/page/pageRequest/@fullURL"/><xsl:text disable-output-escaping="yes">";
 			</xsl:text>
 		</script>
+	</xsl:template>
+	
+	<xsl:template name="populate-user-information-values">
+		<xsl:if test="/page/pageRequest/userInformation">
+			<script type="text/javascript">
+				<xsl:text disable-output-escaping="yes">
+					gs.userInformation = new Array();
+					gs.userInformation.username = "</xsl:text><xsl:value-of select="/page/pageRequest/userInformation/@username"/><xsl:text disable-output-escaping="yes">";
+					gs.userInformation.groups = "</xsl:text><xsl:value-of select="/page/pageRequest/userInformation/@groups"/><xsl:text disable-output-escaping="yes">";
+				</xsl:text>
+			</script>
+		</xsl:if>
 	</xsl:template>
 	
 	<xsl:template name="include-global-javascript-functions">
