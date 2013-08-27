@@ -452,7 +452,7 @@
 		<gsf:variable name="imageHeight"><gsf:metadata name="ImageHeight"/></gsf:variable>
 
 		<xsl:choose>
-			<xsl:when test="metadataList/metadata[@name = 'Screen'] and metadataList/metadata[@name = 'SourceFile'] and ($imageWidth div $screenImageWidth > 1.2)">
+			<xsl:when test="metadataList/metadata[@name = 'Screen'] and metadataList/metadata[@name = 'SourceFile'] and ($imageWidth div $screenImageWidth > 1.2) and (not(/page/pageResponse/format[@type='display']/gsf:option[@name='disableZoom']) or /page/pageResponse/format[@type='display']/gsf:option[@name='disableZoom']/@value='false')">
 				<div id="image{@nodeID}">
 					<div id="wrap{util:replace(@nodeID, '.', '_')}" class="zoomImage" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
 						<div id="small{util:replace(@nodeID, '.', '_')}" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
