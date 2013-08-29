@@ -34,7 +34,6 @@ import org.w3c.dom.NodeList;
 
 /**
  * 
- * @author <a href="mailto:greenstone@cs.waikato.ac.nz">Katherine Don</a>
  */
 
 public class CrossCollectionSearch extends ServiceRack
