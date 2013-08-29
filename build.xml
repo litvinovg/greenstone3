@@ -1308,7 +1308,7 @@
 
   <target name="configure-solr-ext" depends="init" >
     <!-- re-setup the web/ext/solr/solr.xml file -->
-    <copy file="${solr-ext.home}/solr.xml.in"
+    <copy file="${web.home}/ext/solr/solr.xml.in"
 	  tofile="${gsdl3.writablehome}/ext/solr/solr.xml" filtering="true" overwrite="true">
       <filterset>
         <filter token="gsdl3.home" value="${src.gsdl3.home.unix}"/>
