@@ -20,6 +20,7 @@ package org.greenstone.gsdl3.service;
 
 // Greenstone classes
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.AbstractBasicDocument;
@@ -73,12 +74,14 @@ public abstract class AbstractSearch extends ServiceRack
 	 */
 	protected String default_index = "";
 
-	protected String default_max_docs = "100";
-
-	protected String default_hits_per_page = "10";
+  protected HashMap<String, String> paramDefaults = null;
 
 	public AbstractSearch()
 	{
+	  paramDefaults = new HashMap<String, String>();
+	  paramDefaults.put(MAXDOCS_PARAM, "100");
+	  paramDefaults.put(HITS_PER_PAGE_PARAM, "10");
+	  paramDefaults.put(START_PAGE_PARAM, "1");
 	}
 
 	/**
@@ -107,6 +110,11 @@ public abstract class AbstractSearch extends ServiceRack
 		tq_service.setAttribute(GSXML.NAME_ATT, QUERY_SERVICE);
 		this.short_service_info.appendChild(tq_service);
 
+		// load up any search param defaults
+		Element search_elem = (Element) GSXML.getChildByTagName(extra_info, GSXML.SEARCH_ELEM);
+		if (search_elem != null) {
+		  getSearchParamDefaults(search_elem);
+		}
 		// add some format info to service map if there is any 
 		// => lookin extra info first look in buildConfig
 
@@ -114,17 +122,8 @@ public abstract class AbstractSearch extends ServiceRack
 
 		if (format == null)
 		{
-			String path = GSPath.appendLink(GSXML.SEARCH_ELEM, GSXML.FORMAT_ELEM);
-
-			// Note by xiao: instead of retrieving the first 'format'
-			//   element inside the 'search' element, we are trying to
-			//   find the real format element which has at least one
-			//   'gsf:template' child element. (extra_info is
-			//   collectionConfig.xml)
-
-			//format = (Element) GSXML.getNodeByPath(extra_info, path);
-
-			Element search_elem = (Element) GSXML.getChildByTagName(extra_info, GSXML.SEARCH_ELEM);
+		  // try to find a format element inside <search> that contains a gsf:template. Note what if we have only xsl:templates??
+			
 			NodeList format_elems = null;
 			if (search_elem != null)
 			{
@@ -168,6 +167,18 @@ public abstract class AbstractSearch extends ServiceRack
 		return true;
 	}
 
+  protected void getSearchParamDefaults(Element search_elem) {
+
+    NodeList param_defaults_list = GSXML.getChildrenByTagName(search_elem, GSXML.PARAM_DEFAULT_ELEM);
+    for (int i=0; i<param_defaults_list.getLength(); i++) {
+      Element paramdef = (Element)param_defaults_list.item(i);
+      String name = paramdef.getAttribute(GSXML.NAME_ATT);
+      String val = paramdef.getAttribute(GSXML.VALUE_ATT);
+      if (!name.equals("") && !val.equals("")) {
+	paramDefaults.put(name, val);
+      }
+    }
+  }
 	/**
 	 * returns a basic description for QUERY_SERVICE. If a subclass provides
 	 * other services they need to provide their own descriptions
@@ -272,7 +283,10 @@ public abstract class AbstractSearch extends ServiceRack
 	{
 		Element param = null;
 		String param_default = default_value;
-
+		if (default_value == null) {
+		  // have we got a stored up default? will be null if not there
+		  param_default = paramDefaults.get(name);
+		}
 		if (name.equals(QUERY_PARAM) || name.equals(RAW_PARAM))
 		{
 			param = GSXML.createParameterDescription(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_STRING, param_default, null, null);
@@ -300,33 +314,18 @@ public abstract class AbstractSearch extends ServiceRack
 		}
 		else if (name.equals(MAXDOCS_PARAM))
 		{
-			if (param_default == null)
-			{
-				param_default = this.default_max_docs;
-			}
-
 			param = GSXML.createParameterDescription(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_INTEGER, param_default, null, null);
 			param_list.appendChild(param);
 			return true;
 		}
 		else if (name.equals(HITS_PER_PAGE_PARAM))
 		{
-			if (param_default == null)
-			{
-				param_default = this.default_hits_per_page;
-			}
-
 			param = GSXML.createParameterDescription(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_INTEGER, param_default, null, null);
 			param_list.appendChild(param);
 			return true;
 		}
 		else if (name.equals(START_PAGE_PARAM))
 		{
-			if (param_default == null)
-			{
-				param_default = "1";
-			}
-
 			// start page - set to 1 for the search page
 			param = GSXML.createParameterDescription(this.doc, START_PAGE_PARAM, "", GSXML.PARAM_TYPE_INVISIBLE, param_default, null, null);
 			param_list.appendChild(param);

@@ -59,8 +59,13 @@ public abstract class AbstractTextSearch extends AbstractSearch
 
 	public AbstractTextSearch()
 	{
+	  super();
 		// the search service
 		QUERY_SERVICE = "TextQuery";
+		paramDefaults.put(CASE_PARAM, BOOLEAN_PARAM_ON);
+		paramDefaults.put(STEM_PARAM, BOOLEAN_PARAM_OFF);
+		paramDefaults.put(ACCENT_PARAM, BOOLEAN_PARAM_ON);
+		paramDefaults.put(MATCH_PARAM, MATCH_PARAM_SOME);
 	}
 
 	/** adds the standard query params into the service description */
@@ -86,6 +91,10 @@ public abstract class AbstractTextSearch extends AbstractSearch
 	{
 		Element param = null;
 		String param_default = default_value;
+		if (default_value == null) {
+		  // have we got a stored up default? will be null if not there
+		  param_default = paramDefaults.get(name);
+		}
 
 		if (super.createParameterChain(name, param_list, lang, default_value))
 		{
@@ -93,7 +102,7 @@ public abstract class AbstractTextSearch extends AbstractSearch
 			return true;
 		}
 		// otherwise look to see if it is a text specific parameter
-		else if (name.equals(INDEX_SUBCOLLECTION_PARAM))
+		if (name.equals(INDEX_SUBCOLLECTION_PARAM))
 		{
 			Element index_sub_list = (Element) GSXML.getChildByTagName(this.config_info, INDEX_SUBCOLLECTION_ELEM + GSXML.LIST_MODIFIER);
 			if (index_sub_list == null)
@@ -136,18 +145,12 @@ public abstract class AbstractTextSearch extends AbstractSearch
 			return true;
 		}
 	else if (name.equals(CASE_PARAM) || name.equals(STEM_PARAM) || name.equals(ACCENT_PARAM)) {
-	  if (param_default == null) {
-	    param_default = BOOLEAN_PARAM_OFF;
-	  }
 	    String[] bool_ops = {"0", "1"};
 	    String[] bool_texts = {getTextString("param.boolean.off", lang),getTextString("param.boolean.on", lang)}; 
 	    param = GSXML.createParameterDescription(this.doc, name, getTextString("param."+name, lang), GSXML.PARAM_TYPE_BOOLEAN, param_default, bool_ops, bool_texts);
 	    param_list.appendChild(param);
 	    return true;
 	} else if (name.equals(MATCH_PARAM)) {
-	  if (param_default == null) {
-	    param_default = MATCH_PARAM_SOME;
-	  }
 	  
 	    String[] vals = {MATCH_PARAM_SOME, MATCH_PARAM_ALL };
 	    String[] val_texts = {getTextString("param."+MATCH_PARAM+"."+MATCH_PARAM_SOME, lang), getTextString("param."+MATCH_PARAM+"."+MATCH_PARAM_ALL, lang)}; 

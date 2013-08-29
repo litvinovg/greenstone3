@@ -36,7 +36,9 @@ import org.apache.log4j.*;
 public class GoogleNgramMGPPSearch
   extends GS2MGPPSearch {
    static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.GoogleNgramMGPPSearch.class.getName());
-  
+						
+  protected String default_max_docs = "-1";
+  protected String default_hits_per_page = "30";
     /** constructor */
     public GoogleNgramMGPPSearch(){
 	super();	

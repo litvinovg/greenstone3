@@ -93,6 +93,12 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	/** constructor */
 	public AbstractGS2FieldSearch()
 	{
+	  super();
+	  paramDefaults.put(RANK_PARAM, RANK_PARAM_RANK);
+	  paramDefaults.put(FIELD_COMBINE_PARAM, FIELD_COMBINE_PARAM_AND);
+	  // paramDefaults.put(FIELD_CASE_PARAM, BOOLEAN_PARAM_ON);
+	  // paramDefaults.put(FIELD_STEM_PARAM, BOOLEAN_PARAM_OFF);
+	  // paramDefaults.put(FIELD_ACCENT_PARAM, BOOLEAN_PARAM_ON);
 	}
 
 	public void cleanUp()
@@ -107,7 +113,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		{
 			return false;
 		}
-
+		
 		// Get the default level out of <defaultLevel> (buildConfig.xml)
 		Element def = (Element) GSXML.getChildByTagName(info, DEFAULT_LEVEL_ELEM);
 		if (def != null)
@@ -259,6 +265,39 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		return true;
 	}
 
+  // if field case/stem/accent defaults are not specified explicitly, we should use case/stem/accent defaults
+  protected void getSearchParamDefaults(Element search_elem) {
+    
+    boolean found_f_stem = false;
+    boolean found_f_case = false;
+    boolean found_f_accent = false;
+    NodeList param_defaults_list = GSXML.getChildrenByTagName(search_elem, GSXML.PARAM_DEFAULT_ELEM);
+    for (int i=0; i<param_defaults_list.getLength(); i++) {
+      Element paramdef = (Element)param_defaults_list.item(i);
+      String name = paramdef.getAttribute(GSXML.NAME_ATT);
+      String val = paramdef.getAttribute(GSXML.VALUE_ATT);
+      if (!name.equals("") && !val.equals("")) {
+	paramDefaults.put(name, val);
+	if (name.equals(FIELD_STEM_PARAM)) {
+	  found_f_stem = true;
+	} else if (name.equals(FIELD_CASE_PARAM)) {
+	  found_f_case = true;
+	} else if (name.equals(FIELD_ACCENT_PARAM)) {
+	  found_f_accent = true;
+	} 
+	if (!found_f_stem) {
+	  paramDefaults.put (FIELD_STEM_PARAM, paramDefaults.get(STEM_PARAM));
+	}
+	if (!found_f_case) {
+	  paramDefaults.put (FIELD_CASE_PARAM, paramDefaults.get(CASE_PARAM));
+	}
+	if (!found_f_accent) {
+	  paramDefaults.put (FIELD_ACCENT_PARAM, paramDefaults.get(ACCENT_PARAM));
+	}
+
+      }
+    }
+  }
 	protected Element getServiceDescription(String service_id, String lang, String subset)
 	{
 		// should we check that the service is actually on offer? presumably we wont get asked for services that we haven't advertised previously.
@@ -392,6 +431,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	protected void createParameter(String name, Element param_list, String lang)
 	{
 		Element param = null;
+		String param_default = paramDefaults.get(name);
 		if (name.equals(LEVEL_PARAM))
 		{
 			ArrayList<String> level_ids = new ArrayList<String>();
@@ -415,7 +455,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			String[] vals1 = { RANK_PARAM_RANK, RANK_PARAM_NONE };
 			String[] vals1_texts = { getTextString("param." + RANK_PARAM + "." + RANK_PARAM_RANK, lang), getTextString("param." + RANK_PARAM + "." + RANK_PARAM_NONE, lang) };
 
-			param = GSXML.createParameterDescription(this.doc, RANK_PARAM, getTextString("param." + RANK_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, RANK_PARAM_RANK, vals1, vals1_texts);
+			param = GSXML.createParameterDescription(this.doc, RANK_PARAM, getTextString("param." + RANK_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, vals1, vals1_texts);
 
 		}
 		else if (name.equals(FIELD_QUERY_PARAM))
@@ -427,7 +467,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		{
 			String[] bool_ops = { "0", "1" };
 			String[] bool_texts = { getTextString("param.boolean.off", lang, "AbstractTextSearch"), getTextString("param.boolean.on", lang, "AbstractTextSearch") };
-			param = GSXML.createParameterDescription(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_BOOLEAN, BOOLEAN_PARAM_ON, bool_ops, bool_texts);
+			param = GSXML.createParameterDescription(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_BOOLEAN, param_default, bool_ops, bool_texts);
 
 		}
 		else if (name.equals(FIELD_FIELD_PARAM))
@@ -453,7 +493,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			String[] vals = { FIELD_COMBINE_PARAM_AND, FIELD_COMBINE_PARAM_OR, FIELD_COMBINE_PARAM_NOT };
 			String[] val_texts = { getTextString("param." + FIELD_COMBINE_PARAM + "." + FIELD_COMBINE_PARAM_AND, lang), getTextString("param." + FIELD_COMBINE_PARAM + "." + FIELD_COMBINE_PARAM_OR, lang), getTextString("param." + FIELD_COMBINE_PARAM + "." + FIELD_COMBINE_PARAM_NOT, lang) };
 
-			param = GSXML.createParameterDescription(this.doc, FIELD_COMBINE_PARAM, "", GSXML.PARAM_TYPE_ENUM_SINGLE, FIELD_COMBINE_PARAM_AND, vals, val_texts);
+			param = GSXML.createParameterDescription(this.doc, FIELD_COMBINE_PARAM, "", GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, vals, val_texts);
 			param.setAttribute(GSXML.PARAM_IGNORE_POS_ATT, "0");
 		}
 

@@ -55,10 +55,6 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 	protected boolean does_stem = false;
 	protected boolean does_accent = false;
 
-  // default values for stem indexes
-  protected String case_default = BOOLEAN_PARAM_ON;
-  protected String accent_default = BOOLEAN_PARAM_ON;
-  protected String stem_default = BOOLEAN_PARAM_OFF;
 	// maxnumeric - 
 	protected int maxnumeric = 4;
 
@@ -185,27 +181,6 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 		{
 			Document owner = info.getOwnerDocument();
 			Element config_search = (Element) GSXML.getChildByTagName(extra_info, GSXML.SEARCH_ELEM);
-
-			// work out what the default values for the stemming options are
-			if (does_case || does_accent || does_stem) {
-			  // only bother looking for this is we have some of these set
-			  NodeList index_options = config_search.getElementsByTagName(GSXML.INDEX_OPTION_ELEM);
-			  for (int i = 0; i < index_options.getLength(); i++) {
-			    Element ind = (Element) index_options.item(i);
-			    String name = ind.getAttribute(GSXML.NAME_ATT);
-			    String def_val = ind.getAttribute(GSXML.DEFAULT_ATT);
-
-			    if (!def_val.equals("")) {
-			      if (name.equals("stem")) {
-				stem_default = (def_val.equals("on")? BOOLEAN_PARAM_ON: BOOLEAN_PARAM_OFF);
-			      } else if (name.equals("casefold")) {
-				case_default = (def_val.equals("on")? BOOLEAN_PARAM_ON: BOOLEAN_PARAM_OFF);
-			      } else if (name.equals("accentfold")) {
-				accent_default = (def_val.equals("on")? BOOLEAN_PARAM_ON: BOOLEAN_PARAM_OFF);
-			      }
-			    }
-			  }
-			}
 
 			// so far we have index and indexSubcollection specific display elements, and global format elements 
 
@@ -353,15 +328,15 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 	{
 		if (this.does_case)
 		{
-			createParameter(CASE_PARAM, param_list, lang, case_default);
+		  createParameter(CASE_PARAM, param_list, lang);//, case_default);
 		}
 		if (this.does_stem)
 		{
-			createParameter(STEM_PARAM, param_list, lang, stem_default);
+		  createParameter(STEM_PARAM, param_list, lang);//, stem_default);
 		}
 		if (this.does_accent)
 		{
-			createParameter(ACCENT_PARAM, param_list, lang, accent_default);
+		  createParameter(ACCENT_PARAM, param_list, lang);//, accent_default);
 		}
 		createParameter(MATCH_PARAM, param_list, lang);
 	}

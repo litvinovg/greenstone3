@@ -45,14 +45,17 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 
 	protected SharedSoleneQuery solene_src = null;
 
+  
 	public SharedSoleneGS2FieldSearch()
 	{
+	  super();
 		// Lucene/Solr uses double operators, not single
 		AND_OPERATOR = "&&";
 		OR_OPERATOR = "||";
 
 		does_paging = true;
 		does_chunking = true;
+		paramDefaults.put(SORT_ORDER_PARAM, SORT_ORDER_DESCENDING);
 	}
 
 	/** configure this service */
@@ -66,7 +69,7 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 		// the search element
 		Element config_search = (Element) GSXML.getChildByTagName(extra_info, GSXML.SEARCH_ELEM);
 		Document owner = info.getOwnerDocument();
-		// get out the sort fields
+		// find the sort fields in serviceRack xml, and add in the deisplayItems if any
 		NodeList sort_nodes = info.getElementsByTagName(SORT_ELEM);
 
 		for (int i = 0; i < sort_nodes.getLength(); i++)
@@ -114,20 +117,26 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 	protected void createParameter(String name, Element param_list, String lang)
 	{
 		Element param = null;
+		String param_default = paramDefaults.get(name);
 		if (name.equals(RANK_PARAM))
 		{
 			// get the fields
 			ArrayList<String> fields = new ArrayList<String>();
 			ArrayList<String> field_names = new ArrayList<String>();
-			if (getSortData(fields, field_names, lang)) {
-
-			  param = GSXML.createParameterDescription2(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, fields.get(0), fields, field_names);
+			if (!getSortData(fields, field_names, lang)) {
+			  fields.add(RANK_PARAM_RANK);
+			  fields.add(RANK_PARAM_NONE);
+			  field_names.add(getTextString("param." + RANK_PARAM + "." + RANK_PARAM_RANK, lang));
+			  field_names.add(getTextString("param." + RANK_PARAM + "." + RANK_PARAM_NONE, lang));
 			}
+			
+			param = GSXML.createParameterDescription2(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, fields.get(0), fields, field_names);
+			
 		} else if (name.equals(SORT_ORDER_PARAM)) {
 	    String[] vals = { SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING };
 	    String[] vals_texts = { getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_ASCENDING, lang), getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_DESCENDING, lang) };
 
-	    param = GSXML.createParameterDescription(this.doc, SORT_ORDER_PARAM, getTextString("param." + SORT_ORDER_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, SORT_ORDER_ASCENDING, vals, vals_texts);
+	    param = GSXML.createParameterDescription(this.doc, SORT_ORDER_PARAM, getTextString("param." + SORT_ORDER_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, SORT_ORDER_DESCENDING, vals, vals_texts);
 	  }
 
 		if (param != null)
