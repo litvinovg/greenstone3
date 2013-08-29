@@ -91,6 +91,7 @@ public class GSXML
 	public static final String INDEX_ELEM = "index";
 	public static final String INDEX_STEM_ELEM = "indexStem";
 	public static final String INDEX_OPTION_ELEM = "indexOption";
+  public static final String PARAM_DEFAULT_ELEM = "paramDefault";
 	public static final String BROWSE_ELEM = "browse";
 	public static final String DISPLAY_ELEM = "display";
 	public static final String LEVEL_ELEM = "level";
