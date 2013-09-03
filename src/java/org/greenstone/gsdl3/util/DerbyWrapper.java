@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.greenstone.gsdl3.service.Authentication;
 
@@ -38,12 +39,7 @@ public class DerbyWrapper
 	static final String ROLES = "roles";
 	static final String DATA = "data";
 	private Connection conn = null;
-	private Statement state = null;
 	private String protocol_str;
-
-	public DerbyWrapper()
-	{
-	}
 
 	public DerbyWrapper(String dbpath)
 	{
@@ -54,8 +50,13 @@ public class DerbyWrapper
 	{
 		try
 		{
+			if (conn != null)
+			{
+				System.err.println("Connection already established, close the database first");
+				return;
+			}
+
 			Class.forName(DRIVER).newInstance();
-			//System.out.println("Loaded the embedded driver.");
 			protocol_str = PROTOCOL + dbpath;
 			if (create_database)
 			{
@@ -65,7 +66,7 @@ public class DerbyWrapper
 			{
 				conn = DriverManager.getConnection(protocol_str);
 			}
-			state = conn.createStatement();
+			conn.setAutoCommit(false);
 		}
 		catch (Throwable e)
 		{
@@ -83,28 +84,15 @@ public class DerbyWrapper
 
 	public void closeDatabase()
 	{
-		//state = null;
-		//conn = null;
-		boolean gotSQLExc = false;
 		try
 		{
-			//  shutdown the database
-			DriverManager.getConnection(protocol_str + ";shutdown=true");
-
+			conn.commit();
+			conn.close();
+			conn = null;
 		}
-		catch (SQLException se)
-		{
-			// this is good (i.e. what Derby is designed to do on a successful shutdown)
-			gotSQLExc = true;
-		}
-		catch (Exception e)
+		catch (SQLException e)
 		{
 			e.printStackTrace();
-		}
-
-		if (!gotSQLExc)
-		{
-			System.err.println("Warning: Derby Database did not shut down normally");
 		}
 	}
 
@@ -116,7 +104,6 @@ public class DerbyWrapper
 		{
 			//  shutdown the whole server
 			DriverManager.getConnection(PROTOCOL + ";shutdown=true");
-
 		}
 		catch (SQLException se)
 		{
@@ -126,7 +113,6 @@ public class DerbyWrapper
 		}
 		catch (Exception e)
 		{
-
 			e.printStackTrace();
 		}
 		if (!gotSQLExc)
@@ -139,10 +125,27 @@ public class DerbyWrapper
 	{
 		try
 		{
-			conn.setAutoCommit(false);
+			Statement state = conn.createStatement();
 			state.execute("drop table data");
 			state.execute("create table data (username varchar(40) not null, name varchar(128) not null, value clob, primary key (username, name))");
 			conn.commit();
+			state.close();
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public void clearTrackerData()
+	{
+		try
+		{
+			Statement state = conn.createStatement();
+			state.execute("drop table usertracker");
+			state.execute("create table usertracker (username varchar(40) not null, collection varchar(128) not null, site varchar(128) not null, oid varchar(128) not null, time varchar(128) not null, action varchar(128) not null, primary key (username, time))");
+			conn.commit();
+			state.close();
 		}
 		catch (SQLException e)
 		{
@@ -154,14 +157,17 @@ public class DerbyWrapper
 	{
 		try
 		{
-			conn.setAutoCommit(false);
+			Statement state = conn.createStatement();
 			state.execute("create table users (username varchar(40) not null, password varchar(40) not null, accountstatus varchar(10), comment varchar(100), email varchar(40), primary key(username))");
 			state.execute("create table roles (username varchar(40) not null, role varchar(40) not null, primary key (username, role))");
 			state.execute("create table data (username varchar(40) not null, name varchar(128) not null, value clob, primary key (username, name))");
+			state.execute("create table usertracker (username varchar(40) not null, collection varchar(128) not null, site varchar(128) not null, oid varchar(128) not null, time varchar(128) not null, action varchar(128) not null, primary key (username, time))");
+
 			state.execute("insert into " + USERS + " values ('admin', '" + Authentication.hashPassword("admin") + "', 'true', 'change the password for this account as soon as possible', '')");
 			state.execute("insert into " + ROLES + " values ('admin', 'administrator')");
 			state.execute("insert into " + ROLES + " values ('admin', 'all-collections-editor')");
 			conn.commit();
+			state.close();
 		}
 		catch (Exception ex)
 		{
@@ -169,13 +175,66 @@ public class DerbyWrapper
 		}
 	}
 
-	public UserQueryResult listAllUser() throws SQLException
+	public void addUserAction(String username, String site, String collection, String oid, String action)
+	{
+		try
+		{
+			Statement state = conn.createStatement();
+			state.execute("INSERT INTO usertracker VALUES ('" + username + "', '" + collection + "', '" + site + "', '" + oid + "', '" + System.currentTimeMillis() + "', '" + action + "')");
+			conn.commit();
+			state.close();
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+
+	public ArrayList<HashMap<String, String>> getMostRecentUserActions(String site, String collection, String oid)
+	{
+		ArrayList<HashMap<String, String>> actions = new ArrayList<HashMap<String, String>>();
+
+		try
+		{
+			String query = "SELECT username, action FROM usertracker WHERE site = '" + site + "' and collection = '" + collection + "' and oid = '" + oid + "' ORDER BY time";
+			Statement state = conn.createStatement();
+			ResultSet rs = state.executeQuery(query);
+			conn.commit();
+
+			HashSet<String> usernamesSeen = new HashSet<String>();
+
+			while (rs.next())
+			{
+				HashMap<String, String> action = new HashMap<String, String>();
+				if (!usernamesSeen.contains(rs.getString("username")))
+				{
+					action.put("username", rs.getString("username"));
+					action.put("action", rs.getString("action"));
+					actions.add(action);
+
+					usernamesSeen.add(rs.getString("username"));
+				}
+			}
+			state.close();
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		return actions;
+	}
+
+	public UserQueryResult listAllUsers() throws SQLException
 	{
 		UserQueryResult userQueryResult = new UserQueryResult();
 		String sql_list_all_user = "SELECT username, password, accountstatus, email, comment FROM " + USERS;
 
 		ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String, String>>();
+		Statement state = conn.createStatement();
 		ResultSet rs = state.executeQuery(sql_list_all_user);
+		conn.commit();
+		state.close();
+
 		while (rs.next())
 		{
 			HashMap<String, String> user = new HashMap<String, String>();
@@ -220,7 +279,10 @@ public class DerbyWrapper
 		boolean found = false;
 		try
 		{
+			Statement state = conn.createStatement();
 			ResultSet rs = state.executeQuery("SELECT * FROM " + DATA + " WHERE username='" + username + "' AND name='" + name + "'");
+			conn.commit();
+			state.close();
 			if (rs.next())
 			{
 				found = true;
@@ -241,16 +303,16 @@ public class DerbyWrapper
 			{
 				ex.printStackTrace();
 			}
-			closeDatabase();
+
 			System.out.println("Error:" + ex.getMessage());
 			return false;
 		}
 
 		try
 		{
+			PreparedStatement stmt = null;
 			if (!found)
 			{
-				PreparedStatement stmt = null;
 				stmt = conn.prepareStatement("INSERT INTO " + DATA + " VALUES (?, ?, ?)");
 				stmt.setString(1, username);
 				stmt.setString(2, name);
@@ -259,13 +321,14 @@ public class DerbyWrapper
 			}
 			else
 			{
-				PreparedStatement stmt = null;
 				stmt = conn.prepareStatement("UPDATE " + DATA + " SET value=? WHERE username=? AND name=?");
 				stmt.setString(1, value);
 				stmt.setString(2, username);
 				stmt.setString(3, name);
 				stmt.executeUpdate();
 			}
+			conn.commit();
+			stmt.close();
 		}
 		catch (Exception ex)
 		{
@@ -278,7 +341,7 @@ public class DerbyWrapper
 			{
 				ex.printStackTrace();
 			}
-			closeDatabase();
+
 			System.out.println("Error:" + ex.getMessage());
 			return false;
 		}
@@ -289,7 +352,10 @@ public class DerbyWrapper
 	{
 		try
 		{
+			Statement state = conn.createStatement();
 			ResultSet rs = state.executeQuery("SELECT * FROM " + DATA + " WHERE username='" + username + "' AND name='" + name + "'");
+			conn.commit();
+			state.close();
 			if (rs.next())
 			{
 				return rs.getString("value");
@@ -306,7 +372,7 @@ public class DerbyWrapper
 			{
 				ex.printStackTrace();
 			}
-			closeDatabase();
+
 			System.out.println("Error:" + ex.getMessage());
 		}
 		return null;
@@ -316,7 +382,7 @@ public class DerbyWrapper
 	{
 		try
 		{
-			conn.setAutoCommit(false);
+			Statement state = conn.createStatement();
 			String sql_insert_user = "insert into " + USERS + " values ('" + username + "', '" + password + "', '" + accountstatus + "', '" + comment + "', '" + email + "')";
 			state.execute(sql_insert_user);
 
@@ -328,6 +394,7 @@ public class DerbyWrapper
 			}
 
 			conn.commit();
+			state.close();
 		}
 		catch (Throwable e)
 		{
@@ -340,7 +407,7 @@ public class DerbyWrapper
 			{
 				e.printStackTrace();
 			}
-			closeDatabase();
+
 			System.out.println("Error:" + e.getMessage());
 			return false;
 		}
@@ -352,12 +419,13 @@ public class DerbyWrapper
 	{
 		try
 		{
-			conn.setAutoCommit(false);
 			String sql_delete_user = "delete from " + USERS + " where username='" + del_username + "'";
 			String sql_delete_groups = "delete from " + ROLES + " where username='" + del_username + "'";
+			Statement state = conn.createStatement();
 			state.execute(sql_delete_user);
 			state.execute(sql_delete_groups);
 			conn.commit();
+			state.close();
 		}
 		catch (Throwable e)
 		{
@@ -370,7 +438,6 @@ public class DerbyWrapper
 			{
 				e.printStackTrace();
 			}
-			closeDatabase();
 			return false;
 		}
 		return true;
@@ -378,12 +445,13 @@ public class DerbyWrapper
 
 	public boolean deleteAllUser() throws SQLException
 	{
-		conn.setAutoCommit(false);
 		try
 		{
+			Statement state = conn.createStatement();
 			state.execute("delete from " + USERS);
 			state.execute("delete from " + ROLES);
 			conn.commit();
+			state.close();
 		}
 		catch (Throwable e)
 		{
@@ -396,7 +464,7 @@ public class DerbyWrapper
 			{
 				e.printStackTrace();
 			}
-			closeDatabase();
+
 			return false;
 		}
 		return true;
@@ -405,16 +473,6 @@ public class DerbyWrapper
 	public UserQueryResult findUser(String username, String password)
 	{
 		UserQueryResult userQueryResult = new UserQueryResult();
-
-		try
-		{
-			conn.setAutoCommit(false);
-		}
-		catch (Exception ex)
-		{
-			ex.printStackTrace();
-			return null;
-		}
 
 		String sql_find_user = "SELECT  username, password, accountstatus, comment, email FROM " + USERS;
 		String append_sql = "";
@@ -442,6 +500,7 @@ public class DerbyWrapper
 		try
 		{
 			ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String, String>>();
+			Statement state = conn.createStatement();
 			ResultSet rs = state.executeQuery(sql_find_user);
 			while (rs.next())
 			{
@@ -472,6 +531,7 @@ public class DerbyWrapper
 
 				userQueryResult.addUserTerm(user.get("username"), user.get("password"), group, user.get("as"), user.get("comment"), user.get("email"));
 			}
+			state.close();
 		}
 		catch (Exception ex)
 		{
@@ -495,7 +555,6 @@ public class DerbyWrapper
 	{
 		UserQueryResult userQueryResult = new UserQueryResult();
 
-		conn.setAutoCommit(false);
 		String sql_find_user = "SELECT  username, password, accountstatus, comment, email FROM " + USERS;
 		String append_sql = "";
 
@@ -509,6 +568,8 @@ public class DerbyWrapper
 		}
 
 		ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String, String>>();
+
+		Statement state = conn.createStatement();
 		ResultSet rs = state.executeQuery(sql_find_user);
 		while (rs.next())
 		{
@@ -539,6 +600,7 @@ public class DerbyWrapper
 
 			userQueryResult.addUserTerm(user.get("username"), user.get("password"), group, user.get("as"), user.get("comment"), user.get("email"));
 		}
+		state.close();
 
 		if (userQueryResult.getSize() > 0)
 		{
@@ -555,7 +617,6 @@ public class DerbyWrapper
 	{
 		try
 		{
-			conn.setAutoCommit(false);
 			String sql_modify_user_info = "update " + USERS + " set ";
 
 			boolean needComma = false;
@@ -577,6 +638,7 @@ public class DerbyWrapper
 			}
 
 			sql_modify_user_info += " where username='" + username + "'";
+			Statement state = conn.createStatement();
 			state.execute(sql_modify_user_info);
 
 			String sql_delete_groups = "delete from " + ROLES + " where username='" + username + "'";
@@ -590,6 +652,7 @@ public class DerbyWrapper
 			}
 
 			conn.commit();
+			state.close();
 		}
 		catch (Throwable e)
 		{
@@ -602,7 +665,7 @@ public class DerbyWrapper
 			{
 				e.printStackTrace();
 			}
-			closeDatabase();
+
 			return "Error:" + e.getMessage();
 		}
 		return "succeed";
@@ -619,12 +682,9 @@ public class DerbyWrapper
 		String db2txt = "";
 		try
 		{
-			conn.setAutoCommit(false); // An exception at this line can happen when the GS3 tomcat server is already running
-										// and GS3 is already accessing the usersDB when this function independently tries to
-										// connect to it (via usersDB2txt.java's main(). For an explanation of the possible 
-										// reasons, see http://db.apache.org/derby/papers/DerbyTut/embedded_intro.html
-										// section "Embedded Derby supports multiple users in one JVM".
 			String sql_list_all_user = "select username, password, accountstatus, comment, email from " + USERS;
+
+			Statement state = conn.createStatement();
 			ResultSet rs = state.executeQuery(sql_list_all_user);
 
 			ArrayList<HashMap<String, String>> infoMap = new ArrayList<HashMap<String, String>>();
@@ -667,7 +727,7 @@ public class DerbyWrapper
 			db2txt = buffer.toString();
 
 			conn.commit();
-			closeDatabase();
+			state.close();
 		}
 		catch (Exception ex)
 		{
@@ -692,9 +752,10 @@ public class DerbyWrapper
 	{
 		try
 		{
-			conn.setAutoCommit(false);
+			Statement state = conn.createStatement();
 			state.execute("DELETE FROM data WHERE username = '" + username + "' AND SUBSTR(name, 1, " + prefix.length() + ") = '" + prefix + "'");
 			conn.commit();
+			state.close();
 		}
 		catch (Exception ex)
 		{
