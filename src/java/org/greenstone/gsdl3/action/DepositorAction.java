@@ -77,8 +77,7 @@ public class DepositorAction extends Action
 			prevPageNumFail = true;
 		}
 
-		DerbyWrapper database = new DerbyWrapper();
-		database.connectDatabase(GlobalProperties.getGSDL3Home() + File.separator + "sites" + File.separator + this.config_params.get(GSConstants.SITE_NAME) + File.separatorChar + "etc" + File.separatorChar + "usersDB", false);
+		DerbyWrapper database = new DerbyWrapper(GlobalProperties.getGSDL3Home() + File.separatorChar + "etc" + File.separatorChar + "usersDB");
 		if (pageNumParseFail)
 		{
 			try
@@ -360,6 +359,7 @@ public class DepositorAction extends Action
 		else if (subaction.toLowerCase().equals(DE_CLEAR_DATABASE))
 		{
 			database.clearUserData();
+			database.clearTrackerData();
 		}
 		else
 		{

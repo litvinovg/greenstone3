@@ -1,13 +1,5 @@
 package org.greenstone.gsdl3.action;
 
-import org.greenstone.gsdl3.util.*;
-import org.greenstone.util.GlobalProperties;
-// XML classes
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -19,6 +11,17 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
+import org.greenstone.gsdl3.util.GSFile;
+import org.greenstone.gsdl3.util.GSParams;
+import org.greenstone.gsdl3.util.GSPath;
+import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.util.GlobalProperties;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class GeneralAction extends Action
 {
@@ -80,7 +83,7 @@ public class GeneralAction extends Action
 			to = service_name;
 		}
 
-		if (request_type.equals("r") || request_type.equals("s"))
+		if (request_type.equals("r") || request_type.equals("s") || request_type.equals("ro"))
 		{
 			//do the request
 			Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);

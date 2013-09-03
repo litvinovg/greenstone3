@@ -16,7 +16,6 @@ import net.tanesha.recaptcha.ReCaptchaResponse;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.greenstone.gsdl3.util.DerbyWrapper;
 import org.greenstone.gsdl3.util.GSXML;
-import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.UserQueryResult;
 import org.greenstone.gsdl3.util.UserTermInfo;
 import org.greenstone.util.GlobalProperties;
@@ -850,10 +849,11 @@ public class Authentication extends ServiceRack
 	{
 		if (_derbyWrapper == null)
 		{
-			_derbyWrapper = new DerbyWrapper();
-
 			// check the usersDb database, if it isn't existing, check the etc dir, create the etc dir if it isn't existing, then create the  user database and add a "admin" user
 			String usersDB_dir = GlobalProperties.getGSDL3Home() + File.separatorChar + "etc" + File.separatorChar + "usersDB";
+
+			_derbyWrapper = new DerbyWrapper(usersDB_dir);
+
 			File usersDB_file = new File(usersDB_dir);
 			if (!usersDB_file.exists())
 			{
@@ -868,14 +868,10 @@ public class Authentication extends ServiceRack
 						return false;
 					}
 				}
-				_derbyWrapper.connectDatabase(usersDB_dir, true);
 				_derbyWrapper.createDatabase();
 			}
-			else
-			{
-				_derbyWrapper.connectDatabase(usersDB_dir, false);
-			}
 		}
+
 		return true;
 	}
 

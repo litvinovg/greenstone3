@@ -26,164 +26,199 @@ import java.sql.SQLException;
 
 import org.greenstone.gsdl3.service.Authentication;
 
-public class txt2usersDB {
-    
-    public static void main(String[] args) throws SQLException{
-	boolean appending = false;
+public class txt2usersDB
+{
 
-	String usage = "Usage: java org.greenstone.gsdl3.txt2usersDB full_path_of_the_text_file full_path_of_the_usersDB [-append]";
-	if (args.length < 2){
-	    System.out.println(usage);
-	    System.exit(0);
-	}
-	File txtfile = new File(args[0]);
-	if(!txtfile.exists()) {
-	    System.out.println("File " + args[0] + " does not exist.");
-	    System.out.println(usage);	    
-	    System.exit(0);
-	}
+	public static void main(String[] args) throws SQLException
+	{
+		boolean appending = false;
 
-	try {
-	    BufferedReader in = new BufferedReader(new FileReader(args[0]));
-	    String str;
-	    DerbyWrapper dw=new DerbyWrapper();
-	    dw.connectDatabase(args[1],false);
-
-	    if(args.length > 2 && args[2].equals("-append")) {
-		    appending = true;
-	    } else {
-		// no appending, replace existing database: the text file 
-		// represents the new database, so delete the existing DB first
-		boolean delete_rows = dw.deleteAllUser();
-		dw.closeDatabase();
-		if (!delete_rows){
-		    System.out.println("Couldn't delete rows of the users table");
-		    System.exit(0);
+		String usage = "Usage: java org.greenstone.gsdl3.txt2usersDB full_path_of_the_text_file full_path_of_the_usersDB [-append]";
+		if (args.length < 2)
+		{
+			System.out.println(usage);
+			System.exit(0);
 		}
-	    } 
-
-	    String username=null;
-	    String password=null;
-	    String groups=null;
-	    String accountstatus=null;
-	    String comment=null;
-	    String email=null;
-
-	    while ((str = in.readLine()) != null) {
-		//ystem.out.println(str);
-		
-		if(str.indexOf(" = ") != -1) { // works with DerbyWrapper.db2txt() and usersDB2txt.java. Fields listed as: USERNAME = admin
-		    String field=str.substring(0,str.indexOf(" = "));
-		    if (field.equalsIgnoreCase("email")){
-			email=str.substring(str.indexOf(" = ")+3,str.length());
-		    }
-		    if (field.equalsIgnoreCase("comment")){
-			comment=str.substring(str.indexOf(" = ")+3,str.length());
-		    }
-		    if (field.equalsIgnoreCase("status")){
-			accountstatus=str.substring(str.indexOf(" = ")+3,str.length());
-		    }
-		    if (field.equalsIgnoreCase("groups")){
-			groups=str.substring(str.indexOf(" = ")+3,str.length());
-		    }
-		    if (field.equalsIgnoreCase("password")){
-			//password=dw.rot13(str.substring(str.indexOf(">")+1,str.length()));
-			password=str.substring(str.indexOf(" = ")+3,str.length());
-		    }
-		    if (field.equalsIgnoreCase("username")){
-			username=str.substring(str.indexOf(" = ")+3,str.length());
-		    }
-		}		
-		else if (str.startsWith("<")){ // fields listed as: <username>admin
-		    String field=str.substring(1,str.indexOf(">"));
-		    if (field.equals("email")){
-			email=str.substring(str.indexOf(">")+1,str.length());
-		    }
-		    if (field.equals("comment")){
-			comment=str.substring(str.indexOf(">")+1,str.length());
-		    }
-		    if (field.equals("enabled") || field.equals("status")){
-			accountstatus=str.substring(str.indexOf(">")+1,str.length());
-		    }
-		    if (field.equals("groups")){
-			groups=str.substring(str.indexOf(">")+1,str.length());
-		    }
-		    if (field.equals("password")){			
-			password=str.substring(str.indexOf(">")+1,str.length());
-		    }
-		    if (field.equals("username")){
-			username=str.substring(str.indexOf(">")+1,str.length());
-		    }
+		File txtfile = new File(args[0]);
+		if (!txtfile.exists())
+		{
+			System.out.println("File " + args[0] + " does not exist.");
+			System.out.println(usage);
+			System.exit(0);
 		}
-		else if (str.equals("----------------------------------------------------------------------")
-			 || str.equals("-------------------------------------")) {
-		    
-		    if ((username!=null) && (password!=null) && (groups!=null) && (accountstatus!=null) && (comment!=null)) {
-			dw.connectDatabase(args[1],false);
 
-			// check if it's a new user or already exists in the database
-			UserQueryResult findUserResult = dw.findUser(username);
-			
-			if(findUserResult == null) { // add new user
-			    if(password.length() >= 3 && password.length() <= 8) { // if not yet encrypted, encrypt first
-				password = Authentication.hashPassword(password);
-			    } // if > 8 chars, password for user being added was already encrypted (hashed-and-hexed)
-			    dw.addUser(username, password, groups, accountstatus, comment, email);
-			} 
+		try
+		{
+			BufferedReader in = new BufferedReader(new FileReader(args[0]));
+			String str;
+			DerbyWrapper dw = new DerbyWrapper(args[1]);
 
-			else { // modify existing user
-			    // if any of the other fields are not specified, get them from the database
-			    UserTermInfo user = findUserResult.getUserTerms().get(0);
-			    
-			    if(password.length() < 3 || password.length() > 8) { // includes empty string case
-				password = user.password;
-			    } else { // need to first encrypt (hash-and-hex) the user-entered password
-				// Use the same encryption technique used by the Admin Authentication page
-				// This ensures that the password generated for a string remains consistent
-				password = Authentication.hashPassword(password);
-			    }
-			    groups = groups.equals("") ? user.groups : groups;
-			    accountstatus = accountstatus.equals("") ? user.accountstatus : accountstatus;
-			    comment = comment.equals("") ? user.comment : comment;
-
-			    if (email == null) { // special checking for backwards compatibility since old DB did not have email field
-				email = "";
-			    }
-			    if(user.email == null) {
-				user.email = "";
-			    }
-			    if(email.equals("")) {
-				email = user.email; 
-			    }
-			    
-			    //System.err.println("**** Password: " + password);				
-			    //System.err.println("**** " + username + " " + password + " " + groups + " " + accountstatus + " " + comment + " " + email);
-			    dw.modifyUserInfo(username, password, groups, accountstatus, comment, email);
+			if (args.length > 2 && args[2].equals("-append"))
+			{
+				appending = true;
 			}
-			
-			username=null;
-			password=null;
-			groups=null;
-			accountstatus=null;
-			comment=null;
-			email=null;
-			//dw.connectDatabase(args[1],false); // should this be closeDatabase()????
-			dw.closeDatabase();
-		    }
-		}
-		
-		// only true back when when hashed passwords weren't being converted to hex
-		//else { // encrypted passwords can span multiple lines for some reason
-		       // assume that is the case here
-		//if(password != null) { 
-		//	password = password + "\n" + str;
-		//  }
-		//}
+			else
+			{
+				// no appending, replace existing database: the text file 
+				// represents the new database, so delete the existing DB first
+				boolean delete_rows = dw.deleteAllUser();
+				dw.closeDatabase();
+				if (!delete_rows)
+				{
+					System.out.println("Couldn't delete rows of the users table");
+					System.exit(0);
+				}
+			}
 
-	    }
-	    //dw.closeDatabase();
-	    in.close();
-	} catch (IOException e) {
+			String username = null;
+			String password = null;
+			String groups = null;
+			String accountstatus = null;
+			String comment = null;
+			String email = null;
+
+			while ((str = in.readLine()) != null)
+			{
+				//ystem.out.println(str);
+
+				if (str.indexOf(" = ") != -1)
+				{ // works with DerbyWrapper.db2txt() and usersDB2txt.java. Fields listed as: USERNAME = admin
+					String field = str.substring(0, str.indexOf(" = "));
+					if (field.equalsIgnoreCase("email"))
+					{
+						email = str.substring(str.indexOf(" = ") + 3, str.length());
+					}
+					if (field.equalsIgnoreCase("comment"))
+					{
+						comment = str.substring(str.indexOf(" = ") + 3, str.length());
+					}
+					if (field.equalsIgnoreCase("status"))
+					{
+						accountstatus = str.substring(str.indexOf(" = ") + 3, str.length());
+					}
+					if (field.equalsIgnoreCase("groups"))
+					{
+						groups = str.substring(str.indexOf(" = ") + 3, str.length());
+					}
+					if (field.equalsIgnoreCase("password"))
+					{
+						//password=dw.rot13(str.substring(str.indexOf(">")+1,str.length()));
+						password = str.substring(str.indexOf(" = ") + 3, str.length());
+					}
+					if (field.equalsIgnoreCase("username"))
+					{
+						username = str.substring(str.indexOf(" = ") + 3, str.length());
+					}
+				}
+				else if (str.startsWith("<"))
+				{ // fields listed as: <username>admin
+					String field = str.substring(1, str.indexOf(">"));
+					if (field.equals("email"))
+					{
+						email = str.substring(str.indexOf(">") + 1, str.length());
+					}
+					if (field.equals("comment"))
+					{
+						comment = str.substring(str.indexOf(">") + 1, str.length());
+					}
+					if (field.equals("enabled") || field.equals("status"))
+					{
+						accountstatus = str.substring(str.indexOf(">") + 1, str.length());
+					}
+					if (field.equals("groups"))
+					{
+						groups = str.substring(str.indexOf(">") + 1, str.length());
+					}
+					if (field.equals("password"))
+					{
+						password = str.substring(str.indexOf(">") + 1, str.length());
+					}
+					if (field.equals("username"))
+					{
+						username = str.substring(str.indexOf(">") + 1, str.length());
+					}
+				}
+				else if (str.equals("----------------------------------------------------------------------") || str.equals("-------------------------------------"))
+				{
+
+					if ((username != null) && (password != null) && (groups != null) && (accountstatus != null) && (comment != null))
+					{
+						dw.connectDatabase(args[1], false);
+
+						// check if it's a new user or already exists in the database
+						UserQueryResult findUserResult = dw.findUser(username);
+
+						if (findUserResult == null)
+						{ // add new user
+							if (password.length() >= 3 && password.length() <= 8)
+							{ // if not yet encrypted, encrypt first
+								password = Authentication.hashPassword(password);
+							} // if > 8 chars, password for user being added was already encrypted (hashed-and-hexed)
+							dw.addUser(username, password, groups, accountstatus, comment, email);
+						}
+
+						else
+						{ // modify existing user
+							// if any of the other fields are not specified, get them from the database
+							UserTermInfo user = findUserResult.getUserTerms().get(0);
+
+							if (password.length() < 3 || password.length() > 8)
+							{ // includes empty string case
+								password = user.password;
+							}
+							else
+							{ // need to first encrypt (hash-and-hex) the user-entered password
+								// Use the same encryption technique used by the Admin Authentication page
+								// This ensures that the password generated for a string remains consistent
+								password = Authentication.hashPassword(password);
+							}
+							groups = groups.equals("") ? user.groups : groups;
+							accountstatus = accountstatus.equals("") ? user.accountstatus : accountstatus;
+							comment = comment.equals("") ? user.comment : comment;
+
+							if (email == null)
+							{ // special checking for backwards compatibility since old DB did not have email field
+								email = "";
+							}
+							if (user.email == null)
+							{
+								user.email = "";
+							}
+							if (email.equals(""))
+							{
+								email = user.email;
+							}
+
+							//System.err.println("**** Password: " + password);				
+							//System.err.println("**** " + username + " " + password + " " + groups + " " + accountstatus + " " + comment + " " + email);
+							dw.modifyUserInfo(username, password, groups, accountstatus, comment, email);
+						}
+
+						username = null;
+						password = null;
+						groups = null;
+						accountstatus = null;
+						comment = null;
+						email = null;
+						//dw.connectDatabase(args[1],false); // should this be closeDatabase()????
+						dw.closeDatabase();
+					}
+				}
+
+				// only true back when when hashed passwords weren't being converted to hex
+				//else { // encrypted passwords can span multiple lines for some reason
+				// assume that is the case here
+				//if(password != null) { 
+				//	password = password + "\n" + str;
+				//  }
+				//}
+
+			}
+			//dw.closeDatabase();
+			in.close();
+		}
+		catch (IOException e)
+		{
+		}
 	}
-    }
 }
