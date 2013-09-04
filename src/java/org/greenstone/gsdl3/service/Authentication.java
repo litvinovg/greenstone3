@@ -127,7 +127,6 @@ public class Authentication extends ServiceRack
 	protected static final String AUTHENTICATION_SERVICE = "Authentication";
 	protected static final String GET_USER_INFORMATION_SERVICE = "GetUserInformation";
 
-	protected static DerbyWrapper _derbyWrapper = null;
 	protected static boolean _derbyWrapperDoneForcedShutdown = false;
 
 	protected String _recaptchaPrivateKey = null;
@@ -156,7 +155,6 @@ public class Authentication extends ServiceRack
 			logger.info("Authentication Service performing forced shutdown of Derby Server ...");
 
 			DerbyWrapper.shutdownDatabaseServer();
-			_derbyWrapper = null;
 			_derbyWrapperDoneForcedShutdown = true;
 		}
 	}
@@ -270,18 +268,17 @@ public class Authentication extends ServiceRack
 			return result;
 		}
 
-		openDatabase();
+		DerbyWrapper derbyWrapper = openDatabase();
 
 		try
 		{
-			UserQueryResult userQueryResult = _derbyWrapper.findUser(username);
+			UserQueryResult userQueryResult = derbyWrapper.findUser(username);
 
 			Vector<UserTermInfo> terms = userQueryResult.getUserTerms();
 
 			if (terms.size() == 0)
 			{
 				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUESTED_USER_NOT_FOUND));
-				closeDatabase();
 				return result;
 			}
 
@@ -307,7 +304,7 @@ public class Authentication extends ServiceRack
 			ex.printStackTrace();
 		}
 
-		closeDatabase();
+		derbyWrapper.closeDatabase();
 
 		return result;
 	}
@@ -663,9 +660,11 @@ public class Authentication extends ServiceRack
 				return result;
 			}
 
+			DerbyWrapper derbyWrapper = openDatabase();
 			String chpa_groups = retrieveDataForUser(user_name, "groups");
 			String chpa_comment = "password_changed_by_user";
-			String info = this._derbyWrapper.modifyUserInfo(user_name, hashPassword(newPassword), chpa_groups, null, chpa_comment, null);
+			String info = derbyWrapper.modifyUserInfo(user_name, hashPassword(newPassword), chpa_groups, null, chpa_comment, null);
+			derbyWrapper.closeDatabase();
 			if (info != "succeed")
 			{//see DerbyWrapper.modifyUserInfo
 				GSXML.addError(this.doc, result, _errorMessageMap.get(info));
@@ -819,9 +818,9 @@ public class Authentication extends ServiceRack
 
 	private void checkAdminUserExists()
 	{
-		openDatabase();
-
-		UserQueryResult userQueryResult = _derbyWrapper.findUser(null, null);
+		DerbyWrapper derbyWrapper = openDatabase();
+		UserQueryResult userQueryResult = derbyWrapper.findUser(null, null);
+		derbyWrapper.closeDatabase();
 
 		if (userQueryResult != null)
 		{
@@ -841,64 +840,48 @@ public class Authentication extends ServiceRack
 				addUser("admin", "admin", "administrator", "true", "Change the password for this account as soon as possible", "");
 			}
 		}
-
-		closeDatabase();
 	}
 
-	private boolean openDatabase()
+	private DerbyWrapper openDatabase()
 	{
-		if (_derbyWrapper == null)
+		// check the usersDb database, if it isn't existing, check the etc dir, create the etc dir if it isn't existing, then create the  user database and add a "admin" user
+		String usersDB_dir = GlobalProperties.getGSDL3Home() + File.separatorChar + "etc" + File.separatorChar + "usersDB";
+
+		DerbyWrapper derbyWrapper = new DerbyWrapper(usersDB_dir);
+
+		File usersDB_file = new File(usersDB_dir);
+		if (!usersDB_file.exists())
 		{
-			// check the usersDb database, if it isn't existing, check the etc dir, create the etc dir if it isn't existing, then create the  user database and add a "admin" user
-			String usersDB_dir = GlobalProperties.getGSDL3Home() + File.separatorChar + "etc" + File.separatorChar + "usersDB";
-
-			_derbyWrapper = new DerbyWrapper(usersDB_dir);
-
-			File usersDB_file = new File(usersDB_dir);
-			if (!usersDB_file.exists())
+			String etc_dir = GlobalProperties.getGSDL3Home() + File.separatorChar + "etc";
+			File etc_file = new File(etc_dir);
+			if (!etc_file.exists())
 			{
-				String etc_dir = GlobalProperties.getGSDL3Home() + File.separatorChar + "etc";
-				File etc_file = new File(etc_dir);
-				if (!etc_file.exists())
+				boolean success = etc_file.mkdir();
+				if (!success)
 				{
-					boolean success = etc_file.mkdir();
-					if (!success)
-					{
-						logger.error("Couldn't create the etc dir under " + GlobalProperties.getGSDL3Home() + ".");
-						return false;
-					}
+					logger.error("Couldn't create the etc dir under " + GlobalProperties.getGSDL3Home() + ".");
+					return null;
 				}
-				_derbyWrapper.createDatabase();
 			}
+			derbyWrapper.createDatabase();
 		}
 
-		return true;
-	}
-
-	private void closeDatabase()
-	{
-		if (_derbyWrapper != null)
-		{
-			_derbyWrapper.closeDatabase();
-			_derbyWrapper = null;
-		}
+		return derbyWrapper;
 	}
 
 	private int addUserInformationToNode(String username, Element serviceNode)
 	{
-		openDatabase();
-
-		UserQueryResult userQueryResult = _derbyWrapper.findUser(username, null);
+		DerbyWrapper derbyWrapper = openDatabase();
+		UserQueryResult userQueryResult = derbyWrapper.findUser(username, null);
+		derbyWrapper.closeDatabase();
 
 		if (userQueryResult != null)
 		{
 			Element user_node = getUserNode(userQueryResult);
 			serviceNode.appendChild(user_node);
-			closeDatabase();
 			return NO_ERROR;
 		}
 
-		closeDatabase();
 		return ERROR_COULD_NOT_GET_USER_INFO;
 	}
 
@@ -909,46 +892,43 @@ public class Authentication extends ServiceRack
 			return ERROR_USERNAME_NOT_SPECIFIED;
 		}
 
-		openDatabase();
-
-		boolean success = _derbyWrapper.deleteUser(username);
+		DerbyWrapper derbyWrapper = openDatabase();
+		boolean success = derbyWrapper.deleteUser(username);
+		derbyWrapper.closeDatabase();
 
 		if (success)
 		{
-			closeDatabase();
 			return NO_ERROR;
 		}
 
-		closeDatabase();
 		return ERROR_REMOVING_USER;
 	}
 
 	private int addUser(String newUsername, String newPassword, String newGroups, String newStatus, String newComment, String newEmail)
 	{
-		openDatabase();
-
 		newGroups = newGroups.replaceAll(" ", "");
 
 		//Check if the user already exists
-		UserQueryResult userQueryResult = _derbyWrapper.findUser(newUsername, null);
+		DerbyWrapper derbyWrapper = openDatabase();
+		UserQueryResult userQueryResult = derbyWrapper.findUser(newUsername, null);
 
 		if (userQueryResult != null)
 		{
-			closeDatabase();
+			derbyWrapper.closeDatabase();
 			return ERROR_USER_ALREADY_EXISTS;
 		}
 		else
 		{
 			System.err.println("ADDING " + newUsername + " " + newPassword);
-			boolean success = _derbyWrapper.addUser(newUsername, newPassword, newGroups, newStatus, newComment, newEmail);
+			boolean success = derbyWrapper.addUser(newUsername, newPassword, newGroups, newStatus, newComment, newEmail);
+			derbyWrapper.closeDatabase();
+
 			if (!success)
 			{
-				closeDatabase();
 				return ERROR_ADDING_USER;
 			}
 		}
 
-		closeDatabase();
 		return NO_ERROR;
 	}
 
@@ -956,11 +936,10 @@ public class Authentication extends ServiceRack
 	{
 		boolean check_status = false;
 
-		openDatabase();
-
+		DerbyWrapper derbyWrapper = openDatabase();
 		try
 		{
-			UserQueryResult result = _derbyWrapper.findUser(username);
+			UserQueryResult result = derbyWrapper.findUser(username);
 
 			if (result != null)
 			{
@@ -973,8 +952,8 @@ public class Authentication extends ServiceRack
 			// some error occurred accessing the database
 			ex.printStackTrace();
 		}
+		derbyWrapper.closeDatabase();
 
-		closeDatabase();
 		return check_status;
 	}
 
@@ -986,7 +965,9 @@ public class Authentication extends ServiceRack
 
 		try
 		{
-			UserQueryResult result = _derbyWrapper.findUser(username);
+			DerbyWrapper derbyWrapper = openDatabase();
+			UserQueryResult result = derbyWrapper.findUser(username);
+			derbyWrapper.closeDatabase();
 			Vector userInfo = result.users;
 
 			for (int i = 0; i < result.getSize(); i++)
@@ -1023,7 +1004,6 @@ public class Authentication extends ServiceRack
 			ex.printStackTrace();
 		}
 
-		closeDatabase();
 		return data;
 	}
 

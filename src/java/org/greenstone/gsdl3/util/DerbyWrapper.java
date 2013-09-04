@@ -196,15 +196,22 @@ public class DerbyWrapper
 
 		try
 		{
-			String query = "SELECT username, action FROM usertracker WHERE site = '" + site + "' and collection = '" + collection + "' and oid = '" + oid + "' ORDER BY time";
+			String query = "SELECT username, action, time FROM usertracker WHERE site = '" + site + "' and collection = '" + collection + "' and oid = '" + oid + "' ORDER BY time";
 			Statement state = conn.createStatement();
 			ResultSet rs = state.executeQuery(query);
 			conn.commit();
 
 			HashSet<String> usernamesSeen = new HashSet<String>();
-
 			while (rs.next())
 			{
+				String timeStr = rs.getString("time");
+				long time = Long.parseLong(timeStr);
+
+				if (System.currentTimeMillis() - time > 6000)
+				{
+					continue;
+				}
+
 				HashMap<String, String> action = new HashMap<String, String>();
 				if (!usernamesSeen.contains(rs.getString("username")))
 				{
@@ -216,12 +223,29 @@ public class DerbyWrapper
 				}
 			}
 			state.close();
+
+			clearOldUserActions();
 		}
 		catch (Exception ex)
 		{
 			ex.printStackTrace();
 		}
 		return actions;
+	}
+
+	public void clearOldUserActions()
+	{
+		try
+		{
+			Statement state = conn.createStatement();
+			state.execute("DELETE FROM usertracker WHERE (CAST (time AS BIGINT)) < " + (System.currentTimeMillis() - 20000));
+			conn.commit();
+			state.close();
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 
 	public UserQueryResult listAllUsers() throws SQLException
@@ -571,6 +595,7 @@ public class DerbyWrapper
 
 		Statement state = conn.createStatement();
 		ResultSet rs = state.executeQuery(sql_find_user);
+		conn.commit();
 		while (rs.next())
 		{
 			HashMap<String, String> user = new HashMap<String, String>();
@@ -582,11 +607,13 @@ public class DerbyWrapper
 
 			users.add(user);
 		}
-		conn.commit();
+		state.close();
 
+		state = conn.createStatement();
 		for (HashMap<String, String> user : users)
 		{
 			ResultSet gs = state.executeQuery("SELECT role FROM " + ROLES + " WHERE username = '" + user.get("username") + "'");
+			conn.commit();
 
 			String group = "";
 			while (gs.next())

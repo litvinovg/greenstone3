@@ -89,7 +89,6 @@ public class UserTracker extends ServiceRack
 
 	protected synchronized Element processGetActivityOnPage(Element request)
 	{
-		System.err.println("CALLED");
 		Element result = GSXML.createBasicResponse(this.doc, GET_ACTIVITY_ON_PAGE);
 		try
 		{
@@ -97,7 +96,6 @@ public class UserTracker extends ServiceRack
 			Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			if (paramList == null)
 			{
-				System.err.println("WHA?");
 				GSXML.addError(this.doc, result, "Request has no parameter list");
 				return result;
 			}
@@ -109,8 +107,6 @@ public class UserTracker extends ServiceRack
 
 			DerbyWrapper database = new DerbyWrapper(GlobalProperties.getGSDL3Home() + File.separatorChar + "etc" + File.separatorChar + "usersDB");
 			ArrayList<HashMap<String, String>> userActions = database.getMostRecentUserActions(site, collection, oid);
-
-			System.err.println(userActions.size());
 
 			Element userList = this.doc.createElement("userList");
 			for (HashMap<String, String> userAction : userActions)
