@@ -1077,6 +1077,25 @@ function StatusBar(mainElem)
 			}
 		}
 	}
+	
+	this.clear = function()
+	{
+		for(var p in _statusMap)
+		{
+			if(_statusMap.hasOwnProperty(p))
+			{
+				if(_statusMap[p] && _statusMap[p].parentNode)
+				{
+					removeFromParent(_statusMap[p]);
+				}
+			
+				if(--_activeMessages == 0)
+				{
+					_mainElem.style.display = "none";
+				}
+			}
+		}
+	}
 }
 
 /*
