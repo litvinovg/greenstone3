@@ -89,8 +89,7 @@
 		  <xsl:call-template name="panoramaViewer-scripts"/>
 		</xsl:if>
 
-		
-		<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
+		<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true' and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 			<xsl:if test="/page/pageRequest/paramList/param[(@name='docEdit') and (@value='on' or @value='true' or @value='1')]">
 				<script type="text/javascript" src="interfaces/{$interface_name}/js/direct-edit.js"><xsl:text> </xsl:text></script>
 				<xsl:call-template name="init-direct-edit"/>
@@ -301,6 +300,23 @@
 												.html("Account settings")
 												.addClass("ui-state-default");
 											settingsLink.append(settingsButton);
+											
+											var editingLink = $("&lt;a&gt;")
+												.attr("href", "javascript:;");
+											var editingButton = $("&lt;LI&gt;")
+												.css("padding", "3px")
+												.html((gs.userInformation.editEnabled == "true") ? "Disable edit mode" : "Enable edit mode")
+												.addClass("ui-state-default")
+												.click(function()
+												{
+													var url = gs.xsltParams.library_name + "?a=g&amp;rt=ro&amp;s=ChangeUserEditMode&amp;s1.username=" + gs.userInformation.username + "&amp;s1.enabled=" + ((gs.userInformation.editEnabled == "true") ? "false" : "true");
+													$.ajax(url)
+													.success(function(response)
+													{
+														location.reload();
+													});
+												});
+											editingLink.append(editingButton);
 
 											var url = document.URL;
 											var hasQueryString = (url.indexOf("?") != -1);
@@ -322,6 +338,7 @@
 											logoutLink.append(logoutButton);
 
 											menu.append(settingsLink);
+											menu.append(editingLink);
 											menu.append(logoutLink);
 
 											var buttonLeft = button.offset().left;
