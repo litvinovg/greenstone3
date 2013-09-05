@@ -615,7 +615,7 @@ berry basket function to the site
   
 	<!-- put the drag&drop document basket on the page -->
 	<xsl:template name="documentBasket">
-		<xsl:if test="$documentBasketOn and /page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
+		<xsl:if test="$documentBasketOn and /page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true' and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 			<div id="documentbasket" class="hide">
 				<span>Document Basket</span>
 				<span id="documentBasketExpandCollapseLinks" style="display: none;">
