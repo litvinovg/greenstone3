@@ -279,8 +279,6 @@ public class Authentication extends ServiceRack
 			editMode = "false";
 		}
 
-		System.err.println("SETTING USER DATA -> " + username + " -> USER_EDIT_ENABLED -> " + editMode);
-
 		DerbyWrapper dw = openDatabase();
 		dw.addUserData(username, "USER_EDIT_ENABLED", editMode);
 		dw.closeDatabase();
