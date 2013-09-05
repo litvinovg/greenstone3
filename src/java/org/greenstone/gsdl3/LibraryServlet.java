@@ -911,8 +911,10 @@ public class LibraryServlet extends BaseGreenstoneServlet
 			{
 				HashMap<String, Serializable> responseParams = GSXML.extractParams(responseParamList, true);
 				String groups = (String) responseParams.get(GSXML.GROUPS_ATT);
+				String editEnabled = (String) responseParams.get("editEnabled");
 
 				userInformation.setAttribute(GSXML.GROUPS_ATT, groups);
+				userInformation.setAttribute("editEnabled", (editEnabled != null) ? editEnabled : "false");
 				xml_request.appendChild(userInformation);
 			}
 		}

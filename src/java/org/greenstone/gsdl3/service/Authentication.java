@@ -126,6 +126,7 @@ public class Authentication extends ServiceRack
 	//the services on offer
 	protected static final String AUTHENTICATION_SERVICE = "Authentication";
 	protected static final String GET_USER_INFORMATION_SERVICE = "GetUserInformation";
+	protected static final String CHANGE_USER_EDIT_MODE_SERVICE = "ChangeUserEditMode";
 
 	protected static boolean _derbyWrapperDoneForcedShutdown = false;
 
@@ -170,14 +171,18 @@ public class Authentication extends ServiceRack
 		authentication_service.setAttribute(GSXML.NAME_ATT, AUTHENTICATION_SERVICE);
 		this.short_service_info.appendChild(authentication_service);
 
-		// set up Authentication service info - for now just has name and type
 		Element getUserInformation_service = this.doc.createElement(GSXML.SERVICE_ELEM);
 		getUserInformation_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		getUserInformation_service.setAttribute(GSXML.NAME_ATT, GET_USER_INFORMATION_SERVICE);
 		this.short_service_info.appendChild(getUserInformation_service);
 
+		Element changeEditMode_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		changeEditMode_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
+		changeEditMode_service.setAttribute(GSXML.NAME_ATT, CHANGE_USER_EDIT_MODE_SERVICE);
+		this.short_service_info.appendChild(changeEditMode_service);
+
 		DerbyWrapper.createDatabaseIfNeeded();
-		
+
 		NodeList recaptchaElems = info.getElementsByTagName("recaptcha");
 		for (int i = 0; i < recaptchaElems.getLength(); i++)
 		{
@@ -216,6 +221,11 @@ public class Authentication extends ServiceRack
 			authen_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 			authen_service.setAttribute(GSXML.NAME_ATT, GET_USER_INFORMATION_SERVICE);
 		}
+		else if (service_id.equals(CHANGE_USER_EDIT_MODE_SERVICE))
+		{
+			authen_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
+			authen_service.setAttribute(GSXML.NAME_ATT, CHANGE_USER_EDIT_MODE_SERVICE);
+		}
 		else
 		{
 			return null;
@@ -242,6 +252,40 @@ public class Authentication extends ServiceRack
 	protected String getServiceDescription(String service_id, String lang)
 	{
 		return getTextString(service_id + ".description", lang);
+	}
+
+	protected Element processChangeUserEditMode(Element request)
+	{
+		// Create a new (empty) result message
+		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+
+		result.setAttribute(GSXML.FROM_ATT, CHANGE_USER_EDIT_MODE_SERVICE);
+		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
+
+		Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		if (paramList == null)
+		{
+			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUEST_HAS_NO_PARAM_LIST));
+			return result;
+		}
+
+		HashMap<String, Serializable> params = GSXML.extractParams(paramList, true);
+
+		String username = (String) params.get("username");
+		String editMode = (String) params.get("enabled");
+
+		if (!editMode.toLowerCase().equals("true") && !editMode.toLowerCase().equals("false"))
+		{
+			editMode = "false";
+		}
+
+		System.err.println("SETTING USER DATA -> " + username + " -> USER_EDIT_ENABLED -> " + editMode);
+
+		DerbyWrapper dw = openDatabase();
+		dw.addUserData(username, "USER_EDIT_ENABLED", editMode);
+		dw.closeDatabase();
+
+		return result;
 	}
 
 	protected Element processGetUserInformation(Element request)
@@ -271,39 +315,38 @@ public class Authentication extends ServiceRack
 
 		DerbyWrapper derbyWrapper = openDatabase();
 
-		try
+		UserQueryResult userQueryResult = derbyWrapper.findUser(username);
+		String editEnabled = derbyWrapper.getUserData(username, "USER_EDIT_ENABLED");
+
+		Vector<UserTermInfo> terms = userQueryResult.getUserTerms();
+
+		if (terms.size() == 0)
 		{
-			UserQueryResult userQueryResult = derbyWrapper.findUser(username);
-
-			Vector<UserTermInfo> terms = userQueryResult.getUserTerms();
-
-			if (terms.size() == 0)
-			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUESTED_USER_NOT_FOUND));
-				return result;
-			}
-
-			UserTermInfo userInfo = terms.get(0);
-			Element userInfoList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-			result.appendChild(userInfoList);
-
-			Element usernameField = GSXML.createParameter(this.doc, "username", userInfo.username);
-			Element passwordField = GSXML.createParameter(this.doc, "password", userInfo.password);
-			Element groupsField = GSXML.createParameter(this.doc, "groups", userInfo.groups);
-			Element accountStatusField = GSXML.createParameter(this.doc, "accountstatus", userInfo.accountstatus);
-			Element commentField = GSXML.createParameter(this.doc, "comment", userInfo.comment);
-
-			userInfoList.appendChild(usernameField);
-			userInfoList.appendChild(passwordField);
-			userInfoList.appendChild(groupsField);
-			userInfoList.appendChild(accountStatusField);
-			userInfoList.appendChild(commentField);
+			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUESTED_USER_NOT_FOUND));
+			return result;
 		}
-		catch (SQLException ex)
+
+		UserTermInfo userInfo = terms.get(0);
+		Element userInfoList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		result.appendChild(userInfoList);
+
+		Element usernameField = GSXML.createParameter(this.doc, "username", userInfo.username);
+		Element passwordField = GSXML.createParameter(this.doc, "password", userInfo.password);
+		Element groupsField = GSXML.createParameter(this.doc, "groups", userInfo.groups);
+		Element accountStatusField = GSXML.createParameter(this.doc, "accountstatus", userInfo.accountstatus);
+		Element commentField = GSXML.createParameter(this.doc, "comment", userInfo.comment);
+
+		if (editEnabled != null)
 		{
-			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_SQL_EXCEPTION));
-			ex.printStackTrace();
+			Element editEnabledElem = GSXML.createParameter(this.doc, "editEnabled", editEnabled);
+			userInfoList.appendChild(editEnabledElem);
 		}
+
+		userInfoList.appendChild(usernameField);
+		userInfoList.appendChild(passwordField);
+		userInfoList.appendChild(groupsField);
+		userInfoList.appendChild(accountStatusField);
+		userInfoList.appendChild(commentField);
 
 		derbyWrapper.closeDatabase();
 

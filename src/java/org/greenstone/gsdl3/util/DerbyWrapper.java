@@ -334,10 +334,10 @@ public class DerbyWrapper
 		boolean found = false;
 		try
 		{
+			System.err.println("xx" + conn.isClosed());
 			Statement state = conn.createStatement();
 			ResultSet rs = state.executeQuery("SELECT * FROM " + DATA + " WHERE username='" + username + "' AND name='" + name + "'");
 			conn.commit();
-			state.close();
 			if (rs.next())
 			{
 				found = true;
@@ -346,6 +346,7 @@ public class DerbyWrapper
 			{
 				found = false;
 			}
+			state.close();
 		}
 		catch (Exception ex)
 		{
@@ -353,6 +354,7 @@ public class DerbyWrapper
 			if (ex instanceof SQLException)
 			{
 				printSQLError((SQLException) ex);
+				ex.printStackTrace();
 			}
 			else
 			{
@@ -410,11 +412,11 @@ public class DerbyWrapper
 			Statement state = conn.createStatement();
 			ResultSet rs = state.executeQuery("SELECT * FROM " + DATA + " WHERE username='" + username + "' AND name='" + name + "'");
 			conn.commit();
-			state.close();
 			if (rs.next())
 			{
 				return rs.getString("value");
 			}
+			state.close();
 		}
 		catch (Exception ex)
 		{
@@ -422,6 +424,7 @@ public class DerbyWrapper
 			if (ex instanceof SQLException)
 			{
 				printSQLError((SQLException) ex);
+				ex.printStackTrace();
 			}
 			else
 			{
@@ -606,7 +609,7 @@ public class DerbyWrapper
 
 	// findUser(null) will return all users, which is why a UserQueryResult 
 	// (a vector of UserTermInfo) is returned
-	public UserQueryResult findUser(String username) throws SQLException
+	public UserQueryResult findUser(String username)
 	{
 		UserQueryResult userQueryResult = new UserQueryResult();
 
@@ -624,41 +627,48 @@ public class DerbyWrapper
 
 		ArrayList<HashMap<String, String>> users = new ArrayList<HashMap<String, String>>();
 
-		Statement state = conn.createStatement();
-		ResultSet rs = state.executeQuery(sql_find_user);
-		conn.commit();
-		while (rs.next())
+		try
 		{
-			HashMap<String, String> user = new HashMap<String, String>();
-			user.put("username", rs.getString("username"));
-			user.put("password", rs.getString("password"));
-			user.put("as", rs.getString("accountstatus"));
-			user.put("comment", rs.getString("comment"));
-			user.put("email", rs.getString("email"));
-
-			users.add(user);
-		}
-		state.close();
-
-		state = conn.createStatement();
-		for (HashMap<String, String> user : users)
-		{
-			ResultSet gs = state.executeQuery("SELECT role FROM " + ROLES + " WHERE username = '" + user.get("username") + "'");
+			Statement state = conn.createStatement();
+			ResultSet rs = state.executeQuery(sql_find_user);
 			conn.commit();
-
-			String group = "";
-			while (gs.next())
+			while (rs.next())
 			{
-				if (!group.equals(""))
-				{
-					group += ",";
-				}
-				group += gs.getString("role");
-			}
+				HashMap<String, String> user = new HashMap<String, String>();
+				user.put("username", rs.getString("username"));
+				user.put("password", rs.getString("password"));
+				user.put("as", rs.getString("accountstatus"));
+				user.put("comment", rs.getString("comment"));
+				user.put("email", rs.getString("email"));
 
-			userQueryResult.addUserTerm(user.get("username"), user.get("password"), group, user.get("as"), user.get("comment"), user.get("email"));
+				users.add(user);
+			}
+			state.close();
+
+			state = conn.createStatement();
+			for (HashMap<String, String> user : users)
+			{
+				ResultSet gs = state.executeQuery("SELECT role FROM " + ROLES + " WHERE username = '" + user.get("username") + "'");
+				conn.commit();
+
+				String group = "";
+				while (gs.next())
+				{
+					if (!group.equals(""))
+					{
+						group += ",";
+					}
+					group += gs.getString("role");
+				}
+
+				userQueryResult.addUserTerm(user.get("username"), user.get("password"), group, user.get("as"), user.get("comment"), user.get("email"));
+			}
+			state.close();
 		}
-		state.close();
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
 
 		if (userQueryResult.getSize() > 0)
 		{
