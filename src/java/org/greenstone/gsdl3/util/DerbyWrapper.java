@@ -334,7 +334,6 @@ public class DerbyWrapper
 		boolean found = false;
 		try
 		{
-			System.err.println("xx" + conn.isClosed());
 			Statement state = conn.createStatement();
 			ResultSet rs = state.executeQuery("SELECT * FROM " + DATA + " WHERE username='" + username + "' AND name='" + name + "'");
 			conn.commit();
@@ -424,7 +423,6 @@ public class DerbyWrapper
 			if (ex instanceof SQLException)
 			{
 				printSQLError((SQLException) ex);
-				ex.printStackTrace();
 			}
 			else
 			{
