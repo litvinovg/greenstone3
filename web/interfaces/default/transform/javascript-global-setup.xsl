@@ -149,6 +149,7 @@
 					gs.userInformation = new Array();
 					gs.userInformation.username = "</xsl:text><xsl:value-of select="/page/pageRequest/userInformation/@username"/><xsl:text disable-output-escaping="yes">";
 					gs.userInformation.groups = "</xsl:text><xsl:value-of select="/page/pageRequest/userInformation/@groups"/><xsl:text disable-output-escaping="yes">";
+					gs.userInformation.editEnabled = "</xsl:text><xsl:value-of select="/page/pageRequest/userInformation/@editEnabled"/><xsl:text disable-output-escaping="yes">";
 				</xsl:text>
 			</script>
 		</xsl:if>
