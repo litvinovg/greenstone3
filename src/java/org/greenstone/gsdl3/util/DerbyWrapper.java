@@ -51,6 +51,7 @@ public class DerbyWrapper
 	public static void createDatabaseIfNeeded()
 	{
 		String usersDB_dir = GlobalProperties.getGSDL3Home() + File.separatorChar + "etc" + File.separatorChar + "usersDB";
+		protocol_str = PROTOCOL + usersDB_dir;
 		File usersDB_file = new File(usersDB_dir);
 		if (!usersDB_file.exists())
 		{
