@@ -176,8 +176,9 @@ public class Authentication extends ServiceRack
 		getUserInformation_service.setAttribute(GSXML.NAME_ATT, GET_USER_INFORMATION_SERVICE);
 		this.short_service_info.appendChild(getUserInformation_service);
 
+		DerbyWrapper.createDatabaseIfNeeded();
+		
 		NodeList recaptchaElems = info.getElementsByTagName("recaptcha");
-
 		for (int i = 0; i < recaptchaElems.getLength(); i++)
 		{
 			Element currentElem = (Element) recaptchaElems.item(i);
@@ -846,26 +847,7 @@ public class Authentication extends ServiceRack
 	{
 		// check the usersDb database, if it isn't existing, check the etc dir, create the etc dir if it isn't existing, then create the  user database and add a "admin" user
 		String usersDB_dir = GlobalProperties.getGSDL3Home() + File.separatorChar + "etc" + File.separatorChar + "usersDB";
-
 		DerbyWrapper derbyWrapper = new DerbyWrapper(usersDB_dir);
-
-		File usersDB_file = new File(usersDB_dir);
-		if (!usersDB_file.exists())
-		{
-			String etc_dir = GlobalProperties.getGSDL3Home() + File.separatorChar + "etc";
-			File etc_file = new File(etc_dir);
-			if (!etc_file.exists())
-			{
-				boolean success = etc_file.mkdir();
-				if (!success)
-				{
-					logger.error("Couldn't create the etc dir under " + GlobalProperties.getGSDL3Home() + ".");
-					return null;
-				}
-			}
-			derbyWrapper.createDatabase();
-		}
-
 		return derbyWrapper;
 	}
 

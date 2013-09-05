@@ -18,6 +18,7 @@
  */
 package org.greenstone.gsdl3.util;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -29,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.greenstone.gsdl3.service.Authentication;
+import org.greenstone.util.GlobalProperties;
 
 public class DerbyWrapper
 {
@@ -39,11 +41,38 @@ public class DerbyWrapper
 	static final String ROLES = "roles";
 	static final String DATA = "data";
 	private Connection conn = null;
-	private String protocol_str;
+	private static String protocol_str;
 
 	public DerbyWrapper(String dbpath)
 	{
 		connectDatabase(dbpath, false);
+	}
+
+	public static void createDatabaseIfNeeded()
+	{
+		String usersDB_dir = GlobalProperties.getGSDL3Home() + File.separatorChar + "etc" + File.separatorChar + "usersDB";
+		File usersDB_file = new File(usersDB_dir);
+		if (!usersDB_file.exists())
+		{
+			String etc_dir = GlobalProperties.getGSDL3Home() + File.separatorChar + "etc";
+			File etc_file = new File(etc_dir);
+			if (!etc_file.exists())
+			{
+				boolean success = etc_file.mkdir();
+				if (!success)
+				{
+					System.err.println("Couldn't create the etc dir under " + GlobalProperties.getGSDL3Home() + ".");
+				}
+			}
+			try
+			{
+				DerbyWrapper.createDatabase(DriverManager.getConnection(protocol_str + ";create=true"));
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	public void connectDatabase(String dbpath, boolean create_database)
@@ -153,7 +182,7 @@ public class DerbyWrapper
 		}
 	}
 
-	public void createDatabase()
+	public static void createDatabase(Connection conn)
 	{
 		try
 		{
@@ -168,6 +197,7 @@ public class DerbyWrapper
 			state.execute("insert into " + ROLES + " values ('admin', 'all-collections-editor')");
 			conn.commit();
 			state.close();
+			conn.close();
 		}
 		catch (Exception ex)
 		{
