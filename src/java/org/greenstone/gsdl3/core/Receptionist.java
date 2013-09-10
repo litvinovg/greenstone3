@@ -200,7 +200,7 @@ public class Receptionist implements ModuleInterface
 		if (!type.equals(GSXML.REQUEST_TYPE_PAGE))
 		{
 			// now Receptionist forwards non-page requests straight to the MR, and returns the responses
-			logger.error(" request type is not '" + GSXML.REQUEST_TYPE_PAGE + "', but it is '" + type + "', so forwarding the message to the MR!");
+			logger.debug(" request type is not '" + GSXML.REQUEST_TYPE_PAGE + "', but it is '" + type + "', so forwarding the message to the MR!");
 			// process the whole message - mr needs <message> tags, and 
 			// in this case, there may be more than one request in the message
 			return this.mr.process(message);
