@@ -639,64 +639,67 @@ function SliderWidget(_links)
 		var filter = $("#filterText");
 		filter.keyup(function()
 		{
-			var currentValue = filter.val();
-			var isRange = (currentValue.search(/\d+-\d+/) != -1)
+			var fullValue = filter.val().replace(/ /g, "");
+			var values = fullValue.split(",");
 			
-			var found = false;
-			for(var i = 0; i < _titles.length; i++)
-			{
-				if(_titles[i][0] == currentValue)
-				{
-					found = true;
-				}
-			}
+			var matchingTitles = new Array();
 			
-			if(!found && isRange)
+			for (var l = 0; l < values.length; l++)
 			{
-				var firstNumber = currentValue.replace(/^(\d+)-\d+$/, "$1");
-				var secondNumber = currentValue.replace(/^\d+-(\d+)$/, "$1");
+				var currentValue = values[l];
+				var isRange = (currentValue.search(/\d+-\d+/) != -1)
 				
-				if(firstNumber <= secondNumber)
+				var found = false;
+				for(var i = 0; i < _titles.length; i++)
 				{
-					var matchingTitles = new Array();
-					for(var i = firstNumber; i <= secondNumber; i++)
+					if(_titles[i][0] == currentValue)
 					{
-						var numString = i + "";
-						for(var j = 0; j < _titles.length; j++)
+						found = true;
+					}
+				}
+				
+				if(!found && isRange)
+				{
+					var firstNumber = currentValue.replace(/(\d+)-\d+/, "$1");
+					var secondNumber = currentValue.replace(/\d+-(\d+)/, "$1");
+					
+					if(firstNumber <= secondNumber)
+					{
+						for(var i = firstNumber; i <= secondNumber; i++)
 						{
-							var currentTitle = _titles[j];
-							if(currentTitle[0].search(numString) != -1)
+							var numString = i + "";
+							for(var j = 0; j < _titles.length; j++)
 							{
-								matchingTitles.push(currentTitle);
+								var currentTitle = _titles[j];
+								if(currentTitle[0].search(numString) != -1)
+								{
+									matchingTitles.push(currentTitle);
+								}
 							}
 						}
 					}
-					
+				}
+				else
+				{
 					for(var i = 0; i < _titles.length; i++)
 					{
-						$(_titles[i][1].cell).css("display", "none");
-					}
-					
-					for(var i = 0; i < matchingTitles.length; i++)
-					{
-						$(matchingTitles[i][1].cell).css("display", "table-cell");
+						var currentTitle = _titles[i];
+						if(currentTitle[0].search(currentValue.replace(/\./g, "\\.")) != -1)
+						{
+							matchingTitles.push(currentTitle);
+						}
 					}
 				}
 			}
-			else
+			
+			for(var i = 0; i < _titles.length; i++)
 			{
-				for(var i = 0; i < _titles.length; i++)
-				{
-					var currentTitle = _titles[i];
-					if(currentTitle[0].search(currentValue.replace(/\./g, "\\.")) != -1)
-					{
-						$(currentTitle[1].cell).css("display", "table-cell");
-					}
-					else
-					{
-						$(currentTitle[1].cell).css("display", "none");
-					}
-				}
+				$(_titles[i][1].cell).css("display", "none");
+			}
+			
+			for(var i = 0; i < matchingTitles.length; i++)
+			{
+				$(matchingTitles[i][1].cell).css("display", "table-cell");
 			}
 		});
 	}
