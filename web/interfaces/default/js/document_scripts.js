@@ -487,6 +487,10 @@ function extractFilteredPagesToOwnDocument()
 	.success(function(response)
 	{
 		console.log(response);
+		gs.functions.buildCollections([gs.cgiParams.c], function()
+		{
+			console.log("DONE BUILDING!");
+		});
 	});
 }
 
