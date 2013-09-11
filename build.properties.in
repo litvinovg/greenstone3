@@ -92,6 +92,9 @@ with.gli.and.gems=true
 #checkout.gnomelib.ext=true
 #checkout.imagemagick.ext=true
 
+# By default, GS3 will check out the pdfbox extension from SVN
+checkout.pdfbox.ext=true
+
 # The following two properties are automatically overridden by gs3-server
 # when running off a read-only medium such as a DVD ...
 #

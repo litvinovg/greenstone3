@@ -2465,6 +2465,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     
   <target name="prepare-gs2build" depends="init" if="collection.building.enabled" unless="gs2build.present">
     <antcall target="checkout-gs2build"/>
+    <antcall target="prepare-pdfbox"/>
     <antcall target="prepare-imagemagick"/> <!-- has to be done before calling prepare-gnome-lib -->
     <antcall target="prepare-gnome-lib"/>
     <antcall target="unzip-windows-packages"/>
@@ -2482,6 +2483,56 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </exec>
   </target>
 
+  <!-- Gets the PDFBox extension into gs2build/ext if checkout.pdfbox.ext is set to true in build.properties 
+       (which it is by default) -->
+  <target name="prepare-pdfbox" depends="init" if="collection.building.enabled">
+    <if>
+      <bool>
+	<istrue value="${checkout.pdfbox.ext}"/>
+      </bool>
+      
+      <property name="pdfbox.ext.dir" value="${gs2build.home}/ext/pdf-box"/>
+      <condition property="pdfbox.ext.present">
+	<available file="${pdfbox.ext.dir}" type="dir" />
+      </condition>
+      
+      <!-- get the pdfbox tar.gz file if we don't already have it and extract it if there's no pdf-box directory in gs2build/ext-->
+      <if>
+	<bool>
+	  <not><istrue value="${pdfbox.ext.present}"/></not>
+	</bool>
+
+	<if>
+	  <bool>
+	    <not><istrue value="${gs2build.home}/ext/pdf-box-java.tar.gz"/></not>
+	  </bool>
+
+	  <echo>Checking out the PDFBox extension into the GSDLHOME extension area</echo>
+	  <exec executable="svn">
+	    <arg value="export"/>
+	    <arg value="${svn.root}/gs2-extensions/pdf-box/trunk/pdf-box-java.tar.gz"/>
+	    <arg value="${gs2build.home}/ext/pdf-box-java.tar.gz"/>
+	  </exec>
+	</if>	
+
+	<echo>Extacting the PDFBox extension into the GSDLHOME extension area</echo>
+	<untar compression="gzip" 
+	       src="${gs2build.home}/ext/pdf-box-java.tar.gz"
+	       dest="${pdfbox.ext.dir}"/>
+
+	<delete file="${gs2build.home}/ext/pdf-box-java.tar.gz"/>
+
+	<else>
+	  <echo>The PDFBox extension already exists at ${pdfbox.ext.dir}</echo>
+	</else>	
+      </if>
+
+      <else>
+	<echo>**** Not preparing the PDFBox extension:</echo>
+	<echo>The property checkout.pdfbox.ext in build.properties was not set or was set to false</echo>
+      </else>
+    </if>
+  </target>
 
   <target name="prepare-imagemagick" depends="init" if="collection.building.enabled">
     <if>
