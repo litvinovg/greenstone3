@@ -1101,7 +1101,11 @@ public class TransformingReceptionist extends Receptionist
 			}
 
 		}
-		Document finalDoc = GSXSLT.mergedXSLTDocumentCascade(name, (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, _debug);
+		
+		if(name != null)
+		{
+			Document finalDoc = GSXSLT.mergedXSLTDocumentCascade(name, (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, _debug);
+		}
 		return finalDoc;
 	}
 
