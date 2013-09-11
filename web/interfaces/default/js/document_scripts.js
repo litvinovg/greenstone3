@@ -459,6 +459,37 @@ function maximizeSidebar()
 	minLink.css("display", "block");
 }
 
+function extractFilteredPagesToOwnDocument()
+{
+	var oids = new Array();
+	var filtered = $(".pageSliderCol:visible a").each(function()
+	{
+		var hrefString = $(this).attr("href");
+		var oidStart = hrefString.indexOf(".") + 1;
+		var oidFinish = hrefString.indexOf("'", oidStart + 1);
+		
+		oids.push(hrefString.substring(oidStart, oidFinish));
+	});
+	
+	var sectionString = "[";
+	for(var i = 0; i < oids.length; i++)
+	{
+		sectionString += "\"" + oids[i] + "\"";
+		if(i < oids.length - 1)
+		{
+			sectionString += ",";
+		}
+	}
+	sectionString += "]";
+	
+	var url = "cgi-bin/document-extract.pl?a=extract-archives-doc&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&json-sections=" + sectionString;// + "&json-metadata=[{"metaname":"dc.Title","metavalue":"All Black Rugy Success","metamode":"accumulate"]"
+	$.ajax(url)
+	.success(function(response)
+	{
+		console.log(response);
+	});
+}
+
 /**********************
 * PAGED-IMAGE SCRIPTS *
 **********************/
@@ -588,6 +619,18 @@ function replaceLinksWithSlider()
 		if(currentImage.attr("id") && currentImage.attr("id").search(/^ttoggle/) != -1)
 		{
 			currentImage.attr("onclick", "");
+			currentImage.click(function()
+			{
+				var sliderDiv = currentImage.parents("table").first().next();
+				if(sliderDiv.is(":visible"))
+				{
+					sliderDiv.hide();
+				}
+				else
+				{
+					sliderDiv.show();
+				}
+			});
 		}
 		else if(currentImage.attr("id") && currentImage.attr("id").search(/^dtoggle/) != -1)
 		{
@@ -639,14 +682,14 @@ function SliderWidget(_links)
 		var filter = $("#filterText");
 		filter.keyup(function()
 		{
-			var fullValue = filter.val().replace(/ /g, "");
+			var fullValue = filter.val();
 			var values = fullValue.split(",");
 			
 			var matchingTitles = new Array();
 			
 			for (var l = 0; l < values.length; l++)
 			{
-				var currentValue = values[l];
+				var currentValue = values[l].replace(/^ +/g, "").replace(/ +$/g, "");
 				var isRange = (currentValue.search(/\d+-\d+/) != -1)
 				
 				var found = false;

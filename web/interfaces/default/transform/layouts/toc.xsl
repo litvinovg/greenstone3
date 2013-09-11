@@ -88,7 +88,11 @@
 								</div>
 								<table style="width:100%;"><tbody><tr>
 									<td><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.filter_pages')"/><xsl:text>: </xsl:text><input id="filterText" type="text" size="27"/></td>
-								</tr></tbody></table>
+								</tr>
+								<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true'">
+									<tr><td><a href="javascript:extractFilteredPagesToOwnDocument();"><button>Extract these pages to document</button></a></td></tr>
+								</xsl:if>
+								</tbody></table>
 							</xsl:when>
 							<xsl:when test="not(/page/pageRequest/paramList/param[@name = 'ed']/@value = '1')">
 								<div id="tableOfContents">
