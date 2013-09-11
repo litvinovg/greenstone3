@@ -251,7 +251,7 @@ public class DocumentAction extends Action
 			}
 
 		}
-		else if (document_type.equals(GSXML.DOC_TYPE_HIERARCHY) ||document_type.equals(GSXML.DOC_TYPE_PAGED_HIERARCHY) )
+		else if (document_type.equals(GSXML.DOC_TYPE_HIERARCHY) || document_type.equals(GSXML.DOC_TYPE_PAGED_HIERARCHY))
 		{
 			get_structure = true;
 			if (expand_contents)
@@ -378,14 +378,14 @@ public class DocumentAction extends Action
 		{
 			getRequiredMetadataNames(format_elem, meta_names);
 		}
-		
+
 		Element extraMetaListElem = (Element) GSXML.getChildByTagName(request, GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
-		if(extraMetaListElem != null)
+		if (extraMetaListElem != null)
 		{
 			NodeList extraMetaList = extraMetaListElem.getElementsByTagName(GSXML.EXTRA_METADATA);
-			for(int i = 0; i < extraMetaList.getLength(); i++)
+			for (int i = 0; i < extraMetaList.getLength(); i++)
 			{
-				meta_names.add(((Element)extraMetaList.item(i)).getAttribute(GSXML.NAME_ATT));
+				meta_names.add(((Element) extraMetaList.item(i)).getAttribute(GSXML.NAME_ATT));
 			}
 		}
 
@@ -617,7 +617,7 @@ public class DocumentAction extends Action
 						}
 					}
 				}
-				
+
 				the_document.setAttribute(GSXML.NODE_ID_ATT, modified_doc_id);
 			}
 			else
@@ -635,7 +635,7 @@ public class DocumentAction extends Action
 				}
 			}
 		}
-		logger.debug("(DocumentAction) Page:\n" + this.converter.getPrettyString(result));
+		logger.debug("(DocumentAction) Page:\n" + GSXML.xmlNodeToString(result));
 		return result;
 	}
 
@@ -691,7 +691,7 @@ public class DocumentAction extends Action
 		if (format_elem != null)
 		{
 			Element global_format_elem = (Element) GSXML.getChildByTagName(format_resp, GSXML.GLOBAL_FORMAT_ELEM);
-			if(global_format_elem != null)
+			if (global_format_elem != null)
 			{
 				GSXSLT.mergeFormatElements(format_elem, global_format_elem, false);
 			}
