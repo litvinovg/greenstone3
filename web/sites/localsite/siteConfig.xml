@@ -17,6 +17,7 @@
 		<serviceRack name="BerryBasket"/>
 		<serviceRack name="GS2Construct"/>
 		<serviceRack name="DebugService"/>
+		<serviceRack name="UserTracker"/>
 		<serviceRack name="CrossCollectionSearch">
 			<format>
 				<!-- this format is used for the search results -->
