@@ -285,7 +285,7 @@
 												.css("display", "block")
 												.css("z-index", "100")
 												.css("list-style", "none outside none")
-												.css("margin-left", "0px")
+												.css("margin", "0px")
 												.css("padding", "0px")
 												.css("font-size", "90%");
 												
@@ -343,6 +343,7 @@
 
 											var buttonLeft = button.offset().left;
 											var buttonTop = button.offset().top;
+
 											var buttonHeight = button.height();
 
 											menu.offset({top: buttonTop + buttonHeight + 4, left: buttonLeft});
