@@ -482,15 +482,20 @@ function extractFilteredPagesToOwnDocument()
 	}
 	sectionString += "]";
 	
-	var url = "cgi-bin/document-extract.pl?a=extract-archives-doc&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&json-sections=" + sectionString;// + "&json-metadata=[{"metaname":"dc.Title","metavalue":"All Black Rugy Success","metamode":"accumulate"]"
+	var url = "cgi-bin/document-extract.pl?a=extract-archives-doc&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&json-sections=" + sectionString + "&site=" + gs.xsltParams.site_name;// + "&json-metadata=[{"metaname":"dc.Title","metavalue":"All Black Rugy Success","metamode":"accumulate"]"
+	$("#extractDocButton").attr("disabled", "disabled").html("Exracting document...");
 	$.ajax(url)
 	.success(function(response)
 	{
-		console.log(response);
+		$("#extractDocButton").html("Building collection...");
 		gs.functions.buildCollections([gs.cgiParams.c], function()
 		{
-			console.log("DONE BUILDING!");
+			$("#extractDocButton").removeAttr("disabled").html("Extract these pages to document");
 		});
+	})
+	.error(function()
+	{
+		$("#extractDocButton").removeAttr("disabled").html("Extract these pages to document");
 	});
 }
 
