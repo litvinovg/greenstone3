@@ -942,7 +942,6 @@ public class Authentication extends ServiceRack
 		}
 		else
 		{
-			System.err.println("ADDING " + newUsername + " " + newPassword);
 			boolean success = derbyWrapper.addUser(newUsername, newPassword, newGroups, newStatus, newComment, newEmail);
 			derbyWrapper.closeDatabase();
 
