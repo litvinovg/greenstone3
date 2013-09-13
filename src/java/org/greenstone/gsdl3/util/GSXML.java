@@ -91,7 +91,7 @@ public class GSXML
 	public static final String INDEX_ELEM = "index";
 	public static final String INDEX_STEM_ELEM = "indexStem";
 	public static final String INDEX_OPTION_ELEM = "indexOption";
-  public static final String PARAM_DEFAULT_ELEM = "paramDefault";
+	public static final String PARAM_DEFAULT_ELEM = "paramDefault";
 	public static final String BROWSE_ELEM = "browse";
 	public static final String DISPLAY_ELEM = "display";
 	public static final String LEVEL_ELEM = "level";
@@ -1340,8 +1340,67 @@ public class GSXML
 				sb.append('"');
 			}
 		}
-		NodeList children = e.getChildNodes();
 
+		if (e.hasChildNodes())
+		{
+			boolean hasElements = false;
+			boolean indentSwapped = false;
+
+			Node child = e.getFirstChild();
+			do
+			{
+				if (child.getNodeType() == Node.ELEMENT_NODE)
+				{
+					hasElements = true;
+				}
+				if (child.getNodeType() == Node.TEXT_NODE && indent)
+				{
+					if (child.getNodeValue() != null && child.getNodeValue().trim().length() > 0)
+					{
+						indentSwapped = true;
+						indent = false;
+					}
+				}
+			} while ((child = child.getNextSibling()) != null);
+
+			sb.append(">");
+			if (hasElements && indent)
+			{
+				sb.append("\n");
+			}
+
+			child = e.getFirstChild();
+			do
+			{
+				xmlNodeToString(sb, child, indent, indentString, depth + 1);
+			} while ((child = child.getNextSibling()) != null);
+
+			if (indent)
+			{
+				for (int i = 0; i < depth; i++)
+				{
+					sb.append(indentString);
+				}
+			}
+
+			sb.append("</" + e.getNodeName() + ">");
+
+			if ((hasElements && indent) || indentSwapped)
+			{
+				sb.append("\n");
+			}
+		}
+		else
+		{
+			sb.append("/>");
+
+			if (indent)
+			{
+				sb.append("\n");
+			}
+		}
+
+		/*
 		boolean hasElements = false;
 		boolean indentSwapped = false;
 		for (int i = 0; i < children.getLength(); i++)
@@ -1398,6 +1457,7 @@ public class GSXML
 				sb.append("\n");
 			}
 		}
+		*/
 	}
 
 	public static void printXMLNode(Node e, int depth, boolean printText)
