@@ -222,6 +222,8 @@ public class URLFilter implements Filter
 							{
 								ServletOutputStream out = response.getOutputStream();
 								out.write(FileUtils.readFileToByteArray(baseInterfaceFile));
+								out.flush();
+								out.close();
 								return;
 							}
 						}
