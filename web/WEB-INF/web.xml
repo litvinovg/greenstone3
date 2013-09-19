@@ -287,9 +287,6 @@ http://jakarta.apache.org/tomcat/tomcat-4.0-doc/appdev/web.xml.txt
 
          will be mapped to the "controller" servlet.
 
-		Note: context path is determined by the servlet container - 
-		in Tomcat, specified in server.xml -kjdon
-		
          You may define any number of servlet mappings, including zero.
          It is also legal to define more than one mapping for the same
          servlet, if you wish to.

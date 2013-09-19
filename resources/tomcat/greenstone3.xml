@@ -2,7 +2,7 @@
 <!-- set reloadable to false for a production version. if true, automatically reloads the webapp if it detects changes in classes or lib directories -->
 <!-- see http://tomcat.apache.org/tomcat-5.5-doc/config/context.html for more Context attributes -->
 		
-<Context path="/greenstone3" 
+<Context
 	docBase="@gsdl3webwritablehome@" 
 	aliases="/interfaces=@gsdl3webhome@/interfaces,/sites=@gsdl3webhome@/sites"
 	debug="1" reloadable="true" 
