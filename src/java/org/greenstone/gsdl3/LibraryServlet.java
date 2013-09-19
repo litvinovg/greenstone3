@@ -74,6 +74,8 @@ public class LibraryServlet extends BaseGreenstoneServlet
 	 */
 	protected String default_lang = null;
 
+  /** We record the library name for later */
+  protected String library_name = null;
 	/** Whether or not client-side XSLT support should be exposed */
 	protected boolean supports_client_xslt = false;
 
@@ -126,7 +128,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		// disable preferences - does this work anyway??
 		//System.setProperty("java.util.prefs.PreferencesFactory", "org.greenstone.gsdl3.util.DisabledPreferencesFactory");
 
-		String library_name = config.getInitParameter(GSConstants.LIBRARY_NAME);
+		library_name = config.getInitParameter(GSConstants.LIBRARY_NAME);
 		String interface_name = config.getInitParameter(GSConstants.INTERFACE_NAME);
 
 		String allowXslt = (String) config.getInitParameter(GSConstants.ALLOW_CLIENT_SIDE_XSLT);
@@ -755,12 +757,11 @@ public class LibraryServlet extends BaseGreenstoneServlet
 
 		String requestedURL = request.getRequestURL().toString();
 		String baseURL = "";
-		if (requestedURL.indexOf(this.getServletName()) != -1)
+		if (requestedURL.indexOf(library_name) != -1)
 		{
-			baseURL = requestedURL.substring(0, requestedURL.indexOf(this.getServletName()));
+			baseURL = requestedURL.substring(0, requestedURL.indexOf(library_name));
 			xml_request.setAttribute("baseURL", baseURL);
 		}
-
 		String fullURL;
 		if (request.getQueryString() != null)
 		{
@@ -872,7 +873,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 					{
 						queryString = "?" + request.getQueryString().replace("&", "&amp;");
 					}
-					urlParam.setAttribute(GSXML.VALUE_ATT, this.getServletName() + queryString);
+					urlParam.setAttribute(GSXML.VALUE_ATT, library_name + queryString);
 					paramList.appendChild(urlParam);
 
 					Node loginPageResponse = this.recept.process(loginPageMessage);
