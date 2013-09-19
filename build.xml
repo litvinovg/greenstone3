@@ -1284,14 +1284,26 @@
         <filter token="shutdown-port" value="${tomcat.shutdown.port}"/>
       </filterset>
     </copy>
-    <!-- set up the greenstone3 context -->
-    <copy file="${basedir}/resources/tomcat/greenstone3.xml" tofile="${packages.home}/tomcat/conf/Catalina/localhost/greenstone3.xml" overwrite="true">
+    <!-- set up the greenstone3 context, it may have a custom name specified in build.properties -->
+	<if><bool><not><equals arg1="greenstone3" arg2="${custom.context}"></equals></not></bool>
+		<copy file="${basedir}/resources/tomcat/greenstone3.xml" tofile="${basedir}/resources/tomcat/${custom.context}.xml" overwrite="true"/>
+	</if>
+    <copy file="${basedir}/resources/tomcat/${custom.context}.xml" tofile="${packages.home}/tomcat/conf/Catalina/localhost/${custom.context}.xml" overwrite="true">
       <filterset>
         <filter token="gsdl3webhome" value="${web.home}"/>
         <filter token="gsdl3webwritablehome" value="${web.writablehome}"/>
 	<filter token="privilegedattribute" value ="${privileged.attribute}"/>
       </filterset>
     </copy>
+	<if>
+		<bool>
+			<and>
+				<available file="${packages.home}/tomcat/conf/Catalina/localhost/greenstone3.xml"/>
+				<not><equals arg1="greenstone3" arg2="${custom.context}"></equals></not>
+			</and>
+		</bool>
+		<delete file="${packages.home}/tomcat/conf/Catalina/localhost/greenstone3.xml"/>
+	</if>
 	
     <!-- set up the greenstone3 web.xml file -->
     <copy file="${basedir}/resources/tomcat/web.xml" tofile="${packages.home}/tomcat/conf/web.xml" overwrite="true">
@@ -1300,7 +1312,7 @@
       </filterset>
     </copy>
   </target>
-
+ 
   <target name="configure-tomcat-external" depends="init" unless="tomcat.islocal">
     <!-- re-setup the server.xml file -->
     <!-- need to edit the config file, or do we get the user to do this???-->

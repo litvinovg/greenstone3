@@ -30,6 +30,12 @@ server.keep.port=false
 # default servlet to start with
 server.default.servlet=/library
 
+# The context name of your GS3 digital library. By default this will be "greenstone3". 
+# Ensure this has a value. If you change this multiple times, you need to remove the old versions
+# of <custom.context>.xml from GS3/packages/tomcat/conf/Catalina/localhost
+# does not contain previous 
+custom.context=greenstone3
+
 ##Browser setup
 browser.path=
 
