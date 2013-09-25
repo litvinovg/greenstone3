@@ -444,8 +444,19 @@
     <istrue value="${compile.cross}"/>
   </condition>
 
+  <!-- if we're told to work with gnome-lib, or if there's a gnome-lib-minimal that the user
+       has placed in gs2build/ext, then compile gs2build after sourcing gnome-lib environment -->
+  <condition property="opt.gnomelibext.arg" 
+	     value="--enable-gnome-lib-ext" else=" ">
+    <or>
+      <available file="${gs2build.home}/ext/gnome-lib-minimal" type="dir"/>
+      <istrue value="${use.gnomelib.ext}"/>
+      <istrue value="${checkout.gnomelib.ext}"/>
+    </or>
+   </condition>
+
 <!-- if you want to disable wvware, do so here: set the value (not else) field to contain minus-minus-disable-wvware -->
-  <condition property="gs2.opt.args" value=" " else="--disable-mg --disable-mgpp --disable-accentfold --disable-gdbm --disable-sqlite">
+  <condition property="gs2.opt.args" value="${opt.gnomelibext.arg} " else="--disable-mg --disable-mgpp --disable-accentfold --disable-gdbm --disable-sqlite">
     <istrue value="${with.jni}"/>
   </condition>
   <condition property="gs2.compile.target" value="with-jni" else="without-jni">
@@ -632,34 +643,11 @@
       includes="*.sh"/>
     <chmod dir="${basedir}/bin/script" perm="ugo+rx" 
       includes="*.sh,*.pl"/>
-
-    <!-- if the user has set checkout.gnomelib.ext to true, and is using a compiled version of gnome-lib
-	 (it would have been compiled up by this stage), remind them to source devel.bash before compiling -->
-    <condition property="run.source.devel">
-      <available file="${basedir}/gs2build/ext/gnome-lib/${os.bin.dir}" type="dir"/>
-    </condition>
-    <if><bool>
-	<and>
-	  <istrue value="${checkout.gnomelib.ext}"/>
-	  <istrue value="${run.source.devel}"/>
-	</and>
-      </bool>
-<!-- This is automatically done now in the gs2build/common-src/packages/configure script if the
-     gnomelib.ext directory is detected 
-
-      <echo>
-	*********************************************
-	As you have set checkout.gnomelib.ext, 
-	before running ant install next,
-	run source devel.bash from 
-	${basedir}/gs2build/ext/gnome-lib 
-	*********************************************</echo>
--->
-    </if>
   </target>
 
   <!-- install-common-src and install-collection-building are mutually exclusive and either one or the other will be done depending on whether collection building is enabled or not -->
-  <target name="install" depends="init,install-common-src,install-collection-building,install-runtime,install-solr-ext,setup-for-eclipse"
+  <!--before configuring build-src, make sure that gnome-lib is compiled up-->
+  <target name="install" depends="init,compile-gnome-lib,install-common-src,install-collection-building,install-runtime,install-solr-ext,setup-for-eclipse"
     description="Install Greenstone 3. Use this when you first checkout the code: 'ant prepare new-install'."/>
 
   <target name="install-common-src" depends="init" 
@@ -2630,23 +2618,41 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <property name="gnome.lib.src.dir" value="${basedir}/gs2build/ext/gnome-lib"/>
     <property name="gnome.lib.compiled.dir" value="${basedir}/gs2build/ext/gnome-lib/${os.bin.dir}"/>
 
-    <condition property="gnome.src.lib.present">
-      <available file="${gnome.lib.src.dir}" type="dir" />
-    </condition>
-    <condition property="gnome.compiled.lib.present">
+    <condition property="gnome.compiled.lib.present" value="true" else="false">
       <available file="${gnome.lib.compiled.dir}" type="dir"/>
     </condition>
-    <condition property="gnome.lib.min.present">
+    <condition property="gnome.lib.min.present" value="true" else="false">
       <available file="${basedir}/gs2build/ext/gnome-lib-minimal" type="dir" />
     </condition>
+
+    <!-- Make sure to checkout gnome-lib if it was not checked out at this stage 
+	 since we're instructed to do so in th pre-condition to this target -->
+    <if>
+      <bool>
+	<and>
+	  <istrue value="${checkout.gnomelib.ext}"/>
+	  <not><istrue value="${gnome.lib.min.present}"/></not>
+	  <not><istrue value="${gnome.src.lib.present}"/></not>
+	</and>
+      </bool>
+      <antcall target="checkout-gnome-lib"/>
+    </if>
+
+    <!-- Now check we have the gnome-lib src folder at last -->
+    <condition property="gnome.src.lib.present" value="true" else="false">
+      <available file="${gnome.lib.src.dir}" type="dir" />
+    </condition>
+
+    <!--<echo>MIN: ${gnome.lib.min.present}
+      SRC LIB: ${gnome.src.lib.present}
+      COMPILED: ${gnome.compiled.lib.present}</echo>-->
 
     <if>
       <bool>
 	<and>
-	  <!-- <istrue value="${checkout.gnomelib.ext}"/> make sure user wants gnome-lib -->
-	  <not><isset property="${gnome.lib.min.present}"/></not> <!-- no gnome-lib-minimal binary present -->
+	  <isfalse value="${gnome.lib.min.present}"/> <!-- no gnome-lib-minimal binary present -->
 	  <istrue value="${gnome.src.lib.present}"/> <!-- gnome-lib folder for compilation is present-->
-	  <not><istrue value="${gnome.compiled.lib.present}"/></not> <!-- gnome-lib not yet compiled, so no gnome-lib/os subfolder yet -->
+	  <isfalse value="${gnome.compiled.lib.present}"/> <!-- gnome-lib not yet compiled, so no gnome-lib/os subfolder yet -->
 	</and>
       </bool>
 
@@ -2665,7 +2671,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       </bool>
 
       <antcall target="checkout-gnome-lib"/>
-      <antcall target="compile-gnome-lib"/>
+      <!--Compilation of gnome-lib happens during ant install, just before configuring (common-src and) build-src-->
 
       <else>
 	<echo>**** Not preparing gnome-lib:</echo>
