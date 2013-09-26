@@ -647,7 +647,7 @@
 
   <!-- install-common-src and install-collection-building are mutually exclusive and either one or the other will be done depending on whether collection building is enabled or not -->
   <!--before configuring build-src, make sure that gnome-lib is compiled up-->
-  <target name="install" depends="init,compile-gnome-lib,install-common-src,install-collection-building,install-runtime,install-solr-ext,setup-for-eclipse"
+  <target name="install" depends="init,compile-imagemagick,compile-gnome-lib,install-common-src,install-collection-building,install-runtime,install-solr-ext,setup-for-eclipse"
     description="Install Greenstone 3. Use this when you first checkout the code: 'ant prepare new-install'."/>
 
   <target name="install-common-src" depends="init" 
@@ -2541,7 +2541,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       </bool>
 
       <antcall target="checkout-imagemagick"/>
-      <antcall target="compile-imagemagick"/>
+      <!--Compilation of imagemagick now happens during ant install, still before configuring the src code, as before -->
 
       <else>
 	<echo>**** Not preparing imagemagick:</echo>
@@ -2582,7 +2582,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <property name="imagemagick.src.dir" value="${gs2build.home}/ext/imagemagick"/>
     <property name="imagemagick.compiled.dir" value="${gs2build.home}/ext/imagemagick/${os.bin.dir}"/>
 
-    <condition property="imagemagick.src.present">
+    <condition property="imagemagick.src.present.firstcheck">
       <available file="${imagemagick.src.dir}" type="dir" />
     </condition>
     <condition property="imagemagick.compiled.present">
@@ -2592,12 +2592,25 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <available file="${basedir}/wherever/the/imgmagick/binary/is/to/be/found" type="dir" />
     </condition>-->
 
+    <!-- imagemagick will only be checked out if the user set the checkout.imagemagick.ext in build.properties -->
+    <if>
+      <bool>
+	<isfalse value="${imagemagick.src.present.firstcheck}"/>
+      </bool>
+      <antcall target="checkout-imagemagick"/>
+    </if>
+
+    <!-- keep track of whether the imagemagick src is now indeed present. Need to know this for a subsequent test -->
+    <condition property="imagemagick.src.present">
+      <available file="${imagemagick.src.dir}" type="dir" />
+    </condition>
+
     <if>
       <bool>
 	<and>
 	  <istrue value="${imagemagick.src.present}"/> <!-- imagemagick src code is present -->
-	  <not><istrue value="${imagemagick.compiled.present}"/></not> <!-- imagemagick src not compiled yet, so no imagemagick/os subfolder yet -->
-	  </and>
+	  <isfalse value="${imagemagick.compiled.present}"/> <!-- imagemagick src not compiled yet, so no imagemagick/os subfolder yet -->
+	</and>
       </bool>
       <!-- then compile it. Only necessary for mac/linux, since windows has a stable working binary of imagemagick -->
       <exec executable="/bin/bash" dir="${imagemagick.src.dir}" failonerror="true">
@@ -2618,6 +2631,9 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <property name="gnome.lib.src.dir" value="${basedir}/gs2build/ext/gnome-lib"/>
     <property name="gnome.lib.compiled.dir" value="${basedir}/gs2build/ext/gnome-lib/${os.bin.dir}"/>
 
+    <condition property="gnome.src.lib.present.firstcheck" value="true" else="false">
+      <available file="${gnome.lib.src.dir}" type="dir" />
+    </condition>
     <condition property="gnome.compiled.lib.present" value="true" else="false">
       <available file="${gnome.lib.compiled.dir}" type="dir"/>
     </condition>
@@ -2630,15 +2646,14 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <if>
       <bool>
 	<and>
-	  <istrue value="${checkout.gnomelib.ext}"/>
-	  <not><istrue value="${gnome.lib.min.present}"/></not>
-	  <not><istrue value="${gnome.src.lib.present}"/></not>
+	  <isfalse value="${gnome.lib.min.present}"/>
+	  <isfalse value="${gnome.src.lib.present.firstcheck}"/>
 	</and>
       </bool>
       <antcall target="checkout-gnome-lib"/>
     </if>
 
-    <!-- Now check we have the gnome-lib src folder at last -->
+    <!-- Keep track of whether we have the gnome-lib src folder now. Need to know this for a subsequent test -->
     <condition property="gnome.src.lib.present" value="true" else="false">
       <available file="${gnome.lib.src.dir}" type="dir" />
     </condition>
