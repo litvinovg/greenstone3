@@ -37,28 +37,30 @@ public class NoCollQueryAction extends Action
 	{
 
 		Element message = this.converter.nodeToElement(message_node);
-
+	    Document doc = message.getOwnerDocument();
+	    
 		// get the request - assume there is only one
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 
 		// create the return message
-		Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element result = doc.createElement(GSXML.MESSAGE_ELEM);
 		// for now we only have one type of query - subaction not used
 		Element response = basicQuery(request);
-		result.appendChild(this.doc.importNode(response, true));
+		result.appendChild(doc.importNode(response, true));
 		return result;
 	}
 
 	/**
 	 * a generic query handler this gets the service description, does the query
-	 * (just passes all teh params to the service, then gets the titles for any
+	 * (just passes all the params to the service, then gets the titles for any
 	 * results
 	 */
 	protected Element basicQuery(Element request)
 	{
-
 		// the result
-		Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Document doc = request.getOwnerDocument();
+		
+		Element page_response = doc.createElement(GSXML.RESPONSE_ELEM);
 
 		// extract the params from the cgi-request, and check that we have a coll specified
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -71,8 +73,8 @@ public class NoCollQueryAction extends Action
 			// display the query page
 			// the only info we need to return is the collection list cos the xslt does teh rest
 
-			Element coll_list = getCollectionList(userContext);
-			page_response.appendChild(this.doc.importNode(coll_list, true));
+			Element coll_list = getCollectionList(doc, userContext);
+			page_response.appendChild(doc.importNode(coll_list, true));
 			return page_response;
 
 		}
@@ -88,8 +90,8 @@ public class NoCollQueryAction extends Action
 		if (query_coll_list == null || query_coll_list.equals(""))
 		{
 			logger.error("no collections were specified!");
-			Element coll_list = getCollectionList(userContext);
-			page_response.appendChild(this.doc.importNode(coll_list, true));
+			Element coll_list = getCollectionList(doc,userContext);
+			page_response.appendChild(doc.importNode(coll_list, true));
 			return page_response;
 		}
 
@@ -99,18 +101,18 @@ public class NoCollQueryAction extends Action
 		{ // no query
 			return page_response;
 		}
-		Element query_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		GSXML.addParametersToList(this.doc, query_param_list, service_params);
+		Element query_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		GSXML.addParametersToList(doc, query_param_list, service_params);
 
 		// we will do a query for each coll
 		String[] colls = query_coll_list.split(",");
 
-		Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_query_message = doc.createElement(GSXML.MESSAGE_ELEM);
 
 		for (int i = 0; i < colls.length; i++)
 		{
 			String to = GSPath.appendLink(colls[i], service_name);
-			Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+			Element mr_query_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 			mr_query_message.appendChild(mr_query_request);
 			mr_query_request.appendChild(query_param_list.cloneNode(true));
 
@@ -120,7 +122,7 @@ public class NoCollQueryAction extends Action
 		Element mr_query_response = (Element) this.mr.process(mr_query_message);
 
 		// get the Title metadata for each node - need Node title and root title
-		Element mr_meta_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_meta_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		NodeList responses = mr_query_response.getElementsByTagName(GSXML.RESPONSE_ELEM);
 		for (int j = 0; j < responses.getLength(); j++)
 		{
@@ -129,14 +131,14 @@ public class NoCollQueryAction extends Action
 			{
 				String coll_name = extractCollName(((Element) responses.item(j)).getAttribute(GSXML.FROM_ATT));
 				String path = GSPath.appendLink(coll_name, "DocumentMetadataRetrieve");
-				Element mr_meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, path, userContext);
+				Element mr_meta_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, path, userContext);
 				mr_meta_message.appendChild(mr_meta_request);
-				mr_meta_request.appendChild(this.doc.importNode(document_list, true));
+				mr_meta_request.appendChild(doc.importNode(document_list, true));
 				// metadata params 
-				Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-				Element param = GSXML.createParameter(this.doc, "metadata", "Title");
+				Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+				Element param = GSXML.createParameter(doc, "metadata", "Title");
 				param_list.appendChild(param);
-				param = GSXML.createParameter(this.doc, "metadata", "root_Title");
+				param = GSXML.createParameter(doc, "metadata", "root_Title");
 				param_list.appendChild(param);
 				mr_meta_request.appendChild(param_list);
 
@@ -147,7 +149,7 @@ public class NoCollQueryAction extends Action
 		Element mr_meta_response = (Element) this.mr.process(mr_meta_message);
 
 		// the result 
-		Element result_doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element result_doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		page_response.appendChild(result_doc_list);
 
 		responses = mr_meta_response.getElementsByTagName(GSXML.RESPONSE_ELEM);
@@ -181,12 +183,12 @@ public class NoCollQueryAction extends Action
 
 	}
 
-	protected Element getCollectionList(UserContext userContext)
+	protected Element getCollectionList(Document doc, UserContext userContext)
 	{
 
 		// first, get the message router info
-		Element coll_list_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element coll_list_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
+		Element coll_list_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element coll_list_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
 		coll_list_message.appendChild(coll_list_request);
 		Element coll_list_response = (Element) this.mr.process(coll_list_message);
 		if (coll_list_response == null)
@@ -198,17 +200,17 @@ public class NoCollQueryAction extends Action
 		// second, get the display info for each collection 
 		NodeList colls = coll_list_response.getElementsByTagName(GSXML.COLLECTION_ELEM);
 
-		Element coll_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		Element param = GSXML.createParameter(this.doc, GSXML.SUBSET_PARAM, GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+		Element coll_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element param = GSXML.createParameter(doc, GSXML.SUBSET_PARAM, GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
 		coll_param_list.appendChild(param);
 		// we will send all the requests in a single message
-		Element metadata_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element metadata_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		for (int i = 0; i < colls.getLength(); i++)
 		{
 			Element c = (Element) colls.item(i);
 			String name = c.getAttribute(GSXML.NAME_ATT);
 
-			Element metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, name, userContext);
+			Element metadata_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, name, userContext);
 			metadata_request.appendChild(coll_param_list.cloneNode(true));
 			metadata_message.appendChild(metadata_request);
 		}

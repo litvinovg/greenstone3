@@ -42,12 +42,13 @@ public class DepositorAction extends Action
 	public Node process(Node message)
 	{
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
-
+		Document doc = request.getOwnerDocument();
+		
 		UserContext uc = new UserContext((Element) request);
 		String currentUsername = uc.getUsername();
 
-		Element responseMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element response = GSXML.createBasicResponse(this.doc, this.getClass().getSimpleName());
+		Element responseMessage = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element response = GSXML.createBasicResponse(doc, this.getClass().getSimpleName());
 		responseMessage.appendChild(response);
 
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -225,18 +226,18 @@ public class DepositorAction extends Action
 			callToPage.setAttribute("name", "wizardPage" + pageNum);
 			formContainer.appendChild(callToPage);
 
-			Element cachedValueElement = this.doc.createElement("cachedValues");
+			Element cachedValueElement = doc.createElement("cachedValues");
 			response.appendChild(cachedValueElement);
 			try
 			{
 				for (int i = pageNum; i > 0; i--)
 				{
-					Element page = this.doc.createElement("pageCache");
+					Element page = doc.createElement("pageCache");
 					page.setAttribute("pageNum", "" + i);
 					String cachedValues = database.getUserData(currentUsername, "DE___" + collection + "___" + i + "___CACHED_VALUES");
 					if (cachedValues != null)
 					{
-						page.appendChild(this.doc.createTextNode(cachedValues));
+						page.appendChild(doc.createTextNode(cachedValues));
 						cachedValueElement.appendChild(page);
 					}
 				}
@@ -286,7 +287,7 @@ public class DepositorAction extends Action
 				catch (Exception ex)
 				{
 					ex.printStackTrace();
-					GSXML.addError(this.doc, responseMessage, "Failed to copy the deposited file into the collection.");
+					GSXML.addError(doc, responseMessage, "Failed to copy the deposited file into the collection.");
 					return responseMessage;
 				}
 
@@ -330,26 +331,26 @@ public class DepositorAction extends Action
 					ex.printStackTrace();
 				}
 
-				Element buildMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-				Element buildRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, "ImportCollection", uc);
+				Element buildMessage = doc.createElement(GSXML.MESSAGE_ELEM);
+				Element buildRequest = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, "ImportCollection", uc);
 				buildMessage.appendChild(buildRequest);
 
-				Element paramListElem = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+				Element paramListElem = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 				buildRequest.appendChild(paramListElem);
 
-				Element collectionParam = this.doc.createElement(GSXML.PARAM_ELEM);
+				Element collectionParam = doc.createElement(GSXML.PARAM_ELEM);
 				paramListElem.appendChild(collectionParam);
 				collectionParam.setAttribute(GSXML.NAME_ATT, GSXML.COLLECTION_ATT);
 				collectionParam.setAttribute(GSXML.VALUE_ATT, collection);
 
-				Element documentsParam = this.doc.createElement(GSXML.PARAM_ELEM);
+				Element documentsParam = doc.createElement(GSXML.PARAM_ELEM);
 				paramListElem.appendChild(documentsParam);
 				documentsParam.setAttribute(GSXML.NAME_ATT, "documents");
 				documentsParam.setAttribute(GSXML.VALUE_ATT, fileToAdd);
 
 				Element buildResponseMessage = (Element) this.mr.process(buildMessage);
 
-				response.appendChild(this.doc.importNode(buildResponseMessage, true));
+				response.appendChild(doc.importNode(buildResponseMessage, true));
 			}
 		}
 		else if (subaction.toLowerCase().equals(DE_CLEAR_CACHE))
@@ -363,20 +364,20 @@ public class DepositorAction extends Action
 		}
 		else
 		{
-			Element depositorPage = this.doc.createElement("depositorPage");
+			Element depositorPage = doc.createElement("depositorPage");
 			response.appendChild(depositorPage);
 
-			Element collList = getCollectionsInSite();
-			depositorPage.appendChild(this.doc.importNode(collList, true));
+			Element collList = getCollectionsInSite(doc);
+			depositorPage.appendChild(doc.importNode(collList, true));
 		}
 
 		return responseMessage;
 	}
 
-	public Element getCollectionsInSite()
+	public Element getCollectionsInSite(Document doc) 
 	{
-		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
+		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
 		message.appendChild(request);
 		Element responseMessage = (Element) this.mr.process(message);
 

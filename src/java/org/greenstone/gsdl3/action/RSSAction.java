@@ -3,6 +3,7 @@ package org.greenstone.gsdl3.action;
 import org.greenstone.gsdl3.util.*;
 
 // XML classes
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
@@ -25,9 +26,9 @@ public class RSSAction extends Action
 	/** process a request */
 	public Node process(Node message_node)
 	{
-
 		Element message = this.converter.nodeToElement(message_node);
-
+	    Document doc = message.getOwnerDocument();
+	    
 		// assume only one request
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 
@@ -44,8 +45,8 @@ public class RSSAction extends Action
 		// for now get this again from the service. 
 		// this should be cached somehow later on. 
     
-		Element mr_request_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element rss_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		Element mr_request_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element rss_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		mr_request_message.appendChild(rss_request);
 
 		Element rss_response = (Element) this.mr.process(mr_request_message);
@@ -57,8 +58,8 @@ public class RSSAction extends Action
 		addSiteMetadata(rss_response, userContext);
 		addInterfaceOptions(rss_response);
 
-		Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		result.appendChild(this.doc.importNode(rss_response, true));
+		Element result = doc.createElement(GSXML.MESSAGE_ELEM);
+		result.appendChild(doc.importNode(rss_response, true));
 		return result;
 
 	}

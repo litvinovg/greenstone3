@@ -9,6 +9,7 @@ import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.util.GlobalProperties;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -25,6 +26,8 @@ public class PageAction extends Action
 	public Node process(Node message_node)
 	{
 		Element message = this.converter.nodeToElement(message_node);
+	    Document doc = message.getOwnerDocument();
+	    
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 		Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		String collection = "";
@@ -43,7 +46,7 @@ public class PageAction extends Action
 		{ // if no page specified, assume home page
 			page_name = HOME_PAGE;
 		}
-		Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element result = doc.createElement(GSXML.MESSAGE_ELEM);
 		Element response;
 		if (page_name.equals(HOME_PAGE))
 		{
@@ -65,8 +68,8 @@ public class PageAction extends Action
 			response = unknownPage(request);
 		}
 
-		Element formatMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element formatRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, collection, new UserContext(request));
+		Element formatMessage = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element formatRequest = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_FORMAT, collection, new UserContext(request));
 		formatMessage.appendChild(formatRequest);
 		Element formatResponseMessage = (Element) this.mr.process(formatMessage);
 		Element formatResponse = (Element) GSXML.getChildByTagName(formatResponseMessage, GSXML.RESPONSE_ELEM);
@@ -77,7 +80,7 @@ public class PageAction extends Action
 			response.appendChild(globalFormat);
 		}
 
-		result.appendChild(this.doc.importNode(response, true));
+		result.appendChild(doc.importNode(response, true));
 		logger.debug("page action result: " + this.converter.getPrettyString(result));
 
 		return result;
@@ -85,10 +88,12 @@ public class PageAction extends Action
 
 	protected Element homePage(Element request)
 	{
+		Document doc = request.getOwnerDocument();
+		
 		UserContext userContext = new UserContext(request);
 		// first, get the message router info
-		Element info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element coll_list_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
+		Element info_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element coll_list_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
 		info_message.appendChild(coll_list_request);
 		Element info_response_message = (Element) this.mr.process(info_message);
 		if (info_response_message == null)
@@ -112,7 +117,7 @@ public class PageAction extends Action
 			NodeList colls = GSXML.getChildrenByTagName(collection_list, GSXML.COLLECTION_ELEM);
 			if (colls.getLength() > 0)
 			{
-				sendMultipleRequests(colls, null, GSXML.REQUEST_TYPE_DESCRIBE, userContext);
+				sendMultipleRequests(doc, colls, null, GSXML.REQUEST_TYPE_DESCRIBE, userContext);
 			}
 		}
 
@@ -123,7 +128,7 @@ public class PageAction extends Action
 			NodeList services = GSXML.getChildrenByTagName(service_list, GSXML.SERVICE_ELEM);
 			if (services.getLength() > 0)
 			{
-				sendMultipleRequests(services, null, GSXML.REQUEST_TYPE_DESCRIBE, userContext);
+				sendMultipleRequests(doc, services, null, GSXML.REQUEST_TYPE_DESCRIBE, userContext);
 			}
 		}
 
@@ -134,7 +139,7 @@ public class PageAction extends Action
 			NodeList clusters = GSXML.getChildrenByTagName(cluster_list, GSXML.CLUSTER_ELEM);
 			if (clusters.getLength() > 0)
 			{
-				sendMultipleRequests(clusters, null, GSXML.REQUEST_TYPE_DESCRIBE, userContext);
+				sendMultipleRequests(doc, clusters, null, GSXML.REQUEST_TYPE_DESCRIBE, userContext);
 
 			}
 		}
@@ -148,6 +153,8 @@ public class PageAction extends Action
 
 	protected Element aboutPage(Element request)
 	{
+		Document doc = request.getOwnerDocument();
+		
 		UserContext userContext = new UserContext(request);
 		// extract the params from the cgi-request, 
 		Element cgi_paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -158,16 +165,16 @@ public class PageAction extends Action
 		{
 			logger.error("about page requested with no collection or cluster specified!");
 			// return an empty response
-			Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+			Element response = doc.createElement(GSXML.RESPONSE_ELEM);
 			addSiteMetadata(response, userContext);
 			addInterfaceOptions(response);
 			return response;
 		}
 
 		// get the collection or cluster description
-		Element coll_about_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element coll_about_message = doc.createElement(GSXML.MESSAGE_ELEM);
 
-		Element coll_about_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, coll_name, userContext);
+		Element coll_about_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, coll_name, userContext);
 		coll_about_message.appendChild(coll_about_request);
 		Element coll_about_response = (Element) this.mr.process(coll_about_message);
 
@@ -212,7 +219,7 @@ public class PageAction extends Action
 		NodeList services = coll_about_response.getElementsByTagName(GSXML.SERVICE_ELEM);
 		if (services.getLength() > 0)
 		{
-			sendMultipleRequests(services, coll_name, GSXML.REQUEST_TYPE_DESCRIBE, userContext);
+			sendMultipleRequests(doc, services, coll_name, GSXML.REQUEST_TYPE_DESCRIBE, userContext);
 		}
 
 		Element response = (Element) GSXML.getChildByTagName(coll_about_response, GSXML.RESPONSE_ELEM);
@@ -230,6 +237,8 @@ public class PageAction extends Action
 	/** if we dont know the page type, use this method */
 	protected Element unknownPage(Element request)
 	{
+		Document doc = request.getOwnerDocument();
+		
 		UserContext userContext = new UserContext(request);
 		String page_name = request.getAttribute(GSXML.SUBACTION_ATT);
 
@@ -241,7 +250,7 @@ public class PageAction extends Action
 		if (coll_name == null || coll_name.equals(""))
 		{
 			// just return an empty response
-			Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+			Element response = doc.createElement(GSXML.RESPONSE_ELEM);
 			addSiteMetadata(response, userContext);
 			addInterfaceOptions(response);
 			return response;
@@ -251,9 +260,9 @@ public class PageAction extends Action
 
 		// if there is a service specified should we get the service description instead??
 		// get the collection or cluster description
-		Element coll_about_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element coll_about_message = doc.createElement(GSXML.MESSAGE_ELEM);
 
-		Element coll_about_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, coll_name, userContext);
+		Element coll_about_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, coll_name, userContext);
 		coll_about_message.appendChild(coll_about_request);
 
 		Element coll_about_response = (Element) this.mr.process(coll_about_message);
@@ -268,10 +277,10 @@ public class PageAction extends Action
 
 	}
 
-	protected boolean sendMultipleRequests(NodeList items, String path_prefix, String request_type, UserContext userContext)
+	protected boolean sendMultipleRequests(Document doc, NodeList items, String path_prefix, String request_type, UserContext userContext)
 	{
 		// we will send all the requests in a single message
-		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
 		for (int i = 0; i < items.getLength(); i++)
 		{
 			Element c = (Element) items.item(i);
@@ -280,7 +289,7 @@ public class PageAction extends Action
 			{
 				path = GSPath.appendLink(path_prefix, path);
 			}
-			Element request = GSXML.createBasicRequest(this.doc, request_type, path, userContext);
+			Element request = GSXML.createBasicRequest(doc, request_type, path, userContext);
 			message.appendChild(request);
 		}
 
@@ -316,25 +325,27 @@ public class PageAction extends Action
 
 	protected Element gli4gs3Page(Element request)
 	{
+		Document doc = request.getOwnerDocument();
+		
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 		String uid = request.getAttribute(GSXML.USER_ID_ATT);
 
-		Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element page_response = doc.createElement(GSXML.RESPONSE_ELEM);
 
-		Element applet_elem = this.doc.createElement("Applet");
+		Element applet_elem = doc.createElement("Applet");
 		page_response.appendChild(applet_elem);
 		applet_elem.setAttribute("ARCHIVE", "SignedGatherer.jar");
 		applet_elem.setAttribute("CODE", "org.greenstone.gatherer.GathererApplet");
 		applet_elem.setAttribute("CODEBASE", "applet");
 		applet_elem.setAttribute("HEIGHT", "50");
 		applet_elem.setAttribute("WIDTH", "380");
-		Element gwcgi_param_elem = this.doc.createElement("PARAM");
+		Element gwcgi_param_elem = doc.createElement("PARAM");
 		gwcgi_param_elem.setAttribute("name", "gwcgi");
 		String library_name = GlobalProperties.getGSDL3WebAddress();
 		gwcgi_param_elem.setAttribute("value", library_name);
 		applet_elem.appendChild(gwcgi_param_elem);
 
-		Element gsdl3_param_elem = this.doc.createElement("PARAM");
+		Element gsdl3_param_elem = doc.createElement("PARAM");
 		gsdl3_param_elem.setAttribute("name", "gsdl3");
 		gsdl3_param_elem.setAttribute("value", "true");
 		applet_elem.appendChild(gsdl3_param_elem);

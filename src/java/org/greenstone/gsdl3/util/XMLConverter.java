@@ -265,7 +265,7 @@ public class XMLConverter
 	}
 
 	/** creates a new empty DOM Document */
-	public static Document newDOM()
+	public Document newDOM()
 	{
 		Document doc = new DocumentImpl();
 		return doc;

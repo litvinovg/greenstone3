@@ -40,7 +40,8 @@ public class FormatAction extends Action {
     public Node process (Node message_node) {
 	
 	    Element message = this.converter.nodeToElement(message_node);
-
+	    Document doc = message.getOwnerDocument();
+	    
     	// assume only one request
 	    Element request = (Element)GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 	
@@ -50,7 +51,7 @@ public class FormatAction extends Action {
     	Element cgi_param_list = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 	    HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 
-    	Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
+    	Element result = doc.createElement(GSXML.MESSAGE_ELEM);
 	
 	    String coll = (String)params.get(GSParams.COLLECTION); //SYSTEM_CLUSTER);
         String service = (String)params.get(GSParams.SERVICE);
@@ -61,8 +62,8 @@ public class FormatAction extends Action {
             to = coll;
         }
 
-        Element mr_request_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-        Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT_STRING, to, userContext);
+        Element mr_request_message = doc.createElement(GSXML.MESSAGE_ELEM);
+        Element mr_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_FORMAT_STRING, to, userContext);
 
         mr_request.setAttribute("service", service);
         mr_request.setAttribute("subaction", subaction);
@@ -73,13 +74,13 @@ public class FormatAction extends Action {
 	
         String format_string = (String)params.get("data");
     
-        Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+        Element page_response = doc.createElement(GSXML.RESPONSE_ELEM);
 
         Iterator<String> it = params.keySet().iterator();
 
         if(subaction.equals("saveDocument"))
         {
-            Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
+            Element format = doc.createElement(GSXML.FORMAT_STRING_ELEM);
             try{
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder builder = factory.newDocumentBuilder();
@@ -87,7 +88,7 @@ public class FormatAction extends Action {
                 Document d = (Document) builder.parse( is );
                 Node n1 = d.getFirstChild();
 
-                Element format_statement = (Element) this.doc.importNode(n1, true);
+                Element format_statement = (Element) doc.importNode(n1, true);
                 format.appendChild(format_statement);
                 mr_request.appendChild(format);
             } catch( Exception ex ) {
@@ -125,8 +126,8 @@ public class FormatAction extends Action {
                 if(transformed.getNodeType() == Node.DOCUMENT_NODE)
                     transformed = ((Document)transformed).getDocumentElement(); 
 
-                Element format = this.doc.createElement(GSXML.FORMAT_STRING_ELEM);
-                format.appendChild(this.doc.importNode(transformed,true));
+                Element format = doc.createElement(GSXML.FORMAT_STRING_ELEM);
+                format.appendChild(doc.importNode(transformed,true));
                 mr_request.appendChild(format); 
                 logger.error("Transformed: "+transformed);
 
@@ -144,7 +145,7 @@ public class FormatAction extends Action {
 
         Node response_message = this.mr.process(mr_request_message);
 	
-        result.appendChild(GSXML.duplicateWithNewName(this.doc, (Element)GSXML.getChildByTagName(response_message, GSXML.RESPONSE_ELEM), GSXML.RESPONSE_ELEM, true));
+        result.appendChild(GSXML.duplicateWithNewName(doc, (Element)GSXML.getChildByTagName(response_message, GSXML.RESPONSE_ELEM), GSXML.RESPONSE_ELEM, true));
         return result;
 	
     }

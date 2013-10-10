@@ -81,10 +81,11 @@ public class DocumentAction extends Action
 		// for now, no subaction eventually we may want to have subactions such as text assoc or something ?
 
 		Element message = this.converter.nodeToElement(message_node);
-
+		Document doc = message.getOwnerDocument();
+		
 		// the response
-		Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element result = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element page_response = doc.createElement(GSXML.RESPONSE_ELEM);
 		result.appendChild(page_response);
 
 		// get the request - assume only one
@@ -173,12 +174,12 @@ public class DocumentAction extends Action
 
 		// the_document is where all the doc info - structure and metadata etc
 		// is added into, to be returned in the page
-		Element the_document = this.doc.createElement(GSXML.DOCUMENT_ELEM);
+		Element the_document = doc.createElement(GSXML.DOCUMENT_ELEM);
 		page_response.appendChild(the_document);
 
 		// create a basic doc list containing the current node
-		Element basic_doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
-		Element current_doc = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+		Element basic_doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element current_doc = doc.createElement(GSXML.DOC_NODE_ELEM);
 		basic_doc_list.appendChild(current_doc);
 		if (document_id != null)
 		{
@@ -206,11 +207,11 @@ public class DocumentAction extends Action
 		}
 
 		// Create a parameter list to specify the required structure information
-		Element ds_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element ds_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 
 		if (service_params != null)
 		{
-			GSXML.addParametersToList(this.doc, ds_param_list, service_params);
+			GSXML.addParametersToList(doc, ds_param_list, service_params);
 		}
 
 		Element ds_param = null;
@@ -222,29 +223,29 @@ public class DocumentAction extends Action
 
 			if (expand_contents)
 			{
-				ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+				ds_param = doc.createElement(GSXML.PARAM_ELEM);
 				ds_param_list.appendChild(ds_param);
 				ds_param.setAttribute(GSXML.NAME_ATT, "structure");
 				ds_param.setAttribute(GSXML.VALUE_ATT, "entire");
 			}
 
 			// get the info needed for paged naviagtion
-			ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+			ds_param = doc.createElement(GSXML.PARAM_ELEM);
 			ds_param_list.appendChild(ds_param);
 			ds_param.setAttribute(GSXML.NAME_ATT, "info");
 			ds_param.setAttribute(GSXML.VALUE_ATT, "numSiblings");
-			ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+			ds_param = doc.createElement(GSXML.PARAM_ELEM);
 			ds_param_list.appendChild(ds_param);
 			ds_param.setAttribute(GSXML.NAME_ATT, "info");
 			ds_param.setAttribute(GSXML.VALUE_ATT, "numChildren");
-			ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+			ds_param = doc.createElement(GSXML.PARAM_ELEM);
 			ds_param_list.appendChild(ds_param);
 			ds_param.setAttribute(GSXML.NAME_ATT, "info");
 			ds_param.setAttribute(GSXML.VALUE_ATT, "siblingPosition");
 
 			if (get_siblings)
 			{
-				ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+				ds_param = doc.createElement(GSXML.PARAM_ELEM);
 				ds_param_list.appendChild(ds_param);
 				ds_param.setAttribute(GSXML.NAME_ATT, "structure");
 				ds_param.setAttribute(GSXML.VALUE_ATT, "siblings");
@@ -256,7 +257,7 @@ public class DocumentAction extends Action
 			get_structure = true;
 			if (expand_contents)
 			{
-				ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+				ds_param = doc.createElement(GSXML.PARAM_ELEM);
 				ds_param_list.appendChild(ds_param);
 				ds_param.setAttribute(GSXML.NAME_ATT, "structure");
 				ds_param.setAttribute(GSXML.VALUE_ATT, "entire");
@@ -264,17 +265,17 @@ public class DocumentAction extends Action
 			else
 			{
 				// get the info needed for table of contents
-				ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+				ds_param = doc.createElement(GSXML.PARAM_ELEM);
 				ds_param_list.appendChild(ds_param);
 				ds_param.setAttribute(GSXML.NAME_ATT, "structure");
 				ds_param.setAttribute(GSXML.VALUE_ATT, "ancestors");
-				ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+				ds_param = doc.createElement(GSXML.PARAM_ELEM);
 				ds_param_list.appendChild(ds_param);
 				ds_param.setAttribute(GSXML.NAME_ATT, "structure");
 				ds_param.setAttribute(GSXML.VALUE_ATT, "children");
 				if (get_siblings)
 				{
-					ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+					ds_param = doc.createElement(GSXML.PARAM_ELEM);
 					ds_param_list.appendChild(ds_param);
 					ds_param.setAttribute(GSXML.NAME_ATT, "structure");
 					ds_param.setAttribute(GSXML.VALUE_ATT, "siblings");
@@ -291,9 +292,9 @@ public class DocumentAction extends Action
 		{
 
 			// Build a request to obtain the document structure
-			Element ds_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+			Element ds_message = doc.createElement(GSXML.MESSAGE_ELEM);
 			String to = GSPath.appendLink(collection, "DocumentStructureRetrieve");// Hard-wired?
-			Element ds_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+			Element ds_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 			ds_message.appendChild(ds_request);
 			ds_request.appendChild(ds_param_list);
 
@@ -315,7 +316,7 @@ public class DocumentAction extends Action
 			// get the doc_node bit 
 			if (ds_response_struct_info != null)
 			{
-				the_document.appendChild(this.doc.importNode(ds_response_struct_info, true));
+				the_document.appendChild(doc.importNode(ds_response_struct_info, true));
 			}
 			path = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 			path = GSPath.appendLink(path, GSXML.DOC_NODE_ELEM);
@@ -328,13 +329,13 @@ public class DocumentAction extends Action
 				NodeList structs = ds_response_structure.getChildNodes();
 				for (int i = 0; i < structs.getLength(); i++)
 				{
-					the_document.appendChild(this.doc.importNode(structs.item(i), true));
+					the_document.appendChild(doc.importNode(structs.item(i), true));
 				}
 			}
 			else
 			{
 				// no structure nodes, so put in a dummy doc node
-				Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+				Element doc_node = doc.createElement(GSXML.DOC_NODE_ELEM);
 				if (document_id != null)
 				{
 					doc_node.setAttribute(GSXML.NODE_ID_ATT, document_id);
@@ -352,7 +353,7 @@ public class DocumentAction extends Action
 		{ // a simple type - we dont have a dummy node for simple
 			// should think about this more
 			// no structure request, so just put in a dummy doc node
-			Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+			Element doc_node = doc.createElement(GSXML.DOC_NODE_ELEM);
 			if (document_id != null)
 			{
 				doc_node.setAttribute(GSXML.NODE_ID_ATT, document_id);
@@ -366,9 +367,9 @@ public class DocumentAction extends Action
 		}
 
 		// Build a request to obtain some document metadata
-		Element dm_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element dm_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		String to = GSPath.appendLink(collection, "DocumentMetadataRetrieve"); // Hard-wired?
-		Element dm_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		Element dm_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		dm_message.appendChild(dm_request);
 		// Create a parameter list to specify the required metadata information
 
@@ -389,16 +390,16 @@ public class DocumentAction extends Action
 			}
 		}
 
-		Element dm_param_list = createMetadataParamList(meta_names);
+		Element dm_param_list = createMetadataParamList(doc,meta_names);
 		if (service_params != null)
 		{
-			GSXML.addParametersToList(this.doc, dm_param_list, service_params);
+			GSXML.addParametersToList(doc, dm_param_list, service_params);
 		}
 
 		dm_request.appendChild(dm_param_list);
 
 		// create the doc node list for the metadata request
-		Element dm_doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element dm_doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		dm_request.appendChild(dm_doc_list);
 
 		// Add each node from the structure response into the metadata request
@@ -409,7 +410,7 @@ public class DocumentAction extends Action
 			String doc_node_id = doc_node.getAttribute(GSXML.NODE_ID_ATT);
 
 			// Add the documentNode to the list
-			Element dm_doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+			Element dm_doc_node = doc.createElement(GSXML.DOC_NODE_ELEM);
 			dm_doc_list.appendChild(dm_doc_node);
 			dm_doc_node.setAttribute(GSXML.NODE_ID_ATT, doc_node_id);
 			dm_doc_node.setAttribute(GSXML.NODE_TYPE_ATT, doc_node.getAttribute(GSXML.NODE_TYPE_ATT));
@@ -417,25 +418,25 @@ public class DocumentAction extends Action
 
 		// we also want a metadata request to the top level document to get
 		// assocfilepath - this could be cached too
-		Element doc_meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		Element doc_meta_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		dm_message.appendChild(doc_meta_request);
-		Element doc_meta_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element doc_meta_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (service_params != null)
 		{
-			GSXML.addParametersToList(this.doc, doc_meta_param_list, service_params);
+			GSXML.addParametersToList(doc, doc_meta_param_list, service_params);
 		}
 
 		doc_meta_request.appendChild(doc_meta_param_list);
-		Element doc_param = this.doc.createElement(GSXML.PARAM_ELEM);
+		Element doc_param = doc.createElement(GSXML.PARAM_ELEM);
 		doc_meta_param_list.appendChild(doc_param);
 		doc_param.setAttribute(GSXML.NAME_ATT, "metadata");
 		doc_param.setAttribute(GSXML.VALUE_ATT, "assocfilepath");
 
 		// create the doc node list for the metadata request
-		Element doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		doc_meta_request.appendChild(doc_list);
 
-		Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+		Element doc_node = doc.createElement(GSXML.DOC_NODE_ELEM);
 		// the node we want is the root document node
 		if (document_id != null)
 		{
@@ -471,16 +472,16 @@ public class DocumentAction extends Action
 		GSXML.mergeMetadataLists(the_document, top_doc_node);
 
 		// Build a request to obtain some document content
-		Element dc_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element dc_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		to = GSPath.appendLink(collection, "DocumentContentRetrieve"); // Hard-wired?
-		Element dc_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		Element dc_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		dc_message.appendChild(dc_request);
 
 		// Create a parameter list to specify the request parameters - empty for now
-		Element dc_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element dc_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (service_params != null)
 		{
-			GSXML.addParametersToList(this.doc, dc_param_list, service_params);
+			GSXML.addParametersToList(doc, dc_param_list, service_params);
 		}
 
 		dc_request.appendChild(dc_param_list);
@@ -517,7 +518,7 @@ public class DocumentAction extends Action
 					{
 						content = highlightQueryTerms(request, (Element) content);
 					}
-					doc_nodes.item(i).appendChild(this.doc.importNode(content, true));
+					doc_nodes.item(i).appendChild(doc.importNode(content, true));
 				}
 				//GSXML.mergeMetadataLists(doc_nodes.item(i), dm_response_docs.item(i));
 			}
@@ -560,20 +561,20 @@ public class DocumentAction extends Action
 					// now we can modifiy the response doc if needed
 					String enrich_service = (String) params.get(GSParams.SERVICE);
 					// send a message to the service
-					Element enrich_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-					Element enrich_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, enrich_service, userContext);
+					Element enrich_message = doc.createElement(GSXML.MESSAGE_ELEM);
+					Element enrich_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, enrich_service, userContext);
 					enrich_message.appendChild(enrich_request);
 					// check for parameters
 					HashMap e_service_params = (HashMap) params.get("s1");
 					if (e_service_params != null)
 					{
-						Element enrich_pl = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-						GSXML.addParametersToList(this.doc, enrich_pl, e_service_params);
+						Element enrich_pl = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+						GSXML.addParametersToList(doc, enrich_pl, e_service_params);
 						enrich_request.appendChild(enrich_pl);
 					}
-					Element e_doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+					Element e_doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 					enrich_request.appendChild(e_doc_list);
-					e_doc_list.appendChild(this.doc.importNode(dc_response_doc, true));
+					e_doc_list.appendChild(doc.importNode(dc_response_doc, true));
 
 					Node enrich_response = this.mr.process(enrich_message);
 
@@ -594,7 +595,7 @@ public class DocumentAction extends Action
 				Element dummy_node = (Element) doc_nodes.item(0);
 
 				dummy_node.setAttribute(GSXML.NODE_ID_ATT, modified_doc_id);
-				dummy_node.appendChild(this.doc.importNode(dc_response_doc_content, true));
+				dummy_node.appendChild(doc.importNode(dc_response_doc_content, true));
 				// hack for simple type
 				if (document_type.equals(GSXML.DOC_TYPE_SIMPLE))
 				{
@@ -629,7 +630,7 @@ public class DocumentAction extends Action
 					String dn_id = ((Element) dn).getAttribute(GSXML.NODE_ID_ATT);
 					if (dn_id.equals(modified_doc_id))
 					{
-						dn.appendChild(this.doc.importNode(dc_response_doc_content, true));
+						dn.appendChild(doc.importNode(dc_response_doc_content, true));
 						break;
 					}
 				}
@@ -662,21 +663,22 @@ public class DocumentAction extends Action
 	 */
 	protected boolean getBackgroundData(Element page_response, String collection, UserContext userContext)
 	{
-
+		Document doc = page_response.getOwnerDocument();
+		
 		// create a message to process - contains requests for the collection 
 		// description, the format element, the enrich services on offer
 		// these could all be cached
-		Element info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element info_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		String path = GSPath.appendLink(collection, "DocumentContentRetrieve");
 		// the format request - ignore for now, where does this request go to??
-		Element format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, path, userContext);
+		Element format_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_FORMAT, path, userContext);
 		info_message.appendChild(format_request);
 
 		// the enrich_services request - only do this if provide_annotations is true
 
 		if (provide_annotations)
 		{
-			Element enrich_services_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
+			Element enrich_services_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
 			enrich_services_request.setAttribute(GSXML.INFO_ATT, "serviceList");
 			info_message.appendChild(enrich_services_request);
 		}
@@ -698,7 +700,7 @@ public class DocumentAction extends Action
 
 			// set the format type
 			format_elem.setAttribute(GSXML.TYPE_ATT, "display");
-			page_response.appendChild(this.doc.importNode(format_elem, true));
+			page_response.appendChild(doc.importNode(format_elem, true));
 		}
 
 		if (provide_annotations)
@@ -706,14 +708,14 @@ public class DocumentAction extends Action
 			Element services_resp = (Element) responses.item(1);
 
 			// a new message for the mr
-			Element enrich_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+			Element enrich_message = doc.createElement(GSXML.MESSAGE_ELEM);
 			NodeList e_services = services_resp.getElementsByTagName(GSXML.SERVICE_ELEM);
 			boolean service_found = false;
 			for (int j = 0; j < e_services.getLength(); j++)
 			{
 				if (((Element) e_services.item(j)).getAttribute(GSXML.TYPE_ATT).equals("enrich"))
 				{
-					Element s = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, ((Element) e_services.item(j)).getAttribute(GSXML.NAME_ATT), userContext);
+					Element s = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, ((Element) e_services.item(j)).getAttribute(GSXML.NAME_ATT), userContext);
 					enrich_message.appendChild(s);
 					service_found = true;
 				}
@@ -723,11 +725,11 @@ public class DocumentAction extends Action
 				Element enrich_response = (Element) this.mr.process(enrich_message);
 
 				NodeList e_responses = enrich_response.getElementsByTagName(GSXML.RESPONSE_ELEM);
-				Element service_list = this.doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+				Element service_list = doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
 				for (int i = 0; i < e_responses.getLength(); i++)
 				{
 					Element e_resp = (Element) e_responses.item(i);
-					Element e_service = (Element) this.doc.importNode(GSXML.getChildByTagName(e_resp, GSXML.SERVICE_ELEM), true);
+					Element e_service = (Element) doc.importNode(GSXML.getChildByTagName(e_resp, GSXML.SERVICE_ELEM), true);
 					e_service.setAttribute(GSXML.NAME_ATT, e_resp.getAttribute(GSXML.FROM_ATT));
 					service_list.appendChild(e_service);
 				}
@@ -740,14 +742,16 @@ public class DocumentAction extends Action
 
 	protected String getDocumentType(Element basic_doc_list, String collection, UserContext userContext, Element page_response)
 	{
-		Element ds_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Document doc = basic_doc_list.getOwnerDocument();
+		
+		Element ds_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		String to = GSPath.appendLink(collection, "DocumentStructureRetrieve");// Hard-wired?
-		Element ds_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		Element ds_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		ds_message.appendChild(ds_request);
 
 		// Create a parameter list to specify the required structure information
-		Element ds_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		Element ds_param = this.doc.createElement(GSXML.PARAM_ELEM);
+		Element ds_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element ds_param = doc.createElement(GSXML.PARAM_ELEM);
 		ds_param_list.appendChild(ds_param);
 		ds_param.setAttribute(GSXML.NAME_ATT, "info");
 		ds_param.setAttribute(GSXML.VALUE_ATT, "documentType");
@@ -786,6 +790,8 @@ public class DocumentAction extends Action
 	 */
 	protected Element highlightQueryTerms(Element request, Element dc_response_doc_content)
 	{
+		Document doc = request.getOwnerDocument();
+		
 		// do the query again to get term info 
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
@@ -805,15 +811,15 @@ public class DocumentAction extends Action
 		UserContext userContext = new UserContext(request);
 		String to = GSPath.appendLink(collection, service_name);
 
-		Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		Element mr_query_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_query_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		mr_query_message.appendChild(mr_query_request);
 
 		// paramList
 		HashMap service_params = (HashMap) params.get("s1");
 
-		Element query_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		GSXML.addParametersToList(this.doc, query_param_list, service_params);
+		Element query_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		GSXML.addParametersToList(doc, query_param_list, service_params);
 		mr_query_request.appendChild(query_param_list);
 
 		// do the query
@@ -968,13 +974,13 @@ public class DocumentAction extends Action
 			}
 		}
 
-		return highlightQueryTermsInternal(content, query_term_variants, phrase_query_term_variants_hierarchy);
+		return highlightQueryTermsInternal(doc, content, query_term_variants, phrase_query_term_variants_hierarchy);
 	}
 
 	/**
 	 * Highlights query terms in a piece of text.
 	 */
-	private Element highlightQueryTermsInternal(String content, HashSet<String> query_term_variants, ArrayList<ArrayList<HashSet<String>>> phrase_query_term_variants_hierarchy)
+	private Element highlightQueryTermsInternal(Document doc, String content, HashSet<String> query_term_variants, ArrayList<ArrayList<HashSet<String>>> phrase_query_term_variants_hierarchy)
 	{
 		// Convert the content string to an array of characters for speed
 		char[] content_characters = new char[content.length()];
@@ -1121,7 +1127,7 @@ public class DocumentAction extends Action
 		}
 
 		// Now add the annotation tags into the document at the correct points
-		Element content_element = this.doc.createElement(GSXML.NODE_CONTENT_ELEM);
+		Element content_element = doc.createElement(GSXML.NODE_CONTENT_ELEM);
 
 		int last_wrote = 0;
 		for (int i = 0; i < highlight_start_positions.size(); i++)
@@ -1133,14 +1139,14 @@ public class DocumentAction extends Action
 			if (last_wrote < highlight_start)
 			{
 				String preceding_text = new String(content_characters, last_wrote, (highlight_start - last_wrote));
-				content_element.appendChild(this.doc.createTextNode(preceding_text));
+				content_element.appendChild(doc.createTextNode(preceding_text));
 			}
 
 			// Print the highlight text, annotated
 			if (highlight_end > last_wrote)
 			{
 				String highlight_text = new String(content_characters, highlight_start, (highlight_end - highlight_start));
-				Element annotation_element = GSXML.createTextElement(this.doc, "annotation", highlight_text);
+				Element annotation_element = GSXML.createTextElement(doc, "annotation", highlight_text);
 				annotation_element.setAttribute("type", "query_term");
 				content_element.appendChild(annotation_element);
 				last_wrote = highlight_end;
@@ -1151,7 +1157,7 @@ public class DocumentAction extends Action
 		if (last_wrote < content_characters.length)
 		{
 			String remaining_text = new String(content_characters, last_wrote, (content_characters.length - last_wrote));
-			content_element.appendChild(this.doc.createTextNode(remaining_text));
+			content_element.appendChild(doc.createTextNode(remaining_text));
 		}
 
 		return content_element;

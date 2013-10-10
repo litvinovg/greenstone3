@@ -23,8 +23,8 @@ abstract public class Action
 
 	/** the system set up variables */
 	protected HashMap<String, Object> config_params = null;
-	/** container Document to create XML Nodes */
-	protected Document doc = null;
+	
+	
 	/** a converter class to parse XML and create Docs */
 	protected XMLConverter converter = null;
 	/**
@@ -38,7 +38,6 @@ abstract public class Action
 	public Action()
 	{
 		this.converter = new XMLConverter();
-		this.doc = this.converter.newDOM();
 	}
 
 	/** the config variables must be set before configure is called */
@@ -192,16 +191,16 @@ abstract public class Action
 		}
 	}
 
-	protected Element createMetadataParamList(HashSet<String> metadata_names)
+	protected Element createMetadataParamList(Document doc, HashSet<String> metadata_names)
 	{
-		Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 
 		Element param = null;
 		Iterator<String> i = metadata_names.iterator();
 		while (i.hasNext())
 		{
 			String name = i.next();
-			param = this.doc.createElement(GSXML.PARAM_ELEM);
+			param = doc.createElement(GSXML.PARAM_ELEM);
 			param_list.appendChild(param);
 			param.setAttribute(GSXML.NAME_ATT, "metadata");
 			param.setAttribute(GSXML.VALUE_ATT, name);
@@ -239,18 +238,20 @@ abstract public class Action
 	 */
 	protected void addSiteMetadata(Element element, UserContext userContext)
 	{
+		Document doc = element.getOwnerDocument();
+		
 		//ADD SITE METADATA
-		Element metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
+		Element metadata_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
 		//create a hashmap of params
 		HashMap subset_params = new HashMap(1);
 		subset_params.put(GSXML.SUBSET_PARAM, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		//create the element to put the params in
-		Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		//put them in
-		GSXML.addParametersToList(this.doc, param_list, subset_params);
+		GSXML.addParametersToList(doc, param_list, subset_params);
 		metadata_request.appendChild(param_list);
 		//create the message
-		Element metadata_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element metadata_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		metadata_message.appendChild(metadata_request);
 		//get response
 		Element metadata_response_message = (Element) this.mr.process(metadata_message);
@@ -262,10 +263,12 @@ abstract public class Action
 
 	protected void addInterfaceOptions(Element elem)
 	{
-		Element documentOptionList = this.doc.createElement("interfaceOptions");
+		Document doc = elem.getOwnerDocument();
+		
+		Element documentOptionList = doc.createElement("interfaceOptions");
 		for (Object key : this.config_params.keySet())
 		{
-			Element option = this.doc.createElement("option");
+			Element option = doc.createElement("option");
 			option.setAttribute(GSXML.NAME_ATT, (String) key);
 			option.setAttribute(GSXML.VALUE_ATT, this.config_params.get(key).toString());
 			documentOptionList.appendChild(option);
@@ -275,8 +278,17 @@ abstract public class Action
 
 	protected Element getFormatInfo(String to, UserContext userContext)
 	{
-		Element mr_format_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, to, userContext);
+		// Eclipse call hierarchy shows the element returned from this method is 
+		// subsequently used in a 'importNode'.  For this reason it is safe here
+		// for call up our own document DOM.  
+		//
+		// If this pattern changes for any reason, then the DOM will need to be
+		// passed in as a parameter
+		
+		Document doc = this.converter.newDOM();
+		
+		Element mr_format_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_format_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_FORMAT, to, userContext);
 		mr_format_message.appendChild(mr_format_request);
 
 		// process the message

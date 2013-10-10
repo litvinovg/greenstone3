@@ -30,10 +30,11 @@ public class GeneralAction extends Action
 	public Node process(Node message_node)
 	{
 		Element message = this.converter.nodeToElement(message_node);
-
+	    Document doc = message.getOwnerDocument();
+	    
 		// the result
-		Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element result = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element page_response = doc.createElement(GSXML.RESPONSE_ELEM);
 		result.appendChild(page_response);
 
 		// assume only one request
@@ -86,8 +87,8 @@ public class GeneralAction extends Action
 		if (request_type.equals("r") || request_type.equals("s") || request_type.equals("ro"))
 		{
 			//do the request
-			Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+			Element mr_query_message = doc.createElement(GSXML.MESSAGE_ELEM);
+			Element mr_query_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 
 			if (request_type.equals("s"))
 			{
@@ -101,15 +102,15 @@ public class GeneralAction extends Action
 			HashMap service_params = (HashMap) params.get("s1");
 			if (service_params != null)
 			{
-				param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-				GSXML.addParametersToList(this.doc, param_list, service_params);
+				param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+				GSXML.addParametersToList(doc, param_list, service_params);
 				mr_query_request.appendChild(param_list);
 			}
 
 			Element userInformation = (Element) GSXML.getChildByTagName(request, GSXML.USER_INFORMATION_ELEM);
 			if (userInformation != null)
 			{
-				mr_query_request.appendChild(this.doc.importNode(userInformation, true));
+				mr_query_request.appendChild(doc.importNode(userInformation, true));
 			}
 			mr_query_request.setAttribute("remoteAddress", request.getAttribute("remoteAddress"));
 
@@ -133,8 +134,8 @@ public class GeneralAction extends Action
 		// another part of the page is the service description
 
 		// request the service info for the selected service - should be cached
-		Element mr_info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
+		Element mr_info_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_info_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
 		mr_info_message.appendChild(mr_info_request);
 		Element mr_info_response = (Element) this.mr.process(mr_info_message);
 
@@ -144,7 +145,7 @@ public class GeneralAction extends Action
 		Node desNode = GSXML.getNodeByPath(mr_info_response, path);
 		if (desNode != null)
 		{
-			page_response.appendChild((Element) this.doc.importNode(desNode, true));
+			page_response.appendChild((Element) doc.importNode(desNode, true));
 		}
 
 		addSiteMetadata(page_response, userContext);

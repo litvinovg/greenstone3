@@ -10,6 +10,7 @@ import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.UserContext;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -25,16 +26,16 @@ public class QueryAction extends Action
 	 */
 	public Node process(Node message_node)
 	{
-
 		Element message = this.converter.nodeToElement(message_node);
-
+	    Document doc = message.getOwnerDocument();
+	    
 		// get the request - assume there is only one
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 
 		// create the return message
-		Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element result = doc.createElement(GSXML.MESSAGE_ELEM);
 		Element response = basicQuery(request);
-		result.appendChild(this.doc.importNode(response, true));
+		result.appendChild(doc.importNode(response, true));
 		return result;
 	}
 
@@ -46,7 +47,8 @@ public class QueryAction extends Action
 	protected Element basicQuery(Element request)
 	{
 		// the result
-		Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Document doc = request.getOwnerDocument();
+		Element page_response = doc.createElement(GSXML.RESPONSE_ELEM);
 
 		// extract the params from the cgi-request, and check that we have a coll specified
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -74,13 +76,13 @@ public class QueryAction extends Action
 		// set the format type
 		format_elem.setAttribute(GSXML.TYPE_ATT, "search");
 		// for now just add to the response
-		page_response.appendChild(this.doc.importNode(format_elem, true));
+		page_response.appendChild(doc.importNode(format_elem, true));
 
 		if (request_type.indexOf("d") != -1)
 		{
 			// we have been asked for the service description
-			Element mr_info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element mr_info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
+			Element mr_info_message = doc.createElement(GSXML.MESSAGE_ELEM);
+			Element mr_info_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
 			mr_info_message.appendChild(mr_info_request);
 
 			// process the message
@@ -89,7 +91,7 @@ public class QueryAction extends Action
 
 			Element service_response = (Element) GSXML.getChildByTagName(mr_info_response, GSXML.RESPONSE_ELEM);
 
-			Element service_description = (Element) this.doc.importNode(GSXML.getChildByTagName(service_response, GSXML.SERVICE_ELEM), true);
+			Element service_description = (Element) doc.importNode(GSXML.getChildByTagName(service_response, GSXML.SERVICE_ELEM), true);
 			page_response.appendChild(service_description);
 		}
 
@@ -113,12 +115,12 @@ public class QueryAction extends Action
 		}
 
 		// create the query request
-		Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_query_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		Element mr_query_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_query_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		mr_query_message.appendChild(mr_query_request);
 
-		Element query_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		GSXML.addParametersToList(this.doc, query_param_list, service_params);
+		Element query_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		GSXML.addParametersToList(doc, query_param_list, service_params);
 		mr_query_request.appendChild(query_param_list);
 
 		logger.debug(GSXML.xmlNodeToString(mr_query_message));
@@ -143,7 +145,7 @@ public class QueryAction extends Action
 		}
 		else
 		{ // add it into the page response
-			page_response.appendChild(this.doc.importNode(query_result_metadata_list, true));
+			page_response.appendChild(doc.importNode(query_result_metadata_list, true));
 		}
 
 		Element query_term_info_list = (Element) GSXML.getChildByTagName(query_response, GSXML.TERM_ELEM + GSXML.LIST_MODIFIER);
@@ -153,7 +155,7 @@ public class QueryAction extends Action
 		}
 		else
 		{ // add it into the page response
-			page_response.appendChild(this.doc.importNode(query_term_info_list, true));
+			page_response.appendChild(doc.importNode(query_term_info_list, true));
 		}
 
 		Element facet_list = (Element) GSXML.getChildByTagName(query_response, GSXML.FACET_ELEM + GSXML.LIST_MODIFIER);
@@ -163,7 +165,7 @@ public class QueryAction extends Action
 		}
 		else
 		{ // add it into the page response
-			page_response.appendChild(this.doc.importNode(facet_list, true));
+			page_response.appendChild(doc.importNode(facet_list, true));
 		}
 
 		// check that there are some documents - for now check the list, but later should use a numdocs metadata elem	
@@ -172,7 +174,7 @@ public class QueryAction extends Action
 		if (document_list == null)
 		{
 			// add in a dummy doc node list - used by the display. need to think about this
-			page_response.appendChild(this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER));
+			page_response.appendChild(doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER));
 			//append site metadata
 			addSiteMetadata(page_response, userContext);
 			addInterfaceOptions(page_response);
@@ -185,7 +187,7 @@ public class QueryAction extends Action
 		{
 			logger.error("have already found metadata!");
 			// append the doc list to the result
-			page_response.appendChild(this.doc.importNode(document_list, true));
+			page_response.appendChild(doc.importNode(document_list, true));
 			//append site metadata
 			addSiteMetadata(page_response, userContext);
 			addInterfaceOptions(page_response);
@@ -202,16 +204,16 @@ public class QueryAction extends Action
 		}
 
 		// paging of the results is done here - we filter the list to remove unwanted entries before retrieving metadata
-		Element filtered_doc_list = filterDocList(params, service_params, document_list);
+		Element filtered_doc_list = filterDocList(doc, params, service_params, document_list);
 
 		// do the metadata request on the filtered list
-		Element mr_metadata_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_metadata_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		to = "DocumentMetadataRetrieve";
 		if (collection != null)
 		{
 			to = GSPath.prependLink(to, collection);
 		}
-		Element mr_metadata_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		Element mr_metadata_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		mr_metadata_message.appendChild(mr_metadata_request);
 
 		// just get all for now - the receptionist should perhaps pass in some
@@ -227,7 +229,7 @@ public class QueryAction extends Action
 			}
 		}
 
-		Element dm_param_list = createMetadataParamList(metadata_names);
+		Element dm_param_list = createMetadataParamList(doc,metadata_names);
 
 		mr_metadata_request.appendChild(dm_param_list);
 
@@ -245,7 +247,7 @@ public class QueryAction extends Action
 
 		if (query_result_document_list != null)
 		{
-			page_response.appendChild(this.doc.importNode(query_result_document_list, true));
+			page_response.appendChild(doc.importNode(query_result_document_list, true));
 		}
 
 		logger.debug("Query page:\n" + this.converter.getPrettyString(page_response));
@@ -256,7 +258,7 @@ public class QueryAction extends Action
 	}
 
 	/** this filters out some of the doc results for result paging */
-	protected Element filterDocList(HashMap<String, Serializable> params, HashMap service_params, Element orig_doc_list)
+	protected Element filterDocList(Document doc, HashMap<String, Serializable> params, HashMap service_params, Element orig_doc_list)
 	{
 
 		// check the hits_per_page param - is it a service param??
@@ -264,7 +266,7 @@ public class QueryAction extends Action
 		if (hits_pp == null)
 		{
 			// the service is doing the paging, so we want to display all of the returned docs(???)
-			//    return (Element)this.doc.importNode(orig_doc_list, true);
+			//    return (Element)doc.importNode(orig_doc_list, true);
 			// try hitsPerPage in the globle param
 			hits_pp = (String) params.get("hitsPerPage");
 		}
@@ -284,7 +286,7 @@ public class QueryAction extends Action
 
 		if (hits == -1)
 		{ // all
-			return (Element) this.doc.importNode(orig_doc_list, true);
+			return (Element) doc.importNode(orig_doc_list, true);
 		}
 		NodeList result_docs = orig_doc_list.getElementsByTagName(GSXML.DOC_NODE_ELEM);
 
@@ -292,11 +294,11 @@ public class QueryAction extends Action
 		if (num_docs <= hits)
 		{
 			// too few docs to do paging
-			return (Element) this.doc.importNode(orig_doc_list, true);
+			return (Element) doc.importNode(orig_doc_list, true);
 		}
 
 		// now we need our own doc list
-		Element result_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element result_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 
 		String start_p = (String) service_params.get("startPage");
 		if (start_p == null)
@@ -334,7 +336,7 @@ public class QueryAction extends Action
 		// now we finally have the docs numbers to use
 		for (int i = start_from; i <= end_at; i++)
 		{
-			result_list.appendChild(this.doc.importNode(result_docs.item(i), true));
+			result_list.appendChild(doc.importNode(result_docs.item(i), true));
 		}
 
 		return result_list;

@@ -24,10 +24,11 @@ public class AppletAction extends Action
 	{
 
 		Element message = this.converter.nodeToElement(message_node);
-
+		Document doc = message.getOwnerDocument();
+		
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
-		Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element result = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element page_response = doc.createElement(GSXML.RESPONSE_ELEM);
 		result.appendChild(page_response);
 
 		// get the collection and service params
@@ -61,11 +62,11 @@ public class AppletAction extends Action
 		{
 			// we are processing stuff for the applet send a message to the service, type="query", and take out the something element, and return that as our result - the applet must take xml
 
-			Element mr_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+			Element mr_message = doc.createElement(GSXML.MESSAGE_ELEM);
+			Element mr_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 			mr_message.appendChild(mr_request);
 			// just append all the params for now - should filter out unneeded ones
-			mr_request.appendChild(this.doc.importNode(cgi_param_list, true));
+			mr_request.appendChild(doc.importNode(cgi_param_list, true));
 
 			// process the request
 			Element mr_response = (Element) this.mr.process(mr_message);
@@ -79,8 +80,8 @@ public class AppletAction extends Action
 
 		// get the applet description, and the collection info if a collection is specified
 
-		Element mr_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element applet_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
+		Element mr_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element applet_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
 		mr_message.appendChild(applet_request);
 
 		Element mr_response = (Element) this.mr.process(mr_message);
@@ -88,7 +89,7 @@ public class AppletAction extends Action
 		// add in the applet info
 		String path = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.SERVICE_ELEM);
 		//path = GSPath.appendLink(path, GSXML.APPLET_ELEM);
-		Element service_elem = (Element) this.doc.importNode(GSXML.getNodeByPath(mr_response, path), true);
+		Element service_elem = (Element) doc.importNode(GSXML.getNodeByPath(mr_response, path), true);
 		Element applet_elem = (Element) GSXML.getChildByTagName(service_elem, GSXML.APPLET_ELEM);
 		// must handle any params that have values that are not 
 		// necessarily known by the service

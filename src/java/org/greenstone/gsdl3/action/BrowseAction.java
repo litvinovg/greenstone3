@@ -11,6 +11,7 @@ import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.OID;
 import org.greenstone.gsdl3.util.UserContext;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -28,14 +29,14 @@ public class BrowseAction extends Action
 	/** process the request */
 	public Node process(Node message_node)
 	{
-
 		Element message = this.converter.nodeToElement(message_node);
-
+		Document doc = message.getOwnerDocument();
+		
 		// get the request - assume only one
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 
 		// the result
-		Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element result = doc.createElement(GSXML.MESSAGE_ELEM);
 		Element response = classifierBrowse(request);
 		result.appendChild(response);
 		return result;
@@ -43,8 +44,9 @@ public class BrowseAction extends Action
 
 	protected Element classifierBrowse(Element request)
 	{
-
-		Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Document doc = request.getOwnerDocument();
+		
+		Element page_response = doc.createElement(GSXML.RESPONSE_ELEM);
 
 		// extract the params from the cgi-request, and check that we have a coll specified
 		Element cgi_paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -74,12 +76,12 @@ public class BrowseAction extends Action
 		// for now get this again from the service. 
 		// this should be cached somehow later on. 
 
-		Element info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
+		Element info_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element info_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
 		info_message.appendChild(info_request);
 
 		// also get the format stuff now if there is some
-		Element format_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_FORMAT, to, userContext);
+		Element format_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_FORMAT, to, userContext);
 		info_message.appendChild(format_request);
 		// process the requests
 
@@ -91,7 +93,7 @@ public class BrowseAction extends Action
 		Element format_response = (Element) responses.item(1);
 
 		Element service_description = (Element) GSXML.getChildByTagName(service_response, GSXML.SERVICE_ELEM);
-		page_response.appendChild(this.doc.importNode(service_description, true));
+		page_response.appendChild(doc.importNode(service_description, true));
 
 		//append site metadata
 		addSiteMetadata(page_response, userContext);
@@ -136,7 +138,7 @@ public class BrowseAction extends Action
 				{
 					GSXSLT.mergeFormatElements(this_format, global_format_elem, false);
 				}
-				Element new_format = GSXML.duplicateWithNewName(this.doc, this_format, GSXML.FORMAT_ELEM, false);
+				Element new_format = GSXML.duplicateWithNewName(doc, this_format, GSXML.FORMAT_ELEM, false);
 				// set teh format type
 				new_format.setAttribute(GSXML.TYPE_ATT, "browse");
 
@@ -157,33 +159,33 @@ public class BrowseAction extends Action
 
 		logger.info("extracted meta names, " + metadata_names.toString());
 		// get the browse structure for the selected node
-		Element classify_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element classify_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		Element classify_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element classify_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		classify_message.appendChild(classify_request);
 
 		//Create a parameter list to specify the required structure information
 		// for now, always get ancestors and children
-		Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		classify_request.appendChild(param_list);
-		Element param = this.doc.createElement(GSXML.PARAM_ELEM);
+		Element param = doc.createElement(GSXML.PARAM_ELEM);
 		param_list.appendChild(param);
 		param.setAttribute(GSXML.NAME_ATT, "structure");
 		param.setAttribute(GSXML.VALUE_ATT, "ancestors");
-		param = this.doc.createElement(GSXML.PARAM_ELEM);
+		param = doc.createElement(GSXML.PARAM_ELEM);
 		param_list.appendChild(param);
 		param.setAttribute(GSXML.NAME_ATT, "structure");
 		param.setAttribute(GSXML.VALUE_ATT, "children");
 		if (get_siblings)
 		{
-			param = this.doc.createElement(GSXML.PARAM_ELEM);
+			param = doc.createElement(GSXML.PARAM_ELEM);
 			param_list.appendChild(param);
 			param.setAttribute(GSXML.NAME_ATT, "structure");
 			param.setAttribute(GSXML.VALUE_ATT, "siblings");
 		}
 
 		// put the classifier node into a classifier node list
-		Element classifier_list = this.doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
-		Element classifier = this.doc.createElement(GSXML.CLASS_NODE_ELEM);
+		Element classifier_list = doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element classifier = doc.createElement(GSXML.CLASS_NODE_ELEM);
 		classifier.setAttribute(GSXML.NODE_ID_ATT, classifier_node);
 		classifier_list.appendChild(classifier);
 		classify_request.appendChild(classifier_list);
@@ -204,14 +206,14 @@ public class BrowseAction extends Action
 		}
 
 		// add the classifier node as the page classifier 
-		Element page_classifier = GSXML.duplicateWithNewName(this.doc, cl_structure, GSXML.CLASSIFIER_ELEM, true);
+		Element page_classifier = GSXML.duplicateWithNewName(doc, cl_structure, GSXML.CLASSIFIER_ELEM, true);
 		page_response.appendChild(page_classifier);
 		page_classifier.setAttribute(GSXML.NAME_ATT, top_id);
 
 		// get the metadata for each classifier node, 
 		// then for each document node
 
-		Element metadata_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element metadata_message = doc.createElement(GSXML.MESSAGE_ELEM);
 
 		boolean did_classifier = false;
 		boolean did_documents = false;
@@ -224,16 +226,16 @@ public class BrowseAction extends Action
 		if (cl_nodes.getLength() > 0)
 		{
 			did_classifier = true;
-			Element cl_meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to + "MetadataRetrieve", userContext);
+			Element cl_meta_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to + "MetadataRetrieve", userContext);
 			metadata_message.appendChild(cl_meta_request);
 
-			Element new_cl_nodes_list = this.doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
+			Element new_cl_nodes_list = doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
 			cl_meta_request.appendChild(new_cl_nodes_list);
 
 			for (int c = 0; c < cl_nodes.getLength(); c++)
 			{
 
-				Element cl = this.doc.createElement(GSXML.CLASS_NODE_ELEM);
+				Element cl = doc.createElement(GSXML.CLASS_NODE_ELEM);
 				cl.setAttribute(GSXML.NODE_ID_ATT, ((Element) cl_nodes.item(c)).getAttribute(GSXML.NODE_ID_ATT));
 				new_cl_nodes_list.appendChild(cl);
 			}
@@ -244,15 +246,15 @@ public class BrowseAction extends Action
 			Element cl_param_list = null;
 			if (metadata_names.isEmpty())
 			{
-				cl_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-				Element p = this.doc.createElement(GSXML.PARAM_ELEM);
+				cl_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+				Element p = doc.createElement(GSXML.PARAM_ELEM);
 				cl_param_list.appendChild(p);
 				p.setAttribute(GSXML.NAME_ATT, "metadata");
 				p.setAttribute(GSXML.VALUE_ATT, "Title");
 			}
 			else
 			{
-				cl_param_list = createMetadataParamList(metadata_names);
+				cl_param_list = createMetadataParamList(doc,metadata_names);
 			}
 
 			cl_meta_request.appendChild(cl_param_list);
@@ -266,23 +268,23 @@ public class BrowseAction extends Action
 		if (doc_nodes.getLength() > 0)
 		{
 			did_documents = true;
-			Element doc_meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, GSPath.appendLink(collection, "DocumentMetadataRetrieve"), userContext);
+			Element doc_meta_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, GSPath.appendLink(collection, "DocumentMetadataRetrieve"), userContext);
 			metadata_message.appendChild(doc_meta_request);
 
-			Element doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+			Element doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 			doc_meta_request.appendChild(doc_list);
 
 			for (int c = 0; c < doc_nodes.getLength(); c++)
 			{
 
-				Element d = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+				Element d = doc.createElement(GSXML.DOC_NODE_ELEM);
 				d.setAttribute(GSXML.NODE_ID_ATT, ((Element) doc_nodes.item(c)).getAttribute(GSXML.NODE_ID_ATT));
 				doc_list.appendChild(d);
 			}
 
 			// create and add in the param list - add all for now
-			Element doc_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-			Element p = this.doc.createElement(GSXML.PARAM_ELEM);
+			Element doc_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			Element p = doc.createElement(GSXML.PARAM_ELEM);
 			doc_param_list.appendChild(p);
 			p.setAttribute(GSXML.NAME_ATT, "metadata");
 			p.setAttribute(GSXML.VALUE_ATT, "all");

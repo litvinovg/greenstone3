@@ -20,12 +20,12 @@ public class ProcessAction extends Action
 	/** process a request */
 	public Node process(Node message_node)
 	{
-
 		Element message = this.converter.nodeToElement(message_node);
-
+	    Document doc = message.getOwnerDocument();
+	    
 		// the result
-		Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element result = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element page_response = doc.createElement(GSXML.RESPONSE_ELEM);
 		result.appendChild(page_response);
 
 		// assume only one request
@@ -69,14 +69,14 @@ public class ProcessAction extends Action
 		{
 			// if rt=s or rt=r, do the request
 
-			Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+			Element mr_query_message = doc.createElement(GSXML.MESSAGE_ELEM);
 			String request_type_att;
 			Element param_list = null;
 			if (request_type.equals("s"))
 			{ // status
 				request_type_att = GSXML.REQUEST_TYPE_STATUS;
-				param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-				Element param = this.doc.createElement(GSXML.PARAM_ELEM);
+				param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+				Element param = doc.createElement(GSXML.PARAM_ELEM);
 				param.setAttribute(GSXML.NAME_ATT, GSParams.PROCESS_ID);
 				param.setAttribute(GSXML.VALUE_ATT, (String) params.get(GSParams.PROCESS_ID));
 				param_list.appendChild(param);
@@ -88,12 +88,12 @@ public class ProcessAction extends Action
 				HashMap service_params = (HashMap) params.get("s1");
 				if (service_params != null)
 				{
-					param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-					GSXML.addParametersToList(this.doc, param_list, service_params);
+					param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+					GSXML.addParametersToList(doc, param_list, service_params);
 				}
 
 			}
-			Element mr_query_request = GSXML.createBasicRequest(this.doc, request_type_att, to, userContext);
+			Element mr_query_request = GSXML.createBasicRequest(doc, request_type_att, to, userContext);
 			if (param_list != null)
 			{
 				mr_query_request.appendChild(param_list);
@@ -111,20 +111,20 @@ public class ProcessAction extends Action
 
 			// else append the contents of the response to the page - just the status elem for now
 			Element status = (Element) GSXML.getChildByTagName(result_response, GSXML.STATUS_ELEM);
-			page_response.appendChild(this.doc.importNode(status, true));
+			page_response.appendChild(doc.importNode(status, true));
 		}
 
 		// another part of the page is the service description
 
 		// request the service info for the selected service - should be cached
-		Element mr_info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
+		Element mr_info_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_info_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
 		mr_info_message.appendChild(mr_info_request);
 		Element mr_info_response = (Element) this.mr.process(mr_info_message);
 
 		String path = GSXML.RESPONSE_ELEM;
 		path = GSPath.appendLink(path, GSXML.SERVICE_ELEM);
-		Element description = (Element) this.doc.importNode(GSXML.getNodeByPath(mr_info_response, path), true);
+		Element description = (Element) doc.importNode(GSXML.getNodeByPath(mr_info_response, path), true);
 
 		page_response.appendChild(description);
 
@@ -133,8 +133,9 @@ public class ProcessAction extends Action
 
 	protected Element getServiceParamList(Element cgi_param_list)
 	{
-
-		Element new_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Document doc = cgi_param_list.getOwnerDocument();
+		
+		Element new_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		Element param;
 		NodeList cgi_params = cgi_param_list.getChildNodes();
 		for (int i = 0; i < cgi_params.getLength(); i++)
@@ -146,7 +147,7 @@ public class ProcessAction extends Action
 				continue;
 			}
 			// else add it in to the list
-			new_param_list.appendChild(this.doc.importNode(p, true));
+			new_param_list.appendChild(doc.importNode(p, true));
 		}
 		return new_param_list;
 	}

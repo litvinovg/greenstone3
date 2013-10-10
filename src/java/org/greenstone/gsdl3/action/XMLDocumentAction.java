@@ -27,15 +27,15 @@ public class XMLDocumentAction extends Action
 	 */
 	public Node process(Node message_node)
 	{
-
 		Element message = this.converter.nodeToElement(message_node);
-
+	    Document doc = message.getOwnerDocument();
+	    
 		// get the request - assume there is only one
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 
 		// create the return message
-		Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element result = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element page_response = doc.createElement(GSXML.RESPONSE_ELEM);
 		result.appendChild(page_response);
 
 		UserContext userContext = new UserContext(request);
@@ -74,26 +74,26 @@ public class XMLDocumentAction extends Action
 		}
 
 		// make the request to the collection
-		Element mr_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_message = doc.createElement(GSXML.MESSAGE_ELEM);
 
-		Element ret_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		Element ret_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		mr_message.appendChild(ret_request);
 
-		Element doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		ret_request.appendChild(doc_list);
-		Element doc = this.doc.createElement(GSXML.DOC_NODE_ELEM);
-		doc.setAttribute(GSXML.NODE_ID_ATT, doc_name);
-		doc_list.appendChild(doc);
+		Element docelem = doc.createElement(GSXML.DOC_NODE_ELEM);
+		docelem.setAttribute(GSXML.NODE_ID_ATT, doc_name);
+		doc_list.appendChild(docelem);
 
 		// also add in a request for the Title metadata
 		to = GSPath.appendLink(collection, "DocumentMetadataRetrieve");
-		Element meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		Element meta_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		// copy the doc list
 		meta_request.appendChild(doc_list.cloneNode(true));
 		// add in a metadata param
-		Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		meta_request.appendChild(param_list);
-		Element param = GSXML.createParameter(this.doc, "metadata", "root_Title");
+		Element param = GSXML.createParameter(doc, "metadata", "root_Title");
 		param_list.appendChild(param);
 
 		// add the request to the message
@@ -102,7 +102,7 @@ public class XMLDocumentAction extends Action
 		Element ret_response = (Element) this.mr.process(mr_message);
 		String[] links = { GSXML.RESPONSE_ELEM, GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.DOC_NODE_ELEM };
 		String path = GSPath.createPath(links);
-		Element doc_node = (Element) this.doc.importNode(GSXML.getNodeByPath(ret_response, path), true);
+		Element doc_node = (Element) doc.importNode(GSXML.getNodeByPath(ret_response, path), true);
 		page_response.appendChild(doc_node);
 
 		// get the metadata list
@@ -113,7 +113,7 @@ public class XMLDocumentAction extends Action
 		Element meta_list = (Element) GSXML.getNodeByPath(meta_response, path);
 		if (meta_list != null)
 		{
-			doc_node.appendChild(this.doc.importNode(meta_list, true));
+			doc_node.appendChild(doc.importNode(meta_list, true));
 		}
 		return result;
 	}

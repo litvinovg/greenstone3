@@ -3,6 +3,7 @@ package org.greenstone.gsdl3.action;
 import org.greenstone.gsdl3.util.*;
 
 // XML classes
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 
@@ -27,9 +28,9 @@ public class SystemAction extends Action
 	/** process a request */
 	public Node process(Node message_node)
 	{
-
 		Element message = this.converter.nodeToElement(message_node);
-
+	    Document doc = message.getOwnerDocument();
+	    
 		// assume only one request
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 
@@ -39,7 +40,7 @@ public class SystemAction extends Action
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		HashMap<String, Serializable> params = GSXML.extractParams(cgi_param_list, false);
 
-		Element result = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element result = doc.createElement(GSXML.MESSAGE_ELEM);
 
 		String coll = (String) params.get(GSParams.SYSTEM_CLUSTER);
 
@@ -49,11 +50,11 @@ public class SystemAction extends Action
 			to = coll;
 		}
 
-		Element mr_request_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_SYSTEM, to, userContext);
+		Element mr_request_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_SYSTEM, to, userContext);
 		mr_request_message.appendChild(mr_request);
 
-		Element system = this.doc.createElement(GSXML.SYSTEM_ELEM);
+		Element system = doc.createElement(GSXML.SYSTEM_ELEM);
 		mr_request.appendChild(system);
 
 		// will need to change the following if can do more than one system request at once
@@ -108,7 +109,7 @@ public class SystemAction extends Action
 				// create the default response
 				// for now just have an error
 				logger.error("bad subaction type");
-				Element page_response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+				Element page_response = doc.createElement(GSXML.RESPONSE_ELEM);
 				result.appendChild(page_response);
 
 				return result;
@@ -117,7 +118,7 @@ public class SystemAction extends Action
 
 		Node response_message = this.mr.process(mr_request_message);
 
-		Element response = GSXML.duplicateWithNewName(this.doc, (Element) GSXML.getChildByTagName(response_message, GSXML.RESPONSE_ELEM), GSXML.RESPONSE_ELEM, true);
+		Element response = GSXML.duplicateWithNewName(doc, (Element) GSXML.getChildByTagName(response_message, GSXML.RESPONSE_ELEM), GSXML.RESPONSE_ELEM, true);
 		addSiteMetadata(response, userContext);
 		addInterfaceOptions(response);
 
