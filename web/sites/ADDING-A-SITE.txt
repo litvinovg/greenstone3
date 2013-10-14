@@ -1,0 +1,66 @@
+
+For example, for a new site:
+
+   <greenstone3home>/web/sites/multimodal-mdl
+
+Available through the URL:
+
+  localhost:8383/greenstone3/mdl-libray
+
+Do the following:
+
+1. Edit $GSDL3HOME/WEB-INF/web.xml
+
+   (a) Similar to the "library" <servlet>...</servlet> entry, create the entry:
+
+	<servlet>
+		<servlet-name>mdl-library</servlet-name>
+		<description>A Multimodal Music Digital Library (MDL)</description>
+		<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
+		<init-param>
+			<param-name>library_name</param-name>
+			<param-value>mdl-library</param-value>    <!-****-->
+		</init-param>
+		<init-param>
+			<param-name>site_name</param-name>
+			<param-value>multimodal-mdl</param-value> <!-****-->
+		</init-param>
+		<init-param>
+			<param-name>interface_name</param-name>
+			<param-value>default</param-value>
+		</init-param>
+		<init-param>
+			<param-name>receptionist_class</param-name>
+			<param-value>DefaultReceptionist</param-value>
+		</init-param>
+		<init-param>
+			<param-name>default_lang</param-name>
+			<param-value>en</param-value>
+		</init-param>
+	</servlet>
+
+   (b) And further down, similar to the "library" <servlet-mapping>...</servlet-mapping> entry, 
+       add the following:
+
+	<servlet-mapping>
+		<servlet-name>mdl-library</servlet-name>
+		<url-pattern>/mdl-library/*</url-pattern>
+	</servlet-mapping>
+
+2. Setup the site configuration file: $GSDL3HOME/sites/multimodal-mdl/siteConfig.xml
+
+   This can be as simple as:
+
+     /bin/cp $GSDL3HOME/sites/localsite/siteConfig.xml $GSDL3HOME/sites/multimodal-mdl/siteConfig.xml
+
+3. Optionally edit: $GSDL3HOME/index.html
+
+   Add a list-item that links to the newly added site
+
+    <li>
+      <a href="mdl-library">Access the Multimodal Music Digital Library.</a> 
+      This is an interface that demonstrates a wide variety of audio-content based processing
+      (server and client side) in the context of a multimodal music digital library.
+    </li>
+
+
