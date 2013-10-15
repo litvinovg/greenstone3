@@ -23,6 +23,20 @@ Do the following:
 
   leave the rest of the file alone
 
+
+4. Finally, edit a <servlet>...</servlet> block in:
+
+   $GSDL3HOME/WEB-INF/web.xml:
+
+  to use your new interface name as the 'interface_name' parameter:
+
+
+		<init-param>
+			<param-name>interface_name</param-name>
+			<param-value>and-sparql</param-value>
+		</init-param>
+
+
 ====
 
 To add a new page to this interface 'sparql.xsl' do the following:
