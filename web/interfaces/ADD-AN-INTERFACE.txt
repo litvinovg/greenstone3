@@ -1,0 +1,58 @@
+
+
+For a new interface based on the 'default' interface:
+
+   $GSDL3HOME/sites/and-sparql
+
+Do the following:
+
+1. Create a top-level directory in the 'interfaces' folder:
+
+    mkdir $GSDL3HOME/interfaces/and-sparql
+
+2. Add in a suitable interfaceConfig.xml file:
+
+  /bin/cp $GSDL3HOME/interfaces/default/interfaceConfig.xml  $GSDL3HOME/interfaces/and-sparql/.
+
+3. Edit it to include a 'baseInterface' attribute in the root element:
+
+  emacs $GSDL3HOME/interfaces/and-sparql/interfaceConfig.xml
+
+
+    <interfaceConfig> => <interfaceConfig baseInterface="default">
+
+  leave the rest of the file alone
+
+====
+
+To add a new page to this interface 'sparql.xsl' do the following:
+
+1. Create a pages folder:
+
+  mkdir -p $GSDL3HOME/interfaces/and-sparql/transform/pages
+
+2. Create a 'stub' page (that can be customized later on):
+
+  /bin/cp $GSDL3HOME/interfaces/default/transform/pages/about.xsl \
+      $GSDL3HOME/interfaces/and-sparql/transform/pages/sparql.xsl
+
+3. Edit the interfaceConfig.xml file to include
+
+  emacs $GSDL3HOME/interfaces/and-sparql/interfaceConfig.xml
+
+    <?xml version="1.0" encoding="UTF-8"?>
+      <interfaceConfig baseInterface="default">
+      	  <actionList>
+		<action class="PageAction" name="p">
+			<subaction name="sparql" xslt="pages/sparql.xsl"/> <!-- **** -->
+
+			<subaction name="home" xslt="pages/home.xsl"/>
+			<subaction name="about" xslt="pages/about.xsl"/>
+			<!-- ... -->
+
+
+
+4. Now edit 'sparql.xsl' to include the information you want your new page to have
+
+  emacs $GSDL3HOME/interfaces/and-sparql/transform/pages/sparql.xsl
+
