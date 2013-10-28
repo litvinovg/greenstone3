@@ -1072,12 +1072,6 @@ dl dd { padding-bottom:10px}
 	margin-bottom:2px;
 }
 
-/* To get the bookshelves and buckets titlecased (they're stored lowercased) */
-table#classifiernodelist {
-    
-    text-transform: capitalize;
-}
-
 /* DEPOSITOR STYLES */
 
 #wizardBar {
