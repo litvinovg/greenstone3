@@ -85,7 +85,7 @@ pre {
 .horizontalContainer {
 	padding-left:0px;
 	margin:0px;
-	text-transform: uppercase; /* To get the bookshelves and buckets titlecased (they're stored lowercased) */
+	text-transform: capitalize; /* To get the bookshelves and buckets titlecased (they're stored lowercased) */
 }
 
 .selectedHorizontalClassifierNode a{
