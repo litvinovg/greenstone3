@@ -3,13 +3,14 @@
 <xsl:stylesheet version="1.0" 
   xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
   xmlns:gslib="http://www.greenstone.org/skinning"
-	xmlns:gsvar="http://www.greenstone.org/skinning-var"
+  xmlns:gsvar="http://www.greenstone.org/skinning-var"
   xmlns:java="http://xml.apache.org/xslt/java"
   xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
   xmlns:xalan="http://xml.apache.org/xalan"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
   xmlns:xslt="output.xsl"
   xmlns:gs3="http://www.greenstone.org/gs3"
+  xmlns:xlink="http://www.w3.org/1999/xlink" 
   >
 
   <xsl:output method="xml"/>
