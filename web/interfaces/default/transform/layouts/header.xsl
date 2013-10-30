@@ -497,6 +497,17 @@
 						<xsl:if test="not(/page/pageRequest/paramList/param[@name = 's1.maxDocs'])">
 							<input type="hidden" name="s1.maxDocs" value="100"/>
 						</xsl:if>
+						<!-- The index selection list -->
+						<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']/@type = 'enum_single'">
+							<span class="textselect">
+								<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']">
+									<xsl:with-param name="default">
+										<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']" mode="calculate-default"/>
+									</xsl:with-param>
+									<xsl:with-param name="hideSingle">false</xsl:with-param>
+								</xsl:apply-templates>
+							</span>
+						</xsl:if>
 						<!-- The query text box -->
 						<span class="querybox">
 							<xsl:variable name="qs">
@@ -508,17 +519,7 @@
 								</xsl:apply-templates>
 							</nobr>
 						</span>
-						<!-- The index selection list -->
-						<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']/@type = 'enum_single'">
-							<span class="textselect">
-								<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']">
-									<xsl:with-param name="default">
-										<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']" mode="calculate-default"/>
-									</xsl:with-param>
-									<xsl:with-param name="hideSingle">true</xsl:with-param>
-								</xsl:apply-templates>
-							</span>
-						</xsl:if>
+						
 						<!-- The submit button (for TextQuery) -->
 						<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']">
 							<input type="submit" id="quickSearchSubmitButton">
