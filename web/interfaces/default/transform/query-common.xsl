@@ -72,7 +72,7 @@
 		<xsl:choose>
 			<xsl:when test="count(option) = 1">
 				<xsl:if test="$hideSingle = 'false'">
-					<xsl:value-of select="option/displayItem[@name='name']"/>
+					<xsl:value-of select="option/displayItem[@name='name']"/>: 
 				</xsl:if>
 				<input type='hidden' name='{$ns}{@name}'><xsl:attribute name='value'><xsl:value-of  select='option/@name'/></xsl:attribute></input>
 			</xsl:when>
