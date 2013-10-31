@@ -505,6 +505,7 @@
 										<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']" mode="calculate-default"/>
 									</xsl:with-param>
 									<xsl:with-param name="hideSingle">false</xsl:with-param>
+									<xsl:with-param name="quickSearch">true</xsl:with-param>
 								</xsl:apply-templates>
 							</span>
 						</xsl:if>
