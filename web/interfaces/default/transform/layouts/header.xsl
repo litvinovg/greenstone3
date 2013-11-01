@@ -570,4 +570,13 @@
 	   <script type="text/javascript">$(window).load(initPanoramaViewer);$(window).load(_animate);</script>
 	</xsl:template>
 
+	<xsl:template name="choose-title">
+		<gsf:choose-metadata>
+			<gsf:metadata name="dc.Title"/>
+			<gsf:metadata name="exp.Title"/>
+			<gsf:metadata name="ex.dc.Title"/>
+			<gsf:metadata name="Title"/>
+			<gsf:default>Untitled</gsf:default>
+		</gsf:choose-metadata>
+	</xsl:template>
 </xsl:stylesheet>
