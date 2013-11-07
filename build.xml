@@ -1075,17 +1075,24 @@
     <echo>collection solr-jdbm-demo installed</echo>
   </target>
 
-  <!-- Until Mac Lions (64 bit) can generate a working IsisGdl, use the one generated on a Leopard -->
+  <!-- Until 64 bit Linux and Mac (Lion) machines can generate a working IsisGdl, 
+       use the ones generated on a 32 bit Linux and Mac (Leopard), respectively -->
   <target name="get-isisgdl">
-    <if>
-      <bool>
-	<and>
-	  <contains string="${os.bin.dir}" substring="darwin" casesensitive="false"/>
-	  <matches pattern="^(10\.7\.[4-9]|10\.[8-9]|1[1-9]|[2-9])" string="${os.version}"/>
-	</and>
-      </bool>
-      <get src="http://www.greenstone.org/caveat-emptor/IsisGdl.macleopard"
-        dest="${basedir}/gs2build/bin/${os.bin.dir}/IsisGdl"/>
+    <exec executable="/bin/uname" dir="${basedir}" failonerror="false"
+	  outputproperty="uname.val">
+      <arg value="-m"/>
+    </exec>
+    
+    <if><bool><equals arg1="${uname.val}" arg2="x86_64"/></bool>
+      <echo>Bitness: ${uname.val}</echo>
+      <if><bool><contains string="${os.bin.dir}" substring="darwin" casesensitive="false"/></bool>
+	<get src="http://www.greenstone.org/caveat-emptor/IsisGdl.macleopard"
+             dest="${basedir}/gs2build/bin/${os.bin.dir}/IsisGdl"/>	  
+      </if>
+      <if><bool><contains string="${os.bin.dir}" substring="linux" casesensitive="false"/></bool>
+	<get src="http://www.greenstone.org/caveat-emptor/IsisGdl.bin32"
+             dest="${basedir}/gs2build/bin/${os.bin.dir}/IsisGdl"/>
+      </if>
       <chmod file="${basedir}/gs2build/bin/${os.bin.dir}/IsisGdl" perm="755"/>
     </if>
   </target>
