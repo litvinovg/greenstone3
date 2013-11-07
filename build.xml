@@ -647,7 +647,7 @@
 
   <!-- install-common-src and install-collection-building are mutually exclusive and either one or the other will be done depending on whether collection building is enabled or not -->
   <!--before configuring build-src, make sure that gnome-lib is compiled up-->
-  <target name="install" depends="init,compile-imagemagick,compile-gnome-lib,install-common-src,install-collection-building,install-runtime,install-solr-ext,setup-for-eclipse"
+  <target name="install" depends="init,compile-imagemagick,compile-gnome-lib,install-common-src,install-collection-building,install-runtime,install-solr-ext,setup-for-eclipse,get-isisgdl"
     description="Install Greenstone 3. Use this when you first checkout the code: 'ant prepare new-install'."/>
 
   <target name="install-common-src" depends="init" 
@@ -1075,6 +1075,20 @@
     <echo>collection solr-jdbm-demo installed</echo>
   </target>
 
+  <!-- Until Mac Lions (64 bit) can generate a working IsisGdl, use the one generated on a Leopard -->
+  <target name="get-isisgdl">
+    <if>
+      <bool>
+	<and>
+	  <contains string="${os.bin.dir}" substring="darwin" casesensitive="false"/>
+	  <matches pattern="^(10\.7\.[4-9]|10\.[8-9]|1[1-9]|[2-9])" string="${os.version}"/>
+	</and>
+      </bool>
+      <get src="http://www.greenstone.org/caveat-emptor/IsisGdl.macleopard"
+        dest="${basedir}/gs2build/bin/${os.bin.dir}/IsisGdl"/>
+      <chmod file="${basedir}/gs2build/bin/${os.bin.dir}/IsisGdl" perm="755"/>
+    </if>
+  </target>
 
   <target name="set-perl-shebangs" depends="perl-for-building">
     <if>
