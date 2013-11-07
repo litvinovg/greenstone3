@@ -2518,7 +2518,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 	<echo>Extacting the PDFBox extension into the GSDLHOME extension area</echo>
 	<untar compression="gzip" 
 	       src="${gs2build.home}/ext/pdf-box-java.tar.gz"
-	       dest="${pdfbox.ext.dir}"/>
+	       dest="${gs2build.home}/ext"/>
 
 	<delete file="${gs2build.home}/ext/pdf-box-java.tar.gz"/>
 
