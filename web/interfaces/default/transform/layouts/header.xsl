@@ -467,20 +467,15 @@
 			<xsl:variable name="subaction" select="/page/pageRequest/@subaction"/>
 			<div id="quicksearcharea">
 				<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']">
+					<xsl:choose>
+					<xsl:when test="not(page/pageRequest[@action='q']) or /page/pageRequest/paramList/param[@name='qs']/@value = '1'">
 					<form action="{$library_name}/collection/{$collNameChecked}/search/TextQuery">
 						<!-- This parameter says that we have come from the quick search area -->
 						<input type="hidden" name="qs" value="1"/>
 						<input type="hidden" name="rt" value="rd"/>
 						<input type="hidden" name="s1.level">
 							<xsl:attribute name="value">
-								<xsl:choose>
-									<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.level']">
-										<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.level']/@value"/>
-									</xsl:when>
-									<xsl:otherwise>
 									        <xsl:value-of select="/page/pageResponse/collection/serviceList/service[@name='TextQuery']/paramList/param[@name = 'level']/@default"/>
-									</xsl:otherwise>
-								</xsl:choose>
 							</xsl:attribute>
 						</input>
 						<xsl:choose>
@@ -497,18 +492,6 @@
 						<xsl:if test="not(/page/pageRequest/paramList/param[@name = 's1.maxDocs'])">
 							<input type="hidden" name="s1.maxDocs" value="100"/>
 						</xsl:if>
-						<!-- The index selection list -->
-						<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']/@type = 'enum_single'">
-							<span class="textselect">
-								<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']">
-									<xsl:with-param name="default">
-										<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']" mode="calculate-default"/>
-									</xsl:with-param>
-									<xsl:with-param name="hideSingle">false</xsl:with-param>
-									<xsl:with-param name="quickSearch">true</xsl:with-param>
-								</xsl:apply-templates>
-							</span>
-						</xsl:if>
 						<!-- The query text box -->
 						<span class="querybox">
 							<xsl:variable name="qs">
@@ -520,7 +503,30 @@
 								</xsl:apply-templates>
 							</nobr>
 						</span>
-						
+						<!-- The index selection list -->
+						<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']/@type = 'enum_single'">
+							<span class="textselect">
+								<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']">
+									<xsl:with-param name="default">
+										<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='index']" mode="calculate-default"/>
+									</xsl:with-param>
+									<xsl:with-param name="hideSingle">true</xsl:with-param>
+									<xsl:with-param name="quickSearch">true</xsl:with-param>
+								</xsl:apply-templates>
+							</span>
+						</xsl:if>
+						<!-- The partition selection list -->						
+						<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='indexSubcollection']/@type = 'enum_single'">
+							<span class="textselect">
+								<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='indexSubcollection']">
+									<xsl:with-param name="default">
+										<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='indexSubcollection']" mode="calculate-default"/>
+									</xsl:with-param>
+									<xsl:with-param name="hideSingle">true</xsl:with-param>
+									<xsl:with-param name="quickSearch">true</xsl:with-param>
+								</xsl:apply-templates>
+							</span>
+						</xsl:if>						
 						<!-- The submit button (for TextQuery) -->
 						<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']">
 							<input type="submit" id="quickSearchSubmitButton">
@@ -531,11 +537,22 @@
 							<br/>
 						</xsl:if>
 					</form>
+					</xsl:when>
+					<xsl:otherwise><br/></xsl:otherwise>
+					</xsl:choose>			
 				</xsl:if>
 				<!-- The list of other search types -->
 				<ul>
 					<xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']">
-						<li class="ui-state-default ui-corner-all">
+						<li>
+						<xsl:choose>
+						<xsl:when test="@name = /page/pageRequest/paramList/param[@name='s']/@value">
+					<xsl:attribute name="class">ui-state-default ui-corner-all ui-state-active</xsl:attribute>
+					</xsl:when>
+					<xsl:otherwise>
+					<xsl:attribute name="class">ui-state-default ui-corner-all</xsl:attribute>
+					</xsl:otherwise>
+					</xsl:choose>
 							<a>
 								<xsl:attribute name="href">
 									<xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="$collNameChecked"/>/search/<xsl:value-of select="@name"/>
