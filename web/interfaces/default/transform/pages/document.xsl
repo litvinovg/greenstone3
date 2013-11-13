@@ -456,14 +456,14 @@
 				<div id="image{@nodeID}">
 					<div id="wrap{util:replace(@nodeID, '.', '_')}" class="zoomImage" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
 						<div id="small{util:replace(@nodeID, '.', '_')}" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
-							<gsf:image type="screen"/>
+							<gsf:link type="source"><gsf:image type="screen"/></gsf:link>
 						</div>
 						<div id="mover{util:replace(@nodeID, '.', '_')}" style="border: 1px solid green; position: absolute; top: 0; left: 0; width: 598px; height: 598px; overflow: hidden; z-index: 100; background: white; display: none;">
 							<div id="overlay{util:replace(@nodeID, '.', '_')}" style="width: 600px; height: 600px; position: absolute; top: 0; left: 0; z-index: 200;">
 								<xsl:text> </xsl:text>
 							</div>
 							<div id="large{util:replace(@nodeID, '.', '_')}" style="position: relative; width: {$imageWidth}px; height: {$imageHeight}px;">
-								<gsf:image type="source"/>
+								<gsf:link type="source"><gsf:image type="source"/></gsf:link>
 							</div>
 						</div>
 					</div>
@@ -517,7 +517,9 @@
 	<xsl:template name="documentNodeText">
 		<!-- Hides the "This document has no text." message -->
 		<xsl:variable name="noText"><gsf:metadata name="NoText"/></xsl:variable>
-		<xsl:if test="not($noText = '1')">
+		<xsl:choose>
+		<xsl:when test="not($noText = '1')">
+
 			<!-- Section text -->
 			<xsl:for-each select="nodeContent">
 				<xsl:for-each select="node()">
@@ -534,7 +536,12 @@
 					</xsl:choose>
 				</xsl:for-each>
 			</xsl:for-each>
-		</xsl:if><xsl:text> </xsl:text>
+		</xsl:when>
+		<xsl:when test="$noText = '1' and not(metadataList/metadata[@name='Image'])">
+			<gsf:link type="source"><gsf:metadata name="Source"/></gsf:link>
+		</xsl:when>
+		</xsl:choose>
+		<xsl:text> </xsl:text>
 	</xsl:template>
 
 	<!-- Used to produce a version of the page in a format that can be read by the realistic books plugin -->
