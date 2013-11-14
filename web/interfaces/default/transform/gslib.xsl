@@ -456,14 +456,14 @@ _httpjava_ {_httpweb_/java}
   </xsl:template>
   <xsl:template match="collection|serviceCluster">
     <xsl:value-of select="displayItem[@name='description']" disable-output-escaping="yes"/>
-    <xsl:apply-templates select="serviceList">
+<!-- Uncomment this section if you want the collection service links and their descriptions to appear -->
+	<!--<xsl:apply-templates select="serviceList">
       <xsl:with-param name="collName" select="$collName"/>
-    </xsl:apply-templates>
+    </xsl:apply-templates>-->
   </xsl:template>
   
   <xsl:template match="serviceList">	
 	<xsl:param name="collName"/>
-	<xsl:if test="service[not(@type = 'query' or @type = 'browse' or @type = 'retrieve' or @type = 'oai')]">
 		<h3>
 		  <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'about.services')"/>
 		</h3>
@@ -484,7 +484,6 @@ _httpjava_ {_httpweb_/java}
 			  <xsl:variable name="action">
 				<xsl:choose>
 				  <xsl:when test="@type='query'">q</xsl:when>
-				  <xsl:when test="@type='browse'">b</xsl:when>
 				  <xsl:when test="@type='process'">pr</xsl:when>
 				  <xsl:when test="@type='applet'">a</xsl:when>
 				  <xsl:otherwise>DO_NOT_DISPLAY</xsl:otherwise>
@@ -504,7 +503,7 @@ _httpjava_ {_httpweb_/java}
 			</xsl:for-each>
 		  </div>
 		</xsl:if>
-	</xsl:if>
+
   </xsl:template>
   
   <!-- classifier page ............................................................................ -->
