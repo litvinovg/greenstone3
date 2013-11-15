@@ -526,7 +526,19 @@
 									<xsl:with-param name="quickSearch">true</xsl:with-param>
 								</xsl:apply-templates>
 							</span>
-						</xsl:if>						
+						</xsl:if>	
+						<!-- The language selection list -->						
+						<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='indexLanguage']/@type = 'enum_single'">
+							<span class="textselect">
+								<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='indexLanguage']">
+									<xsl:with-param name="default">
+										<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='indexLanguage']" mode="calculate-default"/>
+									</xsl:with-param>
+									<xsl:with-param name="hideSingle">true</xsl:with-param>
+									<xsl:with-param name="quickSearch">true</xsl:with-param>
+								</xsl:apply-templates>
+							</span>
+						</xsl:if>							
 						<!-- The submit button (for TextQuery) -->
 						<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']">
 							<input type="submit" id="quickSearchSubmitButton">
@@ -546,7 +558,7 @@
 					<xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']">
 						<li>
 						<xsl:choose>
-						<xsl:when test="@name = /page/pageRequest/paramList/param[@name='s']/@value">
+						<xsl:when test="@name = /page/pageRequest/paramList/param[@name='s']/@value and not(/page/pageRequest/paramList/param[@name='qs']/@value = 1)">
 					<xsl:attribute name="class">ui-state-default ui-corner-all ui-state-active</xsl:attribute>
 					</xsl:when>
 					<xsl:otherwise>
