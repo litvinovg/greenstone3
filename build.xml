@@ -450,6 +450,7 @@
 	     value="--enable-gnome-lib-ext" else=" ">
     <or>
       <available file="${gs2build.home}/ext/gnome-lib-minimal" type="dir"/>
+      <istrue value="${checkout.gnomelibmin.ext}"/>
       <istrue value="${use.gnomelib.ext}"/>
       <istrue value="${checkout.gnomelib.ext}"/>
     </or>
@@ -872,7 +873,14 @@
     <available file="${basedir}/gli" property="gli.present"/>
     <available file="${basedir}/common-src" property="common.src.present"/>
     <available file="${basedir}/gs2build" property="gs2build.present"/>
-    <available file="${gnome-lib-dir}" property="gnome-lib.present"/>
+    <!--<available file="${gnome-lib-dir}" property="gnome-lib.present"/>-->
+    <condition property="gnome-lib.present">
+      <or>
+	<available file="${gnome-lib-dir}" type="dir"/><!--Only set if use.gnomelib is on-->
+	<available file="${basedir}/gs2build/ext/gnome-lib" type="dir"/>
+	<available file="${basedir}/gs2build/ext/gnome-lib-minimal" type="dir"/>
+      </or>
+    </condition>
 
     <condition property="tomcat.islocal">
       <or>
@@ -2703,19 +2711,61 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   <target name="prepare-gnome-lib" depends="init" if="collection.building.enabled" unless="gnome-lib.present">
     <if>
       <bool>
-	<istrue value="${checkout.gnomelib.ext}"/>
+	<istrue value="${checkout.gnomelibmin.ext}"/>
       </bool>
 
-      <antcall target="checkout-gnome-lib"/>
-      <!--Compilation of gnome-lib happens during ant install, just before configuring (common-src and) build-src-->
-
+      <antcall target="checkout-gnome-lib-min"/>
       <else>
-	<echo>**** Not preparing gnome-lib:</echo>
-	<echo>property checkout.gnomelib.ext in build.properties was not set or was set to false</echo>
+
+	<if>
+	  <bool>
+	    <istrue value="${checkout.gnomelib.ext}"/>
+	  </bool>
+	  
+	  <antcall target="checkout-gnome-lib"/>
+	  <!--Compilation of gnome-lib happens during ant install, just before configuring (common-src and) build-src-->
+	  
+	  <else>
+	    <echo>**** Not preparing gnome-lib:</echo>
+	    <echo>property checkout.gnomelib.ext in build.properties was not set or was set to false</echo>
+	  </else>
+	</if>
       </else>
     </if>
   </target>
 
+  <target name="checkout-gnome-lib-min" depends="init" if="collection.building.enabled" unless="nosvn.mode">
+    <if>
+      <bool>
+	<and>
+	  <istrue value="${checkout.gnomelibmin.ext}"/>
+	  <not><istrue value="${gnome-lib.present}"/></not>
+	</and>
+      </bool>
+
+      <echo>checking out gnome-lib-minimal</echo>
+      <exec executable="svn" os="${os.unix}">
+	<arg value="export"/>
+	<arg value="${svn.root}/gs2-extensions/gnome-lib/trunk/gnome-lib-minimal-linux-x64.tar.gz"/>
+	<arg value="${gs2build.home}/ext/gnome-lib-minimal.tar.gz"/>
+      </exec>
+      
+      <exec executable="tar" os="${os.unix}" dir="${gs2build.home}/ext">
+	<arg value="-xvzf" />
+	<arg value="${gs2build.home}/ext/gnome-lib-minimal.tar.gz" />
+      </exec>
+      <!--<untar compression="gzip" 
+	     src="${gs2build.home}/ext/gnome-lib-minimal.tar.gz"
+	     dest="${gs2build.home}/ext"/>-->
+
+      <delete file="${gs2build.home}/ext/gnome-lib-minimal.tar.gz"/>
+
+      <else>
+	<echo>gnomelib already exists at ${gnomelib.src.dir}</echo>
+      </else>
+    </if>
+
+  </target>
 
   <target name="checkout-gnome-lib" depends="init" if="collection.building.enabled" unless="nosvn.mode">
 
@@ -2831,7 +2881,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     </exec>
   </target>
  
-  <target name="configure-build-src" depends="init" if="collection.building.enabled"
+  <target name="configure-build-src" depends="init,checkout-gnome-lib-min" if="collection.building.enabled"
     description="Configure the build-src component">
     <exec executable="${build.src.home}/configure" os="${os.unix}"
       dir="${build.src.home}" failonerror="true">

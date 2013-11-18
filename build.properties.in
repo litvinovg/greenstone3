@@ -95,6 +95,7 @@ with.gli.and.gems=true
 ## Uncomment these lines if enabling compilation with the gnome-lib extension
 ## and if compiling imagemagick
 ## These extensions should be in the [gsdl3home]/gs2build/ext directory
+#checkout.gnomelibmin.ext=true
 #checkout.gnomelib.ext=true
 #checkout.imagemagick.ext=true
 
