@@ -1,0 +1,101 @@
+@import "palette.less";
+
+
+#social-bar-holder{
+	float: left;
+	width: 100%;
+	position: relative;
+	background: url(../img/transparent-dark.png);
+	border-bottom: 1px solid #f4f3ea;
+	padding-top: 14px;
+	padding-bottom: 9px;
+}
+
+#social-bar{
+	display: block;
+	clear: left;
+	float: right;
+	position: relative;
+	right: 50%;
+	text-align: center;
+	
+	li{
+		display: block;
+		float: left;
+		left: 50%;
+		position: relative;
+		overflow: hidden;
+		width: 32px;
+		height: 32px;
+		margin-left: 5px;
+		margin-right: 5px;
+		margin-bottom: 5px;
+		.border-radius();
+		
+		a{
+			position: absolute;
+			height: 64px;
+			width: 32px;
+			top: 0;
+			left: 0px;
+			background-repeat: no-repeat;
+			.transition(0.15s);
+			
+			&:hover{
+				top:-32px;
+			}
+		}
+		
+		
+	
+	}
+	
+	.dribbble a{
+		background-image: url('../img/social/dribbble.png');
+	}
+	
+	.facebook a{
+		background-image: url('../img/social/facebook.png');
+	}
+	
+	.flickr a{
+		background-image: url('../img/social/flickr.png');
+	}
+	
+	.forrst a{
+		background-image: url('../img/social/forrst.png');
+	}
+	
+	.github a{
+		background-image: url('../img/social/github.png');
+	}
+	
+	.googleplus a{
+		background-image: url('../img/social/googleplus.png');
+	}
+	
+	.lastfm a{
+		background-image: url('../img/social/lastfm.png');
+	}
+	
+	.linkedin a{
+		background-image: url('../img/social/linkedin.png');
+	}
+	
+	.rss a{
+		background-image: url('../img/social/rss.png');
+	}
+	
+	.twitter a{
+		background-image: url('../img/social/twitter.png');
+	}
+	
+	.vimeo a{
+		background-image: url('../img/social/vimeo.png');
+	}
+	
+	.youtube a{
+		background-image: url('../img/social/youtube.png');
+	}
+	
+}

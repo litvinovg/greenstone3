@@ -1,0 +1,389 @@
+
+/* -------- SEARCH ------- */
+.paramLabel {
+clear: both;
+	margin: 2px;
+	float: left;
+	min-width: 250px;
+}
+.paramValue {
+	margin: 2px;
+	float: left;
+}
+
+
+/** query form style**/
+div#queryform{
+
+}
+
+/** search result style */
+.termInfo{
+font-style: italic;
+
+}
+
+div#matchdocs{
+clear: both;
+}
+
+div.resultnavigation{
+ margin: 0;
+ padding:0;
+}
+
+ul#resultlist li{
+  display:block;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* Horizontal Classifiers */
+
+.horizontalContainer {
+	padding-left:0px;
+	margin:0px;
+	text-transform: uppercase; /* To get the bookshelves and buckets titlecased (they're stored lowercased) */
+}
+
+.selectedHorizontalClassifierNode a{
+	font-weight: bold;
+	text-decoration: none;
+}
+
+.horizontalClassifierNode {
+	padding:0px 0px 10px 10px;
+	list-style:none;
+	display: inline-block;
+}
+
+/* Registered users table */
+
+
+#userListTable {
+	text-align: center;
+	width: 90%;
+	margin: auto;
+}
+
+#userListTable td{
+	border: black 1px solid;
+	padding: 5px;
+}
+
+
+table{
+	border-collapse:collapse;
+	border-spacing:0;
+}
+
+
+
+#auth_navbar {
+	width: 90%;
+	margin: 10px auto;
+}
+
+#auth_navbar span{
+	padding:3px;
+}
+
+
+
+
+/* TABLE OF CONTENTS*/
+.termList {
+	font-size:12px;
+	line-height:14px;
+}
+
+.noTermHighlight{
+
+}
+
+.termHighlight{
+	background:yellow;
+}
+
+#viewAndZoomOptions {
+	margin-bottom:10px;
+	border:0px;
+}
+
+#viewOptions {
+	margin: 0px;
+	padding: 0px;
+}
+
+#viewOptions li {
+	list-style:none;
+	float:left;
+	padding: 5px;
+	cursor:pointer;
+}
+
+
+
+.tableOfContentsTitle{
+	font-weight:bold;
+	text-align:left;
+}
+
+.viewOptions a:link, .viewOptions a:hover, .viewOptions a:active, .viewOptions a:visited {
+	text-decoration:none;
+}
+
+#rightSidebar {
+	width: 30%;
+	min-width:180px;
+	float:right;
+	margin: 0 0 10px 20px;
+}
+
+#contentsArea {
+	padding:0px 10px;
+}
+
+#collectionLinks {
+	position: relative;
+}
+
+
+.tocTable {
+	width: 100%;
+	background: white !important;
+}
+
+.tocTextCell {
+	padding-left:5px;
+}
+
+.tableOfContentsContainer {
+	padding:1px;
+
+}
+
+#tableOfContents {
+	margin: 0;
+	padding: 0;
+	font-size: 90%;
+}
+
+#tableOfContents li {
+	list-style: none;
+	margin: 0;
+	padding: 2px;
+}
+
+#tableOfContents li.current {
+	background-color: #090;
+}
+
+#tableOfContents li.current li {
+	background-color: #fff;
+}
+
+
+/* SECTIONED DOCUMENTS*/
+
+.sectionHeader {
+	margin-top:0px;
+	margin-bottom:0px;
+}
+
+.headerTD {
+	vertical-align: middle;
+}
+
+/* Styles for the different depths */
+.sectionHeaderDepthTitle{
+	font-size:1.4em;
+	line-height:1em;
+	font-weight:bold;
+}
+
+.sectionHeaderDepth1{
+	font-size:1.3em;
+	line-height:1em;
+	font-weight:bold;
+}
+
+.sectionHeaderDepth2{
+	font-size:1.2em;
+	line-height:1em;
+	font-weight:bold;
+	font-style:italic;
+}
+
+.sectionHeaderDepth3{
+	font-size:1.1em;
+	line-height:1em;
+	font-style:italic;
+}
+
+.sectionHeaderDepth4{
+	font-size:1em;
+	line-height:1em;
+	font-weight:italic;
+}
+
+.sectionNumberSpan{
+	/*Comment out this line to enable automatic section numbering*/
+	display:none;
+}
+
+.sectionContainer{
+	padding-top:0.5em;
+	padding-bottom:1em;
+	padding-left:1.5em;
+}
+
+
+
+.sectionText pre {
+width: 100%;
+overflow:hidden;
+clear:both;
+}
+
+#gs-document-text pre {
+white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+white-space: -pre-wrap;      /* Opera 4-6 */
+white-space: -o-pre-wrap;    /* Opera 7 */
+white-space: pre-wrap;       /* css-3 */
+word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+
+
+/*  HIERARCHICAL CLASSIFIERS     */
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+.childrenlist {
+    margin: 0 0 0 10px;
+}
+.childrenlist td {
+    padding: 3px 0 0 10px;
+}
+
+
+
+/* PAGED IMAGE VIEWER */
+
+#viewOptions li {
+    cursor: pointer;
+    float: left;
+    list-style: none outside none;
+    padding: 5px;
+	  display: block;
+}
+
+
+.pageSlider {
+    margin-left: auto;
+    margin-right: auto;
+    overflow: auto;
+    padding: 2px;
+    width: 250px;
+}
+.pageSliderSpacer {
+    width: 2px;
+}
+.pageSliderCol {
+    height: 100px;
+    padding: 2px;
+    text-align: center;
+    vertical-align: top;
+}
+
+/* INTERFACE SPECIFIC */
+
+
+#logo {
+text-align: center;
+}
+
+#logo a {
+font-family: Algerian, serif;
+color: #E37655;
+line-height: 1;
+
+}
+
+div.widget-block h4 {
+text-transform: uppercase;
+}
+
+div#title a#lib {
+color: #BB4E2D;
+}
+
+div#title a#lib:hover, div#title a#coll:hover {
+color: #FF9E7D;
+}
+
+@media (max-width:299px) {
+#logo a {font-size: 20px;}
+#logo a#coll {font-size: 10px;}
+#top {height: 50%}
+}
+
+@media (min-width:300px) {
+#logo a {font-size: 20px;}
+#logo a#coll {font-size: 10px;}
+#top {height: 50%}
+}
+@media (min-width:500px) {
+#logo a {font-size: 30px;}
+#logo a#coll {font-size: 20px;}
+#top {height: 40%}
+}
+@media (min-width:800px) {
+#logo a {font-size: 40px;}
+#logo a#coll {font-size: 30px;}
+#top {height: 30%}
+}
+@media (min-width:1000px) {
+#logo a {font-size: 50px;}
+#logo a#coll {font-size: 40px;}
+#top {height: 20%}
+}
+@media (min-width:1200px) {
+#logo a {font-size: 60px;}
+#logo a#coll {font-size: 50px;}
+#top {height: 10%}
+}
+
+
+
+td {
+padding: 1px;
+}
+
+form#prefform h3 {
+clear: both;
+}
+
+input[type='submit'], button {
+	display:block;
+	float:left;
+	clear: both;
+	margin-top: 10px;
+
+}
+
+form div table {
+float: left;
+clear: both;
+}
