@@ -1,0 +1,15 @@
+
+For developers:
+
+To help with configuring your environment to compile up the source code,
+you can set up a 'local' folder with the necessary setup/devel files.
+
+For example, for 64-bit linux (in your top-level Greenstone3 folder):
+
+  svn co http://svn.greenstone.org/local/greenstone3/linux-64bit local
+
+Then edit:
+
+  local/gs3-{setup,devel}.sh
+
+accordingly.
