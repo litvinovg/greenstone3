@@ -63,4 +63,9 @@ Do the following:
       (server and client side) in the context of a multimodal music digital library.
     </li>
 
+****
+
+Example sites can be checked out from:
+
+  http://svn.greenstone.org//main/trunk/model-sites/
 
