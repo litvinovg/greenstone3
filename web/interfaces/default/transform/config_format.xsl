@@ -45,6 +45,20 @@
 		</script>
 	</xsl:template>
 
+
+	<xsl:template match="gsf:variable2">
+		<xslt:variable>
+			<xsl:copy-of select="@*"/>
+			<xsl:apply-templates/>
+		</xslt:variable>
+		<script type="text/javascript">
+			gs.variables.<xsl:value-of select="@name"/>
+			<xslt:text disable-output-escaping="yes"> = '</xslt:text>
+			<xsl:apply-templates/>
+			<xslt:text disable-output-escaping="yes">';</xslt:text>
+		</script>
+	</xsl:template>
+
 	<xsl:template match="gsf:defaultClassifierNode">
 		<xslt:call-template name="defaultClassifierNode"/>
 	</xsl:template>
