@@ -19,14 +19,20 @@ use XML::Writer;
 
 use strict;
 
+my $convert_format_stmts = 0;
+
 &main();
 sub print_usage() {
     print STDOUT "Usage: convert_coll_from_gs2.pl [options] coll-name\n";
     print STDOUT "options:\n";
     
-    print STDOUT "   -collectdir         Directory where collection lives.\n";
-    print STDOUT "   -verbosity          Controls the amount of output.\n";
-    print STDOUT "   -defaultlang        The language that is considered the default (for display text etc). defaults to 'en'\n\n";
+    print STDOUT "   -collectdir             Directory where collection lives.\n";
+    print STDOUT "   -verbosity              Controls the amount of output.\n";
+    print STDOUT "   -defaultlang            The language that is considered the default (for display text etc). defaults to 'en'\n";
+    print STDOUT "   -convert_format_stmts   (Deprecated.) Switch this on if you want the old behaviour of this script, which is \n";
+    print STDOUT "                               to process format statements using perl regular expressions.\n";
+    print STDOUT "                               This option is deprecated in favour of using 'formatconverter' which interprets \n";
+    print STDOUT "                               format statements directly using the same C++ parsing code as in GS2 runtime.\n\n";
 }
 
 
@@ -38,7 +44,8 @@ sub main {
     if (!&parsargv::parse(\@ARGV,
 			  'verbosity/\d+/', \$verbosity,
 			  'collectdir/.*/', \$collectdir,
-			  'defaultlang/.*/', \$defaultlang)) {
+			  'defaultlang/.*/', \$defaultlang,
+			  'convert_format_stmts', \$convert_format_stmts)) {
 	&print_usage();
 	die "\n";
     }
@@ -746,6 +753,9 @@ sub format_if_or {
 
 sub write_format {
     my ($writer, $old_format, $node_type) = @_;
+
+    if($convert_format_stmts) {
+
     # replace \' with '
     $old_format =~ s/\\\'/\'/g;
     # replace \" with "
@@ -776,6 +786,12 @@ sub write_format {
     
     #put quotes around any atts
     $old_format =~ s/=([a-z]+)([> ])/=\'$1\'$2/g;
+    } 
+    else { # not converting format statements, leave them as GS2 format stmts, 
+	# so that formatconverter can convert them and users can oversee the conversion in GLI,
+	# but nest the GS2 statements here in an xml tag that won't be processed by GS3 
+	$old_format = "<gsf:format-gs2>" . $old_format . "</gsf:format-gs2>";
+    }
 
     if ($node_type eq "document") {
 	$writer->startTag('gsf:template', 'match'=>'documentNode');
