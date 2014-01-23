@@ -10,6 +10,7 @@ BEGIN {
 }
 
 use colcfg;
+use docprint; # for sub escape_text
 use util;
 use parsargv;
 use FileHandle;
@@ -754,12 +755,13 @@ sub format_if_or {
 sub write_format {
     my ($writer, $old_format, $node_type) = @_;
 
-    if($convert_format_stmts) {
-
     # replace \' with '
     $old_format =~ s/\\\'/\'/g;
     # replace \" with "
     $old_format =~ s/\\\"/\"/g;
+
+    if($convert_format_stmts) {
+
     #convert [] to <gsf:...>
     # now handles nested {If} and {Or}
     $old_format = &format_if_or($old_format, $node_type);
@@ -790,7 +792,10 @@ sub write_format {
     else { # not converting format statements, leave them as GS2 format stmts, 
 	# so that formatconverter can convert them and users can oversee the conversion in GLI,
 	# but nest the GS2 statements here in an xml tag that won't be processed by GS3 
+
+	$old_format = &docprint::escape_text($old_format); # escape html entities inside the format statement since the <br> and <p> may not be correct for xml
 	$old_format = "<gsf:format-gs2>" . $old_format . "</gsf:format-gs2>";
+	
     }
 
     if ($node_type eq "document") {
