@@ -27,21 +27,6 @@ import java.net.*;
 import java.util.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import org.apache.xerces.parsers.*;
-import org.apache.xml.serialize.*;
-
-// SAX
-import org.xml.sax.XMLReader;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.InputSource;
-
-// JAXP
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
 // import file Logger.java
 import org.apache.log4j.*;
@@ -62,105 +47,107 @@ public class OAIXML {
   public static final String LIST_METADATA_FORMATS = "ListMetadataFormats";
   public static final String IDENTIFY = "Identify";
 
-  // other valid oai parameters
-  public static final String OAI_METADATAFORMAT = "OAIMetadataFormat";
-  public static final String METADATA_NAMESPACE = "metadataNamespace";
-  public static final String OAI_DC = "oai_dc";
-  public static final String DC = "dc";
+  // oai request parameters
   public static final String METADATA_PREFIX = "metadataPrefix";
   public static final String FROM = "from";
   public static final String UNTIL = "until";
   public static final String SET = "set";
   public static final String RESUMPTION_TOKEN = "resumptionToken";
-  public static final String RESUMPTION_TOKEN_EXPIRATION = "resumptionTokenExpiration";
   public static final String IDENTIFIER = "identifier";
 
-  public static final String USE_STYLESHEET = "useOAIStylesheet";
-  public static final String STYLESHEET = "OAIStylesheet";
+  // Error element and code att
+  public static final String ERROR = "error";
+  public static final String CODE = "code";
   
-  // words used to compose oai responses and read in OAIConfig.xml
-  public static final String ADMIN_EMAIL = "adminEmail";
+  // OAI error codes
   public static final String BAD_ARGUMENT = "badArgument";
   public static final String BAD_RESUMPTION_TOKEN = "badResumptionToken";
   public static final String BAD_VERB = "badVerb";
-  public static final String BASE_URL = "baseURL";
   public static final String CANNOT_DISSEMINATE_FORMAT = "cannotDisseminateFormat";
-  public static final String CODE = "code";
-  public static final String COLLECTION = "collection";
-  public static final String COLLECTION_LIST = "collectionList";
-  public static final String COMPLETE_LIST_SIZE = "completeListSize";
+  public static final String ID_DOES_NOT_EXIST = "idDoesNotExist";
+  public static final String NO_METADATA_FORMATS = "noMetadataFormats";
+  public static final String NO_RECORDS_MATCH = "noRecordsMatch";
+  public static final String NO_SET_HIERARCHY = "noSetHierarchy";
+  
+
+  // words used to compose oai responses
+  // many of these used in OAIConfig too
+
+  // General
+  public static final String OAI_PMH = "OAI-PMH";
+  public static final String RESPONSE_DATE = "responseDate";
+  public static final String REQUEST = "request";
+  
+  // Identify data
+  public static final String ADMIN_EMAIL = "adminEmail";
+  public static final String BASE_URL = "baseURL";
   public static final String COMPRESSION = "compression";
-  public static final String CURSOR = "cursor";
-  public static final String DATESTAMP = "datestamp";
   public static final String DELETED_RECORD = "deletedRecord";
   public static final String DESCRIPTION = "description";
   public static final String EARLIEST_DATESTAMP = "earliestDatestamp";
-  public static final String ERROR = "error";
-  public static final String EXPIRATION_DATE = "expirationDate";
   public static final String GRANULARITY = "granularity";
-  public static final String GS3OAI = "GS3OAI";
-  public static final String GS_OAI_RESOURCE_URL = "gs.OAIResourceURL";
-  public static final String HAS_OAI = "hasOAI";
+  public static final String PROTOCOL_VERSION = "protocolVersion";
+  public static final String REPOSITORY_NAME = "repositoryName";
+  public static final String OAI_IDENTIFIER = "oai-identifier";
+  public static final String SCHEME = "scheme";
+  public static final String REPOSITORY_IDENTIFIER = "repositoryIdentifier";
+  public static final String DELIMITER = "delimiter";
+  public static final String SAMPLE_IDENTIFIER = "sampleIdentifier";
+
+  // metadata formats
+  public static final String METADATA_FORMAT = "metadataFormat";
+  public static final String SCHEMA = "schema";
+  public static final String METADATA_NAMESPACE = "metadataNamespace";
+  public static final String OAI_DC = "oai_dc";
+  public static final String DC = "dc";
+
+  // record response data
+  // SET_SPEC
+  public static final String RECORD = "record";
   public static final String HEADER = "header";
-  public static final String ILLEGAL_OAI_VERB = "Illegal OAI verb";
-  public static final String INDEX_STEM = "indexStem";
-  public static final String INFO_METADATA = "Metadata"; // this has capital M
-  public static final String LASTMODIFIED = "lastmodified";
+  public static final String DATESTAMP = "datestamp";
+  public static final String METADATA = "metadata";
+
+  // list sets
+  // SET, 
+  public static final String SET_NAME = "setName";
+  public static final String SET_SPEC = "setSpec";
+  public static final String SET_DESCRIPTION = "setDescription";
+
+  // resumption token element
+  public static final String RESUMPTION_TOKEN_ELEM = "resumptionToken";
+  public static final String EXPIRATION_DATE = "expirationDate";
+  public static final String COMPLETE_LIST_SIZE = "completeListSize";
+  public static final String CURSOR = "cursor";
+  
+  // extra elements/attributes from OAIConfig
+  public static final String OAI_INFO = "oaiInfo";
+  public static final String USE_STYLESHEET = "useOAIStylesheet";
+  public static final String STYLESHEET = "OAIStylesheet";
+  public static final String RESUME_AFTER = "resumeAfter";
+  public static final String RESUMPTION_TOKEN_EXPIRATION = "resumptionTokenExpiration";
+  public static final String OAI_SUPER_SET = "oaiSuperSet";
   public static final String MAPPING = "mapping";
   public static final String MAPPING_LIST = "mappingList";
-  public static final String MESSAGE = "message";
-  public static final String METADATA = "metadata";
-  public static final String METADATA_FORMAT = "metadataFormat";
-  public static final String NAME = "name";
-  public static final String NO_RECORDS_MATCH = "noRecordsMatch";
-  public static final String OAI = "OAI";
-  public static final String OAI_DASH_PMH = "OAI-PMH";
-  public static final String OAI_LASTMODIFIED = "oailastmodified";
-  public static final String OAIPMH = "OAIPMH";
-  public static final String OAI_RESUMPTION_TOKENS = "OAIResumptionTokens";
-  public static final String OAI_INFO = "oaiInfo";
-  public static final String OAI_SERVICE = "oaiService";
-  public static final String OAI_SET_LIST = "oaiSetList";
-  public static final String OAI_SERVICE_UNAVAILABLE = "OAI service unavailable";
-  public static final String OID = "OID";
-  public static final String PARAM = "param";
-  public static final String PARAM_LIST = "paramList";
-  public static final String PROTOCOL_VERSION = "protocolVersion";
-  public static final String RECORD = "record";
-  public static final String REQUEST = "request";
-  public static final String REPOSITORY_NAME = "repositoryName";
-  public static final String REPOSITORY_ID = "repositoryId";
-  public static final String RESPONSE = "response";
-  public static final String RESPONSE_DATE = "responseDate";
-  public static final String RESUME_AFTER = "resumeAfter";
-  public static final String SCHEMA = "schema";
-  public static final String SERVICE = "service";
-  public static final String SERVICE_UNAVAILABLE = "service unavailable";
-  public static final String SET_SPEC = "setSpec";
-  public static final String SET_NAME = "setName";
-  public static final String SET_DESCRIPTION = "setDescription";
-  public static final String SITE = "site";
-  public static final String TO = "to";
-  public static final String TYPE = "type";
-  public static final String VALUE = "value";
+
+  // code constants
+   public static final String GS_OAI_RESOURCE_URL = "gs.OAIResourceURL";
+   public static final String ILLEGAL_OAI_VERB = "Illegal OAI verb";
+   public static final String LASTMODIFIED = "lastmodified";
+  // // The node id in the collection database, which contains all the OIDs in the database
+   public static final String BROWSELIST = "browselist";
+   public static final String OAI_LASTMODIFIED = "oailastmodified";
+   public static final String OAIPMH = "OAIPMH";
+   public static final String OAI_SET_LIST = "oaiSetList";
+   public static final String OAI_SERVICE_UNAVAILABLE = "OAI service unavailable";
+   public static final String OID = "OID";
     
-  //Two error and exception conditions for the verb 'ListMetadataFormats'
-  public static final String ID_DOES_NOT_EXIST = "idDoesNotExist";
-  public static final String NO_METADATA_FORMATS = "noMetadataFormats";
-    
-  // The node id in the collection database, which contains all the OIDs in the database
-  public static final String BROWSELIST = "browselist";
-        
   //system-dependent file separator, maybe '/' or '\'
   public static final String FILE_SEPARATOR = File.separator;
   public static final String OAI_VERSION1 = "1.0";
   public static final String OAI_VERSION2 = "2.0";
   /*************************above are final values****************************/
     
-  public static Element resumption_token_elem = null;
-  //used when saving the token file
-  public static File resumption_token_file = null;
-  //public static ArrayList token_list = new ArrayList();
     
   //initialized in getOAIConfigXML()
   public static Element oai_config_elem = null;
@@ -174,28 +161,19 @@ public class OAIXML {
   // a repository may additionally choose to support.
   public static final String default_granularity = "yyyy-MM-dd";
 
-  //this value is overriden in getOAIConfigXML()
   public static long token_expiration = 7200;
-    
   /** which version of oai that this oaiserver supports; default is 2.0 
    *  initialized in getOAIConfigXML()
    */
   public static String oai_version = "2.0";
   public static String baseURL = "";
     
-  /**response owner document */
-  public static Document response_doc = new XMLConverter().newDOM(); 
-    
+  /** Converter for parsing files and creating Elements */
+  public static XMLConverter converter = new XMLConverter();
+  
   public static String[] special_char = {"/", "?", "#", "=", "&", ":", ";", " ", "%", "+"};
   public static String[] escape_sequence = {"%2F", "%3F", "%23", "%3D", "%26", "%3A", "%3B", "%20", "%25", "%2B"};
-  //    /** key=special character; value=escaped sequence */
-  //    public static HashMap encode_map = new HashMap();
-  //    /** key=escaped sequence; value=special character */
-  //    public static HashMap decode_map = new HashMap();
 
-  public static void init() {
-    resumption_token_elem = getOAIResumptionTokenXML();
-  }
   public static String getOAIVersion() {
     return oai_version;
   }
@@ -204,115 +182,34 @@ public class OAIXML {
     return baseURL;
   }
 	
-  public static Element createElement(String tag_name) {
-    return response_doc.createElement(tag_name);
-  }
-  /**Compose a response element used when OAIPMH service sending responses thru 
-   * ServiceCluster and MessageRouter, as they automatically wrap a message element
-   * on this response element
-   */
-  public static Element getResponse(Element core_msg) {
-    Element res = createElement(RESPONSE);
-    res.appendChild(response_doc.importNode(core_msg, true));
-    return res;
-  }
-  /** Read in OAIResumptionToken.xml (residing web/WEB-INF/classes/) */ 
-  public static Element getOAIResumptionTokenXML() {     
-      
-    // The system environment variable $GSDL3HOME(ends ../web) does not contain the file separator 
-    resumption_token_file = new File(GlobalProperties.getGSDL3Home() + FILE_SEPARATOR +
-				     "WEB-INF" + FILE_SEPARATOR + "classes" +FILE_SEPARATOR + "OAIResumptionToken.xml");
-    if (resumption_token_file.exists()) {
-      Document token_doc = parseXMLFile(resumption_token_file);
-      if (token_doc != null) {
-	resumption_token_elem = token_doc.getDocumentElement();
-      } else {
-	logger.error("Fail to parse resumption token file OAIReceptionToken.xml.");
-	return null;
-      }
-      //remove all expired tokens
-      clearExpiredTokens();
-      return resumption_token_elem;  
-    }
-    //if resumption_token_file does not exist        
-    logger.info("resumption token file: "+ resumption_token_file.getPath()+" not found! create an empty one.");
-    resumption_token_elem = createElement(OAI_RESUMPTION_TOKENS);
-    saveOAIResumptionTokenXML(resumption_token_elem);
-    return resumption_token_elem;
-  }
-  public static void saveOAIResumptionTokenXML(Element token_elem) {     
-    if(writeXMLFile(resumption_token_file, token_elem.getOwnerDocument()) == false) {
-      logger.error("Fail to save the resumption token file");
-    }
-  }
-  public static void clearExpiredTokens() {
-    boolean token_deleted = false;
-    NodeList tokens = GSXML.getChildrenByTagName(resumption_token_elem, RESUMPTION_TOKEN);
-    for (int i=0; i<tokens.getLength(); i++) {
-      Element token_elem = (Element)tokens.item(i);
-      String expire_str = token_elem.getAttribute(EXPIRATION_DATE);
-      long datestamp = getTime(expire_str); // expire_str is in milliseconds
-      if(datestamp < System.currentTimeMillis()) {
-	resumption_token_elem.removeChild(token_elem);
-	token_elem = null;
-	token_deleted = true;
-      }
-    } 
-      
-    if(token_deleted) {
-      saveOAIResumptionTokenXML(resumption_token_elem);
-    }
-  }
-  public static boolean containsToken(String token) {
-    NodeList tokens = GSXML.getChildrenByTagName(resumption_token_elem, OAIXML.RESUMPTION_TOKEN);
-    for (int i=0; i<tokens.getLength(); i++) {
-      if(token.equals(GSXML.getNodeText((Element)tokens.item(i)).trim() ))
-	return true;
-    }
-    return false;
-  }
-  public static void addToken(Element token) {
-    Document doc = resumption_token_elem.getOwnerDocument();
-    resumption_token_elem.appendChild(duplicateElement(doc, token, true));
-    saveOAIResumptionTokenXML(resumption_token_elem);
-  }
-  public static void addToken(String token) {
-    Element te = resumption_token_elem.getOwnerDocument().createElement(OAIXML.RESUMPTION_TOKEN);
-    //add expiration att
-    resumption_token_elem.appendChild(te);
-    saveOAIResumptionTokenXML(resumption_token_elem);
-  }
-  public static boolean removeToken(String token) {
-    NodeList tokens = GSXML.getChildrenByTagName(resumption_token_elem, OAIXML.RESUMPTION_TOKEN);
-    int num_tokens = tokens.getLength();
-    for (int i=0; i<num_tokens; i++) {
-      Element e = (Element)(tokens.item(i));
-      if(token.equals(GSXML.getNodeText(e))) {
-	resumption_token_elem.removeChild(e);
-	saveOAIResumptionTokenXML(resumption_token_elem);
-	return true;
-      }
-    }
-    return false;      
-  }
   /** Read in OAIConfig.xml (residing web/WEB-INF/classes/) and use it to configure the receptionist etc.
    *  the oai_version and baseURL variables are also set in here. 
    *  The init() method is also called in here. */ 
   public static Element getOAIConfigXML() {
-    init();
      
-    // The system environment variable $GSDL3HOME(ends ../web) does not contain the file separator 
-    File oai_config_file = new File(GlobalProperties.getGSDL3Home() + FILE_SEPARATOR +
-				    "WEB-INF" + FILE_SEPARATOR + "classes" +FILE_SEPARATOR + "OAIConfig.xml");
-    if (!oai_config_file.exists()) {
-      logger.error(" oai config file: "+oai_config_file.getPath()+" not found!");
+    File oai_config_file = null;
+
+    try {
+      URL oai_config_url = Class.forName("org.greenstone.gsdl3.OAIServer").getClassLoader().getResource("OAIConfig.xml");
+      if (oai_config_url == null) {
+	logger.error("couldn't find OAIConfig.xml via class loader");
+	return null;
+      }
+      oai_config_file = new File(oai_config_url.toURI());
+      if (!oai_config_file.exists()) {
+        logger.error(" oai config file: "+oai_config_file.getPath()+" not found!");
+        return null;
+      }
+    } catch(Exception e) {
+      logger.error("couldn't find OAIConfig.xml "+e.getMessage());
       return null;
     }
-    Document oai_config_doc = parseXMLFile(oai_config_file);
+
+    Document oai_config_doc = converter.getDOM(oai_config_file, "utf-8");
     if (oai_config_doc != null) {
       oai_config_elem = oai_config_doc.getDocumentElement();
     } else {
-      logger.error("Fail to parse oai config file OAIConfig.xml.");
+      logger.error("Failed to parse oai config file OAIConfig.xml.");
       return null;
     }
       
@@ -382,9 +279,9 @@ public class OAIXML {
   /** TODO: returns a basic response for appropriate oai version
    *  
    */
-  public static  Element createBasicResponse(String verb, String[] pairs) {
+  public static  Element createBasicResponse(Document doc, String verb, String[] pairs) {
 
-    Element response = createResponseHeader(verb);
+    Element response = createResponseHeader(doc, verb);
       
     //set the responseDate and request elements accordingly
     Element request_elem = (Element)GSXML.getChildByTagName(response, REQUEST);
@@ -413,11 +310,36 @@ public class OAIXML {
   }
   /** @param error_code the value of the code attribute
    *  @param error_text the node text of the error element
-   *  @return an oai error element 
-   *  Used by receptionist
+   *  @return an oai error <message><response><error>
    */
-  public static Element createErrorElement(String error_code, String error_text) {
-    Element error = createElement(ERROR);
+  public static Element createErrorMessage(String error_code, String error_text) {
+    Document doc = converter.newDOM();
+    Element message = doc.createElement(GSXML.MESSAGE_ELEM);
+    Element resp = doc.createElement(GSXML.RESPONSE_ELEM);
+    message.appendChild(resp);
+    Element error = createErrorElement(doc, error_code, error_text);
+    resp.appendChild(error);
+    return message;
+  }
+    
+  /** @param error_code the value of the code attribute
+   *  @param error_text the node text of the error element
+   *  @return an oai error <response><error>
+   */
+  public static Element createErrorResponse(String error_code, String error_text) {
+    Document doc = converter.newDOM();
+    Element resp = doc.createElement(GSXML.RESPONSE_ELEM);
+    Element error = createErrorElement(doc, error_code, error_text);
+    resp.appendChild(error);
+    return resp;
+  }
+    
+  /** @param error_code the value of the code attribute
+   *  @param error_text the node text of the error element
+   *  @return an oai error <error>
+   */
+  public static Element createErrorElement(Document doc, String error_code, String error_text) {
+    Element error = doc.createElement(ERROR);
     error.setAttribute(CODE, error_code);
     GSXML.setNodeText(error, error_text);
     return error;
@@ -433,7 +355,6 @@ public class OAIXML {
 	escaped_str = escaped_str.replaceAll(escape_sequence[i], special_char[i]);
       }
     }
-    //escaped_str = escaped_str.replaceAll("%3A", ":");
     return escaped_str;        
   }
   /** convert those special characters (eg, ':') to their
@@ -446,7 +367,6 @@ public class OAIXML {
 	original_str = original_str.replaceAll(special_char[i], escape_sequence[i]);
       }
     }
-    //original_str = original_str.replaceAll(":", "%3A");
     return original_str;  
   }
   /** convert YYYY-MM_DDThh:mm:ssZ to yyyy-MM-ddTHH:mm:ssZ
@@ -540,8 +460,8 @@ public class OAIXML {
     SimpleDateFormat sdf = new SimpleDateFormat(granularity);
     return sdf.format(date);
   }    
-  public static Element createResponseHeader(String verb) {
-    String tag_name = (oai_version.equals(OAI_VERSION2))? OAI_DASH_PMH : verb;
+  public static Element createResponseHeader(Document response_doc, String verb) {
+    String tag_name = (oai_version.equals(OAI_VERSION2))? OAI_PMH : verb;
     Element oai = response_doc.createElement(tag_name);
     Element resp_date = response_doc.createElement(RESPONSE_DATE);
     Element req = response_doc.createElement(REQUEST);
@@ -559,16 +479,16 @@ public class OAIXML {
     }
     return oai;
   }
-  public static Element getMetadataPrefixElement(String tag_name, String version) {
+  public static Element getMetadataPrefixElement(Document doc, String tag_name, String version) {
     //examples of tag_name: dc, oai_dc:dc, etc.
-    Element oai = response_doc.createElement(tag_name);
+    Element oai = doc.createElement(tag_name);
     if (version.equals(OAI_VERSION2)) {
       oai.setAttribute("xmlns:oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc/");
       oai.setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
       oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
       oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ \n http://www.openarchives.org/OAI/2.0/oai_dc.xsd");
     } else {
-      oai.setAttribute("xmlns", "ttp://www.openarchives.com/OAI/1.1/");
+      oai.setAttribute("xmlns", "http://www.openarchives.com/OAI/1.1/");
       oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
       oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/1.1/" + tag_name + ".xsd");        
     }
@@ -589,172 +509,60 @@ public class OAIXML {
     return map;
   }
     
-  /** Duplicates an element */
-  public static Element duplicateElement (Document owner, Element element, boolean with_attributes) {
-    return duplicateElementNS (owner, element, null, with_attributes);
-  }
-    
-  /** Duplicates an element */
-  public static Element duplicateElementNS (Document owner,
-					    Element element,
-					    String namespace_uri,
-					    boolean with_attributes) {
-    Element duplicate;
-    if (namespace_uri == null) {
-      duplicate = owner.createElement (element.getTagName ());
-    } else {
-      duplicate = owner.createElementNS (namespace_uri, element.getTagName ());
-    }
-    // Copy element attributes
-    if (with_attributes) {
-      NamedNodeMap attributes = element.getAttributes ();
-      for (int i = 0; i < attributes.getLength (); i++) {
-	Node attribute = attributes.item (i);
-	duplicate.setAttribute (attribute.getNodeName (), attribute.getNodeValue ());
-      }
-    }
-        
-    // Copy element children
-    NodeList children = element.getChildNodes ();
-    for (int i = 0; i < children.getLength (); i++) {
-      Node child = children.item (i);
-      duplicate.appendChild (owner.importNode (child, true));
-    }
-        
-    return duplicate;
-  }
-
-  public static void copyElement(Element to, Element from, String elem_name) {
-      
-    Document to_doc = to.getOwnerDocument();
-    Node child = from.getFirstChild();
-    while (child != null) {
-      if (child.getNodeName().equals(elem_name)) {
-	to.appendChild(to_doc.importNode(child, true));
-	return;
-      }
-      child = child.getNextSibling();
-    }
-  }
-
-  public static HashMap<String, String> getParamMap(NodeList params) {
-    HashMap<String, String> map = new HashMap<String, String>();
-    for(int i=0; i<params.getLength(); i++) {
-      Element param = (Element)params.item(i);
-      String param_name = param.getAttribute(OAIXML.NAME);
-      String param_value = param.getAttribute(OAIXML.VALUE);
-      map.put(param_name, param_value);
-    }
-    return map;
-  }
-
-
-  /** Parse an XML document from a given file */
-  static public Document parseXMLFile (File xml_file) {
-    // No file? No point trying!
-    if (xml_file.exists () == false) {
-      return null;
-    }
-    Document doc = null;
-    try {
-      doc = parseXML (new FileInputStream (xml_file));
-    }
-    catch (Exception exception) {
-      logger.error(exception.toString());
-      return null;
-    }
-    return doc;
-  }
-    
-    
-  /** Parse an XML document from a given input stream */
-  static public Document parseXML (InputStream xml_input_stream) {
-    Document document = null;
-        
-    try {
-      InputStreamReader isr = new InputStreamReader (xml_input_stream, "UTF-8");
-      Reader xml_reader = new BufferedReader (isr);
-      document = parseXML (xml_reader);
-      isr.close ();
-      xml_input_stream.close ();
-    }
-    catch (Exception exception) {
-      logger.error(exception.toString());
-    }
-        
-    return document;
-  }
-
-  /** Parse an XML document from a given reader */
-  static public Document parseXML (Reader xml_reader) {
-    Document document = null;
-        
-    try {
-      InputSource isc       = new InputSource (xml_reader);
-      DOMParser parser      = new DOMParser ();
-      parser.setFeature ("http://xml.org/sax/features/validation", false);
-      parser.setFeature ("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-      // May or may not be ignored, the documentation for Xerces is contradictory. If it works then parsing -should- be faster.
-      parser.setFeature ("http://apache.org/xml/features/dom/defer-node-expansion", true);
-      parser.setFeature ("http://apache.org/xml/features/dom/include-ignorable-whitespace", false);
-      parser.parse (isc);
-      document = parser.getDocument ();
-    }
-    catch (SAXException exception) {
-      System.err.println ("SAX exception: " + exception.getMessage ());
-      logger.error(exception.toString());
-    }
-    catch (Exception exception) {
-      logger.error(exception.toString());
-    }
-        
-    return document;
-  }
-  /** Write an XML document to a given file */
-  static public boolean writeXMLFile (File xml_file, Document document) {
-    try {
-      OutputStream os = new FileOutputStream (xml_file);
-      // Create an output format for our document.
-      OutputFormat f = new OutputFormat (document);
-      f.setEncoding ("UTF-8");
-      f.setIndenting (true);
-      f.setLineWidth (0); // Why isn't this working!
-      f.setPreserveSpace (false);
-      // Create the necessary writer stream for serialization.
-      OutputStreamWriter osw = new OutputStreamWriter (os, "UTF-8");
-      Writer w               = new BufferedWriter (osw);
-      // Generate a new serializer from the above.
-      XMLSerializer s        = new XMLSerializer (w, f);
-      s.asDOMSerializer ();
-      // Finally serialize the document to file.
-      s.serialize (document);
-      // And close.
-      os.close ();
-      return true;
-    }
-    catch (Exception exception) {
-      logger.error(exception.toString());
-      return false;
-    }
-  }
-    
-
-  public static Element createOAIIdentifierXML(String repository_id, String sample_collection, String sample_doc_id) {
+  public static Element createOAIIdentifierXML(Document doc, String repository_id, String sample_collection, String sample_doc_id) {
     String xml = "<oai-identifier xmlns=\"http://www.openarchives.org/OAI/2.0/oai-identifier\"\n xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n xsi:schemaLocation=\"http://www.openarchives.org/OAI/2.0/oai-identifier\n http://www.openarchives.org/OAI/2.0/oai-identifier.xsd\">\n <scheme>oai</scheme>\n<repositoryIdentifier>" + repository_id + "</repositoryIdentifier>\n<delimiter>:</delimiter>\n<sampleIdentifier>oai:"+repository_id+":"+sample_collection+":"+sample_doc_id+"</sampleIdentifier>\n</oai-identifier>";
 
-    Document xml_doc = new XMLConverter().getDOM(xml);
-    return (Element)response_doc.importNode(xml_doc.getDocumentElement(), true);
+    Document xml_doc = converter.getDOM(xml);
+    return (Element)doc.importNode(xml_doc.getDocumentElement(), true);
     
 
   }
 
-  public static Element createGSDLElement() {
+  public static Element createGSDLElement(Document doc) {
     String xml = "<gsdl xmlns=\"http://www.greenstone.org/namespace/gsdl_oaiinfo/1.0/gsdl_oaiinfo\"\n xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n xsi:schemaLocation=\"http://www.greenstone.org/namespace/gsdl_oaiinfo/1.0/gsdl_oaiinfo\n   http://www.greenstone.org/namespace/gsdl_oaiinfo/1.0/gsdl_oaiinfo.xsd\"></gsdl>";
-    Document xml_doc = new XMLConverter().getDOM(xml);
-    return (Element)response_doc.importNode(xml_doc.getDocumentElement(), true);
+    Document xml_doc = converter.getDOM(xml);
+    return (Element)doc.importNode(xml_doc.getDocumentElement(), true);
     
 
   }
+
+  public static Element createSet(Document doc, String spec, String name, String description) {
+
+    Element set_elem = doc.createElement(SET);
+    Element set_spec = doc.createElement(SET_SPEC);
+    GSXML.setNodeText(set_spec, spec);
+    set_elem.appendChild(set_spec);
+    Element set_name = doc.createElement(SET_NAME);
+    GSXML.setNodeText(set_name, name);
+    set_elem.appendChild(set_name);
+    if (description != null) {
+      Element set_description = doc.createElement(SET_DESCRIPTION);
+      GSXML.setNodeText(set_description, description);
+      set_elem.appendChild(set_description);
+    }
+    return set_elem;
+    
+  }
+
+  /** returns the resumptionToken element to go into an OAI response */
+  public static Element createResumptionTokenElement(Document doc, String token_name, int total_size, int cursor, long expiration_time) {
+    Element token = doc.createElement(OAIXML.RESUMPTION_TOKEN);
+    if (total_size != -1) {
+      token.setAttribute(OAIXML.COMPLETE_LIST_SIZE, "" + total_size);
+    }
+    if (cursor != -1) {
+      token.setAttribute(OAIXML.CURSOR, "" + cursor);
+    }
+    if(expiration_time !=-1) {
+      token.setAttribute(OAIXML.EXPIRATION_DATE, getTime(expiration_time));
+    }
+   
+    if (token != null) {
+      GSXML.setNodeText(token, token_name);
+    }
+    return token;
+  }
+  
 }
 
 
