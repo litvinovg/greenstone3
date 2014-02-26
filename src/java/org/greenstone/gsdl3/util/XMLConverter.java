@@ -34,7 +34,9 @@ import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.dom.*; // for new Documents
 
 // other java classes
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.InputStreamReader;
@@ -622,4 +624,32 @@ public class XMLConverter
 			logger.error(this.errorMessage);
 		}
 	}
+
+  public boolean writeDOM(Element elem, File file) {
+
+    BufferedWriter writer = null;
+    boolean success = false;
+    try {
+      String xml_string = getString(elem);
+      // need createNewFile???
+      writer = new BufferedWriter(new FileWriter(file));
+      writer.write(xml_string);
+      success = true;
+    }
+
+    catch (Exception e) {
+      logger.error(e.getMessage());
+      success = false;
+    }
+    finally {
+      try {
+	if (writer != null) {
+	  writer.close();
+	}
+      } catch(Exception e) {
+	logger.error("couldn't close the file"+e.getMessage());
+      }
+    }
+    return success;
+  }
 }
