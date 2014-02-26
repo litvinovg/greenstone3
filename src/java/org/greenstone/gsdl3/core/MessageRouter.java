@@ -104,7 +104,7 @@ public class MessageRouter implements ModuleInterface
 	protected Element cluster_list = null;
 	/** list of single services that can be reached */
 	protected Element service_list = null;
-	/** list of sites that can be reached */
+	/** list of external sites that can be reached */
 	protected Element site_list = null;
 	/** list of metadata for the site */
 	protected Element metadata_list = null;
@@ -741,14 +741,12 @@ public class MessageRouter implements ModuleInterface
 				if (c.hasOAI())
 				{
 					Element ane = this.doc.createElement(GSXML.COLLECTION_ELEM);
-					//The collection name is returned as site_name:coll_name, which is in fact the set specification
-					ane.setAttribute(GSXML.NAME_ATT, site_name + ":" + col_name);
+					ane.setAttribute(GSXML.NAME_ATT, col_name);
 					ane.setAttribute(OAIXML.LASTMODIFIED, "" + c.getLastmodified());
 					// lastmodified not of use anymore for OAI, perhaps useful as general information
 					ane.setAttribute(OAIXML.EARLIEST_DATESTAMP, "" + c.getEarliestDatestamp()); // for OAI
 
 					this.oai_collection_list.appendChild(ane);
-					//logger.info(GSXML.xmlNodeToString(oai_collection_list));
 				}
 
 			}
