@@ -41,6 +41,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import org.greenstone.gsdl3.util.MyNodeList;
 /** various functions for extracting info out of GS XML */
 public class GSXML
 {
@@ -795,7 +796,7 @@ public class GSXML
 		Element request = owner.createElement(REQUEST_ELEM);
 		request.setAttribute(TO_ATT, to);
 		request.setAttribute(TYPE_ATT, request_type);
-
+                request.setAttribute(LANG_ATT, userContext._lang);
 		Element userContextElem = owner.createElement("userContext");
 		request.appendChild(userContextElem);
 		userContextElem.setAttribute(LANG_ATT, userContext._lang);
