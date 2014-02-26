@@ -319,6 +319,17 @@ public class GSXML
 		return ids;
 	}
 
+      public static HashMap<String, String> getParamMap(NodeList params) {
+      HashMap<String, String> map = new HashMap<String, String>();
+      for(int i=0; i<params.getLength(); i++) {
+        Element param = (Element)params.item(i);
+        String param_name = param.getAttribute(NAME_ATT);
+        String param_value = param.getAttribute(VALUE_ATT);
+        map.put(param_name, param_value);
+      }
+      return map;
+    }
+
 	public static HashMap<String, Serializable> extractParams(Element xml, boolean deep)
 	{
 		return extractParams(xml, deep, null);
@@ -789,6 +800,19 @@ public class GSXML
 			child = child.getNextSibling();
 		}
 	}
+  
+   public static void copyElement(Element to, Element from, String elem_name) {
+      
+      Document to_doc = to.getOwnerDocument();
+      Node child = from.getFirstChild();
+      while (child != null) {
+        if (child.getNodeName().equals(elem_name)) {
+          to.appendChild(to_doc.importNode(child, true));
+          return;
+        }
+        child = child.getNextSibling();
+      }
+    }
 
 	/** returns a basic request message */
 	public static Element createBasicRequest(Document owner, String request_type, String to, UserContext userContext)
@@ -796,31 +820,32 @@ public class GSXML
 		Element request = owner.createElement(REQUEST_ELEM);
 		request.setAttribute(TO_ATT, to);
 		request.setAttribute(TYPE_ATT, request_type);
-                request.setAttribute(LANG_ATT, userContext._lang);
-		Element userContextElem = owner.createElement("userContext");
-		request.appendChild(userContextElem);
-		userContextElem.setAttribute(LANG_ATT, userContext._lang);
-		userContextElem.setAttribute(USERNAME_ATT, userContext._username);
-		userContextElem.setAttribute(USER_ID_ATT, userContext._userID);
-
-		if (userContext._groups != null)
-		{
-			String groupString = "";
-			for (int i = 0; i < userContext._groups.length; i++)
+		request.setAttribute(LANG_ATT, userContext._lang);
+		if (userContext != null) { // should we allow this??
+		  Element userContextElem = owner.createElement("userContext");
+		  request.appendChild(userContextElem);
+		  userContextElem.setAttribute(LANG_ATT, userContext._lang);
+		  userContextElem.setAttribute(USERNAME_ATT, userContext._username);
+		  userContextElem.setAttribute(USER_ID_ATT, userContext._userID);
+		  
+		  if (userContext._groups != null)
+		    {
+		      String groupString = "";
+		      for (int i = 0; i < userContext._groups.length; i++)
 			{
-				groupString += userContext._groups[i];
-				if (i != userContext._groups.length - 1)
-				{
-					groupString += ",";
-				}
+			  groupString += userContext._groups[i];
+			  if (i != userContext._groups.length - 1)
+			    {
+			      groupString += ",";
+			    }
 			}
-
-			if (groupString.length() > 0)
+		      
+		      if (groupString.length() > 0)
 			{
-				userContextElem.setAttribute(GROUPS_ATT, groupString);
+			  userContextElem.setAttribute(GROUPS_ATT, groupString);
 			}
+		    }
 		}
-
 		return request;
 	}
 
@@ -1580,4 +1605,5 @@ public class GSXML
 
 		return groups;
 	}
+
 }
