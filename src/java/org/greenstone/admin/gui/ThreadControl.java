@@ -269,8 +269,6 @@ public class ThreadControl
     }
 
     
-    public void destroy(){
-    }
 }
 
 

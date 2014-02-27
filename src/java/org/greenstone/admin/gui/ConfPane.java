@@ -541,7 +541,6 @@ public class ConfPane extends JPanel implements ActionListener
 				ThreadControl threadControl = new ThreadControl();
 				Runnable startupTomcatThread = threadControl.new startupTomcatServer("start-tomcat");
 				new Thread(startupTomcatThread).start();
-				threadControl.destroy();
 				tomcat_server_up = true;
 				JOptionPane.showMessageDialog((Component) null, "Tomcat server has been Startup successfully!");
 			}
@@ -563,7 +562,6 @@ public class ConfPane extends JPanel implements ActionListener
 				ThreadControl threadControl = new ThreadControl();
 				Runnable shutdownTomcatThread = threadControl.new shutdownTomcatServer("stop-tomcat");
 				new Thread(shutdownTomcatThread).start();
-				threadControl.destroy();
 				tomcat_server_up = false;
 				JOptionPane.showMessageDialog((Component) null, "Tomcat server has been shutted down !");
 			}
@@ -597,7 +595,6 @@ public class ConfPane extends JPanel implements ActionListener
 				ThreadControl threadControl = new ThreadControl();
 				Runnable restartTomcatThread = threadControl.new restartTomcatServer("restart-tomcat");
 				new Thread(restartTomcatThread).start();
-				threadControl.destroy();
 				tomcat_server_up = true;
 				JOptionPane.showMessageDialog((Component) null, "Tomcat server has been Restarted successfully!");
 			}
@@ -620,7 +617,6 @@ public class ConfPane extends JPanel implements ActionListener
 				ThreadControl threadControl = new ThreadControl();
 				Runnable startupMysqlThread = threadControl.new startupMysqlServer("start-mysql");
 				new Thread(startupMysqlThread).start();
-				threadControl.destroy();
 				mysql_server_up = true;
 				JOptionPane.showMessageDialog((Component) null, "MYSQL server has been Startup successfully!");
 			}
@@ -642,7 +638,6 @@ public class ConfPane extends JPanel implements ActionListener
 				ThreadControl threadControl = new ThreadControl();
 				Runnable shutdownMysqlThread = threadControl.new shutdownMysqlServer("stop-mysql");
 				new Thread(shutdownMysqlThread).start();
-				threadControl.destroy();
 				JOptionPane.showMessageDialog((Component) null, "MYSQL server has been Shutdown successfully !");
 				mysql_server_up = false;
 			}
@@ -665,7 +660,6 @@ public class ConfPane extends JPanel implements ActionListener
 				ThreadControl threadControl = new ThreadControl();
 				Runnable restartMysqlThread = threadControl.new restartMysqlServer("restart-mysql");
 				new Thread(restartMysqlThread).start();
-				threadControl.destroy();
 				JOptionPane.showMessageDialog((Component) null, "MYSQL server has been Restarted successfully!");
 				mysql_server_up = true;
 			}
