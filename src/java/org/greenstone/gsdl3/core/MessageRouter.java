@@ -54,13 +54,6 @@ import org.w3c.dom.NodeList;
  * objects talking to other MessageRouters etc.
  * 
  * 
- * @author Katherine Don
- * @version $Revision$
- * @see ModuleInterface
- * @see Collection
- * @see ServiceRack
- * @see Communicator
- * 
  *      Since some service classes are moved into a separate directory in order
  *      for them to be checked out from a different repository, we modify the
  *      configureServices method to search some of the classes in other place if
@@ -83,8 +76,6 @@ public class MessageRouter implements ModuleInterface
 	/** map of names to Module objects */
 	protected HashMap<String, ModuleInterface> module_map = null;
 
-	/** container Document to create XML Nodes */
-	protected Document doc = null;
 	/** the full description of this site */
 
 	// should these things be separated into local and remote??
@@ -120,7 +111,6 @@ public class MessageRouter implements ModuleInterface
 	public MessageRouter()
 	{
 		this.converter = new XMLConverter();
-		this.doc = this.converter.newDOM();
 	}
 
 	public void cleanUp()
@@ -244,6 +234,7 @@ public class MessageRouter implements ModuleInterface
 	public Node process(Node message_node)
 	{
 
+	  Document doc = this.converter.newDOM();
 		Element message = this.converter.nodeToElement(message_node);
 
 		// check that its a correct message tag
@@ -255,7 +246,7 @@ public class MessageRouter implements ModuleInterface
 
 		NodeList requests = message.getElementsByTagName(GSXML.REQUEST_ELEM);
 
-		Element mainResult = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mainResult = doc.createElement(GSXML.MESSAGE_ELEM);
 
 		// empty request
 		if (requests.getLength() == 0)
@@ -263,8 +254,6 @@ public class MessageRouter implements ModuleInterface
 			logger.error("empty request");
 			return mainResult;
 		}
-
-		Document message_doc = message.getOwnerDocument();
 
 		// for now, just process each request one by one, and append the results to mainResult
 		// Note: if you add an element to another node in the same document, it
@@ -297,7 +286,7 @@ public class MessageRouter implements ModuleInterface
 
 				if (result != null)
 				{
-					mainResult.appendChild(this.doc.importNode(result, true));
+					mainResult.appendChild(doc.importNode(result, true));
 				}
 			}
 			else
@@ -310,8 +299,8 @@ public class MessageRouter implements ModuleInterface
 				for (String this_mod : modules)
 				{
 					// why can't we do this outside the loop??
-					Element mess = this.doc.createElement(GSXML.MESSAGE_ELEM);
-					Element copied_request = (Element) this.doc.importNode(req, true);
+					Element mess = doc.createElement(GSXML.MESSAGE_ELEM);
+					Element copied_request = (Element) doc.importNode(req, true);
 					mess.appendChild(copied_request);
 
 					// find the module to pass it on to
@@ -329,13 +318,13 @@ public class MessageRouter implements ModuleInterface
 							Node res = GSXML.getChildByTagName(result, GSXML.RESPONSE_ELEM);
 							if (res != null)
 							{
-								mainResult.appendChild(this.doc.importNode(res, true));
+								mainResult.appendChild(doc.importNode(res, true));
 							}
 						}
 						else
 						{
 							// add in a place holder response
-							Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+							Element response = doc.createElement(GSXML.RESPONSE_ELEM);
 							response.setAttribute(GSXML.FROM_ATT, this_mod);
 							mainResult.appendChild(response);
 							logger.error("MessageRouter Error: request had null result!");
@@ -474,28 +463,29 @@ public class MessageRouter implements ModuleInterface
 		this.config_info = config_doc.getDocumentElement();
 
 		// load up the services: serviceRackList
-		this.service_list = this.doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		Document doc = this.converter.newDOM();
+		this.service_list = doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
 		Element service_rack_list_elem = (Element) GSXML.getChildByTagName(config_info, GSXML.SERVICE_CLASS_ELEM + GSXML.LIST_MODIFIER);
 		configureServices(service_rack_list_elem);
 
 		// load up the service clusters
-		this.cluster_list = this.doc.createElement(GSXML.CLUSTER_ELEM + GSXML.LIST_MODIFIER);
+		this.cluster_list = doc.createElement(GSXML.CLUSTER_ELEM + GSXML.LIST_MODIFIER);
 		Element cluster_list_elem = (Element) GSXML.getChildByTagName(config_info, GSXML.CLUSTER_ELEM + GSXML.LIST_MODIFIER);
 		configureClusters(cluster_list_elem);
 
 		// load up the collections
-		this.collection_list = this.doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
-		this.private_collection_list = this.doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
-		this.oai_collection_list = this.doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
+		this.collection_list = doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
+		this.private_collection_list = doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
+		this.oai_collection_list = doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
 		configureCollections();
 
 		// load up the external sites - this also adds their services/clusters/collections to the other lists - so must be done last
-		this.site_list = this.doc.createElement(GSXML.SITE_ELEM + GSXML.LIST_MODIFIER);
+		this.site_list = doc.createElement(GSXML.SITE_ELEM + GSXML.LIST_MODIFIER);
 		Element site_list_elem = (Element) GSXML.getChildByTagName(config_info, GSXML.SITE_ELEM + GSXML.LIST_MODIFIER);
 		configureExternalSites(site_list_elem);
 
 		// load up the site metadata
-		this.metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		this.metadata_list = doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		Element metadata_list_elem = (Element) GSXML.getChildByTagName(config_info, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		loadMetadata(metadata_list_elem);
 
@@ -521,9 +511,9 @@ public class MessageRouter implements ModuleInterface
 			logger.info("... none to be loaded");
 			return true;
 		}
-
-		Element service_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element service_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
+		Document doc = this.converter.newDOM();
+		Element service_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element service_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
 		service_message.appendChild(service_request);
 
 		for (int i = 0; i < service_racks.getLength(); i++)
@@ -572,6 +562,7 @@ public class MessageRouter implements ModuleInterface
 				}
 				else
 				{
+				  Document service_list_doc = this.service_list.getOwnerDocument();
 					for (int j = 0; j < services.getLength(); j++)
 					{
 						String service = ((Element) services.item(j)).getAttribute(GSXML.NAME_ATT);
@@ -579,7 +570,7 @@ public class MessageRouter implements ModuleInterface
 						this.module_map.put(service, s);
 
 						// add short info to service_list_ XML
-						this.service_list.appendChild(this.doc.importNode(services.item(j), true));
+						this.service_list.appendChild(service_list_doc.importNode(services.item(j), true));
 					}
 				}
 			}
@@ -609,6 +600,7 @@ public class MessageRouter implements ModuleInterface
 			return true;
 		}
 
+		Document doc = this.cluster_list.getOwnerDocument();
 		for (int i = 0; i < service_clusters.getLength(); i++)
 		{
 			Element cluster = (Element) service_clusters.item(i);
@@ -627,7 +619,7 @@ public class MessageRouter implements ModuleInterface
 
 			this.module_map.put(name, sc); // this replaces the old one if there was one already present
 			//add short info to cluster list
-			Element e = this.doc.createElement(GSXML.CLUSTER_ELEM);
+			Element e = doc.createElement(GSXML.CLUSTER_ELEM);
 			e.setAttribute(GSXML.NAME_ATT, name);
 			this.cluster_list.appendChild(e);
 
@@ -687,7 +679,7 @@ public class MessageRouter implements ModuleInterface
 	{
 
 		logger.info("Activating collection: " + col_name + ".");
-
+		Document doc = this.collection_list.getOwnerDocument();
 		// Look for the etc/collectionInit.xml file, and see what sort of Collection to load
 		Collection c = null;
 		File init_file = new File(GSFile.collectionInitFile(this.site_home, col_name));
@@ -729,7 +721,7 @@ public class MessageRouter implements ModuleInterface
 			logger.info("have just configured collection " + col_name);
 			// add to list of collections
 			this.module_map.put(col_name, c);
-			Element e = this.doc.createElement(GSXML.COLLECTION_ELEM);
+			Element e = doc.createElement(GSXML.COLLECTION_ELEM);
 			e.setAttribute(GSXML.NAME_ATT, col_name);
 
 			if (c.isPublic())
@@ -740,7 +732,7 @@ public class MessageRouter implements ModuleInterface
 
 				if (c.hasOAI())
 				{
-					Element ane = this.doc.createElement(GSXML.COLLECTION_ELEM);
+					Element ane = doc.createElement(GSXML.COLLECTION_ELEM);
 					ane.setAttribute(GSXML.NAME_ATT, col_name);
 					ane.setAttribute(OAIXML.LASTMODIFIED, "" + c.getLastmodified());
 					// lastmodified not of use anymore for OAI, perhaps useful as general information
@@ -858,7 +850,7 @@ public class MessageRouter implements ModuleInterface
 
 				// add to map of modules
 				this.module_map.put(name, comm);
-				this.site_list.appendChild(this.doc.importNode(site_elem, true));
+				this.site_list.appendChild(this.site_list.getOwnerDocument().importNode(site_elem, true));
 				// need to get collection list and service
 				// list from here- if the site isn't up yet, the site will
 				// have to be added later
@@ -885,7 +877,7 @@ public class MessageRouter implements ModuleInterface
 	/** Goes through the metadataList and loads each metadatum found */
 	protected boolean loadMetadata(Element config_metadata_list)
 	{
-
+	  
 		// load up the sites
 		logger.info("loading site metadata...");
 		if (config_metadata_list == null)
@@ -901,10 +893,11 @@ public class MessageRouter implements ModuleInterface
 			return true;
 		}
 
+		Document doc = this.metadata_list.getOwnerDocument();
 		for (int i = 0; i < metadata.getLength(); i++)
 		{
 			Element s = (Element) metadata.item(i);
-			this.metadata_list.appendChild(this.doc.importNode(s, true));
+			this.metadata_list.appendChild(doc.importNode(s, true));
 		}
 		return true;
 	}
@@ -922,9 +915,9 @@ public class MessageRouter implements ModuleInterface
 	{
 
 		logger.info(" getting info from site:" + site_name);
-
-		Element info_request = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element req = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
+		Document doc = this.converter.newDOM();
+		Element info_request = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element req = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
 		info_request.appendChild(req);
 
 		// process the message
@@ -947,7 +940,7 @@ public class MessageRouter implements ModuleInterface
 				// this separate in future - so can distinguish own and
 				// other collections ??
 				e.setAttribute(GSXML.NAME_ATT, GSPath.prependLink(col_name, site_name));
-				this.collection_list.appendChild(this.doc.importNode(e, true));
+				this.collection_list.appendChild(doc.importNode(e, true));
 			}
 		}
 
@@ -960,7 +953,7 @@ public class MessageRouter implements ModuleInterface
 				Element e = (Element) services.item(i);
 				String serv_name = e.getAttribute(GSXML.NAME_ATT);
 				e.setAttribute(GSXML.NAME_ATT, GSPath.prependLink(serv_name, site_name));
-				this.service_list.appendChild(this.doc.importNode(e, true));
+				this.service_list.appendChild(doc.importNode(e, true));
 			}
 		}
 
@@ -973,7 +966,7 @@ public class MessageRouter implements ModuleInterface
 				Element e = (Element) clusters.item(i);
 				String clus_name = e.getAttribute(GSXML.NAME_ATT);
 				e.setAttribute(GSXML.NAME_ATT, GSPath.prependLink(clus_name, site_name));
-				this.cluster_list.appendChild(this.doc.importNode(e, true));
+				this.cluster_list.appendChild(doc.importNode(e, true));
 			}
 		}
 		return true;
@@ -1089,8 +1082,9 @@ public class MessageRouter implements ModuleInterface
 	{
 
 		// message for self, should be type=describe/configure at this stage
+	        Document doc = this.converter.newDOM();
 		String type = req.getAttribute(GSXML.TYPE_ATT);
-		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element response = doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, "");
 		if (type.equals(GSXML.REQUEST_TYPE_DESCRIBE))
 		{
@@ -1099,11 +1093,11 @@ public class MessageRouter implements ModuleInterface
 			Element param_list = (Element) GSXML.getChildByTagName(req, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			if (param_list == null)
 			{
-				response.appendChild(this.collection_list);
-				response.appendChild(this.cluster_list);
-				response.appendChild(this.site_list);
-				response.appendChild(this.service_list);
-				response.appendChild(this.metadata_list);
+			  response.appendChild(doc.importNode(this.collection_list, true));
+				response.appendChild(doc.importNode(this.cluster_list, true));
+				response.appendChild(doc.importNode(this.site_list, true));
+				response.appendChild(doc.importNode(this.service_list, true));
+				response.appendChild(doc.importNode(this.metadata_list, true));
 				return response;
 			}
 
@@ -1120,23 +1114,23 @@ public class MessageRouter implements ModuleInterface
 					String info = param.getAttribute(GSXML.VALUE_ATT);
 					if (info.equals(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER))
 					{
-						response.appendChild(this.collection_list);
+						response.appendChild(doc.importNode(this.collection_list, true));
 					}
 					else if (info.equals(GSXML.CLUSTER_ELEM + GSXML.LIST_MODIFIER))
 					{
-						response.appendChild(this.cluster_list);
+						response.appendChild(doc.importNode(this.cluster_list, true));
 					}
 					else if (info.equals(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER))
 					{
-						response.appendChild(this.service_list);
+						response.appendChild(doc.importNode(this.service_list, true));
 					}
 					else if (info.equals(GSXML.SITE_ELEM + GSXML.LIST_MODIFIER))
 					{
-						response.appendChild(this.site_list);
+						response.appendChild(doc.importNode(this.site_list, true));
 					}
 					else if (info.equals(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER))
 					{
-						response.appendChild(this.metadata_list);
+						response.appendChild(doc.importNode(this.metadata_list, true));
 					}
 				}
 			}
@@ -1149,7 +1143,7 @@ public class MessageRouter implements ModuleInterface
 			logger.info("oaiSetList request received");
 			//this is the oai receptionist asking for a list of oai-support collections
 			response.setAttribute(GSXML.TYPE_ATT, OAIXML.OAI_SET_LIST);
-			response.appendChild(this.oai_collection_list);
+			response.appendChild(doc.importNode(this.oai_collection_list, true));
 			return response;
 		}
 
@@ -1190,11 +1184,11 @@ public class MessageRouter implements ModuleInterface
 							message = "Ping for " + module_name + " did not succeed.";
 						}
 					}
-					Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, message);
+					Element s = GSXML.createTextElement(doc, GSXML.STATUS_ELEM, message);
 					response.appendChild(s);
 				}
 				//else if (action.equals(GSXML.SYSTEM_TYPE_ISPERSISTENT)) {
-				//	Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM,  "Persistent: true.");
+				//	Element s = GSXML.createTextElement(doc, GSXML.STATUS_ELEM,  "Persistent: true.");
 				//	response.appendChild(s);
 				//}
 				else if (action.equals(GSXML.SYSTEM_TYPE_CONFIGURE))
@@ -1204,7 +1198,7 @@ public class MessageRouter implements ModuleInterface
 					{
 						// need to reconfigure the MR
 						this.configureLocalSite();
-						Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, "MessageRouter reconfigured successfully");
+						Element s = GSXML.createTextElement(doc, GSXML.STATUS_ELEM, "MessageRouter reconfigured successfully");
 						response.appendChild(s);
 
 					}
@@ -1267,7 +1261,7 @@ public class MessageRouter implements ModuleInterface
 						{
 							message = "Error in reconfiguring " + subset;
 						}
-						Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, message);
+						Element s = GSXML.createTextElement(doc, GSXML.STATUS_ELEM, message);
 						response.appendChild(s);
 					}
 
@@ -1282,12 +1276,12 @@ public class MessageRouter implements ModuleInterface
 						success = deactivateModule(module_type, module_name);
 						if (success)
 						{
-							Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, module_type + ": " + module_name + " deactivated", GSXML.SYSTEM_TYPE_DEACTIVATE, GSXML.SUCCESS);
+							Element s = GSXML.createTextElement(doc, GSXML.STATUS_ELEM, module_type + ": " + module_name + " deactivated", GSXML.SYSTEM_TYPE_DEACTIVATE, GSXML.SUCCESS);
 							response.appendChild(s);
 						}
 						else
 						{
-							Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, module_type + ": " + module_name + " could not be deactivated", GSXML.SYSTEM_TYPE_DEACTIVATE, GSXML.ERROR);
+							Element s = GSXML.createTextElement(doc, GSXML.STATUS_ELEM, module_type + ": " + module_name + " could not be deactivated", GSXML.SYSTEM_TYPE_DEACTIVATE, GSXML.ERROR);
 							response.appendChild(s);
 						}
 
@@ -1311,12 +1305,12 @@ public class MessageRouter implements ModuleInterface
 						}
 						if (success)
 						{
-							Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, module_type + ": " + module_name + " activated", GSXML.SYSTEM_TYPE_ACTIVATE, GSXML.SUCCESS);
+							Element s = GSXML.createTextElement(doc, GSXML.STATUS_ELEM, module_type + ": " + module_name + " activated", GSXML.SYSTEM_TYPE_ACTIVATE, GSXML.SUCCESS);
 							response.appendChild(s);
 						}
 						else
 						{
-							Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, module_type + ": " + module_name + " could not be activated", GSXML.SYSTEM_TYPE_ACTIVATE, GSXML.ERROR);
+							Element s = GSXML.createTextElement(doc, GSXML.STATUS_ELEM, module_type + ": " + module_name + " could not be activated", GSXML.SYSTEM_TYPE_ACTIVATE, GSXML.ERROR);
 							response.appendChild(s);
 						}
 					}
@@ -1339,7 +1333,8 @@ public class MessageRouter implements ModuleInterface
 
 	protected Element modifyMessages(Element request, Element message, Element result)
 	{
-		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document doc = this.converter.newDOM();
+		Element response = doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, "");
 		response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_MESSAGING);
 
