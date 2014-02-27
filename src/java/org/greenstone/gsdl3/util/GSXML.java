@@ -820,8 +820,8 @@ public class GSXML
 		Element request = owner.createElement(REQUEST_ELEM);
 		request.setAttribute(TO_ATT, to);
 		request.setAttribute(TYPE_ATT, request_type);
-		request.setAttribute(LANG_ATT, userContext._lang);
 		if (userContext != null) { // should we allow this??
+		  request.setAttribute(LANG_ATT, userContext._lang);
 		  Element userContextElem = owner.createElement("userContext");
 		  request.appendChild(userContextElem);
 		  userContextElem.setAttribute(LANG_ATT, userContext._lang);
