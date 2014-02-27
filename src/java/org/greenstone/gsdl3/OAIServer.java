@@ -38,6 +38,7 @@ import org.greenstone.gsdl3.core.OAIReceptionist;
 import org.greenstone.gsdl3.util.GSConstants;
 import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.OAIResumptionToken;
 import org.greenstone.gsdl3.util.OAIXML;
 import org.greenstone.gsdl3.util.XMLConverter;
 import org.w3c.dom.Document;
