@@ -49,7 +49,6 @@ import org.apache.log4j.Logger;
 /** Implements the oai metadata retrieval service for GS3 collections.
  *  Dig into each collection's database and retrieve the metadata
  *
- * @author <a href="mailto:xiao@cs.waikato.ac.nz">Xiao</a>
  */
 
 public class OAIPMH extends ServiceRack {
@@ -61,6 +60,9 @@ public class OAIPMH extends ServiceRack {
   protected String site_name = "";
   protected String coll_name = "";
  
+  // set this up during configure
+  protected Element list_sets_response = null;
+  
   /** constructor */
   public OAIPMH() {
 
@@ -79,6 +81,8 @@ public class OAIPMH extends ServiceRack {
       return false;
     }
     
+    Document doc = this.converter.newDOM();
+    this.short_service_info = doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
     //get the names from ServiceRack.java
     this.site_name = this.router.getSiteName();
     this.coll_name = this.cluster_name;
@@ -126,97 +130,87 @@ public class OAIPMH extends ServiceRack {
       return false;
     }
     
+    // work out what sets this collection has. Will usually contain the collection itself, optional super collection, and maybe subcolls if appropriate classifiers are present.
+    configureSetInfo();
     // the short_service_info is used by the message router to find the method names, 
     //so we just use the doc variable in class ServiceRack to create the xml; but
-    // in each method we will use OAIXML to create the response xml
+    // in each method we will use OAIXMLto create the response xml
     // set up short_service_info_ - just the name
- 
-    Element identify = this.doc.createElement(OAIXML.SERVICE);
 
-    identify.setAttribute(OAIXML.NAME, OAIXML.IDENTIFY);
-    identify.setAttribute(GSXML.TYPE_ATT, "oai");
-    this.short_service_info.appendChild(identify);
-
-    Element list_records = this.doc.createElement(OAIXML.SERVICE);
-    list_records.setAttribute(OAIXML.NAME, OAIXML.LIST_RECORDS);
+    Element list_records = doc.createElement(GSXML.SERVICE_ELEM);
+    list_records.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_RECORDS);
     list_records.setAttribute(GSXML.TYPE_ATT, "oai");
     this.short_service_info.appendChild(list_records);
 
-    Element list_identifiers = this.doc.createElement(OAIXML.SERVICE);
-    list_identifiers.setAttribute(OAIXML.NAME, OAIXML.LIST_IDENTIFIERS);
+    Element list_identifiers = doc.createElement(GSXML.SERVICE_ELEM);
+    list_identifiers.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_IDENTIFIERS);
     list_identifiers.setAttribute(GSXML.TYPE_ATT, "oai");
     this.short_service_info.appendChild(list_identifiers);
     
-    Element list_sets = this.doc.createElement(OAIXML.SERVICE);
-    list_sets.setAttribute(OAIXML.NAME, OAIXML.LIST_SETS);
+    Element list_sets = doc.createElement(GSXML.SERVICE_ELEM);
+    list_sets.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_SETS);
     list_sets.setAttribute(GSXML.TYPE_ATT, "oai");
     this.short_service_info.appendChild(list_sets);
     
-    Element list_metadata_formats = this.doc.createElement(OAIXML.SERVICE);
-    list_metadata_formats.setAttribute(OAIXML.NAME, OAIXML.LIST_METADATA_FORMATS);
+    Element list_metadata_formats = doc.createElement(GSXML.SERVICE_ELEM);
+    list_metadata_formats.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_METADATA_FORMATS);
     list_metadata_formats.setAttribute(GSXML.TYPE_ATT, "oai");
     this.short_service_info.appendChild(list_metadata_formats);
 
-    Element get_record = this.doc.createElement(OAIXML.SERVICE);
-    get_record.setAttribute(OAIXML.NAME, OAIXML.GET_RECORD);
+    Element get_record = doc.createElement(GSXML.SERVICE_ELEM);
+    get_record.setAttribute(GSXML.NAME_ATT, OAIXML.GET_RECORD);
     get_record.setAttribute(GSXML.TYPE_ATT, "oai");
     this.short_service_info.appendChild(get_record);
     
     return true;
   }
+
   /** returns a specific service description */
   public Element getServiceDescription(String service_id, String lang, String subset) {
     
-    if (service_id.equals(OAIXML.IDENTIFY)) {
-      Element identify = this.doc.createElement(OAIXML.SERVICE);
-      identify.setAttribute(OAIXML.NAME, OAIXML.IDENTIFY);
-      identify.setAttribute(GSXML.TYPE_ATT, "oai");
-      return identify;
-    }
+    Document doc = this.converter.newDOM();
     if (service_id.equals(OAIXML.LIST_RECORDS)) {
-      Element list_records = this.doc.createElement(OAIXML.SERVICE);
-      list_records.setAttribute(OAIXML.NAME, OAIXML.LIST_RECORDS);
+      Element list_records = doc.createElement(GSXML.SERVICE_ELEM);
+      list_records.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_RECORDS);
       list_records.setAttribute(GSXML.TYPE_ATT, "oai");
       return list_records;
     }
     
     if (service_id.equals(OAIXML.LIST_IDENTIFIERS)) {
-      Element list_identifiers = this.doc.createElement(OAIXML.SERVICE);
-      list_identifiers.setAttribute(OAIXML.NAME, OAIXML.LIST_IDENTIFIERS);
+      Element list_identifiers = doc.createElement(GSXML.SERVICE_ELEM);
+      list_identifiers.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_IDENTIFIERS);
       list_identifiers.setAttribute(GSXML.TYPE_ATT, "oai");
       return list_identifiers;
     }
     if (service_id.equals(OAIXML.LIST_SETS)) {
-      Element list_sets = this.doc.createElement(OAIXML.SERVICE);
-      list_sets.setAttribute(OAIXML.NAME, OAIXML.LIST_SETS);
+      Element list_sets = doc.createElement(GSXML.SERVICE_ELEM);
+      list_sets.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_SETS);
       list_sets.setAttribute(GSXML.TYPE_ATT, "oai");
       return list_sets;
     }
     if (service_id.equals(OAIXML.LIST_METADATA_FORMATS)) {
-      Element list_metadata_formats = this.doc.createElement(OAIXML.SERVICE);
-      list_metadata_formats.setAttribute(OAIXML.NAME, OAIXML.LIST_METADATA_FORMATS);
+      Element list_metadata_formats = doc.createElement(GSXML.SERVICE_ELEM);
+      list_metadata_formats.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_METADATA_FORMATS);
       list_metadata_formats.setAttribute(GSXML.TYPE_ATT, "oai");
       return list_metadata_formats;
     }
     
     if (service_id.equals(OAIXML.GET_RECORD)) {
-      Element get_record = this.doc.createElement(OAIXML.SERVICE);
-      get_record.setAttribute(OAIXML.NAME, OAIXML.GET_RECORD);
+      Element get_record = doc.createElement(GSXML.SERVICE_ELEM);
+      get_record.setAttribute(GSXML.NAME_ATT, OAIXML.GET_RECORD);
       get_record.setAttribute(GSXML.TYPE_ATT, "oai");
       return get_record;
     }
     
     return null;
   }
-  /** return the metadata information about this set of the repository */
-  protected Element processIdentify(Element req) {
-    return null;
-  }
+  // /** return the metadata information about this set of the repository */
+  // protected Element processIdentify(Element req) {
+  //   return null;
+  // }
   /** return the metadata information  */
   protected Element processListSets(Element req) {
-    //This method is never called unless each set in the returned message contain a
-    //'description' element so that we need to ask each collection for their info
-    return null;    
+    return list_sets_response;
   }
   /** return the metadata information  */
   protected Element processGetRecord(Element req) {
@@ -225,32 +219,33 @@ public class OAIPMH extends ServiceRack {
         metadataPrefix: required
      *  Exceptions: badArgument; cannotDisseminateFormat; idDoesNotExist
      */ 
-    NodeList params = GSXML.getChildrenByTagName(req, OAIXML.PARAM);
-    HashMap<String, String> param_map = OAIXML.getParamMap(params);    
+    NodeList params = GSXML.getChildrenByTagName(req, GSXML.PARAM_ELEM);
+    HashMap<String, String> param_map = GSXML.getParamMap(params);    
     
     String prefix = param_map.get(OAIXML.METADATA_PREFIX);
     if (prefix == null || prefix.equals("")) {
       //Just a double-check
       logger.error("the value of metadataPrefix att is not present in the request.");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
+      return OAIXML.createErrorResponse(OAIXML.CANNOT_DISSEMINATE_FORMAT, "");
     }
     
     Element metadata_format = getMetadataFormatElement(prefix);
     if(metadata_format == null) {
       logger.error("metadata prefix is not supported.");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
+      return OAIXML.createErrorResponse(OAIXML.CANNOT_DISSEMINATE_FORMAT, "");
     }
     
-    String oid = param_map.get(OAIXML.OID);
+    String oid = param_map.get(OAIXML.OID); // TODO should this be identifier???
 
     //get a DBInfo object of the identifier; if this identifier is not present in the database,
     // null is returned.
     DBInfo info = this.coll_db.getInfo(oid);
     if (info == null) {
       logger.error("OID: " + oid + " is not present in the database.");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.ID_DOES_NOT_EXIST, ""));
+      return OAIXML.createErrorResponse(OAIXML.ID_DOES_NOT_EXIST, "");
     }
 
+    Document doc = this.converter.newDOM();
     ArrayList<String> keys = new ArrayList<String>(info.getKeys());
     String oailastmodified = "";
     if(keys.contains(OAIXML.OAI_LASTMODIFIED)) {
@@ -258,14 +253,16 @@ public class OAIPMH extends ServiceRack {
       oailastmodified = OAIXML.getTime(Long.parseLong(oailastmodified)*1000); // java wants dates in milliseconds
     }
 
-    Element get_record = OAIXML.createElement(OAIXML.GET_RECORD);
-    Element record = OAIXML.createElement(OAIXML.RECORD);
+    Element get_record_response = doc.createElement(GSXML.RESPONSE_ELEM);
+    Element get_record = doc.createElement(OAIXML.GET_RECORD);
+    get_record_response.appendChild(get_record);
+    Element record = doc.createElement(OAIXML.RECORD);
     //compose the header element
-    record.appendChild(createHeaderElement(oid, oailastmodified));      
+    record.appendChild(createHeaderElement(doc, oid, oailastmodified));      
     //compose the metadata element
-    record.appendChild(createMetadataElement(prefix, info, metadata_format));
+    record.appendChild(createMetadataElement(doc, prefix, info, metadata_format));
     get_record.appendChild(record);
-    return OAIXML.getResponse(get_record);
+    return get_record_response;
   }
   /** return a list of identifiers  */
   protected Element processListIdentifiers(Element req) {
@@ -277,14 +274,14 @@ public class OAIPMH extends ServiceRack {
      *  resumptionToken: exclusive and optional (ignored as it has been handled by OAIReceptionist)
      *  Exceptions: badArgument; cannotDisseminateFormat; idDoesNotExist
      */ 
-    NodeList params = GSXML.getChildrenByTagName(req, OAIXML.PARAM);
+    NodeList params = GSXML.getChildrenByTagName(req, GSXML.PARAM_ELEM);
     
     if(params.getLength() == 0) {
       logger.error("must at least have the metadataPrefix parameter, can't be none");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+      return OAIXML.createErrorResponse(OAIXML.BAD_ARGUMENT, "");
     }
     
-    HashMap<String, String> param_map = OAIXML.getParamMap(params);  
+    HashMap<String, String> param_map = GSXML.getParamMap(params);  
     
     String prefix = "";
     Date from_date = null;
@@ -293,13 +290,13 @@ public class OAIPMH extends ServiceRack {
     if(param_map.containsKey(OAIXML.METADATA_PREFIX) == false) {    
       //Just a double-check
       logger.error("A param element containing the metadataPrefix is not present.");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
+      return OAIXML.createErrorResponse(OAIXML.CANNOT_DISSEMINATE_FORMAT, "");
     }
     prefix = param_map.get(OAIXML.METADATA_PREFIX);
     if (prefix == null || prefix.equals("")) {
       //Just a double-check
       logger.error("the value of metadataPrefix att is not present in the request.");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
+      return OAIXML.createErrorResponse(OAIXML.CANNOT_DISSEMINATE_FORMAT, "");
     }
     
     if(param_map.containsKey(OAIXML.FROM)) {
@@ -314,15 +311,20 @@ public class OAIPMH extends ServiceRack {
     Element metadata_format = getMetadataFormatElement(prefix);
     if(metadata_format == null) {
       logger.error("metadata prefix is not supported.");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
+      return OAIXML.createErrorResponse(OAIXML.CANNOT_DISSEMINATE_FORMAT, "");
     }
     ArrayList<String> oid_list = getChildrenIds(OAIXML.BROWSELIST);
     if (oid_list == null) {
       logger.error("No matched records found in collection: browselist is empty");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.NO_RECORDS_MATCH, ""));
+      return OAIXML.createErrorResponse(OAIXML.NO_RECORDS_MATCH, "");
     }
     // all validation is done
-    Element list_identifiers = OAIXML.createElement(OAIXML.LIST_IDENTIFIERS);
+
+    Document doc = this.converter.newDOM();
+    Element list_identifiers_response = doc.createElement(GSXML.RESPONSE_ELEM);
+    Element list_identifiers = doc.createElement(OAIXML.LIST_IDENTIFIERS);
+    list_identifiers_response.appendChild(list_identifiers);
+
     for(int i=0; i<oid_list.size(); i++) {
       String oid = oid_list.get(i);
       DBInfo info = this.coll_db.getInfo(oid);
@@ -349,10 +351,10 @@ public class OAIPMH extends ServiceRack {
         }
       }      
       //compose the header element and append it
-      list_identifiers.appendChild(createHeaderElement(oid, oailastmodified));      
+      list_identifiers.appendChild(createHeaderElement(doc, oid, oailastmodified));      
     }//end of for(int i=0; i<oid_list.size(); i++) of doing thru each record
     
-    return OAIXML.getResponse(list_identifiers);        
+    return list_identifiers_response;        
   }
   /** return a list of records  */
   protected Element processListRecords(Element req) {
@@ -362,14 +364,14 @@ public class OAIPMH extends ServiceRack {
      * OAIReceptionist. Therefore, the request sent here must not contain 'resumptionToken'
      * argument but a 'metadataPrefix' param. The OAIReceptionist makes sure of this.
      */
-    NodeList params = GSXML.getChildrenByTagName(req, OAIXML.PARAM);
+    NodeList params = GSXML.getChildrenByTagName(req, GSXML.PARAM_ELEM);
     
     if(params.getLength() == 0) {
       logger.error("must at least have the metadataPrefix parameter, can't be none");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.BAD_ARGUMENT, ""));
+      return OAIXML.createErrorResponse(OAIXML.BAD_ARGUMENT, "");
     }
     
-    HashMap<String, String> param_map = OAIXML.getParamMap(params);    
+    HashMap<String, String> param_map = GSXML.getParamMap(params);    
 
     String prefix = "";
     Date from_date = null;
@@ -378,13 +380,13 @@ public class OAIPMH extends ServiceRack {
     if(param_map.containsKey(OAIXML.METADATA_PREFIX) == false) {    
       //Just a double-check
       logger.error("A param element containing the metadataPrefix is not present.");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
+      return OAIXML.createErrorResponse(OAIXML.CANNOT_DISSEMINATE_FORMAT, "");
     }
     prefix = param_map.get(OAIXML.METADATA_PREFIX);
     if (prefix == null || prefix.equals("")) {
       //Just a double-check
       logger.error("the value of metadataPrefix att is not present in the request.");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
+      return OAIXML.createErrorResponse(OAIXML.CANNOT_DISSEMINATE_FORMAT, "");
     }
     
     if(param_map.containsKey(OAIXML.FROM)) {
@@ -398,17 +400,21 @@ public class OAIPMH extends ServiceRack {
     Element metadata_format = getMetadataFormatElement(prefix);
     if(metadata_format == null) {
       logger.error("metadata prefix is not supported.");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.CANNOT_DISSEMINATE_FORMAT, ""));
+      return OAIXML.createErrorResponse(OAIXML.CANNOT_DISSEMINATE_FORMAT, "");
     }
     
     //get a list of identifiers (it contains a list of strings)
     ArrayList<String> oid_list = getChildrenIds(OAIXML.BROWSELIST);
     if (oid_list == null) {
       logger.error("No matched records found in collection: browselist is empty");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.NO_RECORDS_MATCH, ""));
+      return OAIXML.createErrorResponse(OAIXML.NO_RECORDS_MATCH, "");
     }
     // all validation is done
-    Element list_records = OAIXML.createElement(OAIXML.LIST_RECORDS);
+
+    Document doc = this.converter.newDOM();
+    Element list_records_response = doc.createElement(GSXML.RESPONSE_ELEM);
+    Element list_records = doc.createElement(OAIXML.LIST_RECORDS);
+    list_records_response.appendChild(list_records);
     for(int i=0; i<oid_list.size(); i++) {
       String oid = oid_list.get(i);
       DBInfo info = this.coll_db.getInfo(oid);
@@ -435,18 +441,54 @@ public class OAIPMH extends ServiceRack {
         }
       }
       
-      Element record = OAIXML.createElement(OAIXML.RECORD);
+      Element record = doc.createElement(OAIXML.RECORD);
       list_records.appendChild(record);
       //compose the header element
-      record.appendChild(createHeaderElement(oid, oailastmodified));      
+      record.appendChild(createHeaderElement(doc, oid, oailastmodified));      
       //compose the metadata element
-      record.appendChild(createMetadataElement(prefix, info, metadata_format));
+      record.appendChild(createMetadataElement(doc, prefix, info, metadata_format));
       
     }//end of for(int i=0; i<oid_list.size(); i++) of doing thru each record
     
-    return OAIXML.getResponse(list_records);    
+    return list_records_response;    
   }
   
+  // have implemented setDescription as an element, instead of a container containing metadata
+  private boolean configureSetInfo() {
+
+    Document doc = this.converter.newDOM();
+    this.list_sets_response = doc.createElement(GSXML.RESPONSE_ELEM);
+    Element list_sets_elem = doc.createElement(OAIXML.LIST_SETS);
+    this.list_sets_response.appendChild(list_sets_elem);
+    String set_name = this.coll_name;
+    String set_description = null;
+    Element name_elem = (Element)GSXML.getChildByTagName(this.config_info, OAIXML.SET_NAME);
+    if (name_elem!=null) {
+      set_name = GSXML.getNodeText(name_elem);
+      if (set_name.equals("")) {
+	set_name = this.coll_name; // default to coll name if can't find one
+      }
+    }
+    Element description_elem = (Element)GSXML.getChildByTagName(this.config_info, OAIXML.SET_DESCRIPTION);
+    if (description_elem!=null) {
+      set_description = GSXML.getNodeText(description_elem);
+      if (set_description.equals("")) {
+	set_description = null;
+      }
+    }
+    Element coll_set = OAIXML.createSet(doc, this.coll_name, set_name, set_description);
+    list_sets_elem.appendChild(coll_set);
+    
+    // are we part of any super sets?
+    NodeList super_set_list = GSXML.getChildrenByTagName(this.config_info, OAIXML.OAI_SUPER_SET);
+    for (int i=0; i<super_set_list.getLength(); i++) {
+      String super_name = ((Element)super_set_list.item(i)).getAttribute(GSXML.NAME_ATT);
+      if (super_name != null && !super_name.equals("")) {
+	list_sets_elem.appendChild(OAIXML.createSet(doc, super_name, super_name, null));
+      }
+    }
+    return true;
+  }
   /** get the metadataFormat element from the collectionConfig.xml containing the specified metadata prefix.
    *  return null if not found.
    */
@@ -457,7 +499,7 @@ public class OAIPMH extends ServiceRack {
   }
   /** create the metadata element used when processing ListRecords/GetRecord requests
    */
-  private Element createMetadataElement(String prefix, DBInfo info, Element metadata_format) {
+  private Element createMetadataElement(Document doc, String prefix, DBInfo info, Element metadata_format) {
         //the prefix string is in the form: oai_dc, for example.
         String prfx_str = "";
         //the metadata namespace used to retrieve metadata in the repository
@@ -477,8 +519,8 @@ public class OAIPMH extends ServiceRack {
         }
         //create the <metadata> element
         //OAIXML.oai_version is read from OAIConfig.xml and its default value is "2.0"
-	Element metadata = OAIXML.createElement(OAIXML.METADATA);
-        Element prfx_str_elem = OAIXML.getMetadataPrefixElement(prfx_str, OAIXML.oai_version);
+	Element metadata = doc.createElement(OAIXML.METADATA);
+        Element prfx_str_elem = OAIXML.getMetadataPrefixElement(doc, prfx_str, OAIXML.oai_version);
         metadata.appendChild(prfx_str_elem);
         String[] metadata_names = getMetadataNameMapping(metadata_format);
         HashMap meta_map = getInfoByNames(info, metadata_names);
@@ -498,7 +540,7 @@ public class OAIPMH extends ServiceRack {
 	  String meta_name = (String)men.getKey();
 	  //meta_name = meta_name.replace('.', ':'); // namespace separator should be : for oai
 	  String meta_value = (String)men.getValue();
-	  Element e = OAIXML.createElement(meta_name);
+	  Element e = doc.createElement(meta_name);
 	  GSXML.setNodeText(e, meta_value);
 	  prfx_str_elem.appendChild(e);
 	}
@@ -507,15 +549,17 @@ public class OAIPMH extends ServiceRack {
   }
   /** create a header element used when processing requests like ListRecords/GetRecord/ListIdentifiers
    */
-  private Element createHeaderElement(String oid, String oailastmodified) {    
-        Element header = OAIXML.createElement(OAIXML.HEADER);
-        Element identifier = OAIXML.createElement(OAIXML.IDENTIFIER);
-        GSXML.setNodeText(identifier, site_name + ":" + coll_name + ":" + oid);
+  private Element createHeaderElement(Document doc, String oid, String oailastmodified) {    
+        Element header = doc.createElement(OAIXML.HEADER);
+        Element identifier = doc.createElement(OAIXML.IDENTIFIER);
+        //GSXML.setNodeText(identifier, site_name + ":" + coll_name + ":" + oid);
+	GSXML.setNodeText(identifier, coll_name + ":" + oid);
         header.appendChild(identifier);
-        Element set_spec = OAIXML.createElement(OAIXML.SET_SPEC);
-        GSXML.setNodeText(set_spec, site_name + ":" + coll_name);
+        Element set_spec = doc.createElement(OAIXML.SET_SPEC);
+        //GSXML.setNodeText(set_spec, site_name + ":" + coll_name);
+	GSXML.setNodeText(set_spec, coll_name);
         header.appendChild(set_spec);
-        Element datestamp = OAIXML.createElement(OAIXML.DATESTAMP);
+        Element datestamp = doc.createElement(OAIXML.DATESTAMP);
         GSXML.setNodeText(datestamp, oailastmodified);
         header.appendChild(datestamp);
         return header;
@@ -523,20 +567,20 @@ public class OAIPMH extends ServiceRack {
   /** return the metadata information  */
   protected Element processListMetadataFormats(Element req) {
     // the request sent here must contain an OID. see doListMetadataFormats() in OAIReceptionist
-    Element param = GSXML.getNamedElement(req, OAIXML.PARAM, OAIXML.NAME, OAIXML.OID);
+    Element param = GSXML.getNamedElement(req, GSXML.PARAM_ELEM, GSXML.NAME_ATT, OAIXML.OID);
     if (param == null) {
       logger.error("An element containing the OID attribute not is present.");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.ID_DOES_NOT_EXIST, ""));
+      return OAIXML.createErrorResponse(OAIXML.ID_DOES_NOT_EXIST, "");
     }
-    String oid = param.getAttribute(OAIXML.VALUE);
+    String oid = param.getAttribute(GSXML.VALUE_ATT);
     if (oid == null || oid.equals("")) {
       logger.error("No OID is present in the request.");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.ID_DOES_NOT_EXIST, ""));
+      return OAIXML.createErrorResponse(OAIXML.ID_DOES_NOT_EXIST, "");
     }
     ArrayList<String> oid_list = getChildrenIds(OAIXML.BROWSELIST);
     if (oid_list == null || oid_list.contains(oid) == false) {
       logger.error("OID: " + oid + " is not present in the database.");
-      Element e= OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.ID_DOES_NOT_EXIST, ""));
+      Element e= OAIXML.createErrorResponse(OAIXML.ID_DOES_NOT_EXIST, "");
 //      logger.error((new XMLConverter()).getPrettyString (e));
       return e;
     }
@@ -544,16 +588,20 @@ public class OAIPMH extends ServiceRack {
     DBInfo info = null;    
     info = this.coll_db.getInfo(oid);
     if (info == null) { //just double check
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.OAI_SERVICE_UNAVAILABLE, ""));
+      return OAIXML.createErrorResponse(OAIXML.OAI_SERVICE_UNAVAILABLE, "");
     }
     
     NodeList meta_list = getMetadataFormatList();
     if (meta_list == null || meta_list.getLength() == 0) {
       logger.error("No metadata format is present in collectionConfig.xml");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.NO_METADATA_FORMATS, ""));
+      return OAIXML.createErrorResponse(OAIXML.NO_METADATA_FORMATS, "");
     }
 
-    Element list_metadata_formats = OAIXML.createElement(OAIXML.LIST_METADATA_FORMATS);
+    Document doc = this.converter.newDOM();
+    Element list_metadata_formats_response = doc.createElement(GSXML.RESPONSE_ELEM);
+    
+    Element list_metadata_formats = doc.createElement(OAIXML.LIST_METADATA_FORMATS);
+    list_metadata_formats_response.appendChild(list_metadata_formats);
     boolean has_meta_format = false;
     
     for (int i=0; i<meta_list.getLength(); i++) {
@@ -561,18 +609,19 @@ public class OAIPMH extends ServiceRack {
       String[] metadata_names = getMetadataNameMapping(metadata_format);
       if (containsMetadata(info, metadata_names) == true) {
         has_meta_format = true;
-        Element meta_fmt = OAIXML.createElement(OAIXML.METADATA_FORMAT);
-        OAIXML.copyElement(meta_fmt, metadata_format, OAIXML.METADATA_PREFIX);
-        OAIXML.copyElement(meta_fmt, metadata_format, OAIXML.METADATA_NAMESPACE);
-        OAIXML.copyElement(meta_fmt, metadata_format, OAIXML.SCHEMA);
+	// TODO, can we do this in an easier way??
+        Element meta_fmt = doc.createElement(OAIXML.METADATA_FORMAT);
+        GSXML.copyElement(meta_fmt, metadata_format, OAIXML.METADATA_PREFIX);
+        GSXML.copyElement(meta_fmt, metadata_format, OAIXML.METADATA_NAMESPACE);
+        GSXML.copyElement(meta_fmt, metadata_format, OAIXML.SCHEMA);
         list_metadata_formats.appendChild(meta_fmt);
       }
     }//end of for loop
     if (has_meta_format == false) {
       logger.error("Specified metadata names are not contained in the database.");
-      return OAIXML.getResponse(OAIXML.createErrorElement(OAIXML.NO_METADATA_FORMATS, ""));
+      return OAIXML.createErrorResponse(OAIXML.NO_METADATA_FORMATS, "");
     } else {
-      return OAIXML.getResponse(list_metadata_formats);
+      return list_metadata_formats_response;
     }
   }
 
