@@ -26,7 +26,7 @@ public class PageAction extends Action
 	public Node process(Node message_node)
 	{
 		Element message = this.converter.nodeToElement(message_node);
-	    Document doc = message.getOwnerDocument();
+		Document doc = this.converter.newDOM();
 	    
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 		Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -50,22 +50,22 @@ public class PageAction extends Action
 		Element response;
 		if (page_name.equals(HOME_PAGE))
 		{
-			response = homePage(request);
+		  response = homePage(request);
 			//} else if (page_name.equals(ABOUT_PAGE)) {
 		}
 		else if (page_name.equals(ABOUT_PAGE) || page_name.equals(PREFS_PAGE))
 		{
-			response = aboutPage(request);
+		  response = aboutPage(request);
 			//}else if (page_name.equals(PREFS_PAGE)) {
 			//response = prefsPage(request);
 		}
 		else if (page_name.equals(GLI4GS3_PAGE))
 		{
-			response = gli4gs3Page(request);
+		  response = gli4gs3Page(request);
 		}
 		else
 		{ // unknown page
-			response = unknownPage(request);
+		  response = unknownPage(request);
 		}
 
 		Element formatMessage = doc.createElement(GSXML.MESSAGE_ELEM);
@@ -77,7 +77,7 @@ public class PageAction extends Action
 		Element globalFormat = (Element) GSXML.getChildByTagName(formatResponse, GSXML.FORMAT_ELEM);
 		if (globalFormat != null)
 		{
-			response.appendChild(globalFormat);
+		  response.appendChild(response.getOwnerDocument().importNode(globalFormat, true));
 		}
 
 		result.appendChild(doc.importNode(response, true));
@@ -86,9 +86,9 @@ public class PageAction extends Action
 		return result;
 	}
 
-	protected Element homePage(Element request)
+  protected Element homePage(Element request)
 	{
-		Document doc = request.getOwnerDocument();
+	  Document doc = this.converter.newDOM();
 		
 		UserContext userContext = new UserContext(request);
 		// first, get the message router info
@@ -153,7 +153,7 @@ public class PageAction extends Action
 
 	protected Element aboutPage(Element request)
 	{
-		Document doc = request.getOwnerDocument();
+	  Document doc = this.converter.newDOM();
 		
 		UserContext userContext = new UserContext(request);
 		// extract the params from the cgi-request, 
@@ -237,7 +237,7 @@ public class PageAction extends Action
 	/** if we dont know the page type, use this method */
 	protected Element unknownPage(Element request)
 	{
-		Document doc = request.getOwnerDocument();
+	  Document doc = this.converter.newDOM();
 		
 		UserContext userContext = new UserContext(request);
 		String page_name = request.getAttribute(GSXML.SUBACTION_ATT);
@@ -325,7 +325,7 @@ public class PageAction extends Action
 
 	protected Element gli4gs3Page(Element request)
 	{
-		Document doc = request.getOwnerDocument();
+	  Document doc = this.converter.newDOM();
 		
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 		String uid = request.getAttribute(GSXML.USER_ID_ATT);
