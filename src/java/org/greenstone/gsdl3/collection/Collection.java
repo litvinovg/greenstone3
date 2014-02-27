@@ -396,7 +396,7 @@ public class Collection extends ServiceCluster
 		if (service_list != null)
 		{
 			configureServiceRackList(service_list, coll_config_xml);
-			oai_service_rack = GSXML.getNamedElement(service_list, GSXML.SERVICE_CLASS_ELEM, OAIXML.NAME, OAIXML.OAIPMH);
+			oai_service_rack = GSXML.getNamedElement(service_list, GSXML.SERVICE_CLASS_ELEM, GSXML.NAME_ATT, OAIXML.OAIPMH);
 		}
 		// collection Config may also contain manually added service racks
 		service_list = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.SERVICE_CLASS_ELEM + GSXML.LIST_MODIFIER);
@@ -404,7 +404,7 @@ public class Collection extends ServiceCluster
 		{
 			configureServiceRackList(service_list, build_config_xml);
 			// this oai used in preference to one in buildConfig.xml
-			oai_service_rack = GSXML.getNamedElement(service_list, GSXML.SERVICE_CLASS_ELEM, OAIXML.NAME, OAIXML.OAIPMH);
+			oai_service_rack = GSXML.getNamedElement(service_list, GSXML.SERVICE_CLASS_ELEM, GSXML.NAME_ATT, OAIXML.OAIPMH);
 		}
 		// Check for oai
 
