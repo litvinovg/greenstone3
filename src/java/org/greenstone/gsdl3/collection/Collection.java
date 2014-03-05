@@ -172,14 +172,13 @@ public class Collection extends ServiceCluster
 		return is_public;
 	}
 
-	// Not used anymore by the OAIReceptionist to find out the earliest datestamp 
-	// amongst all oai collections in the repository. May be useful generally.
+	// Used by OAI Receptionist to determine whether to expire a resumption token - if a token was issued before a collection is rebuilt, then the token must be expired.
 	public long getLastmodified()
 	{
 		return lastmodified;
 	}
 
-	//used by the OAIReceptionist to find out the earliest datestamp amongst all oai collections in the repository
+	// used by the OAIReceptionist to find out the earliest datestamp amongst all oai collections in the repository
 	public long getEarliestDatestamp()
 	{
 		return earliestDatestamp;
@@ -427,7 +426,8 @@ public class Collection extends ServiceCluster
 						String earliestDatestampStr = GSXML.getValue(metadata);
 						if (!earliestDatestampStr.equals(""))
 						{
-							earliestDatestamp = Long.parseLong(earliestDatestampStr);
+						  earliestDatestamp = Long.parseLong(earliestDatestampStr) * 1000; // stored in seconds, convert to milliseconds
+							
 						}
 						break; // found a metadata element with name=earliestDatestamp in buildconfig
 					}
