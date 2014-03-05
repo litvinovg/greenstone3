@@ -86,7 +86,13 @@ public class OAIReceptionist implements ModuleInterface {
     this.converter = new XMLConverter();
   }
   
-  public void cleanUp() {}
+  public void cleanUp() {
+    if (this.mr != null) {
+      
+      this.mr.cleanUp();
+    }
+    OAIResumptionToken.saveTokensToFile();
+  }
   
   public void setSiteName(String site_name) {
     this.site_name = site_name;

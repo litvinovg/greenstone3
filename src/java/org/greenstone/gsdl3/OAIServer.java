@@ -498,4 +498,11 @@ public class OAIServer extends BaseGreenstoneServlet
 		}
 		doGet(request, response);
 	}
+
+
+	public void destroy()
+	{
+		recept.cleanUp();
+	}
+
 }
