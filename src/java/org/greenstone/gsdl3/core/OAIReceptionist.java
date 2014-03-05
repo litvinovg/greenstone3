@@ -63,7 +63,7 @@ public class OAIReceptionist implements ModuleInterface {
   // we can cache them
   
   /** A list of all the collections available to this OAI server */
-  protected NodeList collection_list = null;
+  protected Element collection_list = null;
   /** a vector of the names, for convenience */
   protected Vector<String> collection_name_list = null;
   /** If this is true, then there are no OAI enabled collections, so can always return noRecordsMatch (after validating the request params) */
@@ -188,17 +188,38 @@ public class OAIReceptionist implements ModuleInterface {
       return false;
     }
 
-    NodeList list = coll_list.getElementsByTagName(GSXML.COLLECTION_ELEM);
-    int length = list.getLength();
-    if (length == 0) {
-      logger.error("length is 0");
+    this.collection_list = (Element)doc.importNode(coll_list, true);
+
+    // go through and store a list of collection names for convenience
+    // also create a 'to' attribute
+    Node child = this.collection_list.getFirstChild();
+    if (child == null) {
+      logger.error("collection list has no children");
       noRecordsMatch = true;
       return false;
     }
-
-    this.collection_list = list;
-    this.collection_name_list = new Vector<String>();
     
+    this.collection_name_list = new Vector<String>();
+    StringBuffer to = new StringBuffer();
+    boolean first = true;
+    while (child != null) {
+      if (child.getNodeName().equals(GSXML.COLLECTION_ELEM)) {
+	String coll_id =((Element) child).getAttribute(GSXML.NAME_ATT);
+	this.collection_name_list.add(coll_id);
+	if (!first) {
+	  to.append(',');
+	}
+	first = false;
+	to.append(coll_id+"/"+OAIXML.LIST_SETS);
+      }
+      child = child.getNextSibling();
+    }
+    if (first) {
+      // we haven't found any collections
+      logger.error("found no collection elements in collectionList");
+      noRecordsMatch = true;
+      return false;
+    }
     Document listsets_doc = this.converter.newDOM();
     Element listsets_element = listsets_doc.createElement(OAIXML.LIST_SETS);
     this.listsets_response = getMessage(listsets_doc, listsets_element);
@@ -207,17 +228,6 @@ public class OAIReceptionist implements ModuleInterface {
     // might include subsets (classifiers) or super colls
     // We'll reuse the first message, changing its type and to atts
     request.setAttribute(GSXML.TYPE_ATT, "");
-    StringBuffer to = new StringBuffer();
-    for (int i=0; i<collection_list.getLength(); i++) {
-      if (i!=0) {
-	to.append(',');
-      }
-      String coll_id =((Element) collection_list.item(i)).getAttribute(GSXML.NAME_ATT);
-      logger.error("coll_id = "+coll_id);
-      to.append(coll_id+"/"+OAIXML.LIST_SETS);
-      this.collection_name_list.add(coll_id);
-    }
-    logger.error ("to att = "+to.toString());
     request.setAttribute(GSXML.TO_ATT, to.toString());
     // send to MR
     msg_node = mr.process(message);
@@ -984,22 +994,43 @@ public class OAIReceptionist implements ModuleInterface {
   // See OAIConfig.xml
   // dynamically works out what the earliestDateStamp is, since it varies by collection
   // returns this time in *milliseconds*.
-  protected long getEarliestDateStamp(NodeList oai_coll) {
+  protected long getEarliestDateStamp(Element oai_coll_list) {
+    // config earliest datstamp
+    long config_datestamp = 0;
+    Element config_datestamp_elem = (Element)GSXML.getChildByTagName(this.oai_config, OAIXML.EARLIEST_DATESTAMP);
+    if (config_datestamp_elem != null) {
+      String datest = GSXML.getNodeText(config_datestamp_elem);
+      config_datestamp = OAIXML.getTime(datest);
+      if (config_datestamp == -1) {
+	config_datestamp = 0;
+      }
+    }
     //do the earliestDatestamp
-    long earliestDatestamp = System.currentTimeMillis();	
+    long current_time = System.currentTimeMillis();
+    long earliestDatestamp = current_time;
+    NodeList oai_coll = oai_coll_list.getElementsByTagName(GSXML.COLLECTION_ELEM);
     int oai_coll_size = oai_coll.getLength();
     if (oai_coll_size == 0) {
-      logger.info("returned oai collection list is empty. Setting repository earliestDatestamp to be 1970-01-01.");
-      earliestDatestamp = 0;
+      logger.info("returned oai collection list is empty. Setting repository earliestDatestamp to be the earliest datestamp from OAIConfig.xml, or 1970-01-01 if not specified.");
+      return config_datestamp;
     }
     // the earliestDatestamp is now stored as a metadata element in the collection's buildConfig.xml file
     // we get the earliestDatestamp among the collections
     for(int i=0; i<oai_coll_size; i++) {
       long coll_earliestDatestamp = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.EARLIEST_DATESTAMP));
-      earliestDatestamp = (earliestDatestamp > coll_earliestDatestamp)? coll_earliestDatestamp : earliestDatestamp;
+      if (coll_earliestDatestamp == 0) {
+	// try last modified
+	coll_earliestDatestamp = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.LAST_MODIFIED));
+      }
+      if (coll_earliestDatestamp > 0) {
+	earliestDatestamp = (earliestDatestamp > coll_earliestDatestamp)? coll_earliestDatestamp : earliestDatestamp;
+      }
     }
-
-    return earliestDatestamp*1000; // converting from seconds to milliseconds
+    if (earliestDatestamp == current_time) {
+      logger.info("no collection had a real datestamp, using value from OAIConfig");
+      return config_datestamp;
+    }
+    return earliestDatestamp; 
   }
 }
 
