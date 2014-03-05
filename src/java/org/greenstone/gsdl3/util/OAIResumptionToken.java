@@ -250,10 +250,13 @@ public class OAIResumptionToken {
 				     FILE_SEPARATOR + "classes" +
 				     FILE_SEPARATOR + "OAIResumptionToken.xml");
     try {
-      if (!resumption_token_file.createNewFile()) {
-	logger.error("Couldn't create a new resumption token file "+ resumption_token_file.getPath());
-	resumption_token_file = null;
-	return false;
+      if (!resumption_token_file.exists()) {
+
+	if (!resumption_token_file.createNewFile()) {
+	  logger.error("Couldn't create a new resumption token file "+ resumption_token_file.getPath());
+	  resumption_token_file = null;
+	  return false;
+	}
       }
     } catch (Exception e) {
       logger.error("Couldn't create a new resumption token file "+ resumption_token_file.getPath()+", "+e.getMessage());
