@@ -86,6 +86,7 @@ public class OAIXML {
   public static final String DESCRIPTION = "description";
   public static final String EARLIEST_DATESTAMP = "earliestDatestamp";
   public static final String GRANULARITY = "granularity";
+  public static final String LAST_MODIFIED = "lastmodified";
   public static final String PROTOCOL_VERSION = "protocolVersion";
   public static final String REPOSITORY_NAME = "repositoryName";
   public static final String OAI_IDENTIFIER = "oai-identifier";
