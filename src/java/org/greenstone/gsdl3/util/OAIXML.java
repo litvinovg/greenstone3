@@ -153,6 +153,7 @@ public class OAIXML {
   public static Element oai_config_elem = null;
     
   //stores the date format "yyyy-MM-ddTHH:mm:ssZ"
+  // this is the granularity for datestamps
   public static String granularity = "";
 
   // http://www.openarchives.org/OAI/openarchivesprotocol.html#DatestampsRequests 
