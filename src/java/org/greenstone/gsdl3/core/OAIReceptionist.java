@@ -674,7 +674,7 @@ public class OAIReceptionist implements ModuleInterface {
     if (has_super_colls && super_coll_map.containsKey(set)) {
       return super_coll_map.get(set);
     }
-    //********************8
+
     Vector<String> coll_list = new Vector<String>();
     if (set.indexOf(":") != -1) {
       String col_name = set.substring(0, set.indexOf(":"));
