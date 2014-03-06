@@ -407,6 +407,7 @@ public class OAIReceptionist implements ModuleInterface {
     int cursor = 0;
     int current_cursor = 0;
     String current_set = null;
+    long initial_time = 0;
     
     int total_size = -1; // we are only going to set this in resumption 
     // token if it is easy to work out, i.e. not sending extra requests to
@@ -436,10 +437,17 @@ public class OAIReceptionist implements ModuleInterface {
 	cursor = Integer.parseInt(token_data.get(OAIXML.CURSOR));
 	cursor = cursor + resume_after; // increment cursor
 	current_cursor = Integer.parseInt(token_data.get(OAIResumptionToken.CURRENT_CURSOR));
+	initial_time = Long.parseLong(token_data.get(OAIResumptionToken.INITIAL_TIME));
       } catch (NumberFormatException e) {
 	logger.error("tried to parse int from cursor data and failed");
       }
       
+      // check that the collections/sets haven't changed since the token was issued
+      if (collectionsChangedSinceTime(set_spec_str, initial_time)) {
+	logger.error("one of the collections in set "+set_spec_str+" has changed since token issued. Expiring the token");
+	OAIResumptionToken.expireToken(token);
+	return OAIXML.createErrorMessage(OAIXML.BAD_RESUMPTION_TOKEN, "Repository data has changed since this token was issued. Resend original request");
+      }
     }
     else {
       // no resumption token, lets check the other params
@@ -519,30 +527,14 @@ public class OAIReceptionist implements ModuleInterface {
     // if super set, we send to all collections in super set list
     // if a single collection, send to it
     // if a subset, send to the collection
-    Vector<String> current_coll_list = null;
+    Vector<String> current_coll_list = getCollectionListForSet(set_spec_str);
     boolean single_collection = false;
-    if (set_requested == false) {
-      // just do all colls
-      current_coll_list = collection_name_list;
+    if (current_coll_list.size() == 1) {
+      single_collection = true;
     }
-    else if (has_super_colls && super_coll_map.containsKey(set_spec_str)) {
-      current_coll_list = super_coll_map.get(set_spec_str);
-    }
-    else {
-      current_coll_list = new Vector<String>();
-      if (set_spec_str.indexOf(":") != -1) {
-	// we have a subset
-	//add the set param back into the request, but send the request to the collection
-	String col_name = set_spec_str.substring(0, set_spec_str.indexOf(":"));
-	current_coll_list.add(col_name);
-	mr_req.appendChild(GSXML.createParameter(doc, OAIXML.SET, set_spec_str));
-	single_collection = true;
-      }
-      else {
-	// it must be a single collection name
-	current_coll_list.add(set_spec_str);
-	single_collection = true;
-      }
+    if (set_spec_str != null && set_spec_str.indexOf(":") != -1) {
+      // we have a subset - add the set param back in
+      mr_req.appendChild(GSXML.createParameter(doc, OAIXML.SET, set_spec_str));
     }
 
     int num_collected_records = 0;
@@ -674,6 +666,25 @@ public class OAIReceptionist implements ModuleInterface {
     return getMessage(result_doc, result_element);
   }
 
+  private Vector<String> getCollectionListForSet(String set) {
+    if (set == null) {
+      // no set requested, need the complete collection list
+      return this.collection_name_list;
+    }
+    if (has_super_colls && super_coll_map.containsKey(set)) {
+      return super_coll_map.get(set);
+    }
+    //********************8
+    Vector<String> coll_list = new Vector<String>();
+    if (set.indexOf(":") != -1) {
+      String col_name = set.substring(0, set.indexOf(":"));
+      coll_list.add(col_name);
+    }
+    else {
+      coll_list.add(set);
+    }
+    return coll_list;
+  }
   private void addRecordsToList(Document doc, Element result_element, NodeList
 				record_list, int start_point, int num_records) {
     int end_point = start_point + num_records;
@@ -1032,6 +1043,29 @@ public class OAIReceptionist implements ModuleInterface {
     }
     return earliestDatestamp; 
   }
+
+  private boolean collectionsChangedSinceTime(String set_spec_str, long initial_time) {
+
+    // we need to look though all collections in the set to see if any have last modified dates > initial_time
+    Vector<String> set_coll_list = getCollectionListForSet(set_spec_str);
+
+    Node child = this.collection_list.getFirstChild();
+    while (child != null) {
+      if (child.getNodeName().equals(GSXML.COLLECTION_ELEM)) {
+	String coll_id =((Element) child).getAttribute(GSXML.NAME_ATT);
+	if (set_coll_list.contains(coll_id)) {
+	  long last_modified = Long.parseLong(((Element)child).getAttribute(OAIXML.LAST_MODIFIED));
+	  if (initial_time < last_modified) {
+	    return true;
+	  }
+	}
+      }
+      child = child.getNextSibling();
+    }
+    return false;
+ 
+  }
+
 }
 
   
