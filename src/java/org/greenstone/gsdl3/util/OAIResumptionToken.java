@@ -48,6 +48,7 @@ public class OAIResumptionToken {
   public static final String TOKEN_LIST = "tokenList";
   public static final String NAME = "name";
   public static final String EXPIRATION = "expiration";
+  public static final String INITIAL_TIME = "initial";
   //public static final String FROM
   public static final String FILE_SEPARATOR = File.separator;
   static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.GSXML.class.getName());
@@ -188,11 +189,20 @@ public class OAIResumptionToken {
       data.put(OAIXML.CURSOR, parts[1]);
       data.put(CURRENT_SET, parts[2]);
       data.put(CURRENT_CURSOR, parts[3]);
+      data.put(INITIAL_TIME, base_name);
     }
     return data;
 
   }
 
+  // used to manually expire a particular token - eg when one of its collections has changed since token was issued.
+  public static void expireToken(String token) {
+    if (token.indexOf(":") != -1) {
+      token = token.substring(0, token.indexOf(":"));
+    }
+    expiration_data.remove(token);
+    stored_tokens.remove(token);
+  }
   // read through all stored expiry dates, and delete any tokens that are too
   // old
   public static void clearExpiredTokens() {
