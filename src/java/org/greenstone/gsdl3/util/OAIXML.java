@@ -347,6 +347,18 @@ public class OAIXML {
     return error;
   }
 
+  public static Element createResetResponse(boolean success) {
+    Document doc = converter.newDOM();
+    Element response = doc.createElement(GSXML.RESPONSE_ELEM);
+    if (success) {
+      response.setAttribute("status", "OK");
+      GSXML.setNodeText(response, "Reset OAIServer successfully");
+    } else {
+      response.setAttribute("status", "FAIL");
+      GSXML.setNodeText(response, "Failed to reset oaiserver");
+    }
+    return response;
+  }
   /** convert the escaped sequences (eg, '%3A') of those special characters back to their
    *  original form (eg, ':'). 
    */
