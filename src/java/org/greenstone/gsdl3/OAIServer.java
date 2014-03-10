@@ -344,11 +344,19 @@ public class OAIServer extends BaseGreenstoneServlet
 		//we don't get the baseURL from the http request because what we get might be different from the one known publicly due to local network redirection.
 		//For example, puka.cs.waikato.ac.nz vs www.greenstone.org
 		//String base_url = request.getRequestURL().toString();
+		
 		// if called by doPost (if this was originally a POST request), var queryString would have been set
 		String query = (queryString == null) ? request.getQueryString() : queryString;
 		queryString = null; // reset member variable, else no doGet will work as long as the server remains running
 
+		if (query!=null && query.equals("reset")) {
+		  logger.error("reset was called*******************");
+		  out.println("<?xml version='1.0' encoding='UTF-8' ?>");
+		  out.println(this.recept.process("<message><request reset='true'/></message>"));
+		  return;
+		}
 		String[] pairs = (query == null) ? null : query.split("&");//split into key/value pairs
+		
 		String verb = getVerb(query);
 		Document response_doc = this.converter.newDOM();
 		Element xml_response = OAIXML.createBasicResponse(response_doc, verb, pairs);
