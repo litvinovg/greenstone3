@@ -75,6 +75,8 @@ public class OAIReceptionist implements ModuleInterface {
   protected boolean has_super_colls = false;
   /** a hash of super set-> collection list */
   protected HashMap<String, Vector<String>> super_coll_map = null;
+  /** store the super coll elements for convenience */
+  HashMap<String, Element> super_coll_data = null;
   /** The identify response */
   protected Element identify_response = null;
   /** The list set response */
@@ -118,6 +120,7 @@ public class OAIReceptionist implements ModuleInterface {
     resume_after = getResumeAfter();
     
     repository_id = getRepositoryIdentifier(); 
+    configureSuperSetInfo();
     if (!configureSetInfo()) {
       // there are no sets
       logger.error("No sets (collections) available for OAI");
@@ -133,7 +136,7 @@ public class OAIReceptionist implements ModuleInterface {
 
   // assuming that sets are static. If collections change then the servlet 
   // should be restarted.
-  private boolean configureSetInfo() {
+  private boolean configureSuperSetInfo() {
     // do we have any super colls listed in web/WEB-INF/classes/OAIConfig.xml?
     // Will be like 
     // <oaiSuperSet>
@@ -144,7 +147,7 @@ public class OAIReceptionist implements ModuleInterface {
     // The super set is listed in OAIConfig, and collections themselves state
     // whether they are part of the super set or not.
     NodeList super_coll_list = this.oai_config.getElementsByTagName(OAIXML.OAI_SUPER_SET);
-    HashMap<String, Element> super_coll_data = new HashMap<String, Element>();
+    this.super_coll_data = new HashMap<String, Element>();
     if (super_coll_list.getLength() > 0) {
       this.has_super_colls = true;
       for (int i=0; i<super_coll_list.getLength(); i++) {
@@ -153,22 +156,26 @@ public class OAIReceptionist implements ModuleInterface {
 	if (set_spec != null) {
 	  String name = GSXML.getNodeText(set_spec);
 	  if (!name.equals("")) {
-	    super_coll_data.put(name, super_coll);
+	    this.super_coll_data.put(name, super_coll);
 	    logger.error("adding in super coll "+name);
 	  }
 	}
       }
     
-      if (super_coll_data.size()==0) {
+      if (this.super_coll_data.size()==0) {
 	this.has_super_colls = false;
       }
     }
     if (this.has_super_colls == true) {
       this.super_coll_map = new HashMap<String, Vector<String>>();
     }
+    return true;
+    
+  }
+  private boolean configureSetInfo() {
     this.set_set = new HashSet<String>();
 
-    // next, we get a list of all the OAI enabled collections
+    // First, we get a list of all the OAI enabled collections
     // We get this by sending a listSets request to the MR
     Document doc = this.converter.newDOM();
     Element message = doc.createElement(GSXML.MESSAGE_ELEM);
@@ -250,7 +257,7 @@ public class OAIReceptionist implements ModuleInterface {
 	  // it must be a super coll spec
 	  logger.error("found super coll, "+set_spec);
 	  // check that it is a valid one from config
-	  if (this.has_super_colls == true && super_coll_data.containsKey(set_spec)) {
+	  if (this.has_super_colls == true && this.super_coll_data.containsKey(set_spec)) {
 	    Vector <String> subcolls = this.super_coll_map.get(set_spec);
 	    if (subcolls == null) {
 	      logger.error("its new!!");
@@ -259,8 +266,8 @@ public class OAIReceptionist implements ModuleInterface {
 	      this.set_set.add(set_spec);
 	      this.super_coll_map.put(set_spec, subcolls);
 	      // the first time a supercoll is mentioned, add into the set list
-	      logger.error("finding the set info "+this.converter.getPrettyString(super_coll_data.get(set_spec)));
-	      listsets_element.appendChild(GSXML.duplicateWithNewName(listsets_doc, super_coll_data.get(set_spec), OAIXML.SET, true));
+	      logger.error("finding the set info "+this.converter.getPrettyString(this.super_coll_data.get(set_spec)));
+	      listsets_element.appendChild(GSXML.duplicateWithNewName(listsets_doc, this.super_coll_data.get(set_spec), OAIXML.SET, true));
 	    }
 	    // add this collection to the list for the super coll
 	    subcolls.add(coll_name);
@@ -275,6 +282,20 @@ public class OAIReceptionist implements ModuleInterface {
     return true;
   }
 
+  protected void resetMessageRouter() {
+    // we just need to send a configure request to MR
+    Document doc = this.converter.newDOM();
+    Element mr_request_message = doc.createElement(GSXML.MESSAGE_ELEM);
+    Element mr_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_SYSTEM, "", null);
+    mr_request_message.appendChild(mr_request);
+    
+    Element system = doc.createElement(GSXML.SYSTEM_ELEM);
+    mr_request.appendChild(system);
+    system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_CONFIGURE);
+
+    Element response = (Element) this.mr.process(mr_request_message);
+    logger.error("configure response = "+this.converter.getPrettyString(response));
+  }
   /** process using strings - just calls process using Elements */
   public String process(String xml_in) {
     
@@ -314,6 +335,16 @@ public class OAIReceptionist implements ModuleInterface {
       logger.error(" message had no request!");
       return OAIXML.createErrorMessage(OAIXML.BAD_ARGUMENT, "Internal messaging error");
     }
+
+    // special case, reset=true for reloading the MR and recept data
+    String reset = request.getAttribute("reset");
+    if (!reset.equals("")) {
+      resetMessageRouter();
+      configureSetInfo();
+      return OAIXML.createResetResponse(true);
+    }
+
+    
     //At this stage, the value of 'to' attribute of the request must be the 'verb'
     //The only thing that the oai receptionist can be sure is that these verbs are valid, nothing else.
     String verb = request.getAttribute(GSXML.TO_ATT);
@@ -843,7 +874,7 @@ public class OAIReceptionist implements ModuleInterface {
     logger.info("");
     if (this.identify_response != null) {
       // we have already created it
-      return this.identify_response;
+      return getMessage(this.identify_response.getOwnerDocument(), this.identify_response);
     }
     Document doc = this.converter.newDOM();
     Element identify = doc.createElement(OAIXML.IDENTIFY);
