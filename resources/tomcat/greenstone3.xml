@@ -15,4 +15,12 @@
 		userTable="users" userNameCol="username" userCredCol="password"
 		userRoleTable="roles" roleNameCol="role"
 		/>
+	<!-- Session Manager. Default values are used. See
+	     packages/tomcat/webapps/docs/config/manager.html for more info.
+	     Pathname may be absolute, or relative to greenstone3 context work 
+	     directory: packages/tomcat/work/Catalina/localhost/greenstone3.
+	     Set pathname="" to disable storing session info between restarts. 
+	     To manually clear session info, stop Tomcat and delete the session
+	     file. -->
+	<Manager pathname="SESSIONS.ser" />
 </Context>
