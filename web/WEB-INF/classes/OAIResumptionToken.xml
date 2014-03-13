@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<OAIResumptionTokens>
-    <!-- A list of resumptionTokens alive in this oai repository, maintained by the oai receptionist. 
-              If the resumeAfter parameter is less than 0, there will not be any tokens stored.
-         <resumptionToken expirationDate="<UTC time>">token_string</resumptionToken>
-         -->
-</OAIResumptionTokens>
