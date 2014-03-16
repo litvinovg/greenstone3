@@ -35,4 +35,8 @@ if test -e local ; then
   fi
 fi
 
+echo "Adding devel/bin/script to PATH"
+
+export PATH=$PATH:"$GSDL3SRCHOME/devel/bin/script"
+
 echo ""
