@@ -954,7 +954,14 @@
       <copy file="${basedir}/resources/cgi/gsdl3site.cfg" tofile="${basedir}/resources/cgi/gsdl3site.cfg.backup" overwrite="true"/>
     </if>
     <copy file="${basedir}/resources/cgi/gsdl3site.cfg.in" tofile="${basedir}/resources/cgi/gsdl3site.cfg" overwrite="true"/>
-
+    <if><bool><available file="${basedir}/resources/java/global.properties"/></bool>
+    <copy file="${basedir}/resources/java/global.properties" tofile="${basedir}/resources/java/global.properties.backup" overwrite="true"/>
+    </if>
+    <copy file="${basedir}/resources/java/global.properties.in" tofile="${basedir}/resources/java/global.properties" overwrite="true"/>
+    <if><bool><available file="${basedir}/resources/java/log4j.properties"/></bool>
+    <copy file="${basedir}/resources/java/log4j.properties" tofile="${basedir}/resources/java/log4j.properties.backup" overwrite="true"/>
+    </if>
+    <copy file="${basedir}/resources/java/log4j.properties.in" tofile="${basedir}/resources/java/log4j.properties" overwrite="true"/>
   </target>
   <!-- ========== Web app Targets ================================ -->
   
@@ -1184,8 +1191,8 @@
     <filter token="perlpath" value="${escaped.perl.path}"/>
     <filter token="disable.collection.building" value="${disable.collection.building}"/>
     <copy file="${basedir}/resources/cgi/gsdl3site.cfg" tofile="${web.writablehome}/WEB-INF/cgi/gsdl3site.cfg" filtering="true" overwrite="true"/>
-    <copy file="${basedir}/resources/java/global.properties.in" tofile="${web.writableclasses}/global.properties" filtering="true" overwrite="true"/>
-    <copy file="${basedir}/resources/java/log4j.properties.in" tofile="${web.writableclasses}/log4j.properties" filtering="true" overwrite="true"/>
+    <copy file="${basedir}/resources/java/global.properties" tofile="${web.writableclasses}/global.properties" filtering="true" overwrite="true"/>
+    <copy file="${basedir}/resources/java/log4j.properties" tofile="${web.writableclasses}/log4j.properties" filtering="true" overwrite="true"/>
     <if><bool><istrue value="${gsdl3home.isreadonly}"/></bool>
       <!-- uncomment the writablehome properties -->
       <rsr verbosity="1" file="${web.writableclasses}/global.properties" pattern="^#gsdl3\.(writable{1})?home" replacement="gsdl3.$1home" />
