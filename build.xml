@@ -635,7 +635,7 @@
   
   <!-- ==================== Primary and Global Targets ============================= -->
 
-  <target name="prepare" depends="accept-properties,init,prepare-core,prepare-packages,prepare-common-src,prepare-collection-building,prepare-tomcat,prepare-axis,prepare-web,prepare-collections, prepare-flax"
+  <target name="prepare" depends="accept-properties,init,copy-dot-in-files,prepare-core,prepare-packages,prepare-common-src,prepare-collection-building,prepare-tomcat,prepare-axis,prepare-web,prepare-collections, prepare-flax"
     description="Use this when you first checkout the code: 'ant prepare install'. This will do some additional subversion checkouts and downloads, so you need to be online to run this.">
 
     <!-- make sure .sh files are executable -->
@@ -927,6 +927,31 @@
     <mysetproxy proxyhost="${proxy.host}" proxyport="${proxy.port}" proxyuser="${proxy.username}" proxypassword="${proxy.password}"/>
   </target>
   
+  <target name="copy-dot-in-files" depends="init" 
+	  description="Copies all resources .in files to version without the .in suffix" >
+    <if><bool><available file="${basedir}/resources/tomcat/greenstone3.xml"/></bool>
+      <copy file="${basedir}/resources/tomcat/greenstone3.xml" tofile="${basedir}/resources/tomcat/greenstone3.xml.backup"  overwrite="true"/>
+    </if>
+   
+    <copy file="${basedir}/resources/tomcat/greenstone3.xml.in" tofile="${basedir}/resources/tomcat/greenstone3.xml"  overwrite="true"/>
+    <if><bool><available file="${basedir}/resources/tomcat/server_tomcat5.xml"/></bool>
+      <copy file="${basedir}/resources/tomcat/server_tomcat5.xml" tofile="${basedir}/resources/tomcat/server_tomcat5.xml.backup"  overwrite="true"/>
+    </if>
+    <copy file="${basedir}/resources/tomcat/server_tomcat5.xml.in" tofile="${basedir}/resources/tomcat/server_tomcat5.xml"  overwrite="true"/>
+    <if><bool><available file="${basedir}/resources/tomcat/server_tomcat7.xml"/></bool>
+      <copy file="${basedir}/resources/tomcat/server_tomcat7.xml" tofile="${basedir}/resources/tomcat/server_tomcat7.xml.backup"  overwrite="true"/>
+    </if>
+    <copy file="${basedir}/resources/tomcat/server_tomcat7.xml.in" tofile="${basedir}/resources/tomcat/server_tomcat7.xml" overwrite="true"/>
+    <if><bool><available file="${basedir}/resources/tomcat/web.xml"/></bool>
+      <copy file="${basedir}/resources/tomcat/web.xml" tofile="${basedir}/resources/tomcat/web.xml.backup"  overwrite="true"/>
+    </if>
+    <copy file="${basedir}/resources/tomcat/web.xml.in" tofile="${basedir}/resources/tomcat/web.xml"  overwrite="true"/>
+    <if><bool><available file="${basedir}/resources/oai/OAIConfig.xml"/></bool>
+    <copy file="${basedir}/resources/oai/OAIConfig.xml" tofile="${basedir}/resources/oai/OAIConfig.xml.backup"  overwrite="true"/>
+    </if>
+    <copy file="${basedir}/resources/oai/OAIConfig.xml.in" tofile="${basedir}/resources/oai/OAIConfig.xml"  overwrite="true"/>
+
+  </target>
   <!-- ========== Web app Targets ================================ -->
   
   <target name="prepare-web" depends="init">
