@@ -950,6 +950,10 @@
     <copy file="${basedir}/resources/oai/OAIConfig.xml" tofile="${basedir}/resources/oai/OAIConfig.xml.backup"  overwrite="true"/>
     </if>
     <copy file="${basedir}/resources/oai/OAIConfig.xml.in" tofile="${basedir}/resources/oai/OAIConfig.xml"  overwrite="true"/>
+    <if><bool><available file="${basedir}/resources/cgi/gsdl3site.cfg"/></bool>
+      <copy file="${basedir}/resources/cgi/gsdl3site.cfg" tofile="${basedir}/resources/cgi/gsdl3site.cfg.backup" overwrite="true"/>
+    </if>
+    <copy file="${basedir}/resources/cgi/gsdl3site.cfg.in" tofile="${basedir}/resources/cgi/gsdl3site.cfg" overwrite="true"/>
 
   </target>
   <!-- ========== Web app Targets ================================ -->
@@ -1179,8 +1183,7 @@
     <filter token="tomcat.port" value="${tomcat.port}"/>
     <filter token="perlpath" value="${escaped.perl.path}"/>
     <filter token="disable.collection.building" value="${disable.collection.building}"/>
-    <copy file="${web.home}/WEB-INF/cgi/gsdl3site.cfg.in" tofile="${web.writablehome}/WEB-INF/cgi/gsdl3site.cfg" filtering="true" overwrite="true"/>
-
+    <copy file="${basedir}/resources/cgi/gsdl3site.cfg" tofile="${web.writablehome}/WEB-INF/cgi/gsdl3site.cfg" filtering="true" overwrite="true"/>
     <copy file="${basedir}/resources/java/global.properties.in" tofile="${web.writableclasses}/global.properties" filtering="true" overwrite="true"/>
     <copy file="${basedir}/resources/java/log4j.properties.in" tofile="${web.writableclasses}/log4j.properties" filtering="true" overwrite="true"/>
     <if><bool><istrue value="${gsdl3home.isreadonly}"/></bool>
