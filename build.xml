@@ -788,7 +788,7 @@
     <!-- assuming that index.html is not needed here -->   
 
     <!--Now write out the url with oaiserver suffix as the baseURL property in OAIConfig.xml-->
-    <available file="${web.classes}/OAIConfig.xml.in" property="oaiconfig.present"/>
+    <available file="${basedir}/resources/oai/OAIConfig.xml" property="oaiconfig.present"/>
     <antcall target="init-oaiconfig">
       <param name="url" value="${url}"/>
     </antcall>
@@ -796,7 +796,7 @@
 
   <target name="init-oaiconfig" if="oaiconfig.present">
     <echo>Writing out baseURL ${url}oaiserver to ${web.writableclasses}/OAIConfig.xml</echo>
-    <copy file="${web.classes}/OAIConfig.xml.in" tofile="${web.writableclasses}/OAIConfig.xml"/>
+    <copy file="${basedir}/resources/oai/OAIConfig.xml" tofile="${web.writableclasses}/OAIConfig.xml"/>
     <rsr verbosity="1" file="${web.writableclasses}/OAIConfig.xml" pattern="&lt;baseURL&gt;.*&lt;/baseURL&gt;" replacement="&lt;baseURL&gt;${url}oaiserver&lt;/baseURL&gt;" />   
   </target>
 
