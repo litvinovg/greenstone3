@@ -99,7 +99,7 @@ public class Server3 extends BaseServer
 	String propsFolder = gsdl3_writablehome + File.separator + "WEB-INF" + File.separator + "classes" + File.separator;
 	File propsFile = new File(propsFolder+"log4j.properties");
 
-	// create it from the template file GS3/resources/java/log4j.properties.in
+	// create it from the template file GS3/resources/web/log4j.properties
 	// Always do this => helps make Greenstone3 portable
 
 
@@ -108,7 +108,7 @@ public class Server3 extends BaseServer
 		// so that the location  of the log files gets resolved correctly
 		
 		// load the template log4j.properties.in file into logProps
-		FileInputStream infile = new FileInputStream(new File(gsdl_home+File.separator+"resources"+File.separator+"java"+File.separator+"log4j.properties.in"));
+		FileInputStream infile = new FileInputStream(new File(gsdl_home+File.separator+"resources"+File.separator+"web"+File.separator+"log4j.properties"));
 		if(infile != null) {
 		    Properties logProps = new Properties();
 		    logProps.load(infile);
