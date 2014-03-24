@@ -255,7 +255,7 @@ public class GS2BrowseAction extends Action
 						if (currentElem.getAttribute(GSXML.NODE_ID_ATT).equals(classifier_node + ".1"))
 						{
 							Element parent = (Element) currentElem.getParentNode();
-							parent.insertBefore(replacementElem, currentElem);
+							parent.insertBefore(parent.getOwnerDocument().importNode(replacementElem, true), currentElem); // wrong doc node!!!
 							parent.removeChild(currentElem);
 							break;
 						}
@@ -293,7 +293,7 @@ public class GS2BrowseAction extends Action
 						if (currentElem.getAttribute(GSXML.NODE_ID_ATT).equals(idToSearchFor))
 						{
 							Element parent = (Element) currentElem.getParentNode();
-							parent.insertBefore(replacementElem, currentElem);
+							parent.insertBefore(parent.getOwnerDocument().importNode(replacementElem,true), currentElem);
 							parent.removeChild(currentElem);
 							break;
 						}
