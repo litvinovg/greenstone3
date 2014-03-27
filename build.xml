@@ -1113,7 +1113,7 @@
 
   <!-- Until 64 bit Linux and Mac (Lion) machines can generate a working IsisGdl, 
        use the ones generated on a 32 bit Linux and Mac (Leopard), respectively -->
-  <target name="get-isisgdl">
+  <target name="get-isisgdl" if="${current.os.isunix}">
     <exec executable="uname" dir="${basedir}" failonerror="false"
 	  outputproperty="uname.val">
       <arg value="-m"/>
