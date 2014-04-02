@@ -306,11 +306,11 @@ p.intro {
   <xsl:template match="id:gsdl" xmlns:id="http://www.greenstone.org/namespace/gsdl_oaiinfo/1.0/gsdl_oaiinfo">
     <h2> Description </h2>
     <table class="values">
-      <xsl:apply-templates select="id:Metadata"/>
+      <xsl:apply-templates select="id:metadata"/>
     </table>
   </xsl:template>
 
-  <xsl:template match="id:Metadata" xmlns:id="http://www.greenstone.org/namespace/gsdl_oaiinfo/1.0/gsdl_oaiinfo">
+  <xsl:template match="id:metadata" xmlns:id="http://www.greenstone.org/namespace/gsdl_oaiinfo/1.0/gsdl_oaiinfo">
     <tr><td class="key"><xsl:value-of select="@name"/></td>
       <td class="value"><xsl:value-of select="."/></td></tr>
   </xsl:template>
