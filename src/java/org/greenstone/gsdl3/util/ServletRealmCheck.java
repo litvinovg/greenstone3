@@ -108,7 +108,7 @@ public class ServletRealmCheck
 		//System.err.println("** Got result:\n" + result);
 		
 		// Parse out the content nested inside <div ... id="gs_content"> </div>
-		int start = result.indexOf("id=\"gs_content\">");
+		int start = result.indexOf("id=\"gs_content\"");
 		if(start != -1) {
 			start = result.indexOf(">", start);
 			int end = result.indexOf("<", start);
