@@ -127,6 +127,7 @@ public class Authentication extends ServiceRack
 	protected static final String AUTHENTICATION_SERVICE = "Authentication";
 	protected static final String GET_USER_INFORMATION_SERVICE = "GetUserInformation";
 	protected static final String CHANGE_USER_EDIT_MODE_SERVICE = "ChangeUserEditMode";
+	protected static final String REMOTE_AUTHENTICATION_SERVICE = "RemoteAuthentication";
 
 	protected static boolean _derbyWrapperDoneForcedShutdown = false;
 
@@ -180,6 +181,12 @@ public class Authentication extends ServiceRack
 		changeEditMode_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		changeEditMode_service.setAttribute(GSXML.NAME_ATT, CHANGE_USER_EDIT_MODE_SERVICE);
 		this.short_service_info.appendChild(changeEditMode_service);
+		
+		Element remoteAuthentication_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		remoteAuthentication_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
+		remoteAuthentication_service.setAttribute(GSXML.NAME_ATT, REMOTE_AUTHENTICATION_SERVICE);
+		this.short_service_info.appendChild(remoteAuthentication_service);
+		
 
 		DerbyWrapper.createDatabaseIfNeeded();
 
@@ -226,6 +233,11 @@ public class Authentication extends ServiceRack
 			authen_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 			authen_service.setAttribute(GSXML.NAME_ATT, CHANGE_USER_EDIT_MODE_SERVICE);
 		}
+		else if (service_id.equals(REMOTE_AUTHENTICATION_SERVICE))
+		{
+			authen_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
+			authen_service.setAttribute(GSXML.NAME_ATT, REMOTE_AUTHENTICATION_SERVICE);
+		}		
 		else
 		{
 			return null;
@@ -286,6 +298,78 @@ public class Authentication extends ServiceRack
 		return result;
 	}
 
+	/**
+	 * This method replaces the gliserver.pl code for authenticating a user against the derby database
+	 * gliserver.pl needed to instantiate its own JVM to access the derby DB, but the GS3 already has
+	 * the Derby DB open and 2 JVMs are not allowed concurrent access to an open embedded Derby DB.
+	 * Gliserver.pl now goes through this method (via ServletRealmCheck.java), thereby using the same 
+	 * connection to the DerbyDB. This method reproduces the same behaviour as gliserver.pl used to,
+	 * by returning the user_groups on successful authentication, else returns the specific 
+	 * "Authentication failed" messages that glisever.pl would produce.
+	 * http://remote-host-name:8383/greenstone3/library?a=s&sa=authenticated-ping&excerptid=gs_content&un=admin&pw=<PW>&col=demo
+	*/
+	protected Element processRemoteAuthentication(Element request) {
+		//logger.info("*** Authentication::processRemoteAuthentication");	
+		
+		String message = "";
+		
+		Element system = (Element) GSXML.getChildByTagName(request, GSXML.REQUEST_TYPE_SYSTEM);		
+		String username = system.hasAttribute("username") ? system.getAttribute("username") : "";
+		String password = system.hasAttribute("password") ? system.getAttribute("password") : "";
+		
+		
+		// If we're not editing a collection then the user doesn't need to be in a particular group
+		String collection = system.hasAttribute("collection") ? system.getAttribute("collection") : "";
+				
+		
+		if(username.equals("") || password.equals("")) {
+			message = "Authentication failed: no (username or) password specified.";
+			//logger.error("*** Remote login failed. No username or pwd provided");
+		}		
+		else {		
+			String storedPassword = retrieveDataForUser(username, "password");
+			if(storedPassword != null && (password.equals(storedPassword) || hashPassword(password).equals(storedPassword))) {
+				
+				// gliserver.pl used to return the groups when authentication succeeded
+				String groups = retrieveDataForUser(username, "groups"); //comma-separated list
+				
+				if(collection.equals("")) {
+					message = groups;
+				} else { 					
+					
+					if(groups.indexOf("all-collections-editor") != -1) { // Does this user have access to all collections?
+						message = groups;
+					} else if(groups.indexOf("personal-collections-editor") != -1 && collection.startsWith(username+"-")) { // Does this user have access to personal collections, and is this one?
+						message = groups;
+					} else if(groups.indexOf(collection+"-collection-editor") != -1) { //  Does this user have access to this collection?
+						message = groups;
+					}
+					else {
+						message = "Authentication failed: user is not in the required group.";
+						//logger.error("*** Remote login failed. Groups did not match for the collection specified");
+					}
+				}
+				
+			} else {
+				
+				if(storedPassword == null) {
+					message = "Authentication failed: no account for user '" + username + "'";
+					//logger.error("*** Remote login failed. User not found or password not set for user.");
+				} else {
+					message = "Authentication failed: incorrect password.";
+					//logger.error("*** Remote login failed. Password did not match for user");
+				}
+			}
+		}
+		
+		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		result.setAttribute(GSXML.FROM_ATT, REMOTE_AUTHENTICATION_SERVICE);
+		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);		
+		Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, message);
+		result.appendChild(s);
+		return result;
+	}
+	
 	protected Element processGetUserInformation(Element request)
 	{
 		// Create a new (empty) result message

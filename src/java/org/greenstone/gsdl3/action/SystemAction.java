@@ -49,6 +49,9 @@ public class SystemAction extends Action
 		{
 			to = coll;
 		}
+		else if(subaction.equals("authenticated-ping")) {
+			to = "RemoteAuthentication"; // not "Authentication/RemoteAuthentication": MessageRouter knows to map the RemoteAuthentication service to the Authentication module
+		}
 
 		Element mr_request_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		Element mr_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_SYSTEM, to, userContext);
@@ -84,6 +87,23 @@ public class SystemAction extends Action
 			  
 			system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_PING);
 		}
+		else if (subaction.equals("authenticated-ping")) { // can check whether a given username and password authenticates
+		
+			String username = (String) params.get(GSParams.UN);
+			String password = (String) params.get(GSParams.PW);
+			
+			
+			system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_AUTHENTICATED_PING);
+			system.setAttribute(GSXML.USERNAME_ATT, username);
+			system.setAttribute(GSXML.PASSWORD_ATT, password);
+			
+			if(params.containsKey("col")) {//params.containsKey(GSParams.COLLECTION)) {
+				String collection = (String) params.get("col");//(String) params.get(GSParams.COLLECTION);
+				system.setAttribute(GSXML.COLLECTION_ATT, collection);
+			}
+			
+		}
+		
 		//else if (subaction.equals("is-persistent")){
 		//	system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_ISPERSISTENT);
 		//}

@@ -242,6 +242,7 @@ public class GSXML
 	public static final String SYSTEM_TYPE_ACTIVATE = "activate";
 	public static final String SYSTEM_TYPE_DEACTIVATE = "deactivate";
 	public static final String SYSTEM_TYPE_PING = "ping";
+	public static final String SYSTEM_TYPE_AUTHENTICATED_PING = "authenticated-ping";
 	//public static final String SYSTEM_TYPE_ISPERSISTENT = "is-persistent";
 
 	public static final String SYSTEM_SUBSET_ATT = "subset";
@@ -286,6 +287,9 @@ public class GSXML
 	public static final String GROUPS_ATT = "groups";
 	public static final String BASE_URL = "baseURL";
 
+	// only for authenticated-ping
+	public static final String PASSWORD_ATT = "password";
+	
 	//for classifiers
 	public static final String CHILD_TYPE_ATT = "childType";
 	public static final String CLASSIFIER_STYLE_ATT = "classifierStyle";

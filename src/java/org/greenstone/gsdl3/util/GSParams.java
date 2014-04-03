@@ -31,6 +31,9 @@ public class GSParams
 	public static final String RESPONSE_ONLY = "ro"; // if == 1 do the request and pass back the response xml - no page formatting
 	public static final String OUTPUT = "o"; // if processing is to be done, what type of output - html/xml/other??
 	public static final String SERVICE = "s"; // the name of the service
+	
+	public static final String UN = "un"; // username for authenticated-ping
+	public static final String PW = "pw"; // pwd for authenticated-ping
 
 	public static final String CLUSTER = "c"; // these two are the same
 	public static final String COLLECTION = "c";
