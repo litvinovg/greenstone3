@@ -80,7 +80,8 @@ extends AbstractGS2TextSearch {
     protected Element processTextQuery (Element request) {
         synchronized(this.mg_src){
         // Create a new (empty) result message ('doc' is in ServiceRack.java)
-        Element result = this.doc.createElement (GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+        Element result = result_doc.createElement (GSXML.RESPONSE_ELEM);
         result.setAttribute (GSXML.FROM_ATT, QUERY_SERVICE);
         result.setAttribute (GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
         
@@ -140,7 +141,7 @@ extends AbstractGS2TextSearch {
         MGQueryResult mqr = this.mg_src.getQueryResult ();
         if (mqr.isClear ()) {
             // something has gone wrong
-            GSXML.addError (this.doc, result, "Couldn't query the mg database", GSXML.ERROR_TYPE_SYSTEM);
+            GSXML.addError (result, "Couldn't query the mg database", GSXML.ERROR_TYPE_SYSTEM);
             return result;
         }
         long totalDocs = mqr.getTotalDocs ();
@@ -152,30 +153,30 @@ extends AbstractGS2TextSearch {
         }
         
         // Create a metadata list to store information about the query results
-        Element metadata_list = this.doc.createElement (GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+        Element metadata_list = result_doc.createElement (GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
         result.appendChild (metadata_list);
         
         // Add a metadata element specifying the number of matching documents
         // because teh total number is just the number returned, use numDocsReturned, not numDocsMatched
-        GSXML.addMetadata (this.doc, metadata_list, "numDocsReturned", ""+totalDocs);
+        GSXML.addMetadata (metadata_list, "numDocsReturned", ""+totalDocs);
         // add a metadata item to specify what actual query was done - eg if stuff was stripped out etc. and then we can use the query later, cos we don't know which parameter was the query
-        GSXML.addMetadata (this.doc, metadata_list, "query", query);
+        GSXML.addMetadata (metadata_list, "query", query);
         
         if (docs.size () > 0) {
             // Create a document list to store the matching documents, and add them
-            Element document_list = this.doc.createElement (GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
+            Element document_list = result_doc.createElement (GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
             result.appendChild (document_list);
             for (int d = 0; d < docs.size (); d++) {
                 long docnum = ((MGDocInfo) docs.elementAt (d)).num_;
                 float rank = ((MGDocInfo) docs.elementAt (d)).rank_;
                 String doc_id = internalNum2OID (docnum);
-                Element doc_node = createDocNode (doc_id, Float.toString (rank));
+                Element doc_node = createDocNode (result_doc, doc_id, Float.toString (rank));
                 document_list.appendChild (doc_node);
             }
         }
         
         // Create a term list to store the term information, and add it
-        Element term_list = this.doc.createElement (GSXML.TERM_ELEM+GSXML.LIST_MODIFIER);
+        Element term_list = result_doc.createElement (GSXML.TERM_ELEM+GSXML.LIST_MODIFIER);
         result.appendChild (term_list);
         Vector terms = mqr.getTerms ();
         for (int t = 0; t < terms.size (); t++) {
@@ -185,18 +186,18 @@ extends AbstractGS2TextSearch {
             int stem_method = term_info.stem_method_;
             Vector equiv_terms = term_info.equiv_terms_;
             
-            Element term_elem = this.doc.createElement (GSXML.TERM_ELEM);
+            Element term_elem = result_doc.createElement (GSXML.TERM_ELEM);
             term_elem.setAttribute (GSXML.NAME_ATT, term);
             term_elem.setAttribute (STEM_ATT, "" + stem_method);
             
-            Element equiv_term_list = this.doc.createElement (EQUIV_TERM_ELEM+GSXML.LIST_MODIFIER);
+            Element equiv_term_list = result_doc.createElement (EQUIV_TERM_ELEM+GSXML.LIST_MODIFIER);
             term_elem.appendChild (equiv_term_list);
             
             long total_term_freq = 0;
             for (int et = 0; et < equiv_terms.size (); et++) {
                 MGEquivTermInfo equiv_term_info = (MGEquivTermInfo) equiv_terms.get (et);
                 
-                Element equiv_term_elem = this.doc.createElement (GSXML.TERM_ELEM);
+                Element equiv_term_elem = result_doc.createElement (GSXML.TERM_ELEM);
                 equiv_term_elem.setAttribute (GSXML.NAME_ATT, equiv_term_info.term_);
                 equiv_term_elem.setAttribute (NUM_DOCS_MATCH_ATT, "" + equiv_term_info.match_docs_);
                 equiv_term_elem.setAttribute (FREQ_ATT, "" + equiv_term_info.term_freq_);

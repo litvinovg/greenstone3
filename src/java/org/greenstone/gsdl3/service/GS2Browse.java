@@ -32,6 +32,7 @@ import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.OID;
 import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -107,7 +108,7 @@ public class GS2Browse extends AbstractBrowse
 		}
 		this.macro_resolver = new GS2MacroResolver(this.coll_db, this.class_loader);
 		
-		gs_doc_db = new BasicDocumentDatabase(this.doc, database_type, this.site_home, this.cluster_name, index_stem);
+		gs_doc_db = new BasicDocumentDatabase(database_type, this.site_home, this.cluster_name, index_stem);
 		if (!gs_doc_db.isValid())
 		{
 			logger.error("Failed to open Document Database.");
@@ -170,10 +171,10 @@ public class GS2Browse extends AbstractBrowse
 	 */
 	// assumes only one value per metadata
   // does no macro resolving. assumes classifier metadata will not have macros.
-	protected Element getMetadataList(String node_id, boolean all_metadata, ArrayList<String> metadata_names)
+  protected Element getMetadataList(Document doc, String node_id, boolean all_metadata, ArrayList<String> metadata_names)
 	{
 		String lang = "en";
-		Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		Element metadata_list = doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		DBInfo info = this.coll_db.getInfo(node_id);
 		if (info == null)
 		{
@@ -188,7 +189,7 @@ public class GS2Browse extends AbstractBrowse
 			{
 				String key = it.next();
 				String value = info.getInfo(key);
-				GSXML.addMetadata(this.doc, metadata_list, key, value);
+				GSXML.addMetadata(metadata_list, key, value);
 			}
 
 		}
@@ -198,7 +199,7 @@ public class GS2Browse extends AbstractBrowse
 			{
 				String meta_name = metadata_names.get(i);
 				String value = (String) info.getInfo(meta_name);
-				GSXML.addMetadata(this.doc, metadata_list, meta_name, value);
+				GSXML.addMetadata(metadata_list, meta_name, value);
 			}
 		}
 		return metadata_list;

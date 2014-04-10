@@ -7,6 +7,9 @@ import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ServiceUtil extends ServiceRack
@@ -33,7 +36,7 @@ public class ServiceUtil extends ServiceRack
 
 		for (int i = 0; i < services.length; i++)
 		{
-			Element service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 			service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			service.setAttribute(GSXML.NAME_ATT, services[i]);
 			this.short_service_info.appendChild(service);
@@ -42,13 +45,13 @@ public class ServiceUtil extends ServiceRack
 		return true;
 	}
 
-	protected Element getServiceDescription(String service_id, String lang, String subset)
+	protected Element getServiceDescription(Document doc, String service_id, String lang, String subset)
 	{
 		for (int i = 0; i < services.length; i++)
 		{
 			if (service_id.equals(services[i]))
 			{
-				Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+				Element service_elem = doc.createElement(GSXML.SERVICE_ELEM);
 				service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 				service_elem.setAttribute(GSXML.NAME_ATT, services[i]);
 				return service_elem;
@@ -60,11 +63,12 @@ public class ServiceUtil extends ServiceRack
 	
 	protected Element processGetAllImagesInCollection(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, GET_ALL_IMAGES_IN_COLLECTION);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, GET_ALL_IMAGES_IN_COLLECTION);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, GET_ALL_IMAGES_IN_COLLECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, GET_ALL_IMAGES_IN_COLLECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 		
@@ -75,7 +79,7 @@ public class ServiceUtil extends ServiceRack
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 
 		if (param_list == null) {
-			GSXML.addError(this.doc, result, GET_ALL_IMAGES_IN_COLLECTION + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, GET_ALL_IMAGES_IN_COLLECTION + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
 			return result;  // Return the empty result
 		}
 
@@ -84,7 +88,7 @@ public class ServiceUtil extends ServiceRack
 		String regex = (String)params.get("extregex");
 		if(regex == null)
 		{
-			GSXML.addError(this.doc, result, GET_ALL_IMAGES_IN_COLLECTION + ": No file name extensions specified", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, GET_ALL_IMAGES_IN_COLLECTION + ": No file name extensions specified", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 		regex = ".*" + regex + ".*";
@@ -92,7 +96,7 @@ public class ServiceUtil extends ServiceRack
 		String collection = (String)params.get("c");
 		if(collection == null)
 		{
-			GSXML.addError(this.doc, result, GET_ALL_IMAGES_IN_COLLECTION + ": No collection specified", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, GET_ALL_IMAGES_IN_COLLECTION + ": No collection specified", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 		
@@ -100,12 +104,12 @@ public class ServiceUtil extends ServiceRack
 		ArrayList<String> images = new ArrayList<String>();
 		getImagesRecursive(indexDir, regex, images);
 		
-		Element imageListElem = this.doc.createElement("imageList");
+		Element imageListElem = result_doc.createElement("imageList");
 		result.appendChild(imageListElem);
 		for(String i : images)
 		{
-			Element imageElem = this.doc.createElement("image");
-			imageElem.appendChild(this.doc.createTextNode(i));
+			Element imageElem = result_doc.createElement("image");
+			imageElem.appendChild(result_doc.createTextNode(i));
 			imageListElem.appendChild(imageElem);
 		}
 		return result;

@@ -52,9 +52,7 @@ import org.apache.log4j.*;
  *
  * Document ids are formed by encoding the document using standard URLEncoding
  *
- * @author Katherine Don
- * @author <a href="mailto:s.yeates@cs.waikato.ac.nz">Stuart Yeates</a>
- * @version $Revision$
+ * @author Stuart Yeates
  * @see ServiceRack
  * @see java.net.URLEncoder
  * @see java.net.URLDecoder
@@ -125,7 +123,7 @@ public class XSLTServices
     return true;    
   }
 
-    protected Element getServiceDescription(String service, String lang, String subset) {
+    protected Element getServiceDescription(Document doc, String service, String lang, String subset) {
 
 	return null;
     }
@@ -143,21 +141,22 @@ public class XSLTServices
       return processResourceRetrieve(request);
     }
     // create the response so we can report the error
-    Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+    Document result_doc = XMLConverter.newDOM();
+    Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
     String from = GSPath.appendLink(this.cluster_name, RESOURCE_RETRIEVE_SERVICE);
     response.setAttribute(GSXML.FROM_ATT, from);
     response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
     
     logger.error("should never get here. service type wrong:"+service);
-    GSXML.addError(this.doc, response,"XSLTServices:should never get here. service type wrong:"+service);
+    GSXML.addError(response,"XSLTServices:should never get here. service type wrong:"+service);
     return response;
   }
 
   /** process a document resquest query */
   protected Element processResourceRetrieve(Element request) {
-    
+    Document result_doc = XMLConverter.newDOM();
     // create the result and set the path so we know where we are
-    Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+    Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
     String from = GSPath.appendLink(this.cluster_name, RESOURCE_RETRIEVE_SERVICE);
     response.setAttribute(GSXML.FROM_ATT, from);
     response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
@@ -176,7 +175,7 @@ public class XSLTServices
 
     if (param_elem==null) { 
 	logger.error("bad query request");
-	GSXML.addError(this.doc, response,"bad query request in XSLTServices");
+	GSXML.addError(response,"bad query request in XSLTServices");
 	return response; 
     }
     
@@ -192,9 +191,9 @@ public class XSLTServices
 	throw new Error(e.toString());
       }
       // something funny with the doc - 
-      Element new_doc = this.doc.createElement(GSXML.DOCUMENT_ELEM);
+      Element new_doc = result_doc.createElement(GSXML.DOCUMENT_ELEM);
       new_doc.setAttribute(GSXML.NAME_ATT, ids[j]); //GSXML.createDocumentElement(this.doc, ids[j]);
-      GSXML.addDocText(this.doc, new_doc, document);
+      GSXML.addDocText(new_doc, document);
       response.appendChild(new_doc);
     }
     
@@ -203,9 +202,9 @@ public class XSLTServices
   
   /** process a XSLT query */
   protected Element processXSLTQuery(Element request) {
-    
+    Document result_doc = XMLConverter.newDOM();
     // create the result and set the path so we know where we are
-    Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+    Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
     String from = GSPath.appendLink(this.cluster_name, XSLT_QUERY_SERVICE);
     response.setAttribute(GSXML.FROM_ATT, from);
     response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
@@ -232,11 +231,11 @@ public class XSLTServices
 					   Character.MAX_VALUE);
     } else {
       logger.error("bad alphabet name : "+ alphabet);
-      GSXML.addError(this.doc, response,"XSLTServices: bad alphabet name : "+ alphabet);
+      GSXML.addError(response,"XSLTServices: bad alphabet name : "+ alphabet);
       stream = new GeneratedDocumentStream();
     }
 
-    Element resource_list = this.doc.createElement(GSXML.RESOURCE_ELEM+GSXML.LIST_MODIFIER);
+    Element resource_list = result_doc.createElement(GSXML.RESOURCE_ELEM+GSXML.LIST_MODIFIER);
     response.appendChild(resource_list);
 
     // Framework to stringise the document
@@ -253,12 +252,12 @@ public class XSLTServices
 	Source source = new DOMSource(doc);
 	transformer.transform(source,result);
 	String id = writer.toString();
-	Element e = this.doc.createElement(GSXML.DOCUMENT_ELEM);
+	Element e = result_doc.createElement(GSXML.DOCUMENT_ELEM);
 	e.setAttribute(GSXML.NAME_ATT, id); 
 	//Node no = GSXML.createDocumentElement(this.doc, id);
 	resource_list.appendChild(e);
       } catch (Throwable t) {
-	GSXML.addError(this.doc, response, "Error in XSLTServices finding results:" + t.toString());
+	GSXML.addError(response, "Error in XSLTServices finding results:" + t.toString());
       }
     }
     return response; 

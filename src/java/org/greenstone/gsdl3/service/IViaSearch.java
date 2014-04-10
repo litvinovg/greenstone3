@@ -22,7 +22,7 @@ import org.apache.log4j.*;
 /**
  *
  * @author Katherine Don
- * @author <a href="mailto:chi@cs.waikato.ac.nz">Chi-Yu Huang</a>
+ * @author Chi-Yu Huang
  */
 
 public class IViaSearch
@@ -75,11 +75,12 @@ public class IViaSearch
     
     /** Process a text query - implemented by concrete subclasses */
     protected Element processTextQuery(Element request) {
+      Document result_doc = XMLConverter.newDOM();
 	// Create a new (empty) result message
-	Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 	result.setAttribute(GSXML.FROM_ATT, QUERY_SERVICE);
 	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
-	Element doc_node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
+	Element doc_node_list = result_doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
 	result.appendChild(doc_node_list);
 	Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 	if (param_list == null) {
@@ -126,10 +127,10 @@ public class IViaSearch
 	    results_num = reader.readLine();
 	    doc_ids = reader.readLine();
 	} catch (java.net.MalformedURLException e) {
-	    GSXML.addError(this.doc, result, "Malformed URL: "+url_string);
+	    GSXML.addError(result, "Malformed URL: "+url_string);
 	    return result;
 	} catch (java.io.IOException e) {
-	    GSXML.addError(this.doc, result, "IOException during connection to "+url_string+": "+e.toString());
+	    GSXML.addError(result, "IOException during connection to "+url_string+": "+e.toString());
 	    return result;
 	}
 	    
@@ -151,22 +152,22 @@ public class IViaSearch
 	    } catch (Exception e) {
 		result_string.append("Exception: "+e);
 	    }
-	    GSXML.addError(this.doc, result, result_string.toString());
+	    GSXML.addError(result, result_string.toString());
 	    
 	    return result;
 	}
 	
 	// get the num docs and add to a metadata list
-	Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER); 
+	Element metadata_list = result_doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER); 
 	result.appendChild(metadata_list);
 	
 	// Add a metadata element specifying the number of matching documents
 	long numdocs = Long.parseLong(results_num);
-	GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", ""+numdocs);	
+	GSXML.addMetadata(metadata_list, "numDocsMatched", ""+numdocs);	
 	String [] ids = doc_ids.split(" ");
 	
 	for (int d=0; d<ids.length; d++) {
-	    Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+	    Element doc_node = result_doc.createElement(GSXML.DOC_NODE_ELEM);
 	    doc_node.setAttribute(GSXML.NODE_ID_ATT, ids[d]);
 	    doc_node_list.appendChild(doc_node);
 	}

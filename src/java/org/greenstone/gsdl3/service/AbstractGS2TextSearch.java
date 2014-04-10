@@ -107,7 +107,7 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 		}
 
 		// replaces default AbstractSearch version with one tied to database
-		gs_doc_db = new BasicDocumentDatabase(this.doc, database_type, this.site_home, this.cluster_name, this.index_stem);
+		gs_doc_db = new BasicDocumentDatabase(database_type, this.site_home, this.cluster_name, this.index_stem);
 		if (!gs_doc_db.isValid())
 		{
 			logger.error("Failed to open Document Database.");

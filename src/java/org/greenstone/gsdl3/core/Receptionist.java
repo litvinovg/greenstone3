@@ -32,7 +32,7 @@ public class Receptionist implements ModuleInterface
 	/** the set up variables */
 	protected HashMap<String, Object> config_params = null;
 	/** container Document to create XML Nodes */
-	protected Document doc = null;
+	//protected Document doc = null;
 
 	/** a converter class to parse XML and create Docs */
 	protected XMLConverter converter = null;
@@ -53,7 +53,7 @@ public class Receptionist implements ModuleInterface
 	public Receptionist()
 	{
 		this.converter = new XMLConverter();
-		this.doc = this.converter.newDOM();
+		//this.doc = XMLConverter.newDOM();
 		this.action_map = new HashMap<String, Action>();
 	}
 
@@ -181,7 +181,7 @@ public class Receptionist implements ModuleInterface
 	 */
 	public Node process(Node message_node)
 	{
-		Element message = this.converter.nodeToElement(message_node);
+		Element message = GSXML.nodeToElement(message_node);
 
 		// get the request out of the message - assume that there is only one
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
@@ -241,7 +241,8 @@ public class Receptionist implements ModuleInterface
 		// transform the request in some way -- does nothing!
 		preProcessRequest(request);
 		// set up the page
-		Element page = this.doc.createElement(GSXML.PAGE_ELEM);
+		Document doc = XMLConverter.newDOM();
+		Element page = doc.createElement(GSXML.PAGE_ELEM);
 		page.setAttribute(GSXML.LANG_ATT, request.getAttribute(GSXML.LANG_ATT));
 		// just in case these namespaces end up in the page and we want to display the XML
 		page.setAttribute("xmlns:gsf", GSXML.GSF_NAMESPACE);
@@ -272,9 +273,9 @@ public class Receptionist implements ModuleInterface
 		}
 
 		// the request is part of the page
-		page.appendChild(GSXML.duplicateWithNewName(this.doc, request, GSXML.PAGE_REQUEST_ELEM, true));
+		page.appendChild(GSXML.duplicateWithNewName(doc, request, GSXML.PAGE_REQUEST_ELEM, true));
 		// add the response too
-		Element page_response = GSXML.duplicateWithNewName(this.doc, (Element) GSXML.getChildByTagName(action_response, GSXML.RESPONSE_ELEM), GSXML.PAGE_RESPONSE_ELEM, true);
+		Element page_response = GSXML.duplicateWithNewName(doc, (Element) GSXML.getChildByTagName(action_response, GSXML.RESPONSE_ELEM), GSXML.PAGE_RESPONSE_ELEM, true);
 		page.appendChild(page_response);
 
 		//logger.info(" raw page="+this.converter.getString(page));

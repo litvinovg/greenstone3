@@ -28,7 +28,9 @@ import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
 import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -71,24 +73,24 @@ public class ArchiveIO extends ServiceRack
 
 		for (int i = 0; i < _services.length; i++)
 		{
-			Element service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 			service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			service.setAttribute(GSXML.NAME_ATT, _services[i]);
 			this.short_service_info.appendChild(service);
 		}
 		
-		_GSDM = new GSDocumentModel(this.site_home, this.doc, this.router);
+		_GSDM = new GSDocumentModel(this.site_home, this.router);
 
 		return true;
 	}
 
-	protected Element getServiceDescription(String service_id, String lang, String subset)
+  protected Element getServiceDescription(Document doc, String service_id, String lang, String subset)
 	{
 		for (int i = 0; i < _services.length; i++)
 		{
 			if (service_id.equals(_services[i]))
 			{
-				Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+				Element service_elem = doc.createElement(GSXML.SERVICE_ELEM);
 				service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 				service_elem.setAttribute(GSXML.NAME_ATT, _services[i]);
 				return service_elem;
@@ -105,7 +107,8 @@ public class ArchiveIO extends ServiceRack
 	protected Element processArchiveGetDocumentFilePath(Element request)
 	{
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_GET_DOCUMENT_FILE_PATH);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -115,7 +118,7 @@ public class ArchiveIO extends ServiceRack
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, ARCHIVE_GET_DOCUMENT_FILE_PATH + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, ARCHIVE_GET_DOCUMENT_FILE_PATH + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
@@ -125,8 +128,8 @@ public class ArchiveIO extends ServiceRack
 
 		String filePath = _GSDM.archiveGetDocumentFilePath(oid, collection, userContext);
 		
-		Element metadataList = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		metadataList.appendChild(GSXML.createMetadataElement(this.doc, "docfilepath", filePath)); //TODO: Replace "docfilepath" with a constant 
+		Element metadataList = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		metadataList.appendChild(GSXML.createMetadataElement(result_doc, "docfilepath", filePath)); //TODO: Replace "docfilepath" with a constant 
 		result.appendChild(metadataList);
 
 		return result;
@@ -135,7 +138,8 @@ public class ArchiveIO extends ServiceRack
 	protected Element processArchiveGetSourceFileOID(Element request)
 	{
 		//Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_GET_SOURCE_FILE_OID);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -145,7 +149,7 @@ public class ArchiveIO extends ServiceRack
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, ARCHIVE_GET_SOURCE_FILE_OID + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, ARCHIVE_GET_SOURCE_FILE_OID + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
@@ -159,8 +163,8 @@ public class ArchiveIO extends ServiceRack
 			return result;
 		}
 
-		Element metadataList = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		metadataList.appendChild(GSXML.createMetadataElement(this.doc, GSXML.NODE_ID_ATT, oid));
+		Element metadataList = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		metadataList.appendChild(GSXML.createMetadataElement(result_doc, GSXML.NODE_ID_ATT, oid));
 		result.appendChild(metadataList);
 
 		return result;
@@ -169,7 +173,8 @@ public class ArchiveIO extends ServiceRack
 	protected Element processArchiveCheckDocumentOrSectionExists(Element request)
 	{
 		//Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_CHECK_DOCUMENT_OR_SECTION_EXISTS);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -179,7 +184,7 @@ public class ArchiveIO extends ServiceRack
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, ARCHIVE_CHECK_DOCUMENT_OR_SECTION_EXISTS + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, ARCHIVE_CHECK_DOCUMENT_OR_SECTION_EXISTS + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
@@ -201,7 +206,8 @@ public class ArchiveIO extends ServiceRack
 	protected Element processArchiveWriteEntryToDatabase(Element request)
 	{
 		//Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_WRITE_ENTRY_TO_DATABASE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -211,7 +217,7 @@ public class ArchiveIO extends ServiceRack
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, ARCHIVE_WRITE_ENTRY_TO_DATABASE + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, ARCHIVE_WRITE_ENTRY_TO_DATABASE + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -261,7 +267,8 @@ public class ArchiveIO extends ServiceRack
 	protected Element processArchiveRemoveEntryFromDatabase(Element request)
 	{
 		//Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_REMOVE_ENTRY_FROM_DATABASE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -271,7 +278,7 @@ public class ArchiveIO extends ServiceRack
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, ARCHIVE_REMOVE_ENTRY_FROM_DATABASE + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, ARCHIVE_REMOVE_ENTRY_FROM_DATABASE + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -304,7 +311,8 @@ public class ArchiveIO extends ServiceRack
 	protected Element processArchiveGetAssociatedImportFiles(Element request)
 	{
 		//Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, ARCHIVE_GET_ASSOCIATED_IMPORT_FILES);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -314,7 +322,7 @@ public class ArchiveIO extends ServiceRack
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, ARCHIVE_GET_ASSOCIATED_IMPORT_FILES + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, ARCHIVE_GET_ASSOCIATED_IMPORT_FILES + ": Missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
@@ -328,12 +336,12 @@ public class ArchiveIO extends ServiceRack
 			return result;
 		}
 		
-		Element metadataList = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		metadataList.appendChild(GSXML.createMetadataElement(this.doc, "srcfile", assocFiles.get(0)));
+		Element metadataList = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		metadataList.appendChild(GSXML.createMetadataElement(result_doc, "srcfile", assocFiles.get(0)));
 
 		for (int i = 1; i < assocFiles.size(); i++)
 		{
-			metadataList.appendChild(GSXML.createMetadataElement(this.doc, "assocfile", assocFiles.get(i)));
+			metadataList.appendChild(GSXML.createMetadataElement(result_doc, "assocfile", assocFiles.get(i)));
 		}
 
 		result.appendChild(metadataList);

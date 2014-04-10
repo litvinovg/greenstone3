@@ -30,6 +30,7 @@ import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.MacroResolver;
 import org.greenstone.gsdl3.util.OID;
 import org.greenstone.gsdl3.util.GSConstants;
+import org.greenstone.gsdl3.util.XMLConverter;
 
 // XML classes
 import org.w3c.dom.Document;
@@ -103,7 +104,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		// set up short_service_info_ - for now just has name and type
 		if (does_structure)
 		{
-			Element dsr_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element dsr_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 			dsr_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			dsr_service.setAttribute(GSXML.NAME_ATT, DOCUMENT_STRUCTURE_RETRIEVE_SERVICE);
 			this.short_service_info.appendChild(dsr_service);
@@ -111,7 +112,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 
 		if (does_metadata)
 		{
-			Element dmr_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element dmr_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 			dmr_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			dmr_service.setAttribute(GSXML.NAME_ATT, DOCUMENT_METADATA_RETRIEVE_SERVICE);
 			this.short_service_info.appendChild(dmr_service);
@@ -119,7 +120,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 
 		if (does_content)
 		{
-			Element dcr_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element dcr_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 			dcr_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			dcr_service.setAttribute(GSXML.NAME_ATT, DOCUMENT_CONTENT_RETRIEVE_SERVICE);
 			this.short_service_info.appendChild(dcr_service);
@@ -130,7 +131,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		Element display_format = (Element) GSXML.getNodeByPath(extra_info, path);
 		if (display_format != null)
 		{
-			this.format_info_map.put(DOCUMENT_CONTENT_RETRIEVE_SERVICE, this.doc.importNode(display_format, true));
+			this.format_info_map.put(DOCUMENT_CONTENT_RETRIEVE_SERVICE, this.desc_doc.importNode(display_format, true));
 			// should we keep a copy?
 			// check for docType option.
 			Element doc_type_opt = GSXML.getNamedElement(display_format, "gsf:option", GSXML.NAME_ATT, "documentType");
@@ -170,16 +171,16 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		}
 
 		// Base line for document (might be overriden by sub-classes)
-		gs_doc = new BasicDocument(this.doc, this.default_document_type);
+		gs_doc = new BasicDocument(this.default_document_type);
 
 		return true;
 	}
 
-	protected Element getServiceDescription(String service_id, String lang, String subset)
+  protected Element getServiceDescription(Document doc, String service_id, String lang, String subset)
 	{
 
 		// these ones are probably never called, but put them here just in case
-		Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element service_elem = doc.createElement(GSXML.SERVICE_ELEM);
 		service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 		service_elem.setAttribute(GSXML.NAME_ATT, service_id);
 		return service_elem;
@@ -189,7 +190,8 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	{
 
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 		result.setAttribute(GSXML.FROM_ATT, DOCUMENT_METADATA_RETRIEVE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
@@ -203,7 +205,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, "DocumentMetadataRetrieve: missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, "DocumentMetadataRetrieve: missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -231,7 +233,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		// check that there has been some metadata specified
 		if (!all_metadata && metadata_names_list.size() == 0)
 		{
-			GSXML.addError(this.doc, result, "DocumentMetadataRetrieve: no metadata names found in the " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, "DocumentMetadataRetrieve: no metadata names found in the " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -239,36 +241,36 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		Element request_node_list = (Element) GSXML.getChildByTagName(request, GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		if (request_node_list == null)
 		{
-			GSXML.addError(this.doc, result, "DocumentMetadataRetrieve: missing " + GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, "DocumentMetadataRetrieve: missing " + GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
 		// copy the request doc node list to the response
-		Element response_node_list = (Element) this.doc.importNode(request_node_list, true);
+		Element response_node_list = (Element) result_doc.importNode(request_node_list, true);
 		result.appendChild(response_node_list);
 
 		// use the copied list so that we add the metadata into the copy
 		// are we just adding metadata for the top level nodes? or can we accept a hierarchy here???
-		NodeList request_nodes = GSXML.getChildrenByTagName(response_node_list, GSXML.DOC_NODE_ELEM);
-		if (request_nodes.getLength() == 0)
+		NodeList doc_nodes = GSXML.getChildrenByTagName(response_node_list, GSXML.DOC_NODE_ELEM);
+		if (doc_nodes.getLength() == 0)
 		{
-			GSXML.addError(this.doc, result, "DocumentMetadataRetrieve: no " + GSXML.DOC_NODE_ELEM + " found in the " + GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, "DocumentMetadataRetrieve: no " + GSXML.DOC_NODE_ELEM + " found in the " + GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
 		// Whew, now we have checked (almost) all the syntax of the request, now we can process it.
-		for (int i = 0; i < request_nodes.getLength(); i++)
+		for (int i = 0; i < doc_nodes.getLength(); i++)
 		{
-			Element request_node = (Element) request_nodes.item(i);
-			String node_id = request_node.getAttribute(GSXML.NODE_ID_ATT);
+			Element doc_node = (Element) doc_nodes.item(i);
+			String node_id = doc_node.getAttribute(GSXML.NODE_ID_ATT);
 			boolean is_href_id = false;
 			if (node_id.equals(""))
 			{
-				node_id = getGreenstoneIdFromHref(request_node);
+				node_id = getGreenstoneIdFromHref(doc_node);
 				if (node_id == null)
 				{
 					// **** TODO, is this good enough???
-					request_node.setAttribute("external_link", "true");
+					doc_node.setAttribute("external_link", "true");
 					continue;
 				}
 
@@ -286,15 +288,15 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 			}
 			try
 			{
-			  Element metadata_list = getMetadataList(node_id, all_metadata, metadata_names_list, lang);
+			  Element metadata_list = getMetadataList(result_doc, node_id, all_metadata, metadata_names_list, lang);
 				if (metadata_list != null)
 				{
-					request_node.appendChild(metadata_list);
+					doc_node.appendChild(metadata_list);
 				}
 			}
 			catch (GSException e)
 			{
-				GSXML.addError(this.doc, result, e.getMessage(), e.getType());
+				GSXML.addError(result, e.getMessage(), e.getType());
 				if (e.getType().equals(GSXML.ERROR_TYPE_SYSTEM))
 				{
 					// there is no point trying any others
@@ -311,7 +313,8 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	{
 
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, DOCUMENT_STRUCTURE_RETRIEVE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -327,7 +330,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, "DocumentStructureRetrieve: missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, "DocumentStructureRetrieve: missing " + GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -335,19 +338,19 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		Element query_doc_list = (Element) GSXML.getChildByTagName(request, GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		if (query_doc_list == null)
 		{
-			GSXML.addError(this.doc, result, "DocumentStructureRetrieve: missing " + GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, "DocumentStructureRetrieve: missing " + GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
 		// copy the doc_list to the response
-		Element response_node_list = (Element) this.doc.importNode(query_doc_list, true);
+		Element response_node_list = (Element) result_doc.importNode(query_doc_list, true);
 		result.appendChild(response_node_list);
 
 		// check that we have some doc nodes specified
 		NodeList node_list = GSXML.getChildrenByTagName(response_node_list, GSXML.DOC_NODE_ELEM);
 		if (node_list.getLength() == 0)
 		{
-			GSXML.addError(this.doc, result, "DocumentStructureRetrieve: no " + GSXML.DOC_NODE_ELEM + " found in the " + GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, "DocumentStructureRetrieve: no " + GSXML.DOC_NODE_ELEM + " found in the " + GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -406,28 +409,30 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		if (want_descendants)
 			want_children = false;
 
+		// for each of the doc nodes, get the required info
+		// these nodes are part of result_doc - can use that to create Elements
 		for (int i = 0; i < node_list.getLength(); i++)
 		{
-			Element doc = (Element) node_list.item(i);
+			Element doc_node = (Element) node_list.item(i);
 
-			String doc_id = doc.getAttribute(GSXML.NODE_ID_ATT);
+			String doc_id = doc_node.getAttribute(GSXML.NODE_ID_ATT);
 			boolean is_href_id = false;
 			if (doc_id.equals(""))
 			{
-				doc_id = getGreenstoneIdFromHref(doc);
+				doc_id = getGreenstoneIdFromHref(doc_node);
 				if (doc_id == null)
 				{
 					// **** TODO, is this good enough???
-					doc.setAttribute("external_link", "true");
+					doc_node.setAttribute("external_link", "true");
 					continue;
 				}
-				doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
+				doc_node.setAttribute(GSXML.NODE_ID_ATT, doc_id);
 			}
 
 			if (idNeedsTranslating(doc_id))
 			{
 				doc_id = translateId(doc_id);
-				doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
+				doc_node.setAttribute(GSXML.NODE_ID_ATT, doc_id);
 			}
 
 			if (doc_id == null)
@@ -437,8 +442,8 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 
 			if (want_info)
 			{
-				Element node_info_elem = this.doc.createElement("nodeStructureInfo");
-				doc.appendChild(node_info_elem);
+			  Element node_info_elem = result_doc.createElement("nodeStructureInfo");
+				doc_node.appendChild(node_info_elem);
 
 				for (int j = 0; j < info_types.size(); j++)
 				{
@@ -446,7 +451,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 					String info_value = getStructureInfo(doc_id, info_type);
 					if (info_value != null)
 					{
-						Element info_elem = this.doc.createElement("info");
+						Element info_elem = result_doc.createElement("info");
 						info_elem.setAttribute(GSXML.NAME_ATT, info_type);
 						info_elem.setAttribute(GSXML.VALUE_ATT, info_value);
 						node_info_elem.appendChild(info_elem);
@@ -457,20 +462,20 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 			if (want_structure)
 			{
 				// all structure info goes into a nodeStructure elem
-				Element structure_elem = this.doc.createElement(GSXML.NODE_STRUCTURE_ELEM);
-				doc.appendChild(structure_elem);
+				Element structure_elem = result_doc.createElement(GSXML.NODE_STRUCTURE_ELEM);
+				doc_node.appendChild(structure_elem);
 
 				if (want_entire_structure)
 				{
 					String root_id = getRootId(doc_id);
-					Element root_node = createDocNode(root_id); //, true, false);
+					Element root_node = createDocNode(result_doc, root_id); //, true, false);
 					addDescendants(root_node, root_id, true);
 					structure_elem.appendChild(root_node);
 					continue; // with the next document, we dont need to do any more here
 				}
 
 				// Add the requested structure information
-				Element base_node = createDocNode(doc_id); //, false, false);
+				Element base_node = createDocNode(result_doc, doc_id); //, false, false);
 
 				//Ancestors: continually add parent nodes until the root is reached
 				Element top_node = base_node; // the top node so far
@@ -483,7 +488,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 						//Element parent = getParent(current_id);
 						if (parent_id == null)
 							break; // no parent
-						Element parent_node = createDocNode(parent_id);
+						Element parent_node = createDocNode(result_doc, parent_id);
 						parent_node.appendChild(top_node);
 						current_id = parent_id;//.getAttribute(GSXML.NODE_ID_ATT);
 						top_node = parent_node;
@@ -495,7 +500,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 					String parent_id = getParentId(doc_id);
 					if (parent_id != null)
 					{
-						Element parent_node = createDocNode(parent_id);
+					  Element parent_node = createDocNode(result_doc, parent_id);
 						parent_node.appendChild(base_node);
 						top_node = parent_node;
 					}
@@ -540,7 +545,8 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	protected Element processDocumentContentRetrieve(Element request)
 	{
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, DOCUMENT_CONTENT_RETRIEVE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -563,17 +569,17 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 
 		// copy the request doc node list to the response
-		Element response_node_list = (Element) this.doc.importNode(query_doc_list, true);
+		Element response_node_list = (Element) result_doc.importNode(query_doc_list, true);
 		result.appendChild(response_node_list);
 
-		NodeList request_nodes = GSXML.getChildrenByTagName(response_node_list, GSXML.DOC_NODE_ELEM);
-		if (request_nodes.getLength() == 0)
+		NodeList doc_nodes = GSXML.getChildrenByTagName(response_node_list, GSXML.DOC_NODE_ELEM);
+		if (doc_nodes.getLength() == 0)
 		{
-			GSXML.addError(this.doc, result, "DocumentContentRetrieve: no " + GSXML.DOC_NODE_ELEM + " found in the " + GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, "DocumentContentRetrieve: no " + GSXML.DOC_NODE_ELEM + " found in the " + GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
-		//Element doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		//Element doc_list = result_doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		//result.appendChild(doc_list);
 
 		// set up the retrieval??
@@ -582,21 +588,21 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		//String[] doc_ids = GSXML.getAttributeValuesFromList(query_doc_list, GSXML.NODE_ID_ATT);
 		//String[] is_externals = GSXML.getAttributeValuesFromList(query_doc_list, "externalURL");
 
-		for (int i = 0; i < request_nodes.getLength(); i++)
+		for (int i = 0; i < doc_nodes.getLength(); i++)
 		{
-			Element request_node = (Element) request_nodes.item(i);
-			String node_id = request_node.getAttribute(GSXML.NODE_ID_ATT);
+			Element doc_node = (Element) doc_nodes.item(i);
+			String node_id = doc_node.getAttribute(GSXML.NODE_ID_ATT);
 			
 			if (node_id.equals(""))
 			{
-				node_id = getGreenstoneIdFromHref(request_node);
+				node_id = getGreenstoneIdFromHref(doc_node);
 				if (node_id == null)
 				{
 					// **** TODO, is this good enough???
-					request_node.setAttribute("external_link", "true");
+					doc_node.setAttribute("external_link", "true");
 					continue;
 				}
-				request_node.setAttribute(GSXML.NODE_ID_ATT, node_id);
+				doc_node.setAttribute(GSXML.NODE_ID_ATT, node_id);
 			}
 
 			// may have modifiers .rt, .1.ss etc
@@ -611,15 +617,15 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 			}
 			try
 			{
-				Element node_content = getNodeContent(node_id, lang);
+			  Element node_content = getNodeContent(result_doc, node_id, lang);
 				if (node_content != null)
 				{
-					request_node.appendChild(node_content);
+				  doc_node.appendChild(node_content);
 				}
 			}
 			catch (GSException e)
 			{
-				GSXML.addError(this.doc, result, e.getMessage());
+				GSXML.addError(result, e.getMessage());
 				return result;
 			}
 		} // for each node
@@ -630,9 +636,9 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	 * create an element to go into the structure. A node element has the form
 	 * <docNode nodeId='xxx' nodeType='leaf' docType='hierarchy'/>
 	 */
-	protected Element createDocNode(String node_id)
+  protected Element createDocNode(Document doc, String node_id)
 	{
-		return this.gs_doc.createDocNode(node_id);
+	  return this.gs_doc.createDocNode(doc, node_id);
 	}
 
 	/**
@@ -758,13 +764,13 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	 * get the metadata for the doc node doc_id returns a metadataList element:
 	 * <metadataList><metadata name="xxx">value</metadata></metadataList>
 	 */
-  abstract protected Element getMetadataList(String doc_id, boolean all_metadata, ArrayList<String> metadata_names, String lang) throws GSException;
+  abstract protected Element getMetadataList(Document doc, String doc_id, boolean all_metadata, ArrayList<String> metadata_names, String lang) throws GSException;
 
 	/**
 	 * returns the content of a node should return a nodeContent element:
 	 * <nodeContent>text content or other elements</nodeContent> can return
 	 */
-	abstract protected Element getNodeContent(String doc_id, String lang) throws GSException;
+  abstract protected Element getNodeContent(Document doc, String doc_id, String lang) throws GSException;
 
 	/**
 	 * returns the structural information asked for. info_type may be one of

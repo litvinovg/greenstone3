@@ -51,7 +51,7 @@ public class DebugService extends ServiceRack
 
 		for (int i = 0; i < services.length; i++)
 		{
-			Element service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 			service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			service.setAttribute(GSXML.NAME_ATT, services[i]);
 			this.short_service_info.appendChild(service);
@@ -60,13 +60,13 @@ public class DebugService extends ServiceRack
 		return true;
 	}
 
-	protected Element getServiceDescription(String service_id, String lang, String subset)
+  protected Element getServiceDescription(Document doc, String service_id, String lang, String subset)
 	{
 		for (int i = 0; i < services.length; i++)
 		{
 			if (service_id.equals(services[i]))
 			{
-				Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+				Element service_elem = doc.createElement(GSXML.SERVICE_ELEM);
 				service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 				service_elem.setAttribute(GSXML.NAME_ATT, services[i]);
 				return service_elem;
@@ -78,11 +78,13 @@ public class DebugService extends ServiceRack
 
 	protected Element processResolveCallTemplate(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, RESOLVE_CALL_TEMPLATE);
+	  	Document result_doc = XMLConverter.newDOM();
+
+		Element result = GSXML.createBasicResponse(result_doc, RESOLVE_CALL_TEMPLATE);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, RESOLVE_CALL_TEMPLATE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, RESOLVE_CALL_TEMPLATE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -98,7 +100,7 @@ public class DebugService extends ServiceRack
 
 		if (!found)
 		{
-			GSXML.addError(this.doc, result, "This user does not have the required permissions to perform this action.");
+			GSXML.addError(result, "This user does not have the required permissions to perform this action.");
 			return result;
 		}
 
@@ -107,7 +109,7 @@ public class DebugService extends ServiceRack
 
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, RESOLVE_CALL_TEMPLATE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, RESOLVE_CALL_TEMPLATE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -141,7 +143,7 @@ public class DebugService extends ServiceRack
 			{
 				Element debugElement = (Element) current.getElementsByTagName("debug").item(0);
 
-				Element requestedTemplate = this.doc.createElement("requestedTemplate");
+				Element requestedTemplate = result_doc.createElement("requestedTemplate");
 				requestedTemplate.setTextContent(debugElement.getAttribute("filename"));
 				result.appendChild(requestedTemplate);
 			}
@@ -152,11 +154,12 @@ public class DebugService extends ServiceRack
 
 	protected Element processGetXMLTemplateFromFile(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, GET_TEMPLATE_FROM_XML_FILE);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, GET_TEMPLATE_FROM_XML_FILE);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, GET_TEMPLATE_FROM_XML_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, GET_TEMPLATE_FROM_XML_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -172,7 +175,7 @@ public class DebugService extends ServiceRack
 
 		if (!found)
 		{
-			GSXML.addError(this.doc, result, "This user does not have the required permissions to perform this action.");
+			GSXML.addError(result, "This user does not have the required permissions to perform this action.");
 			return result;
 		}
 
@@ -181,7 +184,7 @@ public class DebugService extends ServiceRack
 
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, GET_TEMPLATE_FROM_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, GET_TEMPLATE_FROM_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -209,7 +212,7 @@ public class DebugService extends ServiceRack
 		}
 		else
 		{
-			GSXML.addError(this.doc, result, "A valid namespace was not specified.");
+			GSXML.addError(result, "A valid namespace was not specified.");
 			return result;
 		}
 
@@ -256,8 +259,8 @@ public class DebugService extends ServiceRack
 					{
 						fixAttributes(template);
 
-						Element requestedTemplate = this.doc.createElement("requestedNameTemplate");
-						requestedTemplate.appendChild(this.doc.importNode(template, true));
+						Element requestedTemplate = result_doc.createElement("requestedNameTemplate");
+						requestedTemplate.appendChild(result_doc.importNode(template, true));
 						result.appendChild(requestedTemplate);
 					}
 				}
@@ -273,8 +276,8 @@ public class DebugService extends ServiceRack
 					{
 						fixAttributes(template);
 
-						Element requestedTemplate = this.doc.createElement("requestedMatchTemplate");
-						requestedTemplate.appendChild(this.doc.importNode(template, true));
+						Element requestedTemplate = result_doc.createElement("requestedMatchTemplate");
+						requestedTemplate.appendChild(result_doc.importNode(template, true));
 						result.appendChild(requestedTemplate);
 					}
 				}
@@ -305,11 +308,12 @@ public class DebugService extends ServiceRack
 
 	protected Element processSaveXMLTemplateToFile(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, SAVE_TEMPLATE_TO_XML_FILE);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, SAVE_TEMPLATE_TO_XML_FILE);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, SAVE_TEMPLATE_TO_XML_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, SAVE_TEMPLATE_TO_XML_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -325,7 +329,7 @@ public class DebugService extends ServiceRack
 
 		if (!foundGroup)
 		{
-			GSXML.addError(this.doc, result, "This user does not have the required permissions to perform this action.");
+			GSXML.addError(result, "This user does not have the required permissions to perform this action.");
 			return result;
 		}
 
@@ -334,7 +338,7 @@ public class DebugService extends ServiceRack
 
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, SAVE_TEMPLATE_TO_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, SAVE_TEMPLATE_TO_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -363,7 +367,7 @@ public class DebugService extends ServiceRack
 		}
 		else
 		{
-			GSXML.addError(this.doc, result, SAVE_TEMPLATE_TO_XML_FILE + ": The specified namespace was not valid", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, SAVE_TEMPLATE_TO_XML_FILE + ": The specified namespace was not valid", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -440,7 +444,7 @@ public class DebugService extends ServiceRack
 
 			if (!found)
 			{
-				GSXML.addError(this.doc, result, SAVE_TEMPLATE_TO_XML_FILE + ": Could not save as the specified template could not be found", GSXML.ERROR_TYPE_SYNTAX);
+				GSXML.addError(result, SAVE_TEMPLATE_TO_XML_FILE + ": Could not save as the specified template could not be found", GSXML.ERROR_TYPE_SYNTAX);
 			}
 			else
 			{
@@ -456,14 +460,14 @@ public class DebugService extends ServiceRack
 				}
 				catch (Exception ex)
 				{
-					GSXML.addError(this.doc, result, SAVE_TEMPLATE_TO_XML_FILE + ": There was an error writing out the XML file", GSXML.ERROR_TYPE_SYNTAX);
+					GSXML.addError(result, SAVE_TEMPLATE_TO_XML_FILE + ": There was an error writing out the XML file", GSXML.ERROR_TYPE_SYNTAX);
 				}
 
 			}
 		}
 		else
 		{
-			GSXML.addError(this.doc, result, SAVE_TEMPLATE_TO_XML_FILE + "File: " + xslFile.getAbsolutePath() + " does not exist", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, SAVE_TEMPLATE_TO_XML_FILE + "File: " + xslFile.getAbsolutePath() + " does not exist", GSXML.ERROR_TYPE_SYNTAX);
 		}
 
 		return result;
@@ -471,11 +475,12 @@ public class DebugService extends ServiceRack
 
 	protected Element processGetTemplateListFromFile(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, GET_TEMPLATE_LIST_FROM_FILE);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, GET_TEMPLATE_LIST_FROM_FILE);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, GET_TEMPLATE_LIST_FROM_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, GET_TEMPLATE_LIST_FROM_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -491,7 +496,7 @@ public class DebugService extends ServiceRack
 
 		if (!found)
 		{
-			GSXML.addError(this.doc, result, "This user does not have the required permissions to perform this action.");
+			GSXML.addError(result, "This user does not have the required permissions to perform this action.");
 			return result;
 		}
 
@@ -500,7 +505,7 @@ public class DebugService extends ServiceRack
 
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, GET_TEMPLATE_FROM_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, GET_TEMPLATE_FROM_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -516,7 +521,7 @@ public class DebugService extends ServiceRack
 
 		if (locationName == null || locationName.length() == 0)
 		{
-			GSXML.addError(this.doc, result, "Parameter \"locationName\" was null or empty.");
+			GSXML.addError(result, "Parameter \"locationName\" was null or empty.");
 			return result;
 		}
 
@@ -533,7 +538,7 @@ public class DebugService extends ServiceRack
 				GSXSLT.modifyCollectionConfigForDebug(xslDocElem);
 			}
 
-			Element templateList = this.doc.createElement("templateList");
+			Element templateList = result_doc.createElement("templateList");
 			StringBuilder templateListString = new StringBuilder("[");
 
 			NodeList xslTemplateElems = xslDocElem.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "template");
@@ -573,7 +578,7 @@ public class DebugService extends ServiceRack
 		}
 		else
 		{
-			GSXML.addError(this.doc, result, "File: " + xslFile.getAbsolutePath() + " does not exist");
+			GSXML.addError(result, "File: " + xslFile.getAbsolutePath() + " does not exist");
 			return result;
 		}
 
@@ -582,11 +587,12 @@ public class DebugService extends ServiceRack
 
 	protected Element processGetXSLTFilesForCollection(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, GET_XSLT_FILES_FOR_COLLECTION);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, GET_XSLT_FILES_FOR_COLLECTION);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, GET_XSLT_FILES_FOR_COLLECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, GET_XSLT_FILES_FOR_COLLECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -602,7 +608,7 @@ public class DebugService extends ServiceRack
 
 		if (!found)
 		{
-			GSXML.addError(this.doc, result, "This user does not have the required permissions to perform this action.");
+			GSXML.addError(result, "This user does not have the required permissions to perform this action.");
 			return result;
 		}
 
@@ -611,7 +617,7 @@ public class DebugService extends ServiceRack
 
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, GET_TEMPLATE_FROM_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, GET_TEMPLATE_FROM_XML_FILE + ": No param list specified", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -621,7 +627,7 @@ public class DebugService extends ServiceRack
 		String siteName = (String) params.get("siteName");
 		String collectionName = (String) params.get("collectionName");
 
-		Element fileList = this.doc.createElement("fileListJSON");
+		Element fileList = result_doc.createElement("fileListJSON");
 		StringBuilder fileListString = new StringBuilder("[");
 
 		String[] placesToCheck = new String[] { GlobalProperties.getGSDL3Home() + File.separator + "interfaces" + File.separator + interfaceName + File.separator + "transform", //INTERFACE FILE PATH

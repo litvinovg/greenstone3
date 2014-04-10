@@ -161,8 +161,9 @@ public class MapSearch
     /** Process a map query */
     protected Element processTextQuery(Element request) 
     {
+      Document result_doc = XMLConverter.newDOM();
 	// Create a new (empty) result message
-	Element result = doc.createElement(GSXML.RESPONSE_ELEM);
+	Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 	result.setAttribute(GSXML.FROM_ATT, QUERY_SERVICE);
 	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -336,19 +337,19 @@ public class MapSearch
 	    tempList.add(tempListArray[tla]);
 
 	// Create a metadata list to store information about the query results
-	Element metadata_list = doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER); 
+	Element metadata_list = result_doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER); 
 	result.appendChild(metadata_list);
 			
 	// Add a metadata element specifying the number of matching documents
-	GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", "" + totalDocs);
-	GSXML.addMetadata(this.doc, metadata_list, "numDocsReturned", ""+totalDocs);
+	GSXML.addMetadata(metadata_list, "numDocsMatched", "" + totalDocs);
+	GSXML.addMetadata(metadata_list, "numDocsReturned", ""+totalDocs);
        	// Create a document list to store the matching documents, and add them
-	Element document_list = doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
+	Element document_list = result_doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
 	result.appendChild(document_list);
 	for (int d = 0; d < totalDocs; d++) {
 	    String doc_id = (String)tempList.get(d);
 
-	    Element doc_node = doc.createElement(GSXML.DOC_NODE_ELEM);
+	    Element doc_node = result_doc.createElement(GSXML.DOC_NODE_ELEM);
 	    doc_node.setAttribute(GSXML.NODE_ID_ATT, doc_id);
 	    doc_node.setAttribute(GSXML.NODE_TYPE_ATT, "thumbnail");
 	    doc_node.setAttribute(GSXML.DOC_TYPE_ATT, "map");
@@ -356,14 +357,14 @@ public class MapSearch
 	}
 			
 	// Create a term list to store the term information, and add it
-	Element term_list = doc.createElement(GSXML.TERM_ELEM+GSXML.LIST_MODIFIER);
+	Element term_list = result_doc.createElement(GSXML.TERM_ELEM+GSXML.LIST_MODIFIER);
 	result.appendChild(term_list);	
 	
 
 	for (int t=0; t<words; t++){
 	    String term = terms[t];
 	
-	    Element term_elem = doc.createElement(GSXML.TERM_ELEM);
+	    Element term_elem = result_doc.createElement(GSXML.TERM_ELEM);
   	    term_elem.setAttribute(GSXML.NAME_ATT, term);
   	    term_elem.setAttribute(FREQ_ATT, "" + terms_freq[t]);
 

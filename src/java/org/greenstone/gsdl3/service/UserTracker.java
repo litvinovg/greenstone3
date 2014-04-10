@@ -8,7 +8,9 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.DerbyWrapper;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
 import org.greenstone.util.GlobalProperties;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class UserTracker extends ServiceRack
@@ -37,7 +39,7 @@ public class UserTracker extends ServiceRack
 
 		for (int i = 0; i < services.length; i++)
 		{
-			Element service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 			service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			service.setAttribute(GSXML.NAME_ATT, services[i]);
 			this.short_service_info.appendChild(service);
@@ -46,13 +48,13 @@ public class UserTracker extends ServiceRack
 		return true;
 	}
 
-	protected Element getServiceDescription(String service_id, String lang, String subset)
+	protected Element getServiceDescription(Document doc, String service_id, String lang, String subset)
 	{
 		for (int i = 0; i < services.length; i++)
 		{
 			if (service_id.equals(services[i]))
 			{
-				Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+				Element service_elem = doc.createElement(GSXML.SERVICE_ELEM);
 				service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 				service_elem.setAttribute(GSXML.NAME_ATT, services[i]);
 				return service_elem;
@@ -64,12 +66,13 @@ public class UserTracker extends ServiceRack
 
 	protected synchronized Element processRecordUserAction(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, RECORD_USER_ACTION);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, RECORD_USER_ACTION);
 
 		Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (paramList == null)
 		{
-			GSXML.addError(this.doc, result, "Request has no parameter list");
+			GSXML.addError(result, "Request has no parameter list");
 			return result;
 		}
 
@@ -89,14 +92,15 @@ public class UserTracker extends ServiceRack
 
 	protected synchronized Element processGetActivityOnPage(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, GET_ACTIVITY_ON_PAGE);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, GET_ACTIVITY_ON_PAGE);
 		try
 		{
 
 			Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			if (paramList == null)
 			{
-				GSXML.addError(this.doc, result, "Request has no parameter list");
+				GSXML.addError(result, "Request has no parameter list");
 				return result;
 			}
 
@@ -108,10 +112,10 @@ public class UserTracker extends ServiceRack
 			DerbyWrapper database = new DerbyWrapper(GlobalProperties.getGSDL3Home() + File.separatorChar + "etc" + File.separatorChar + "usersDB");
 			ArrayList<HashMap<String, String>> userActions = database.getMostRecentUserActions(site, collection, oid);
 
-			Element userList = this.doc.createElement("userList");
+			Element userList = result_doc.createElement("userList");
 			for (HashMap<String, String> userAction : userActions)
 			{
-				Element user = this.doc.createElement("user");
+				Element user = result_doc.createElement("user");
 				user.setAttribute("username", userAction.get("username"));
 				user.setAttribute("action", userAction.get("action"));
 				userList.appendChild(user);

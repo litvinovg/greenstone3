@@ -28,7 +28,10 @@ public class DefaultReceptionist extends TransformingReceptionist
 	protected void addExtraInfo(Element page)
 	{
 		super.addExtraInfo(page);
-
+		// the document for the page
+		Document doc = page.getOwnerDocument();
+		// a new document to create messages to send to MR
+		Document msg_doc = XMLConverter.newDOM();
 		Element page_request = (Element) GSXML.getChildByTagName(page, GSXML.PAGE_REQUEST_ELEM);
 		// if it is a system request, then we don't bother with this.
 		String action = page_request.getAttribute(GSXML.ACTION_ATT);
@@ -69,7 +72,7 @@ public class DefaultReceptionist extends TransformingReceptionist
 		Element page_response = (Element) GSXML.getChildByTagName(page, GSXML.PAGE_RESPONSE_ELEM);
 		if (this.language_list != null)
 		{
-			page_response.appendChild(this.language_list);
+		  page_response.appendChild(doc.importNode(this.language_list, true));
 		}
 		Element coll_description = (Element) GSXML.getChildByTagName(page_response, GSXML.COLLECTION_ELEM);
 		if (coll_description == null)
@@ -79,10 +82,11 @@ public class DefaultReceptionist extends TransformingReceptionist
 		}
 		if (coll_description == null)
 		{
-
+		  logger.debug("getting the coll description");
 			// we dont have one yet - get it
-			Element coll_about_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element coll_about_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, coll_name, userContext);
+
+			Element coll_about_message = msg_doc.createElement(GSXML.MESSAGE_ELEM);
+			Element coll_about_request = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_DESCRIBE, coll_name, userContext);
 			coll_about_message.appendChild(coll_about_request);
 
 			Node coll_about_response_message = this.mr.process(coll_about_message);
@@ -103,10 +107,11 @@ public class DefaultReceptionist extends TransformingReceptionist
 				return;
 			}
 			// have found one, append it to the page response
-			coll_description = (Element) this.doc.importNode(coll_description, true);
+			coll_description = (Element) doc.importNode(coll_description, true);
 			page_response.appendChild(coll_description);
 			get_service_description = true;
 		}
+		
 
 		// have got a coll description
 		// now get the dispay info for the services
@@ -150,13 +155,13 @@ public class DefaultReceptionist extends TransformingReceptionist
 		// if get here, we need to get the service descriptions
 
 		// we will send all the requests in a single message
-		Element info_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element info_message = msg_doc.createElement(GSXML.MESSAGE_ELEM);
 		for (int i = 0; i < services.getLength(); i++)
 		{
 			Element c = (Element) services.item(i);
 			String name = c.getAttribute(GSXML.NAME_ATT);
 			String address = GSPath.appendLink(coll_name, name);
-			Element info_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, address, userContext);
+			Element info_request = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_DESCRIBE, address, userContext);
 			//Element req_param_list = this.doc.createElement(GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 			//req_param_list.appendChild(GSXML.createParameter(this.doc, GSXML.SUBSET_PARAM, GSXML.DISPLAY_TEXT_ELEM+GSXML.LIST_MODIFIER));
 			//info_request.appendChild(req_param_list);

@@ -38,6 +38,7 @@ import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.OAIXML;
 import org.greenstone.gsdl3.util.SimpleMacroResolver;
 import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
 import org.greenstone.gsdl3.util.XMLTransformer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -94,7 +95,7 @@ public class Collection extends ServiceCluster
 	public Collection()
 	{
 		super();
-		this.description = this.doc.createElement(GSXML.COLLECTION_ELEM);
+		this.description = this.desc_doc.createElement(GSXML.COLLECTION_ELEM);
 	}
 
 	/**
@@ -462,7 +463,7 @@ public class Collection extends ServiceCluster
 			return configureServiceRacks(coll_config_elem, build_config_elem);
 		}
 
-		if (subset.equals(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER) || subset.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER) || subset.equals("libraryParamList"))
+		if (subset.equals(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER) || subset.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER) || subset.equals(GSXML.LIBRARY_PARAM_ELEM+GSXML.LIST_MODIFIER))
 		{
 			configureLocalData(coll_config_elem);
 			configureLocalData(build_config_elem);
@@ -481,36 +482,37 @@ public class Collection extends ServiceCluster
 	 *            - the request Element- <request>
 	 * @return the result Element - should be <response>
 	 */
-	protected Element processMessage(Element request)
+  protected Element processMessage(Document result_doc, Element request)
 	{
 		String type = request.getAttribute(GSXML.TYPE_ATT);
 		if (type.equals(GSXML.REQUEST_TYPE_FORMAT_STRING))
 		{
-			return processFormatStringRequest(request);
+		  return processFormatStringRequest(result_doc, request);
 		}
 		else if (type.equals(GSXML.REQUEST_TYPE_SECURITY))
 		{
-			return processSecurityRequest(request);
+		  return processSecurityRequest(result_doc, request);
 		}
 		else if (type.equals(GSXML.REQUEST_TYPE_FORMAT))
 		{
-			Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+
+			Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
 			response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
 			response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_FORMAT);
 			if (_globalFormat != null)
 			{
-				response.appendChild(this.doc.importNode(_globalFormat, true));
+				response.appendChild(result_doc.importNode(_globalFormat, true));
 			}
 			return response;
 		}
 		// unknown type
-		return super.processMessage(request);
+		return super.processMessage(result_doc, request);
 
 	}
 
-	protected Element processSecurityRequest(Element request)
+  protected Element processSecurityRequest(Document result_doc, Element request)
 	{
-		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
 		response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_SECURITY);
 
@@ -522,12 +524,12 @@ public class Collection extends ServiceCluster
 
 		ArrayList<String> groups = getPermittedGroups(oid);
 
-		Element groupList = this.doc.createElement(GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
+		Element groupList = result_doc.createElement(GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
 		response.appendChild(groupList);
 
 		for (String groupName : groups)
 		{
-			Element group = this.doc.createElement(GSXML.GROUP_ELEM);
+			Element group = result_doc.createElement(GSXML.GROUP_ELEM);
 			groupList.appendChild(group);
 			group.setAttribute(GSXML.NAME_ATT, groupName);
 		}
@@ -651,23 +653,24 @@ public class Collection extends ServiceCluster
 
 	protected String getFieldValue(String oid, String fieldName)
 	{
-		Element metadataMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element metadataRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, this.cluster_name + "/DocumentMetadataRetrieve", new UserContext());
+	  Document msg_doc = XMLConverter.newDOM();
+		Element metadataMessage = msg_doc.createElement(GSXML.MESSAGE_ELEM);
+		Element metadataRequest = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_PROCESS, this.cluster_name + "/DocumentMetadataRetrieve", new UserContext());
 		metadataMessage.appendChild(metadataRequest);
 
-		Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element paramList = msg_doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		metadataRequest.appendChild(paramList);
 
-		Element param = this.doc.createElement(GSXML.PARAM_ELEM);
+		Element param = msg_doc.createElement(GSXML.PARAM_ELEM);
 		paramList.appendChild(param);
 
 		param.setAttribute(GSXML.NAME_ATT, "metadata");
 		param.setAttribute(GSXML.VALUE_ATT, fieldName);
 
-		Element docList = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element docList = msg_doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		metadataRequest.appendChild(docList);
 
-		Element doc = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+		Element doc = msg_doc.createElement(GSXML.DOC_NODE_ELEM);
 		docList.appendChild(doc);
 
 		doc.setAttribute(GSXML.NODE_ID_ATT, oid);
@@ -684,9 +687,9 @@ public class Collection extends ServiceCluster
 		return null;
 	}
 
-	protected Element processFormatStringRequest(Element request)
+  protected Element processFormatStringRequest(Document result_doc, Element request)
 	{
-		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_FORMAT_STRING);
 		response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
 
@@ -833,8 +836,6 @@ public class Collection extends ServiceCluster
 				int k;
 				int index;
 				Element elem;
-				// Try importing entire tree to this.doc so we can add and remove children at ease
-				//Node current_node = this.doc.importNode(GSXML.getChildByTagName(config, "CollectionConfig"),true);
 				Node current_node = GSXML.getChildByTagName(config, "CollectionConfig");
 				NodeList current_node_list;
 

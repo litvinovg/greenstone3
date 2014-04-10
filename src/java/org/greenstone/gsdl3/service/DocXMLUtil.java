@@ -24,6 +24,7 @@ import org.greenstone.gsdl3.util.GSDocumentModel;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -81,24 +82,24 @@ public class DocXMLUtil extends ServiceRack
 
 		for (int i = 0; i < services.length; i++)
 		{
-			Element service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 			service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			service.setAttribute(GSXML.NAME_ATT, services[i]);
 			this.short_service_info.appendChild(service);
 		}
 		
-		_GSDM = new GSDocumentModel(this.site_home, this.doc, this.router);
+		_GSDM = new GSDocumentModel(this.site_home, this.router);
 
 		return true;
 	}
 
-	protected Element getServiceDescription(String service_id, String lang, String subset)
+  protected Element getServiceDescription(Document doc, String service_id, String lang, String subset)
 	{
 		for (int i = 0; i < services.length; i++)
 		{
 			if (service_id.equals(services[i]))
 			{
-				Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+				Element service_elem = doc.createElement(GSXML.SERVICE_ELEM);
 				service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 				service_elem.setAttribute(GSXML.NAME_ATT, services[i]);
 				return service_elem;
@@ -114,11 +115,12 @@ public class DocXMLUtil extends ServiceRack
 
 	protected Element processDocXMLCreateEmptyFile(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOC_XML_CREATE_EMPTY_FILE);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOC_XML_CREATE_EMPTY_FILE);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOC_XML_CREATE_EMPTY_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOC_XML_CREATE_EMPTY_FILE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -143,11 +145,12 @@ public class DocXMLUtil extends ServiceRack
 
 	protected Element processDocXMLGetMetadata(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOC_XML_GET_METADATA);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOC_XML_GET_METADATA);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOC_XML_GET_METADATA + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOC_XML_GET_METADATA + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -170,7 +173,7 @@ public class DocXMLUtil extends ServiceRack
 			
 			for(Element metadataValue : metadataValues)
 			{
-				Element metadataElem = this.doc.createElement(GSXML.METADATA_ELEM);
+				Element metadataElem = result_doc.createElement(GSXML.METADATA_ELEM);
 				metadataElem.setAttribute(GSXML.NAME_ATT, metadataName);
 				metadataElem.setAttribute(GSXML.VALUE_ATT, metadataValue.getFirstChild().getNodeValue());
 				result.appendChild(metadataElem);
@@ -182,11 +185,12 @@ public class DocXMLUtil extends ServiceRack
 
 	protected Element processDocXMLSetMetadata(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOC_XML_SET_METADATA);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOC_XML_SET_METADATA);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOC_XML_SET_METADATA + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOC_XML_SET_METADATA + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -231,7 +235,7 @@ public class DocXMLUtil extends ServiceRack
 				}
 				catch(Exception ex)
 				{
-					GSXML.addError(this.doc, result, DOC_XML_SET_METADATA + ": Error converting the position attribute to an integer", GSXML.ERROR_TYPE_SYNTAX);
+					GSXML.addError(result, DOC_XML_SET_METADATA + ": Error converting the position attribute to an integer", GSXML.ERROR_TYPE_SYNTAX);
 					return result;
 				}
 				_GSDM.documentXMLSetMetadata(oid, collection, metadataName, newMetadataValue, pos, op, userContext);
@@ -251,7 +255,7 @@ public class DocXMLUtil extends ServiceRack
 			}
 			else
 			{
-				GSXML.addError(this.doc, result, DOC_XML_SET_METADATA + ": A position or previous value was not given", GSXML.ERROR_TYPE_SYNTAX);
+				GSXML.addError(result, DOC_XML_SET_METADATA + ": A position or previous value was not given", GSXML.ERROR_TYPE_SYNTAX);
 				return result;
 			}
 		}
@@ -261,11 +265,12 @@ public class DocXMLUtil extends ServiceRack
 	
 	protected Element processDocXMLCreateSection(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOC_XML_CREATE_SECTION);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOC_XML_CREATE_SECTION);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOC_XML_CREATE_SECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOC_XML_CREATE_SECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -290,11 +295,12 @@ public class DocXMLUtil extends ServiceRack
 	
 	protected Element processDocXMLDeleteSection(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOC_XML_DELETE_SECTION);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOC_XML_DELETE_SECTION);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOC_XML_DELETE_SECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOC_XML_DELETE_SECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -319,11 +325,12 @@ public class DocXMLUtil extends ServiceRack
 	
 	protected Element processDocXMLGetSection(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOC_XML_GET_SECTION);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOC_XML_GET_SECTION);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOC_XML_GET_SECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOC_XML_GET_SECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -348,11 +355,12 @@ public class DocXMLUtil extends ServiceRack
 
 	protected Element processDocXMLSetSection(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOC_XML_SET_SECTION);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOC_XML_SET_SECTION);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOC_XML_SET_SECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOC_XML_SET_SECTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -393,11 +401,12 @@ public class DocXMLUtil extends ServiceRack
 
 	protected Element processDocXMLGetText(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOC_XML_GET_TEXT);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOC_XML_GET_TEXT);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOC_XML_GET_TEXT + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOC_XML_GET_TEXT + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -419,12 +428,12 @@ public class DocXMLUtil extends ServiceRack
 			
 			if (content == null)
 			{
-				result.appendChild(this.doc.createElement(GSXML.DOCXML_CONTENT_ELEM));
+				result.appendChild(result_doc.createElement(GSXML.DOCXML_CONTENT_ELEM));
 			}
 			else
 			{
-				Element contentElem = this.doc.createElement(GSXML.DOCXML_CONTENT_ELEM);
-				Node textNode = this.doc.createTextNode(content);
+				Element contentElem = result_doc.createElement(GSXML.DOCXML_CONTENT_ELEM);
+				Node textNode = result_doc.createTextNode(content);
 				contentElem.appendChild(textNode);
 				result.appendChild(contentElem); 
 			}
@@ -435,11 +444,12 @@ public class DocXMLUtil extends ServiceRack
 
 	protected Element processDocXMLSetText(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOC_XML_SET_TEXT);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOC_XML_SET_TEXT);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOC_XML_SET_TEXT + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOC_XML_SET_TEXT + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 

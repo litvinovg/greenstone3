@@ -77,7 +77,7 @@ public class SOAPServerlocalsite
 	    }
 	    Element new_req = GSXML.duplicateWithNewName(req.getOwnerDocument(), req, tag_name, true);
 	    Node n = mr.process(new_req);
-	    Element r = XMLConverter.nodeToElement(n);
+	    Element r = GSXML.nodeToElement(n);
 	    // add the namespace back on
 	    //Element new_res = r;
 	    //if (!namespace.equals("")) {

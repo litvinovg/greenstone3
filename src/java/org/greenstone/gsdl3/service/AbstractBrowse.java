@@ -28,6 +28,8 @@ import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.MacroResolver;
 import org.greenstone.gsdl3.util.OID;
+import org.greenstone.gsdl3.util.XMLConverter;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -112,26 +114,26 @@ public abstract class AbstractBrowse extends ServiceRack
 		extractExtraClassifierInfo(info, extra_info);
 
 		// short_service_info_ - the browse one
-		Element cb_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element cb_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		cb_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_BROWSE);
 		cb_service.setAttribute(GSXML.NAME_ATT, CLASSIFIER_SERVICE);
 		this.short_service_info.appendChild(cb_service);
 
 		// metadata retrieval for the browsing  
-		Element cbmr_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element cbmr_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		cbmr_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 		cbmr_service.setAttribute(GSXML.NAME_ATT, CLASSIFIER_METADATA_SERVICE);
 		this.short_service_info.appendChild(cbmr_service);
 
 		// the format info
-		Element cb_format_info = this.doc.createElement(GSXML.FORMAT_ELEM);
+		Element cb_format_info = this.desc_doc.createElement(GSXML.FORMAT_ELEM);
 		boolean format_found = false;
 
 		// try the default format first
 		Element def_format = (Element) GSXML.getChildByTagName(info, GSXML.FORMAT_ELEM);
 		if (def_format != null)
 		{
-			cb_format_info.appendChild(GSXML.duplicateWithNewName(this.doc, def_format, GSXML.DEFAULT_ELEM, true));
+			cb_format_info.appendChild(GSXML.duplicateWithNewName(this.desc_doc, def_format, GSXML.DEFAULT_ELEM, true));
 			format_found = true;
 		}
 
@@ -141,7 +143,7 @@ public abstract class AbstractBrowse extends ServiceRack
 		{
 			Element cl = (Element) classifiers.item(i);
 
-			Element new_cl = (Element) this.doc.importNode(cl, false); // just import this node, not the children
+			Element new_cl = (Element) this.desc_doc.importNode(cl, false); // just import this node, not the children
 
 			// get the format info out, and put inside a classifier element
 			Element format_cl = (Element) new_cl.cloneNode(false);
@@ -152,7 +154,7 @@ public abstract class AbstractBrowse extends ServiceRack
 				NodeList elems = format.getChildNodes();
 				for (int j = 0; j < elems.getLength(); j++)
 				{
-					format_cl.appendChild(this.doc.importNode(elems.item(j), true));
+					format_cl.appendChild(this.desc_doc.importNode(elems.item(j), true));
 				}
 				cb_format_info.appendChild(format_cl);
 				format_found = true;
@@ -183,12 +185,12 @@ public abstract class AbstractBrowse extends ServiceRack
 		}
 
 		// Base line for document (might be overriden by sub-classes)
-		gs_doc = new BasicDocument(this.doc, this.default_document_type);
+		gs_doc = new BasicDocument(this.default_document_type);
 
 		return true;
 	}
 
-	protected Element getServiceDescription(String service_id, String lang, String subset)
+  protected Element getServiceDescription(Document doc, String service_id, String lang, String subset)
 	{
 
 		if (service_id.equals(CLASSIFIER_SERVICE))
@@ -201,19 +203,19 @@ public abstract class AbstractBrowse extends ServiceRack
 				return null;
 			}
 
-			Element cb_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element cb_service = doc.createElement(GSXML.SERVICE_ELEM);
 			cb_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_BROWSE);
 			cb_service.setAttribute(GSXML.NAME_ATT, CLASSIFIER_SERVICE);
-			cb_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_NAME, getTextString(CLASSIFIER_SERVICE + ".name", lang)));
-			cb_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getTextString(CLASSIFIER_SERVICE + ".description", lang)));
+			cb_service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_NAME, getTextString(CLASSIFIER_SERVICE + ".name", lang)));
+			cb_service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getTextString(CLASSIFIER_SERVICE + ".description", lang)));
 
-			Element cl_list = this.doc.createElement(GSXML.CLASSIFIER_ELEM + GSXML.LIST_MODIFIER);
+			Element cl_list = doc.createElement(GSXML.CLASSIFIER_ELEM + GSXML.LIST_MODIFIER);
 			cb_service.appendChild(cl_list);
 			NodeList classifiers = class_list.getElementsByTagName(GSXML.CLASSIFIER_ELEM);
 			for (int i = 0; i < classifiers.getLength(); i++)
 			{
 				Element cl = (Element) classifiers.item(i);
-				Element new_cl = (Element) this.doc.importNode(cl, false); // just import this node, not the children
+				Element new_cl = (Element) doc.importNode(cl, false); // just import this node, not the children
 
 				//String content = cl.getAttribute(GSXML.CLASSIFIER_CONTENT_ATT);
 
@@ -235,7 +237,7 @@ public abstract class AbstractBrowse extends ServiceRack
 					text = content;
 				}
 
-				Element cl_name = GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_NAME, text);
+				Element cl_name = GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_NAME, text);
 				new_cl.appendChild(cl_name);
 
 				// description
@@ -247,7 +249,7 @@ public abstract class AbstractBrowse extends ServiceRack
 				}
 				String[] array = { meta_name };
 				String description = getTextString("ClassifierBrowse.classifier_help", lang, array);
-				Element cl_desc = GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_DESCRIPTION, description);
+				Element cl_desc = GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_DESCRIPTION, description);
 				new_cl.appendChild(cl_desc);
 
 			}
@@ -259,7 +261,7 @@ public abstract class AbstractBrowse extends ServiceRack
 		if (service_id.equals(CLASSIFIER_METADATA_SERVICE))
 		{
 
-			Element cbmr_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element cbmr_service = doc.createElement(GSXML.SERVICE_ELEM);
 			cbmr_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			cbmr_service.setAttribute(GSXML.NAME_ATT, CLASSIFIER_METADATA_SERVICE);
 			return cbmr_service;
@@ -347,7 +349,8 @@ public abstract class AbstractBrowse extends ServiceRack
 	{
 
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, CLASSIFIER_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -423,7 +426,7 @@ public abstract class AbstractBrowse extends ServiceRack
 			want_children = false;
 
 		// the node list to hold the results
-		Element node_list = this.doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element node_list = result_doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(node_list);
 
 		// Get the nodes
@@ -431,7 +434,7 @@ public abstract class AbstractBrowse extends ServiceRack
 		for (int i = 0; i < node_ids.length; i++)
 		{
 			// Add the document to the list
-			Element node = this.doc.createElement(GSXML.CLASS_NODE_ELEM);
+			Element node = result_doc.createElement(GSXML.CLASS_NODE_ELEM);
 			node_list.appendChild(node);
 
 			String node_id = node_ids[i];
@@ -449,7 +452,7 @@ public abstract class AbstractBrowse extends ServiceRack
 
 			if (want_info)
 			{
-				Element node_info_elem = this.doc.createElement("nodeStructureInfo");
+				Element node_info_elem = result_doc.createElement("nodeStructureInfo");
 				node.appendChild(node_info_elem);
 
 				for (int j = 0; j < info_types.size(); j++)
@@ -458,7 +461,7 @@ public abstract class AbstractBrowse extends ServiceRack
 					String info_value = getStructureInfo(node_id, info_type);
 					if (info_value != null)
 					{
-						Element info_elem = this.doc.createElement("info");
+						Element info_elem = result_doc.createElement("info");
 						info_elem.setAttribute(GSXML.NAME_ATT, info_type);
 						info_elem.setAttribute(GSXML.VALUE_ATT, info_value);
 						node_info_elem.appendChild(info_elem);
@@ -469,20 +472,20 @@ public abstract class AbstractBrowse extends ServiceRack
 			if (want_structure)
 			{
 				// all structure info goes into a nodeStructure elem
-				Element structure_elem = this.doc.createElement(GSXML.NODE_STRUCTURE_ELEM);
+				Element structure_elem = result_doc.createElement(GSXML.NODE_STRUCTURE_ELEM);
 				node.appendChild(structure_elem);
 
 				if (want_entire_structure)
 				{
 					String root_id = getRootId(node_id);
-					Element root_node = createClassifierNode(root_id); //, true, false);
+					Element root_node = createClassifierNode(result_doc, root_id); //, true, false);
 					addDescendants(root_node, root_id, true);
 					structure_elem.appendChild(root_node);
 					continue; // with the next document, we dont need to do any more here
 				}
 
 				// Add the requested structure information
-				Element base_node = createClassifierNode(node_id); //, false, false);
+				Element base_node = createClassifierNode(result_doc, node_id); //, false, false);
 
 				//Ancestors: continually add parent nodes until the root is reached
 				Element top_node = base_node; // the top node so far
@@ -495,7 +498,7 @@ public abstract class AbstractBrowse extends ServiceRack
 						//Element parent = getParent(current_id);
 						if (parent_id == null)
 							break; // no parent
-						Element parent_node = createClassifierNode(parent_id);
+						Element parent_node = createClassifierNode(result_doc, parent_id);
 						parent_node.appendChild(top_node);
 						current_id = parent_id;//.getAttribute(GSXML.NODE_ID_ATT);
 						top_node = parent_node;
@@ -507,7 +510,7 @@ public abstract class AbstractBrowse extends ServiceRack
 					String parent_id = getParentId(node_id);
 					if (parent_id != null)
 					{
-						Element parent_node = createClassifierNode(parent_id);
+					  Element parent_node = createClassifierNode(result_doc, parent_id);
 						parent_node.appendChild(base_node);
 						top_node = parent_node;
 					}
@@ -566,7 +569,8 @@ public abstract class AbstractBrowse extends ServiceRack
 	{
 
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 		result.setAttribute(GSXML.FROM_ATT, CLASSIFIER_METADATA_SERVICE);
@@ -601,7 +605,7 @@ public abstract class AbstractBrowse extends ServiceRack
 			param = (Element) param.getNextSibling();
 		}
 
-		Element node_list = this.doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element node_list = result_doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(node_list);
 
 		// Get the nodes
@@ -619,7 +623,7 @@ public abstract class AbstractBrowse extends ServiceRack
 			String node_id = request_node.getAttribute(GSXML.NODE_ID_ATT);
 
 			// Add the document to the results list
-			Element new_node = (Element) this.doc.importNode(request_node, false);
+			Element new_node = (Element) result_doc.importNode(request_node, false);
 			node_list.appendChild(new_node);
 
 			if (idNeedsTranslating(node_id))
@@ -631,7 +635,7 @@ public abstract class AbstractBrowse extends ServiceRack
 				continue;
 			}
 
-			Element metadata_list = getMetadataList(node_id, all_metadata, metadata_names_list);
+			Element metadata_list = getMetadataList(result_doc, node_id, all_metadata, metadata_names_list);
 			new_node.appendChild(metadata_list);
 		}
 
@@ -639,9 +643,9 @@ public abstract class AbstractBrowse extends ServiceRack
 	}
 
 	/** Creates a classifier node */
-	protected Element createClassifierNode(String node_id)
+  protected Element createClassifierNode(Document doc, String node_id)
 	{
-		Element node = this.doc.createElement(GSXML.CLASS_NODE_ELEM);
+		Element node = doc.createElement(GSXML.CLASS_NODE_ELEM);
 		node.setAttribute(GSXML.NODE_ID_ATT, node_id);
 		node.setAttribute(GSXML.CHILD_TYPE_ATT, getChildType(node_id));
 		return node;
@@ -651,9 +655,9 @@ public abstract class AbstractBrowse extends ServiceRack
 	 * create an element to go into the structure. A node element has the form
 	 * <docNode nodeId='xxx' nodeType='leaf' docType='hierarchy'/>
 	 */
-	protected Element createDocNode(String node_id)
+  protected Element createDocNode(Document doc, String node_id)
 	{
-	  return this.gs_doc.createDocNode(node_id);
+	  return this.gs_doc.createDocNode(doc, node_id);
 	}
 
 	/**
@@ -674,17 +678,18 @@ public abstract class AbstractBrowse extends ServiceRack
 		ArrayList<String> child_ids = getChildrenIds(node_id);
 		if (child_ids == null)
 			return;
+		Document doc = node.getOwnerDocument();
 		for (int i = 0; i < child_ids.size(); i++)
 		{
 			String child_id = child_ids.get(i);
 			Element child_elem;
 			if (isDocumentId(child_id))
 			{
-				child_elem = createDocNode(child_id);
+			  child_elem = createDocNode(doc, child_id);
 			}
 			else
 			{
-				child_elem = createClassifierNode(child_id);
+			  child_elem = createClassifierNode(doc, child_id);
 			}
 			node.appendChild(child_elem);
 			if (recursive)
@@ -783,7 +788,7 @@ public abstract class AbstractBrowse extends ServiceRack
 	 * name="xxx">value</metadata></metadataList> if all_metadata is true,
 	 * returns all available metadata, otherwise just returns requested metadata
 	 */
-	abstract protected Element getMetadataList(String node_id, boolean all_metadata, ArrayList<String> metadata_names);
+  abstract protected Element getMetadataList(Document doc, String node_id, boolean all_metadata, ArrayList<String> metadata_names);
 
 	/**
 	 * get the particular metadata (identified by the metadata name) for the

@@ -27,6 +27,7 @@ import org.greenstone.gsdl3.util.AbstractBasicDocument;
 import org.greenstone.gsdl3.util.BasicDocument;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -105,7 +106,7 @@ public abstract class AbstractSearch extends ServiceRack
 		// => for now just has id and type. the name (lang dependent)
 		//    will be added in if the list is requested.
 
-		Element tq_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element tq_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		tq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
 		tq_service.setAttribute(GSXML.NAME_ATT, QUERY_SERVICE);
 		this.short_service_info.appendChild(tq_service);
@@ -141,7 +142,7 @@ public abstract class AbstractSearch extends ServiceRack
 			//
 		if (format != null)
 		{
-			this.format_info_map.put(QUERY_SERVICE, this.doc.importNode(format, true));
+			this.format_info_map.put(QUERY_SERVICE, this.desc_doc.importNode(format, true));
 		}
 
 		// look for document display format - for documentType
@@ -162,7 +163,7 @@ public abstract class AbstractSearch extends ServiceRack
 		}
 
 		// Base line for document (might be overriden by sub-classes)
-		gs_doc = new BasicDocument(this.doc, this.default_document_type);
+		gs_doc = new BasicDocument(this.default_document_type);
 
 		return true;
 	}
@@ -183,25 +184,25 @@ public abstract class AbstractSearch extends ServiceRack
 	 * returns a basic description for QUERY_SERVICE. If a subclass provides
 	 * other services they need to provide their own descriptions
 	 */
-	protected Element getServiceDescription(String service, String lang, String subset)
+  protected Element getServiceDescription(Document doc, String service, String lang, String subset)
 	{
 		if (!service.equals(QUERY_SERVICE))
 		{
 			return null;
 		}
 
-		Element tq_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element tq_service = doc.createElement(GSXML.SERVICE_ELEM);
 		tq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
 		tq_service.setAttribute(GSXML.NAME_ATT, QUERY_SERVICE);
 		if (subset == null || subset.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER))
 		{
-			tq_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_NAME, getServiceName(QUERY_SERVICE, lang)));
-			tq_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_SUBMIT, getServiceSubmit(QUERY_SERVICE, lang)));
-			tq_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getServiceDescription(QUERY_SERVICE, lang)));
+			tq_service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_NAME, getServiceName(QUERY_SERVICE, lang)));
+			tq_service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_SUBMIT, getServiceSubmit(QUERY_SERVICE, lang)));
+			tq_service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getServiceDescription(QUERY_SERVICE, lang)));
 		}
 		if (subset == null || subset.equals(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER))
 		{
-			Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			addCustomQueryParams(param_list, lang);
 			addStandardQueryParams(param_list, lang);
 			tq_service.appendChild(param_list);
@@ -281,6 +282,7 @@ public abstract class AbstractSearch extends ServiceRack
 
 	protected boolean createParameterChain(String name, Element param_list, String lang, String default_value)
 	{
+	  Document doc = param_list.getOwnerDocument();
 		Element param = null;
 		String param_default = default_value;
 		if (default_value == null) {
@@ -289,7 +291,7 @@ public abstract class AbstractSearch extends ServiceRack
 		}
 		if (name.equals(QUERY_PARAM) || name.equals(RAW_PARAM))
 		{
-			param = GSXML.createParameterDescription(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_STRING, param_default, null, null);
+			param = GSXML.createParameterDescription(doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_STRING, param_default, null, null);
 			param_list.appendChild(param);
 			return true;
 		}
@@ -308,26 +310,26 @@ public abstract class AbstractSearch extends ServiceRack
 			{
 				param_default = this.default_index;
 			}
-			param = GSXML.createParameterDescription2(this.doc, INDEX_PARAM, getTextString("param." + INDEX_PARAM, lang), param_type, param_default, index_ids, index_names);
+			param = GSXML.createParameterDescription2(doc, INDEX_PARAM, getTextString("param." + INDEX_PARAM, lang), param_type, param_default, index_ids, index_names);
 			param_list.appendChild(param);
 			return true;
 		}
 		else if (name.equals(MAXDOCS_PARAM))
 		{
-			param = GSXML.createParameterDescription(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_INTEGER, param_default, null, null);
+			param = GSXML.createParameterDescription(doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_INTEGER, param_default, null, null);
 			param_list.appendChild(param);
 			return true;
 		}
 		else if (name.equals(HITS_PER_PAGE_PARAM))
 		{
-			param = GSXML.createParameterDescription(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_INTEGER, param_default, null, null);
+			param = GSXML.createParameterDescription(doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_INTEGER, param_default, null, null);
 			param_list.appendChild(param);
 			return true;
 		}
 		else if (name.equals(START_PAGE_PARAM))
 		{
 			// start page - set to 1 for the search page
-			param = GSXML.createParameterDescription(this.doc, START_PAGE_PARAM, "", GSXML.PARAM_TYPE_INVISIBLE, param_default, null, null);
+			param = GSXML.createParameterDescription(doc, START_PAGE_PARAM, "", GSXML.PARAM_TYPE_INVISIBLE, param_default, null, null);
 			param_list.appendChild(param);
 			return true;
 		}
@@ -342,9 +344,9 @@ public abstract class AbstractSearch extends ServiceRack
 	 * the form <docNode nodeId='xxx' nodeType='leaf' docType='hierarchy'
 	 * rank='0.23'/>
 	 */
-	protected Element createDocNode(String node_id, String rank)
+  protected Element createDocNode(Document doc, String node_id, String rank)
 	{
-		return this.gs_doc.createDocNode(node_id, rank);
+	  return this.gs_doc.createDocNode(doc, node_id, rank);
 	}
 
 	/**

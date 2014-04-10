@@ -25,6 +25,8 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.FacetWrapper;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -225,7 +227,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		if (this.simple_form_search)
 		{
 			// set up short_service_info_ - for now just has id and type - name will be added in on the fly
-			Element fq_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element fq_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 			fq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
 			fq_service.setAttribute(GSXML.NAME_ATT, FIELD_QUERY_SERVICE);
 			this.short_service_info.appendChild(fq_service);
@@ -238,7 +240,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 
 		if (this.advanced_form_search)
 		{
-			Element afq_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element afq_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 			afq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
 			afq_service.setAttribute(GSXML.NAME_ATT, ADVANCED_FIELD_QUERY_SERVICE);
 			this.short_service_info.appendChild(afq_service);
@@ -251,7 +253,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 
 		if (this.raw_search)
 		{
-			Element rq_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element rq_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 			rq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
 			rq_service.setAttribute(GSXML.NAME_ATT, RAW_QUERY_SERVICE);
 			this.short_service_info.appendChild(rq_service);
@@ -298,28 +300,28 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
       }
     }
   }
-	protected Element getServiceDescription(String service_id, String lang, String subset)
+  protected Element getServiceDescription(Document doc, String service_id, String lang, String subset)
 	{
 		// should we check that the service is actually on offer? presumably we wont get asked for services that we haven't advertised previously.
 
 		if (!service_id.equals(FIELD_QUERY_SERVICE) && !service_id.equals(ADVANCED_FIELD_QUERY_SERVICE) && !service_id.equals(RAW_QUERY_SERVICE))
 		{
-			return super.getServiceDescription(service_id, lang, subset);
+		  return super.getServiceDescription(doc, service_id, lang, subset);
 		}
 
-		Element service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element service = doc.createElement(GSXML.SERVICE_ELEM);
 		service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
 		service.setAttribute(GSXML.NAME_ATT, service_id);
 		if (subset == null || subset.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER))
 		{
-			service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_NAME, getTextString(service_id + ".name", lang)));
-			service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_SUBMIT, getTextString(service_id + ".submit", lang)));
-			service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getTextString(service_id + ".description", lang)));
+			service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_NAME, getTextString(service_id + ".name", lang)));
+			service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_SUBMIT, getTextString(service_id + ".submit", lang)));
+			service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getTextString(service_id + ".description", lang)));
 
 		}
 		if (subset == null || subset.equals(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER))
 		{
-			Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			service.appendChild(param_list);
 			if (service_id.equals(FIELD_QUERY_SERVICE))
 			{
@@ -345,7 +347,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				// text box, field
 				Element multiparam = null;
 				Element param = null;
-				multiparam = GSXML.createParameterDescription(this.doc, SIMPLE_FIELD_PARAM, "", GSXML.PARAM_TYPE_MULTI, null, null, null);
+				multiparam = GSXML.createParameterDescription(doc, SIMPLE_FIELD_PARAM, "", GSXML.PARAM_TYPE_MULTI, null, null, null);
 				multiparam.setAttribute("occurs", "4");
 				param_list.appendChild(multiparam);
 
@@ -375,7 +377,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				Element multiparam = null;
 				Element param = null;
 
-				multiparam = GSXML.createParameterDescription(this.doc, ADVANCED_FIELD_PARAM, "", GSXML.PARAM_TYPE_MULTI, null, null, null);
+				multiparam = GSXML.createParameterDescription(doc, ADVANCED_FIELD_PARAM, "", GSXML.PARAM_TYPE_MULTI, null, null, null);
 				multiparam.setAttribute("occurs", "4");
 				param_list.appendChild(multiparam);
 
@@ -430,6 +432,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	/** create a param and add to the list */
 	protected void createParameter(String name, Element param_list, String lang)
 	{
+	  Document doc = param_list.getOwnerDocument();
 		Element param = null;
 		String param_default = paramDefaults.get(name);
 		if (name.equals(LEVEL_PARAM))
@@ -440,14 +443,14 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			if (level_ids.size() > 1)
 			{
 				// the first one is the default
-				//param = GSXML.createParameterDescription2(this.doc, LEVEL_PARAM, getTextString("param."+LEVEL_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, (String)level_ids.get(0), level_ids, level_names);
-				param = GSXML.createParameterDescription2(this.doc, LEVEL_PARAM, getTextString("param." + LEVEL_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, this.default_level, level_ids, level_names);
+				//param = GSXML.createParameterDescription2(doc, LEVEL_PARAM, getTextString("param."+LEVEL_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, (String)level_ids.get(0), level_ids, level_names);
+				param = GSXML.createParameterDescription2(doc, LEVEL_PARAM, getTextString("param." + LEVEL_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, this.default_level, level_ids, level_names);
 			}
 			else
 			{
 				// we need to set the level, but hidden, in case there is an invalid level saved
-				//param = GSXML.createParameterDescription(this.doc, LEVEL_PARAM, "", GSXML.PARAM_TYPE_INVISIBLE, (String)level_ids.get(0), null, null);
-				param = GSXML.createParameterDescription(this.doc, LEVEL_PARAM, "", GSXML.PARAM_TYPE_INVISIBLE, this.default_level, null, null);
+				//param = GSXML.createParameterDescription(doc, LEVEL_PARAM, "", GSXML.PARAM_TYPE_INVISIBLE, (String)level_ids.get(0), null, null);
+				param = GSXML.createParameterDescription(doc, LEVEL_PARAM, "", GSXML.PARAM_TYPE_INVISIBLE, this.default_level, null, null);
 			}
 		}
 		else if (name.equals(RANK_PARAM))
@@ -455,19 +458,19 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			String[] vals1 = { RANK_PARAM_RANK, RANK_PARAM_NONE };
 			String[] vals1_texts = { getTextString("param." + RANK_PARAM + "." + RANK_PARAM_RANK, lang), getTextString("param." + RANK_PARAM + "." + RANK_PARAM_NONE, lang) };
 
-			param = GSXML.createParameterDescription(this.doc, RANK_PARAM, getTextString("param." + RANK_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, vals1, vals1_texts);
+			param = GSXML.createParameterDescription(doc, RANK_PARAM, getTextString("param." + RANK_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, vals1, vals1_texts);
 
 		}
 		else if (name.equals(FIELD_QUERY_PARAM))
 		{
-			param = GSXML.createParameterDescription(this.doc, FIELD_QUERY_PARAM, getTextString("param." + FIELD_QUERY_PARAM, lang), GSXML.PARAM_TYPE_STRING, null, null, null);
+			param = GSXML.createParameterDescription(doc, FIELD_QUERY_PARAM, getTextString("param." + FIELD_QUERY_PARAM, lang), GSXML.PARAM_TYPE_STRING, null, null, null);
 
 		}
 		else if (name.equals(FIELD_CASE_PARAM) || name.equals(FIELD_STEM_PARAM) || name.equals(FIELD_ACCENT_PARAM))
 		{
 			String[] bool_ops = { "0", "1" };
 			String[] bool_texts = { getTextString("param.boolean.off", lang, "AbstractTextSearch"), getTextString("param.boolean.on", lang, "AbstractTextSearch") };
-			param = GSXML.createParameterDescription(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_BOOLEAN, param_default, bool_ops, bool_texts);
+			param = GSXML.createParameterDescription(doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_BOOLEAN, param_default, bool_ops, bool_texts);
 
 		}
 		else if (name.equals(FIELD_FIELD_PARAM))
@@ -480,11 +483,11 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			// Fix for http://trac.greenstone.org/ticket/245 "java crash, index out of bounds"
 			// org.greenstone.gsdl3.service.AbstractGS2FieldSearch.createParameter(AbstractGS2FieldSearch.java:362)
 			// Changed from:
-			// param = GSXML.createParameterDescription2(this.doc, name, getTextString("param."+name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, (String)fields.get(0), fields, field_names );
+			// param = GSXML.createParameterDescription2(doc, name, getTextString("param."+name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, (String)fields.get(0), fields, field_names );
 			String default_value = (fields.size() > 0) ? fields.get(0) : null;
 			// don't want to access element 0 if fields.size()==0, and
 			// GSXML.createParameterDescription2 checks for default_value==null condition
-			param = GSXML.createParameterDescription2(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, default_value, fields, field_names);
+			param = GSXML.createParameterDescription2(doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, default_value, fields, field_names);
 
 		}
 		else if (name.equals(FIELD_COMBINE_PARAM))
@@ -493,7 +496,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			String[] vals = { FIELD_COMBINE_PARAM_AND, FIELD_COMBINE_PARAM_OR, FIELD_COMBINE_PARAM_NOT };
 			String[] val_texts = { getTextString("param." + FIELD_COMBINE_PARAM + "." + FIELD_COMBINE_PARAM_AND, lang), getTextString("param." + FIELD_COMBINE_PARAM + "." + FIELD_COMBINE_PARAM_OR, lang), getTextString("param." + FIELD_COMBINE_PARAM + "." + FIELD_COMBINE_PARAM_NOT, lang) };
 
-			param = GSXML.createParameterDescription(this.doc, FIELD_COMBINE_PARAM, "", GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, vals, val_texts);
+			param = GSXML.createParameterDescription(doc, FIELD_COMBINE_PARAM, "", GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, vals, val_texts);
 			param.setAttribute(GSXML.PARAM_IGNORE_POS_ATT, "0");
 		}
 
@@ -595,7 +598,8 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		}
 
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, service_name);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -651,13 +655,13 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 
 		// Create a metadata list to store information about the query results
 		// should we be using metadataList? or something else?
-		Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		Element metadata_list = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(metadata_list);
 
 		// Add a metadata element specifying the number of matching documents
 		long totalDocs = numDocsMatched(query_result);
 
-		GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", "" + totalDocs);
+		GSXML.addMetadata(metadata_list, "numDocsMatched", "" + totalDocs);
 
 		// Create a document list to store the matching documents, and add them
 		String[] docs = getDocIDs(query_result);
@@ -674,24 +678,24 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				docs_returned = (maxdocs < (int) totalDocs ? maxdocs : (int) totalDocs);
 			}
 		}
-		GSXML.addMetadata(this.doc, metadata_list, "numDocsReturned", "" + docs_returned);
+		GSXML.addMetadata(metadata_list, "numDocsReturned", "" + docs_returned);
 
 		// add a metadata item to specify what actual query was done - eg if stuff was stripped out etc. and then we can use the query later, cos we don't know which parameter was the query
-		GSXML.addMetadata(this.doc, metadata_list, "query", query);
+		GSXML.addMetadata(metadata_list, "query", query);
 		if (docs.length > 0)
 		{
-			Element document_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+			Element document_list = result_doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 			result.appendChild(document_list);
 			for (int d = 0; d < docs.length; d++)
 			{
 				String doc_id = internalNum2OID(docs[d]);
-				Element doc_node = createDocNode(doc_id, doc_ranks[d]);
+				Element doc_node = createDocNode(result_doc, doc_id, doc_ranks[d]);
 				document_list.appendChild(doc_node);
 			}
 		}
 
 		// Create a term list to store the term information, and add it
-		Element term_list = this.doc.createElement(GSXML.TERM_ELEM + GSXML.LIST_MODIFIER);
+		Element term_list = result_doc.createElement(GSXML.TERM_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(term_list);
 		addTermInfo(term_list, params, query_result);
 
@@ -700,12 +704,12 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			ArrayList<FacetWrapper> facets = getFacets(query_result);
 			if(facets != null)
 			{
-				Element facet_list = this.doc.createElement(GSXML.FACET_ELEM + GSXML.LIST_MODIFIER);
+				Element facet_list = result_doc.createElement(GSXML.FACET_ELEM + GSXML.LIST_MODIFIER);
 				result.appendChild(facet_list);
 
 				for(FacetWrapper currentFacet : facets)
 				{
-					Element facet_elem = this.doc.createElement(GSXML.FACET_ELEM);
+					Element facet_elem = result_doc.createElement(GSXML.FACET_ELEM);
 					facet_elem.setAttribute(GSXML.NAME_ATT, currentFacet.getName());
 					facet_list.appendChild(facet_elem);
 					
@@ -716,7 +720,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 						long countValue = countMap.get(countName);
 						if(countValue > 0)
 						{
-							Element count_elem = this.doc.createElement(GSXML.COUNT_ELEM);
+							Element count_elem = result_doc.createElement(GSXML.COUNT_ELEM);
 							count_elem.setAttribute(GSXML.NAME_ATT, countName);
 							count_elem.setTextContent("" + countValue);
 

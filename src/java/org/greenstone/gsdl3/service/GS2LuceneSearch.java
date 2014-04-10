@@ -33,6 +33,9 @@ import org.greenstone.LuceneWrapper3.LuceneQueryResult;
 import org.greenstone.gsdl3.util.FacetWrapper;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
@@ -227,6 +230,7 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 	/** add in term info if available */
 	protected boolean addTermInfo(Element term_list, HashMap params, Object query_result)
 	{
+	  Document doc = term_list.getOwnerDocument();
 		String query_level = (String) params.get(LEVEL_PARAM); // the current query level
 
 		Vector terms = ((LuceneQueryResult) query_result).getTerms();
@@ -234,7 +238,7 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 		{
 			LuceneQueryResult.TermInfo term_info = (LuceneQueryResult.TermInfo) terms.get(t);
 
-			Element term_elem = this.doc.createElement(GSXML.TERM_ELEM);
+			Element term_elem = doc.createElement(GSXML.TERM_ELEM);
 			term_elem.setAttribute(GSXML.NAME_ATT, term_info.term_);
 			term_elem.setAttribute(FREQ_ATT, "" + term_info.term_freq_);
 			term_elem.setAttribute(NUM_DOCS_MATCH_ATT, "" + term_info.match_docs_);
@@ -247,7 +251,7 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 		{
 			String stopword = (String) stopwords.get(t);
 
-			Element stopword_elem = this.doc.createElement(GSXML.STOPWORD_ELEM);
+			Element stopword_elem = doc.createElement(GSXML.STOPWORD_ELEM);
 			stopword_elem.setAttribute(GSXML.NAME_ATT, stopword);
 			term_list.appendChild(stopword_elem);
 		}

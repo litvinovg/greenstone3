@@ -186,7 +186,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 			config_params.put(GSConstants.SITE_NAME, site_name);
 		}
 		this.converter = new XMLConverter();
-		this.doc = this.converter.newDOM();
+		this.doc = XMLConverter.newDOM();
 
 		// the receptionist -the servlet will talk to this
 		String recept_name = (String) config.getInitParameter("receptionist_class");

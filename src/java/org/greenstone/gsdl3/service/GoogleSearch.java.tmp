@@ -194,7 +194,7 @@ public class GoogleSearch
 		// only need to do this on the first loop
 		
 		long numdocs_matched = google_result.getEstimatedTotalResultsCount();	    
-		GSXML.addMetadata(this.doc, query_metadata_list, "numDocsMatched", ""+numdocs_matched);
+		GSXML.addMetadata(query_metadata_list, "numDocsMatched", ""+numdocs_matched);
 		
 	    }
 	    GoogleSearchResultElement[] details = google_result.getResultElements();
@@ -209,13 +209,13 @@ public class GoogleSearch
 		String google_title = details[i].getTitle();
 		String google_snippet = details[i].getSnippet();
 		if (google_url !=null) {
-		    GSXML.addMetadata(this.doc, metadata_list, "URL", google_url);
+		    GSXML.addMetadata(metadata_list, "URL", google_url);
 		}
 		if (google_title != null) {
-		    GSXML.addMetadata(this.doc, metadata_list, "Title", google_title);
+		    GSXML.addMetadata(metadata_list, "Title", google_title);
 		}
 		if (google_snippet != null) {
-		    GSXML.addMetadata(this.doc, metadata_list, "Snippet", google_snippet);
+		    GSXML.addMetadata(metadata_list, "Snippet", google_snippet);
 		}
 	    }
 	} // for each loop

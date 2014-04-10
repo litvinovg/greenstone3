@@ -66,7 +66,7 @@ public class IViaRetrieve
     }
         
     /** gets a document by sending a request to iVia, then processes it and creates a documentNode around the text */
-    protected Element getNodeContent(String doc_id, String lang) 
+  protected Element getNodeContent(Document doc, String doc_id, String lang) 
 	throws GSException {
 
 	String url_string = ivia_server_url+"/cgi-bin/view_record?theme=gsdl3&record_id="+doc_id;
@@ -115,7 +115,7 @@ public class IViaRetrieve
 	
 	Element content_element = content_doc.getDocumentElement();
 
-	return (Element)this.doc.importNode(content_element,true);
+	return (Element)doc.importNode(content_element,true);
     }
 	
     /** converts a url from an <a> element into a greenstone suitable one */
@@ -212,13 +212,13 @@ public class IViaRetrieve
 	return null;
     }
     
-    protected Element getMetadataList (String doc_id,
+  protected Element getMetadataList (Document doc, String doc_id,
 				       boolean all_metadata,
 				       ArrayList<String> metadata_names,
 				       String lang) 
 	throws GSException {
 	
-	Element meta_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+	Element meta_list = doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
 
 	// do the query to the iVia server
 	StringBuffer field_list= new StringBuffer();
@@ -248,7 +248,7 @@ public class IViaRetrieve
 		}
 		String name = line.substring(0,col_pos);
 		String value = line.substring(col_pos+2); // includes a space
-		GSXML.addMetadata(this.doc, meta_list, name, value);
+		GSXML.addMetadata(meta_list, name, value);
 	    }
 	} catch (java.net.MalformedURLException e) {
 	    throw new GSException("Malformed URL: "+url_string, GSXML.ERROR_TYPE_SYSTEM);

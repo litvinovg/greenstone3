@@ -12,14 +12,15 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
+ * Service class to proxy IVia
  * 
- * @author Katherine Don
- * @version $Revision$
  */
 
 public class IViaProxy extends ServiceRack
@@ -63,17 +64,17 @@ public class IViaProxy extends ServiceRack
 			logger.error("no url for the iViaServer element");
 			return false;
 		}
-		Element tq_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element tq_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		tq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
 		tq_service.setAttribute(GSXML.NAME_ATT, TEXT_QUERY_SERVICE);
 		this.short_service_info.appendChild(tq_service);
 
-		Element dc_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element dc_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		dc_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 		dc_service.setAttribute(GSXML.NAME_ATT, DOC_CONTENT_SERVICE);
 		this.short_service_info.appendChild(dc_service);
 
-		Element dm_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element dm_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		dm_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 		dm_service.setAttribute(GSXML.NAME_ATT, DOC_META_SERVICE);
 		this.short_service_info.appendChild(dm_service);
@@ -84,7 +85,7 @@ public class IViaProxy extends ServiceRack
 		Element format = (Element) GSXML.getNodeByPath(extra_info, path);
 		if (format != null)
 		{
-			this.format_info_map.put(TEXT_QUERY_SERVICE, this.doc.importNode(format, true));
+			this.format_info_map.put(TEXT_QUERY_SERVICE, this.desc_doc.importNode(format, true));
 		}
 
 		// look for document display format
@@ -92,7 +93,7 @@ public class IViaProxy extends ServiceRack
 		Element display_format = (Element) GSXML.getNodeByPath(extra_info, path);
 		if (display_format != null)
 		{
-			this.format_info_map.put(DOC_CONTENT_SERVICE, this.doc.importNode(display_format, true));
+			this.format_info_map.put(DOC_CONTENT_SERVICE, this.desc_doc.importNode(display_format, true));
 			// shoudl we make a copy?
 		}
 
@@ -100,44 +101,44 @@ public class IViaProxy extends ServiceRack
 
 	}
 
-	protected Element getServiceDescription(String service, String lang, String subset)
+	protected Element getServiceDescription(Document doc, String service, String lang, String subset)
 	{
 
 		if (service.equals(TEXT_QUERY_SERVICE))
 		{
-			Element tq_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element tq_service = doc.createElement(GSXML.SERVICE_ELEM);
 			tq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
 			tq_service.setAttribute(GSXML.NAME_ATT, TEXT_QUERY_SERVICE);
 			if (subset == null || subset.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER))
 			{
-				tq_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_NAME, getTextString(TEXT_QUERY_SERVICE + ".name", lang)));
-				tq_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_SUBMIT, getTextString(TEXT_QUERY_SERVICE + ".submit", lang)));
-				tq_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getTextString(TEXT_QUERY_SERVICE + ".description", lang)));
+				tq_service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_NAME, getTextString(TEXT_QUERY_SERVICE + ".name", lang)));
+				tq_service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_SUBMIT, getTextString(TEXT_QUERY_SERVICE + ".submit", lang)));
+				tq_service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getTextString(TEXT_QUERY_SERVICE + ".description", lang)));
 			}
 			if (subset == null || subset.equals(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER))
 			{
-				Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+				Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 				tq_service.appendChild(param_list);
-				Element param = GSXML.createParameterDescription(this.doc, QUERY_PARAM, getTextString("param." + QUERY_PARAM, lang), GSXML.PARAM_TYPE_STRING, null, null, null);
+				Element param = GSXML.createParameterDescription(doc, QUERY_PARAM, getTextString("param." + QUERY_PARAM, lang), GSXML.PARAM_TYPE_STRING, null, null, null);
 				param_list.appendChild(param);
 				String[] field_ids = { "kw", "au", "su", "ti", "de", "fu" };
 				String[] field_names = { getTextString("param." + FIELD_PARAM + ".kw", lang), getTextString("param." + FIELD_PARAM + ".au", lang), getTextString("param." + FIELD_PARAM + ".su", lang), getTextString("param." + FIELD_PARAM + ".ti", lang), getTextString("param." + FIELD_PARAM + ".de", lang), getTextString("param." + FIELD_PARAM + ".fu", lang) };
 
-				param = GSXML.createParameterDescription(this.doc, FIELD_PARAM, getTextString("param." + FIELD_PARAM, lang), GSXML.PARAM_TYPE_ENUM_MULTI, "kw,au,su,ti,de,fu", field_ids, field_names);
+				param = GSXML.createParameterDescription(doc, FIELD_PARAM, getTextString("param." + FIELD_PARAM, lang), GSXML.PARAM_TYPE_ENUM_MULTI, "kw,au,su,ti,de,fu", field_ids, field_names);
 				param_list.appendChild(param);
 
 				String[] hits_options = { "10", "30", "50" };
-				param = GSXML.createParameterDescription(this.doc, GS_HITS_PARAM, getTextString("param." + GS_HITS_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, "10", hits_options, hits_options);
+				param = GSXML.createParameterDescription(doc, GS_HITS_PARAM, getTextString("param." + GS_HITS_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, "10", hits_options, hits_options);
 				param_list.appendChild(param);
 
-				param = GSXML.createParameterDescription(this.doc, GS_START_PAGE_PARAM, "", GSXML.PARAM_TYPE_INVISIBLE, "1", null, null);
+				param = GSXML.createParameterDescription(doc, GS_START_PAGE_PARAM, "", GSXML.PARAM_TYPE_INVISIBLE, "1", null, null);
 				param_list.appendChild(param);
 			}
 			return tq_service;
 		}
 		if (service.equals(DOC_META_SERVICE))
 		{
-			Element dm_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element dm_service = doc.createElement(GSXML.SERVICE_ELEM);
 			dm_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			dm_service.setAttribute(GSXML.NAME_ATT, DOC_META_SERVICE);
 			return dm_service;
@@ -145,7 +146,7 @@ public class IViaProxy extends ServiceRack
 		}
 		if (service.equals(DOC_CONTENT_SERVICE))
 		{
-			Element dc_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element dc_service = doc.createElement(GSXML.SERVICE_ELEM);
 			dc_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			dc_service.setAttribute(GSXML.NAME_ATT, DOC_CONTENT_SERVICE);
 			return dc_service;
@@ -157,12 +158,12 @@ public class IViaProxy extends ServiceRack
 	/** Process a text query - implemented by concrete subclasses */
 	protected Element processTextQuery(Element request)
 	{
-
+	  Document result_doc = XMLConverter.newDOM();
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, TEXT_QUERY_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
-		Element doc_node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element doc_node_list = result_doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(doc_node_list);
 
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -242,17 +243,17 @@ public class IViaProxy extends ServiceRack
 		}
 
 		// get the num docs and add to a metadata list
-		Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		Element metadata_list = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(metadata_list);
 
 		// Add a metadata element specifying the number of matching documents
 		long numdocs = Long.parseLong(results_num);
-		GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", "" + numdocs);
+		GSXML.addMetadata(metadata_list, "numDocsMatched", "" + numdocs);
 		String[] ids = doc_ids.split(" ");
 
 		for (int d = 0; d < ids.length; d++)
 		{
-			Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+			Element doc_node = result_doc.createElement(GSXML.DOC_NODE_ELEM);
 			doc_node.setAttribute(GSXML.NODE_ID_ATT, ids[d]);
 			doc_node_list.appendChild(doc_node);
 		}
@@ -264,7 +265,8 @@ public class IViaProxy extends ServiceRack
 
 	protected Element processDocumentMetadataRetrieve(Element request)
 	{
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, DOC_META_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -322,7 +324,7 @@ public class IViaProxy extends ServiceRack
 		// do the query to the iVia server
 		String url_string = ivia_server_url + "/cgi-bin/view_record_set?theme=gsdl3&record_id_list=" + record_id_list.toString() + "&field_list=" + field_list.toString();
 
-		Element node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element node_list = result_doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(node_list);
 		try
 		{
@@ -336,9 +338,9 @@ public class IViaProxy extends ServiceRack
 				}
 				// the first line is the record
 				line = line.substring(8);
-				Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+				Element doc_node = result_doc.createElement(GSXML.DOC_NODE_ELEM);
 				doc_node.setAttribute(GSXML.NODE_ID_ATT, line);
-				Element meta_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+				Element meta_list = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 				doc_node.appendChild(meta_list);
 				while ((line = reader.readLine()) != null)
 				{
@@ -351,7 +353,7 @@ public class IViaProxy extends ServiceRack
 					}
 					String name = line.substring(0, col_pos);
 					String value = line.substring(col_pos + 2); // includes a space
-					GSXML.addMetadata(this.doc, meta_list, name, value);
+					GSXML.addMetadata(meta_list, name, value);
 				}
 				node_list.appendChild(doc_node);
 
@@ -370,7 +372,8 @@ public class IViaProxy extends ServiceRack
 
 	protected Element processDocumentContentRetrieve(Element request)
 	{
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, DOC_CONTENT_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -382,7 +385,7 @@ public class IViaProxy extends ServiceRack
 			return result;
 		}
 
-		Element doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element doc_list = result_doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(doc_list);
 
 		// Get the documents
@@ -390,7 +393,7 @@ public class IViaProxy extends ServiceRack
 		for (int i = 0; i < doc_ids.length; i++)
 		{
 			String doc_id = doc_ids[i];
-			Element doc_node = getDocument(doc_id);
+			Element doc_node = getDocument(result_doc, doc_id);
 			doc_list.appendChild(doc_node);
 		}
 		return result;
@@ -401,7 +404,7 @@ public class IViaProxy extends ServiceRack
 	 * gets a document by sending a request to iVia, then processes it and
 	 * creates a documentNode around the text
 	 */
-	protected Element getDocument(String doc_id)
+  protected Element getDocument(Document result_doc, String doc_id)
 	{
 
 		String url_string = ivia_server_url + "/cgi-bin/view_record?theme=gsdl3&record_id=" + doc_id;
@@ -446,14 +449,14 @@ public class IViaProxy extends ServiceRack
 		processed_content.append(escaped_content.substring(lastpos)); // get the last bit
 		processed_content.append("</nodeContent>");
 
-		Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+		Element doc_node = result_doc.createElement(GSXML.DOC_NODE_ELEM);
 		doc_node.setAttribute(GSXML.NODE_ID_ATT, doc_id);
 
 		Document content_doc = this.converter.getDOM(processed_content.toString());
 		if (content_doc != null)
 		{
 			Element content_element = content_doc.getDocumentElement();
-			doc_node.appendChild(this.doc.importNode(content_element, true));
+			doc_node.appendChild(result_doc.importNode(content_element, true));
 		}
 		else
 		{

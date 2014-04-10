@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -33,6 +34,7 @@ import org.greenstone.util.GlobalProperties;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -110,37 +112,37 @@ public class BerryBasket extends ServiceRack
 		this.config_info = info;
 
 		// set up short_service_info_ - for now just has name and type
-		Element add_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element add_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		add_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 		add_service.setAttribute(GSXML.NAME_ATT, ADD_ITEM_SERVICE);
 		this.short_service_info.appendChild(add_service);
 
 		// set up short_service_info_ - for now just has name and type
-		Element disp_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element disp_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		disp_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 		disp_service.setAttribute(GSXML.NAME_ATT, DISPLAY_ITEMS_SERVICE);
 		this.short_service_info.appendChild(disp_service);
 
 		// set up short_service_info_ - for now just has name and type
-		Element num_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element num_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		num_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 		num_service.setAttribute(GSXML.NAME_ATT, ITEM_NUM_SERVICE);
 		this.short_service_info.appendChild(num_service);
 
 		// set up short_service_info_ - for now just has name and type
-		Element delete_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element delete_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		delete_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 		delete_service.setAttribute(GSXML.NAME_ATT, DELETE_ITEMS_SERVICE);
 		this.short_service_info.appendChild(delete_service);
 
 		// set up short_service_info_ - for now just has name and type
-		Element deleteone_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element deleteone_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		deleteone_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 		deleteone_service.setAttribute(GSXML.NAME_ATT, DELETE_ITEM_SERVICE);
 		this.short_service_info.appendChild(deleteone_service);
 
 		// set up short_service_info_ - for now just has name and type
-		Element mail_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element mail_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		mail_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 		mail_service.setAttribute(GSXML.NAME_ATT, SEND_MAIL_SERVICE);
 		this.short_service_info.appendChild(mail_service);
@@ -150,12 +152,12 @@ public class BerryBasket extends ServiceRack
 	}
 
 	/** returns a specific service description */
-	protected Element getServiceDescription(String service_id, String lang, String subset)
+  protected Element getServiceDescription(Document doc, String service_id, String lang, String subset)
 	{
 
 		if (service_id.equals(ADD_ITEM_SERVICE))
 		{
-			Element add_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element add_service = doc.createElement(GSXML.SERVICE_ELEM);
 			add_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 			add_service.setAttribute(GSXML.NAME_ATT, ADD_ITEM_SERVICE);
 			return add_service;
@@ -163,7 +165,7 @@ public class BerryBasket extends ServiceRack
 		if (service_id.equals(DISPLAY_ITEMS_SERVICE))
 		{
 
-			Element disp_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element disp_service = doc.createElement(GSXML.SERVICE_ELEM);
 			disp_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 			disp_service.setAttribute(GSXML.NAME_ATT, DISPLAY_ITEMS_SERVICE);
 			return disp_service;
@@ -172,7 +174,7 @@ public class BerryBasket extends ServiceRack
 		if (service_id.equals(ITEM_NUM_SERVICE))
 		{
 
-			Element num_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element num_service = doc.createElement(GSXML.SERVICE_ELEM);
 			num_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 			num_service.setAttribute(GSXML.NAME_ATT, ITEM_NUM_SERVICE);
 			return num_service;
@@ -181,7 +183,7 @@ public class BerryBasket extends ServiceRack
 		if (service_id.equals(DELETE_ITEMS_SERVICE))
 		{
 
-			Element del_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element del_service = doc.createElement(GSXML.SERVICE_ELEM);
 			del_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 			del_service.setAttribute(GSXML.NAME_ATT, DELETE_ITEMS_SERVICE);
 			return del_service;
@@ -190,7 +192,7 @@ public class BerryBasket extends ServiceRack
 		if (service_id.equals(DELETE_ITEM_SERVICE))
 		{
 
-			Element delone_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element delone_service = doc.createElement(GSXML.SERVICE_ELEM);
 			delone_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 			delone_service.setAttribute(GSXML.NAME_ATT, DELETE_ITEM_SERVICE);
 			return delone_service;
@@ -199,7 +201,7 @@ public class BerryBasket extends ServiceRack
 		if (service_id.equals(SEND_MAIL_SERVICE))
 		{
 
-			Element mail_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element mail_service = doc.createElement(GSXML.SERVICE_ELEM);
 			mail_service.setAttribute(GSXML.TYPE_ATT, "gather"); // what??
 			mail_service.setAttribute(GSXML.NAME_ATT, SEND_MAIL_SERVICE);
 			return mail_service;
@@ -213,7 +215,8 @@ public class BerryBasket extends ServiceRack
 		Hashtable<String, Hashtable<String, Item>> docsMap = updateDocMap(request);
 
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -241,7 +244,7 @@ public class BerryBasket extends ServiceRack
 			{
 				Item newItem = generateItem(collection, item);
 				items.put(item, newItem);
-				result.appendChild(newItem.wrapIntoElement());
+				result.appendChild(newItem.wrapIntoElement(result_doc));
 			}
 		}
 		else
@@ -250,7 +253,7 @@ public class BerryBasket extends ServiceRack
 			Item newItem = generateItem(collection, item);
 			items.put(item, newItem);
 			docsMap.put(collection, items);
-			result.appendChild(newItem.wrapIntoElement());
+			result.appendChild(newItem.wrapIntoElement(result_doc));
 		}
 
 		return result;
@@ -306,7 +309,8 @@ public class BerryBasket extends ServiceRack
 		Hashtable<String, Hashtable<String, Item>> docsMap = updateDocMap(request);
 
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -362,7 +366,8 @@ public class BerryBasket extends ServiceRack
 		Hashtable<String, Hashtable<String, Item>> docsMap = updateDocMap(request);
 
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -412,7 +417,8 @@ public class BerryBasket extends ServiceRack
 		Hashtable<String, Hashtable<String, Item>> docsMap = updateDocMap(request);
 
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 
 		int size = 0;
 		String ids = "";
@@ -426,11 +432,11 @@ public class BerryBasket extends ServiceRack
 			while (values.hasNext())
 			{
 				Item item = (Item) values.next();
-				result.appendChild(item.wrapIntoElement());
+				result.appendChild(item.wrapIntoElement(result_doc));
 			}
 		}
 
-		Element selement = this.doc.createElement("size");
+		Element selement = result_doc.createElement("size");
 		selement.setAttribute("value", size + "");
 		result.appendChild(selement);
 
@@ -441,8 +447,9 @@ public class BerryBasket extends ServiceRack
 	{
 
 		// Build a request to obtain some document metadata
-		Element dm_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element dm_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+	  Document doc = XMLConverter.newDOM();
+		Element dm_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element dm_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		dm_message.appendChild(dm_request);
 
 		// Create a parameter list to specify the required metadata information
@@ -451,14 +458,14 @@ public class BerryBasket extends ServiceRack
 		meta_names.add("root_Title");
 		meta_names.add("Date");
 
-		Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 
 		Element param = null;
 		Iterator<String> i = meta_names.iterator();
 		while (i.hasNext())
 		{
 			String name = i.next();
-			param = this.doc.createElement(GSXML.PARAM_ELEM);
+			param = doc.createElement(GSXML.PARAM_ELEM);
 			param_list.appendChild(param);
 			param.setAttribute(GSXML.NAME_ATT, "metadata");
 			param.setAttribute(GSXML.VALUE_ATT, name);
@@ -468,13 +475,13 @@ public class BerryBasket extends ServiceRack
 		dm_request.appendChild(param_list);
 
 		// create the doc node list for the metadata request
-		Element dm_doc_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element dm_doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		dm_request.appendChild(dm_doc_list);
 
 		while (ids.hasNext())
 		{
 			// Add the documentNode to the list
-			Element dm_doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+			Element dm_doc_node = doc.createElement(GSXML.DOC_NODE_ELEM);
 			dm_doc_list.appendChild(dm_doc_node);
 			dm_doc_node.setAttribute(GSXML.NODE_ID_ATT, ids.next());
 		}
@@ -488,7 +495,8 @@ public class BerryBasket extends ServiceRack
 		Hashtable<String, Hashtable<String, Item>> docsMap = updateDocMap(request);
 
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 
 		Iterator<String> keys = docsMap.keySet().iterator();
 
@@ -498,14 +506,14 @@ public class BerryBasket extends ServiceRack
 			Hashtable items = docsMap.get(collection);
 			Iterator itemItr = items.values().iterator();
 
-			Element collectionNode = this.doc.createElement("berryList");
+			Element collectionNode = result_doc.createElement("berryList");
 			collectionNode.setAttribute("name", collection);
 			result.appendChild(collectionNode);
 
 			while (itemItr.hasNext())
 			{
 				Item item = (Item) itemItr.next();
-				Element itemElement = this.doc.createElement("item");
+				Element itemElement = result_doc.createElement("item");
 
 				collectionNode.appendChild(itemElement);
 				itemElement.setAttribute("name", item.docid);
@@ -523,7 +531,8 @@ public class BerryBasket extends ServiceRack
 	public Element processSendMail(Element request)
 	{
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -605,12 +614,12 @@ public class BerryBasket extends ServiceRack
 			Transport.send(msg);
 
 			logger.info("\nMail was sent successfully.");
-			result.appendChild(this.doc.createTextNode("Mail was sent successfully."));
+			result.appendChild(result_doc.createTextNode("Mail was sent successfully."));
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			result.appendChild(this.doc.createTextNode(e.getMessage()));
+			result.appendChild(result_doc.createTextNode(e.getMessage()));
 		}
 
 		return result;
@@ -650,7 +659,7 @@ public class BerryBasket extends ServiceRack
 			return collection + ":" + docid + ":" + "[" + ((!rootTitle.equals("")) ? (rootTitle + ":") : "") + title + "]";
 		}
 
-		public Element wrapIntoElement()
+		public Element wrapIntoElement(Document doc)
 		{
 			Element itemElement = doc.createElement("item");
 			itemElement.setAttribute("name", docid);

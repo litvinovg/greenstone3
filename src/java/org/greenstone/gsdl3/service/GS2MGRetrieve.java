@@ -25,6 +25,7 @@ import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
 
 // XML classes
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
@@ -114,13 +115,13 @@ extends AbstractGS2DocumentRetrieve {
      * should return a nodeContent element:
      * <nodeContent>text content or other elements</nodeContent>
      */
-    protected Element getNodeContent (String doc_id, String lang) throws GSException {
+  protected Element getNodeContent (Document doc, String doc_id, String lang) throws GSException {
         long doc_num = this.coll_db.OID2DocnumLong (doc_id);
         if (doc_num == -1) {
             logger.error ("OID "+doc_id +" couldn't be converted to mg num");
             return null;
         }
-        Element content_node = this.doc.createElement (GSXML.NODE_CONTENT_ELEM);
+        Element content_node = doc.createElement (GSXML.NODE_CONTENT_ELEM);
                 
         String doc_content = null;
         
@@ -139,12 +140,12 @@ extends AbstractGS2DocumentRetrieve {
             doc_content = StringUtils.replace(doc_content, "\u0002|\u0003", "");
             // replace _httpimg_ with the correct address
             doc_content = resolveTextMacros (doc_content, doc_id, lang);
-            //GSXML.addDocText(this.doc, doc, doc_content);
+            //GSXML.addDocText(doc, doc_content);
         } else {
             logger.error ("the doc content was null, not getting that section\n");
             doc_content = "couldn't retrieve content for this section, please check the log file for more detail\n";
         }
-        Text t = this.doc.createTextNode (doc_content);
+        Text t = doc.createTextNode (doc_content);
         content_node.appendChild (t);
         return content_node;
         

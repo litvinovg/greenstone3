@@ -177,7 +177,7 @@ public class OAIReceptionist implements ModuleInterface {
 
     // First, we get a list of all the OAI enabled collections
     // We get this by sending a listSets request to the MR
-    Document doc = this.converter.newDOM();
+    Document doc = XMLConverter.newDOM();
     Element message = doc.createElement(GSXML.MESSAGE_ELEM);
     
     Element request = GSXML.createBasicRequest(doc, OAIXML.OAI_SET_LIST, "", null);
@@ -227,7 +227,7 @@ public class OAIReceptionist implements ModuleInterface {
       noRecordsMatch = true;
       return false;
     }
-    Document listsets_doc = this.converter.newDOM();
+    Document listsets_doc = XMLConverter.newDOM();
     Element listsets_element = listsets_doc.createElement(OAIXML.LIST_SETS);
     this.listsets_response = getMessage(listsets_doc, listsets_element);
     
@@ -284,7 +284,7 @@ public class OAIReceptionist implements ModuleInterface {
 
   protected void resetMessageRouter() {
     // we just need to send a configure request to MR
-    Document doc = this.converter.newDOM();
+    Document doc = XMLConverter.newDOM();
     Element mr_request_message = doc.createElement(GSXML.MESSAGE_ELEM);
     Element mr_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_SYSTEM, "", null);
     mr_request_message.appendChild(mr_request);
@@ -320,7 +320,7 @@ public class OAIReceptionist implements ModuleInterface {
   public Node process(Node message_node) {
     logger.error("OAIReceptionist received request");
 
-    Element message = this.converter.nodeToElement(message_node);
+    Element message = GSXML.nodeToElement(message_node);
     logger.error(this.converter.getString(message));
 
     // check that its a correct message tag
@@ -412,7 +412,7 @@ public class OAIReceptionist implements ModuleInterface {
     valid_strs.add(OAIXML.METADATA_PREFIX);
     valid_strs.add(OAIXML.RESUMPTION_TOKEN);
     
-    Document result_doc = this.converter.newDOM();
+    Document result_doc = XMLConverter.newDOM();
     Element result_element = result_doc.createElement(verb);
     boolean result_token_needed = false; // does this result need to include a
     // resumption token
@@ -537,7 +537,7 @@ public class OAIReceptionist implements ModuleInterface {
     // request
 
 
-    Document doc = this.converter.newDOM();
+    Document doc = XMLConverter.newDOM();
     Element mr_msg = doc.createElement(GSXML.MESSAGE_ELEM);
     Element mr_req = doc.createElement(GSXML.REQUEST_ELEM);
     // TODO does this need a type???
@@ -766,7 +766,7 @@ public class OAIReceptionist implements ModuleInterface {
     
     NodeList params = GSXML.getChildrenByTagName(req, GSXML.PARAM_ELEM);
     Element param = null;
-    Document lmf_doc = this.converter.newDOM();
+    Document lmf_doc = XMLConverter.newDOM();
     if(params.getLength() == 0) {
       //this is requesting metadata formats for the whole repository
       //read the oaiConfig.xml file, return the metadata formats specified there.
@@ -851,7 +851,7 @@ public class OAIReceptionist implements ModuleInterface {
     message.appendChild(req);
     //Now send the request to the message router to process
     Node result_node = mr.process(message);
-    return converter.nodeToElement(result_node);
+    return GSXML.nodeToElement(result_node);
   }
   
     
@@ -876,7 +876,7 @@ public class OAIReceptionist implements ModuleInterface {
       // we have already created it
       return getMessage(this.identify_response.getOwnerDocument(), this.identify_response);
     }
-    Document doc = this.converter.newDOM();
+    Document doc = XMLConverter.newDOM();
     Element identify = doc.createElement(OAIXML.IDENTIFY);
     //do the repository name
     copyNamedElementfromConfig(identify, OAIXML.REPOSITORY_NAME);
@@ -978,7 +978,7 @@ public class OAIReceptionist implements ModuleInterface {
         metadataPrefix: required
 	*  Exceptions: badArgument; cannotDisseminateFormat; idDoesNotExist
 	*/ 
-    Document doc = this.converter.newDOM();
+    Document doc = XMLConverter.newDOM();
     Element get_record = doc.createElement(OAIXML.GET_RECORD);
 
     HashSet<String> valid_strs = new HashSet<String>();
@@ -1030,7 +1030,7 @@ public class OAIReceptionist implements ModuleInterface {
     Element msg = doc.createElement(GSXML.MESSAGE_ELEM);
     msg.appendChild(doc.importNode(req, true));
     Node result_node = mr.process(msg);
-    return converter.nodeToElement(result_node);
+    return GSXML.nodeToElement(result_node);
   }
 
   // See OAIConfig.xml

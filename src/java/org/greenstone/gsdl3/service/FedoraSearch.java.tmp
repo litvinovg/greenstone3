@@ -184,13 +184,13 @@ public class FedoraSearch
 		    doc_node.appendChild(metadata_list);
 		    
 		    if (fedora_url != null) {
-			GSXML.addMetadata(this.doc, metadata_list, "URL", fedora_url);
+			GSXML.addMetadata( metadata_list, "URL", fedora_url);
 		    }
 		    if (o.getDescription() != null) {
-			GSXML.addMetadata(this.doc, metadata_list, "Description", description[0]);
+			GSXML.addMetadata(metadata_list, "Description", description[0]);
 		    }
 		    if (title[0] != null) {
-			GSXML.addMetadata(this.doc, metadata_list, "Title", title[0]);
+			GSXML.addMetadata(metadata_list, "Title", title[0]);
 		    }
 		}
 		ListSession sess=result_fedora.getListSession();
@@ -210,7 +210,7 @@ public class FedoraSearch
 	
 	// Add a metadata element specifying the number of matching documents
 	//logger.info("FedoraSearch Number of Documents:" + matchNum);
-	GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", ""+matchNum);
+	GSXML.addMetadata(metadata_list, "numDocsMatched", ""+matchNum);
 	
 	return result;
     }

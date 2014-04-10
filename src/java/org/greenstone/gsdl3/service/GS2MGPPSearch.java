@@ -31,10 +31,14 @@ import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.FacetWrapper;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
+
 import org.greenstone.mgpp.MGPPDocInfo;
 import org.greenstone.mgpp.MGPPQueryResult;
 import org.greenstone.mgpp.MGPPSearchWrapper;
 import org.greenstone.mgpp.MGPPTermInfo;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class GS2MGPPSearch extends AbstractGS2FieldSearch
@@ -233,7 +237,7 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 
 	protected boolean addTermInfo(Element term_list, HashMap<String, Serializable> params, Object query_result)
 	{
-
+	  Document doc = term_list.getOwnerDocument();
 		String query_level = (String) params.get(LEVEL_PARAM); // the current query level
 
 		Vector terms = ((MGPPQueryResult) query_result).getTerms();
@@ -241,7 +245,7 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 		{
 			MGPPTermInfo term_info = (MGPPTermInfo) terms.get(t);
 
-			Element term_elem = this.doc.createElement(GSXML.TERM_ELEM);
+			Element term_elem = doc.createElement(GSXML.TERM_ELEM);
 			term_elem.setAttribute(GSXML.NAME_ATT, term_info.term_);
 			term_elem.setAttribute(STEM_ATT, "" + term_info.stem_method_);
 			term_elem.setAttribute(FREQ_ATT, "" + term_info.term_freq_);
@@ -255,14 +259,14 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 			term_elem.setAttribute(FIELD_ATT, field);
 
 			Vector equiv_terms = term_info.equiv_terms_;
-			Element equiv_term_list = this.doc.createElement(EQUIV_TERM_ELEM + GSXML.LIST_MODIFIER);
+			Element equiv_term_list = doc.createElement(EQUIV_TERM_ELEM + GSXML.LIST_MODIFIER);
 			term_elem.appendChild(equiv_term_list);
 
 			for (int et = 0; et < equiv_terms.size(); et++)
 			{
 				String equiv_term = (String) equiv_terms.get(et);
 
-				Element equiv_term_elem = this.doc.createElement(GSXML.TERM_ELEM);
+				Element equiv_term_elem = doc.createElement(GSXML.TERM_ELEM);
 				equiv_term_elem.setAttribute(GSXML.NAME_ATT, equiv_term);
 				equiv_term_elem.setAttribute(NUM_DOCS_MATCH_ATT, "");
 				equiv_term_elem.setAttribute(FREQ_ATT, "");

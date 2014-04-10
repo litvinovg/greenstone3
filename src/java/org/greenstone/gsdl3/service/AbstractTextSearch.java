@@ -23,6 +23,8 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSXML;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -89,6 +91,7 @@ public abstract class AbstractTextSearch extends AbstractSearch
 	 */
 	protected boolean createParameterChain(String name, Element param_list, String lang, String default_value)
 	{
+	  Document doc = param_list.getOwnerDocument();
 		Element param = null;
 		String param_default = default_value;
 		if (default_value == null) {
@@ -119,7 +122,7 @@ public abstract class AbstractTextSearch extends AbstractSearch
 			{
 				param_default = this.default_index_subcollection;
 			}
-			param = GSXML.createParameterDescription2(this.doc, INDEX_SUBCOLLECTION_PARAM, getTextString("param." + INDEX_SUBCOLLECTION_PARAM, lang), param_type, param_default, index_sub_ids, index_sub_names);
+			param = GSXML.createParameterDescription2(doc, INDEX_SUBCOLLECTION_PARAM, getTextString("param." + INDEX_SUBCOLLECTION_PARAM, lang), param_type, param_default, index_sub_ids, index_sub_names);
 			param_list.appendChild(param);
 			return true;
 		}
@@ -140,21 +143,21 @@ public abstract class AbstractTextSearch extends AbstractSearch
 			{
 				param_default = this.default_index_language;
 			}
-			param = GSXML.createParameterDescription2(this.doc, INDEX_LANGUAGE_PARAM, getTextString("param." + INDEX_LANGUAGE_PARAM, lang), param_type, param_default, index_lang_ids, index_lang_names);
+			param = GSXML.createParameterDescription2(doc, INDEX_LANGUAGE_PARAM, getTextString("param." + INDEX_LANGUAGE_PARAM, lang), param_type, param_default, index_lang_ids, index_lang_names);
 			param_list.appendChild(param);
 			return true;
 		}
 	else if (name.equals(CASE_PARAM) || name.equals(STEM_PARAM) || name.equals(ACCENT_PARAM)) {
 	    String[] bool_ops = {"0", "1"};
 	    String[] bool_texts = {getTextString("param.boolean.off", lang),getTextString("param.boolean.on", lang)}; 
-	    param = GSXML.createParameterDescription(this.doc, name, getTextString("param."+name, lang), GSXML.PARAM_TYPE_BOOLEAN, param_default, bool_ops, bool_texts);
+	    param = GSXML.createParameterDescription(doc, name, getTextString("param."+name, lang), GSXML.PARAM_TYPE_BOOLEAN, param_default, bool_ops, bool_texts);
 	    param_list.appendChild(param);
 	    return true;
 	} else if (name.equals(MATCH_PARAM)) {
 	  
 	    String[] vals = {MATCH_PARAM_SOME, MATCH_PARAM_ALL };
 	    String[] val_texts = {getTextString("param."+MATCH_PARAM+"."+MATCH_PARAM_SOME, lang), getTextString("param."+MATCH_PARAM+"."+MATCH_PARAM_ALL, lang)}; 
-	    param = GSXML.createParameterDescription(this.doc, MATCH_PARAM, getTextString("param."+MATCH_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, vals, val_texts);
+	    param = GSXML.createParameterDescription(doc, MATCH_PARAM, getTextString("param."+MATCH_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, vals, val_texts);
 	    param_list.appendChild(param);
 	    return true;
 	}

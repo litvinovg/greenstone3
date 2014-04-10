@@ -5,6 +5,7 @@ package org.greenstone.gsdl3.service;
 import org.greenstone.gsdl3.util.*;
 
 // XML classes
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
@@ -14,20 +15,20 @@ import org.w3c.dom.Text;
 // just needs to override a few methods that are TEI specific
 public class TEIRetrieve extends XMLRetrieve {
 
-   protected Element extractTitleMeta(Element section) {
+  protected Element extractTitleMeta(Document doc, Element section) {
 	
-	Element meta_elem = this.doc.createElement(GSXML.METADATA_ELEM);
+	Element meta_elem = doc.createElement(GSXML.METADATA_ELEM);
 	meta_elem.setAttribute(GSXML.NAME_ATT, "Title");
 	
 	Element section_head = (Element)GSXML.getChildByTagName(section, "head");
 	if (section_head == null || !section_head.hasChildNodes()) {
 	    // there is no head element, so take the type attribute and make that the title
 	    String title = "("+section.getAttribute("type")+")";
-	    Text t = this.doc.createTextNode(title);
+	    Text t = doc.createTextNode(title);
 	    meta_elem.appendChild(t);
 	} else {
 	    // add the head element as the metadata content
-	    meta_elem.appendChild(this.doc.importNode(section_head, true));
+	    meta_elem.appendChild(doc.importNode(section_head, true));
 	}
 	return meta_elem;
     }

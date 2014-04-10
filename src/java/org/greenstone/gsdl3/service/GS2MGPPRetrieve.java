@@ -25,6 +25,7 @@ import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
 
 // XML classes
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
@@ -90,13 +91,13 @@ public class GS2MGPPRetrieve
    * should return a nodeContent element:
    * <nodeContent>text content or other elements</nodeContent>
    */
-  protected Element getNodeContent(String doc_id, String lang) throws GSException {
+  protected Element getNodeContent(Document doc, String doc_id, String lang) throws GSException {
     long doc_num = this.coll_db.OID2DocnumLong(doc_id);
     if (doc_num == -1) {
       logger.error("OID "+doc_id +" couldn't be converted to mgpp num");
       return null;
     }
-    Element content_node = this.doc.createElement(GSXML.NODE_CONTENT_ELEM);
+    Element content_node = doc.createElement(GSXML.NODE_CONTENT_ELEM);
     synchronized (mgpp_src) {
     	String doc_content = "";
     	try {
@@ -117,7 +118,7 @@ public class GS2MGPPRetrieve
     		doc_content = "this is the content for section hash id "+ doc_id+", mgpp doc num "+doc_num+"\n";
     		
     	}
-    	Text t = this.doc.createTextNode(doc_content);
+    	Text t = doc.createTextNode(doc_content);
     	content_node.appendChild(t);
     	return content_node;
     }//end of synchronized

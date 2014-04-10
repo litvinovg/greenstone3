@@ -17,6 +17,9 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -111,7 +114,7 @@ public class LuceneSearch extends AbstractTextSearch
 		if (param_list == null)
 		{
 			logger.error("TextQuery request had no paramList.");
-			GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", "0");
+			GSXML.addMetadata(metadata_list, "numDocsMatched", "0");
 			return false; // signal that an empty result should be return
 		}
 
@@ -127,7 +130,7 @@ public class LuceneSearch extends AbstractTextSearch
 		if (query_string == null || query_string.equals(""))
 		{
 			logger.error("TextQuery request had no query string.");
-			GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", "0");
+			GSXML.addMetadata(metadata_list, "numDocsMatched", "0");
 			return false; // signal that an empty result should be return
 		}
 
@@ -137,9 +140,10 @@ public class LuceneSearch extends AbstractTextSearch
 	/** Process a text query - implemented by concrete subclasses */
 	protected Element processTextQuery(Element request)
 	{
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
-		Element doc_node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
-		Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
+		Element doc_node_list = result_doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element metadata_list = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		initResultElement(result, doc_node_list, metadata_list);
 
 		if (!hasParamList(request, metadata_list))
@@ -176,7 +180,7 @@ public class LuceneSearch extends AbstractTextSearch
 
 			TopDocs hits = searcher.search(query, Integer.MAX_VALUE);
 
-			GSXML.addMetadata(this.doc, metadata_list, "numDocsMatched", "" + hits.scoreDocs.length);
+			GSXML.addMetadata(metadata_list, "numDocsMatched", "" + hits.scoreDocs.length);
 
 			IndexReader reader = searcher.getIndexReader();
 
@@ -185,7 +189,7 @@ public class LuceneSearch extends AbstractTextSearch
 				int lucene_doc_num = hits.scoreDocs[i].doc;
 				org.apache.lucene.document.Document luc_doc = reader.document(lucene_doc_num);
 				String node_id = luc_doc.get("nodeID");
-				Element node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+				Element node = result_doc.createElement(GSXML.DOC_NODE_ELEM);
 				node.setAttribute(GSXML.NODE_ID_ATT, node_id);
 				doc_node_list.appendChild(node);
 			}

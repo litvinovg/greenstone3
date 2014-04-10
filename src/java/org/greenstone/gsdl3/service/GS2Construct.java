@@ -35,6 +35,9 @@ import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSStatus;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
@@ -44,7 +47,6 @@ import org.w3c.dom.Text;
  * perl scripts
  * 
  * @author Katherine Don
- * @version $Revision$
  */
 public class GS2Construct extends ServiceRack
 {
@@ -85,43 +87,43 @@ public class GS2Construct extends ServiceRack
 	}
 
 	/** returns a specific service description */
-	protected Element getServiceDescription(String service, String lang, String subset)
+	protected Element getServiceDescription(Document doc, String service, String lang, String subset)
 	{
 
-		Element description = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element description = doc.createElement(GSXML.SERVICE_ELEM);
 		description.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		description.setAttribute(GSXML.NAME_ATT, service);
 		if (subset == null || subset.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER))
 		{
-			description.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_NAME, getTextString(service + ".name", lang)));
-			description.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getTextString(service + ".description", lang)));
-			description.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_SUBMIT, getTextString(service + ".submit", lang)));
+			description.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_NAME, getTextString(service + ".name", lang)));
+			description.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getTextString(service + ".description", lang)));
+			description.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_SUBMIT, getTextString(service + ".submit", lang)));
 		}
 		if (subset == null || subset.equals(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER))
 		{
-			Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			description.appendChild(param_list);
 
 			if (service.equals(NEW_SERVICE))
 			{
 
-				Element param = GSXML.createParameterDescription(this.doc, NEW_COL_TITLE_PARAM, getTextString("param." + NEW_COL_TITLE_PARAM, lang), GSXML.PARAM_TYPE_STRING, null, null, null);
+				Element param = GSXML.createParameterDescription(doc, NEW_COL_TITLE_PARAM, getTextString("param." + NEW_COL_TITLE_PARAM, lang), GSXML.PARAM_TYPE_STRING, null, null, null);
 				param_list.appendChild(param);
-				param = GSXML.createParameterDescription(this.doc, CREATOR_PARAM, getTextString("param." + CREATOR_PARAM, lang), GSXML.PARAM_TYPE_STRING, null, null, null);
+				param = GSXML.createParameterDescription(doc, CREATOR_PARAM, getTextString("param." + CREATOR_PARAM, lang), GSXML.PARAM_TYPE_STRING, null, null, null);
 				param_list.appendChild(param);
-				param = GSXML.createParameterDescription(this.doc, NEW_COL_ABOUT_PARAM, getTextString("param." + NEW_COL_ABOUT_PARAM, lang), GSXML.PARAM_TYPE_TEXT, null, null, null);
+				param = GSXML.createParameterDescription(doc, NEW_COL_ABOUT_PARAM, getTextString("param." + NEW_COL_ABOUT_PARAM, lang), GSXML.PARAM_TYPE_TEXT, null, null, null);
 				param_list.appendChild(param);
 				String[] types = { BUILDTYPE_MGPP, BUILDTYPE_MG };
 				String[] type_texts = { getTextString("param." + BUILDTYPE_PARAM + "." + BUILDTYPE_MGPP, lang), getTextString("param." + BUILDTYPE_PARAM + "." + BUILDTYPE_MG, lang) };
 
-				param = GSXML.createParameterDescription(this.doc, BUILDTYPE_PARAM, getTextString("param." + BUILDTYPE_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, BUILDTYPE_MGPP, types, type_texts);
+				param = GSXML.createParameterDescription(doc, BUILDTYPE_PARAM, getTextString("param." + BUILDTYPE_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, BUILDTYPE_MGPP, types, type_texts);
 				param_list.appendChild(param);
 			}
 			else if (service.equals(ACTIVATE_SERVICE) || service.equals(IMPORT_SERVICE) || service.equals(BUILD_SERVICE) || service.equals(RELOAD_SERVICE) || service.equals(DELETE_SERVICE))
 			{
 
 				this.collection_list = getCollectionList();
-				Element param = GSXML.createParameterDescription(this.doc, COL_PARAM, getTextString("param." + COL_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, null, this.collection_list, this.collection_list);
+				Element param = GSXML.createParameterDescription(doc, COL_PARAM, getTextString("param." + COL_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, null, this.collection_list, this.collection_list);
 				param_list.appendChild(param);
 			}
 			else
@@ -143,15 +145,16 @@ public class GS2Construct extends ServiceRack
 	/** TODO:implement this */
 	protected Element processAddDocument(Element request)
 	{
+	  Document result_doc = XMLConverter.newDOM();
 		// decode the file name, add it to the import directory
 		String name = GSPath.getFirstLink(request.getAttribute(GSXML.TO_ATT));
-		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, name);
-		Element status = this.doc.createElement(GSXML.STATUS_ELEM);
+		Element status = result_doc.createElement(GSXML.STATUS_ELEM);
 		response.appendChild(status);
 		//String lang = request.getAttribute(GSXML.LANG_ATT);
 		//String request_type = request.getAttribute(GSXML.TYPE_ATT);
-		Text t = this.doc.createTextNode("AddDocument: not implemented yet");
+		Text t = result_doc.createTextNode("AddDocument: not implemented yet");
 		status.appendChild(t);
 		status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
 		return response;
@@ -159,6 +162,7 @@ public class GS2Construct extends ServiceRack
 
 	protected Element processBuildAndActivateCollection(Element request)
 	{
+	  
 		waitUntilReady(request);
 		Element buildResponse = processBuildCollection(request);
 		if (buildResponse.getElementsByTagName(GSXML.ERROR_ELEM).getLength() > 0)
@@ -310,7 +314,7 @@ public class GS2Construct extends ServiceRack
 		}
 
 		// add the rest of the messages to the status node
-		Text t = this.doc.createTextNode("\n" + listener.getUpdate());
+		Text t = status.getOwnerDocument().createTextNode("\n" + listener.getUpdate());
 		status.appendChild(t);
 		status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(listener.getStatus()));
 		if (GSStatus.isError(status_code))
@@ -318,7 +322,7 @@ public class GS2Construct extends ServiceRack
 			return response; // without doing the next bit
 		}
 
-		t = this.doc.createTextNode("\n");
+		t = status.getOwnerDocument().createTextNode("\n");
 		status.appendChild(t);
 		// once have got here, we assume
 		// the first bit proceeded successfully, now reload the collection
@@ -329,12 +333,12 @@ public class GS2Construct extends ServiceRack
 
 	protected Element processDeleteCollection(Element request)
 	{
-
+	  Document result_doc = XMLConverter.newDOM();
 		// the response to send back
 		String name = GSPath.getFirstLink(request.getAttribute(GSXML.TO_ATT));
-		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, name);
-		Element status = this.doc.createElement(GSXML.STATUS_ELEM);
+		Element status = result_doc.createElement(GSXML.STATUS_ELEM);
 		response.appendChild(status);
 		Text t = null; // the text node for the error/success message
 		String lang = request.getAttribute(GSXML.LANG_ATT);
@@ -352,7 +356,7 @@ public class GS2Construct extends ServiceRack
 		{
 			// at the moment, delete is synchronous. but it may take ages so should do the command in another thread maybe? in which case we will want to ask for status
 			logger.error("had a status request for delete - this shouldn't happen!!");
-			//t = this.doc.createTextNode("");
+			//t = result_doc.createTextNode("");
 			//status.appendChild(t);
 			status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
 			return response;
@@ -363,7 +367,7 @@ public class GS2Construct extends ServiceRack
 		// check that the coll is there in the first place
 		if (!coll_dir.exists())
 		{
-			t = this.doc.createTextNode(getTextString("delete.exists_error", lang, args));
+			t = result_doc.createTextNode(getTextString("delete.exists_error", lang, args));
 			status.appendChild(t);
 			status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
 			return response;
@@ -372,7 +376,7 @@ public class GS2Construct extends ServiceRack
 		// try to delete the directory
 		if (!GSFile.deleteFile(coll_dir))
 		{
-			t = this.doc.createTextNode(getTextString("delete.delete_error", lang, args));
+			t = result_doc.createTextNode(getTextString("delete.delete_error", lang, args));
 			status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
 			status.appendChild(t);
 			return response;
@@ -386,12 +390,12 @@ public class GS2Construct extends ServiceRack
 
 	protected Element processReloadCollection(Element request)
 	{
-
+	  Document result_doc = XMLConverter.newDOM();
 		// the response to send back
 		String name = GSPath.getFirstLink(request.getAttribute(GSXML.TO_ATT));
-		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, name);
-		Element status = this.doc.createElement(GSXML.STATUS_ELEM);
+		Element status = result_doc.createElement(GSXML.STATUS_ELEM);
 		response.appendChild(status);
 		Text t = null; // the text node for the error/success message
 
@@ -410,7 +414,7 @@ public class GS2Construct extends ServiceRack
 		{
 			// reload is synchronous - this makes no sense
 			logger.error("had a status request for reload - this shouldn't happen!!");
-			//t = this.doc.createTextNode("");
+			//t = result_doc.createTextNode("");
 			//status.appendChild(t);
 			status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
 			return response;
@@ -432,10 +436,11 @@ public class GS2Construct extends ServiceRack
 	protected void systemRequest(String operation, String coll_name, Element status, UserContext userContext)
 	{
 		// send the request to the MR
-		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_SYSTEM, "", userContext);
+	  Document doc = XMLConverter.newDOM();
+		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_SYSTEM, "", userContext);
 		message.appendChild(request);
-		Element command = this.doc.createElement(GSXML.SYSTEM_ELEM);
+		Element command = doc.createElement(GSXML.SYSTEM_ELEM);
 		request.appendChild(command);
 		command.setAttribute(GSXML.SYSTEM_MODULE_TYPE_ATT, GSXML.COLLECTION_ELEM);
 		command.setAttribute(GSXML.SYSTEM_MODULE_NAME_ATT, coll_name);
@@ -462,14 +467,14 @@ public class GS2Construct extends ServiceRack
 		{
 			if (response == null)
 			{
-				t = this.doc.createTextNode(getTextString(operation + ".configure_error", userContext.getLanguage(), args));
+			  t = status.getOwnerDocument().createTextNode(getTextString(operation + ".configure_error", userContext.getLanguage(), args));
 				status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
 				status.appendChild(t);
 				return;
 			}
 
 			// if we got here, we have succeeded!
-			t = this.doc.createTextNode(getTextString(operation + ".success", userContext.getLanguage(), args));
+			t = status.getOwnerDocument().createTextNode(getTextString(operation + ".success", userContext.getLanguage(), args));
 			status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.SUCCESS));
 			status.appendChild(t);
 		}
@@ -493,42 +498,42 @@ public class GS2Construct extends ServiceRack
 
 		// set up short_service_info_ - for now just has name and type
 
-		e = this.doc.createElement(GSXML.SERVICE_ELEM);
+		e = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		e.setAttribute(GSXML.NAME_ATT, NEW_SERVICE);
 		this.short_service_info.appendChild(e);
 
-		e = this.doc.createElement(GSXML.SERVICE_ELEM);
+		e = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		e.setAttribute(GSXML.NAME_ATT, IMPORT_SERVICE);
 		this.short_service_info.appendChild(e);
 
-		e = this.doc.createElement(GSXML.SERVICE_ELEM);
+		e = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		e.setAttribute(GSXML.NAME_ATT, BUILD_SERVICE);
 		this.short_service_info.appendChild(e);
 
-		e = this.doc.createElement(GSXML.SERVICE_ELEM);
+		e = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		e.setAttribute(GSXML.NAME_ATT, ACTIVATE_SERVICE);
 		this.short_service_info.appendChild(e);
 
-		e = this.doc.createElement(GSXML.SERVICE_ELEM);
+		e = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		e.setAttribute(GSXML.NAME_ATT, BUILD_AND_ACTIVATE_SERVICE);
 		this.short_service_info.appendChild(e);
 
-		e = this.doc.createElement(GSXML.SERVICE_ELEM);
+		e = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		e.setAttribute(GSXML.NAME_ATT, DELETE_SERVICE);
 		this.short_service_info.appendChild(e);
 
-		e = this.doc.createElement(GSXML.SERVICE_ELEM);
+		e = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		e.setAttribute(GSXML.NAME_ATT, RELOAD_SERVICE);
 		this.short_service_info.appendChild(e);
 
-		//e = this.doc.createElement(GSXML.SERVICE_ELEM);
+		//e = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		//e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		//e.setAttribute(GSXML.NAME_ATT, ADD_DOC_SERVICE);
 		//this.short_service_info.appendChild(e);
@@ -539,11 +544,12 @@ public class GS2Construct extends ServiceRack
 	/** returns a response element */
 	protected Element runCommand(Element request, int type)
 	{
+	  Document result_doc = XMLConverter.newDOM();
 		// the response to send back
 		String name = GSPath.getFirstLink(request.getAttribute(GSXML.TO_ATT));
-		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, name);
-		Element status = this.doc.createElement(GSXML.STATUS_ELEM);
+		Element status = result_doc.createElement(GSXML.STATUS_ELEM);
 		response.appendChild(status);
 
 		String lang = request.getAttribute(GSXML.LANG_ATT);
@@ -566,13 +572,13 @@ public class GS2Construct extends ServiceRack
 			GS2PerlListener listener = this.listeners.get(id);
 			if (listener == null)
 			{
-				Text t = this.doc.createTextNode(getTextString("general.process_id_error", lang));
+				Text t = result_doc.createTextNode(getTextString("general.process_id_error", lang));
 				status.appendChild(t);
 				status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
 			}
 			else
 			{
-				Text t = this.doc.createTextNode(listener.getUpdate());
+				Text t = result_doc.createTextNode(listener.getUpdate());
 				status.appendChild(t);
 				status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(listener.getStatus()));
 				// check that we actually should be removing the listener here
@@ -604,7 +610,7 @@ public class GS2Construct extends ServiceRack
 		GS2PerlConstructor constructor = new GS2PerlConstructor("perl_build");
 		if (!constructor.configure())
 		{
-			Text t = this.doc.createTextNode(getTextString("general.configure_constructor_error", lang));
+			Text t = result_doc.createTextNode(getTextString("general.configure_constructor_error", lang));
 			status.appendChild(t);
 			status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
 			return response;
@@ -628,7 +634,7 @@ public class GS2Construct extends ServiceRack
 
 		status.setAttribute(GSXML.STATUS_PROCESS_ID_ATT, id);
 		status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ACCEPTED));
-		Text t = this.doc.createTextNode(getTextString("general.process_start", lang));
+		Text t = result_doc.createTextNode(getTextString("general.process_start", lang));
 		status.appendChild(t);
 		return response;
 	}
@@ -726,24 +732,24 @@ public class GS2Construct extends ServiceRack
 	 */
 	protected Element extractOtherParams(HashMap<String, Serializable> params, int type)
 	{
-
-		Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+	  Document doc = XMLConverter.newDOM();
+		Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (type == GS2PerlConstructor.NEW)
 		{
-			Element param = this.doc.createElement(GSXML.PARAM_ELEM);
+			Element param = doc.createElement(GSXML.PARAM_ELEM);
 			param.setAttribute(GSXML.NAME_ATT, "creator");
 			param.setAttribute(GSXML.VALUE_ATT, (String) params.get(CREATOR_PARAM));
 
 			param_list.appendChild(param);
-			param = this.doc.createElement(GSXML.PARAM_ELEM);
+			param = doc.createElement(GSXML.PARAM_ELEM);
 			param.setAttribute(GSXML.NAME_ATT, "about");
 			param.setAttribute(GSXML.VALUE_ATT, (String) params.get(NEW_COL_ABOUT_PARAM));
 			param_list.appendChild(param);
-			param = this.doc.createElement(GSXML.PARAM_ELEM);
+			param = doc.createElement(GSXML.PARAM_ELEM);
 			param.setAttribute(GSXML.NAME_ATT, "title");
 			param.setAttribute(GSXML.VALUE_ATT, (String) params.get(NEW_COL_TITLE_PARAM));
 			param_list.appendChild(param);
-			param = this.doc.createElement(GSXML.PARAM_ELEM);
+			param = doc.createElement(GSXML.PARAM_ELEM);
 			param.setAttribute(GSXML.NAME_ATT, "buildtype");
 			param.setAttribute(GSXML.VALUE_ATT, (String) params.get(BUILDTYPE_PARAM));
 			param_list.appendChild(param);

@@ -21,6 +21,9 @@ import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -66,17 +69,17 @@ public class MapRetrieve extends ServiceRack
 		this.config_info = info;
 
 		// set up short_service_info_ - for now just has name and type
-		Element dmr_service = doc.createElement(GSXML.SERVICE_ELEM);
+		Element dmr_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		dmr_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 		dmr_service.setAttribute(GSXML.NAME_ATT, DOCUMENT_METADATA_RETRIEVE_SERVICE);
 		short_service_info.appendChild(dmr_service);
 
-		Element dcr_service = doc.createElement(GSXML.SERVICE_ELEM);
+		Element dcr_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		dcr_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 		dcr_service.setAttribute(GSXML.NAME_ATT, DOCUMENT_CONTENT_RETRIEVE_SERVICE);
 		short_service_info.appendChild(dcr_service);
 
-		Element dsr_service = doc.createElement(GSXML.SERVICE_ELEM);
+		Element dsr_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		dsr_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 		dsr_service.setAttribute(GSXML.NAME_ATT, DOCUMENT_STRUCTURE_RETRIEVE_SERVICE);
 		short_service_info.appendChild(dsr_service);
@@ -131,7 +134,7 @@ public class MapRetrieve extends ServiceRack
 		Element display_format = (Element) GSXML.getNodeByPath(extra_info, path);
 		if (display_format != null)
 		{
-			this.format_info_map.put(DOCUMENT_CONTENT_RETRIEVE_SERVICE, this.doc.importNode(display_format, true));
+			this.format_info_map.put(DOCUMENT_CONTENT_RETRIEVE_SERVICE, this.desc_doc.importNode(display_format, true));
 			// shoudl we make a copy?
 		}
 
@@ -155,7 +158,7 @@ public class MapRetrieve extends ServiceRack
 	}
 
 	/** */
-	protected Element getServiceDescription(String service, String lang, String subset)
+	protected Element getServiceDescription(Document doc, String service, String lang, String subset)
 	{
 		if (service.equals(DOCUMENT_STRUCTURE_RETRIEVE_SERVICE))
 		{
@@ -190,16 +193,17 @@ public class MapRetrieve extends ServiceRack
 	protected Element processDocumentStructureRetrieve(Element request)
 	{
 		// Create a new (empty) result message
-		Element result = doc.createElement(GSXML.RESPONSE_ELEM);
+	  Element result = XMLConverter.newDOM().createElement(GSXML.RESPONSE_ELEM);
 		return result;
 	}
 
 	protected Element processDocumentMetadataRetrieve(Element request)
 	{
+	  Document result_doc = XMLConverter.newDOM();
 		// Create a new (empty) result message
 		try
 		{
-			Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+			Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 
 			String uid = request.getAttribute(GSXML.USER_ID_ATT);
 			if (uid.equals(""))
@@ -239,7 +243,7 @@ public class MapRetrieve extends ServiceRack
 				param = (Element) param.getNextSibling();
 			}
 
-			Element node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+			Element node_list = result_doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 			result.appendChild(node_list);
 
 			// Get the documents
@@ -314,11 +318,11 @@ public class MapRetrieve extends ServiceRack
 					}
 
 					// Add the document to the list
-					Element new_node = (Element) this.doc.importNode(request_node, false);
+					Element new_node = (Element) result_doc.importNode(request_node, false);
 					node_list.appendChild(new_node);
 
 					// Add the requested metadata information
-					Element node_meta_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+					Element node_meta_list = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 					new_node.appendChild(node_meta_list);
 
 					// create the navigation thumbnails.  This doesn't seem to work most of the time ???????
@@ -355,9 +359,9 @@ public class MapRetrieve extends ServiceRack
 						value = "<table><tr><td>" + link + "<p>" + place_data + "<br>" + value + "</a></td><td>" + link + thumb + "</a></td></tr></table>";
 						if (metadata.equals("Title"))
 							if (!(place_data.equals("")) && place_data.indexOf(", , ;") == -1 && node_id.indexOf("```") == -1)
-								GSXML.addMetadata(this.doc, node_meta_list, "Title", value);//metadata, value);
+								GSXML.addMetadata(node_meta_list, "Title", value);//metadata, value);
 							else
-								GSXML.addMetadata(this.doc, node_meta_list, metadata, "");
+								GSXML.addMetadata(node_meta_list, metadata, "");
 
 						if (place_data.indexOf(", , ;") == -1)
 						{
@@ -403,8 +407,9 @@ public class MapRetrieve extends ServiceRack
 
 	protected Element processDocumentContentRetrieve(Element request)
 	{
+	  Document result_doc = XMLConverter.newDOM();
 		// Create a new (empty) result message
-		Element result = doc.createElement(GSXML.RESPONSE_ELEM);
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, DOCUMENT_CONTENT_RETRIEVE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
@@ -421,7 +426,7 @@ public class MapRetrieve extends ServiceRack
 
 		String legend_file = this.temp_files_dir + "legend_" + uid + ".jpg";
 		String blank_file = this.files_home_dir + "blank.jpg";
-		Element doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element doc_list = result_doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(doc_list);
 
 		// Get the documents
@@ -795,9 +800,9 @@ public class MapRetrieve extends ServiceRack
 			}
 
 			// put the html in a text node
-			Element text_doc = doc.createElement(GSXML.DOC_NODE_ELEM);
+			Element text_doc = result_doc.createElement(GSXML.DOC_NODE_ELEM);
 			text_doc.setAttribute(GSXML.NODE_ID_ATT, doc_id);
-			GSXML.addDocText(doc, text_doc, doc_content);
+			GSXML.addDocText(text_doc, doc_content);
 			doc_list.appendChild(text_doc);
 
 		}

@@ -106,7 +106,7 @@ public class GS2LuceneRetrieve extends AbstractGS2DocumentRetrieve
 	 * returns the content of a node should return a nodeContent element:
 	 * <nodeContent>text content or other elements</nodeContent>
 	 */
-	protected Element getNodeContent(String doc_id, String lang) throws GSException
+  protected Element getNodeContent(Document doc, String doc_id, String lang) throws GSException
 	{
 		String[] args = new String[1];
 		args[0] = doc_id;
@@ -168,8 +168,8 @@ public class GS2LuceneRetrieve extends AbstractGS2DocumentRetrieve
 			logger.error("Error trying to get document text for " + doc_id + " in collection " + this.cluster_name + ": " + e);
 		}
 
-		Element content_node = this.doc.createElement(GSXML.NODE_CONTENT_ELEM);
-		Text t = this.doc.createTextNode(doc_content);
+		Element content_node = doc.createElement(GSXML.NODE_CONTENT_ELEM);
+		Text t = doc.createTextNode(doc_content);
 		content_node.appendChild(t);
 		return content_node;
 	}

@@ -18,7 +18,10 @@ import org.greenstone.gsdl3.util.DerbyWrapper;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserQueryResult;
 import org.greenstone.gsdl3.util.UserTermInfo;
+import org.greenstone.gsdl3.util.XMLConverter;
 import org.greenstone.util.GlobalProperties;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -167,22 +170,22 @@ public class Authentication extends ServiceRack
 		this.config_info = info;
 
 		// set up Authentication service info - for now just has name and type
-		Element authentication_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element authentication_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		authentication_service.setAttribute(GSXML.TYPE_ATT, "authen");
 		authentication_service.setAttribute(GSXML.NAME_ATT, AUTHENTICATION_SERVICE);
 		this.short_service_info.appendChild(authentication_service);
 
-		Element getUserInformation_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element getUserInformation_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		getUserInformation_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		getUserInformation_service.setAttribute(GSXML.NAME_ATT, GET_USER_INFORMATION_SERVICE);
 		this.short_service_info.appendChild(getUserInformation_service);
 
-		Element changeEditMode_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element changeEditMode_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		changeEditMode_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		changeEditMode_service.setAttribute(GSXML.NAME_ATT, CHANGE_USER_EDIT_MODE_SERVICE);
 		this.short_service_info.appendChild(changeEditMode_service);
 		
-		Element remoteAuthentication_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element remoteAuthentication_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		remoteAuthentication_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
 		remoteAuthentication_service.setAttribute(GSXML.NAME_ATT, REMOTE_AUTHENTICATION_SERVICE);
 		this.short_service_info.appendChild(remoteAuthentication_service);
@@ -213,10 +216,10 @@ public class Authentication extends ServiceRack
 		return true;
 	}
 
-	protected Element getServiceDescription(String service_id, String lang, String subset)
+  protected Element getServiceDescription(Document doc, String service_id, String lang, String subset)
 	{
 
-		Element authen_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element authen_service = doc.createElement(GSXML.SERVICE_ELEM);
 
 		if (service_id.equals(AUTHENTICATION_SERVICE))
 		{
@@ -245,8 +248,8 @@ public class Authentication extends ServiceRack
 
 		if (service_id.equals(AUTHENTICATION_SERVICE) && (subset == null || subset.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER)))
 		{
-			authen_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_NAME, getServiceName(service_id, lang)));
-			authen_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getServiceDescription(service_id, lang)));
+			authen_service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_NAME, getServiceName(service_id, lang)));
+			authen_service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_DESCRIPTION, getServiceDescription(service_id, lang)));
 		}
 		return authen_service;
 	}
@@ -269,7 +272,8 @@ public class Authentication extends ServiceRack
 	protected Element processChangeUserEditMode(Element request)
 	{
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 
 		result.setAttribute(GSXML.FROM_ATT, CHANGE_USER_EDIT_MODE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
@@ -277,7 +281,7 @@ public class Authentication extends ServiceRack
 		Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (paramList == null)
 		{
-			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUEST_HAS_NO_PARAM_LIST));
+			GSXML.addError(result, _errorMessageMap.get(ERROR_REQUEST_HAS_NO_PARAM_LIST));
 			return result;
 		}
 
@@ -361,11 +365,11 @@ public class Authentication extends ServiceRack
 				}
 			}
 		}
-		
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, REMOTE_AUTHENTICATION_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);		
-		Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, message);
+		Element s = GSXML.createTextElement(result_doc, GSXML.STATUS_ELEM, message);
 		result.appendChild(s);
 		return result;
 	}
@@ -373,7 +377,8 @@ public class Authentication extends ServiceRack
 	protected Element processGetUserInformation(Element request)
 	{
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 
 		result.setAttribute(GSXML.FROM_ATT, GET_USER_INFORMATION_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
@@ -381,7 +386,7 @@ public class Authentication extends ServiceRack
 		Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (paramList == null)
 		{
-			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUEST_HAS_NO_PARAM_LIST));
+			GSXML.addError(result, _errorMessageMap.get(ERROR_REQUEST_HAS_NO_PARAM_LIST));
 			return result;
 		}
 
@@ -391,7 +396,7 @@ public class Authentication extends ServiceRack
 
 		if (username == null)
 		{
-			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_USERNAME_NOT_SPECIFIED));
+			GSXML.addError(result, _errorMessageMap.get(ERROR_USERNAME_NOT_SPECIFIED));
 			return result;
 		}
 
@@ -404,23 +409,23 @@ public class Authentication extends ServiceRack
 
 		if (terms.size() == 0)
 		{
-			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUESTED_USER_NOT_FOUND));
+			GSXML.addError(result, _errorMessageMap.get(ERROR_REQUESTED_USER_NOT_FOUND));
 			return result;
 		}
 
 		UserTermInfo userInfo = terms.get(0);
-		Element userInfoList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element userInfoList = result_doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(userInfoList);
 
-		Element usernameField = GSXML.createParameter(this.doc, "username", userInfo.username);
-		Element passwordField = GSXML.createParameter(this.doc, "password", userInfo.password);
-		Element groupsField = GSXML.createParameter(this.doc, "groups", userInfo.groups);
-		Element accountStatusField = GSXML.createParameter(this.doc, "accountstatus", userInfo.accountstatus);
-		Element commentField = GSXML.createParameter(this.doc, "comment", userInfo.comment);
+		Element usernameField = GSXML.createParameter(result_doc, "username", userInfo.username);
+		Element passwordField = GSXML.createParameter(result_doc, "password", userInfo.password);
+		Element groupsField = GSXML.createParameter(result_doc, "groups", userInfo.groups);
+		Element accountStatusField = GSXML.createParameter(result_doc, "accountstatus", userInfo.accountstatus);
+		Element commentField = GSXML.createParameter(result_doc, "comment", userInfo.comment);
 
 		if (editEnabled != null)
 		{
-			Element editEnabledElem = GSXML.createParameter(this.doc, "editEnabled", editEnabled);
+			Element editEnabledElem = GSXML.createParameter(result_doc, "editEnabled", editEnabled);
 			userInfoList.appendChild(editEnabledElem);
 		}
 
@@ -440,17 +445,18 @@ public class Authentication extends ServiceRack
 		checkAdminUserExists();
 
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, AUTHENTICATION_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
 		// Create an Authentication node put into the result
-		Element authenNode = this.doc.createElement(GSXML.AUTHEN_NODE_ELEM);
+		Element authenNode = result_doc.createElement(GSXML.AUTHEN_NODE_ELEM);
 		result.appendChild(authenNode);
-		result.appendChild(getCollectList(this.site_home + File.separatorChar + "collect"));
+		result.appendChild(getCollectList(result_doc, this.site_home + File.separatorChar + "collect"));
 
 		// Create a service node added into the Authentication node
-		Element serviceNode = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element serviceNode = result_doc.createElement(GSXML.SERVICE_ELEM);
 		authenNode.appendChild(serviceNode);
 
 		// Get the parameters of the request
@@ -458,7 +464,7 @@ public class Authentication extends ServiceRack
 		if (param_list == null)
 		{
 			serviceNode.setAttribute("operation", LOGIN);
-			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_REQUEST_HAS_NO_PARAM_LIST));
+			GSXML.addError(result, _errorMessageMap.get(ERROR_REQUEST_HAS_NO_PARAM_LIST));
 			return result; // Return the empty result
 		}
 		HashMap<String, Serializable> paramMap = GSXML.extractParams(param_list, false);
@@ -472,7 +478,7 @@ public class Authentication extends ServiceRack
 		if (userInformation == null && _userOpList.contains(op))
 		{
 			serviceNode.setAttribute("operation", LOGIN);
-			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_NOT_LOGGED_IN));
+			GSXML.addError(result, _errorMessageMap.get(ERROR_NOT_LOGGED_IN));
 			return result;
 		}
 
@@ -485,14 +491,14 @@ public class Authentication extends ServiceRack
 		if (username == null && _userOpList.contains(op))
 		{
 			serviceNode.setAttribute("operation", LOGIN);
-			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_NOT_LOGGED_IN));
+			GSXML.addError(result, _errorMessageMap.get(ERROR_NOT_LOGGED_IN));
 			return result;
 		}
 
 		if (_adminOpList.contains(op) && (groups == null || !groups.matches(".*\\badministrator\\b.*")))
 		{
 			serviceNode.setAttribute("operation", LOGIN);
-			GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_ADMIN_NOT_LOGGED_IN));
+			GSXML.addError(result, _errorMessageMap.get(ERROR_ADMIN_NOT_LOGGED_IN));
 			return result;
 		}
 
@@ -501,7 +507,7 @@ public class Authentication extends ServiceRack
 			int error = addUserInformationToNode(null, serviceNode);
 			if (error != NO_ERROR)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 			}
 		}
 		else if (op.equals(PERFORM_ADD))
@@ -517,14 +523,14 @@ public class Authentication extends ServiceRack
 			int error;
 			if ((error = checkUsername(newUsername)) != NO_ERROR)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 				return result;
 			}
 
 			//Check the given password
 			if ((error = checkPassword(newPassword)) != NO_ERROR)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 				return result;
 			}
 
@@ -534,7 +540,7 @@ public class Authentication extends ServiceRack
 			if (error != NO_ERROR)
 			{
 				serviceNode.setAttribute("operation", ADD_USER);
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 			}
 			else
 			{
@@ -552,14 +558,14 @@ public class Authentication extends ServiceRack
 			int error;
 			if ((error = checkUsername(newUsername)) != NO_ERROR)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 				return result;
 			}
 
 			//Check the given password
 			if ((error = checkPassword(newPassword)) != NO_ERROR)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 				return result;
 			}
 
@@ -583,7 +589,7 @@ public class Authentication extends ServiceRack
 					if (challenge == null || uResponse == null)
 					{
 						serviceNode.setAttribute("operation", REGISTER);
-						GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_MISSING));
+						GSXML.addError(result, _errorMessageMap.get(ERROR_CAPTCHA_MISSING));
 						return result;
 					}
 
@@ -592,7 +598,7 @@ public class Authentication extends ServiceRack
 					if (!reCaptchaResponse.isValid())
 					{
 						serviceNode.setAttribute("operation", REGISTER);
-						GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_CAPTCHA_DOES_NOT_MATCH));
+						GSXML.addError(result, _errorMessageMap.get(ERROR_CAPTCHA_DOES_NOT_MATCH));
 						return result;
 					}
 				}
@@ -605,7 +611,7 @@ public class Authentication extends ServiceRack
 			if (error != NO_ERROR)
 			{
 				serviceNode.setAttribute("operation", REGISTER);
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 			}
 		}
 		else if (op.equals(PERFORM_EDIT))
@@ -622,7 +628,7 @@ public class Authentication extends ServiceRack
 			int error;
 			if ((error = checkUsername(newUsername)) != NO_ERROR)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 				return result;
 			}
 
@@ -635,7 +641,7 @@ public class Authentication extends ServiceRack
 				//Check the given password
 				if ((error = checkPassword(newPassword)) != NO_ERROR)
 				{
-					GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+					GSXML.addError(result, _errorMessageMap.get(error));
 					return result;
 				}
 
@@ -653,7 +659,7 @@ public class Authentication extends ServiceRack
 				else
 				{
 					serviceNode.setAttribute("operation", EDIT_USER);
-					GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+					GSXML.addError(result, _errorMessageMap.get(error));
 				}
 				return result;
 			}
@@ -662,7 +668,7 @@ public class Authentication extends ServiceRack
 			if (error != NO_ERROR)
 			{
 				serviceNode.setAttribute("operation", EDIT_USER);
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 			}
 			else
 			{
@@ -683,7 +689,7 @@ public class Authentication extends ServiceRack
 			{
 				addUserInformationToNode(previousUsername, serviceNode);
 				serviceNode.setAttribute("operation", ACCOUNT_SETTINGS);
-				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_USER_ALREADY_EXISTS));
+				GSXML.addError(result, _errorMessageMap.get(ERROR_USER_ALREADY_EXISTS));
 				return result;
 			}
 
@@ -697,7 +703,7 @@ public class Authentication extends ServiceRack
 				{
 					addUserInformationToNode(previousUsername, serviceNode);
 					serviceNode.setAttribute("operation", ACCOUNT_SETTINGS);
-					GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_INCORRECT_PASSWORD), "Incorrect Password");
+					GSXML.addError(result, _errorMessageMap.get(ERROR_INCORRECT_PASSWORD), "Incorrect Password");
 					return result;
 				}
 
@@ -705,7 +711,7 @@ public class Authentication extends ServiceRack
 				int error;
 				if ((error = checkPassword(newPassword)) != NO_ERROR)
 				{
-					GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+					GSXML.addError(result, _errorMessageMap.get(error));
 					return result;
 				}
 
@@ -720,7 +726,7 @@ public class Authentication extends ServiceRack
 			int error;
 			if ((error = checkUsername(newUsername)) != NO_ERROR)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 				return result;
 			}
 
@@ -740,7 +746,7 @@ public class Authentication extends ServiceRack
 				{
 					addUserInformationToNode(previousUsername, serviceNode);
 					serviceNode.setAttribute("operation", ACCOUNT_SETTINGS);
-					GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+					GSXML.addError(result, _errorMessageMap.get(error));
 				}
 				return result;
 			}
@@ -748,7 +754,7 @@ public class Authentication extends ServiceRack
 			error = addUser(newUsername, newPassword, prevGroups, prevStatus, prevComment, newEmail);
 			if (error != NO_ERROR)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 			}
 
 			addUserInformationToNode(null, serviceNode);
@@ -766,7 +772,7 @@ public class Authentication extends ServiceRack
 			String newPassword = (String) paramMap.get("newPassword");
 			if (user_name == null || oldPassword == null || newPassword == null)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get("missing compulsory parameters: username, oldPassword, or newPassword"));
+				GSXML.addError(result, _errorMessageMap.get("missing compulsory parameters: username, oldPassword, or newPassword"));
 				return result;
 			}
 
@@ -774,7 +780,7 @@ public class Authentication extends ServiceRack
 			if (!hashPassword(oldPassword).equals(prevPassword))
 			{
 				addUserInformationToNode(user_name, serviceNode);
-				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_INCORRECT_PASSWORD), "Incorrect Password");
+				GSXML.addError(result, _errorMessageMap.get(ERROR_INCORRECT_PASSWORD), "Incorrect Password");
 				return result;
 			}
 
@@ -782,7 +788,7 @@ public class Authentication extends ServiceRack
 			int error;
 			if ((error = checkPassword(newPassword)) != NO_ERROR)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 				return result;
 			}
 
@@ -793,7 +799,7 @@ public class Authentication extends ServiceRack
 			derbyWrapper.closeDatabase();
 			if (info != "succeed")
 			{//see DerbyWrapper.modifyUserInfo
-				GSXML.addError(this.doc, result, _errorMessageMap.get(info));
+				GSXML.addError(result, _errorMessageMap.get(info));
 				return result;
 			}
 		}
@@ -803,7 +809,7 @@ public class Authentication extends ServiceRack
 			int error = addUserInformationToNode(editUsername, serviceNode);
 			if (error != NO_ERROR)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 			}
 		}
 		else if (op.equals(ACCOUNT_SETTINGS))
@@ -813,20 +819,20 @@ public class Authentication extends ServiceRack
 			if (editUsername == null)
 			{
 				serviceNode.setAttribute("operation", "");
-				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_USERNAME_NOT_SPECIFIED));
+				GSXML.addError(result, _errorMessageMap.get(ERROR_USERNAME_NOT_SPECIFIED));
 				return result;
 			}
 
 			if (!editUsername.equals(username))
 			{
 				serviceNode.setAttribute("operation", LOGIN);
-				GSXML.addError(this.doc, result, _errorMessageMap.get(ERROR_NOT_AUTHORISED));
+				GSXML.addError(result, _errorMessageMap.get(ERROR_NOT_AUTHORISED));
 				return result;
 			}
 			int error = addUserInformationToNode(editUsername, serviceNode);
 			if (error != NO_ERROR)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 			}
 		}
 		else if (op.equals(PERFORM_RESET_PASSWORD))
@@ -860,7 +866,7 @@ public class Authentication extends ServiceRack
 
 			if (_recaptchaPublicKey != null && _recaptchaPrivateKey != null)
 			{
-				Element recaptchaElem = this.doc.createElement("recaptcha");
+				Element recaptchaElem = result_doc.createElement("recaptcha");
 				recaptchaElem.setAttribute("publicKey", _recaptchaPublicKey);
 				recaptchaElem.setAttribute("privateKey", _recaptchaPrivateKey);
 				result.appendChild(recaptchaElem);
@@ -872,7 +878,7 @@ public class Authentication extends ServiceRack
 			int error = removeUser(usernameToDelete);
 			if (error != NO_ERROR)
 			{
-				GSXML.addError(this.doc, result, _errorMessageMap.get(error));
+				GSXML.addError(result, _errorMessageMap.get(error));
 			}
 			addUserInformationToNode(null, serviceNode);
 			serviceNode.setAttribute("operation", LIST_USERS);
@@ -984,7 +990,7 @@ public class Authentication extends ServiceRack
 
 		if (userQueryResult != null)
 		{
-			Element user_node = getUserNode(userQueryResult);
+		  Element user_node = getUserNodeList(serviceNode.getOwnerDocument(), userQueryResult);
 			serviceNode.appendChild(user_node);
 			return NO_ERROR;
 		}
@@ -1113,15 +1119,15 @@ public class Authentication extends ServiceRack
 		return data;
 	}
 
-	private Element getUserNode(UserQueryResult userQueryResult)
+  private Element getUserNodeList(Document doc, UserQueryResult userQueryResult)
 	{
-		Element user_list_node = this.doc.createElement(GSXML.USER_NODE_ELEM + "List");
+		Element user_list_node = doc.createElement(GSXML.USER_NODE_ELEM + GSXML.LIST_MODIFIER);
 
 		Vector userInfo = userQueryResult.users;
 
 		for (int i = 0; i < userQueryResult.getSize(); i++)
 		{
-			Element user_node = this.doc.createElement(GSXML.USER_NODE_ELEM);
+			Element user_node = doc.createElement(GSXML.USER_NODE_ELEM);
 			String username = ((UserTermInfo) userInfo.get(i)).username;
 			String groups = ((UserTermInfo) userInfo.get(i)).groups;
 			String accountstatus = ((UserTermInfo) userInfo.get(i)).accountstatus;
@@ -1138,9 +1144,9 @@ public class Authentication extends ServiceRack
 		return user_list_node;
 	}
 
-	private Element getCollectList(String collect)
+  private Element getCollectList(Document doc, String collect)
 	{
-		Element collect_list_node = this.doc.createElement(GSXML.COLLECTION_ELEM + "List");
+		Element collect_list_node = doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
 		File[] collect_dir = (new File(collect)).listFiles();
 		if (collect_dir != null && collect_dir.length > 0)
 		{
@@ -1148,8 +1154,8 @@ public class Authentication extends ServiceRack
 			{
 				if (collect_dir[i].isDirectory() && (!collect_dir[i].getName().startsWith(".svn")))
 				{
-					Element collect_node = this.doc.createElement(GSXML.COLLECTION_ELEM);
-					collect_node.setAttribute("name", collect_dir[i].getName());
+					Element collect_node = doc.createElement(GSXML.COLLECTION_ELEM);
+					collect_node.setAttribute(GSXML.NAME_ATT, collect_dir[i].getName());
 					collect_list_node.appendChild(collect_node);
 				}
 			}

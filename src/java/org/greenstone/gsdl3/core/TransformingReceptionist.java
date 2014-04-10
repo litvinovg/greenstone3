@@ -178,7 +178,8 @@ public class TransformingReceptionist extends Receptionist
 		}
 		else
 		{
-			this.language_list = (Element) this.doc.importNode(lang_list, true);
+		  //this.language_list = (Element) this.doc.importNode(lang_list, true);
+		  this.language_list = lang_list;
 		}
 
 		getRequiredMetadataNamesFromXSLFiles();
@@ -379,7 +380,8 @@ public class TransformingReceptionist extends Receptionist
 
 		ArrayList<File> stylesheets = GSFile.getStylesheetFiles(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, name);
 
-		Element extraMetadataList = this.doc.createElement(GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
+		Document doc = XMLConverter.newDOM();
+		Element extraMetadataList = doc.createElement(GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
 		for (File stylesheet : stylesheets)
 		{
 			ArrayList<String> requiredMetadata = _metadataRequiredMap.get(stylesheet.getAbsolutePath());
@@ -388,7 +390,7 @@ public class TransformingReceptionist extends Receptionist
 			{
 				for (String metadataString : requiredMetadata)
 				{
-					Element metadataElem = this.doc.createElement(GSXML.EXTRA_METADATA);
+					Element metadataElem = doc.createElement(GSXML.EXTRA_METADATA);
 					metadataElem.setAttribute(GSXML.NAME_ATT, metadataString);
 					extraMetadataList.appendChild(metadataElem);
 				}
@@ -700,18 +702,19 @@ public class TransformingReceptionist extends Receptionist
 		Document style_doc = getXSLTDocument(action, subaction, collection);
 		if (style_doc == null)
 		{
-			String errorPage = this.converter.getParseErrorMessage();
-			if (errorPage != null)
-			{
-				return XMLTransformer.constructErrorXHTMLPage("Cannot parse the xslt file\n" + errorPage);
-			}
+		  // this getParseErrorMessage may have originally worked, but now it doesn't.
+		  // //String errorPage = this.converter.getParseErrorMessage();
+		  // 	if (errorPage != null)
+		  // 	{
+		  // 	  return XMLTransformer.constructErrorXHTMLPage("Cannot parse the xslt file\n");// + errorPage);
+		  // 	}
 			return page;
 		}
 
 		// put the page into a document - this is necessary for xslt to get
 		// the paths right if you have paths relative to the document root
 		// eg /page.
-		Document doc = this.converter.newDOM();
+		Document doc = XMLConverter.newDOM();
 		doc.appendChild(doc.importNode(page, true));
 		Element page_response = (Element) GSXML.getChildByTagName(page, GSXML.PAGE_RESPONSE_ELEM);
 		Element format_elem = (Element) GSXML.getChildByTagName(page_response, GSXML.FORMAT_ELEM);
@@ -742,7 +745,7 @@ public class TransformingReceptionist extends Receptionist
 
 			if (configStylesheet_doc != null)
 			{
-				Document format_doc = this.converter.newDOM();
+				Document format_doc = XMLConverter.newDOM();
 				format_doc.appendChild(format_doc.importNode(format_elem, true));
 
 				if (_debug)

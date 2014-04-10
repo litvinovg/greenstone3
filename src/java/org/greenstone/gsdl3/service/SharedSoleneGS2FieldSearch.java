@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import org.greenstone.LuceneWrapper3.SharedSoleneQuery;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -114,8 +116,9 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 
 	/** create a param and add to the list */
 	/** we override this to do a special rank param */
-	protected void createParameter(String name, Element param_list, String lang)
+  protected void createParameter(String name, Element param_list, String lang)
 	{
+	  Document doc = param_list.getOwnerDocument();
 		Element param = null;
 		String param_default = paramDefaults.get(name);
 		if (name.equals(RANK_PARAM))
@@ -130,13 +133,13 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 			  field_names.add(getTextString("param." + RANK_PARAM + "." + RANK_PARAM_NONE, lang));
 			}
 			
-			param = GSXML.createParameterDescription2(this.doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, fields.get(0), fields, field_names);
+			param = GSXML.createParameterDescription2(doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, fields.get(0), fields, field_names);
 			
 		} else if (name.equals(SORT_ORDER_PARAM)) {
 	    String[] vals = { SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING };
 	    String[] vals_texts = { getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_ASCENDING, lang), getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_DESCENDING, lang) };
 
-	    param = GSXML.createParameterDescription(this.doc, SORT_ORDER_PARAM, getTextString("param." + SORT_ORDER_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, SORT_ORDER_DESCENDING, vals, vals_texts);
+	    param = GSXML.createParameterDescription(doc, SORT_ORDER_PARAM, getTextString("param." + SORT_ORDER_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, SORT_ORDER_DESCENDING, vals, vals_texts);
 	  }
 
 		if (param != null)

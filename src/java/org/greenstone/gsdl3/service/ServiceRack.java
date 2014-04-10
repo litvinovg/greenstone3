@@ -76,8 +76,8 @@ public abstract class ServiceRack implements ModuleInterface
 	/** the original config info - if need to store it */
 	protected Element config_info = null;
 
-	/** XML element for describe requests - the container doc */
-       protected Document doc = null;
+  /** XML element for stored description XML */
+  protected Document desc_doc = null;
 
 	/**
 	 * XML element for describe requests - list of supported services - this is
@@ -122,7 +122,7 @@ public abstract class ServiceRack implements ModuleInterface
 
 	public void setGlobalFormat(Element globalFormat)
 	{
-		_globalFormat = globalFormat;
+	  _globalFormat = GSXML.duplicateWithNewName(this.desc_doc, globalFormat, GSXML.GLOBAL_FORMAT_ELEM, false);
 	}
 
 	/** sets the site home */
@@ -158,8 +158,8 @@ public abstract class ServiceRack implements ModuleInterface
 	public ServiceRack()
 	{
 		this.converter = new XMLConverter();
-		this.doc = this.converter.newDOM();
-		this.short_service_info = this.doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		this.desc_doc = XMLConverter.newDOM();
+		this.short_service_info = this.desc_doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
 		this.format_info_map = new HashMap<String, Node>();
 	}
 
@@ -219,11 +219,11 @@ public abstract class ServiceRack implements ModuleInterface
 	 */
 	public Node process(Node message_node)
 	{
-		Element message = this.converter.nodeToElement(message_node);
+		Element message = GSXML.nodeToElement(message_node);
 
 		NodeList requests = message.getElementsByTagName(GSXML.REQUEST_ELEM);
-		Document doc = this.converter.newDOM();
-		Element mainResult = doc.createElement(GSXML.MESSAGE_ELEM);
+		Document result_doc = XMLConverter.newDOM();
+		Element mainResult = result_doc.createElement(GSXML.MESSAGE_ELEM);
 		if (requests.getLength() == 0)
 		{
 			// no requests
@@ -237,17 +237,17 @@ public abstract class ServiceRack implements ModuleInterface
 			String type = request.getAttribute(GSXML.TYPE_ATT);
 			if (type.equals(GSXML.REQUEST_TYPE_DESCRIBE))
 			{
-				Element response = processDescribe(request);
+			  Element response = processDescribe(request);
 				if (response != null)
 				{
-					mainResult.appendChild(doc.importNode(response, true));
+				  mainResult.appendChild(result_doc.importNode(response, true));
 				}
 
 			}
 			else if (type.equals(GSXML.REQUEST_TYPE_FORMAT))
 			{
-				Element response = processFormat(request);
-				mainResult.appendChild(doc.importNode(response, true));
+			  Element response = processFormat(request);
+			  mainResult.appendChild(result_doc.importNode(response, true));
 			}
 			else
 			{
@@ -311,14 +311,14 @@ public abstract class ServiceRack implements ModuleInterface
 				}
 				if (response != null)
 				{
-					mainResult.appendChild(doc.importNode(response, true));
+					mainResult.appendChild(result_doc.importNode(response, true));
 				}
 				else
 				{
 					// add in a dummy response
 					logger.error("adding in an error element\n");
-					response = doc.createElement(GSXML.RESPONSE_ELEM);
-					GSXML.addError(doc, response, error_string.toString());
+					response = result_doc.createElement(GSXML.RESPONSE_ELEM);
+					GSXML.addError(response, error_string.toString());
 					mainResult.appendChild(response);
 
 				}
@@ -335,15 +335,15 @@ public abstract class ServiceRack implements ModuleInterface
 	 */
 	protected Element processDescribe(Element request)
 	{
-	  Document doc = this.converter.newDOM();
-		Element response = doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_DESCRIBE);
 
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 		String to = GSPath.getFirstLink(request.getAttribute(GSXML.TO_ATT));
 		if (to.equals(""))
 		{ // return the service list
-		  response.appendChild(doc.importNode(getServiceList(lang), true));
+		  response.appendChild(result_doc.importNode(getServiceList(result_doc, lang), true));
 			return response;
 		}
 		response.setAttribute(GSXML.FROM_ATT, to);
@@ -351,7 +351,7 @@ public abstract class ServiceRack implements ModuleInterface
 		Element description = null;
 		if (param_list == null)
 		{
-			description = getServiceDescription(to, lang, null);
+		  description = getServiceDescription(result_doc, to, lang, null);
 		}
 		else
 		{
@@ -366,11 +366,11 @@ public abstract class ServiceRack implements ModuleInterface
 					String info = param.getAttribute(GSXML.VALUE_ATT);
 					if (description == null)
 					{
-						description = getServiceDescription(to, lang, info);
+					  description = getServiceDescription(result_doc, to, lang, info);
 					}
 					else
 					{
-						Element temp = getServiceDescription(to, lang, info);
+					  Element temp = getServiceDescription(result_doc, to, lang, info);
 						GSXML.mergeElements(description, temp);
 					}
 				}
@@ -378,7 +378,7 @@ public abstract class ServiceRack implements ModuleInterface
 		}
 		if (description != null)
 		{ // may be null if non-existant service
-		  response.appendChild(doc.importNode(description, true));
+		  response.appendChild(description);
 		}
 		return response;
 
@@ -389,8 +389,8 @@ public abstract class ServiceRack implements ModuleInterface
 	 */
 	protected Element processFormat(Element request)
 	{
-	  Document doc = this.converter.newDOM();
-		Element response = doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_FORMAT);
 
 		String to = GSPath.getFirstLink(request.getAttribute(GSXML.TO_ATT));
@@ -403,10 +403,10 @@ public abstract class ServiceRack implements ModuleInterface
 		// describe a particular service	
 		if (this.format_info_map.containsKey(to))
 		{
-			response.appendChild(doc.importNode(getServiceFormat(to), true));
-			if (_globalFormat != null)
+		  response.appendChild(getServiceFormat(result_doc, to));
+		  if (_globalFormat != null)
 			{
-				response.appendChild(GSXML.duplicateWithNewName(doc, _globalFormat, GSXML.GLOBAL_FORMAT_ELEM, false));
+			  response.appendChild(result_doc.importNode(this._globalFormat, true));
 			}
 			response.setAttribute(GSXML.FROM_ATT, to);
 			return response;
@@ -418,19 +418,22 @@ public abstract class ServiceRack implements ModuleInterface
 	}
 
 	/** returns the service list for the subclass */
-	protected Element getServiceList(String lang)
+  protected Element getServiceList(Document doc, String lang)
 	{
 		// for now, it is static and has no language stuff
-		return (Element) this.short_service_info.cloneNode(true);
+	  return (Element)doc.importNode(this.short_service_info, true);
 	}
 
 	/** returns a specific service description */
-	abstract protected Element getServiceDescription(String service, String lang, String subset);
+  abstract protected Element getServiceDescription(Document doc, String service, String lang, String subset);
 
-	protected Element getServiceFormat(String service)
+  protected Element getServiceFormat(Document doc, String service)
 	{
-		Element format = (Element) ((Element) this.format_info_map.get(service)).cloneNode(true);
-		return format;
+	  Element format = (Element) this.format_info_map.get(service);
+	  if (format != null) {
+	    return (Element)doc.importNode(format, true);
+	  }
+	  return null;
 	}
 
 	/** overloaded version for no args case */

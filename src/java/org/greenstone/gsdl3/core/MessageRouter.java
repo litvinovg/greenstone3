@@ -234,8 +234,8 @@ public class MessageRouter implements ModuleInterface
 	public Node process(Node message_node)
 	{
 
-	  Document doc = this.converter.newDOM();
-		Element message = this.converter.nodeToElement(message_node);
+	  Document doc = XMLConverter.newDOM();
+		Element message = GSXML.nodeToElement(message_node);
 
 		// check that its a correct message tag
 		if (!message.getTagName().equals(GSXML.MESSAGE_ELEM))
@@ -463,7 +463,7 @@ public class MessageRouter implements ModuleInterface
 		this.config_info = config_doc.getDocumentElement();
 
 		// load up the services: serviceRackList
-		Document doc = this.converter.newDOM();
+		Document doc = XMLConverter.newDOM();
 		this.service_list = doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
 		Element service_rack_list_elem = (Element) GSXML.getChildByTagName(config_info, GSXML.SERVICE_CLASS_ELEM + GSXML.LIST_MODIFIER);
 		configureServices(service_rack_list_elem);
@@ -511,7 +511,7 @@ public class MessageRouter implements ModuleInterface
 			logger.info("... none to be loaded");
 			return true;
 		}
-		Document doc = this.converter.newDOM();
+		Document doc = XMLConverter.newDOM();
 		Element service_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		Element service_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
 		service_message.appendChild(service_request);
@@ -915,14 +915,14 @@ public class MessageRouter implements ModuleInterface
 	{
 
 		logger.info(" getting info from site:" + site_name);
-		Document doc = this.converter.newDOM();
+		Document doc = XMLConverter.newDOM();
 		Element info_request = doc.createElement(GSXML.MESSAGE_ELEM);
 		Element req = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
 		info_request.appendChild(req);
 
 		// process the message
 		Node info_response_node = comm.process(info_request);
-		Element info_response = converter.nodeToElement(info_response_node);
+		Element info_response = GSXML.nodeToElement(info_response_node);
 
 		if (info_response == null)
 		{
@@ -1082,7 +1082,7 @@ public class MessageRouter implements ModuleInterface
 	{
 
 		// message for self, should be type=describe/configure at this stage
-	        Document doc = this.converter.newDOM();
+	        Document doc = XMLConverter.newDOM();
 		String type = req.getAttribute(GSXML.TYPE_ATT);
 		Element response = doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, "");
@@ -1333,7 +1333,7 @@ public class MessageRouter implements ModuleInterface
 
 	protected Element modifyMessages(Element request, Element message, Element result)
 	{
-	  Document doc = this.converter.newDOM();
+	  Document doc = XMLConverter.newDOM();
 		Element response = doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, "");
 		response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_MESSAGING);

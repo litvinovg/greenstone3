@@ -39,7 +39,9 @@ import org.greenstone.gsdl3.util.GSDocumentModel;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -83,24 +85,24 @@ public class DocumentMaker extends ServiceRack
 
 		for (int i = 0; i < services.length; i++)
 		{
-			Element service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 			service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			service.setAttribute(GSXML.NAME_ATT, services[i]);
 			this.short_service_info.appendChild(service);
 		}
 
-		_GSDM = new GSDocumentModel(this.site_home, this.doc, this.router);
+		_GSDM = new GSDocumentModel(this.site_home, this.router);
 
 		return true;
 	}
 
-	protected Element getServiceDescription(String service_id, String lang, String subset)
+  protected Element getServiceDescription(Document doc, String service_id, String lang, String subset)
 	{
 		for (int i = 0; i < services.length; i++)
 		{
 			if (service_id.equals(services[i]))
 			{
-				Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+				Element service_elem = doc.createElement(GSXML.SERVICE_ELEM);
 				service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 				service_elem.setAttribute(GSXML.NAME_ATT, services[i]);
 				return service_elem;
@@ -116,11 +118,12 @@ public class DocumentMaker extends ServiceRack
 
 	protected Element processDocumentCreate(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOCUMENT_CREATE);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOCUMENT_CREATE);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOCUMENT_CREATE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOCUMENT_CREATE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -147,11 +150,12 @@ public class DocumentMaker extends ServiceRack
 
 	protected Element processDocumentDelete(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOCUMENT_DELETE);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOCUMENT_DELETE);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOCUMENT_DELETE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOCUMENT_DELETE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -177,11 +181,12 @@ public class DocumentMaker extends ServiceRack
 
 	protected Element processDocumentDuplicate(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOCUMENT_DUPLICATE);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOCUMENT_DUPLICATE);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOCUMENT_DUPLICATE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOCUMENT_DUPLICATE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -210,11 +215,12 @@ public class DocumentMaker extends ServiceRack
 
 	protected Element processDocumentGetInformation(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOCUMENT_GET_INFORMATION);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOCUMENT_GET_INFORMATION);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOCUMENT_GET_INFORMATION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOCUMENT_GET_INFORMATION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -248,11 +254,12 @@ public class DocumentMaker extends ServiceRack
 
 	protected Element processDocumentMove(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOCUMENT_MOVE);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOCUMENT_MOVE);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOCUMENT_MOVE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOCUMENT_MOVE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -280,11 +287,12 @@ public class DocumentMaker extends ServiceRack
 
 	protected Element processDocumentMerge(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOCUMENT_MERGE);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOCUMENT_MERGE);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOCUMENT_MERGE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOCUMENT_MERGE + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -311,11 +319,12 @@ public class DocumentMaker extends ServiceRack
 
 	protected Element processDocumentSplit(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOCUMENT_SPLIT);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOCUMENT_SPLIT);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOCUMENT_SPLIT + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOCUMENT_SPLIT + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -337,7 +346,7 @@ public class DocumentMaker extends ServiceRack
 			}
 			catch (Exception ex)
 			{
-				GSXML.addError(this.doc, result, DOCUMENT_SPLIT + ": The split point was not an integer", GSXML.ERROR_TYPE_SYNTAX);
+				GSXML.addError(result, DOCUMENT_SPLIT + ": The split point was not an integer", GSXML.ERROR_TYPE_SYNTAX);
 				return result;
 			}
 
@@ -353,11 +362,12 @@ public class DocumentMaker extends ServiceRack
 
 	protected Element processDocumentExecuteTransaction(Element request)
 	{
-		Element result = GSXML.createBasicResponse(this.doc, DOCUMENT_EXECUTE_TRANSACTION);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, DOCUMENT_EXECUTE_TRANSACTION);
 
 		if (request == null)
 		{
-			GSXML.addError(this.doc, result, DOCUMENT_EXECUTE_TRANSACTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOCUMENT_EXECUTE_TRANSACTION + ": Request is null", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -366,7 +376,7 @@ public class DocumentMaker extends ServiceRack
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (param_list == null)
 		{
-			GSXML.addError(this.doc, result, DOCUMENT_EXECUTE_TRANSACTION + ": Request has no parameter list", GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, DOCUMENT_EXECUTE_TRANSACTION + ": Request has no parameter list", GSXML.ERROR_TYPE_SYNTAX);
 			return result;
 		}
 
@@ -418,7 +428,7 @@ public class DocumentMaker extends ServiceRack
 					String subOperation = (String) keyValueMap.get("subOperation");
 
 					//_GSDM.documentCreate(oid, collection, userContext); <--- Maybe go back to this
-					_GSDM.documentXMLSetSection(oid, collection, this.doc.createElement(GSXML.DOCXML_SECTION_ELEM), _GSDM.operationStringToInt(subOperation), userContext);
+					_GSDM.documentXMLSetSection(oid, collection, result_doc.createElement(GSXML.DOCXML_SECTION_ELEM), _GSDM.operationStringToInt(subOperation), userContext);
 				}
 				else if (operation.equals("delete"))
 				{

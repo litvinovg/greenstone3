@@ -25,7 +25,9 @@ import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
 import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element; 
 
 import org.apache.log4j.*;
@@ -56,17 +58,17 @@ public class ArchiveRetrieve extends ServiceRack
 		logger.info("Configuring ArchiveRetrieve...");
 		this.config_info = info;
 		
-		Element documentFilePathRetrieveService = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element documentFilePathRetrieveService = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		documentFilePathRetrieveService.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 		documentFilePathRetrieveService.setAttribute(GSXML.NAME_ATT, DOCUMENT_FILE_PATH_RETRIEVE_SERVICE);
 		this.short_service_info.appendChild(documentFilePathRetrieveService);
 		
-		Element associatedImportFilesRetrieveService = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element associatedImportFilesRetrieveService = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		associatedImportFilesRetrieveService.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 		associatedImportFilesRetrieveService.setAttribute(GSXML.NAME_ATT, ASSOCIATED_IMPORT_FILES_RETRIEVE_SERVICE);
 		this.short_service_info.appendChild(associatedImportFilesRetrieveService);
 		
-		Element sourceFileDocIDRetrieveService = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element sourceFileDocIDRetrieveService = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		sourceFileDocIDRetrieveService.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 		sourceFileDocIDRetrieveService.setAttribute(GSXML.NAME_ATT, SOURCE_FILE_OID_RETRIEVE);
 		this.short_service_info.appendChild(sourceFileDocIDRetrieveService);
@@ -74,25 +76,25 @@ public class ArchiveRetrieve extends ServiceRack
 		return true;
 	}
 	
-	protected Element getServiceDescription(String service_id, String lang, String subset) 
+  protected Element getServiceDescription(Document doc, String service_id, String lang, String subset) 
 	{
 		if (service_id.equals(DOCUMENT_FILE_PATH_RETRIEVE_SERVICE)) 
 		{
-			Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element service_elem = doc.createElement(GSXML.SERVICE_ELEM);
 			service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			service_elem.setAttribute(GSXML.NAME_ATT, DOCUMENT_FILE_PATH_RETRIEVE_SERVICE);
 			return service_elem;
 		}
 		else if (service_id.equals(ASSOCIATED_IMPORT_FILES_RETRIEVE_SERVICE)) 
 		{
-			Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element service_elem = doc.createElement(GSXML.SERVICE_ELEM);
 			service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			service_elem.setAttribute(GSXML.NAME_ATT, ASSOCIATED_IMPORT_FILES_RETRIEVE_SERVICE);
 			return service_elem;
 		}
 		else if (service_id.equals(SOURCE_FILE_OID_RETRIEVE))
 		{
-			Element service_elem = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element service_elem = doc.createElement(GSXML.SERVICE_ELEM);
 			service_elem.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 			service_elem.setAttribute(GSXML.NAME_ATT, SOURCE_FILE_OID_RETRIEVE);
 			return service_elem;
@@ -103,7 +105,8 @@ public class ArchiveRetrieve extends ServiceRack
 	protected Element processDocumentFilePathRetrieve(Element request)
 	{
 		// Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, DOCUMENT_FILE_PATH_RETRIEVE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 		
@@ -112,7 +115,7 @@ public class ArchiveRetrieve extends ServiceRack
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 		if (param_list == null) {
-			GSXML.addError(this.doc, result, "DocumentFilePathRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, "DocumentFilePathRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;  
 		}
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
@@ -129,8 +132,8 @@ public class ArchiveRetrieve extends ServiceRack
 			assocFilePath + File.separatorChar + 
 			"doc.xml";
 
-		Element metadataList = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		metadataList.appendChild(createMetadataElement("docfilepath", docFilePath));
+		Element metadataList = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		metadataList.appendChild(GSXML.createMetadataElement(result_doc, "docfilepath", docFilePath));
 		result.appendChild(metadataList);
 		
 		return result;
@@ -139,7 +142,8 @@ public class ArchiveRetrieve extends ServiceRack
 	protected Element processSourceFileOIDRetrieveService(Element request)
 	{
 		//Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, SOURCE_FILE_OID_RETRIEVE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 		
@@ -149,7 +153,7 @@ public class ArchiveRetrieve extends ServiceRack
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 		if (param_list == null) 
 		{
-			GSXML.addError(this.doc, result, "DocumentFilePathRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, "DocumentFilePathRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;  
 		}
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
@@ -200,8 +204,8 @@ public class ArchiveRetrieve extends ServiceRack
 		
 		String oid = info.getInfo("oid");
 		
-		Element metadataList = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		metadataList.appendChild(createMetadataElement("oid", oid));
+		Element metadataList = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		metadataList.appendChild(GSXML.createMetadataElement(result_doc, "oid", oid));
 		result.appendChild(metadataList);
 		
 		return result;
@@ -210,7 +214,8 @@ public class ArchiveRetrieve extends ServiceRack
 	protected Element processAssociatedImportFilesRetrieve(Element request)
 	{
 		//Create a new (empty) result message
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, ASSOCIATED_IMPORT_FILES_RETRIEVE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 		
@@ -220,7 +225,7 @@ public class ArchiveRetrieve extends ServiceRack
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 		if (param_list == null) 
 		{
-			GSXML.addError(this.doc, result, "AssociatedImportFilesRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(result, "AssociatedImportFilesRetrieve: missing "+ GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER, GSXML.ERROR_TYPE_SYNTAX);
 			return result;  
 		}
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
@@ -271,12 +276,12 @@ public class ArchiveRetrieve extends ServiceRack
 		String srcFile = info.getInfo("src-file");
 		Vector<String> data = info.getMultiInfo("assoc-file");
 		
-		Element metadataList = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		metadataList.appendChild(createMetadataElement("srcfile", srcFile));
+		Element metadataList = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		metadataList.appendChild(GSXML.createMetadataElement(result_doc, "srcfile", srcFile));
 		
 		for (int i = 0; i < data.size(); i++)
 		{
-			metadataList.appendChild(createMetadataElement("assocfile", data.get(i)));
+		  metadataList.appendChild(GSXML.createMetadataElement(result_doc, "assocfile", data.get(i)));
 		}
 		
 		result.appendChild(metadataList);
@@ -284,27 +289,21 @@ public class ArchiveRetrieve extends ServiceRack
 		return result;
 	}
 	
-	public Element createMetadataElement(String name, String value)
-	{
-		Element metaElem = this.doc.createElement(GSXML.METADATA_ELEM);
-		metaElem.setAttribute("name", name);
-		metaElem.setAttribute("value", value);
-		return metaElem;
-	}
 	
 	public String getAssocFilePathFromDocID(String oid, String collection, UserContext userContext)
 	{
-		Element mr_query_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_query_request = GSXML.createBasicRequest (this.doc, GSXML.REQUEST_TYPE_PAGE, collection + "/DocumentMetadataRetrieve", userContext);
+	  Document doc = XMLConverter.newDOM();
+		Element mr_query_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_query_request = GSXML.createBasicRequest (doc, GSXML.REQUEST_TYPE_PAGE, collection + "/DocumentMetadataRetrieve", userContext);
 		mr_query_message.appendChild(mr_query_request);
 		
-		Element paramList = this.doc.createElement(GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
-		paramList.appendChild(createMetadataElement("metadata", "assocfilepath"));
+		Element paramList = doc.createElement(GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+		paramList.appendChild(GSXML.createMetadataElement(doc, "metadata", "assocfilepath"));
 		
 		mr_query_request.appendChild(paramList);
 
-		Element docListElem = this.doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
-		Element docElem = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+		Element docListElem = doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
+		Element docElem = doc.createElement(GSXML.DOC_NODE_ELEM);
 		docElem.setAttribute(GSXML.NODE_ID_ATT, oid);
 		docListElem.appendChild(docElem);
 		mr_query_request.appendChild(docListElem);
@@ -323,8 +322,9 @@ public class ArchiveRetrieve extends ServiceRack
 	public String getDatabaseTypeFromCollection(String collection, UserContext userContext)
 	{
 		//Find out what kind of database we have
-		Element dbTypeMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element dbTypeRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, collection, userContext);
+	  Document doc = XMLConverter.newDOM();
+		Element dbTypeMessage = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element dbTypeRequest = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, collection, userContext);
 		dbTypeMessage.appendChild(dbTypeRequest);
 		Element dbTypeResponse = (Element)this.router.process(dbTypeMessage);
 		

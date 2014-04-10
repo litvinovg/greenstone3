@@ -81,8 +81,6 @@ public class OAIPMH extends ServiceRack {
       return false;
     }
     
-    Document doc = this.converter.newDOM();
-    this.short_service_info = doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
     //get the names from ServiceRack.java
     this.site_name = this.router.getSiteName();
     this.coll_name = this.cluster_name;
@@ -137,27 +135,27 @@ public class OAIPMH extends ServiceRack {
     // in each method we will use OAIXMLto create the response xml
     // set up short_service_info_ - just the name
 
-    Element list_records = doc.createElement(GSXML.SERVICE_ELEM);
+    Element list_records = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
     list_records.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_RECORDS);
     list_records.setAttribute(GSXML.TYPE_ATT, "oai");
     this.short_service_info.appendChild(list_records);
 
-    Element list_identifiers = doc.createElement(GSXML.SERVICE_ELEM);
+    Element list_identifiers = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
     list_identifiers.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_IDENTIFIERS);
     list_identifiers.setAttribute(GSXML.TYPE_ATT, "oai");
     this.short_service_info.appendChild(list_identifiers);
     
-    Element list_sets = doc.createElement(GSXML.SERVICE_ELEM);
+    Element list_sets = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
     list_sets.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_SETS);
     list_sets.setAttribute(GSXML.TYPE_ATT, "oai");
     this.short_service_info.appendChild(list_sets);
     
-    Element list_metadata_formats = doc.createElement(GSXML.SERVICE_ELEM);
+    Element list_metadata_formats = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
     list_metadata_formats.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_METADATA_FORMATS);
     list_metadata_formats.setAttribute(GSXML.TYPE_ATT, "oai");
     this.short_service_info.appendChild(list_metadata_formats);
 
-    Element get_record = doc.createElement(GSXML.SERVICE_ELEM);
+    Element get_record = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
     get_record.setAttribute(GSXML.NAME_ATT, OAIXML.GET_RECORD);
     get_record.setAttribute(GSXML.TYPE_ATT, "oai");
     this.short_service_info.appendChild(get_record);
@@ -166,9 +164,8 @@ public class OAIPMH extends ServiceRack {
   }
 
   /** returns a specific service description */
-  public Element getServiceDescription(String service_id, String lang, String subset) {
+  public Element getServiceDescription(Document doc, String service_id, String lang, String subset) {
     
-    Document doc = this.converter.newDOM();
     if (service_id.equals(OAIXML.LIST_RECORDS)) {
       Element list_records = doc.createElement(GSXML.SERVICE_ELEM);
       list_records.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_RECORDS);
@@ -245,7 +242,7 @@ public class OAIPMH extends ServiceRack {
       return OAIXML.createErrorResponse(OAIXML.ID_DOES_NOT_EXIST, "");
     }
 
-    Document doc = this.converter.newDOM();
+    Document doc = XMLConverter.newDOM();
     ArrayList<String> keys = new ArrayList<String>(info.getKeys());
     String oailastmodified = "";
     if(keys.contains(OAIXML.OAI_LASTMODIFIED)) {
@@ -320,7 +317,7 @@ public class OAIPMH extends ServiceRack {
     }
     // all validation is done
 
-    Document doc = this.converter.newDOM();
+    Document doc = XMLConverter.newDOM();
     Element list_identifiers_response = doc.createElement(GSXML.RESPONSE_ELEM);
     Element list_identifiers = doc.createElement(OAIXML.LIST_IDENTIFIERS);
     list_identifiers_response.appendChild(list_identifiers);
@@ -411,7 +408,7 @@ public class OAIPMH extends ServiceRack {
     }
     // all validation is done
 
-    Document doc = this.converter.newDOM();
+    Document doc = XMLConverter.newDOM();
     Element list_records_response = doc.createElement(GSXML.RESPONSE_ELEM);
     Element list_records = doc.createElement(OAIXML.LIST_RECORDS);
     list_records_response.appendChild(list_records);
@@ -456,7 +453,7 @@ public class OAIPMH extends ServiceRack {
   // have implemented setDescription as an element, instead of a container containing metadata
   private boolean configureSetInfo() {
 
-    Document doc = this.converter.newDOM();
+    Document doc = XMLConverter.newDOM();
     this.list_sets_response = doc.createElement(GSXML.RESPONSE_ELEM);
     Element list_sets_elem = doc.createElement(OAIXML.LIST_SETS);
     this.list_sets_response.appendChild(list_sets_elem);
@@ -597,7 +594,7 @@ public class OAIPMH extends ServiceRack {
       return OAIXML.createErrorResponse(OAIXML.NO_METADATA_FORMATS, "");
     }
 
-    Document doc = this.converter.newDOM();
+    Document doc = XMLConverter.newDOM();
     Element list_metadata_formats_response = doc.createElement(GSXML.RESPONSE_ELEM);
     
     Element list_metadata_formats = doc.createElement(OAIXML.LIST_METADATA_FORMATS);

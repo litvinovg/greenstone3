@@ -82,8 +82,9 @@ public class ServiceCluster implements ModuleInterface
   /** a MacroResolver for resolving macros in displayItems */
   protected SimpleMacroResolver macro_resolver = null;
 
-	/** container doc for description elements */
-	protected Document doc = null;
+	/** container doc for description elements 
+	 only use this document for creating the below stored lists. */
+        protected Document desc_doc = null;
 	/** list of services */
 	protected Element service_list = null;
 	/** list of metadata - all metadata, regardless of language goes in here */
@@ -138,13 +139,13 @@ public class ServiceCluster implements ModuleInterface
 		this.service_name_map = new HashMap<String, String>();
 		this.converter = new XMLConverter();
 		this.macro_resolver = new SimpleMacroResolver();
-		this.doc = this.converter.newDOM();
-		this.description = this.doc.createElement(GSXML.CLUSTER_ELEM);
-		this.display_item_list = this.doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
-		this.metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		this.library_param_list = this.doc.createElement("libraryParamList");
-		this.service_list = this.doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
-		//this.plugin_item_list = this.doc.createElement(GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER);
+		this.desc_doc = XMLConverter.newDOM();
+		this.description = this.desc_doc.createElement(GSXML.CLUSTER_ELEM);
+		this.display_item_list = this.desc_doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+		this.metadata_list = this.desc_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		this.library_param_list = this.desc_doc.createElement(GSXML.LIBRARY_PARAM_ELEM+GSXML.LIST_MODIFIER);
+		this.service_list = this.desc_doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		//this.plugin_item_list = this.desc_doc.createElement(GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER);
 	}
 
 	/**
@@ -265,7 +266,7 @@ public class ServiceCluster implements ModuleInterface
 		}
 
 		// get the servlet params
-		Element param_list = (Element) GSXML.getChildByTagName(service_cluster_info, "libraryParamList");
+		Element param_list = (Element) GSXML.getChildByTagName(service_cluster_info, GSXML.LIBRARY_PARAM_ELEM+GSXML.LIST_MODIFIER);
 		if (param_list != null) {
 		  if (!addLibraryParams(param_list)) {
 		    logger.error("couldn't configure the library param list");
@@ -285,7 +286,7 @@ public class ServiceCluster implements ModuleInterface
 		{
 			for (int k = 0; k < metanodes.getLength(); k++)
 			{
-				this.metadata_list.appendChild(this.doc.importNode(metanodes.item(k), true));
+				this.metadata_list.appendChild(this.desc_doc.importNode(metanodes.item(k), true));
 			}
 		}
 
@@ -293,7 +294,7 @@ public class ServiceCluster implements ModuleInterface
 	}
   /** adds an individual metadata element into the list */
   protected boolean addMetadata(String name, String value) {
-    return GSXML.addMetadata(this.doc, this.metadata_list, name, value);
+    return GSXML.addMetadata(this.metadata_list, name, value);
   }
   
   /** in displayItemList, end up with the following for each named displayItem
@@ -323,12 +324,12 @@ public class ServiceCluster implements ModuleInterface
 				Element this_item = GSXML.getNamedElement(this.display_item_list, GSXML.DISPLAY_TEXT_ELEM, GSXML.NAME_ATT, name);
 				if (this_item == null)
 				{
-					this_item = this.doc.createElement(GSXML.DISPLAY_TEXT_ELEM);
+					this_item = this.desc_doc.createElement(GSXML.DISPLAY_TEXT_ELEM);
 					this_item.setAttribute(GSXML.NAME_ATT, name);
 					this.display_item_list.appendChild(this_item);
 				}
 
-				this_item.appendChild(this.doc.importNode(d, true));
+				this_item.appendChild(this.desc_doc.importNode(d, true));
 			}
 		}
 
@@ -384,7 +385,7 @@ public class ServiceCluster implements ModuleInterface
 		{
 			for (int k = 0; k < paramnodes.getLength(); k++)
 			{
-				this.library_param_list.appendChild(this.doc.importNode(paramnodes.item(k), true));
+				this.library_param_list.appendChild(this.desc_doc.importNode(paramnodes.item(k), true));
 			}
 		}
 
@@ -395,14 +396,14 @@ public class ServiceCluster implements ModuleInterface
 	  cleanUp();
 		service_map.clear();
 		service_name_map.clear();
-		this.service_list = this.doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		this.service_list = this.desc_doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
 	}
 
   protected void clearLocalData() {
-    this.description = this.doc.createElement(GSXML.CLUSTER_ELEM);
-    this.display_item_list = this.doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
-    this.metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-    this.library_param_list = this.doc.createElement("libraryParamList");
+    this.description = this.desc_doc.createElement(GSXML.CLUSTER_ELEM);
+    this.display_item_list = this.desc_doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+    this.metadata_list = this.desc_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+    this.library_param_list = this.desc_doc.createElement(GSXML.LIBRARY_PARAM_ELEM+GSXML.LIST_MODIFIER);
  
   }
 	/**
@@ -421,14 +422,16 @@ public class ServiceCluster implements ModuleInterface
 			return false;
 		}
 
+		// the xml request to send to the serviceRacks to query what
+		// services they provide
+		// can send same message to each service rack
+		Document doc = XMLConverter.newDOM();
+		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
+		message.appendChild(request);
 		for (int i = 0; i < nodes.getLength(); i++)
 		{
 
-			// the xml request to send to the serviceRack to query what
-			// services it provides
-			Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
-			message.appendChild(request);
 
 			Element n = (Element) nodes.item(i);
 			String servicetype = n.getAttribute(GSXML.NAME_ATT);
@@ -498,7 +501,7 @@ public class ServiceCluster implements ModuleInterface
 					}
 					this.service_map.put(service, s);
 					// also add info to the ServiceInfo XML element
-					this.service_list.appendChild(this.doc.importNode(typenodes.item(j), true));
+					this.service_list.appendChild(this.desc_doc.importNode(typenodes.item(j), true));
 				}
 			}
 		}
@@ -531,11 +534,12 @@ public class ServiceCluster implements ModuleInterface
 	 */
 	public Node process(Node message_node)
 	{
-		Element message = this.converter.nodeToElement(message_node);
+		Element message = GSXML.nodeToElement(message_node);
 
 		NodeList requests = message.getElementsByTagName(GSXML.REQUEST_ELEM);
 		Document mess_doc = message.getOwnerDocument();
-		Element mainResult = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Document result_doc = XMLConverter.newDOM();
+		Element mainResult = result_doc.createElement(GSXML.MESSAGE_ELEM);
 		if (requests.getLength() == 0)
 		{
 			logger.error("no requests for cluster:" + this.cluster_name);
@@ -559,7 +563,7 @@ public class ServiceCluster implements ModuleInterface
 
 			if (to.equals(""))
 			{ // this command is for me
-				Element response = processMessage(request);
+			  Element response = processMessage(result_doc, request);
 				mainResult.appendChild(response);
 
 			}
@@ -605,7 +609,7 @@ public class ServiceCluster implements ModuleInterface
 					}
 					from = GSPath.prependLink(from, this.cluster_name);
 					response.setAttribute(GSXML.FROM_ATT, from);
-					mainResult.appendChild(this.doc.importNode(response, true));
+					mainResult.appendChild(result_doc.importNode(response, true));
 				}
 
 			} // else
@@ -621,9 +625,10 @@ public class ServiceCluster implements ModuleInterface
 	 *            - the request Element- <request>
 	 * @return the result Element - should be <response>
 	 */
-	protected Element processMessage(Element request)
+  protected Element processMessage(Document result_doc, Element request)
 	{
-		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+
+		Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
 		String type = request.getAttribute(GSXML.TYPE_ATT);
 		String lang = request.getAttribute(GSXML.LANG_ATT);
@@ -632,7 +637,7 @@ public class ServiceCluster implements ModuleInterface
 		if (type.equals(GSXML.REQUEST_TYPE_DESCRIBE))
 		{
 			// create the collection element
-			Element description = (Element) this.description.cloneNode(false);
+		  Element description = (Element) result_doc.importNode(this.description, false);
 			// set collection type : mg, mgpp, lucene or solr
 			//description.setAttribute(GSXML.TYPE_ATT, col_type);
 			//description.setAttribute(GSXML.DB_TYPE_ATT, db_type);
@@ -643,9 +648,9 @@ public class ServiceCluster implements ModuleInterface
 			if (param_list == null)
 			{
 				addAllDisplayInfo(description, lang);
-				description.appendChild(this.service_list);
-				description.appendChild(this.metadata_list);
-				description.appendChild(this.library_param_list);
+				description.appendChild(result_doc.importNode(this.service_list, true));
+				description.appendChild(result_doc.importNode(this.metadata_list, true));
+				description.appendChild(result_doc.importNode(this.library_param_list, true));
 				//description.appendChild(this.plugin_item_list);
 				return response;
 			}
@@ -662,19 +667,19 @@ public class ServiceCluster implements ModuleInterface
 					String info = param.getAttribute(GSXML.VALUE_ATT);
 					if (info.equals(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER))
 					{
-						description.appendChild(this.service_list);
+					  description.appendChild(result_doc.importNode(this.service_list, true));
 					}
 					else if (info.equals(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER))
 					{
-						description.appendChild(this.metadata_list);
+					  description.appendChild(result_doc.importNode(this.metadata_list, true));
 					}
 					else if (info.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER))
 					{
 						addAllDisplayInfo(description, lang);
 					}
-					else if (info.equals("libraryParamlist"))
+					else if (info.equals(GSXML.LIBRARY_PARAM_ELEM+GSXML.LIST_MODIFIER))
 					{
-					  description.appendChild(this.library_param_list);
+					  description.appendChild(result_doc.importNode(this.library_param_list, true));
 					}
 				}
 			}
@@ -777,8 +782,8 @@ public class ServiceCluster implements ModuleInterface
 
 	protected Element processSystemRequest(Element request)
 	{
-
-		Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	  Document result_doc = XMLConverter.newDOM();
+		Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
 		response.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_SYSTEM);
 
@@ -800,24 +805,24 @@ public class ServiceCluster implements ModuleInterface
 
 					if (this.configure())
 					{
-						Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, this.cluster_name + " reconfigured");
+						Element s = GSXML.createTextElement(result_doc, GSXML.STATUS_ELEM, this.cluster_name + " reconfigured");
 						response.appendChild(s);
 
 					}
 					else
 					{
-						Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, this.cluster_name + " could not be reconfigured");
+						Element s = GSXML.createTextElement(result_doc, GSXML.STATUS_ELEM, this.cluster_name + " could not be reconfigured");
 						response.appendChild(s);
 					}
 				}
 				else if (this.configureSubset(subset))
 				{
-					Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, this.cluster_name + " " + subset + " reconfigured");
+					Element s = GSXML.createTextElement(result_doc, GSXML.STATUS_ELEM, this.cluster_name + " " + subset + " reconfigured");
 					response.appendChild(s);
 				}
 				else
 				{
-					Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, this.cluster_name + " " + subset + " could not be reconfigured");
+					Element s = GSXML.createTextElement(result_doc, GSXML.STATUS_ELEM, this.cluster_name + " " + subset + " could not be reconfigured");
 					response.appendChild(s);
 				}
 				continue;
@@ -827,7 +832,7 @@ public class ServiceCluster implements ModuleInterface
 			String module_type = elem.getAttribute(GSXML.SYSTEM_MODULE_TYPE_ATT);
 			if (action.equals(GSXML.SYSTEM_TYPE_ACTIVATE))
 			{
-				Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, "activate action not yet implemented - does it even make sense in this context??");
+				Element s = GSXML.createTextElement(result_doc, GSXML.STATUS_ELEM, "activate action not yet implemented - does it even make sense in this context??");
 				response.appendChild(s);
 			}
 			else if (action.equals(GSXML.SYSTEM_TYPE_DEACTIVATE))
@@ -845,7 +850,7 @@ public class ServiceCluster implements ModuleInterface
 				{
 					message = "Can't deactivate " + module_type + " type modules!";
 				}
-				Element s = GSXML.createTextElement(this.doc, GSXML.STATUS_ELEM, message);
+				Element s = GSXML.createTextElement(result_doc, GSXML.STATUS_ELEM, message);
 				response.appendChild(s);
 			}
 			else
@@ -896,7 +901,7 @@ public class ServiceCluster implements ModuleInterface
 		}
 		else if (subset.equals(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER))
 		{
-			this.metadata_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+			this.metadata_list = this.desc_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 			Element metadata_list = (Element) GSXML.getChildByTagName(cluster_config_elem, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 			return addMetadata(metadata_list);
 		}
@@ -922,7 +927,7 @@ public class ServiceCluster implements ModuleInterface
 
 	protected boolean addAllDisplayInfo(Element description, String lang)
 	{
-
+	  Document doc = description.getOwnerDocument();
 		NodeList items = this.display_item_list.getChildNodes();
 		for (int i = 0; i < items.getLength(); i++)
 		{ // for each key
@@ -939,7 +944,7 @@ public class ServiceCluster implements ModuleInterface
 				// just get the first one
 				new_m = (Element) GSXML.getChildByTagName(m, GSXML.DISPLAY_TEXT_ELEM);
 			}
-			description.appendChild(new_m.cloneNode(true));
+			description.appendChild(doc.importNode(new_m, true));
 		}
 		return true;
 

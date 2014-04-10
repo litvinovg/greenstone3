@@ -64,12 +64,12 @@ public class CoverageMetadataRetrieve extends ServiceRack
 		// set up short_service_info - this currently is a list of services, 
 		// with their names and service types
 		// we have two services, a new textquery, and a new one of a new type
-		//Element tq_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		//Element tq_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		//tq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
 		//tq_service.setAttribute(GSXML.NAME_ATT, QUERY_SERVICE);
 		//this.short_service_info.appendChild(tq_service);
 
-		Element diff_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+		Element diff_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		diff_service.setAttribute(GSXML.TYPE_ATT, "retrieve");
 		diff_service.setAttribute(GSXML.NAME_ATT, COVERAGE_SERVICE);
 		this.short_service_info.appendChild(diff_service);
@@ -121,7 +121,7 @@ public class CoverageMetadataRetrieve extends ServiceRack
 		Element format = null; // find it from info/extra_info
 		if (format != null)
 		{
-			this.format_info_map.put(COVERAGE_SERVICE, this.doc.importNode(format, true));
+			this.format_info_map.put(COVERAGE_SERVICE, this.desc_doc.importNode(format, true));
 		}
 
 		return true;
@@ -129,7 +129,7 @@ public class CoverageMetadataRetrieve extends ServiceRack
 	}
 
 	// get the desription of a service. Could include parameter lists, displayText
-	protected Element getServiceDescription(String service, String lang, String subset)
+  protected Element getServiceDescription(Document doc, String service, String lang, String subset)
 	{
 
 		// check that we have been asked for the right service
@@ -140,41 +140,41 @@ public class CoverageMetadataRetrieve extends ServiceRack
 
 		/*
 		 * if (service.equals(QUERY_SERVICE)) { Element tq_service =
-		 * this.doc.createElement(GSXML.SERVICE_ELEM);
+		 * doc.createElement(GSXML.SERVICE_ELEM);
 		 * tq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
 		 * tq_service.setAttribute(GSXML.NAME_ATT, QUERY_SERVICE); if
 		 * (subset==null ||
 		 * subset.equals(GSXML.DISPLAY_TEXT_ELEM+GSXML.LIST_MODIFIER)) { // add
 		 * in any <displayText> elements // name, for example - get from
 		 * properties file
-		 * tq_service.appendChild(GSXML.createDisplayTextElement(this.doc,
+		 * tq_service.appendChild(GSXML.createDisplayTextElement(doc,
 		 * GSXML.DISPLAY_TEXT_NAME, getTextString(QUERY_SERVICE+".name", lang)
 		 * )); }
 		 * 
 		 * if (subset==null ||
 		 * subset.equals(GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER)) { // add in a
 		 * param list if this service has parameters Element param_list =
-		 * this.doc.createElement(GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
+		 * doc.createElement(GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 		 * tq_service.appendChild(param_list); // create any params and append
 		 * to param_list } return tq_service; }
 		 */
 
 		if (service.equals(COVERAGE_SERVICE))
 		{
-			Element diff_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+			Element diff_service = doc.createElement(GSXML.SERVICE_ELEM);
 			diff_service.setAttribute(GSXML.TYPE_ATT, "retrieve");
 			diff_service.setAttribute(GSXML.NAME_ATT, COVERAGE_SERVICE);
 			if (subset == null || subset.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER))
 			{
 				// add in any <displayText> elements
 				// name, for example - get from properties file
-				diff_service.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_NAME, getTextString(COVERAGE_SERVICE + ".name", lang)));
+				diff_service.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_NAME, getTextString(COVERAGE_SERVICE + ".name", lang)));
 			}
 
 			if (subset == null || subset.equals(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER))
 			{
 				// add in a param list if this service has parameters
-				Element param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+				Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 				diff_service.appendChild(param_list);
 				// create any params and append to param_list
 			}
@@ -229,11 +229,12 @@ public class CoverageMetadataRetrieve extends ServiceRack
 		}
 
 		// Create response
-		Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+		Document result_doc = XMLConverter.newDOM();
+		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, COVERAGE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 
-		Element metadataSetList = this.doc.createElement("metadataSetList");
+		Element metadataSetList = result_doc.createElement("metadataSetList");
 		result.appendChild(metadataSetList);
 
 		// Iterate over valid keys and build up response
@@ -248,7 +249,7 @@ public class CoverageMetadataRetrieve extends ServiceRack
 			current_key = iter.next();
 
 			// Create metadataSet using the current key and add to metadataSetList
-			metadataSet = this.doc.createElement("metadataSet");
+			metadataSet = result_doc.createElement("metadataSet");
 			if (current_key.indexOf("-") != -1)
 			{
 				name = current_key.split("-")[1];
@@ -262,7 +263,7 @@ public class CoverageMetadataRetrieve extends ServiceRack
 			while (iter2.hasNext())
 			{
 				value = iter2.next();
-				metadata = this.doc.createElement("metadata");
+				metadata = result_doc.createElement("metadata");
 				metadata.setAttribute(GSXML.NAME_ATT, value);
 				metadataSet.appendChild(metadata);
 			}

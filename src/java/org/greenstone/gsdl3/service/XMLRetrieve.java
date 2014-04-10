@@ -1,3 +1,22 @@
+/*
+ *    ServiceRack.java
+ *    Copyright (C) 2014 New Zealand Digital Library, http://www.nzdl.org
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 package org.greenstone.gsdl3.service;
 
 
@@ -38,6 +57,7 @@ public class XMLRetrieve extends ServiceRack {
     protected boolean provide_structure = true;
     protected boolean provide_metadata = true;
     
+  protected GSEntityResolver entity_resolver = null;
 
     public boolean configure(Element info, Element extra_info) {
 	if (!super.configure(info, extra_info)){
@@ -80,19 +100,19 @@ public class XMLRetrieve extends ServiceRack {
 	// set up short_service_info_ - for now just has name and type
 	Element retrieve_service;
 	if (provide_content) {
-	    retrieve_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+	    retrieve_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 	    retrieve_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 	    retrieve_service.setAttribute(GSXML.NAME_ATT, CONTENT_SERVICE);
 	    this.short_service_info.appendChild(retrieve_service);
 	}
 	if (provide_metadata) {
-	    retrieve_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+	    retrieve_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 	    retrieve_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 	    retrieve_service.setAttribute(GSXML.NAME_ATT, METADATA_SERVICE);
 	    this.short_service_info.appendChild(retrieve_service);
 	}
 	if (provide_structure) {
-	    retrieve_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+	    retrieve_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 	    retrieve_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 	    retrieve_service.setAttribute(GSXML.NAME_ATT, STRUCTURE_SERVICE);
 	    this.short_service_info.appendChild(retrieve_service);
@@ -100,23 +120,24 @@ public class XMLRetrieve extends ServiceRack {
 	// find the doc list from the extra_info and keep it - should this be in collect.cfg or build.cfg??
 	collection_doc_list = (Element)GSXML.getChildByTagName(extra_info, GSXML.DOCUMENT_ELEM+GSXML.LIST_MODIFIER);
 
-	GSEntityResolver resolver = new GSEntityResolver();
-	resolver.setClassLoader(this.class_loader);
-	this.converter.setEntityResolver(resolver);
+	entity_resolver = new GSEntityResolver();
+	entity_resolver.setClassLoader(this.class_loader);
+	//this.converter.setEntityResolver(resolver);
 	return true;
     }
 
     // this may get called but is not useful in the case of retrieve services
-    protected Element getServiceDescription(String service_id, String lang, String subset) {
+    protected Element getServiceDescription(Document doc, String service_id, String lang, String subset) {
 
-	Element retrieve_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+	Element retrieve_service = doc.createElement(GSXML.SERVICE_ELEM);
 	retrieve_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 	retrieve_service.setAttribute(GSXML.NAME_ATT, service_id);
 	return retrieve_service;
     }
     
     protected Element processDocumentContentRetrieve(Element request) {
-	Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+      Document result_doc = XMLConverter.newDOM();
+	Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 	result.setAttribute(GSXML.FROM_ATT, CONTENT_SERVICE);
 	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 	
@@ -124,14 +145,14 @@ public class XMLRetrieve extends ServiceRack {
 	if (doc_list == null) {
 	    return result;
 	}
-	Element result_doc_list = (Element)this.doc.importNode(doc_list, true);
+	Element result_doc_list = (Element)result_doc.importNode(doc_list, true);
 	result.appendChild(result_doc_list);
 
 	NodeList docs = result_doc_list.getElementsByTagName(GSXML.DOC_NODE_ELEM);
 	for (int i=0; i<docs.getLength(); i++) {
 
 	    Element doc = (Element)docs.item(i);
-	    Element content = this.doc.createElement(GSXML.NODE_CONTENT_ELEM);
+	    Element content = result_doc.createElement(GSXML.NODE_CONTENT_ELEM);
 	    doc.appendChild(content);
 
 	    String node_id = doc.getAttribute(GSXML.NODE_ID_ATT);
@@ -145,7 +166,7 @@ public class XMLRetrieve extends ServiceRack {
 	    
 	    // if we have asked for the whole doc, just append it
 	    if (doc_name.equals(node_id)) {
-		content.appendChild(this.doc.importNode(doc_elem, true));
+		content.appendChild(result_doc.importNode(doc_elem, true));
 		continue;
 	    }
 		   
@@ -153,7 +174,7 @@ public class XMLRetrieve extends ServiceRack {
 	    
 	    Element section = getSection(doc_elem, node_id);
 	    if (section != null) {
-		content.appendChild(this.doc.importNode(section, true));
+		content.appendChild(result_doc.importNode(section, true));
 	    }
 	    
 	} // for each doc
@@ -163,7 +184,8 @@ public class XMLRetrieve extends ServiceRack {
     }
     
     protected Element processDocumentStructureRetrieve(Element request) {
-	Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+      Document result_doc = XMLConverter.newDOM();
+	Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 	result.setAttribute(GSXML.FROM_ATT, STRUCTURE_SERVICE);
 	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 	
@@ -173,7 +195,7 @@ public class XMLRetrieve extends ServiceRack {
 	    return result;
 	}
 
-	Element result_doc_list = (Element)this.doc.importNode(doc_list, true);
+	Element result_doc_list = (Element)result_doc.importNode(doc_list, true);
 	result.appendChild(result_doc_list);
 	// first look for the stylesheet in the collection
 	File stylesheet = new File(GSFile.collStylesheetFile(this.site_home, this.cluster_name, this.toc_xsl_name));
@@ -195,7 +217,7 @@ public class XMLRetrieve extends ServiceRack {
 
 	    Element doc = (Element)docs.item(i);
 	    
-	    Element structure = this.doc.createElement(GSXML.NODE_STRUCTURE_ELEM);
+	    Element structure = result_doc.createElement(GSXML.NODE_STRUCTURE_ELEM);
 	    doc.appendChild(structure);
 	    String doc_name = doc.getAttribute(GSXML.NODE_ID_ATT);
 	    // make sure we are at the top level
@@ -208,7 +230,7 @@ public class XMLRetrieve extends ServiceRack {
 	    } else {
 		try {
 		    Node toc = transformer.transform(stylesheet, doc_file);
-		    structure.appendChild(this.doc.importNode(toc, true));
+		    structure.appendChild(result_doc.importNode(toc, true));
 		} catch (Exception e) {
 		    logger.error("couldn't transform the document to get the toc");
 		}
@@ -223,7 +245,8 @@ public class XMLRetrieve extends ServiceRack {
     // this just extracts a bit of text from the section to use as the Title
     // this should be overwritten for any format that  has something more suitable
     protected Element processDocumentMetadataRetrieve(Element request) {
-	Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+      Document result_doc = XMLConverter.newDOM();
+	Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 	result.setAttribute(GSXML.FROM_ATT, METADATA_SERVICE);
 	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 	
@@ -233,7 +256,7 @@ public class XMLRetrieve extends ServiceRack {
 	    return result;
 	}
 
-	Element result_doc_list = (Element)this.doc.importNode(doc_list, true);
+	Element result_doc_list = (Element)result_doc.importNode(doc_list, true);
 	result.appendChild(result_doc_list);
 
 	Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
@@ -265,7 +288,7 @@ public class XMLRetrieve extends ServiceRack {
 	    String node_id = doc.getAttribute(GSXML.NODE_ID_ATT);
 	    String doc_name = getWorkName(node_id);
 	    
-	    Element metadata_list = getMetadata(node_id, all_metadata, meta_name_list); 
+	    Element metadata_list = getMetadata(result_doc, node_id, all_metadata, meta_name_list); 
 	    doc.appendChild(metadata_list);
 	}
 	
@@ -283,7 +306,7 @@ public class XMLRetrieve extends ServiceRack {
 	
 	Document the_doc = null;
 	try {
-	    the_doc = this.converter.getDOM(doc_file, this.document_encoding);
+	  the_doc = this.converter.getDOM(doc_file, this.document_encoding, this.entity_resolver);
 	} catch (Exception e) {
 	    logger.error("couldn't create a DOM from file "+doc_file.getPath());
 	    return null;
@@ -345,13 +368,13 @@ public class XMLRetrieve extends ServiceRack {
 	
     }
 
-    protected Element getMetadata(String node_id, boolean all, Vector<String> meta_name_list) {
+  protected Element getMetadata(Document result_doc, String node_id, boolean all, Vector<String> meta_name_list) {
 
 	// our default strategy here is to only return Title and root:Title
 	// ignore all others 
 	// the title of a section is just a little bit of the text inside it.
 	// the root_Title is the title from the doc info in the config file
-	Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+ GSXML.LIST_MODIFIER);
+	Element metadata_list = result_doc.createElement(GSXML.METADATA_ELEM+ GSXML.LIST_MODIFIER);
 	String doc_name = getWorkName(node_id);
 	boolean node_is_root = false;
 	if (doc_name.equals(node_id)) {
@@ -365,7 +388,7 @@ public class XMLRetrieve extends ServiceRack {
 	
 	if (all) {
 	    if (node_is_root) {
-	    return (Element)this.doc.importNode(doc_meta_list, true);
+	    return (Element)result_doc.importNode(doc_meta_list, true);
 	    } else {
 		get_section_title = true;
 	    }
@@ -390,7 +413,7 @@ public class XMLRetrieve extends ServiceRack {
 		// here, we look for the specific meta elem in doc_meta_list
 		Element meta_item = GSXML.getNamedElement(doc_meta_list, GSXML.METADATA_ELEM, GSXML.NAME_ATT, actual_meta_name);
 		if (meta_item != null) {
-		    meta_item = (Element)this.doc.importNode(meta_item, true);
+		    meta_item = (Element)result_doc.importNode(meta_item, true);
 		    meta_item.setAttribute(GSXML.NAME_ATT, meta_name);
 		    metadata_list.appendChild(meta_item);
 		}
@@ -404,7 +427,7 @@ public class XMLRetrieve extends ServiceRack {
 	    if (doc_elem != null) {
 		Element section = getSection(doc_elem, node_id);
 		if (section != null) {
-		    Element title_meta = extractTitleMeta(section);
+		  Element title_meta = extractTitleMeta(result_doc, section);
 		    if (title_meta != null) {
 			metadata_list.appendChild(title_meta);
 		    }
@@ -415,12 +438,12 @@ public class XMLRetrieve extends ServiceRack {
 	return metadata_list;
     }
     
-    protected Element extractTitleMeta(Element section) {
-	Element meta_elem = this.doc.createElement(GSXML.METADATA_ELEM);
+  protected Element extractTitleMeta(Document result_doc, Element section) {
+	Element meta_elem = result_doc.createElement(GSXML.METADATA_ELEM);
 	meta_elem.setAttribute(GSXML.NAME_ATT, "Title");
 
 	String title = "dummy title";
-	Text t = this.doc.createTextNode(title);
+	Text t = result_doc.createTextNode(title);
 	meta_elem.appendChild(t);
 	return meta_elem;
 

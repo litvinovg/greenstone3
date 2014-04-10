@@ -183,7 +183,7 @@ public class OAIServer extends BaseGreenstoneServlet
 			// talking to a remote site, create a communicator
 			Communicator communicator = null;
 			// we need to create the XML to configure the communicator
-			Document site_doc = this.converter.newDOM();
+			Document site_doc = XMLConverter.newDOM();
 			Element site_elem = site_doc.createElement(GSXML.SITE_ELEM);
 			site_elem.setAttribute(GSXML.TYPE_ATT, remote_site_type);
 			site_elem.setAttribute(GSXML.NAME_ATT, remote_site_name);
@@ -358,7 +358,7 @@ public class OAIServer extends BaseGreenstoneServlet
 		String[] pairs = (query == null) ? null : query.split("&");//split into key/value pairs
 		
 		String verb = getVerb(query);
-		Document response_doc = this.converter.newDOM();
+		Document response_doc = XMLConverter.newDOM();
 		Element xml_response = OAIXML.createBasicResponse(response_doc, verb, pairs);
 		Element verb_elem = null;
 
@@ -388,7 +388,7 @@ public class OAIServer extends BaseGreenstoneServlet
 
 		// The query is valid, we can now
 		// compose the request message to the receptionist
-		Document request_doc = this.converter.newDOM();
+		Document request_doc = XMLConverter.newDOM();
 		Element xml_message = request_doc.createElement(GSXML.MESSAGE_ELEM);
 		Element xml_request = request_doc.createElement(GSXML.REQUEST_ELEM);
 		// The type attribute is set to be 'oaiService' from OAIServer to OAIReceptionist.

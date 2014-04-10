@@ -39,7 +39,7 @@ public class RSSRetrieve extends ServiceRack {
 	logger.info("configuring RSSRetrieve...");	
 	
 	// set up short_service_info_ - for now just has name and type
-	Element rss_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+	Element rss_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 	rss_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 	rss_service.setAttribute(GSXML.NAME_ATT, RSS_SERVICE);
 	this.short_service_info.appendChild(rss_service);
@@ -48,9 +48,9 @@ public class RSSRetrieve extends ServiceRack {
     }
 
     // this may get called but is not useful in the case of retrieve services
-    protected Element getServiceDescription(String service_id, String lang, String subset) {
+    protected Element getServiceDescription(Document doc, String service_id, String lang, String subset) {
 
-	Element rss_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+	Element rss_service = doc.createElement(GSXML.SERVICE_ELEM);
 	rss_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_RETRIEVE);
 	rss_service.setAttribute(GSXML.NAME_ATT, service_id);
 	return rss_service;
@@ -59,9 +59,11 @@ public class RSSRetrieve extends ServiceRack {
     // Sends off a collection 'describe' message and returns the <collection> element of the response.
     // This contains the collection meta from collectionConfig.xml. Used to construct header of RSS feed
     protected Element getCollMetadata(UserContext userContext) {
-	Element mr_request_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+      
+      Document msg_doc = XMLConverter.newDOM();
+	Element mr_request_message = msg_doc.createElement(GSXML.MESSAGE_ELEM);
 	String to = this.cluster_name;
-	Element meta_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
+	Element meta_request = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_DESCRIBE, to, userContext);
 	mr_request_message.appendChild(meta_request);
 	Element meta_response = (Element) this.router.process(mr_request_message);
 	meta_response = (Element) GSXML.getChildByTagName(meta_response, GSXML.RESPONSE_ELEM);
@@ -99,7 +101,7 @@ public class RSSRetrieve extends ServiceRack {
 
 
 	// generate the header and footer
-	Document rssDoc = this.doc;
+	Document rssDoc = XMLConverter.newDOM();
 	
 	Element rssNode = rssDoc.createElement("rss"); // rootnode
 	rssNode.setAttribute("version", "2.0");
@@ -227,7 +229,7 @@ public class RSSRetrieve extends ServiceRack {
 	}
 
 	// generate the GS3 response message containing the RSS xml
-	Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	Element result = rssDoc.createElement(GSXML.RESPONSE_ELEM);
 	result.setAttribute(GSXML.FROM_ATT, RSS_SERVICE);
 	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 	result.appendChild(rssNode); // body of <response> is simply the <rss> root element of the RSS feed

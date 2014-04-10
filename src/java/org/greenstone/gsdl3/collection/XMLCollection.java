@@ -29,15 +29,13 @@ public class XMLCollection
     protected boolean findAndLoadInfo(Element coll_config_xml, 
 				      Element build_config_xml){
 
-	// metadata
+	// add metadata to stored metadata list from collConfig and buildConfig
 	Element meta_list = (Element)GSXML.getChildByTagName(coll_config_xml, GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
 	addMetadata(meta_list);
 	meta_list = (Element)GSXML.getChildByTagName(build_config_xml, GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
 	addMetadata(meta_list);
 
-	meta_list = this.doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-	GSXML.addMetadata(this.doc, meta_list, "httpPath", this.site_http_address+"/collect/"+this.cluster_name);
-	addMetadata(meta_list);
+	addMetadata("httpPath", this.site_http_address+"/collect/"+this.cluster_name);
 
 	// display stuff
 	Element display_list = (Element)GSXML.getChildByTagName(coll_config_xml, GSXML.DISPLAY_TEXT_ELEM+GSXML.LIST_MODIFIER);
@@ -46,14 +44,6 @@ public class XMLCollection
 	    addDisplayItems(display_list);
 	}
 
-	//plugin stuff
-	// Element import_list = (Element)GSXML.getChildByTagName(coll_config_xml, GSXML.IMPORT_ELEM);
-	// if (import_list != null)
-	// {
-	// 	Element plugin_list = (Element)GSXML.getChildByTagName(import_list, GSXML.PLUGIN_ELEM+GSXML.LIST_MODIFIER);
-	// 	addPlugins(plugin_list);
-	// }
-	
 	// are we a private collection??
 	if (this.metadata_list != null) {
 	  
@@ -68,9 +58,9 @@ public class XMLCollection
 	}
 	Element config_doc_list = (Element)GSXML.getChildByTagName(coll_config_xml, GSXML.DOCUMENT_ELEM+GSXML.LIST_MODIFIER);
 	if (config_doc_list != null) {
-	    document_list = (Element)this.doc.importNode(config_doc_list, true);
+	    document_list = (Element)desc_doc.importNode(config_doc_list, true);
 	} else {
-	    document_list = this.doc.createElement(GSXML.DOCUMENT_ELEM+GSXML.LIST_MODIFIER);
+	    document_list = desc_doc.createElement(GSXML.DOCUMENT_ELEM+GSXML.LIST_MODIFIER);
 	}
 	return true;
 
@@ -81,9 +71,9 @@ public class XMLCollection
      * @param req - the request Element- <request>
      * @return the result Element - should be <response>
      */
-    protected Element processMessage(Element request) {
+  protected Element processMessage(Document response_doc, Element request) {
 
-	Element response = this.doc.createElement(GSXML.RESPONSE_ELEM);
+	Element response = response_doc.createElement(GSXML.RESPONSE_ELEM);
 	response.setAttribute(GSXML.FROM_ATT, this.cluster_name);
 	String type = request.getAttribute(GSXML.TYPE_ATT);
 	String lang = request.getAttribute(GSXML.LANG_ATT);
@@ -91,16 +81,16 @@ public class XMLCollection
 	
 	if (type.equals(GSXML.REQUEST_TYPE_DESCRIBE)) {
 	    // create the collection element
-	    Element description = (Element)this.description.cloneNode(false);
+	  Element description = (Element)response_doc.importNode(this.description, false);
 	    response.appendChild(description);
 	    // check the param list
 	    Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 	    if (param_list == null) {
 		addAllDisplayInfo(description, lang);
-		description.appendChild(this.service_list);
-		description.appendChild(this.metadata_list);
-		description.appendChild(this.library_param_list);
-		description.appendChild(this.document_list);
+		description.appendChild(response_doc.importNode(this.service_list, true));
+		description.appendChild(response_doc.importNode(this.metadata_list, true));
+		description.appendChild(response_doc.importNode(this.library_param_list, true));
+		description.appendChild(response_doc.importNode(this.document_list, true));
 		return response;
 	    }
 	    
@@ -113,27 +103,24 @@ public class XMLCollection
 		if (param.getAttribute(GSXML.NAME_ATT) == GSXML.SUBSET_PARAM ) {
 		    String info = param.getAttribute(GSXML.VALUE_ATT);
 		    if (info.equals(GSXML.SERVICE_ELEM+GSXML.LIST_MODIFIER)) {
-			description.appendChild(this.service_list);
+			description.appendChild(response_doc.importNode(this.service_list, true));
 		    } else if (info.equals(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER)) {
-			description.appendChild(metadata_list);
+			description.appendChild(response_doc.importNode(metadata_list, true));
 		    } else if (info.equals(GSXML.DISPLAY_TEXT_ELEM+GSXML.LIST_MODIFIER)) {
 			addAllDisplayInfo(description, lang);
 			
 		    } else if (info.equals(GSXML.DOCUMENT_ELEM+GSXML.LIST_MODIFIER)) {
-			description.appendChild(this.document_list);
-		    // } else if (info.equals(GSXML.PLUGIN_ELEM+GSXML.LIST_MODIFIER)) {
-		    // 	description.appendChild(this.plugin_item_list);
-		    // }
-		    } else if (info.equals("libraryParamlist")) {
+			description.appendChild(response_doc.importNode(this.document_list, true));
+		    } else if (info.equals(GSXML.LIBRARY_PARAM_ELEM+GSXML.LIST_MODIFIER)) {
 		      
-		      description.appendChild(this.library_param_list);
+			description.appendChild(response_doc.importNode(this.library_param_list, true));
 		    }
 		
 		}
 	    }
 	    return response;
 	}
-	return super.processMessage(request);
+	return super.processMessage(response_doc, request);
 	    
     }
   

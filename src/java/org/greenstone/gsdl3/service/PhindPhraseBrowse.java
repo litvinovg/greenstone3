@@ -87,14 +87,14 @@ public class PhindPhraseBrowse
     logger.info("configuring PhindPhraseBrowse");
     
     // set up short_service_info_ - for now just has name and type
-    Element e = this.doc.createElement(GSXML.SERVICE_ELEM);
+    Element e = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
     e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_APPLET);
     e.setAttribute(GSXML.NAME_ATT, PHIND_SERVICE);
     this.short_service_info.appendChild(e);
     
     // set up the static applet description
     
-    applet_description = this.doc.createElement(GSXML.SERVICE_ELEM);
+    applet_description = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
     applet_description.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_APPLET);
     applet_description.setAttribute(GSXML.NAME_ATT, PHIND_SERVICE);
     
@@ -115,23 +115,23 @@ public class PhindPhraseBrowse
       return false;
     }
     Element app_elem = dom.getDocumentElement();
-    applet_description.appendChild(this.doc.importNode(app_elem, true));
+    applet_description.appendChild(this.desc_doc.importNode(app_elem, true));
     
     return true;
   }
   
-  protected Element getServiceDescription(String service, String lang, String subset) {
+  protected Element getServiceDescription(Document doc, String service, String lang, String subset) {
     if (!service.equals(PHIND_SERVICE)) {
       return null;
     }
     Element describe = (Element) applet_description.cloneNode(true);
-    describe.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_NAME,  getTextString(PHIND_SERVICE+".name", lang)));
-    describe.appendChild(GSXML.createDisplayTextElement(this.doc, GSXML.DISPLAY_TEXT_DESCRIPTION,  getTextString(PHIND_SERVICE+".description", lang)));
+    describe.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_NAME,  getTextString(PHIND_SERVICE+".name", lang)));
+    describe.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_DESCRIPTION,  getTextString(PHIND_SERVICE+".description", lang)));
     return describe;
   }
   
   protected Element processPhindApplet(Element request) {
-    
+    Document result_doc = XMLConverter.newDOM();
     Element param_elem = (Element)GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
     HashMap<String, Serializable> params = GSXML.extractParams(param_elem, false);
     
@@ -155,21 +155,21 @@ public class PhindPhraseBrowse
     this.basepath = GSFile.phindBaseDir(this.site_home, this.cluster_name, phind_index);
     
     // the result element
-    Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
+    Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
     result.setAttribute(GSXML.FROM_ATT, PHIND_SERVICE);
     result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
     
     // applet result info must be in appletInfo element
-    Element applet_data = this.doc.createElement(GSXML.APPLET_DATA_ELEM);
+    Element applet_data = result_doc.createElement(GSXML.APPLET_DATA_ELEM);
     result.appendChild(applet_data);
-    Element phind_data = this.doc.createElement("phindData");
+    Element phind_data = result_doc.createElement("phindData");
     applet_data.appendChild(phind_data);
     
     
     // if we dont know the phrase number, look it up
     if (phrase == 0) {
       if (word==null || word.equals("")) {
-        Element error = phindError("no word or phrase");
+        Element error = phindError(result_doc, "no word or phrase");
         phind_data.appendChild(error);
         return result;
       }
@@ -178,7 +178,7 @@ public class PhindPhraseBrowse
     if (phrase==0) {
       // the word is not in the collection
       // return a phind error string
-      Element error = phindError("the term "+word+" is not in the collection");
+      Element error = phindError(result_doc, "the term "+word+" is not in the collection");
       phind_data.appendChild(error);
       return result;
     }
@@ -214,11 +214,11 @@ public class PhindPhraseBrowse
     long first_e, long last_e, long first_d,
     long last_d) {
     
-	  synchronized (mgpp_retrieve_src) {
+    synchronized (mgpp_retrieve_src) {
     String record = this.mgpp_retrieve_src.getDocument(this.basepath+File.separatorChar+"pdata", "Document",
       phrase);
     if (record.equals("")) {
-      Element error = phindError("somethings gone wrong - we haven't got a record for phrase number "+phrase);
+      Element error = phindError(phind_data.getOwnerDocument(), "somethings gone wrong - we haven't got a record for phrase number "+phrase);
       phind_data.appendChild(error);
       return false;
     }
@@ -257,7 +257,7 @@ public class PhindPhraseBrowse
     phind_data.setAttribute("ef", ef);
     phind_data.setAttribute("lf", lf);
     phind_data.setAttribute("tf", tf);
-    GSXML.createTextElement(this.doc, "phrase", word);
+    // GSXML.createTextElement(result_doc, "phrase", word); ??? - this needs to be appended somewhere????
     
     addExpansionList(phind_data, expansions, word, ef, first_e, last_e);
     addDocumentList(phind_data, documents, word, df, first_d, last_d);
@@ -265,15 +265,15 @@ public class PhindPhraseBrowse
       addThesaurusList(phind_data, linklist, word, lf, first_l, last_l);
     }
     return true;
-	  }
+    } // end of synchronized (mgpp_retrieve_src) 
   }
   
   protected boolean addExpansionList( Element phind_data, String record,
     String word,
     String freq,
     long first, long last) {
-    
-    Element expansion_list = this.doc.createElement("expansionList");
+    Document phind_doc = phind_data.getOwnerDocument();
+    Element expansion_list = phind_doc.createElement("expansionList");
     phind_data.appendChild(expansion_list);
     expansion_list.setAttribute("length", freq);
     expansion_list.setAttribute("start", Long.toString(first));
@@ -285,14 +285,14 @@ public class PhindPhraseBrowse
     if (length < last) last = length;
     for (long i = first; i < last; i++) {
       long num  = Long.parseLong(expansions[(int)i]);
-      Element expansion = getExpansion( num, word);
+      Element expansion = getExpansion(phind_doc, num, word);
       expansion.setAttribute("num", Long.toString(i));
       expansion_list.appendChild(expansion);
     }
     return true;
   }
   
-  protected Element getExpansion(long phrase_num,
+  protected Element getExpansion(Document phind_doc, long phrase_num,
     String orig_phrase) {
     
     // look up the phrase in the pdata thingy
@@ -310,7 +310,7 @@ public class PhindPhraseBrowse
     //String ef = fields[2]; dont use this
     String df = fields[3];
     
-    Element expansion = this.doc.createElement("expansion");
+    Element expansion = phind_doc.createElement("expansion");
     expansion.setAttribute("tf", tf);
     expansion.setAttribute("df", df);
     expansion.setAttribute("id", Long.toString(phrase_num));
@@ -318,10 +318,10 @@ public class PhindPhraseBrowse
     // get teh suffix and prefix
     String [] ends = splitPhraseOnWord(phrase, orig_phrase);
     if (!ends[0].equals("")) {
-      expansion.appendChild(GSXML.createTextElement(this.doc, "prefix", ends[0]));
+      expansion.appendChild(GSXML.createTextElement(phind_doc, "prefix", ends[0]));
     }
     if (!ends[1].equals("")) {
-      expansion.appendChild(GSXML.createTextElement(this.doc, "suffix", ends[1]));
+      expansion.appendChild(GSXML.createTextElement(phind_doc, "suffix", ends[1]));
     }
     
     return expansion;
@@ -332,8 +332,8 @@ public class PhindPhraseBrowse
     String word,
     String freq,
     long first, long last) {
-    
-    Element document_list = this.doc.createElement("documentList");
+    Document phind_doc = phind_data.getOwnerDocument();
+    Element document_list = phind_doc.createElement("documentList");
     phind_data.appendChild(document_list);
     document_list.setAttribute("length", freq);
     document_list.setAttribute("start", Long.toString(first));
@@ -356,7 +356,7 @@ public class PhindPhraseBrowse
         doc_num = Long.parseLong(doc_elem.substring(0,p));
         doc_freq = doc_elem.substring(p+1);
       }
-      Element document = getDocument( doc_num);
+      Element document = getDocument(phind_doc, doc_num);
       document.setAttribute("freq", doc_freq);
       document.setAttribute("num", Long.toString(i));
       document_list.appendChild(document);
@@ -367,7 +367,7 @@ public class PhindPhraseBrowse
   }
   
   
-  protected Element getDocument(long doc_num) {
+  protected Element getDocument(Document phind_doc, long doc_num) {
     
     // look up the phrase in the docs thingy
     String record = this.mgpp_retrieve_src.getDocument(this.basepath+File.separatorChar+"docs", "Document",
@@ -382,9 +382,9 @@ public class PhindPhraseBrowse
     String hash = fields[0];
     String title = fields[1];
     
-    Element d = this.doc.createElement("document");
+    Element d = phind_doc.createElement("document");
     d.setAttribute("hash", hash);
-    d.appendChild(GSXML.createTextElement(this.doc, "title", title));
+    d.appendChild(GSXML.createTextElement(phind_doc, "title", title));
     
     return d;
     
@@ -394,8 +394,8 @@ public class PhindPhraseBrowse
     String freq,
     long first, long last) {
     
-    
-    Element thesaurus_list = this.doc.createElement("thesaurusList");
+    Document phind_doc = phind_data.getOwnerDocument();
+    Element thesaurus_list = phind_doc.createElement("thesaurusList");
     phind_data.appendChild(thesaurus_list);
     thesaurus_list.setAttribute("length", freq);
     thesaurus_list.setAttribute("start", Long.toString(first));
@@ -413,7 +413,7 @@ public class PhindPhraseBrowse
       for (int j = 1; j<items.length; j++, index++) {
         if (index >= first && index < last) { // only output the ones we want
           long phrase = Long.parseLong(items[j]);
-          Element t = getThesaurus(phrase);
+          Element t = getThesaurus(phind_doc, phrase);
           t.setAttribute("type", type);
           thesaurus_list.appendChild(t);
         }
@@ -423,7 +423,7 @@ public class PhindPhraseBrowse
     return true;
   }
   
-  protected Element getThesaurus(long phrase_num) {
+  protected Element getThesaurus(Document phind_doc, long phrase_num) {
     
     // look up the phrase in the pdata thingy
     String record = this.mgpp_retrieve_src.getDocument(this.basepath+File.separatorChar+"pdata", "Document",
@@ -440,11 +440,11 @@ public class PhindPhraseBrowse
     //String ef = fields[2]; dont use this
     String df = fields[3];
     
-    Element thesaurus = this.doc.createElement("thesaurus");
+    Element thesaurus = phind_doc.createElement("thesaurus");
     thesaurus.setAttribute("tf", tf);
     thesaurus.setAttribute("df", df);
     thesaurus.setAttribute("id", Long.toString(phrase_num));
-    thesaurus.appendChild(GSXML.createTextElement(this.doc, "phrase", phrase));
+    thesaurus.appendChild(GSXML.createTextElement(phind_doc, "phrase", phrase));
     return thesaurus;
     
   }
@@ -463,9 +463,9 @@ public class PhindPhraseBrowse
     
   }
   
-  protected Element phindError(String message) {
-    Element e = this.doc.createElement("phindError");
-    Text t = this.doc.createTextNode(message);
+  protected Element phindError(Document phind_doc, String message) {
+    Element e = phind_doc.createElement("phindError");
+    Text t = phind_doc.createTextNode(message);
     e.appendChild(t);
     return e;
   }

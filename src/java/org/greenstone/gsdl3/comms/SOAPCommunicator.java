@@ -95,7 +95,7 @@ public class SOAPCommunicator
 
     public Node process(Node message_node) {
 	
-	Element message = XMLConverter.nodeToElement(message_node);
+	Element message = GSXML.nodeToElement(message_node);
 
 	NodeList requests = message.getElementsByTagName(GSXML.REQUEST_ELEM);
 	if (requests.getLength()==0) {
