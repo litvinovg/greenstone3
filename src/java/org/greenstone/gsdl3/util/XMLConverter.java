@@ -30,8 +30,11 @@ import org.xml.sax.InputSource;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 import org.apache.xerces.parsers.DOMParser;
-import org.apache.xerces.dom.*; // for new Documents
+import org.apache.xerces.dom.DocumentImpl; // for new Documents
+import org.apache.xerces.dom.DocumentTypeImpl; 
 
 // other java classes
 import java.io.BufferedWriter;
@@ -57,106 +60,42 @@ import java.lang.reflect.*;
 /**
  * XMLConverter - utility class for greenstone
  * 
- * parses XML Strings into Documents, converts Nodes to Strings different
- * parsers have different behaviour - can experiment in here now we only use
- * xerces
- * 
+ * generates new Documents
+ * parses XML Strings into Documents, converts Nodes to Strings 
+ * different parsers have different behaviour - can experiment in here 
+ * at the moment we only use xerces
+ * all xerces specific code is in here
  */
 public class XMLConverter
 {
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.XMLConverter.class.getName());
 
-	protected EntityResolver resolver = null;
-
-	/** xerces parser */
-	protected DOMParser parser = null;
+  //protected EntityResolver resolver = null;
 
 	private static boolean outputEscaping = true;
 
 	/** the no-args constructor */
 	public XMLConverter()
 	{
-		try
-		{
-			this.parser = new DOMParser();
-			this.parser.setFeature("http://xml.org/sax/features/validation", false);
-			// don't try and load external DTD - no need if we are not validating, and may cause connection errors if a proxy is not set up.
-			this.parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-			// a performance test showed that having this on lead to increased 
-			// memory use for small-medium docs, and not much gain for large 
-			// docs.
-			// http://www.sosnoski.com/opensrc/xmlbench/conclusions.html
-			this.parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
-			// add an errorhandler to the parser which will store useful a error message on encountering fatal errors, errors and warnings when parsing
-			// this errormessage can then be converted to xhtml and displayed in a browser.
-			this.parser.setErrorHandler(new ParseErrorHandler());
-		}
-		catch (Exception e)
-		{
-			logger.error(e.getMessage());
-		}
+
 	}
 
-	/** sets the entity resolver. pass in null to unset it */
-	public void setEntityResolver(EntityResolver er)
-	{
-		this.resolver = er;
-		this.parser.setEntityResolver(er);
-	}
-
-	/**
-	 * Given a Node representing an Element or Document, will return the
-	 * Element/docroot Element. Returns null if the Node was not an element.
-	 */
-	public static Element nodeToElement(Node node)
-	{
-		if (node == null)
-		{
-			return null;
-		}
-		short nodeType = node.getNodeType();
-
-		if (nodeType == Node.DOCUMENT_NODE)
-		{
-			Document docNode = (Document) node;
-			return docNode.getDocumentElement();
-		}
-		else if (nodeType == Node.ELEMENT_NODE)
-		{
-			return (Element) node;
-		}
-		else
-		{
-			String message = "Expecting Document or Element node type but got " + node.getNodeName() + "\nReturning null";
-			System.err.println(message);
-			logger.warn(message);
-			return null;
-		}
-	}
+	// /** sets the entity resolver. pass in null to unset it */
+	// public void setEntityResolver(EntityResolver er)
+	// {
+	// 	this.resolver = er;
+	// }
 
 	/** returns a DOM Document */
-	public Document getDOM(String in)
+  public static Document getDOM(String in)
 	{
 
 		try
 		{
 			Reader reader = new StringReader(in);
 			InputSource xml_source = new InputSource(reader);
-
-			DOMParser parser = new DOMParser();
-			parser.setFeature("http://xml.org/sax/features/validation", false);
-			parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-			parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
-			if (resolver != null)
-			{
-				parser.setEntityResolver(this.resolver);
-			}
-			parser.setErrorHandler(new ParseErrorHandler());
-			parser.parse(xml_source);
-
-			Document doc = parser.getDocument();
-
+			Document doc = getDOM(xml_source, null);
 			reader.close();
 			return doc;
 
@@ -169,26 +108,13 @@ public class XMLConverter
 	}
 
 	/** returns a DOM Document */
-	public Document getDOM(String in, String encoding)
+  public static Document getDOM(String in, String encoding)
 	{
 		try
 		{
 			InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(in.getBytes(encoding)), encoding);
 			InputSource xml_source = new InputSource(reader);
-
-			DOMParser parser = new DOMParser();
-			parser.setFeature("http://xml.org/sax/features/validation", false);
-			parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-			parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
-			if (resolver != null)
-			{
-				parser.setEntityResolver(this.resolver);
-			}
-			parser.setErrorHandler(new ParseErrorHandler());
-			parser.parse(xml_source);
-
-			Document doc = parser.getDocument();
-
+			Document doc = getDOM(xml_source, null);
 			reader.close();
 			return doc;
 
@@ -201,26 +127,12 @@ public class XMLConverter
 	}
 
 	/** returns a DOM Document */
-	public Document getDOM(File in)
-	{
+  public static Document getDOM(File in) {
 		try
 		{
 			FileReader reader = new FileReader(in);
 			InputSource xml_source = new InputSource(reader);
-
-			DOMParser parser = new DOMParser();
-			parser.setFeature("http://xml.org/sax/features/validation", false);
-			parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-			parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
-			if (resolver != null)
-			{
-				parser.setEntityResolver(this.resolver);
-			}
-			parser.setErrorHandler(new ParseErrorHandler());
-			parser.parse(xml_source);
-
-			Document doc = parser.getDocument();
-
+			Document doc = getDOM(xml_source, null);
 			reader.close();
 			return doc;
 
@@ -233,41 +145,62 @@ public class XMLConverter
 		return null;
 	}
 
+  public static Document getDOM(File in, String encoding) {
+    return getDOM(in, encoding, null);
+  }
+
 	/** returns a DOM document */
-	public Document getDOM(File in, String encoding)
-	{
-		try
-		{
-
-			InputStreamReader isr = new InputStreamReader(new FileInputStream(in), encoding);
-			InputSource xml_source = new InputSource(isr);
-
-			DOMParser parser = new DOMParser();
-			parser.setFeature("http://xml.org/sax/features/validation", false);
-			parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-			parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
-			if (resolver != null)
-			{
-				parser.setEntityResolver(this.resolver);
-			}
-			parser.setErrorHandler(new ParseErrorHandler());
-			parser.parse(xml_source);
-
-			Document doc = parser.getDocument();
-
-			isr.close();
-			return doc;
-
-		}
-		catch (Exception e)
-		{
-			logger.error(e.getMessage());
-		}
-		return null;
+  public static Document getDOM(File in, String encoding, EntityResolver er) {
+    
+    try {
+      
+      
+      InputStreamReader isr = new InputStreamReader(new FileInputStream(in), encoding);
+      InputSource xml_source = new InputSource(isr);
+      Document doc = getDOM(xml_source, er);
+      isr.close();
+      return doc;
+      
+    }
+    catch (Exception e)
+      {
+	logger.error(e.getMessage());
+      }
+    return null;
 	}
 
+  public static Document getDOM(InputSource source, EntityResolver er) {
+    
+    try {
+    DOMParser parser = new DOMParser();
+    parser.setFeature("http://xml.org/sax/features/validation", false);
+    // don't try and load external DTD - no need if we are not validating, and may cause connection errors if a proxy is not set up.
+    parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+    // a performance test showed that having this on lead to increased 
+    // memory use for small-medium docs, and not much gain for large 
+    // docs.
+    // http://www.sosnoski.com/opensrc/xmlbench/conclusions.html
+    parser.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
+    // add an errorhandler to the parser which will output messages on encountering fatal errors, errors and warnings when parsing
+    parser.setErrorHandler(new ParseErrorHandler());
+    if (er != null) {
+      parser.setEntityResolver(er);
+    }
+    parser.parse(source);
+
+    Document doc = parser.getDocument();
+    return doc;
+
+    } catch (Exception e) {
+      
+      logger.error(e.getMessage());
+    }
+    return null;
+    
+  }
+
 	/** creates a new empty DOM Document */
-	public Document newDOM()
+	public static Document newDOM()
 	{
 		Document doc = new DocumentImpl();
 		return doc;
@@ -562,11 +495,12 @@ public class XMLConverter
 	}
 
 	// returns null if there no error occurred during parsing, or else returns the error message
-	public String getParseErrorMessage()
-	{
-		ParseErrorHandler errorHandler = (ParseErrorHandler) this.parser.getErrorHandler();
-		return errorHandler.getErrorMessage();
-	}
+
+	// public String getParseErrorMessage()
+	// {
+	// 	ParseErrorHandler errorHandler = (ParseErrorHandler) this.parser.getErrorHandler();
+	// 	return errorHandler.getErrorMessage();
+	// }
 
 	// Errorhandler for SAXParseExceptions that are errors, fatal errors or warnings. This class can be used to 
 	// register a handler for any fatal errors, errors and warnings that may occur when parsing an xml file. The
@@ -625,7 +559,7 @@ public class XMLConverter
 		}
 	}
 
-  public boolean writeDOM(Element elem, File file) {
+  public static boolean writeDOM(Element elem, File file) {
 
     BufferedWriter writer = null;
     boolean success = false;
