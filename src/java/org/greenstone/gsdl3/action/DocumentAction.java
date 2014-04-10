@@ -80,7 +80,7 @@ public class DocumentAction extends Action
 	{
 		// for now, no subaction eventually we may want to have subactions such as text assoc or something ?
 
-		Element message = this.converter.nodeToElement(message_node);
+		Element message = GSXML.nodeToElement(message_node);
 		Document doc = message.getOwnerDocument();
 		
 		// the response
@@ -211,7 +211,7 @@ public class DocumentAction extends Action
 
 		if (service_params != null)
 		{
-			GSXML.addParametersToList(doc, ds_param_list, service_params);
+			GSXML.addParametersToList(ds_param_list, service_params);
 		}
 
 		Element ds_param = null;
@@ -393,7 +393,7 @@ public class DocumentAction extends Action
 		Element dm_param_list = createMetadataParamList(doc,meta_names);
 		if (service_params != null)
 		{
-			GSXML.addParametersToList(doc, dm_param_list, service_params);
+			GSXML.addParametersToList(dm_param_list, service_params);
 		}
 
 		dm_request.appendChild(dm_param_list);
@@ -423,7 +423,7 @@ public class DocumentAction extends Action
 		Element doc_meta_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (service_params != null)
 		{
-			GSXML.addParametersToList(doc, doc_meta_param_list, service_params);
+			GSXML.addParametersToList(doc_meta_param_list, service_params);
 		}
 
 		doc_meta_request.appendChild(doc_meta_param_list);
@@ -481,7 +481,7 @@ public class DocumentAction extends Action
 		Element dc_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (service_params != null)
 		{
-			GSXML.addParametersToList(doc, dc_param_list, service_params);
+			GSXML.addParametersToList(dc_param_list, service_params);
 		}
 
 		dc_request.appendChild(dc_param_list);
@@ -569,7 +569,7 @@ public class DocumentAction extends Action
 					if (e_service_params != null)
 					{
 						Element enrich_pl = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-						GSXML.addParametersToList(doc, enrich_pl, e_service_params);
+						GSXML.addParametersToList(enrich_pl, e_service_params);
 						enrich_request.appendChild(enrich_pl);
 					}
 					Element e_doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
@@ -819,7 +819,7 @@ public class DocumentAction extends Action
 		HashMap service_params = (HashMap) params.get("s1");
 
 		Element query_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		GSXML.addParametersToList(doc, query_param_list, service_params);
+		GSXML.addParametersToList(query_param_list, service_params);
 		mr_query_request.appendChild(query_param_list);
 
 		// do the query

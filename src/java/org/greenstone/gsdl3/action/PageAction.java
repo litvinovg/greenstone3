@@ -8,6 +8,7 @@ import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
 import org.greenstone.util.GlobalProperties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -25,8 +26,8 @@ public class PageAction extends Action
 
 	public Node process(Node message_node)
 	{
-		Element message = this.converter.nodeToElement(message_node);
-		Document doc = this.converter.newDOM();
+		Element message = GSXML.nodeToElement(message_node);
+		Document doc = XMLConverter.newDOM();
 	    
 		Element request = (Element) GSXML.getChildByTagName(message, GSXML.REQUEST_ELEM);
 		Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -88,7 +89,7 @@ public class PageAction extends Action
 
   protected Element homePage(Element request)
 	{
-	  Document doc = this.converter.newDOM();
+	  Document doc = XMLConverter.newDOM();
 		
 		UserContext userContext = new UserContext(request);
 		// first, get the message router info
@@ -153,7 +154,7 @@ public class PageAction extends Action
 
 	protected Element aboutPage(Element request)
 	{
-	  Document doc = this.converter.newDOM();
+	  Document doc = XMLConverter.newDOM();
 		
 		UserContext userContext = new UserContext(request);
 		// extract the params from the cgi-request, 
@@ -237,7 +238,7 @@ public class PageAction extends Action
 	/** if we dont know the page type, use this method */
 	protected Element unknownPage(Element request)
 	{
-	  Document doc = this.converter.newDOM();
+	  Document doc = XMLConverter.newDOM();
 		
 		UserContext userContext = new UserContext(request);
 		String page_name = request.getAttribute(GSXML.SUBACTION_ATT);
@@ -325,7 +326,7 @@ public class PageAction extends Action
 
 	protected Element gli4gs3Page(Element request)
 	{
-	  Document doc = this.converter.newDOM();
+	  Document doc = XMLConverter.newDOM();
 		
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 		String uid = request.getAttribute(GSXML.USER_ID_ATT);

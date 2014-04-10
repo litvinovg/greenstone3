@@ -248,7 +248,7 @@ abstract public class Action
 		//create the element to put the params in
 		Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		//put them in
-		GSXML.addParametersToList(doc, param_list, subset_params);
+		GSXML.addParametersToList(param_list, subset_params);
 		metadata_request.appendChild(param_list);
 		//create the message
 		Element metadata_message = doc.createElement(GSXML.MESSAGE_ELEM);
@@ -285,7 +285,7 @@ abstract public class Action
 		// If this pattern changes for any reason, then the DOM will need to be
 		// passed in as a parameter
 		
-		Document doc = this.converter.newDOM();
+		Document doc = XMLConverter.newDOM();
 		
 		Element mr_format_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		Element mr_format_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_FORMAT, to, userContext);

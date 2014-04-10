@@ -20,7 +20,7 @@ public class ProcessAction extends Action
 	/** process a request */
 	public Node process(Node message_node)
 	{
-		Element message = this.converter.nodeToElement(message_node);
+		Element message = GSXML.nodeToElement(message_node);
 	    Document doc = message.getOwnerDocument();
 	    
 		// the result
@@ -89,7 +89,7 @@ public class ProcessAction extends Action
 				if (service_params != null)
 				{
 					param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-					GSXML.addParametersToList(doc, param_list, service_params);
+					GSXML.addParametersToList(param_list, service_params);
 				}
 
 			}

@@ -36,7 +36,7 @@ public class NoCollQueryAction extends Action
 	public Node process(Node message_node)
 	{
 
-		Element message = this.converter.nodeToElement(message_node);
+		Element message = GSXML.nodeToElement(message_node);
 	    Document doc = message.getOwnerDocument();
 	    
 		// get the request - assume there is only one
@@ -102,7 +102,7 @@ public class NoCollQueryAction extends Action
 			return page_response;
 		}
 		Element query_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		GSXML.addParametersToList(doc, query_param_list, service_params);
+		GSXML.addParametersToList(query_param_list, service_params);
 
 		// we will do a query for each coll
 		String[] colls = query_coll_list.split(",");

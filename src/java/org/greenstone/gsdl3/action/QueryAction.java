@@ -26,7 +26,7 @@ public class QueryAction extends Action
 	 */
 	public Node process(Node message_node)
 	{
-		Element message = this.converter.nodeToElement(message_node);
+		Element message = GSXML.nodeToElement(message_node);
 	    Document doc = message.getOwnerDocument();
 	    
 		// get the request - assume there is only one
@@ -120,7 +120,7 @@ public class QueryAction extends Action
 		mr_query_message.appendChild(mr_query_request);
 
 		Element query_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		GSXML.addParametersToList(doc, query_param_list, service_params);
+		GSXML.addParametersToList(query_param_list, service_params);
 		mr_query_request.appendChild(query_param_list);
 
 		logger.debug(GSXML.xmlNodeToString(mr_query_message));

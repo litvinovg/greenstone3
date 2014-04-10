@@ -26,7 +26,7 @@ public class RSSAction extends Action
 	/** process a request */
 	public Node process(Node message_node)
 	{
-		Element message = this.converter.nodeToElement(message_node);
+		Element message = GSXML.nodeToElement(message_node);
 	    Document doc = message.getOwnerDocument();
 	    
 		// assume only one request

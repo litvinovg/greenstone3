@@ -287,7 +287,7 @@ public class DepositorAction extends Action
 				catch (Exception ex)
 				{
 					ex.printStackTrace();
-					GSXML.addError(doc, responseMessage, "Failed to copy the deposited file into the collection.");
+					GSXML.addError(responseMessage, "Failed to copy the deposited file into the collection.");
 					return responseMessage;
 				}
 
