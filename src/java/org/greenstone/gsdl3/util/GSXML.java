@@ -58,6 +58,7 @@ public class GSXML
 	public static final String SITE_ELEM = "site";
 	public static final String PARAM_ELEM = "param";
 	public static final String PARAM_OPTION_ELEM = "option";
+        public static final String LIBRARY_PARAM_ELEM = "libraryParam";
 	public static final String CONTENT_ELEM = "content";
 	public static final String RESOURCE_ELEM = "resource";
 	public static final String DOCUMENT_ELEM = "document";
@@ -459,45 +460,45 @@ public class GSXML
 	}
 
 	/** add text to a document/subsection element */
-	public static boolean addDocText(Document owner, Element doc, String text)
+	public static boolean addDocText(Element doc, String text)
 	{
-
-		Element content = owner.createElement(NODE_CONTENT_ELEM);
-		Text t = owner.createTextNode(text);
+	  
+	  Element content = doc.getOwnerDocument().createElement(NODE_CONTENT_ELEM);
+		Text t = doc.getOwnerDocument().createTextNode(text);
 		content.appendChild(t);
 		doc.appendChild(content);
 		return true;
 	}
 
 	/** add an error message, unknown error type */
-	public static boolean addError(Document owner, Element doc, String text)
+  public static boolean addError(Element doc, String text)
 	{
-		return addError(owner, doc, text, ERROR_TYPE_OTHER);
+		return addError(doc, text, ERROR_TYPE_OTHER);
 	}
 
 	/** add an error message */
-	public static boolean addError(Document owner, Element doc, String text, String error_type)
+	public static boolean addError(Element doc, String text, String error_type)
 	{
 
-		Element content = owner.createElement(ERROR_ELEM);
+		Element content = doc.getOwnerDocument().createElement(ERROR_ELEM);
 		content.setAttribute(ERROR_TYPE_ATT, error_type);
-		Text t = owner.createTextNode(text);
+		Text t = doc.getOwnerDocument().createTextNode(text);
 		content.appendChild(t);
 		doc.appendChild(content);
 		return true;
 	}
 
 	/** add an error message */
-	public static boolean addError(Document owner, Element doc, Throwable error)
+	public static boolean addError(Element doc, Throwable error)
 	{
-		return addError(owner, doc, error, ERROR_TYPE_OTHER);
+		return addError(doc, error, ERROR_TYPE_OTHER);
 	}
 
 	/** add an error message */
-	public static boolean addError(Document owner, Element doc, Throwable error, String error_type)
+	public static boolean addError(Element doc, Throwable error, String error_type)
 	{
 		error.printStackTrace();
-		return addError(owner, doc, error.toString(), error_type);
+		return addError(doc, error.toString(), error_type);
 	}
 
 	public static Element createMetadataParamList(Document owner, Vector meta_values)
@@ -517,12 +518,13 @@ public class GSXML
 	}
 
 	/** adds a metadata elem to a list */
-	public static boolean addMetadata(Document owner, Element list, String meta_name, String meta_value)
+	public static boolean addMetadata(Element list, String meta_name, String meta_value)
 	{
 		if (meta_value == null || meta_value.equals(""))
 		{
 			return false;
 		}
+		Document owner = list.getOwnerDocument();
 		Element data = owner.createElement(METADATA_ELEM);
 		data.setAttribute(NAME_ATT, meta_name);
 		Text t = owner.createTextNode(meta_value);
@@ -818,6 +820,37 @@ public class GSXML
       }
     }
 
+ 	/**
+	 * Given a Node representing an Element or Document, will return the
+	 * Element/docroot Element. Returns null if the Node was not an element.
+	 */
+	public static Element nodeToElement(Node node)
+	{
+		if (node == null)
+		{
+			return null;
+		}
+		short nodeType = node.getNodeType();
+
+		if (nodeType == Node.DOCUMENT_NODE)
+		{
+			Document docNode = (Document) node;
+			return docNode.getDocumentElement();
+		}
+		else if (nodeType == Node.ELEMENT_NODE)
+		{
+			return (Element) node;
+		}
+		else
+		{
+			String message = "Expecting Document or Element node type but got " + node.getNodeName() + "\nReturning null";
+			System.err.println(message);
+			logger.warn(message);
+			return null;
+		}
+	}
+ 
+
 	/** returns a basic request message */
 	public static Element createBasicRequest(Document owner, String request_type, String to, UserContext userContext)
 	{
@@ -906,7 +939,7 @@ public class GSXML
 		return param;
 	}
 
-	public static void addParametersToList(Document owner, Element param_list, HashMap params)
+	public static void addParametersToList(Element param_list, HashMap params)
 	{
 		if (params == null)
 		{
@@ -915,6 +948,7 @@ public class GSXML
 
 		Set items = params.entrySet();
 		Iterator i = items.iterator();
+		Document owner = param_list.getOwnerDocument();
 		while (i.hasNext())
 		{
 			Map.Entry m = (Map.Entry) i.next();
