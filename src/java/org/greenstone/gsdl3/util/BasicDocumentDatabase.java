@@ -51,11 +51,10 @@ public class BasicDocumentDatabase extends AbstractBasicDocument
 
 
     /** constructor */
-    public BasicDocumentDatabase(Document doc, 
-				  String database_type, String site_home,
+    public BasicDocumentDatabase(String database_type, String site_home,
 				  String cluster_name,  String index_stem)
     {
-	super(doc);
+	super();
 
 	coll_db = new SimpleCollectionDatabase(database_type);
 	if (!coll_db.databaseOK()) {
@@ -129,10 +128,10 @@ public class BasicDocumentDatabase extends AbstractBasicDocument
 	if (childtype.equals("Paged")) {
 	    return GSXML.DOC_TYPE_PAGED;
 	}
-		if (childtype.equals("PagedHierarchy"))
-		  {
-		    return GSXML.DOC_TYPE_PAGED_HIERARCHY;
-		  }
+	if (childtype.equals("PagedHierarchy")) {
+	  
+	  return GSXML.DOC_TYPE_PAGED_HIERARCHY;
+	}
 	return GSXML.DOC_TYPE_HIERARCHY;
 
     }
@@ -307,7 +306,7 @@ public class BasicDocumentDatabase extends AbstractBasicDocument
 		for (int i = 0; i < child_ids.size(); i++)
 		{
 			String child_id = child_ids.get(i);
-			Element child_elem = createDocNode(child_id);
+			Element child_elem = createDocNode(doc.getOwnerDocument(), child_id);
 			doc.appendChild(child_elem);
 			if (recursive && (!child_elem.getAttribute(GSXML.NODE_TYPE_ATT).equals(GSXML.NODE_TYPE_LEAF) || child_elem.getAttribute(GSXML.DOC_TYPE_ATT).equals(GSXML.DOC_TYPE_PAGED)))
 			{

@@ -33,28 +33,27 @@ public abstract class AbstractBasicDocument {
 	public static final String INFO_DOC_TYPE = "documentType";
 
     /** XML element for describe requests - the container doc */
-    protected Document doc = null; // typically a shared reference to the one in ServiceRack
+    //protected Document doc = null; // typically a shared reference to the one in ServiceRack
 
     static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.AbstractBasicDocument.class.getName());
 
-    public AbstractBasicDocument(Document doc) 
+    public AbstractBasicDocument() 
     {
-	this.doc = doc;
     }
 
     /** create an element to go into a results list. A node element
      * has the form
      * <docNode nodeId='xxx' nodeType='leaf' docType='hierarchy'/>
      */
-  public Element createDocNode(String node_id) {
-    return createDocNode(node_id, null);
+  public Element createDocNode(Document doc, String node_id) {
+    return createDocNode(doc, node_id, null);
   }
     /** create an element to go into a results list. A node element
      * has the form
      * <docNode nodeId='xxx' nodeType='leaf' docType='hierarchy' [rank='0.23']/>
      */
-    public Element createDocNode(String node_id, String rank) {
-	Element node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+  public Element createDocNode(Document doc, String node_id, String rank) {
+	Element node = doc.createElement(GSXML.DOC_NODE_ELEM);
 	node.setAttribute(GSXML.NODE_ID_ATT, node_id);
 	if (rank != null) {
 	  node.setAttribute(GSXML.NODE_RANK_ATT, rank);

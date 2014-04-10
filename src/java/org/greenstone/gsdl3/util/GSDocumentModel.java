@@ -101,14 +101,12 @@ public class GSDocumentModel
 	protected int _errorStatus = NO_ERROR;
 
 	protected String _siteHome;
-	protected Document _mainDoc;
-	protected MessageRouter _router;
+ 	protected MessageRouter _router;
 	protected HashMap<String, Document> _docCache = new HashMap<String, Document>();
 
-	public GSDocumentModel(String siteHome, Document mainDocument, MessageRouter router)
+	public GSDocumentModel(String siteHome, MessageRouter router)
 	{
 		_siteHome = siteHome;
-		_mainDoc = mainDocument;
 		_router = router;
 	}
 
@@ -1701,7 +1699,7 @@ public class GSDocumentModel
 	{
 		if (_errorMessageMap.get(_errorStatus) != null)
 		{
-			GSXML.addError(elem.getOwnerDocument(), elem, methodName + ": " + _errorMessageMap.get(_errorStatus), GSXML.ERROR_TYPE_SYNTAX);
+			GSXML.addError(elem, methodName + ": " + _errorMessageMap.get(_errorStatus), GSXML.ERROR_TYPE_SYNTAX);
 			return true;
 		}
 
@@ -2008,8 +2006,9 @@ public class GSDocumentModel
 	public String getDatabaseTypeFromCollection(String collection, UserContext userContext)
 	{
 		//Find out what kind of database we have
-		Element dbTypeMessage = _mainDoc.createElement(GSXML.MESSAGE_ELEM);
-		Element dbTypeRequest = GSXML.createBasicRequest(_mainDoc, GSXML.REQUEST_TYPE_DESCRIBE, collection, userContext);
+	  Document doc = XMLConverter.newDOM();
+		Element dbTypeMessage = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element dbTypeRequest = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, collection, userContext);
 		dbTypeMessage.appendChild(dbTypeRequest);
 		Element dbTypeResponse = (Element) _router.process(dbTypeMessage);
 

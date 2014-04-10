@@ -33,9 +33,9 @@ public class BasicDocument extends AbstractBasicDocument {
 
     static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.BasicDocument.class.getName());
 
-    public BasicDocument(Document doc, String default_document_type)
+  public BasicDocument(String default_document_type)
     {
-	super(doc);
+	super();
 
 	this.default_document_type = default_document_type;
     }
