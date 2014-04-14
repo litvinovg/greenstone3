@@ -37,24 +37,16 @@ import java.util.Iterator;
 /**
  * A program to take cgi args from the command line and return html
  * 
- * @author Katherine Don
- * @version $Revision$
  */
 
 final public class LibraryCommandline
 {
-
-	protected XMLConverter converter = null;
-	protected Document doc = null;
-
 	protected HashMap<String, String> saved_args = null;
 	protected GSParams params = null;
 	protected DefaultReceptionist recept = null;
 
 	public LibraryCommandline()
 	{
-		this.converter = new XMLConverter();
-		this.doc = converter.newDOM();
 		this.saved_args = new HashMap<String, String>();
 		this.params = new GSParams();
 		this.recept = new DefaultReceptionist();
@@ -142,18 +134,19 @@ final public class LibraryCommandline
 	{
 		Element xml_message = generateRequest(query);
 		System.out.println("*********************");
-		System.out.println(converter.getPrettyString(xml_message));
+		System.out.println(XMLConverter.getPrettyString(xml_message));
 		Node xml_result = recept.process(xml_message);
-		return this.converter.getPrettyString(xml_result);
+		return XMLConverter.getPrettyString(xml_result);
 	}
 
 	protected Element generateRequest(String cgiargs)
 	{
 
-		Element xml_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element xml_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PAGE, "", new UserContext());
+	  Document msg_doc = XMLConverter.newDOM();
+		Element xml_message = msg_doc.createElement(GSXML.MESSAGE_ELEM);
+		Element xml_request = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_PAGE, "", new UserContext());
 		xml_message.appendChild(xml_request);
-		Element xml_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element xml_param_list = msg_doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		xml_request.appendChild(xml_param_list);
 
 		// the defaults
@@ -199,7 +192,7 @@ final public class LibraryCommandline
 			else
 			{
 				// make a param now
-				Element param = doc.createElement(GSXML.PARAM_ELEM);
+				Element param = msg_doc.createElement(GSXML.PARAM_ELEM);
 				param.setAttribute(GSXML.NAME_ATT, name);
 				param.setAttribute(GSXML.VALUE_ATT, GSXML.xmlSafe(value));
 				xml_param_list.appendChild(param);
@@ -219,7 +212,7 @@ final public class LibraryCommandline
 			String name = i.next();
 			if (name.equals(GSParams.LANGUAGE))
 				continue;
-			Element param = this.doc.createElement(GSXML.PARAM_ELEM);
+			Element param = msg_doc.createElement(GSXML.PARAM_ELEM);
 			param.setAttribute(GSXML.NAME_ATT, name);
 			param.setAttribute(GSXML.VALUE_ATT, GSXML.xmlSafe(saved_args.get(name)));
 			xml_param_list.appendChild(param);

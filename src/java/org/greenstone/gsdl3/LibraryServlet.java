@@ -85,12 +85,6 @@ public class LibraryServlet extends BaseGreenstoneServlet
 	 */
 	protected final String DEFAULT_LANG = "en";
 
-	/** container Document to create XML Nodes */
-	protected Document doc = null;
-
-	/** a converter class to parse XML and create Docs */
-	protected XMLConverter converter = null;
-
 	/**
 	 * the cgi stuff - the Receptionist can add new args to this
 	 * 
@@ -185,8 +179,8 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		{
 			config_params.put(GSConstants.SITE_NAME, site_name);
 		}
-		this.converter = new XMLConverter();
-		this.doc = XMLConverter.newDOM();
+		//this.converter = new XMLConverter();
+		//this.doc = XMLConverter.newDOM();
 
 		// the receptionist -the servlet will talk to this
 		String recept_name = (String) config.getInitParameter("receptionist_class");
@@ -242,7 +236,8 @@ public class LibraryServlet extends BaseGreenstoneServlet
 			// talking to a remote site, create a communicator
 			Communicator communicator = null;
 			// we need to create the XML to configure the communicator
-			Element site_elem = this.doc.createElement(GSXML.SITE_ELEM);
+			Document doc = XMLConverter.newDOM();
+			Element site_elem = doc.createElement(GSXML.SITE_ELEM);
 			site_elem.setAttribute(GSXML.TYPE_ATT, remote_site_type);
 			site_elem.setAttribute(GSXML.NAME_ATT, remote_site_name);
 			site_elem.setAttribute(GSXML.ADDRESS_ATT, remote_site_address);
@@ -291,7 +286,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 
 		//Allow the message router and the document to be accessed from anywhere in this servlet context
 		this.getServletContext().setAttribute("GSRouter", this.recept.getMessageRouter());
-		this.getServletContext().setAttribute("GSDocument", this.doc);
+		//this.getServletContext().setAttribute("GSDocument", this.doc);
 	}
 
 	private void logUsageInfo(HttpServletRequest request)
@@ -463,13 +458,14 @@ public class LibraryServlet extends BaseGreenstoneServlet
 			userContext.setUsername(request.getUserPrincipal().getName());
 
 			//Get the groups for the user
-			Element acquireGroupMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element acquireGroupRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PROCESS, "GetUserInformation", userContext);
+			Document msg_doc = XMLConverter.newDOM();
+			Element acquireGroupMessage = msg_doc.createElement(GSXML.MESSAGE_ELEM);
+			Element acquireGroupRequest = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_PROCESS, "GetUserInformation", userContext);
 			acquireGroupMessage.appendChild(acquireGroupRequest);
 
-			Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			Element paramList = msg_doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			acquireGroupRequest.appendChild(paramList);
-			paramList.appendChild(GSXML.createParameter(this.doc, GSXML.USERNAME_ATT, request.getUserPrincipal().getName()));
+			paramList.appendChild(GSXML.createParameter(msg_doc, GSXML.USERNAME_ATT, request.getUserPrincipal().getName()));
 
 			Element aquireGroupsResponseMessage = (Element) this.recept.process(acquireGroupMessage);
 			Element aquireGroupsResponse = (Element) GSXML.getChildByTagName(aquireGroupsResponseMessage, GSXML.RESPONSE_ELEM);
@@ -519,8 +515,9 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		}
 
 		// the request to the receptionist
-		Element xml_message = this.doc.createElement(GSXML.MESSAGE_ELEM);
-		Element xml_request = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PAGE, "", userContext);
+		Document msg_doc = XMLConverter.newDOM();
+		Element xml_message = msg_doc.createElement(GSXML.MESSAGE_ELEM);
+		Element xml_request = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_PAGE, "", userContext);
 		xml_request.setAttribute(GSXML.OUTPUT_ATT, output);
 
 		xml_message.appendChild(xml_request);
@@ -654,7 +651,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 
 			//  create the param list for the greenstone request - includes
 			// the params from the current request and any others from the saved session
-			Element xml_param_list = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			Element xml_param_list = msg_doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			xml_request.appendChild(xml_param_list);
 
 			for (String name : queryMap.keySet())
@@ -679,7 +676,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 					}
 					else
 					{
-						Element param = this.doc.createElement(GSXML.PARAM_ELEM);
+						Element param = msg_doc.createElement(GSXML.PARAM_ELEM);
 						param.setAttribute(GSXML.NAME_ATT, name);
 						param.setAttribute(GSXML.VALUE_ATT, GSXML.xmlSafe(value));
 						xml_param_list.appendChild(param);
@@ -708,7 +705,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 				{
 
 					// lang and uid are stored but we dont want it in the param list cos its already in the request
-					Element param = this.doc.createElement(GSXML.PARAM_ELEM);
+					Element param = msg_doc.createElement(GSXML.PARAM_ELEM);
 					param.setAttribute(GSXML.NAME_ATT, name);
 					String value = GSXML.xmlSafe((String) session.getAttribute(name));
 
@@ -783,7 +780,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		Node xml_result = this.recept.process(xml_message);
 		encodeURLs(xml_result, response);
 
-		String xml_string = this.converter.getPrettyString(xml_result);
+		String xml_string = XMLConverter.getPrettyString(xml_result);
 
 		if (output.equals("json"))
 		{
@@ -850,23 +847,24 @@ public class LibraryServlet extends BaseGreenstoneServlet
 				catch (Exception exc)
 				{
 					//The user entered in either the wrong username or the wrong password
-					Element loginPageMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-					Element loginPageRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PAGE, "", userContext);
+				  Document loginPageDoc = XMLConverter.newDOM();
+					Element loginPageMessage = loginPageDoc.createElement(GSXML.MESSAGE_ELEM);
+					Element loginPageRequest = GSXML.createBasicRequest(loginPageDoc, GSXML.REQUEST_TYPE_PAGE, "", userContext);
 					loginPageRequest.setAttribute(GSXML.ACTION_ATT, "p");
 					loginPageRequest.setAttribute(GSXML.SUBACTION_ATT, "login");
 					loginPageRequest.setAttribute(GSXML.OUTPUT_ATT, "html");
 					loginPageRequest.setAttribute(GSXML.BASE_URL, baseURL);
 					loginPageMessage.appendChild(loginPageRequest);
 
-					Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+					Element paramList = loginPageDoc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 					loginPageRequest.appendChild(paramList);
 
-					Element messageParam = this.doc.createElement(GSXML.PARAM_ELEM);
+					Element messageParam = loginPageDoc.createElement(GSXML.PARAM_ELEM);
 					messageParam.setAttribute(GSXML.NAME_ATT, "loginMessage");
 					messageParam.setAttribute(GSXML.VALUE_ATT, "Either your username or password was incorrect, please try again.");
 					paramList.appendChild(messageParam);
 
-					Element urlParam = this.doc.createElement(GSXML.PARAM_ELEM);
+					Element urlParam = loginPageDoc.createElement(GSXML.PARAM_ELEM);
 					urlParam.setAttribute(GSXML.NAME_ATT, "redirectURL");
 					String queryString = "";
 					if (request.getQueryString() != null)
@@ -877,7 +875,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 					paramList.appendChild(urlParam);
 
 					Node loginPageResponse = this.recept.process(loginPageMessage);
-					out.println(this.converter.getPrettyString(loginPageResponse));
+					out.println(XMLConverter.getPrettyString(loginPageResponse));
 
 					return false;
 				}
@@ -887,17 +885,18 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		//If a user is logged in
 		if (request.getAuthType() != null)
 		{
-			Element userInformation = this.doc.createElement(GSXML.USER_INFORMATION_ELEM);
+		  Element userInformation = xml_request.getOwnerDocument().createElement(GSXML.USER_INFORMATION_ELEM);
 			userInformation.setAttribute(GSXML.USERNAME_ATT, request.getUserPrincipal().getName());
 
-			Element userInfoMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element userInfoRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_SECURITY, "GetUserInformation", userContext);
+			Document msg_doc = XMLConverter.newDOM();
+			Element userInfoMessage = msg_doc.createElement(GSXML.MESSAGE_ELEM);
+			Element userInfoRequest = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_SECURITY, "GetUserInformation", userContext);
 			userInfoMessage.appendChild(userInfoRequest);
 
-			Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			Element paramList = msg_doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			userInfoRequest.appendChild(paramList);
 
-			Element param = this.doc.createElement(GSXML.PARAM_ELEM);
+			Element param = msg_doc.createElement(GSXML.PARAM_ELEM);
 			param.setAttribute(GSXML.NAME_ATT, GSXML.USERNAME_ATT);
 			param.setAttribute(GSXML.VALUE_ATT, request.getUserPrincipal().getName());
 			paramList.appendChild(param);
@@ -924,8 +923,9 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		if (collection != null && !collection.equals(""))
 		{
 			//Get the security info for this collection
-			Element securityMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-			Element securityRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_SECURITY, collection, userContext);
+		  Document msg_doc = XMLConverter.newDOM();
+			Element securityMessage = msg_doc.createElement(GSXML.MESSAGE_ELEM);
+			Element securityRequest = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_SECURITY, collection, userContext);
 			securityMessage.appendChild(securityRequest);
 			if (document != null && !document.equals(""))
 			{
@@ -956,18 +956,19 @@ public class LibraryServlet extends BaseGreenstoneServlet
 				//The current user is not allowed to access the page so produce a login page
 				if (!found)
 				{
-					Element loginPageMessage = this.doc.createElement(GSXML.MESSAGE_ELEM);
-					Element loginPageRequest = GSXML.createBasicRequest(this.doc, GSXML.REQUEST_TYPE_PAGE, "", userContext);
+				  Document loginPageDoc = XMLConverter.newDOM();
+					Element loginPageMessage = loginPageDoc.createElement(GSXML.MESSAGE_ELEM);
+					Element loginPageRequest = GSXML.createBasicRequest(loginPageDoc, GSXML.REQUEST_TYPE_PAGE, "", userContext);
 					loginPageRequest.setAttribute(GSXML.ACTION_ATT, "p");
 					loginPageRequest.setAttribute(GSXML.SUBACTION_ATT, "login");
 					loginPageRequest.setAttribute(GSXML.OUTPUT_ATT, "html");
 					loginPageRequest.setAttribute(GSXML.BASE_URL, baseURL);
 					loginPageMessage.appendChild(loginPageRequest);
 
-					Element paramList = this.doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+					Element paramList = loginPageDoc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 					loginPageRequest.appendChild(paramList);
 
-					Element messageParam = this.doc.createElement(GSXML.PARAM_ELEM);
+					Element messageParam = loginPageDoc.createElement(GSXML.PARAM_ELEM);
 					messageParam.setAttribute(GSXML.NAME_ATT, "loginMessage");
 					if (request.getAuthType() == null)
 					{
@@ -979,7 +980,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 					}
 					paramList.appendChild(messageParam);
 
-					Element urlParam = this.doc.createElement(GSXML.PARAM_ELEM);
+					Element urlParam = loginPageDoc.createElement(GSXML.PARAM_ELEM);
 					urlParam.setAttribute(GSXML.NAME_ATT, "redirectURL");
 					if (request.getQueryString() != null && request.getQueryString().length() > 0)
 					{
@@ -992,7 +993,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 					paramList.appendChild(urlParam);
 
 					Node loginPageResponse = this.recept.process(loginPageMessage);
-					out.println(this.converter.getPrettyString(loginPageResponse));
+					out.println(XMLConverter.getPrettyString(loginPageResponse));
 
 					return false;
 				}
