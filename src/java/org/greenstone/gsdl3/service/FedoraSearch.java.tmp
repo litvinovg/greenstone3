@@ -68,6 +68,7 @@ public class FedoraSearch
     
     public FedoraSearch()
     {
+      QUERY_SERVICE = "TextQuery";
     }
     
     //Configure FedoraSearch Service
@@ -85,9 +86,9 @@ public class FedoraSearch
 	    logger.error("no url for the fedoraServer element");
 	    return false;
 	}
-	Element tq_service = this.doc.createElement(GSXML.SERVICE_ELEM);
+	Element tq_service = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 	tq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
-	tq_service.setAttribute(GSXML.NAME_ATT, TEXT_QUERY_SERVICE);
+	tq_service.setAttribute(GSXML.NAME_ATT, QUERY_SERVICE);
 	this.short_service_info.appendChild(tq_service);
 	//does_paging = true;
 	
@@ -95,7 +96,7 @@ public class FedoraSearch
 	String path = GSPath.appendLink(GSXML.SEARCH_ELEM, GSXML.FORMAT_ELEM);
 	Element format = (Element) GSXML.getNodeByPath(extra_info, path);
 	if (format != null) {
-	    this.format_info_map.put(TEXT_QUERY_SERVICE, this.doc.importNode(format, true));
+	    this.format_info_map.put(QUERY_SERVICE, this.desc_doc.importNode(format, true));
 	}
 	return true;
     }
@@ -103,11 +104,12 @@ public class FedoraSearch
     /** Process a text query - implemented by concrete subclasses */
     protected Element processTextQuery(Element request) {
 	// Create a new (empty) result message
-	Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
-	result.setAttribute(GSXML.FROM_ATT, TEXT_QUERY_SERVICE);
+	Document result_doc = XMLConverter.newDOM();
+	Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
+	result.setAttribute(GSXML.FROM_ATT, QUERY_SERVICE);
 	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
 	
-	Element doc_node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
+	Element doc_node_list = result_doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
 	result.appendChild(doc_node_list);
 	
 	Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
@@ -177,10 +179,10 @@ public class FedoraSearch
 		    String[] source = o.getSource();
 		    String[] language = o.getLanguage();
 
-		    Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+		    Element doc_node = result_doc.createElement(GSXML.DOC_NODE_ELEM);
 		    doc_node_list.appendChild(doc_node);
 		    
-		    Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+		    Element metadata_list = result_doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
 		    doc_node.appendChild(metadata_list);
 		    
 		    if (fedora_url != null) {
@@ -205,7 +207,7 @@ public class FedoraSearch
 			       + ((e.getMessage()==null) ? "" : ": " + e.getMessage()));
 	}
     	
-	Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+	Element metadata_list = result_doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
 	result.appendChild(metadata_list);
 	
 	// Add a metadata element specifying the number of matching documents

@@ -35,7 +35,6 @@ import org.apache.log4j.*;
 
 /**
  *
- * @author <a href="mailto:chi@cs.waikato.ac.nz">Chi-Yu Huang</a>
  *
  */
 
@@ -56,6 +55,7 @@ public class GoogleSearch
     
     public GoogleSearch()
     {
+      QUERY_SERVICE = "TextQuery";
     }
 	    
     //Configure GoogleSearch Service
@@ -119,12 +119,13 @@ public class GoogleSearch
 	search.setSafeSearch(true);
 	
 	// Create a new (empty) result message
-	Element result = this.doc.createElement(GSXML.RESPONSE_ELEM);
-	result.setAttribute(GSXML.FROM_ATT, TEXT_QUERY_SERVICE);
+	Document result_doc = XMLConverter.newDOM();
+	Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
+	result.setAttribute(GSXML.FROM_ATT, QUERY_SERVICE);
 	result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
-	Element doc_node_list = this.doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
+	Element doc_node_list = result_doc.createElement(GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
 	result.appendChild(doc_node_list);
-	Element query_metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+	Element query_metadata_list = result_doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
 	result.appendChild(query_metadata_list);
 
 	Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
@@ -199,10 +200,10 @@ public class GoogleSearch
 	    }
 	    GoogleSearchResultElement[] details = google_result.getResultElements();
 	    for (int i=0; i<details.length; i++){
-		Element doc_node = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+		Element doc_node = result_doc.createElement(GSXML.DOC_NODE_ELEM);
 		doc_node_list.appendChild(doc_node);
 		
-		Element metadata_list = this.doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+		Element metadata_list = result_doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
 		doc_node.appendChild(metadata_list);
 		
 		String google_url = details[i].getURL();  
