@@ -135,7 +135,7 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable
 		String value;
 		for (int i = 0; i < lines.length; i++)
 		{
-			logger.debug("line:" + lines[i]);
+		  //logger.debug("line:" + lines[i]);
 			int a = lines[i].indexOf('<');
 			int b = lines[i].indexOf('>');
 			if (a == -1 || b == -1)
@@ -146,7 +146,7 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable
 			{
 				key = lines[i].substring(a + 1, b);
 				value = lines[i].substring(b + 1);
-				logger.debug("key=" + key + ", val=" + value);
+				//logger.debug("key=" + key + ", val=" + value);
 				info.addInfo(key, value);
 			}
 		}
