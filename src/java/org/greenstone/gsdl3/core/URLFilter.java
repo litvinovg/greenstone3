@@ -126,12 +126,7 @@ public class URLFilter implements Filter
 					return;
 				}
 
-				Document gsDoc = (Document) request.getServletContext().getAttribute("GSDocument");
-				if (gsDoc == null)
-				{
-					_logger.error("Document is null, stopping filter");
-					return;
-				}
+				Document gsDoc = XMLConverter.newDOM();
 
 				Element metaMessage = gsDoc.createElement(GSXML.MESSAGE_ELEM);
 				Element metaRequest = GSXML.createBasicRequest(gsDoc, GSXML.REQUEST_TYPE_PROCESS, collection + "/" + METADATA_RETRIEVAL_SERVICE, new UserContext());
@@ -211,8 +206,7 @@ public class URLFilter implements Filter
 
 					if (interfaceConfigFile.exists())
 					{
-						XMLConverter xmlC = new XMLConverter();
-						Document interfaceConfigDoc = xmlC.getDOM(interfaceConfigFile);
+					  Document interfaceConfigDoc = XMLConverter.getDOM(interfaceConfigFile);
 
 						String baseInterface = interfaceConfigDoc.getDocumentElement().getAttribute("baseInterface");
 						if (baseInterface.length() > 0)
