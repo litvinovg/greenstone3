@@ -192,7 +192,7 @@ public class XSLTServices
       }
       // something funny with the doc - 
       Element new_doc = result_doc.createElement(GSXML.DOCUMENT_ELEM);
-      new_doc.setAttribute(GSXML.NAME_ATT, ids[j]); //GSXML.createDocumentElement(this.doc, ids[j]);
+      new_doc.setAttribute(GSXML.NAME_ATT, ids[j]); 
       GSXML.addDocText(new_doc, document);
       response.appendChild(new_doc);
     }
@@ -254,7 +254,6 @@ public class XSLTServices
 	String id = writer.toString();
 	Element e = result_doc.createElement(GSXML.DOCUMENT_ELEM);
 	e.setAttribute(GSXML.NAME_ATT, id); 
-	//Node no = GSXML.createDocumentElement(this.doc, id);
 	resource_list.appendChild(e);
       } catch (Throwable t) {
 	GSXML.addError(response, "Error in XSLTServices finding results:" + t.toString());
