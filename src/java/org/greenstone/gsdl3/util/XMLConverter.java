@@ -71,21 +71,11 @@ public class XMLConverter
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.XMLConverter.class.getName());
 
-  //protected EntityResolver resolver = null;
-
-	private static boolean outputEscaping = true;
-
 	/** the no-args constructor */
 	public XMLConverter()
 	{
 
 	}
-
-	// /** sets the entity resolver. pass in null to unset it */
-	// public void setEntityResolver(EntityResolver er)
-	// {
-	// 	this.resolver = er;
-	// }
 
 	/** returns a DOM Document */
   public static Document getDOM(String in)
@@ -241,7 +231,6 @@ public class XMLConverter
 	/** returns the Node as a String */
 	public static String getString(Node xmlNode)
 	{
-		outputEscaping = true;
 		StringBuffer xmlRepresentation = new StringBuffer();
 		getString(xmlNode, xmlRepresentation, 0, false);
 		return xmlRepresentation.toString();
@@ -254,8 +243,6 @@ public class XMLConverter
 	 */
 	public static String getPrettyString(Node xmlNode)
 	{
-
-		outputEscaping = true;
 		StringBuffer xmlRepresentation = new StringBuffer();
 		getString(xmlNode, xmlRepresentation, 0, true);
 		return xmlRepresentation.toString();
@@ -355,20 +342,54 @@ public class XMLConverter
 			// Close the opening tag
 			xmlRepresentation.append(">");
 
-			// Apply recursively to the children of this node
-			// hack for nodes next to text nodes - dont make them pretty
-			// this is needed for text inside a <pre> element - any new lines 
-			// or spaces around the span elements show up in the text
+			// Process the children. We process text nodes here, but recursively process other nodes. 
+			// hack for nodes next to text nodes - dont make them pretty, ie don'e do any new lines or indenting
+			// Usually text nodes will be inside their own element. Sometimes we have eg span tags next to text nodes - don't want those indented.
+			// also if these are inside a pre tag then the space shows up in the page.
+			
 			NodeList children = xmlNode.getChildNodes();
 			boolean do_pretty = pretty;
+			boolean output_escaping = true; // record if we have encountered a disable-output-escaping instruction
 			for (int i = 0; i < children.getLength(); i++)
 			{
-				if (children.item(i).getNodeType() == Node.TEXT_NODE)
-				{
-					do_pretty = false; // if there is a text node amongst the children, do teh following nodes in non-pretty mode - hope this doesn't stuff up something else
-				}
-				getString(children.item(i), xmlRepresentation, depth + 1, do_pretty);
-			}
+			  Node child = children.item(i);
+			  short child_type = child.getNodeType();
+			  if (child_type == Node.PROCESSING_INSTRUCTION_NODE) {
+			    if (child.getNodeName().equals("javax.xml.transform.disable-output-escaping")) {
+			      output_escaping = false;
+			    }
+			    else if (child.getNodeName().equals("javax.xml.transform.enable-output-escaping")) {
+			      output_escaping = true;
+			    }
+			    else {
+			      logger.warn("Unhandled processing instruction " + child.getNodeName());
+			    }
+			  }
+			  else if (child_type == Node.TEXT_NODE) {
+			   do_pretty = false; // if there is a text node amongst the children, do all the following nodes in non-pretty mode - hope this doesn't stuff up something else
+			    // output the text
+			    String text = child.getNodeValue();
+
+			    // Perform output escaping, if required
+			    // Apache Commons replace method is far superior to String.replaceAll - very fast!
+			    if (output_escaping) {
+			      text = StringUtils.replace(text, "&", "&amp;");
+			      text = StringUtils.replace(text, "<", "&lt;");
+			      text = StringUtils.replace(text, ">", "&gt;");
+			      text = StringUtils.replace(text, "'", "&apos;");
+			      text = StringUtils.replace(text, "\"", "&quot;");
+			    }
+			    // Remove any control-C characters
+			    text = StringUtils.replace(text, "" + (char) 3, "");
+			    
+			    xmlRepresentation.append(text);
+			    
+			  }
+			  else {
+			    // recursively call getString
+			    getString(child, xmlRepresentation, depth + 1, do_pretty);
+			  }
+			} // foreach child of the element
 
 			// Write closing tag
 			if (pretty)
@@ -386,47 +407,7 @@ public class XMLConverter
 			{
 				xmlRepresentation.append("\n");
 			}
-		}
-
-		// Handle Text nodes
-		else if (nodeType == Node.TEXT_NODE)
-		{
-			String text = xmlNode.getNodeValue();
-
-			// Perform output escaping, if required
-			// Apache Commons replace method is far superior to String.replaceAll - very fast!
-			if (outputEscaping)
-			{
-
-				text = StringUtils.replace(text, "&", "&amp;");
-				text = StringUtils.replace(text, "<", "&lt;");
-				text = StringUtils.replace(text, ">", "&gt;");
-				text = StringUtils.replace(text, "'", "&apos;");
-				text = StringUtils.replace(text, "\"", "&quot;");
-			}
-
-			// Remove any control-C characters
-			text = StringUtils.replace(text, "" + (char) 3, "");
-
-			xmlRepresentation.append(text);
-		}
-
-		// Handle Processing Instruction nodes
-		else if (nodeType == Node.PROCESSING_INSTRUCTION_NODE)
-		{
-			if (nodeName.equals("javax.xml.transform.disable-output-escaping"))
-			{
-				outputEscaping = false;
-			}
-			else if (nodeName.equals("javax.xml.transform.enable-output-escaping"))
-			{
-				outputEscaping = true;
-			}
-			else
-			{
-				logger.warn("Unhandled processing instruction " + nodeName);
-			}
-		}
+		} // ELEMENT_NODE
 
 		else if (nodeType == Node.COMMENT_NODE)
 		{
@@ -436,6 +417,7 @@ public class XMLConverter
 			xmlRepresentation.append(" -->");
 		}
 
+		// TEXT and PROCESSING_INSTRUCTION nodes are handled inside their containing element node
 		// A type of node that is not handled yet
 		else
 		{
