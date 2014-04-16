@@ -75,12 +75,6 @@ public class OAIServer extends BaseGreenstoneServlet
 	 */
 	protected final String DEFAULT_LANG = "en";
 
-	/**
-	 * a converter class to parse XML and create Documents for 
-	 * XML generation
-	 */
-	protected XMLConverter converter = null;
-
 	/** A HashSet which contains all the legal verbs. */
 	protected HashSet<String> verb_set = null;
 	/**
@@ -144,8 +138,7 @@ public class OAIServer extends BaseGreenstoneServlet
 
 		// the receptionist -the servlet will talk to this
 		this.recept = new OAIReceptionist();
-		// the converter - used to get new Documents to generate XML messages
-		this.converter = new XMLConverter();
+
 		// the receptionist uses a MessageRouter or Communicator to send its requests to. We either create a MessageRouter here for the designated site (if site_name set), or we create a Communicator for a remote site. The is given to teh Receptionist, and the servlet never talks to it again.directly.
 		if (site_name != null)
 		{
@@ -382,7 +375,7 @@ public class OAIServer extends BaseGreenstoneServlet
 			{
 				out.println("<?xml-stylesheet type='text/xsl' href='" + this.oai_stylesheet + "' ?>\n");
 			}
-			out.println(this.converter.getPrettyString(xml_response));
+			out.println(XMLConverter.getPrettyString(xml_response));
 			return;
 		}//end of if(validate
 
@@ -443,7 +436,7 @@ public class OAIServer extends BaseGreenstoneServlet
 		{
 			out.println("<?xml-stylesheet type='text/xsl' href='" + this.oai_stylesheet + "' ?>\n");
 		}
-		out.println(this.converter.getPrettyString(xml_response));
+		out.println(XMLConverter.getPrettyString(xml_response));
 		return;
 	}
 
