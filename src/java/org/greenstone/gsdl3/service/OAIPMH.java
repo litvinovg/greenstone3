@@ -131,9 +131,6 @@ public class OAIPMH extends ServiceRack {
     // work out what sets this collection has. Will usually contain the collection itself, optional super collection, and maybe subcolls if appropriate classifiers are present.
     configureSetInfo();
     // the short_service_info is used by the message router to find the method names, 
-    //so we just use the doc variable in class ServiceRack to create the xml; but
-    // in each method we will use OAIXMLto create the response xml
-    // set up short_service_info_ - just the name
 
     Element list_records = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
     list_records.setAttribute(GSXML.NAME_ATT, OAIXML.LIST_RECORDS);
@@ -608,9 +605,9 @@ public class OAIPMH extends ServiceRack {
         has_meta_format = true;
 	// TODO, can we do this in an easier way??
         Element meta_fmt = doc.createElement(OAIXML.METADATA_FORMAT);
-        GSXML.copyElement(meta_fmt, metadata_format, OAIXML.METADATA_PREFIX);
-        GSXML.copyElement(meta_fmt, metadata_format, OAIXML.METADATA_NAMESPACE);
-        GSXML.copyElement(meta_fmt, metadata_format, OAIXML.SCHEMA);
+        GSXML.copyNamedElement(meta_fmt, metadata_format, OAIXML.METADATA_PREFIX);
+        GSXML.copyNamedElement(meta_fmt, metadata_format, OAIXML.METADATA_NAMESPACE);
+        GSXML.copyNamedElement(meta_fmt, metadata_format, OAIXML.SCHEMA);
         list_metadata_formats.appendChild(meta_fmt);
       }
     }//end of for loop
