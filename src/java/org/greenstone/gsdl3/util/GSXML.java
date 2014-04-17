@@ -806,8 +806,13 @@ public class GSXML
 			child = child.getNextSibling();
 		}
 	}
-  
-   public static void copyElement(Element to, Element from, String elem_name) {
+
+  public static void copyNode(Element to_elem, Node original_element) {
+    to_elem.appendChild(to_elem.getOwnerDocument().importNode(original_element, true));
+
+  }
+
+   public static void copyNamedElement(Element to, Element from, String elem_name) {
       
       Document to_doc = to.getOwnerDocument();
       Node child = from.getFirstChild();
@@ -939,6 +944,10 @@ public class GSXML
 		return param;
 	}
 
+  public static void addParameterToList(Element param_list, String name, String value) {
+    Element p = createParameter(param_list.getOwnerDocument(), name, value);
+    param_list.appendChild(p);
+  }
 	public static void addParametersToList(Element param_list, HashMap params)
 	{
 		if (params == null)
