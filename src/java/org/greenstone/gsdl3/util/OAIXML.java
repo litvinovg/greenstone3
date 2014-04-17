@@ -143,6 +143,7 @@ public class OAIXML {
    public static final String OAI_SERVICE_UNAVAILABLE = "OAI service unavailable";
    public static final String OID = "OID";
     
+  public static final String OAI_SERVICE_RACK = "OAIPMH";
   //system-dependent file separator, maybe '/' or '\'
   public static final String FILE_SEPARATOR = File.separator;
   public static final String OAI_VERSION1 = "1.0";
