@@ -46,10 +46,7 @@ public class OAIReceptionist implements ModuleInterface {
   protected String site_name = null;
   /** The unique  repository identifier */
   protected String repository_id = null;
-    
-  /** a converter class to parse XML and create Docs */
-  protected XMLConverter converter=null;
-  
+      
   /** the configure file of this receptionist passed from the oai servlet. */
   protected Element oai_config = null;
 
@@ -77,6 +74,7 @@ public class OAIReceptionist implements ModuleInterface {
   protected HashMap<String, Vector<String>> super_coll_map = null;
   /** store the super coll elements for convenience */
   HashMap<String, Element> super_coll_data = null;
+  /** store the metadata formats ??????*/
   /** The identify response */
   protected Element identify_response = null;
   /** The list set response */
@@ -85,7 +83,7 @@ public class OAIReceptionist implements ModuleInterface {
   protected Element listmetadataformats_response = null;
 
   public OAIReceptionist() {
-    this.converter = new XMLConverter();
+
   }
   
   public void cleanUp() {
@@ -198,7 +196,8 @@ public class OAIReceptionist implements ModuleInterface {
     this.collection_list = (Element)doc.importNode(coll_list, true);
 
     // go through and store a list of collection names for convenience
-    // also create a 'to' attribute
+    // also create a 'to' attribute for the next request to the MR, which
+    // is a ListSets request to each collection
     Node child = this.collection_list.getFirstChild();
     if (child == null) {
       logger.error("collection list has no children");
@@ -238,7 +237,7 @@ public class OAIReceptionist implements ModuleInterface {
     request.setAttribute(GSXML.TO_ATT, to.toString());
     // send to MR
     msg_node = mr.process(message);
-    logger.error(this.converter.getPrettyString(msg_node));
+    logger.error(XMLConverter.getPrettyString(msg_node));
     NodeList response_list =  ((Element)msg_node).getElementsByTagName(GSXML.RESPONSE_ELEM);
     for (int c=0; c<response_list.getLength(); c++) {
       // for each collection's response
@@ -266,7 +265,7 @@ public class OAIReceptionist implements ModuleInterface {
 	      this.set_set.add(set_spec);
 	      this.super_coll_map.put(set_spec, subcolls);
 	      // the first time a supercoll is mentioned, add into the set list
-	      logger.error("finding the set info "+this.converter.getPrettyString(this.super_coll_data.get(set_spec)));
+	      logger.error("finding the set info "+XMLConverter.getPrettyString(this.super_coll_data.get(set_spec)));
 	      listsets_element.appendChild(GSXML.duplicateWithNewName(listsets_doc, this.super_coll_data.get(set_spec), OAIXML.SET, true));
 	    }
 	    // add this collection to the list for the super coll
@@ -294,14 +293,14 @@ public class OAIReceptionist implements ModuleInterface {
     system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_CONFIGURE);
 
     Element response = (Element) this.mr.process(mr_request_message);
-    logger.error("configure response = "+this.converter.getPrettyString(response));
+    logger.error("configure response = "+XMLConverter.getPrettyString(response));
   }
   /** process using strings - just calls process using Elements */
   public String process(String xml_in) {
     
-    Node message_node = this.converter.getDOM(xml_in);
+    Node message_node = XMLConverter.getDOM(xml_in);
     Node page = process(message_node);
-    return this.converter.getString(page);
+    return XMLConverter.getString(page);
   }
 
   //Compose a message/response element used to send back to the OAIServer servlet. 
@@ -321,7 +320,7 @@ public class OAIReceptionist implements ModuleInterface {
     logger.error("OAIReceptionist received request");
 
     Element message = GSXML.nodeToElement(message_node);
-    logger.error(this.converter.getString(message));
+    logger.error(XMLConverter.getString(message));
 
     // check that its a correct message tag
     if (!message.getTagName().equals(GSXML.MESSAGE_ELEM)) {
@@ -592,7 +591,7 @@ public class OAIReceptionist implements ModuleInterface {
 
       Element result = (Element)mr.process(mr_msg);
       logger.error(verb+ " result for coll "+current_coll);
-      logger.error(this.converter.getPrettyString(result));
+      logger.error(XMLConverter.getPrettyString(result));
       if (result == null) {
 	logger.info("message router returns null");
 	// do what??? carry on? fail??
@@ -724,13 +723,6 @@ public class OAIReceptionist implements ModuleInterface {
     }
   }
 
-
-  // method exclusively used by doListRecords/doListIdentifiers
-  private void getRecords(Element verb_elem, NodeList list, int start_point, int end_point) {
-    for (int i=start_point; i<end_point; i++) {
-      verb_elem.appendChild(verb_elem.getOwnerDocument().importNode(list.item(i), true));
-    }
-  }
   private Element collectAll(Element result, Element msg, String verb, String elem_name) {
     if(result == null) {
       //in the first round, result is null
@@ -762,7 +754,7 @@ public class OAIReceptionist implements ModuleInterface {
   private Element doListMetadataFormats(Element req) {
     //if the verb is ListMetadataFormats, there could be only one parameter: identifier
     //, or there is no parameter; otherwise it is an error
-    //logger.info("" + this.converter.getString(msg));
+    //logger.info("" + XMLConverter.getString(msg));
     
     NodeList params = GSXML.getChildrenByTagName(req, GSXML.PARAM_ELEM);
     Element param = null;
@@ -776,14 +768,14 @@ public class OAIReceptionist implements ModuleInterface {
       }
 
       Element list_metadata_formats = lmf_doc.createElement(OAIXML.LIST_METADATA_FORMATS);
-      
-      Element format_list = (Element)GSXML.getChildByTagName(oai_config, OAIXML.LIST_METADATA_FORMATS);
-      if(format_list == null) {
-	logger.error("OAIConfig.xml must contain the supported metadata formats");
-	// TODO this is internal error, what to do???
-	return getMessage(lmf_doc, list_metadata_formats);
+      // get all the formats out of oai_config
+      NodeList formats = oai_config.getElementsByTagName(OAIXML.METADATA_FORMAT);
+      if (formats.getLength() ==0) {
+       	logger.error("OAIConfig.xml must contain the supported metadata formats");
+      	// TODO this is internal error, what to do???
+      	return getMessage(lmf_doc, list_metadata_formats);
       }
-      NodeList formats = format_list.getElementsByTagName(OAIXML.METADATA_FORMAT);
+	
       for(int i=0; i<formats.getLength(); i++) {
 	Element meta_fmt = lmf_doc.createElement(OAIXML.METADATA_FORMAT);
 	Element first_meta_format = (Element)formats.item(i);
@@ -793,8 +785,8 @@ public class OAIReceptionist implements ModuleInterface {
 	meta_fmt.appendChild(lmf_doc.importNode(GSXML.getChildByTagName(first_meta_format, OAIXML.METADATA_NAMESPACE), true));
 	list_metadata_formats.appendChild(meta_fmt);
       }
-      return getMessage(lmf_doc, list_metadata_formats);
-      
+      this.listmetadataformats_response = getMessage(lmf_doc, list_metadata_formats);
+      return this.listmetadataformats_response;
       
     } 
 
@@ -819,36 +811,28 @@ public class OAIReceptionist implements ModuleInterface {
       
     identifier = param.getAttribute(GSXML.VALUE_ATT);
     // the identifier is in the form: <coll_name>:<OID>
-    // so it must contain at least two ':' characters
-    String[] strs = identifier.split(":");
-    if(strs == null || strs.length < 2) {
-      // the OID may also contain ':'
+    // so it must contain at least one ':' characters 
+    // (the oid itself may contain : chars)
+    String[] strs = identifier.split(":", 2);
+    if(strs.length != 2) {
       logger.error("identifier is not in the form coll:id" + identifier);
       return OAIXML.createErrorMessage(OAIXML.ID_DOES_NOT_EXIST, "");
     }
         
     // send request to message router
     // get the names
-    strs = splitNames(identifier);
-    if(strs == null || strs.length < 2) {
-      logger.error("identifier is not in the form coll:id" + identifier);
-      return OAIXML.createErrorMessage(OAIXML.ID_DOES_NOT_EXIST, "");
-    }
-    //String name_of_site = strs[0];
     String coll_name = strs[0];
     String oid = strs[1];
 
-    //re-organize the request element
-    // reset the 'to' attribute
+    Document msg_doc = XMLConverter.newDOM();
+    Element message = msg_doc.createElement(GSXML.MESSAGE_ELEM);
     String verb = req.getAttribute(GSXML.TO_ATT);
-    req.setAttribute(GSXML.TO_ATT, coll_name + "/" + verb);
-    // reset the identifier element
-    param.setAttribute(GSXML.NAME_ATT, OAIXML.OID);
-    param.setAttribute(GSXML.VALUE_ATT, oid);
+    String new_to = coll_name + "/" + verb;
+    Element request = GSXML.createBasicRequest(msg_doc, "oai???", new_to, null);
+    message.appendChild(request);
+    // add the id param
+    GSXML.addParameterToList(request, OAIXML.OID, oid);
 
-    // TODO is this the best way to do this???? should we create a new request???
-    Element message = req.getOwnerDocument().createElement(GSXML.MESSAGE_ELEM);
-    message.appendChild(req);
     //Now send the request to the message router to process
     Node result_node = mr.process(message);
     return GSXML.nodeToElement(result_node);
@@ -860,14 +844,10 @@ public class OAIReceptionist implements ModuleInterface {
   private void copyNamedElementfromConfig(Element to_elem, String element_name) {
     Element original_element = (Element)GSXML.getChildByTagName(oai_config, element_name);
     if(original_element != null) {
-      copyNode(to_elem, original_element);
+      GSXML.copyNode(to_elem, original_element);
     }
   }
 
-  private void copyNode(Element to_elem, Node original_element) {
-    to_elem.appendChild(to_elem.getOwnerDocument().importNode(original_element, true));
-
-  }
 
   private Element doIdentify() {
     //The validation for this verb has been done in OAIServer.validate(). So no bother here.
@@ -893,7 +873,7 @@ public class OAIReceptionist implements ModuleInterface {
       num_admin = admin_emails.getLength();
     }
     for (int i=0; i<num_admin; i++) {
-      copyNode(identify, admin_emails.item(i));
+      GSXML.copyNode(identify, admin_emails.item(i));
     }
 
     //do the earliestDatestamp
@@ -926,7 +906,7 @@ public class OAIReceptionist implements ModuleInterface {
 	Element gsdl = OAIXML.createGSDLElement(doc);
 	description.appendChild(gsdl);
 	for (int m = 0; m<meta.getLength(); m++) {
-	  copyNode(gsdl, meta.item(m));
+	  GSXML.copyNode(gsdl, meta.item(m));
 	}
 	
       }
@@ -934,30 +914,20 @@ public class OAIReceptionist implements ModuleInterface {
     this.identify_response = identify;
     return getMessage(doc, identify);
   }
-  //split setSpec (site_name:coll_name) into an array of strings
-  //It has already been checked that the set_spec contains at least one ':'
-  private String[] splitSetSpec(String set_spec) {
-    logger.info(set_spec);
-    String[] strs = new String[2];
-    int colon_index = set_spec.indexOf(":");
-    strs[0] = set_spec.substring(0, colon_index);
-    strs[1] = set_spec.substring(colon_index + 1);
-    return strs;
-  }
   /** split the identifier into <collection + OID> as an array 
       It has already been checked that the 'identifier' contains at least one ':'
   */
-  private String[] splitNames(String identifier) {
-    logger.info(identifier);
-    String [] strs = new String[2];
-    int first_colon = identifier.indexOf(":");
-    if(first_colon == -1) {
-      return null;
-    }
-    strs[0] = identifier.substring(0, first_colon);
-    strs[1] = identifier.substring(first_colon + 1);
-    return strs;
-  }
+  // private String[] splitNames(String identifier) {
+  //   logger.info(identifier);
+  //   String [] strs = new String[2];
+  //   int first_colon = identifier.indexOf(":");
+  //   if(first_colon == -1) {
+  //     return null;
+  //   }
+  //   strs[0] = identifier.substring(0, first_colon);
+  //   strs[1] = identifier.substring(first_colon + 1);
+  //   return strs;
+  // }
   /** validate if the specified metadata prefix value is supported by the repository
    *  by checking it in the OAIConfig.xml
    */
@@ -1006,7 +976,7 @@ public class OAIReceptionist implements ModuleInterface {
     }
 
     // get the names
-    String[] strs = splitNames(identifier);
+    String[] strs = identifier.split(":", 2);
     if(strs == null || strs.length < 2) {
       logger.error("identifier is not in the form coll:id" + identifier);
       return OAIXML.createErrorMessage(OAIXML.ID_DOES_NOT_EXIST, "");
