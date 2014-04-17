@@ -35,7 +35,6 @@ import org.greenstone.gsdl3.service.ServiceRack;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
-import org.greenstone.gsdl3.util.OAIXML;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
 import org.greenstone.util.GlobalProperties;
@@ -87,10 +86,6 @@ public class MessageRouter implements ModuleInterface
 	protected Element collection_list = null;
 	/** list of collections that are loaded but are private */
 	protected Element private_collection_list = null;
-
-	/** list of collections that are public and OAI-supportive */
-	protected Element oai_collection_list = null;
-
 	/** list of service clusters that can be reached */
 	protected Element cluster_list = null;
 	/** list of single services that can be reached */
@@ -100,9 +95,6 @@ public class MessageRouter implements ModuleInterface
 	/** list of metadata for the site */
 	protected Element metadata_list = null;
 
-	/** a converter class to parse XML and create Docs */
-	protected XMLConverter converter = null;
-
 	//***************************************************************
 	// public methods
 	//***************************************************************
@@ -110,7 +102,6 @@ public class MessageRouter implements ModuleInterface
 	/** constructor */
 	public MessageRouter()
 	{
-		this.converter = new XMLConverter();
 	}
 
 	public void cleanUp()
@@ -217,10 +208,10 @@ public class MessageRouter implements ModuleInterface
 	public String process(String xml_in)
 	{
 
-		Document doc = this.converter.getDOM(xml_in);
+		Document doc = XMLConverter.getDOM(xml_in);
 
 		Node result = process(doc);
-		return this.converter.getString(result);
+		return XMLConverter.getString(result);
 	}
 
 	/**
@@ -332,7 +323,7 @@ public class MessageRouter implements ModuleInterface
 					}
 					else
 					{
-						logger.error("MessageRouter Error: request has illegal module name in:\n" + this.converter.getString(req));
+						logger.error("MessageRouter Error: request has illegal module name in:\n" + XMLConverter.getString(req));
 					}
 				}
 			}
@@ -340,7 +331,7 @@ public class MessageRouter implements ModuleInterface
 		} // for each request
 
 		logger.debug("MR returned response");
-		logger.debug(this.converter.getString(mainResult));
+		logger.debug(XMLConverter.getString(mainResult));
 
 		return mainResult;
 	}
@@ -390,7 +381,7 @@ public class MessageRouter implements ModuleInterface
 	 */
 	protected void cleanUpModuleMapSubset(Element list, String remote_site)
 	{
-		logger.error(this.converter.getString(list));
+		logger.error(XMLConverter.getString(list));
 		NodeList elements = list.getChildNodes(); // we are assuming no extraneous nodes
 		for (int i = elements.getLength() - 1; i >= 0; i--)
 		{
@@ -415,7 +406,7 @@ public class MessageRouter implements ModuleInterface
 				}
 			}
 		}
-		logger.error(this.converter.getString(list));
+		logger.error(XMLConverter.getString(list));
 	}
 
 	/**
@@ -453,7 +444,7 @@ public class MessageRouter implements ModuleInterface
 			return false;
 		}
 
-		Document config_doc = this.converter.getDOM(configFile);
+		Document config_doc = XMLConverter.getDOM(configFile);
 		if (config_doc == null)
 		{
 			logger.error(" couldn't parse site config file: " + configFile.getPath());
@@ -476,7 +467,6 @@ public class MessageRouter implements ModuleInterface
 		// load up the collections
 		this.collection_list = doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
 		this.private_collection_list = doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
-		this.oai_collection_list = doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
 		configureCollections();
 
 		// load up the external sites - this also adds their services/clusters/collections to the other lists - so must be done last
@@ -686,7 +676,7 @@ public class MessageRouter implements ModuleInterface
 
 		if (init_file.exists())
 		{
-			Document init_doc = this.converter.getDOM(init_file);
+			Document init_doc = XMLConverter.getDOM(init_file);
 			if (init_doc != null)
 			{
 				Element init_elem = init_doc.getDocumentElement();
@@ -729,18 +719,6 @@ public class MessageRouter implements ModuleInterface
 				// only public collections will appear on the home page
 				// add short description_ to collection_list_
 				this.collection_list.appendChild(e);
-
-				if (c.hasOAI())
-				{
-					Element ane = doc.createElement(GSXML.COLLECTION_ELEM);
-					ane.setAttribute(GSXML.NAME_ATT, col_name);
-					ane.setAttribute(OAIXML.LASTMODIFIED, "" + c.getLastmodified());
-					// lastmodified not of use anymore for OAI, perhaps useful as general information
-					ane.setAttribute(OAIXML.EARLIEST_DATESTAMP, "" + c.getEarliestDatestamp()); // for OAI
-
-					this.oai_collection_list.appendChild(ane);
-				}
-
 			}
 			else
 			{
@@ -803,7 +781,7 @@ public class MessageRouter implements ModuleInterface
 			logger.error(" site config file: " + configFile.getPath() + " not found!");
 			return false;
 		}
-		Document config_doc = this.converter.getDOM(configFile);
+		Document config_doc = XMLConverter.getDOM(configFile);
 		if (config_doc == null)
 		{
 			logger.error(" couldn't parse site config file: " + configFile.getPath());
@@ -1002,14 +980,6 @@ public class MessageRouter implements ModuleInterface
 					{
 						this.collection_list.removeChild(this_col);
 					}
-					if (((Collection) m).hasOAI())
-					{
-						this_col = GSXML.getNamedElement(this.oai_collection_list, GSXML.COLLECTION_ELEM, GSXML.NAME_ATT, name);
-						if (this_col != null)
-						{
-							this.oai_collection_list.removeChild(this_col);
-						}
-					}
 				}
 				else
 				{
@@ -1049,7 +1019,7 @@ public class MessageRouter implements ModuleInterface
 					cleanUpModuleMapSubset(this.cluster_list, name);
 					cleanUpModuleMapSubset(this.service_list, name);
 
-					// can remote collections be in the oai_coll list, or private coll list ??
+					// can remote collections be in the private coll list ??
 				}
 			}
 			else
@@ -1138,15 +1108,6 @@ public class MessageRouter implements ModuleInterface
 
 		}
 
-		if (type.equals(OAIXML.OAI_SET_LIST))
-		{
-			logger.info("oaiSetList request received");
-			//this is the oai receptionist asking for a list of oai-support collections
-			response.setAttribute(GSXML.TYPE_ATT, OAIXML.OAI_SET_LIST);
-			response.appendChild(doc.importNode(this.oai_collection_list, true));
-			return response;
-		}
-
 		if (type.equals(GSXML.REQUEST_TYPE_SYSTEM))
 		{
 
@@ -1225,7 +1186,7 @@ public class MessageRouter implements ModuleInterface
 									logger.error(" site config file: " + configFile.getPath() + " not found!");
 									continue;
 								}
-								Document site_config_doc = this.converter.getDOM(configFile);
+								Document site_config_doc = XMLConverter.getDOM(configFile);
 								if (site_config_doc == null)
 								{
 									logger.error(" couldn't parse site config file: " + configFile.getPath());
@@ -1323,7 +1284,7 @@ public class MessageRouter implements ModuleInterface
 		// if get here something has gone wrong
 		String eol = System.getProperty("line.separator");
 
-		String mess = "Can't process request:" + eol + "  " + this.converter.getString(req);
+		String mess = "Can't process request:" + eol + "  " + XMLConverter.getString(req);
 		logger.error(mess);
 		return null;
 
@@ -1341,7 +1302,7 @@ public class MessageRouter implements ModuleInterface
 		NodeList commands = request.getElementsByTagName("command");
 		if (commands == null)
 		{
-			logger.error("no commands, " + converter.getPrettyString(request));
+			logger.error("no commands, " + XMLConverter.getPrettyString(request));
 			return response;
 		}
 		for (int i = 0; i < commands.getLength(); i++)
