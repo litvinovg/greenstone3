@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.comms.Communicator;
 import org.greenstone.gsdl3.comms.SOAPCommunicator;
-import org.greenstone.gsdl3.core.MessageRouter;
+import org.greenstone.gsdl3.core.OAIMessageRouter;
 import org.greenstone.gsdl3.core.OAIReceptionist;
 import org.greenstone.gsdl3.util.GSConstants;
 import org.greenstone.gsdl3.util.GSParams;
@@ -139,33 +139,33 @@ public class OAIServer extends BaseGreenstoneServlet
 		// the receptionist -the servlet will talk to this
 		this.recept = new OAIReceptionist();
 
-		// the receptionist uses a MessageRouter or Communicator to send its requests to. We either create a MessageRouter here for the designated site (if site_name set), or we create a Communicator for a remote site. The is given to teh Receptionist, and the servlet never talks to it again.directly.
+		// the receptionist uses a OAIMessageRouter or Communicator to send its requests to. We either create a OAIMessageRouter here for the designated site (if site_name set), or we create a Communicator for a remote site. The is given to teh Receptionist, and the servlet never talks to it again.directly.
 		if (site_name != null)
 		{
 			//this site_name could consist of comma separated more than one site name.
 			String mr_name = (String) config.getInitParameter("messagerouter_class");
-			MessageRouter message_router = null;
+			OAIMessageRouter message_router = null;
 			if (mr_name == null)
 			{ // just use the normal MR *********
-				message_router = new MessageRouter();
+				message_router = new OAIMessageRouter();
 			}
 			else
 			{ // try the specified one
 				try
 				{
-					message_router = (MessageRouter) Class.forName("org.greenstone.gsdl3.core." + mr_name).newInstance();
+					message_router = (OAIMessageRouter) Class.forName("org.greenstone.gsdl3.core." + mr_name).newInstance();
 				}
 				catch (Exception e)
 				{ // cant use this new one, so use normal one
-				  logger.error("OAIServlet configure exception when trying to use a new MessageRouter " + mr_name, e);
-				  message_router = new MessageRouter();
+				  logger.error("OAIServlet configure exception when trying to use a new OAIMessageRouter " + mr_name, e);
+				  message_router = new OAIMessageRouter();
 				}
 			}
 
 			message_router.setSiteName(site_name);
-			// lots of work is done in this step; see MessageRouter.java
+			// lots of work is done in this step; see OAIMessageRouter.java
 			if (!message_router.configure()) {
-			  throw new UnavailableException("OAIServer: Couldn't configure MessageRouter");
+			  throw new UnavailableException("OAIServer: Couldn't configure OAIMessageRouter");
 			}
 			this.recept.setSiteName(site_name);
 			this.recept.setMessageRouter(message_router);
