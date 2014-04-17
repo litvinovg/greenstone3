@@ -68,13 +68,10 @@ public class Collection extends ServiceCluster
 	protected String col_type = "";
 	/** database type : gdbm, jdbm or sqlite */
 	protected String db_type = "";
-
-	/** does this collection provide the OAI service */
-	protected boolean has_oai = false;
-	/** time when this collection was built */
+	/** time when this collection was built Used by RSS */
 	protected long lastmodified = 0;
-	/** earliestDatestamp of this collection. Necessary for OAI */
-	protected long earliestDatestamp = 0;
+	/** earliestDatestamp of this collection. Used by OAI/RSS */
+        protected long earliestDatestamp = 0;
 
 	/** Stores the default accessibility of guest users */
 	protected boolean _publicAccess = true;
@@ -173,25 +170,16 @@ public class Collection extends ServiceCluster
 		return is_public;
 	}
 
-	// Used by OAI Receptionist to determine whether to expire a resumption token - if a token was issued before a collection is rebuilt, then the token must be expired.
+	// Used by OAI Receptionist and RSSRetrieve 
 	public long getLastmodified()
 	{
 		return lastmodified;
 	}
 
-	// used by the OAIReceptionist to find out the earliest datestamp amongst all oai collections in the repository
+	// used by the OAIReceptionist and RSSRetrieve
 	public long getEarliestDatestamp()
 	{
 		return earliestDatestamp;
-	}
-
-	/**
-	 * whether the service_map in ServiceCluster.java contains the service
-	 * 'OAIPMH' 11/06/2007 xiao
-	 */
-	public boolean hasOAI()
-	{
-		return has_oai;
 	}
 
 	/**
@@ -247,19 +235,8 @@ public class Collection extends ServiceCluster
 	 */
 	protected boolean findAndLoadInfo(Element coll_config_xml, Element build_config_xml)
 	{
-		// Element meta_list = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		// addMetadata(meta_list);
-		// meta_list = (Element) GSXML.getChildByTagName(build_config_xml, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		// addMetadata(meta_list);
-		addMetadata("httpPath", this.site_http_address + "/collect/" + this.cluster_name);
+	  addMetadata("httpPath", this.site_http_address + "/collect/" + this.cluster_name);
 
-		// display stuff
-		// Element display_list = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
-		// if (display_list != null)
-		// {
-		// 	resolveMacros(display_list);
-		// 	addDisplayItems(display_list);
-		// }
 
 		//check whether the html are tidy or not
 		Element import_list = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.IMPORT_ELEM);
@@ -284,9 +261,10 @@ public class Collection extends ServiceCluster
 		String tidy = (useBook == true ? "tidy" : "untidy");
 		addMetadata("tidyoption", tidy);
 
-		// check whether we are public or not
+		
 		if (this.metadata_list != null)
 		{
+		  // check whether we are public or not
 			Element meta_elem = (Element) GSXML.getNamedElement(this.metadata_list, GSXML.METADATA_ELEM, GSXML.NAME_ATT, "public");
 			if (meta_elem != null)
 			{
@@ -296,6 +274,15 @@ public class Collection extends ServiceCluster
 					is_public = false;
 				}
 			}
+			// earliest datestamp is the time the collection was created.
+			meta_elem = (Element) GSXML.getNamedElement(this.metadata_list, GSXML.METADATA_ELEM, GSXML.NAME_ATT, OAIXML.EARLIEST_DATESTAMP);
+			if (meta_elem != null) {
+			  String earliestDatestampStr = GSXML.getValue(meta_elem);
+			  if (!earliestDatestampStr.equals("")) {
+			      earliestDatestamp = Long.parseLong(earliestDatestampStr) * 1000; // stored in seconds, convert to milliseconds
+			  }
+			}
+		
 		}
 		return true;
 	}
@@ -392,54 +379,16 @@ public class Collection extends ServiceCluster
 	{
 		clearServices();
 		Element service_list = (Element) GSXML.getChildByTagName(build_config_xml, GSXML.SERVICE_CLASS_ELEM + GSXML.LIST_MODIFIER);
-		Element oai_service_rack = null;
 		if (service_list != null)
 		{
 			configureServiceRackList(service_list, coll_config_xml);
-			oai_service_rack = GSXML.getNamedElement(service_list, GSXML.SERVICE_CLASS_ELEM, GSXML.NAME_ATT, OAIXML.OAIPMH);
 		}
 		// collection Config may also contain manually added service racks
 		service_list = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.SERVICE_CLASS_ELEM + GSXML.LIST_MODIFIER);
 		if (service_list != null)
 		{
 			configureServiceRackList(service_list, build_config_xml);
-			// this oai used in preference to one in buildConfig.xml
-			oai_service_rack = GSXML.getNamedElement(service_list, GSXML.SERVICE_CLASS_ELEM, GSXML.NAME_ATT, OAIXML.OAIPMH);
 		}
-		// Check for oai
-
-		if (oai_service_rack != null)
-		{
-			has_oai = true;
-			logger.info(this.cluster_name + " has OAI services");
-			// extract earliestDatestamp from the buildconfig.xml for OAI
-			Element metadata_list = (Element) GSXML.getChildByTagName(build_config_xml, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-
-			if (metadata_list != null)
-			{
-				NodeList children = metadata_list.getElementsByTagName(GSXML.METADATA_ELEM);
-				// can't do getChildNodes(), because whitespace, such as newlines, creates Text nodes
-				for (int i = 0; i < children.getLength(); i++)
-				{
-					Element metadata = (Element) children.item(i);
-					if (metadata.getAttribute(GSXML.NAME_ATT).equals(OAIXML.EARLIEST_DATESTAMP))
-					{
-						String earliestDatestampStr = GSXML.getValue(metadata);
-						if (!earliestDatestampStr.equals(""))
-						{
-						  earliestDatestamp = Long.parseLong(earliestDatestampStr) * 1000; // stored in seconds, convert to milliseconds
-							
-						}
-						break; // found a metadata element with name=earliestDatestamp in buildconfig
-					}
-				}
-			}
-
-			// If at the end of this, there is no value for earliestDatestamp, print out a warning
-			logger.warn("No earliestDatestamp in buildConfig.xml for collection: " + this.cluster_name + ". Defaulting to 0.");
-
-		} // if oai_service_rack != null
-
 		return true;
 	}
 
