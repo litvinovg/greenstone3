@@ -794,12 +794,8 @@ sub write_format {
 	# but nest the GS2 statements here in an xml tag that won't be processed by GS3 
 
 	$old_format = &docprint::escape_text($old_format); # escape html entities inside the format statement since the <br> and <p> may not be correct for xml
-
-	# some html tidy
-	#turn <br> into <br />
-#	$old_format =~ s/\<br\>/\<br \/\>/g;
-#	$old_format =~ s/\<hr\>/\<hr \/\>/g;
 	$old_format = "<gsf:format-gs2>" . $old_format . "</gsf:format-gs2>";
+	
     }
 
     if ($node_type eq "document") {
