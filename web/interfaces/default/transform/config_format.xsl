@@ -14,6 +14,10 @@
 	<xsl:output method="xml"/>
 	<xsl:namespace-alias stylesheet-prefix="xslt" result-prefix="xsl"/>
 
+	<!-- don't output anything for gsf:format-gs2 elements, 
+	     they just exist in collectionconfig files to keep the XML valid -->
+	<xsl:template match="gsf:format-gs2" />
+
 	<xsl:template match="format">
 		<format>
 			<xsl:apply-templates/>
