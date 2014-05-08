@@ -126,6 +126,9 @@ sub main {
     if (defined $buildcfg->{'indexstem'}) {
 	$indexstem = $buildcfg->{'indexstem'};
     }
+    #my $indexstem = $buildcfg->{'indexstem'} || undef;
+    my $infodbtype = $buildcfg->{'infodbtype'} || "gdbm";
+    my $earliestDatestamp = $buildcfg->{'earliestdatestamp'} || undef;
 
     my $buildoutput = new IO::File(">$buildoutfile");
     binmode($buildoutput,":utf8");
@@ -183,6 +186,9 @@ sub main {
     $buildwriter->startTag('metadataList');
     &output_metadata($buildwriter,'', 'numDocs', $numdocs);
     &output_metadata($buildwriter,'', 'buildType', $buildtype);
+    &output_metadata($buildwriter,'', 'indexStem', $indexstem) if(defined $indexstem);
+    &output_metadata($buildwriter,'', 'infodbType', $infodbtype);
+    &output_metadata($buildwriter,'', 'earliestDatestamp', $earliestDatestamp) if(defined $earliestDatestamp);
     $buildwriter->endTag('metadataList');
     
     
@@ -430,7 +436,9 @@ sub main {
 
     if (defined $indexstem) {
 	$buildwriter->emptyTag('indexStem', 'name'=>$indexstem);
-    } 
+    }
+    $buildwriter->emptyTag('databaseType', 'name'=>$infodbtype) if (defined $infodbtype);
+    
     # close off the Retrieve service
     $buildwriter->endTag('serviceRack');
 
@@ -472,7 +480,8 @@ sub main {
 		$buildwriter->startTag('serviceRack', 'name'=>'GS2Browse');
 		if (defined $indexstem) {
 		    $buildwriter->emptyTag('indexStem', 'name'=>$indexstem);
-		} 
+		}
+		$buildwriter->emptyTag('databaseType', 'name'=>$infodbtype) if (defined $infodbtype);
 
 		$buildwriter->startTag('classifierList');		
 		$started_classifiers = 1;
@@ -489,7 +498,9 @@ sub main {
 		    } elsif ($arg eq "-metadata") {
 			$content = @$cl[$i+1];
 		    }
-		    
+
+		    # remove "ex." prefix from "ex.metaname" but not from "ex.namespace.metaname"
+		    $content =~ s@ex\.([^.]+)(,|;|$)@$1$2@g; #$content =~ s@ex\.([A-Z])@$1@g;
 		}
 	    }
 	    if ($horizontalAtTop) {
@@ -563,6 +574,7 @@ sub main {
     # do the search service
     $buildwriter->startTag('serviceRack', 'name'=>'GS2'.$service_type.'Search');
     #$buildwriter->emptyTag('defaultIndex', 'shortname'=>$defaultindex);
+    $buildwriter->emptyTag('defaultIndex', 'shortname'=>$indexmap->{$defaultindex});
     $buildwriter->startTag('indexList');
     #for each index
     foreach my $i (@indexlist) {
@@ -572,7 +584,8 @@ sub main {
     $buildwriter->endTag('indexList');
     if (defined $indexstem) {
 	$buildwriter->emptyTag('indexStem', 'name'=>$indexstem);
-    } 
+    }
+    $buildwriter->emptyTag('databaseType', 'name'=>$infodbtype) if (defined $infodbtype);
     
     # index options
     if ($buildtype eq 'mg' || $buildtype eq 'mgpp') {
@@ -596,7 +609,7 @@ sub main {
 		
 	# level info
 	$buildwriter->emptyTag('defaultLevel', 'shortname'=>$default_search_level_shortname);
-	$buildwriter->emptyTag('defaultGDBMLevel', 'shortname'=>$default_retrieve_level);
+	$buildwriter->emptyTag('defaultDBLevel', 'shortname'=>$default_retrieve_level);
 	$buildwriter->startTag('levelList');
 	foreach my $l (@levellist) {
 	    my $level = $levelmap->{$l};
@@ -688,7 +701,7 @@ sub output_metadata {
     }else{
 	$writer->startTag('metadata', 'name'=>$metaname);
     }
-    $writer->characters($metavalue);
+    $writer->characters($metavalue) if(defined $metavalue);
     $writer->endTag('metadata');
 }
 
