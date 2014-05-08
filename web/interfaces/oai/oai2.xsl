@@ -157,7 +157,7 @@ p.intro {
 <xsl:call-template name='xmlstyle' />
 </xsl:template>
 
-<xsl:variable name='identifier' select="substring-before(concat(substring-after(/oai:OAI-PMH/oai:request,'identifier='),'&amp;'),'&amp;')" />
+<xsl:variable name="identifier" select="/oai:OAI-PMH/oai:request/@identifier"/>
 
 <xsl:template match="/">
 <html>
