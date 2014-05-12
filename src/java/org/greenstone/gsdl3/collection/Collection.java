@@ -511,27 +511,40 @@ public class Collection extends ServiceCluster
 			if (oid != null && !oid.equals(""))
 			{
 				boolean inSet = false;
-				for (HashMap<String, ArrayList<String>> exception : _securityExceptions)
-				{
-					for (String setName : exception.get("sets"))
+				for (HashMap<String, ArrayList<String>> exception : _securityExceptions) {
+				  
+				  ArrayList<String> exceptionSets = exception.get("sets");
+				   if (exceptionSets.size() == 0) {
+				    inSet = true;
+				    for (String group : exception.get("groups"))
+				      {
+					groups.add(group);
+				      }
+				   }
+				   else {
+				      for (String setName : exception.get("sets"))
 					{
-						if (documentIsInSet(oid, setName))
+					  if (documentIsInSet(oid, setName))
+					    {
+					      inSet = true;
+					      for (String group : exception.get("groups"))
 						{
-							inSet = true;
-							for (String group : exception.get("groups"))
-							{
-								groups.add(group);
-							}
+						  groups.add(group);
 						}
+					      break;
+					    }
 					}
+				   }
 				}
-
+			
+			
+				  
 				if (!inSet && _publicAccess)
-				{
+				  {// our doc was not part of any exception, so it must be public
 					groups.add("");
 				}
 			}
-			else
+			else // if we are not doing a request with an oid, then free to access
 			{
 				groups.add("");
 			}
