@@ -52,12 +52,12 @@ public class DBInfo
 	 */
 	public String getInfo(String key)
 	{
-		Vector items = info_map_.get(key);
+		Vector<String> items = info_map_.get(key);
 		if (items == null)
 		{
 			return "";
 		}
-		return (String) items.firstElement();
+		return items.firstElement();
 	}
 
 	// methods for keys that can have multiple values
