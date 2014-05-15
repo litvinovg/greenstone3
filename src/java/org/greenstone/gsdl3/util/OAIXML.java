@@ -128,9 +128,13 @@ public class OAIXML {
   public static final String RESUME_AFTER = "resumeAfter";
   public static final String RESUMPTION_TOKEN_EXPIRATION = "resumptionTokenExpiration";
   public static final String OAI_SUPER_SET = "oaiSuperSet";
+  public static final String ELEMENT = "element";
+  public static final String ELEMENTS = "elements";
   public static final String MAPPING = "mapping";
-  public static final String MAPPING_LIST = "mappingList";
-
+  public static final String SELECT = "select";
+  public static final String SELECT_SINGLE_VALUE = "firstvalue";
+  public static final String SELECT_FIRST_VALID_META = "firstvalidmetadata";
+  public static final String SELECT_ALL_VALUES = "allvalues";
   // code constants
    public static final String GS_OAI_RESOURCE_URL = "gs.OAIResourceURL";
    public static final String ILLEGAL_OAI_VERB = "Illegal OAI verb";
@@ -274,7 +278,17 @@ public class OAIXML {
     return getMetadataMapping(metadata_format);
   }
 
-    
+  /** Copies out the main info from a metadataFormat element, leaving behind the mapping stuff. This gets the bit needed for OAI response */
+  public static Element getMetadataFormatShort(Document doc, Element meta_format_long) {
+    Element meta_fmt = doc.createElement(OAIXML.METADATA_FORMAT);
+    // Copy in the elements that we want, and ignore the rest
+    meta_fmt.appendChild(doc.importNode(GSXML.getChildByTagName(meta_format_long, OAIXML.METADATA_PREFIX), true));
+	meta_fmt.appendChild(doc.importNode(GSXML.getChildByTagName(meta_format_long, OAIXML.SCHEMA), true));
+	meta_fmt.appendChild(doc.importNode(GSXML.getChildByTagName(meta_format_long, OAIXML.METADATA_NAMESPACE), true));
+
+	return meta_fmt;
+  }
+
   public static long getTokenExpiration() {
     return token_expiration*1000; // in milliseconds
   }
@@ -494,8 +508,9 @@ public class OAIXML {
     }
     return oai;
   }
-  public static Element getMetadataPrefixElement(Document doc, String tag_name, String version) {
+  public static Element getMetadataPrefixElement(Document doc, String prefix, String version) {
     //examples of tag_name: dc, oai_dc:dc, etc.
+    String tag_name = getMetadataTagName(prefix, version);
     Element oai = doc.createElement(tag_name);
     if (version.equals(OAI_VERSION2)) {
       oai.setAttribute("xmlns:oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc/");
@@ -510,6 +525,16 @@ public class OAIXML {
       
     return oai;
   }
+  public static String getMetadataTagName(String prefix, String oai_version) {
+    if (prefix.equals("oai_dc")) {
+      if (oai_version.equals(OAI_VERSION2)) {
+	return "oai_dc:dc";
+      }
+      return "dc";
+    }
+    return prefix;
+  }
+
   public static HashMap<String, Node> getChildrenMapByTagName(Node n, String tag_name) {
 	
     HashMap<String, Node> map= new HashMap<String, Node>();
