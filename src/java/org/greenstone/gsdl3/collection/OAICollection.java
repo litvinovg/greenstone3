@@ -1,5 +1,5 @@
 /*
- *    Collection.java
+ *    OAICollection.java
  *    Copyright (C) 2002 New Zealand Digital Library, http://www.nzdl.org
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.core.ModuleInterface;
 import org.greenstone.gsdl3.service.ServiceRack;
+import org.greenstone.gsdl3.service.OAIPMH;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSXSLT;
@@ -50,8 +51,6 @@ import org.w3c.dom.NodeList;
  * Represents a collection for the OAI server. This is a cut down version of Collection, as we
  * only want to load the OAIPMH service rack, not any of the others
  * 
- * @author Katherine Don
- * @see ModuleInterface
  */
 public class OAICollection extends Collection
 {
@@ -60,6 +59,9 @@ public class OAICollection extends Collection
 
 	/** does this collection provide the OAI service */
 	protected boolean has_oai = false;
+
+  /** a reference to the OAIPMH service rack */
+  protected OAIPMH oai_service_rack = null;
 
 	/**
 	 * Configures the collection.
@@ -111,14 +113,18 @@ public class OAICollection extends Collection
 		return has_oai;
 	}
 
-
+  /** add any extra info for collection from OAIConfig.xml */
+  public boolean configureOAI(Element oai_config) {
+    // just pass the element to each service - should only be one
+    return this.oai_service_rack.configureOAI(oai_config);
+  }
 
   /** override this to only load up OAIPMH serviceRack  - don't need all the rest of them for oai*/
 	protected boolean configureServiceRackList(Element service_rack_list, Element extra_info)
 	{
 
 	  // find the OAIPMH service
-	  Element oai_service_xml = GSXML.getNamedElement(service_rack_list, GSXML.SERVICE_CLASS_ELEM, GSXML.NAME_ATT, OAIXML.OAI_SERVICE_RACK);
+	  Element oai_service_xml = GSXML.getNamedElement(service_rack_list, GSXML.SERVICE_CLASS_ELEM, GSXML.NAME_ATT, "OAIPMH");
 	  if (oai_service_xml == null) {
 	    return false;
 	  }
@@ -129,40 +135,17 @@ public class OAICollection extends Collection
 	  Element request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", new UserContext());
 	  message.appendChild(request);
 
-	  ServiceRack s = null;
-	  
-	  try {
-	    
-	    // try for a default service in standard package
-	    s = (ServiceRack) Class.forName("org.greenstone.gsdl3.service." + OAIXML.OAI_SERVICE_RACK).newInstance();
-	    
-	  } catch (Exception e) {}
-	    
-	  if (s == null) {
-	    
-	    try {
-	      // name as is, in case package is already specified
-	      s = (ServiceRack) Class.forName(OAIXML.OAI_SERVICE_RACK).newInstance();
-	    } catch (Exception e) {}
-	  }
-
-	  if (s == null) {
-	    
-	    logger.error("Couldn't get an instance of class " + OAIXML.OAI_SERVICE_RACK + ", or org.greenstone.gsdl3.service." + OAIXML.OAI_SERVICE_RACK);
-	    return false;
-	  }
-
-
-	  s.setSiteHome(this.site_home);
-	  s.setSiteAddress(this.site_http_address);
-	  s.setClusterName(this.cluster_name);
-	  s.setServiceCluster(this);
-	  s.setMessageRouter(this.router);
+	  this.oai_service_rack = new OAIPMH();
+	  this.oai_service_rack.setSiteHome(this.site_home);
+	  this.oai_service_rack.setSiteAddress(this.site_http_address);
+	  this.oai_service_rack.setClusterName(this.cluster_name);
+	  this.oai_service_rack.setServiceCluster(this);
+	  this.oai_service_rack.setMessageRouter(this.router);
 	  // pass the xml node to the service for configuration
-	  if (s.configure(oai_service_xml, extra_info)) {
+	  if (this.oai_service_rack.configure(oai_service_xml, extra_info)) {
 	    
 	    // find out the supported service types for this service module
-	    Node types = s.process(message);
+	    Node types = this.oai_service_rack.process(message);
 	    NodeList typenodes = ((Element) types).getElementsByTagName(GSXML.SERVICE_ELEM);
 	    
 	    for (int j = 0; j < typenodes.getLength(); j++)
@@ -183,7 +166,7 @@ public class OAICollection extends Collection
 		    service = new_service;
 		    ((Element) typenodes.item(j)).setAttribute(GSXML.NAME_ATT, service);
 		  }
-		this.service_map.put(service, s);
+		this.service_map.put(service, this.oai_service_rack);
 		// also add info to the ServiceInfo XML element
 		this.service_list.appendChild(this.desc_doc.importNode(typenodes.item(j), true));
 	      }
