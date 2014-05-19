@@ -54,7 +54,7 @@ public class OAIMessageRouter extends MessageRouter
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.core.MessageRouter.class.getName());
 
-
+  public Element oai_config = null;
 	//***************************************************************
 	// public methods
 	//***************************************************************
@@ -73,6 +73,7 @@ public class OAIMessageRouter extends MessageRouter
 	  // this may be a reconfigure, so clean up the old moduleMap
 		cleanUpModuleMapEntire();
 
+		// for oai, we don't do anything with the site config file. But we'll read it in and keep it in case need it later, eg for replace elements when retrieving metadata - which I don't think has been implemented
 		File configFile = new File(GSFile.siteConfigFile(this.site_home));
 
 		if (!configFile.exists())
@@ -90,8 +91,13 @@ public class OAIMessageRouter extends MessageRouter
 
 		this.config_info = config_doc.getDocumentElement();
 
-		// for oai, we don't do anything with the config file. But we'll keep it in case need it later, eg for replace elements when retrieving metadata - which I don't think has been implemented
-
+		// this is the receptionists OAIConfig.xml. Need to rethink how the MR gets this this if we ever talk to remote site, and whether it should be using it anyway
+		this.oai_config = OAIXML.getOAIConfigXML();
+		if (this.oai_config == null)
+		{
+		  logger.error("Couldn't load in OAIConfig.xml");
+		  return false;
+		}
 		Document doc = XMLConverter.newDOM();
 		// load up the collections
 		this.collection_list = doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
@@ -130,6 +136,10 @@ public class OAIMessageRouter extends MessageRouter
 		logger.info("have just configured collection " + col_name);
 		if (!c.hasOAI()) {
 		  logger.info ("collection "+col_name+" has no OAI services. Not keeping it loaded");
+		  return false;
+		}
+		if (!c.configureOAI(this.oai_config)) {
+		  logger.info("couldn't configure the collection : "+col_name +" with the oai config info");
 		  return false;
 		}
 		// add to list of collections
