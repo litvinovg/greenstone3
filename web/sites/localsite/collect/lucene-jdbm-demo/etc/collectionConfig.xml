@@ -1,58 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CollectionConfig xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<metadataList>
-		<metadata lang="en" name="creator"></metadata>
-		<metadata lang="en" name="maintainer"></metadata>
-		<metadata lang="en" name="public">true</metadata>
-	</metadataList>
+  <metadataList>
+    <metadata lang="en" name="creator"></metadata>
+    <metadata lang="en" name="maintainer"></metadata>
+    <metadata lang="en" name="public">true</metadata>
+  </metadataList>
 
-	<displayItemList>
-		<displayItem assigned="true" lang="en" name="name">Demo Collection</displayItem> 
-		<displayItem assigned="true" lang="en" name="description">
-		  This is a demonstration collection for the Greenstone3 digital library software. 
-		  It contains a small subset (11 books) of the Humanitarian and Development Libraries. 
-		  It is the Greenstone 3 equivalent of the Greenstone 2 demo collection, built with 
-		  Lucene for indexing and JDBM as the database for metadata.
-		</displayItem>
-		<displayItem lang="en" name="shortDescription">
-		  Demonstration collection containing a few books from the Humanitarian and Development 
-		  Libraries. Uses Lucene and JDBM.
-		</displayItem> 
-	</displayItemList>
+  <displayItemList>
+    <displayItem assigned="true" lang="en" name="name">Demo Collection</displayItem> 
+    <displayItem assigned="true" lang="en" name="description">
+      This is a demonstration collection for the Greenstone3 digital library software. 
+      It contains a small subset (11 books) of the Humanitarian and Development Libraries. 
+      It is the Greenstone 3 equivalent of the Greenstone 2 demo collection, built with 
+      Lucene for indexing and JDBM as the database for metadata.
+    </displayItem>
+    <displayItem lang="en" name="shortDescription">
+      Demonstration collection containing a few books from the Humanitarian and Development 
+      Libraries. Uses Lucene and JDBM.
+    </displayItem> 
+  </displayItemList>
 
-	<format>
-	  <!-- Define any global format statements here -->
+  <format>
+    <!-- Define any global format statements here -->
 
-	  <!-- Setting the RSS option to true here will display a link to the collection's RSS feed on all
-	       pages of the collection. Can include the RSS feed link in section specific format statements
-	       too, such as search, if wishing to display the link only in particular sections.-->
-	  <gsf:option name="RSS" value="true"/>
-	</format>
+    <!-- Setting the RSS option to true here will display a link to the collection's RSS feed on all
+	 pages of the collection. Can include the RSS feed link in section specific format statements
+	 too, such as search, if wishing to display the link only in particular sections.-->
+    <gsf:option name="RSS" value="true"/>
+  </format>
 
-	<search type="lucene">
-		<level name="section">
-			<displayItem lang="en" name="name">chapter</displayItem>
-		</level>
-		<level name="document">
-			<displayItem lang="en" name="name">book</displayItem>
-		</level>
-		<defaultLevel name="section"/>
-		<index name="allfields">
-			<displayItem lang="en" name="name">all fields</displayItem>
-		</index>
-		<index name="text">
-			<displayItem lang="en" name="name">text</displayItem>
-		</index>
-		<index name="dc.Title,Title">
-			<displayItem lang="en" name="name">titles</displayItem>
-		</index>
-		<index name="dc.Subject">
-			<displayItem lang="en" name="name">subjects</displayItem>
-		</index>
-		<index name="dls.Organization">
-			<displayItem lang="en" name="name">organisations</displayItem>
-		</index>
+  <search type="lucene">
+    <level name="section">
+      <displayItem lang="en" name="name">chapter</displayItem>
+    </level>
+    <level name="document">
+      <displayItem lang="en" name="name">book</displayItem>
+    </level>
+    <defaultLevel name="section"/>
+    <index name="allfields">
+      <displayItem lang="en" name="name">all fields</displayItem>
+    </index>
+    <index name="text">
+      <displayItem lang="en" name="name">text</displayItem>
+    </index>
+    <index name="dc.Title,Title">
+      <displayItem lang="en" name="name">titles</displayItem>
+    </index>
+    <index name="dc.Subject">
+      <displayItem lang="en" name="name">subjects</displayItem>
+    </index>
+    <index name="dls.Organization">
+      <displayItem lang="en" name="name">organisations</displayItem>
+    </index>
 
     <sort name="rank">
       <displayItem lang="en" name="name">ranks</displayItem>
@@ -67,184 +67,184 @@
       <displayItem lang="en" name="name">natural (build) order</displayItem>
     </sort>
     <searchType name="plain"/>
-		<searchType name="simpleform"/>
-		<searchType name="advancedform"/>
-		<format>
-			<gsf:template match="documentNode">
-				<td valign="top">
-					<gsf:link type="document">
-						<gsf:icon type="document"/>
-					</gsf:link>
-				</td>
-				<td>
-					<gsf:link type="document">
-						<gsf:choose-metadata>
-							<gsf:metadata name="dc.Title"/>
-							<gsf:metadata name="exp.Title"/>
-							<gsf:metadata name="ex.dc.Title"/>
-							<gsf:metadata name="Title"/>
-							<gsf:default>Untitled</gsf:default>
-						</gsf:choose-metadata>
-					</gsf:link>
-				</td>
+    <searchType name="simpleform"/>
+    <searchType name="advancedform"/>
+    <format>
+      <gsf:template match="documentNode">
+	<td valign="top">
+	  <gsf:link type="document">
+	    <gsf:icon type="document"/>
+	  </gsf:link>
+	</td>
+	<td>
+	  <gsf:link type="document">
+	    <gsf:choose-metadata>
+	      <gsf:metadata name="dc.Title"/>
+	      <gsf:metadata name="exp.Title"/>
+	      <gsf:metadata name="ex.dc.Title"/>
+	      <gsf:metadata name="Title"/>
+	      <gsf:default>Untitled</gsf:default>
+	    </gsf:choose-metadata>
+	  </gsf:link>
+	</td>
 	<td>
 	  <gsf:choose-metadata><gsf:metadata name="dls.Organization" select="root"/><gsf:metadata name="dls.Organization"/></gsf:choose-metadata></td>
 	<td><gsf:choose-metadata><gsf:metadata name="FileSize" select="root"/><gsf:metadata name="FileSize"/></gsf:choose-metadata>(rank <gsf:rank/>)
 	</td>
-			</gsf:template>
-		</format>
-	</search>
-	<infodb type="jdbm"/>
-	<import>
-		<pluginList>
-			<plugin name="GreenstoneXMLPlugin"/>
-			<plugin name="HTMLPlugin">
-				<option name="-description_tags"/>
-			</plugin>
-			<plugin name="MetadataXMLPlugin"/>
-			<plugin name="ArchivesInfPlugin"/>
-			<plugin name="DirectoryPlugin"/>
-		</pluginList>
-	</import>
+      </gsf:template>
+    </format>
+  </search>
+  <infodb type="jdbm"/>
+  <import>
+    <pluginList>
+      <plugin name="GreenstoneXMLPlugin"/>
+      <plugin name="HTMLPlugin">
+	<option name="-description_tags"/>
+      </plugin>
+      <plugin name="MetadataXMLPlugin"/>
+      <plugin name="ArchivesInfPlugin"/>
+      <plugin name="DirectoryPlugin"/>
+    </pluginList>
+  </import>
   <importOption name="OIDtype" value="dirname"/>
   <buildOption name="sections_sort_on_document_metadata" value="unless_section_metadata_exists"/>
 
-	<browse>
-		<classifier name="List">
-			<option name="-metadata" value="dc.Title"/>
-			<option name="-partition_type_within_level" value="constant_size"/>
-		</classifier>
-		<classifier name="Hierarchy">
-			<option name="-metadata" value="dc.Subject"/>
-			<option name="-sort" value="dc.Title"/>
-		</classifier>
-		<classifier name="List">
-			<option name="-metadata" value="dls.Organization"/>
-			<option name="-sort_leaf_nodes_using" value="dc.Title"/>
-			<option name="-partition_type_within_level" value="constant_size"/>
-			<option name="-bookshelf_type" value="always"/>
-			<option name="-buttonname" value="Organization"/>
-		</classifier>
-		<classifier name="List">
-			<option name="-metadata" value="dls.Keyword"/>
-			<option name="-buttonname" value="Howto"/>
-			<option name="-partition_type_within_level" value="constant_size"/>
-			<format>
-			<gsf:template match="documentNode">
-				<td>
-					<gsf:link type="document">
-						<gsf:metadata name="dls.Keyword"/>
-					</gsf:link>
-				</td>
-			</gsf:template>
-			<gsf:template match="classifierNode">
-				<td>
-					<gsf:link type="classifier">
-						<gsf:metadata name="Title"/>
-					</gsf:link>
-				</td>
-			</gsf:template>
-		</format>
-		</classifier>
-		<format>
-			<gsf:template match="documentNode">
-				<td valign="top">
-					<gsf:link type="document">
-						<gsf:icon type="document"/>
-					</gsf:link>
-				</td>
-				<td valign="top">
-					<gsf:link type="source">
-						<gsf:choose-metadata>
-							<gsf:metadata name="thumbicon"/>
-							<gsf:metadata name="srcicon"/>
-						</gsf:choose-metadata>
-					</gsf:link>
-				</td>
-				<td valign="top">
-					<gsf:link type="document">
-						<gsf:choose-metadata>
-							<gsf:metadata name="dc.Title"/>
-							<gsf:metadata name="exp.Title"/>
-							<gsf:metadata name="ex.dc.Title"/>
-							<gsf:metadata name="Title"/>
-							<gsf:default>Untitled</gsf:default>
-						</gsf:choose-metadata>
-					</gsf:link>
-					<gsf:switch>
-						<gsf:metadata name="Source"/>
-						<gsf:when test="exists">
-							<br/>
-							<i>(<gsf:metadata name="Source"/>)</i>
-						</gsf:when>
-					</gsf:switch>
+  <browse>
+    <classifier name="List">
+      <option name="-metadata" value="dc.Title"/>
+      <option name="-partition_type_within_level" value="constant_size"/>
+    </classifier>
+    <classifier name="Hierarchy">
+      <option name="-metadata" value="dc.Subject"/>
+      <option name="-sort" value="dc.Title"/>
+    </classifier>
+    <classifier name="List">
+      <option name="-metadata" value="dls.Organization"/>
+      <option name="-sort_leaf_nodes_using" value="dc.Title"/>
+      <option name="-partition_type_within_level" value="constant_size"/>
+      <option name="-bookshelf_type" value="always"/>
+      <option name="-buttonname" value="Organization"/>
+    </classifier>
+    <classifier name="List">
+      <option name="-metadata" value="dls.Keyword"/>
+      <option name="-buttonname" value="Howto"/>
+      <option name="-partition_type_within_level" value="constant_size"/>
+      <format>
+	<gsf:template match="documentNode">
+	  <td>
+	    <gsf:link type="document">
+	      <gsf:metadata name="dls.Keyword"/>
+	    </gsf:link>
+	  </td>
+	</gsf:template>
+	<gsf:template match="classifierNode">
+	  <td>
+	    <gsf:link type="classifier">
+	      <gsf:metadata name="Title"/>
+	    </gsf:link>
+	  </td>
+	</gsf:template>
+      </format>
+    </classifier>
+    <format>
+      <gsf:template match="documentNode">
+	<td valign="top">
+	  <gsf:link type="document">
+	    <gsf:icon type="document"/>
+	  </gsf:link>
+	</td>
+	<td valign="top">
+	  <gsf:link type="source">
+	    <gsf:choose-metadata>
+	      <gsf:metadata name="thumbicon"/>
+	      <gsf:metadata name="srcicon"/>
+	    </gsf:choose-metadata>
+	  </gsf:link>
+	</td>
+	<td valign="top">
+	  <gsf:link type="document">
+	    <gsf:choose-metadata>
+	      <gsf:metadata name="dc.Title"/>
+	      <gsf:metadata name="exp.Title"/>
+	      <gsf:metadata name="ex.dc.Title"/>
+	      <gsf:metadata name="Title"/>
+	      <gsf:default>Untitled</gsf:default>
+	    </gsf:choose-metadata>
+	  </gsf:link>
+	  <gsf:switch>
+	    <gsf:metadata name="Source"/>
+	    <gsf:when test="exists">
+	      <br/>
+	      <i>(<gsf:metadata name="Source"/>)</i>
+	    </gsf:when>
+	  </gsf:switch>
 
-				</td>
-			</gsf:template>
-			<gsf:template match="classifierNode[@classifierStyle = 'VList']">
-				<td valign="top">
-					<gsf:link type="classifier">
-						<gsf:icon type="classifier"/>
-					</gsf:link>
-				</td>
-				<td valign="top">
-					<gsf:choose-metadata>
-						<gsf:metadata name="dc.Title"/>
-						<gsf:metadata name="exp.Title"/>
-						<gsf:metadata name="ex.dc.Title"/>
-						<gsf:metadata name="Title"/>
-						<gsf:default>Untitled</gsf:default>
-					</gsf:choose-metadata>
-					<gsf:switch>
-						<gsf:metadata name="Source"/>
-						<gsf:when test="exists">
-							<br/>
-							<i>(<gsf:metadata name="Source"/>)</i>
-						</gsf:when>
-					</gsf:switch>
-				</td>
-			</gsf:template>
-			<gsf:template match="classifierNode[@classifierStyle = 'HList']">
-				<gsf:link type="classifier">
-					<gsf:metadata name="Title"/>
-				</gsf:link>
-			</gsf:template>
-		</format>
-	</browse>
-	<display>
-		<format>
-			<gsf:option name="TOC" value="true"/>
-			
-			<gsf:headMetaTags>
-			  <gsf:metadata name="dc.Title"/>
-			  <gsf:metadata name="dc.Subject"/>
-			  <gsf:metadata name="dls.Organization"/>
-			</gsf:headMetaTags>
+	</td>
+      </gsf:template>
+      <gsf:template match="classifierNode[@classifierStyle = 'VList']">
+	<td valign="top">
+	  <gsf:link type="classifier">
+	    <gsf:icon type="classifier"/>
+	  </gsf:link>
+	</td>
+	<td valign="top">
+	  <gsf:choose-metadata>
+	    <gsf:metadata name="dc.Title"/>
+	    <gsf:metadata name="exp.Title"/>
+	    <gsf:metadata name="ex.dc.Title"/>
+	    <gsf:metadata name="Title"/>
+	    <gsf:default>Untitled</gsf:default>
+	  </gsf:choose-metadata>
+	  <gsf:switch>
+	    <gsf:metadata name="Source"/>
+	    <gsf:when test="exists">
+	      <br/>
+	      <i>(<gsf:metadata name="Source"/>)</i>
+	    </gsf:when>
+	  </gsf:switch>
+	</td>
+      </gsf:template>
+      <gsf:template match="classifierNode[@classifierStyle = 'HList']">
+	<gsf:link type="classifier">
+	  <gsf:metadata name="Title"/>
+	</gsf:link>
+      </gsf:template>
+    </format>
+  </browse>
+  <display>
+    <format>
+      <gsf:option name="TOC" value="true"/>
+      
+      <gsf:headMetaTags>
+	<gsf:metadata name="dc.Title"/>
+	<gsf:metadata name="dc.Subject"/>
+	<gsf:metadata name="dls.Organization"/>
+      </gsf:headMetaTags>
 
-		</format>
-	</display>
-	<replaceListRef id="gs2-standard"/>
-	<serviceRackList>
-	  	<serviceRack name="RSSRetrieve"/>
-		<!-- comment out the following serviceRack if you want to disable OAI for this collection -->
-		<serviceRack name="OAIPMH">
-			<ListMetadataFormats>
-				<!--What metadata sets to support is collection specific. To support other metadata schema, simply add a metadataFormat element here.
-					The support of unqualified Dublin Core metadata set is mandatory in the oai specification.
-				-->
-				<metadataFormat metadataPrefix="oai_dc">
-					<metadataPrefix>oai_dc</metadataPrefix>
-					<schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
-					<metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
-					<!--   a custom mapping as this collection doesn't have dc metadata -->                    
-					<mappingList>						
-                        <mapping>dc:title,dc.Title</mapping>
-                        <mapping>dc:subject,dc.Subject</mapping>
-                        <mapping>dc:language,dc.Language</mapping>
-                        <mapping>dc:publisher,dls.Organization</mapping>                    
-					</mappingList>
-				</metadataFormat>
-			</ListMetadataFormats>
-		</serviceRack>
-	</serviceRackList>
+    </format>
+  </display>
+  <replaceListRef id="gs2-standard"/>
+  <serviceRackList>
+    <serviceRack name="RSSRetrieve"/>
+    <!-- comment out the following serviceRack if you want to disable OAI for this collection -->
+    <serviceRack name="OAIPMH">
+      <ListMetadataFormats>
+	<!--What metadata sets to support is collection specific. To support other metadata schema, simply add a metadataFormat element here.
+		 The support of unqualified Dublin Core metadata set is mandatory in the oai specification.
+	  -->
+	<metadataFormat metadataPrefix="oai_dc">
+	  <metadataPrefix>oai_dc</metadataPrefix>
+	  <schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
+	  <metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
+	  <!--   a custom mapping as this collection doesn't have dc metadata -->                    
+	  <mappingList>						
+            <mapping>dc:title,dc.Title</mapping>
+            <mapping>dc:subject,dc.Subject</mapping>
+            <mapping>dc:language,dc.Language</mapping>
+            <mapping>dc:publisher,dls.Organization</mapping>                    
+	  </mappingList>
+	</metadataFormat>
+      </ListMetadataFormats>
+    </serviceRack>
+  </serviceRackList>
 </CollectionConfig>
