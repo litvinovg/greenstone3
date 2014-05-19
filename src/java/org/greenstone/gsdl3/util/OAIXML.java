@@ -99,8 +99,7 @@ public class OAIXML {
   public static final String METADATA_FORMAT = "metadataFormat";
   public static final String SCHEMA = "schema";
   public static final String METADATA_NAMESPACE = "metadataNamespace";
-  public static final String OAI_DC = "oai_dc";
-  public static final String DC = "dc";
+  public static final String META_FORMAT_DC = "oai_dc";
 
   // record response data
   // SET_SPEC
@@ -508,25 +507,30 @@ public class OAIXML {
     }
     return oai;
   }
+
   public static Element getMetadataPrefixElement(Document doc, String prefix, String version) {
-    //examples of tag_name: dc, oai_dc:dc, etc.
-    String tag_name = getMetadataTagName(prefix, version);
-    Element oai = doc.createElement(tag_name);
-    if (version.equals(OAI_VERSION2)) {
-      oai.setAttribute("xmlns:oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc/");
-      oai.setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
-      oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-      oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ \n http://www.openarchives.org/OAI/2.0/oai_dc.xsd");
-    } else {
-      oai.setAttribute("xmlns", "http://www.openarchives.com/OAI/1.1/");
-      oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-      oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/1.1/" + tag_name + ".xsd");        
+    if (prefix.equals(META_FORMAT_DC)) {
+      //examples of tag_name: dc, oai_dc:dc, etc.
+      String tag_name = getMetadataTagName(prefix, version);
+      Element oai = doc.createElement(tag_name);
+      if (version.equals(OAI_VERSION2)) {
+	oai.setAttribute("xmlns:oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc/");
+	oai.setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
+	oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+	oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ \n http://www.openarchives.org/OAI/2.0/oai_dc.xsd");
+      } else {
+	oai.setAttribute("xmlns", "http://www.openarchives.com/OAI/1.1/");
+	oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+	oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/1.1/" + tag_name + ".xsd");        
+      }
+      return oai;
     }
-      
-    return oai;
+    return null;
+    
   }
+
   public static String getMetadataTagName(String prefix, String oai_version) {
-    if (prefix.equals("oai_dc")) {
+    if (prefix.equals(META_FORMAT_DC)) {
       if (oai_version.equals(OAI_VERSION2)) {
 	return "oai_dc:dc";
       }
