@@ -112,8 +112,8 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable
 	 */
 	public DBInfo getInfo(String main_key)
 	{
-		//   logger.warn("All the entries of the db are:");
-		//   this.coll_db.displayAllEntries();
+	  //logger.warn("All the entries of the db are:");
+	  //this.coll_db.displayAllEntries();
 
 		if (this.coll_db == null)
 		{
@@ -129,7 +129,8 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable
 		}
 		
 		DBInfo info = new DBInfo();
-
+		// add in the Identifier field // hack for OAI. useful for other things? or not???
+		info.addInfo("Identifier", main_key);
 		String[] lines = StringUtils.split(key_info, "\n");
 		String key;
 		String value;
