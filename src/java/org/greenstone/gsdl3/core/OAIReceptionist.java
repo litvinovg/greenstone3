@@ -777,14 +777,9 @@ public class OAIReceptionist implements ModuleInterface {
       }
 	
       for(int i=0; i<formats.getLength(); i++) {
-	Element meta_fmt = lmf_doc.createElement(OAIXML.METADATA_FORMAT);
-	Element first_meta_format = (Element)formats.item(i);
-	//the element also contains mappings, but we don't want them
-	meta_fmt.appendChild(lmf_doc.importNode(GSXML.getChildByTagName(first_meta_format, OAIXML.METADATA_PREFIX), true));
-	meta_fmt.appendChild(lmf_doc.importNode(GSXML.getChildByTagName(first_meta_format, OAIXML.SCHEMA), true));
-	meta_fmt.appendChild(lmf_doc.importNode(GSXML.getChildByTagName(first_meta_format, OAIXML.METADATA_NAMESPACE), true));
-	list_metadata_formats.appendChild(meta_fmt);
-      }
+	Element f = OAIXML.getMetadataFormatShort(lmf_doc, (Element)formats.item(i));
+	list_metadata_formats.appendChild(f);
+     }
       this.listmetadataformats_response = getMessage(lmf_doc, list_metadata_formats);
       return this.listmetadataformats_response;
       
