@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CollectionConfig xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-
+  <security scope="document" default_access="private">
+    <exception>
+      <group name="demo"/>
+    </exception>
+    <exception>
+      <documentSet name="poo"/>
+      <group name=""/>
+    </exception>
+    <documentSet name="poo">
+      <match>b17mie</match>
+      <match>b18ase</match>
+      <match>b20cre</match>
+      <match>b21wae</match>
+    </documentSet>
+  </security>
   <metadataList>
     <metadata lang="en" name="creator"></metadata>
     <metadata lang="en" name="maintainer"></metadata>
     <metadata lang="en" name="public">true</metadata>
   </metadataList>
-
   <displayItemList>
     <displayItem assigned="true" lang="en" name="name">Demo Collection</displayItem> 
     <displayItem assigned="true" lang="en" name="description">
@@ -19,8 +32,12 @@
       Demonstration collection containing a few books from the Humanitarian and Development 
       Libraries. Uses Lucene and JDBM.
     </displayItem> 
+    <displayItem assigned="true" lang="en" name="name">Demo Collection</displayItem>
+    <displayItem assigned="true" lang="en" name="shortDescription">
+      Demonstration collection containing a few books from the Humanitarian and Development 
+      Libraries. Uses Lucene and JDBM.
+    </displayItem>
   </displayItemList>
-
   <format>
     <!-- Define any global format statements here -->
 
@@ -29,7 +46,6 @@
 	 too, such as search, if wishing to display the link only in particular sections.-->
     <gsf:option name="RSS" value="true"/>
   </format>
-
   <search type="lucene">
     <level name="section">
       <displayItem lang="en" name="name">chapter</displayItem>
@@ -53,7 +69,6 @@
     <index name="dls.Organization">
       <displayItem lang="en" name="name">organisations</displayItem>
     </index>
-
     <sort name="rank">
       <displayItem lang="en" name="name">ranks</displayItem>
     </sort>    
@@ -77,15 +92,13 @@
 	  </gsf:link>
 	</td>
 	<td>
-	  <gsf:link type="document">
-	    <gsf:choose-metadata>
-	      <gsf:metadata name="dc.Title"/>
-	      <gsf:metadata name="exp.Title"/>
-	      <gsf:metadata name="ex.dc.Title"/>
-	      <gsf:metadata name="Title"/>
-	      <gsf:default>Untitled</gsf:default>
-	    </gsf:choose-metadata>
-	  </gsf:link>
+	  <gsf:choose-metadata>
+	    <gsf:metadata name="dc.Title"/>
+	    <gsf:metadata name="exp.Title"/>
+	    <gsf:metadata name="ex.dc.Title"/>
+	    <gsf:metadata name="Title"/>
+	    <gsf:default>Untitled</gsf:default>
+	  </gsf:choose-metadata>
 	</td>
 	<td>
 	  <gsf:choose-metadata><gsf:metadata name="dls.Organization" select="root"/><gsf:metadata name="dls.Organization"/></gsf:choose-metadata></td>
@@ -108,7 +121,6 @@
   </import>
   <importOption name="OIDtype" value="dirname"/>
   <buildOption name="sections_sort_on_document_metadata" value="unless_section_metadata_exists"/>
-
   <browse>
     <classifier name="List">
       <option name="-metadata" value="dc.Title"/>
@@ -129,7 +141,7 @@
       <option name="-metadata" value="dls.Keyword"/>
       <option name="-buttonname" value="Howto"/>
       <option name="-partition_type_within_level" value="constant_size"/>
-      <format>
+      <format> <!-- format statement specific to this classifier -->
 	<gsf:template match="documentNode">
 	  <td>
 	    <gsf:link type="document">
@@ -146,7 +158,7 @@
 	</gsf:template>
       </format>
     </classifier>
-    <format>
+    <format> <!-- general format statements for all classifiers that don't have their own versions -->
       <gsf:template match="documentNode">
 	<td valign="top">
 	  <gsf:link type="document">
@@ -162,23 +174,13 @@
 	  </gsf:link>
 	</td>
 	<td valign="top">
-	  <gsf:link type="document">
-	    <gsf:choose-metadata>
-	      <gsf:metadata name="dc.Title"/>
-	      <gsf:metadata name="exp.Title"/>
-	      <gsf:metadata name="ex.dc.Title"/>
-	      <gsf:metadata name="Title"/>
-	      <gsf:default>Untitled</gsf:default>
-	    </gsf:choose-metadata>
-	  </gsf:link>
-	  <gsf:switch>
-	    <gsf:metadata name="Source"/>
-	    <gsf:when test="exists">
-	      <br/>
-	      <i>(<gsf:metadata name="Source"/>)</i>
-	    </gsf:when>
-	  </gsf:switch>
-
+	  <gsf:choose-metadata>
+	    <gsf:metadata name="dc.Title"/>
+	    <gsf:metadata name="exp.Title"/>
+	    <gsf:metadata name="ex.dc.Title"/>
+	    <gsf:metadata name="Title"/>
+	    <gsf:default>Untitled</gsf:default>
+	  </gsf:choose-metadata>
 	</td>
       </gsf:template>
       <gsf:template match="classifierNode[@classifierStyle = 'VList']">
@@ -188,20 +190,7 @@
 	  </gsf:link>
 	</td>
 	<td valign="top">
-	  <gsf:choose-metadata>
-	    <gsf:metadata name="dc.Title"/>
-	    <gsf:metadata name="exp.Title"/>
-	    <gsf:metadata name="ex.dc.Title"/>
-	    <gsf:metadata name="Title"/>
-	    <gsf:default>Untitled</gsf:default>
-	  </gsf:choose-metadata>
-	  <gsf:switch>
-	    <gsf:metadata name="Source"/>
-	    <gsf:when test="exists">
-	      <br/>
-	      <i>(<gsf:metadata name="Source"/>)</i>
-	    </gsf:when>
-	  </gsf:switch>
+	  <gsf:metadata name="Title"/>
 	</td>
       </gsf:template>
       <gsf:template match="classifierNode[@classifierStyle = 'HList']">
@@ -213,14 +202,12 @@
   </browse>
   <display>
     <format>
-      <gsf:option name="TOC" value="true"/>
-      
+      <gsf:option name="TOC" value="true"/>     
       <gsf:headMetaTags>
 	<gsf:metadata name="dc.Title"/>
 	<gsf:metadata name="dc.Subject"/>
 	<gsf:metadata name="dls.Organization"/>
       </gsf:headMetaTags>
-
     </format>
   </display>
   <replaceListRef id="gs2-standard"/>
@@ -228,21 +215,19 @@
     <serviceRack name="RSSRetrieve"/>
     <!-- comment out the following serviceRack if you want to disable OAI for this collection -->
     <serviceRack name="OAIPMH">
+      <setName>Lucene demo collection</setName>
+      <setDescription>A demo collection for greenstone</setDescription>
+      <!-- uncomment the following and set the name attribute if you want this
+	   collection to be part of a super set. -->
+      <!--<oaiSuperSet name="xxx"/>-->
       <ListMetadataFormats>
-	<!--What metadata sets to support is collection specific. To support other metadata schema, simply add a metadataFormat element here.
-		 The support of unqualified Dublin Core metadata set is mandatory in the oai specification.
-	  -->
+	<!--What metadata sets to support for this collection. You can select any set that is specified in OAIConfig.xml. To use a new set, you need to add a set definition in OAIConfig.xml, then reference it here, like:
+		 <metadataFormat metadataPrefix="prefix"/> -->
 	<metadataFormat metadataPrefix="oai_dc">
-	  <metadataPrefix>oai_dc</metadataPrefix>
-	  <schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
-	  <metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
-	  <!--   a custom mapping as this collection doesn't have dc metadata -->                    
-	  <mappingList>						
-            <mapping>dc:title,dc.Title</mapping>
-            <mapping>dc:subject,dc.Subject</mapping>
-            <mapping>dc:language,dc.Language</mapping>
-            <mapping>dc:publisher,dls.Organization</mapping>                    
-	  </mappingList>
+	  <!--   a custom mapping as this collection doesn't have exclusive dc metadata --><!-- this will replace the dc:publisher element from the main set -->
+	  <element name="dc:publisher">
+	    <mapping elements="dls.Organization"/>
+	  </element>
 	</metadataFormat>
       </ListMetadataFormats>
     </serviceRack>
