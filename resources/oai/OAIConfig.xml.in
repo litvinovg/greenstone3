@@ -49,32 +49,33 @@
   <resumeAfter>250</resumeAfter>
   <!-- a list of metadata formats supported by this repository -->
   <ListMetadataFormats>
-    <metadataFormat metadataPrefix="oai_dc">
+    <metadataFormat>
       <metadataPrefix>oai_dc</metadataPrefix>
       <schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
       <metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
-      <mappingList>
-        <!-- 
-        This is the default mapping for dc metadata. It can be overridden for a collection by adding a mappingList into the oai_dc metadataFormat element in the collection's collectionConfig.xml file.
-        The mapping is in the form: <publicly supported metadata name>,<greenstone metadata name>, (<A>,<B>). B metadata from a document will be mapped to A. 
-        The first metadata name is mandatory; if there is no greenstone name following, then the first name will be looked for in the documents. 
-        -->
-	<mapping>dc:title,dc.Title</mapping>
-	<mapping>dc:creator,dc.Creator</mapping>
-	<mapping>dc:subject,dc.Subject</mapping>
-	<mapping>dc:description,dc.Description</mapping>
-	<mapping>dc:publisher,dc.Publisher</mapping>
-	<mapping>dc:contributor,dc.Contributor</mapping>
-	<mapping>dc:date,dc.Date</mapping>
-	<mapping>dc:type,dc.Type</mapping>
-	<mapping>dc:format,dc.Format</mapping>
-	<mapping>dc:identifier,dc.Identifier</mapping>
-	<mapping>dc:source,dc.Source</mapping>
-	<mapping>dc:language,dc.Language</mapping>
-	<mapping>dc:relation,dc.Relation</mapping>
-	<mapping>dc:coverage,dc.Coverage</mapping>
-	<mapping>dc:rights,dc.Rights</mapping>
-      </mappingList>
+      <elementList>
+	<!-- <element name="oai name"/> - will look for this oai-name metadata in the document
+	     <element name="oai-name"><mapping select="allvalues|firstvalue|firstvalidmetadata" elements="comma-separated-list-of-gs-metadata"/></element> - will map gs-metadata to oai-name metadata. 
+	     allvalues: will display all values of each metadata element
+	     firstvalue: will go through each metadata element until it finds a value, and will return only one value.
+	     firstvalidmetadata: will go through each element until it finds one that has a value, then output all values of that element. 
+	     default is allvalues -->
+	<element name="dc:title"><mapping select="firstvalidmetadata" elements="dc.Title,Title"/></element>
+	<element name="dc:creator"><mapping elements="dc.Creator"/></element>
+	<element name="dc:subject"><mapping elements="dc.Subject"/></element>
+	<element name="dc:description"><mapping elements="dc.Description"/></element>
+	<element name="dc:publisher"><mapping elements="dc.Publisher"/></element>
+	<element name="dc:contributor"><mapping elements="dc.Contributor"/></element>
+	<element name="dc:date"><mapping elements="dc.Date"/></element>
+	<element name="dc:type"><mapping elements="dc.Type"/></element>
+	<element name="dc:format"><mapping elements="dc.Format"/></element>
+	<element name="dc:identifier"><mapping elements="dc.Identifier,Identifier" select="firstvalue"/></element>
+	<element name="dc:source"><mapping elements="dc.Source"/></element>
+	<element name="dc:language"><mapping elements="dc.Language"/></element>
+	<element name="dc:relation"><mapping elements="dc.Relation"/></element>
+	<element name="dc:coverage"><mapping elements="dc.Coverage"/></element>
+	<element name="dc:rights"><mapping elements="dc.Rights"/></element>
+      </elementList>
     </metadataFormat>
   </ListMetadataFormats>
 </OAIConfig>
