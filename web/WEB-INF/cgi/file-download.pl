@@ -43,11 +43,11 @@ sub main{
 		
 		my $collect_dir = $gsdl_cgi->get_collection_dir($site);
 		
-		my $dir = &util::filename_cat($collect_dir,$c,"index/assoc");
+		my $dir = &util::filename_cat($collect_dir,$c,"index","assoc");
 		
-		my $download_file = "$dir\\$assoc\\$filename";
+		my $download_file = &util::filename_cat($dir,$assoc,$filename);
 
-		open(DOWNLOAD_FILE, "<$download_file") or die "$!";
+		open(DOWNLOAD_FILE, "<$download_file") or die "Failed to open file $download_file\n $!";
 		binmode DOWNLOAD_FILE;
 		@fileholder = <DOWNLOAD_FILE>;
 		
