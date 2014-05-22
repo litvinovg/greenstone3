@@ -232,10 +232,9 @@ function save()
 			var name = nameCell.innerHTML;
 			var value = changedElem.innerHTML;
 			value = value.replace(/&nbsp;/g, " ");
-			value = escape(value);
+			value = encodeURI(value);
 
 			changedElem.originalValue = changedElem.innerHTML;
-			
 			metadataChanges.push({collection:collection, docID:docID, name:name, value:value, orig:changedElem.originalValue});
 			addCollectionToBuild(collection);
 		}
