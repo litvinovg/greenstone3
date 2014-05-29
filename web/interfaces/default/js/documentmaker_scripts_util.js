@@ -210,50 +210,6 @@ function save()
 		removeFromParent(currentRow);
 	}
 
-	var changes = de.Changes.getChangedEditableSections();
-	var metadataChanges = new Array();
-	
-	for(var i = 0; i < changes.length; i++)
-	{
-		var changedElem = changes[i];
-		
-		//Save metadata 
-		if(gs.functions.hasClass(changedElem, "metaTableCell")) 
-		{
-			//Get document ID
-			var currentElem = changedElem;
-			while((currentElem = currentElem.parentNode).tagName != "TABLE");
-			var docID = currentElem.getAttribute("id").substring(4);
-
-			//Get metadata name
-			var row = changedElem.parentNode;
-			var cells = row.getElementsByTagName("TD");
-			var nameCell = cells[0];
-			var name = nameCell.innerHTML;
-			var value = changedElem.innerHTML;
-			value = value.replace(/&nbsp;/g, " ");
-			value = encodeURI(value);
-
-			changedElem.originalValue = changedElem.innerHTML;
-			metadataChanges.push({collection:collection, docID:docID, name:name, value:value, orig:changedElem.originalValue});
-			addCollectionToBuild(collection);
-		}
-		//Save content
-		else if(gs.functions.hasClass(changedElem, "renderedText"))
-		{
-			var section = changedElem.parentDiv.parentItem;
-			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + section.collection + '", "oid":"' + section.nodeID + '"}');
-			addCollectionToBuild(section.collection);
-		}
-		else if(gs.functions.hasClass(changedElem, "sectionText"))
-		{
-			var id = changedElem.getAttribute("id");
-			var sectionID = id.substring(4);
-			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + gs.cgiParams.c + '", "oid":"' + sectionID + '"}');
-			addCollectionToBuild(gs.cgiParams.c);
-		}
-	}
-	
 	var sendBuildRequest = function()
 	{
 		var request = "[";
@@ -313,9 +269,68 @@ function save()
 			ajax.send("a=g&rt=r&s=DocumentExecuteTransaction&s1.transactions=" + request);
 		}
 	}
+
+	var changes = de.Changes.getChangedEditableSections();
+	var metadataChanges = new Array();
+	if (changes.length == 0) {
+	  sendBuildRequest();
+	  return;
+	}
+	
+	for(var i = 0; i < changes.length; i++)
+	{
+		var changedElem = changes[i];
+		
+		//Save metadata 	
+		if(gs.functions.hasClass(changedElem, "metaTableCell")) 
+		{
+			//Get document ID
+			var currentElem = changedElem;
+			while((currentElem = currentElem.parentNode).tagName != "TABLE");
+			var docID = currentElem.getAttribute("id").substring(4);
+
+			//Get metadata name
+			var row = changedElem.parentNode;
+			var cells = row.getElementsByTagName("TD");
+			var nameCell = cells[0];
+			var name = nameCell.innerHTML;
+			var value = changedElem.innerHTML;
+			value = value.replace(/&nbsp;/g, " ");
+			value = encodeURI(value);
+
+			var orig = changedElem.originalValue;
+			if (orig) {
+			  orig = orig.replace(/&nbsp;/g, " ");
+			  orig = encodeURI(orig);
+			}
+			//changedElem.originalValue = changedElem.innerHTML;
+			//metadataChanges.push({collection:collection, docID:docID, name:name, value:value, orig:changedElem.originalValue});
+			metadataChanges.push({collection:collection, docID:docID, name:name, value:value, orig:orig});
+			changedElem.originalValue = changedElem.innerHTML;
+			//changedElem.originalValue = value;
+			addCollectionToBuild(collection);
+		}
+		//Save content
+		else if(gs.functions.hasClass(changedElem, "renderedText"))
+		{
+			var section = changedElem.parentDiv.parentItem;
+			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + section.collection + '", "oid":"' + section.nodeID + '"}');
+			addCollectionToBuild(section.collection);
+		}
+		else if(gs.functions.hasClass(changedElem, "sectionText"))
+		{
+			var id = changedElem.getAttribute("id");
+			var sectionID = id.substring(4);
+			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + gs.cgiParams.c + '", "oid":"' + sectionID + '"}');
+			addCollectionToBuild(gs.cgiParams.c);
+		}
+	}
+	
+	
 	
 	var setMetadataLoop = function(index)
 	{
+	  
 		var change = metadataChanges[index];
 		
 		var callbackFunction;
@@ -763,7 +778,8 @@ function addRemoveLinkToRow(row)
 		undo.removeDeletedMetadata = true;
 		_undoOperations.push(undo);
 		_deletedMetadata.push(row);
-		row.css("display", "none");
+		//row.css("display", "none");
+		$(row).hide();
 	});
 	newCell.append(removeLink);
 	newCell.attr({"class": "metaTableCell", "style": "font-size:0.6em; padding-left: 3px; padding-right: 3px;"});
