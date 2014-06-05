@@ -480,6 +480,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 				<xsl:choose>
 					<xsl:when test="@pos = 'first'">position()=1</xsl:when>
 					<xsl:when test="@pos = 'last'">position() = last()</xsl:when>
+					<xsl:when test="@pos = 'classifiedBy'">position() = number(../../@mdoffset)+1</xsl:when>
 					<xsl:when test="@pos">position() = <xsl:value-of select="@pos"/>
 					</xsl:when>
 					<xsl:otherwise>true()</xsl:otherwise>
