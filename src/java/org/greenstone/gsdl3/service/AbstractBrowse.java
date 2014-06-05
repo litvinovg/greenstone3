@@ -358,7 +358,7 @@ public abstract class AbstractBrowse extends ServiceRack
 		Element query_node_list = (Element) GSXML.getChildByTagName(request, GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
 		if (query_node_list == null)
 		{
-			logger.error(" ClassifierBrowse request specified no doc nodes.\n");
+			logger.error(" ClassifierBrowse request specified no classifier nodes.\n");
 			return result;
 		}
 
@@ -676,9 +676,13 @@ public abstract class AbstractBrowse extends ServiceRack
 	protected void addDescendants(Element node, String node_id, boolean recursive)
 	{
 		ArrayList<String> child_ids = getChildrenIds(node_id);
+		String[] offsets = getMDOffsets(node_id);
 		if (child_ids == null)
 			return;
 		Document doc = node.getOwnerDocument();
+		if (offsets != null && child_ids.size() != offsets.length) {
+		  offsets = null; // something is wrong, they should be the same length
+		}
 		for (int i = 0; i < child_ids.size(); i++)
 		{
 			String child_id = child_ids.get(i);
@@ -686,6 +690,9 @@ public abstract class AbstractBrowse extends ServiceRack
 			if (isDocumentId(child_id))
 			{
 			  child_elem = createDocNode(doc, child_id);
+			  if (offsets != null) {
+			    child_elem.setAttribute("mdoffset", offsets[i]);
+			  }
 			}
 			else
 			{
@@ -771,6 +778,14 @@ public abstract class AbstractBrowse extends ServiceRack
     return this.gs_doc.getChildrenIds(node_id);
   }
 
+  protected String[] getMDOffsets(String node_id) {
+    
+    String offset_str =  this.gs_doc.getMetadata(node_id, "mdoffset");
+    if (offset_str.equals("")) {
+      return null;
+    }
+    return offset_str.split(";"); //, -1); // use -1 limit to get trailing empty strings
+  }
 	/** returns the node id of the parent node, null if no parent */
   protected String getParentId(String node_id) {
     return this.gs_doc.getParentId(node_id);
