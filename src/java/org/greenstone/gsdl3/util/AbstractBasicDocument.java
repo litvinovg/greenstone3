@@ -141,4 +141,7 @@ public abstract class AbstractBasicDocument {
 
   /** returns the list of sibling ids, including the specified node_id */
   abstract public ArrayList<String> getSiblingIds(String node_id);
+
+  /** get a piece of metadata about the document node */
+  abstract public String getMetadata(String node_id, String meta_name);
 }

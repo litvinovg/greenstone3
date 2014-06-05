@@ -136,5 +136,7 @@ public class BasicDocument extends AbstractBasicDocument {
     return null;
   }
 
- 
+  public String getMetadata(String node_id, String meta_name) {
+    return null;
+  }
 }

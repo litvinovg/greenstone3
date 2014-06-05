@@ -254,6 +254,15 @@ public class BasicDocumentDatabase extends AbstractBasicDocument
 
   }
 
+  public String getMetadata(String node_id, String meta_name) {
+    DBInfo info = this.coll_db.getInfo(node_id);
+    if (info == null)
+      {
+  	return null;
+      }
+    return info.getInfo(meta_name);
+  }
+		
     /** returns true if the node has a parent */
     public boolean hasParent(String node_id){
 	String parent = OID.getParent(node_id);
