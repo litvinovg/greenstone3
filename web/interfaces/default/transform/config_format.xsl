@@ -4,8 +4,9 @@
 	xmlns:xslt="output.xsl"
 	xmlns:java="http://xml.apache.org/xslt/java"
 	xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat"
+	xmlns:xalan="http://xml.apache.org/xalan"
 	xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
-	extension-element-prefixes="java">
+	extension-element-prefixes="java xalan">
 	<xsl:param name="interface_name"/>
 	<xsl:param name="library_name"/>
 	<xsl:param name="site_name"/>
@@ -440,9 +441,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 	<xsl:template match="gsf:metadata">
 		<xsl:if test="not(@hidden = 'true')">
 			<!-- set hidden=true on a gsf:metadata so that it gets retrieved from the server but not displayed -->
-			<xsl:variable name="meta_name">
-				<xsl:call-template name="getMetadataName"/>
-			</xsl:variable>
+			<xsl:variable name="meta_test"><xsl:call-template name="getMetadataTest"/></xsl:variable>			  
 			<xsl:variable name="separator">
 				<xsl:choose>
 					<xsl:when test="@separator">
@@ -494,7 +493,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 			</xsl:variable>
 			<xslt:for-each>
 				<xsl:attribute name="select">
-					(<xsl:if test="@type='collection'">/page/pageResponse/collection/</xsl:if>.//metadataList)[last()]/metadata[@name='<xsl:value-of select="$meta_name"/>'<xsl:if test="@lang">
+				  (<xsl:if test="@type='collection'">/page/pageResponse/collection/</xsl:if>.//metadataList)[last()]/metadata[<xsl:value-of select="$meta_test"/><xsl:if test="@lang">
 						<xsl:text> and @lang=</xsl:text>
 						<xsl:value-of select="@lang"/>
 					</xsl:if>
@@ -541,6 +540,10 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
     <xsl:value-of select="@name"/>
   </xsl:template>
 
+  <!-- if we have metadata name="dc.Date,Date" will make a test like @name = 'dc.Date' or @name = 'Date' -->
+  <xsl:template name="getMetadataTest">
+    <xsl:for-each select="xalan:tokenize(@name, ',')"><xsl:if test="position()!=1"> or </xsl:if>@name='<xsl:if test='@select'><xsl:value-of select='@select'/><xsl:text>_</xsl:text></xsl:if><xsl:value-of select="."/>'</xsl:for-each>
+  </xsl:template>
 
 	<xsl:template match="gsf:text">
 		<xslt:call-template name="documentNodeText"/>
