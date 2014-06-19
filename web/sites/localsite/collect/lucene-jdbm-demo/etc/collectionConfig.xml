@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CollectionConfig xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-  <security scope="document" default_access="private">
+  <!--<security scope="document" default_access="private">
     <exception>
       <group name="demo"/>
     </exception>
     <exception>
-      <documentSet name="poo"/>
+      <documentSet name="publicset"/>
       <group name=""/>
     </exception>
-    <documentSet name="poo">
+    <documentSet name="publicset">
       <match>b17mie</match>
       <match>b18ase</match>
       <match>b20cre</match>
       <match>b21wae</match>
     </documentSet>
-  </security>
+  </security>-->
   <metadataList>
     <metadata lang="en" name="creator"></metadata>
     <metadata lang="en" name="maintainer"></metadata>
