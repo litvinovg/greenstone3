@@ -540,9 +540,9 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
     <xsl:value-of select="@name"/>
   </xsl:template>
 
-  <!-- if we have metadata name="dc.Date,Date" will make a test like @name = 'dc.Date' or @name = 'Date' -->
+  <!-- if we have metadata name="dc.Date,Date" will make a test like (@name = 'dc.Date' or @name = 'Date') -->
   <xsl:template name="getMetadataTest">
-    <xsl:for-each select="xalan:tokenize(@name, ',')"><xsl:if test="position()!=1"> or </xsl:if>@name='<xsl:if test='@select'><xsl:value-of select='@select'/><xsl:text>_</xsl:text></xsl:if><xsl:value-of select="."/>'</xsl:for-each>
+    (<xsl:for-each select="xalan:tokenize(@name, ',')"><xsl:if test="position()!=1"> or </xsl:if>@name='<xsl:if test='@select'><xsl:value-of select='@select'/><xsl:text>_</xsl:text></xsl:if><xsl:value-of select="."/>'</xsl:for-each>)
   </xsl:template>
 
 	<xsl:template match="gsf:text">
