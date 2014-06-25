@@ -175,41 +175,18 @@ function addCollectionToBuild(collection)
 	_collectionsToBuild.push(collection);
 }
 
-function save()
+function save() 
 {
-	//This works in most cases but will not work when taking a doc from one collection to another, will need to be fixed at some point
-	var collection;
-	if(gs.cgiParams.c && gs.cgiParams.c != "")
-	{
-		collection = gs.cgiParams.c
-	}
-	else
-	{
-		collection = gs.cgiParams.p_c
-	}
-
-	for(var i = 0; i < _deletedMetadata.length; i++)
-	{
-		var currentRow = _deletedMetadata[i];
-
-		//Get document ID
-		var currentElem = currentRow;
-		while((currentElem = currentElem.parentNode).tagName != "TABLE");
-		var docID = currentElem.getAttribute("id").substring(4);
-
-		//Get metadata name
-		var cells = currentRow.getElementsByTagName("TD");
-		var nameCell = cells[0];
-		var name = nameCell.innerHTML;
-		var valueCell = cells[1];
-		var value = valueCell.innerHTML;
-		
-		gs.functions.removeArchivesMetadata(collection, gs.xsltParams.site_name, docID, name, null, value, function(){console.log("REMOVED ARCHIVES");});
-		addCollectionToBuild(collection);
-		
-		removeFromParent(currentRow);
-	}
-
+//This works in most cases but will not work when taking a doc from one collection to another, will need to be fixed at some point
+  var collection;
+  if(gs.cgiParams.c && gs.cgiParams.c != "") {
+    
+    collection = gs.cgiParams.c;
+  }
+  else {
+    collection = gs.cgiParams.p_c;
+  }
+  
 	var sendBuildRequest = function()
 	{
 		var request = "[";
@@ -270,13 +247,31 @@ function save()
 		}
 	}
 
-	var changes = de.Changes.getChangedEditableSections();
-	var metadataChanges = new Array();
-	if (changes.length == 0) {
-	  sendBuildRequest();
-	  return;
-	}
-	
+  var metadataChanges = new Array();
+  if (_deletedMetadata.length > 0) {
+    addCollectionToBuild(collection);
+
+    for(var i = 0; i < _deletedMetadata.length; i++) {
+      
+      var currentRow = _deletedMetadata[i];
+      
+      //Get document ID
+      var currentElem = currentRow;
+      while((currentElem = currentElem.parentNode).tagName != "TABLE");
+      var docID = currentElem.getAttribute("id").substring(4);
+      
+      //Get metadata name
+      var cells = currentRow.getElementsByTagName("TD");
+      var nameCell = cells[0];
+      var name = nameCell.innerHTML;
+      var valueCell = cells[1];
+      var value = valueCell.innerHTML;
+      metadataChanges.push({type:'delete', docID:docID, name:name, value:value});
+      removeFromParent(currentRow);
+    }
+  }
+
+  var changes = de.Changes.getChangedEditableSections();
 	for(var i = 0; i < changes.length; i++)
 	{
 		var changedElem = changes[i];
@@ -296,18 +291,13 @@ function save()
 			var name = nameCell.innerHTML;
 			var value = changedElem.innerHTML;
 			value = value.replace(/&nbsp;/g, " ");
-			value = encodeURI(value);
 
 			var orig = changedElem.originalValue;
 			if (orig) {
 			  orig = orig.replace(/&nbsp;/g, " ");
-			  orig = encodeURI(orig);
 			}
-			//changedElem.originalValue = changedElem.innerHTML;
-			//metadataChanges.push({collection:collection, docID:docID, name:name, value:value, orig:changedElem.originalValue});
 			metadataChanges.push({collection:collection, docID:docID, name:name, value:value, orig:orig});
 			changedElem.originalValue = changedElem.innerHTML;
-			//changedElem.originalValue = value;
 			addCollectionToBuild(collection);
 		}
 		//Save content
@@ -325,10 +315,9 @@ function save()
 			addCollectionToBuild(gs.cgiParams.c);
 		}
 	}
+
 	
-	
-	
-	var setMetadataLoop = function(index)
+	var processChangesLoop = function(index)
 	{
 	  
 		var change = metadataChanges[index];
@@ -340,20 +329,25 @@ function save()
 		}
 		else
 		{
-			callbackFunction = function(){setMetadataLoop(index + 1)};
+			callbackFunction = function(){processChangesLoop(index + 1)};
 		}
-		
-		if(change.orig)
-		{
-			gs.functions.setArchivesMetadata(change.collection, gs.xsltParams.site_name, change.docID, change.name, null, change.value, change.orig, "override", function(){callbackFunction();});
-		}
-		else
-		{
-			gs.functions.setArchivesMetadata(change.collection, gs.xsltParams.site_name, change.docID, change.name, null, change.value, null, "accumulate", function(){callbackFunction();});
+		if (change.type == "delete") {
+		  gs.functions.removeArchivesMetadata(collection, gs.xsltParams.site_name, change.docID, change.name, null, change.value, function(){callbackFunction();});
+		} else {
+		  if(change.orig)
+		    {
+		      gs.functions.setArchivesMetadata(change.collection, gs.xsltParams.site_name, change.docID, change.name, null, change.value, change.orig, "override", function(){callbackFunction();});
+		    }
+		  else
+		    {
+		      gs.functions.setArchivesMetadata(change.collection, gs.xsltParams.site_name, change.docID, change.name, null, change.value, null, "accumulate", function(){callbackFunction();});
+		    }
 		}
 	}
-	setMetadataLoop(0);
+	processChangesLoop(0);
+
 }
+
 
 function buildCollections(collections, documents, callback)
 {
