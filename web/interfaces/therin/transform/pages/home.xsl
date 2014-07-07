@@ -104,7 +104,7 @@
 	<script src="interfaces/{$interface_name}/js/jquery.nivo.slider.js" ><xsl:text> </xsl:text></script>
 	<script src="interfaces/{$interface_name}/js/css3-mediaqueries.js"><xsl:text> </xsl:text></script>
 	<script src="interfaces/{$interface_name}/js/tabs.js"><xsl:text> </xsl:text></script>
-	<script  src="interfaces/{$interface_name}/js/poshytip-1.1/src/jquery.poshytip.min.js"><xsl:text> </xsl:text></script>
+	<script  src="interfaces/{$interface_name}/js/poshytip-1.1/src/jquery.poshytip.js"><xsl:text> </xsl:text></script>
 	<!-- end scripts -->
 	
 	</xsl:template>	

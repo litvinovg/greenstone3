@@ -346,7 +346,7 @@
 	<script  src="interfaces/{$interface_name}/js/superfish-1.4.8/js/supersubs.js"><xsl:text> </xsl:text></script>
 	<!-- ENDS superfish -->
 
-	<script  src="interfaces/{$interface_name}/js/poshytip-1.1/src/jquery.poshytip.min.js"><xsl:text> </xsl:text></script>
+	<script  src="interfaces/{$interface_name}/js/poshytip-1.1/src/jquery.poshytip.js"><xsl:text> </xsl:text></script>
 	<!-- end scripts -->
 	
 	</xsl:template>

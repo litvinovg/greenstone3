@@ -61,8 +61,26 @@
 		
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery.min.js"><xsl:text> </xsl:text></script>
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery-ui-1.10.2.custom/js/jquery-ui-1.10.2.custom.min.js"><xsl:text> </xsl:text></script>
+		<script src="http://code.jquery.com/jquery-migrate-1.2.1.js"><xsl:text> </xsl:text></script>
+
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery.themeswitcher.min.js"><xsl:text> </xsl:text></script>
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery.blockUI.js"><xsl:text> </xsl:text></script>
+
+
+
+	<!-- superfish -->
+	<script  src="interfaces/{$interface_name}/js/superfish-1.4.8/js/hoverIntent.js"><xsl:text> </xsl:text></script>
+	<script  src="interfaces/{$interface_name}/js/superfish-1.4.8/js/superfish.js"><xsl:text> </xsl:text></script>
+	<script  src="interfaces/{$interface_name}/js/superfish-1.4.8/js/supersubs.js"><xsl:text> </xsl:text></script>
+	<!-- ENDS superfish -->
+	
+	<script src="interfaces/{$interface_name}/js/jquery.nivo.slider.js" ><xsl:text> </xsl:text></script>
+	<script src="interfaces/{$interface_name}/js/css3-mediaqueries.js"><xsl:text> </xsl:text></script>
+	<script src="interfaces/{$interface_name}/js/tabs.js"><xsl:text> </xsl:text></script>
+
+
+		<script type="text/javascript" src="interfaces/{$interface_name}/js/poshytip-1.1/src/jquery.poshytip.js"><xsl:text> </xsl:text></script>
+
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/ace/ace.js"><xsl:text> </xsl:text></script>
 		
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/zoomer.js"><xsl:text> </xsl:text></script>
