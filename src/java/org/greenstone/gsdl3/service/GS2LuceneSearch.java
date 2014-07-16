@@ -28,8 +28,8 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.greenstone.LuceneWrapper3.GS2LuceneQuery;
-import org.greenstone.LuceneWrapper3.LuceneQueryResult;
+import org.greenstone.LuceneWrapper4.GS2LuceneQuery;
+import org.greenstone.LuceneWrapper4.LuceneQueryResult;
 import org.greenstone.gsdl3.util.FacetWrapper;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;

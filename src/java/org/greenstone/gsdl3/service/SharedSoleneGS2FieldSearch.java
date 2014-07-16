@@ -22,7 +22,7 @@ package org.greenstone.gsdl3.service;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
-import org.greenstone.LuceneWrapper3.SharedSoleneQuery;
+import org.greenstone.LuceneWrapper4.SharedSoleneQuery;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.XMLConverter;
 

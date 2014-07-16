@@ -2194,7 +2194,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <copy file="${mgpp.home}/mgpp.jar" todir="${lib.jni}"/>
     </if>
 
-    <copy file="${lucene.home}/LuceneWrapper3.jar" todir="${web.lib}"/>    
+    <copy file="${lucene.home}/LuceneWrapper4.jar" todir="${web.lib}"/>    
   </target>
   
   <target name="install-jni-files" depends="init" if="with.jni">
@@ -2400,7 +2400,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 
     <!-- LuceneWrapper jar file not installed by default -->
     <mkdir dir="${gs2build.home}/bin/java"/>
-    <copy file="${lucene.home}/LuceneWrapper3.jar" todir="${gs2build.home}/bin/java"/>
+    <copy file="${lucene.home}/LuceneWrapper4.jar" todir="${gs2build.home}/bin/java"/>
 
   </target>
 

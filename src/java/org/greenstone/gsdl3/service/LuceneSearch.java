@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
@@ -172,7 +173,8 @@ public class LuceneSearch extends AbstractTextSearch
 			String index_dir = GSFile.collectionIndexDir(this.site_home, this.cluster_name);
 			index_dir += File.separator + index;
 			Directory index_dir_dir = FSDirectory.open(new File(index_dir));
-			IndexSearcher searcher = new IndexSearcher(index_dir_dir);
+			IndexReader reader = DirectoryReader.open(index_dir_dir); //deprecated: IndexReader.open(index_dir_dir);
+			IndexSearcher searcher = new IndexSearcher(reader);
 
 			Term term = new Term("content", query_string);
 
@@ -181,8 +183,6 @@ public class LuceneSearch extends AbstractTextSearch
 			TopDocs hits = searcher.search(query, Integer.MAX_VALUE);
 
 			GSXML.addMetadata(metadata_list, "numDocsMatched", "" + hits.scoreDocs.length);
-
-			IndexReader reader = searcher.getIndexReader();
 
 			for (int i = 0; i < hits.scoreDocs.length; i++)
 			{

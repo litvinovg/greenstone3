@@ -14,11 +14,15 @@
 	<classpathentry kind="lib" path="gs2build/bin/java/ApplyXSLT.jar"/>
 	<classpathentry kind="lib" path="gs2build/bin/java/GLIServer.jar"/>
 	<classpathentry kind="lib" path="gs2build/bin/java/JDBMWrapper.jar"/>
-	<classpathentry kind="lib" path="gs2build/bin/java/LuceneWrapper3.jar"/>
+	<classpathentry kind="lib" path="gs2build/bin/java/LuceneWrapper4.jar"/>
 	<classpathentry kind="lib" path="gs2build/bin/java/xalan.jar"/>
 	<classpathentry kind="lib" path="gs2build/common-src/indexers/lucene-gs/lib/lucene-core-2.3.2.jar"/>
 	<classpathentry kind="lib" path="gs2build/common-src/indexers/lucene-gs/lib/lucene-core-3.3.0.jar"/>
-	<classpathentry kind="lib" path="gs2build/common-src/indexers/lucene-gs/LuceneWrapper3.jar"/>
+	<classpathentry kind="lib" path="gs2build/common-src/indexers/lucene-gs/lib/lucene-core-4.7.2.jar"/>
+	<classpathentry kind="lib" path="gs2build/common-src/indexers/lucene-gs/lib/lucene-analyzers-common-4.7.2.jar"/>
+	<classpathentry kind="lib" path="gs2build/common-src/indexers/lucene-gs/lib/lucene-analyzers-kuromoji-4.7.2.jar"/>
+	<classpathentry kind="lib" path="gs2build/common-src/indexers/lucene-gs/lib/lucene-analyzers-queryparser-4.7.2.jar"/>
+	<classpathentry kind="lib" path="gs2build/common-src/indexers/lucene-gs/LuceneWrapper4.jar"/>
 	<classpathentry kind="lib" path="gs2build/common-src/indexers/mg/mg.jar"/>
 	<classpathentry kind="lib" path="gs2build/common-src/indexers/mgpp/mgpp.jar"/>
 	<classpathentry kind="lib" path="gs2build/common-src/packages/jdbm/jdbm-1.0/dist/jdbm-1.0.jar"/>
@@ -74,7 +78,7 @@
 	<classpathentry kind="lib" path="web/WEB-INF/lib/junit.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/log4j-1.2.8.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/lucene-1.4.1.jar"/>
-	<classpathentry kind="lib" path="web/WEB-INF/lib/LuceneWrapper3.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/LuceneWrapper4.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/mail.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/maxent-2.4.0.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/recaptcha4j-0.0.7.jar"/>
