@@ -1585,7 +1585,7 @@
     Doing "cat </dev/null > packages/tomcat/logs/catalina.out" doesn't work as an ant target.
     It seems to have a problem with cat or </dev/null, with or without the < sign. -->
   <target name="reset-logs" description="Empties catalina.out, greenstone.log and contents of web/logs/tmp">
-    <echo>Truncating catalina.out, greenstone.log and server.log, and emptying ${web.writablehome}/logs/tmp</echo>    
+    <echo>Truncating catalina.out, solr.log, greenstone.log and server.log, and emptying ${web.writablehome}/logs/tmp</echo>    
     <exec executable="rm" os="${os.unix}" dir="${catalina.home}/logs" spawn="false">
       <arg value="-f"/>
       <arg value="catalina.out"/>
@@ -1622,6 +1622,20 @@
       <arg line="/c echo. > server.log"/>
     </exec>
 
+	<!-- if ext/solr/logs/solr.log exists, truncate it -->
+	<if><bool><available file="${solr-ext.home}/logs/solr.log" type="file"/></bool>		
+		<exec executable="rm" os="${os.unix}" dir="${solr-ext.home}/logs" spawn="false">
+		  <arg value="-f"/>
+		  <arg value="solr.log"/>
+		</exec>	
+		<exec executable="touch" os="${os.unix}" dir="${solr-ext.home}/logs" spawn="false">
+		  <arg value="solr.log"/>
+		</exec>	  
+		<exec executable="cmd" osfamily="windows" dir="${solr-ext.home}/logs" spawn="false">
+		  <arg line="/c echo. > solr.log"/>
+		</exec>
+	</if>
+	
     <if>
       <bool><available file="${web.writablehome}/logs/tmp" type="dir"/></bool>
       <delete>
