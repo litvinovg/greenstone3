@@ -116,14 +116,21 @@ public class Collection extends ServiceCluster
 		macro_resolver.addMacro("_httpcollection_", this.site_http_address + "/collect/" + this.cluster_name);
 
 		Element coll_config_xml = loadCollConfigFile();
-		GSXSLT.modifyCollectionConfigForDebug(coll_config_xml);
+		if (coll_config_xml == null) {
+		  logger.error("Collection: couldn't configure collection: " + this.cluster_name + ", " + "Couldn't load collection config file");
+
+		  return false;
+		}
 		Element build_config_xml = loadBuildConfigFile();
 
-		if (coll_config_xml == null || build_config_xml == null)
+		if (build_config_xml == null)
 		{
-			return false;
+		  logger.error("Collection: couldn't configure collection: " + this.cluster_name + ", " + "Couldn't load build config file");
+
+		  return false;
 		}
 
+		GSXSLT.modifyCollectionConfigForDebug(coll_config_xml);
 		// get the collection type attribute
 		Element search = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.SEARCH_ELEM);
 		if (search != null)
@@ -192,7 +199,6 @@ public class Collection extends ServiceCluster
 
 		if (!coll_config_file.exists())
 		{
-			logger.error("Collection: couldn't configure collection: " + this.cluster_name + ", " + coll_config_file + " does not exist");
 			return null;
 		}
 		// get the xml
