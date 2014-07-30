@@ -9,14 +9,18 @@
 	exclude-result-prefixes="java util gsf">
 	
 	<xsl:template name="rightSidebar">
-		<div id="rightSidebar">
-			<xsl:call-template name="displayCoverImage"/>
-			<xsl:call-template name="viewOptions"/>
-
-			<xsl:if test="@docType != 'simple'">
-				<xsl:call-template name="displayTOC"/>
-			</xsl:if>
-		</div>
+	  <div id="rightSidebar">
+	    <xsl:choose>
+	      <xsl:when test="@docType = 'simple'">
+		<xsl:text>  </xsl:text>
+	      </xsl:when>
+	    <xsl:otherwise>
+	      <xsl:call-template name="displayCoverImage"/>
+	      <xsl:call-template name="viewOptions"/>
+	      <xsl:call-template name="displayTOC"/>
+	    </xsl:otherwise>
+	  </xsl:choose>
+	  </div>
 	</xsl:template>
 	
 	<xsl:template name="displayCoverImage">
