@@ -205,7 +205,7 @@
 						<xsl:if test="util:checkMetadataNotDuplicate(@name, .)">
 							<tr>
 								<td class="metaTableCellName"><xsl:value-of select="@name"/></td>
-								<td class="metaTableCell"><xsl:value-of disable-output-escaping="yes" select="."/></td>
+								<td class="metaTableCell"><xsl:value-of select="."/></td>
 							</tr>
 						</xsl:if>
 					</xsl:for-each>
@@ -231,7 +231,10 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse/document">
-		<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true' and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
+	  <xsl:variable name="canDoEditing">
+		<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true' and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">true</xsl:if>
+	  </xsl:variable>
+	  <xsl:if test="$canDoEditing = 'true'">
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript">
@@ -295,6 +298,18 @@
 						}
 					</xsl:text>
 				</script>
+			</xsl:when>
+			<!-- we want to do this stuff even if docType is simple or paged. Don't want to just set dt=hierarchy as that gives other unnecessary stuff-->
+			<!-- This is the first choice from wrappedDocument template-->
+			<xsl:when test="$canDoEditing = 'true' and /page/pageRequest/paramList/param[@name='docEdit']/@value = '1'">
+				<div id="gs-document">
+				  <xsl:call-template name="documentPre"/>
+				  <div id="gs-document-text" class="documenttext" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
+				    <xsl:for-each select="documentNode">
+				      <xsl:call-template name="wrapDocumentNodes"/>
+				    </xsl:for-each>
+				  </div>
+				</div>
 			</xsl:when>
 			<xsl:when test="@docType='simple'">
 				<xsl:call-template name="documentHeading"/><br/>
@@ -409,7 +424,7 @@
 									</xsl:otherwise>
 								</xsl:choose>
 								<xsl:if test="not(/page/pageRequest/paramList/param[@name = 'docEdit']/@value = '1')">
-									<xsl:text>?ed=1&amp;docEdit=1&amp;dt=hierarchy</xsl:text>
+									<xsl:text>?ed=1&amp;docEdit=1</xsl:text>
 								</xsl:if>
 							</xsl:attribute>
 							<xsl:choose>
