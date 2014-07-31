@@ -52,8 +52,11 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 	{
 	  super();
 		// Lucene/Solr uses double operators, not single
-		AND_OPERATOR = "&&";
-		OR_OPERATOR = "||";
+		//AND_OPERATOR = "&&";
+		//OR_OPERATOR = "||";
+		AND_OPERATOR = "AND";
+		OR_OPERATOR = "OR";
+		NOT_OPERATOR = "NOT";
 
 		does_paging = true;
 		does_chunking = true;
