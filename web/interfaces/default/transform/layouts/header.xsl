@@ -104,8 +104,20 @@
 		<xsl:call-template name="additionalHeaderContent"/>
 	</xsl:template>
 	
+	<!-- This template allows for extra header content to be added by interface, site and collection. -->
 	<xsl:template name="additionalHeaderContent">
-		<!-- This template should be overridden in the collectionConfig.xml file if you want to add extra header content -->
+	  <xsl:call-template name="additionalHeaderContent-interface"/>
+	  <xsl:call-template name="additionalHeaderContent-site"/>
+	  <xsl:call-template name="additionalHeaderContent-collection"/>
+	</xsl:template>
+	<!-- This template should be overridden in header.xsl of a new interface file if you want to add extra header content -->
+	<xsl:template name="additionalHeaderContent-interface">
+	</xsl:template>
+	<!-- This template should be overridden in the header.xsl file in a site's transform directory if you want to add site specific headers -->
+	<xsl:template name="additionalHeaderContent-site">
+	</xsl:template>
+	<!-- This template should be overridden in the collectionConfig.xml file if you want to add extra header content -->
+	<xsl:template name="additionalHeaderContent-collection">
 	</xsl:template>
 	
 	<xsl:template name="init-direct-edit">
