@@ -149,7 +149,10 @@ public class XSLTUtil
 
 	public static String getNumberedItem(String list, int number)
 	{
-		String[] items = StringUtils.split(list, ",", -1);
+	    String[] items = list.split(",", -1); //String[] items = StringUtils.split(list, ",", -1); 
+	    // Using StringUtils.split() causes an off-by-one error for the boolean operators (fqk)
+	    // where boolean operators combining rows in multiforms are shifted up by 1 row.
+
 		if (items.length > number)
 		{
 			return items[number];
