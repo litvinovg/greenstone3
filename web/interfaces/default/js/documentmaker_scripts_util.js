@@ -6,6 +6,7 @@ var CONTINUING = 10;
 var COMPLETED = 11;
 var HALTED = 12;
 
+
 function getElementsByClassName(cl, parent) 
 {
 	var elemArray = [];
@@ -684,6 +685,15 @@ function asyncRegisterEditSection(cell)
 	setTimeout(function(){de.doc.registerEditSection(cell)}, 0);
 }
 
+function addMetaSetToList(list, set, selected) {
+  var newOption = $("<option>");
+  newOption.html(set);
+  if (selected) {
+    newOption.attr("selected", true);
+  }
+  list.append(newOption);
+}
+
 function addFunctionalityToTable(table)
 {
 	table.find("tr").each(function()
@@ -691,7 +701,7 @@ function addFunctionalityToTable(table)
 		var cells = $(this).find("td");
 		var metadataName = $(cells[0]).html();
 		
-		if(metadataName.indexOf(".") != -1)
+		if(dynamic_metadata_list == true && metadataName.indexOf(".") != -1)
 		{
 			var metadataSetName = metadataName.substring(0, metadataName.lastIndexOf("."));
 			
@@ -708,11 +718,7 @@ function addFunctionalityToTable(table)
 			if(!found)
 			{
 				_metadataSetList.push(metadataSetName);
-				
-				var metadataSetList = $("#metadataSetList");
-				var newOption = $("<option>");
-				newOption.html(metadataSetName);
-				metadataSetList.append(newOption);
+				addMetaSetToList( $("#metadataSetList"), metadataSetName);
 			}
 		}
 			
@@ -780,6 +786,7 @@ function addRemoveLinkToRow(row)
 	$(row).append(newCell);
 }
 
+/* This is for 'edit structure' menu bar */
 function createTopMenuBar()
 {
 	//Create the top menu bar
