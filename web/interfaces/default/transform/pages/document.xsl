@@ -229,12 +229,7 @@
 		</div>	
 	</xsl:template>
 
-	<!-- the page content -->
-	<xsl:template match="/page/pageResponse/document">
-	  <xsl:variable name="canDoEditing">
-		<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true' and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">true</xsl:if>
-	  </xsl:variable>
-	  <xsl:if test="$canDoEditing = 'true'">
+	<xsl:template name="javascriptForDocumentEditing">
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript">
@@ -248,33 +243,52 @@
 					});
 				</xsl:text>
 			</script>
-			<gsf:metadata name="all"/>
-			<gslib:langfrag name="dse"/>
-		</xsl:if>
+	  
+	</xsl:template>
+
+	<!-- the page content -->
+	<xsl:template match="/page/pageResponse/document">
+	  <xsl:if test="$bookswitch = 'off'">
+	    <script type="text/javascript" src="interfaces/{$interface_name}/js/document_scripts.js"><xsl:text> </xsl:text></script>
+			
+	    <xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
+	      <script type="text/javascript">
+		<xsl:text disable-output-escaping="yes">
+		  if(document.URL.indexOf("book=on") != -1)
+		  {
+		  loadBook();
+		  }
+		</xsl:text>
+	      </script>
+	    </xsl:if>
+	  </xsl:if>
+	  <xsl:variable name="canDoEditing">
+		<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true' and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">true</xsl:if>
+	  </xsl:variable>
+	  <xsl:if test="$canDoEditing = 'true'">
+	    <xsl:call-template name="javascriptForDocumentEditing"/>
+	    <gsf:metadata name="all"/>
+	    <gslib:langfrag name="dse"/>
+	  </xsl:if>
 
 		<xsl:if test="$bookswitch = 'off'">
 			<div id="bookdiv" style="visibility:hidden; height:0px; display:inline;"><xsl:text> </xsl:text></div>
 		
-			<script type="text/javascript" src="interfaces/{$interface_name}/js/document_scripts.js"><xsl:text> </xsl:text></script>
-			
-			<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
-				<script type="text/javascript">
-					<xsl:text disable-output-escaping="yes">
-						if(document.URL.indexOf("book=on") != -1)
-						{
-							loadBook();
-						}
-					</xsl:text>
-				</script>
-			</xsl:if>
-					
+			<div id="float-anchor" style="width: 30%; min-width:180px; float:right; margin: 0 0 10px 20px;">		
 			<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true' and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 				<xsl:call-template name="editBar"/>
 			</xsl:if>
-
 			<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']) or /page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']/@value='true'">
 				<xsl:call-template name="rightSidebar"/>
 			</xsl:if>
+			</div>
+			<script type="text/javascript"> 
+			  if (keep_editing_controls_visible) {
+			  $(function() {
+			  moveScroller();
+			  });
+			  }
+			</script> 	
 		</xsl:if>
 		
 		<!-- display the document -->
@@ -314,7 +328,7 @@
 			<xsl:when test="@docType='simple'">
 				<xsl:call-template name="documentHeading"/><br/>
 				<xsl:call-template name="documentContent"/>
-			</xsl:when>			
+			</xsl:when>	
 			<xsl:otherwise> <!-- display the standard greenstone document -->
 				<xsl:call-template name="wrappedDocument"/>
 			</xsl:otherwise>
@@ -401,7 +415,7 @@
 	</xsl:template>
 	
 	<xsl:template name="editBar">
-		<table style="width:100%"><tr>
+		<table style="width:100%; border:none;" id="editBar" class="ui-widget-content"><tr>
 			<td id="editBarLeft" style="width:70%"><xsl:text> </xsl:text></td>
 			<td id="editBarRight">
 				<div style="text-align:center;">
