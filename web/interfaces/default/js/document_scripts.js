@@ -2,6 +2,14 @@ var _imageZoomEnabled = false;
 var _linkCellMap = new Array();
 var _onCells = new Array();
 
+/* some vars for document editing */
+/* if true, will look through all the metadata for the document, and add each namespace into the list of metadata sets. If set to false, will only add in the ones defined in setStaticMetadataSets function (defined below) - override this function to make a custom list of sets */
+var dynamic_metadata_list = true;
+/* if true, will make the editing controls stay visible even on page scrolling */
+var keep_editing_controls_visible = true;
+/* Here you can choose which save buttons you like. Choose from 'save', 'rebuild', 'saveandrebuild' */
+var save_and_rebuild_buttons = ["saveandrebuild"];
+
 /********************
 * EXPANSION SCRIPTS *
 ********************/
@@ -1123,10 +1131,12 @@ function setEditingFeaturesVisible(visible)
 	if(visible)
 	{
 		$("#editContentButton").html("Hide editor");
+		$("#editContentButtonDiv").attr("class", "ui-state-default ui-corner-all");
 	}
 	else
 	{
 		$("#editContentButton").html("Edit content");
+		$("#editContentButtonDiv").attr("class", "");
 	}
 	
 	var visibility = (visible ? "" : "none");
@@ -1150,8 +1160,16 @@ function setEditingFeaturesVisible(visible)
 	});
 }
 
+/* override this function in other interface/site/collection if you want
+   a different set of metadata sets 
+  Use in conjunction with the dynamic_metadata_list variable. */
+function setStaticMetadataSets(list) {
+  addMetaSetToList(list, "All");
+}
+
 function readyPageForEditing()
 {
+
 	if($("#metadataSetList").length)
 	{
 		var setList = $("#metadataSetList");
@@ -1171,23 +1189,36 @@ function readyPageForEditing()
 	var textDivs = $(".sectionText").each(function(){de.doc.registerEditSection(this);});
 	
 	var editBar = $("#editBarLeft");
-
-	var saveButton = $("<button>", {"id": "saveButton", "class": "ui-state-default ui-corner-all"});
-	saveButton.click(save);
-	saveButton.html("Save changes");
-	editBar.append(saveButton);
-	
 	
 	var visibleMetadataList = $("<select>", {"id": "metadataSetList"});
-	var allOption = $("<option>All</option>");
-	visibleMetadataList.append(allOption);
+	setStaticMetadataSets(visibleMetadataList);
 
 	var metadataListLabel = $("<span>", {"id": "metadataListLabel", "style": "margin-left:20px;"});
 	metadataListLabel.html("Visible metadata: ");
 	editBar.append(metadataListLabel);
 	editBar.append(visibleMetadataList);
 	visibleMetadataList.change(onVisibleMetadataSetChange);
-	
+	editBar.append("<br>");
+	for (var i=0; i< save_and_rebuild_buttons.length; i++) {
+	  var button_type = save_and_rebuild_buttons[i];
+	  if (button_type == "save") {
+	    var saveButton = $("<button>", {"id": "saveButton", "class": "ui-state-default ui-corner-all"});
+	    saveButton.click(saveMetadataChanges);
+	    saveButton.html("Save changes");
+	    editBar.append(saveButton);
+	  } else if(button_type == "rebuild") {
+	    var rebuildButton = $("<button>", {"id": "rebuildButton", "class": "ui-state-default ui-corner-all"});
+	    rebuildButton.click(rebuildCollection);
+	    rebuildButton.html("Rebuild");
+	    editBar.append(rebuildButton);
+	  } else if (button_type == "saveandrebuild") {
+	    var saveAndRebuildButton = $("<button>", {"id": "saveAndRebuildButton", "class": "ui-state-default ui-corner-all"});
+	    saveAndRebuildButton.click(save);
+	    saveAndRebuildButton.html("Save and Rebuild");
+	    editBar.append(saveAndRebuildButton);
+
+	  }
+	}
 	var statusBarDiv = $("<div>");
 	editBar.append(statusBarDiv);
 	_statusBar = new StatusBar(statusBarDiv[0]);
@@ -1201,9 +1232,140 @@ function readyPageForEditing()
 	_baseURL = gs.xsltParams.library_name;
 }
 
+
+/* this is a cut down version of save() from documentmaker_scripts_util.js */
+function saveMetadataChanges() {
+
+  console.log("Saving metadata changes");
+ 
+  // get collection name
+  var collection = gs.cgiParams.c;;
+
+  // get document id
+  var docID = gs.cgiParams.d;
+
+  var metadataChanges = new Array();
+  if (_deletedMetadata.length > 0) {
+
+    for(var i = 0; i < _deletedMetadata.length; i++) {
+      
+      var currentRow = _deletedMetadata[i];
+      
+      //Get metadata name
+      var cells = currentRow.getElementsByTagName("TD");
+      var nameCell = cells[0];
+      var name = nameCell.innerHTML;
+      var valueCell = cells[1];
+      var value = valueCell.innerHTML;
+      metadataChanges.push({type:'delete', docID:docID, name:name, value:value});
+      removeFromParent(currentRow);
+    }
+  }
+
+  var changes = de.Changes.getChangedEditableSections();
+  for(var i = 0; i < changes.length; i++) {
+    
+    var changedElem = changes[i];
+		
+    //Get metadata name
+    var row = changedElem.parentNode;
+    var cells = row.getElementsByTagName("TD");
+    var nameCell = cells[0];
+    var name = nameCell.innerHTML;
+    var value = changedElem.innerHTML;
+    value = value.replace(/&nbsp;/g, " ");
+    
+    var orig = changedElem.originalValue;
+    if (orig) {
+      orig = orig.replace(/&nbsp;/g, " ");
+    }
+    metadataChanges.push({collection:collection, docID:docID, name:name, value:value, orig:orig});
+    changedElem.originalValue = changedElem.innerHTML;
+    
+  }
+
+  if (metadataChanges.length ==0) {
+    console.log ("... No changes detected. ");
+    return;
+  }
+
+  var processChangesLoop = function(index)
+    {
+      var change = metadataChanges[index];
+      
+      var callbackFunction;
+      if(index + 1 == metadataChanges.length)
+	{
+	  callbackFunction = function(){console.log("Completed saving metadata changes. You must rebuild the collection for the changes to take effect.");};
+	}
+      else
+	{
+	  callbackFunction = function(){processChangesLoop(index + 1)};
+	}
+      if (change.type == "delete") {
+	gs.functions.removeArchivesMetadata(collection, gs.xsltParams.site_name, change.docID, change.name, null, change.value, function(){callbackFunction();});
+      } else {
+	if(change.orig)
+	  {
+	    gs.functions.setArchivesMetadata(collection, gs.xsltParams.site_name, docID, change.name, null, change.value, change.orig, "override", function(){callbackFunction();});
+	  }
+	else
+	  {
+	    gs.functions.setArchivesMetadata(collection, gs.xsltParams.site_name, docID, change.name, null, change.value, null, "accumulate", function(){callbackFunction();});
+	  }
+      }
+    }
+  processChangesLoop(0);
+  /* need to clear the changes from the page */
+  de.Changes.clear();
+  while (_deletedMetadata.length>0) {
+    _deletedMetadata.pop();
+  }
+    
+}
+
+
+
+
+function rebuildCollection() {
+
+  console.log("rebuilding collection");
+  var collection = gs.cgiParams.c;
+
+  var collectionsArray = new Array();
+  collectionsArray.push(collection);
+  buildCollections(collectionsArray);
+}
+
 /***************
 * MENU SCRIPTS *
 ***************/
+function moveScroller() {
+  var move = function() {
+    var editbar = $("#editBar");
+    var st = $(window).scrollTop();
+    var fa = $("#float-anchor").offset().top;
+    if(st > fa) {
+      
+      editbar.css({
+	  position: "fixed",
+	    top: "0px",
+	    width: editbar.data("width"),
+	    //width: "30%"
+            });
+    } else {
+      editbar.data("width", editbar.css("width"));
+      editbar.css({
+	  position: "relative",
+	    top: "",
+	    width: ""
+	    });
+    }
+  };
+  $(window).scroll(move);
+  move();
+}
+
 
 function floatMenu(enabled)
 {
