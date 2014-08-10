@@ -1230,6 +1230,7 @@ function readyPageForEditing()
 	}
 	
 	_baseURL = gs.xsltParams.library_name;
+	onVisibleMetadataSetChange(); // make sure that the selected item in the list is active
 }
 
 
