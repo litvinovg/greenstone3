@@ -4,12 +4,20 @@ var _onCells = new Array();
 
 /* some vars for document editing */
 /* if true, will look through all the metadata for the document, and add each namespace into the list of metadata sets. If set to false, will only add in the ones defined in setStaticMetadataSets function (defined below) - override this function to make a custom list of sets */
-var dynamic_metadata_list = true;
+var dynamic_metadata_set_list = true;
 /* if true, will make the editing controls stay visible even on page scrolling */
 var keep_editing_controls_visible = true;
 /* Here you can choose which save buttons you like. Choose from 'save', 'rebuild', 'saveandrebuild' */
 var save_and_rebuild_buttons = ["saveandrebuild"];
 
+/* What kind of metadata element selection do we provide?
+   plain: just a text input box
+   fixedlist: a drop down menu with a fixed list of options (provided by the availableMetadataElements list)
+   autocomplete: a text input box with a list of suggestions to choose from (provided by the availableMetadataElements list). Allows additional input other than the fixed list 
+*/
+var new_metadata_field_input_type = "plain";
+/* Metadata elements to be used in the fixedlist/autocomplete options above */
+var availableMetadataElements = ["dc.Title", "dc.Subject"];
 /********************
 * EXPANSION SCRIPTS *
 ********************/
@@ -1162,9 +1170,9 @@ function setEditingFeaturesVisible(visible)
 
 /* override this function in other interface/site/collection if you want
    a different set of metadata sets 
-  Use in conjunction with the dynamic_metadata_list variable. */
+  Use in conjunction with the dynamic_metadata_set_list variable. */
 function setStaticMetadataSets(list) {
-  addMetaSetToList(list, "All");
+  addOptionToList(list, "All", "All");
 }
 
 function readyPageForEditing()
@@ -1190,7 +1198,7 @@ function readyPageForEditing()
 	
 	var editBar = $("#editBarLeft");
 	
-	var visibleMetadataList = $("<select>", {"id": "metadataSetList"});
+	var visibleMetadataList = $("<select>", {"id": "metadataSetList", "class": "ui-state-default"});
 	setStaticMetadataSets(visibleMetadataList);
 
 	var metadataListLabel = $("<span>", {"id": "metadataListLabel", "style": "margin-left:20px;"});
