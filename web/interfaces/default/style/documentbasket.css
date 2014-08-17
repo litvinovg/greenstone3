@@ -125,11 +125,23 @@ textarea#pretextarea {
 .metaTableCellName{
 	border:1px solid black;
 	background:#BBFFBB;
+	padding-left:3px;
+	padding-right:3px;
 }
 
 .metaTableCell{
 	border:1px solid black;
 	background:white;
+	padding-left:3px;
+	padding-right:3px;
+	min-width:100px;
+}
+
+.metaTableCellRemove{
+	border:1px solid black;
+	background:white;
+	padding-left:3px;
+	padding-right:3px;
 }
 
 .statusBar{
