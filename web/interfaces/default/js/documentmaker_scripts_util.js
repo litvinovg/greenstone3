@@ -632,7 +632,7 @@ function onVisibleMetadataSetChange()
 	var options = metadataList.getElementsByTagName("OPTION");
 	var selectedOption = options[index];
 	
-	var selectedSet = selectedOption.innerHTML;
+	var selectedSet = selectedOption.value;
 	changeVisibleMetadata(selectedSet);
 }
 
@@ -685,14 +685,46 @@ function asyncRegisterEditSection(cell)
 	setTimeout(function(){de.doc.registerEditSection(cell)}, 0);
 }
 
-function addMetaSetToList(list, set, selected) {
+function addOptionToList(list, optionvalue, optiontext, selected) {
   var newOption = $("<option>");
-  newOption.html(set);
+  if (optiontext) {
+    newOption.html(optiontext);
+    newOption.attr("value", optionvalue);
+  } else {
+    newOption.html(optionvalue);
+  }
   if (selected) {
     newOption.attr("selected", true);
   }
   list.append(newOption);
 }
+
+/* returns either an input or a select element. Data based on 
+   availableMetadataElements var. */
+function createMetadataElementSelector() {
+  var metaNameField;
+  if (new_metadata_field_input_type == "fixedlist") {
+    metaNameField =  $("<select>", {"class": "ui-state-default"});
+    for(var i=0; i<availableMetadataElements.length; i++) {
+      addOptionToList(metaNameField, availableMetadataElements[i]);
+    }
+    return metaNameField;
+  }
+  metaNameField = $("<input>", {"type": "text","style":"margin: 5px; border: 1px solid #000;"}); 
+  if (new_metadata_field_input_type == "autocomplete") {
+    metaNameField.autocomplete({
+	minLength: 0,
+	  source: availableMetadataElements
+	  });
+    metaNameField.attr("title", "Enter a metadata name, or use the down arrow to select one, then click 'Add New Metadata'");
+  } else {
+metaNameField.attr("title", "Enter a metadata name, then click 'Add New Metadata'");
+  }
+  
+  return metaNameField;
+}
+
+
 
 function addFunctionalityToTable(table)
 {
@@ -701,7 +733,7 @@ function addFunctionalityToTable(table)
 		var cells = $(this).find("td");
 		var metadataName = $(cells[0]).html();
 		
-		if(dynamic_metadata_list == true && metadataName.indexOf(".") != -1)
+		if(dynamic_metadata_set_list == true && metadataName.indexOf(".") != -1)
 		{
 			var metadataSetName = metadataName.substring(0, metadataName.lastIndexOf("."));
 			
@@ -718,7 +750,7 @@ function addFunctionalityToTable(table)
 			if(!found)
 			{
 				_metadataSetList.push(metadataSetName);
-				addMetaSetToList( $("#metadataSetList"), metadataSetName);
+				addOptionToList( $("#metadataSetList"), metadataSetName);
 			}
 		}
 			
@@ -726,8 +758,7 @@ function addFunctionalityToTable(table)
 		addRemoveLinkToRow(this);
 	});
 
-	
-	var metaNameField = $("<input>", {"type": "text","style":"margin: 5px; border: 1px solid #000;"});
+	var metaNameField = createMetadataElementSelector(); 	
 	table.after(metaNameField);
 	table.metaNameField = metaNameField;
 	
@@ -735,7 +766,7 @@ function addFunctionalityToTable(table)
 	addRowButton.html(gs.text.dse.add_new_metadata);
 	addRowButton.click(function() 
 	{ 
-		var name = metaNameField.val();
+	        var name = metaNameField.val();
 		if(!name || name == "")
 		{
 			console.log(gs.text.dse.no_value_given);
@@ -763,6 +794,7 @@ function addFunctionalityToTable(table)
 	});
 	table.addRowButton = addRowButton;
 	metaNameField.after(addRowButton);
+
 }
 
 function addRemoveLinkToRow(row)
@@ -782,7 +814,7 @@ function addRemoveLinkToRow(row)
 		$(row).hide();
 	});
 	newCell.append(removeLink);
-	newCell.attr({"class": "metaTableCell", "style": "font-size:0.6em; padding-left: 3px; padding-right: 3px;"});
+	newCell.attr({"class": "metaTableCellRemove", "style": "font-size:0.6em; padding-left: 3px; padding-right: 3px;"});
 	$(row).append(newCell);
 }
 
