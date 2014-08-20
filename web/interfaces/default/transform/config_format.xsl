@@ -210,7 +210,7 @@
 					<xslt:attribute name='href'>
 						<xslt:value-of 
 				   disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']" />/index/assoc/<xslt:value-of 
-				   disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='assocfilepath']" />/<xslt:value-of 
+				   disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name='assocfilepath']" />/<xslt:value-of 
 				   disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='srclinkFile']" />
 					</xslt:attribute>
 					<xsl:copy-of select="$opt-title"/>
