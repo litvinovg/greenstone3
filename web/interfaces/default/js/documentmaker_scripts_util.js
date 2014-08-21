@@ -305,14 +305,14 @@ function save()
 		else if(gs.functions.hasClass(changedElem, "renderedText"))
 		{
 			var section = changedElem.parentDiv.parentItem;
-			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + section.collection + '", "oid":"' + section.nodeID + '"}');
+			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + section.collection + '", "oid":"' + section.nodeID + '"}'); //'
 			addCollectionToBuild(section.collection);
 		}
 		else if(gs.functions.hasClass(changedElem, "sectionText"))
 		{
 			var id = changedElem.getAttribute("id");
 			var sectionID = id.substring(4);
-			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + gs.cgiParams.c + '", "oid":"' + sectionID + '"}');
+			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + gs.cgiParams.c + '", "oid":"' + sectionID + '"}'); //'
 			addCollectionToBuild(gs.cgiParams.c);
 		}
 	}
@@ -345,7 +345,20 @@ function save()
 		    }
 		}
 	}
-	processChangesLoop(0);
+	if (metadataChanges.length>0) {
+	  // this will process each change one by one, and then send the build request
+	  processChangesLoop(0);
+	}
+	else if(_collectionsToBuild.length > 0) {
+	  // if there are no metadata changes, but some other changes eg text have happened, then we need to send the build request.
+	  sendBuildRequest();
+	}
+	  
+	/* need to clear the changes from the page so that we don't process them again next time */
+	de.Changes.clear();
+	while (_deletedMetadata.length>0) {
+	  _deletedMetadata.pop();
+	}
 
 }
 
