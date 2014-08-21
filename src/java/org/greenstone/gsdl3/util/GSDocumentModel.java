@@ -102,7 +102,9 @@ public class GSDocumentModel
 
 	protected String _siteHome;
  	protected MessageRouter _router;
-	protected HashMap<String, Document> _docCache = new HashMap<String, Document>();
+
+  // When we are doing document editing through browser, metadata changes are currently handled by metadata_server.pl. This edits files directly. If I then come to edit text via this class, the doc xml gets read from the cache and my external changes are lost. I am disabling it for now...
+  //protected HashMap<String, Document> _docCache = new HashMap<String, Document>();
 
 	public GSDocumentModel(String siteHome, MessageRouter router)
 	{
@@ -694,7 +696,7 @@ public class GSDocumentModel
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			docXML = db.parse(docFile);
 
-			_docCache.put(oid + "__" + collection, docXML);
+			//_docCache.put(oid + "__" + collection, docXML);
 		}
 		catch (Exception ex)
 		{
@@ -1909,8 +1911,8 @@ public class GSDocumentModel
 		}
 
 		Document docXML = null;
-		if ((docXML = _docCache.get(oid + "__" + collection)) == null)
-		{
+		//if ((docXML = _docCache.get(oid + "__" + collection)) == null)
+		//	{
 			String filePath = archiveGetDocumentFilePath(oid, collection, userContext);
 			File docFile = new File(filePath);
 
@@ -1925,13 +1927,13 @@ public class GSDocumentModel
 				DocumentBuilder db = dbf.newDocumentBuilder();
 				docXML = db.parse(docFile);
 
-				_docCache.put(oid + "__" + collection, docXML);
+				//_docCache.put(oid + "__" + collection, docXML);
 			}
 			catch (Exception ex)
 			{
 				return null;
 			}
-		}
+			//	}
 		return docXML;
 	}
 
