@@ -164,6 +164,17 @@ function undo()
 	}
 }
 
+function enableSaveButtons(enabled) {
+  if (enabled) {
+    $("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
+    $("#saveButton, #quickSaveButton").removeAttr("disabled");
+
+  } else {
+    $("#saveButton, #quickSaveButton").html(gs.text.dse.saving + "...");
+    $("#saveButton, #quickSaveButton").attr("disabled", "disabled");
+   
+  }
+}
 function addCollectionToBuild(collection)
 {
 	for(var i = 0; i < _collectionsToBuild.length; i++)
@@ -176,7 +187,22 @@ function addCollectionToBuild(collection)
 	_collectionsToBuild.push(collection);
 }
 
-function save() 
+function save() {
+  saveAndRebuild(false);
+}
+
+function rebuildCurrentCollection() {
+
+  console.log("rebuilding collection");
+  enableSaveButtons(false);
+  var collection = gs.cgiParams.c;
+
+  var collectionsArray = new Array();
+  collectionsArray.push(collection);
+  buildCollections(collectionsArray);
+}
+
+function saveAndRebuild(rebuild) 
 {
 //This works in most cases but will not work when taking a doc from one collection to another, will need to be fixed at some point
   var collection;
@@ -217,8 +243,7 @@ function save()
 				{
 					alert(gs.text.dse.error_saving);
 				
-					$("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
-					$("#saveButton, #quickSaveButton").removeAttr("disabled");
+					enableSaveButtons(true);
 					
 					if(_statusBar)
 					{
@@ -231,14 +256,18 @@ function save()
 				{
 					_statusBar.removeStatus(statusID);
 				}
-				buildCollections(_collectionsToBuild);
+				if (rebuild) {
+				  buildCollections(_collectionsToBuild);
+				} else {
+				  // reset the save button here
+				  enableSaveButtons(true);
+				}
 			}
 		}
 
 		if(_collectionsToBuild.length > 0)
 		{
-			$("#saveButton, #quickSaveButton").html(gs.text.dse.saving + "...");
-			$("#saveButton, #quickSaveButton").attr("disabled", "disabled");
+		  enableSaveButtons(false);
 
 			if(_statusBar)
 			{
@@ -368,8 +397,7 @@ function buildCollections(collections, documents, callback)
 	if(!collections || collections.length == 0)
 	{
 		console.log(gs.text.dse.empty_collection_list);
-		$("#saveButton, #quickSaveButton").html(gs.text.save_changes);
-		$("#saveButton, #quickSaveButton").removeAttr("disabled");
+		enableSaveButtons(true);
 		return;
 	}
 	
@@ -414,8 +442,7 @@ function buildCollections(collections, documents, callback)
 					{
 						_statusBar.removeStatus(statusID);
 					}
-					$("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
-					$("#saveButton, #quickSaveButton").removeAttr("disabled");
+					enableSaveButtons(true);
 					
 					return;
 				}
@@ -443,8 +470,7 @@ function buildCollections(collections, documents, callback)
 								{
 									_statusBar.removeStatus(statusID);
 								}
-								$("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
-								$("#saveButton, #quickSaveButton").removeAttr("disabled");
+								enableSaveButtons(true);
 								
 								return;
 							}
@@ -476,8 +502,7 @@ function buildCollections(collections, documents, callback)
 									{
 										_statusBar.removeStatus(statusID);
 									}
-									$("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
-									$("#saveButton, #quickSaveButton").removeAttr("disabled");
+									enableSaveButtons(true);
 								/*
 								});
 							}
@@ -522,8 +547,7 @@ function startCheckLoop(pid, serverFunction, statusID, callbackFunction)
 					{
 						_statusBar.removeStatus(statusID);
 					}
-					$("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
-					$("#saveButton, #quickSaveButton").removeAttr("disabled");
+					enableSaveButtons(true);
 					
 					return;
 				}
@@ -543,8 +567,7 @@ function startCheckLoop(pid, serverFunction, statusID, callbackFunction)
 					{
 						_statusBar.removeStatus(statusID);
 					}
-					$("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
-					$("#saveButton, #quickSaveButton").removeAttr("disabled");
+					enableSaveButtons(true);
 				}
 				else
 				{
@@ -872,7 +895,7 @@ function createTopMenuBar()
 	//The "Save changes" button
 	var saveButton = document.createElement("BUTTON");
 	saveButton.innerHTML = gs.text.dse.save_changes;
-	saveButton.setAttribute("onclick", "save();");
+	saveButton.setAttribute("onclick", "saveAndRebuild();");
 	saveButton.setAttribute("id", "saveButton");
 	saveCell.appendChild(saveButton);
 	

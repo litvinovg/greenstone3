@@ -10,6 +10,10 @@ var keep_editing_controls_visible = true;
 /* Here you can choose which save buttons you like. Choose from 'save', 'rebuild', 'saveandrebuild' */
 var save_and_rebuild_buttons = ["saveandrebuild"];
 
+var save_button_text = "Save changes";
+var rebuild_button_text = "Rebuild";
+var save_and_rebuild_button_text = "Save and Rebuild";
+
 /* What kind of metadata element selection do we provide?
    plain: just a text input box
    fixedlist: a drop down menu with a fixed list of options (provided by the availableMetadataElements list)
@@ -1148,7 +1152,7 @@ function setEditingFeaturesVisible(visible)
 	}
 	
 	var visibility = (visible ? "" : "none");
-	$("#saveButton, #metadataListLabel, #metadataSetList").css("display", visibility);
+	$("#metadataListLabel, #metadataSetList").css("display", visibility);
 	
 	$(".editMetadataButton").each(function()
 	{
@@ -1211,18 +1215,18 @@ function readyPageForEditing()
 	  var button_type = save_and_rebuild_buttons[i];
 	  if (button_type == "save") {
 	    var saveButton = $("<button>", {"id": "saveButton", "class": "ui-state-default ui-corner-all"});
-	    saveButton.click(saveMetadataChanges);
-	    saveButton.html("Save changes");
+	    saveButton.click(save);
+	    saveButton.html(save_button_text);
 	    editBar.append(saveButton);
 	  } else if(button_type == "rebuild") {
 	    var rebuildButton = $("<button>", {"id": "rebuildButton", "class": "ui-state-default ui-corner-all"});
-	    rebuildButton.click(rebuildCollection);
-	    rebuildButton.html("Rebuild");
+	    rebuildButton.click(rebuildCurrentCollection);
+	    rebuildButton.html(rebuild_button_text);
 	    editBar.append(rebuildButton);
 	  } else if (button_type == "saveandrebuild") {
 	    var saveAndRebuildButton = $("<button>", {"id": "saveAndRebuildButton", "class": "ui-state-default ui-corner-all"});
-	    saveAndRebuildButton.click(save);
-	    saveAndRebuildButton.html("Save and Rebuild");
+	    saveAndRebuildButton.click(saveAndRebuild);
+	    saveAndRebuildButton.html(save_and_rebuild_button_text);
 	    editBar.append(saveAndRebuildButton);
 
 	  }
@@ -1241,9 +1245,19 @@ function readyPageForEditing()
 	onVisibleMetadataSetChange(); // make sure that the selected item in the list is active
 }
 
+// override the one in documentmaker_scripts_util
+// currently not used if other one is present. need to get the js include order right
+function enableSaveButtons(enabled) {
+  if (enabled) {
+    $("#saveButton, #rebuildButton, #saveAndRebuildButton").removeAttr("disabled");
+  } else {
+    $("#saveButton, #rebuildButton, #saveAndRebuildButton").attr("disabled", "disabled");
+  }
+}
 
-/* this is a cut down version of save() from documentmaker_scripts_util.js */
-function saveMetadataChanges() {
+/* this is a cut down version of save() from documentmaker_scripts_util.js 
+ going back to using save, will delete this once everything working*/
+function saveMetadataChangesOld() {
 
   console.log("Saving metadata changes");
  
@@ -1336,15 +1350,6 @@ function saveMetadataChanges() {
 
 
 
-function rebuildCollection() {
-
-  console.log("rebuilding collection");
-  var collection = gs.cgiParams.c;
-
-  var collectionsArray = new Array();
-  collectionsArray.push(collection);
-  buildCollections(collectionsArray);
-}
 
 /***************
 * MENU SCRIPTS *
