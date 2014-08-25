@@ -124,9 +124,14 @@ public class PhindPhraseBrowse
     if (!service.equals(PHIND_SERVICE)) {
       return null;
     }
-    Element describe = (Element) applet_description.cloneNode(true);
-    describe.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_NAME,  getTextString(PHIND_SERVICE+".name", lang)));
-    describe.appendChild(GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_DESCRIPTION,  getTextString(PHIND_SERVICE+".description", lang)));
+    Element describe = (Element)doc.importNode(applet_description,true);
+	
+	Element el1 = GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_NAME,  getTextString(PHIND_SERVICE+".name", lang));	
+    describe.appendChild(el1);
+	
+	Element el2 = GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_DESCRIPTION,  getTextString(PHIND_SERVICE+".description", lang));
+    describe.appendChild(el2);
+	
     return describe;
   }
   
