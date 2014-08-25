@@ -200,17 +200,26 @@
 				</a>
 			</xsl:when>
 			<xsl:when test="@type='source'">
+				<xslt:variable name="thisAssocfilepath">					
+					<xslt:choose>
+						<xslt:when test="/page/pageResponse/document">
+							<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name='assocfilepath']" />
+						</xslt:when>
+						<xslt:otherwise>
+							<xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='assocfilepath']" />
+						</xslt:otherwise>
+					</xslt:choose>						
+				</xslt:variable>
 				<a>
-				        <xsl:if test="@target">
+				    <xsl:if test="@target">
 					  <xsl:attribute name='target'>
 					    <xsl:value-of select='@target'/>
 					  </xsl:attribute>   
 					</xsl:if>
-
 					<xslt:attribute name='href'>
 						<xslt:value-of 
 				   disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']" />/index/assoc/<xslt:value-of 
-				   disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name='assocfilepath']" />/<xslt:value-of 
+				   disable-output-escaping="yes" select="$thisAssocfilepath" />/<xslt:value-of 
 				   disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='srclinkFile']" />
 					</xslt:attribute>
 					<xsl:copy-of select="$opt-title"/>
