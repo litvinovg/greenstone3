@@ -450,7 +450,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 	<xsl:template match="gsf:metadata">
 		<xsl:if test="not(@hidden = 'true')">
 			<!-- set hidden=true on a gsf:metadata so that it gets retrieved from the server but not displayed -->
-			<xsl:variable name="meta_test"><xsl:call-template name="getMetadataTest"/></xsl:variable>			  
+			<xsl:variable name="meta_test"><xsl:call-template name="getMetadataTest"/></xsl:variable>
 			<xsl:variable name="separator">
 				<xsl:choose>
 					<xsl:when test="@separator">
@@ -551,7 +551,8 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 
   <!-- if we have metadata name="dc.Date,Date" will make a test like (@name = 'dc.Date' or @name = 'Date') -->
   <xsl:template name="getMetadataTest">
-    (<xsl:for-each select="xalan:tokenize(@name, ',')"><xsl:if test="position()!=1"> or </xsl:if>@name='<xsl:if test='@select'><xsl:value-of select='@select'/><xsl:text>_</xsl:text></xsl:if><xsl:value-of select="."/>'</xsl:for-each>)
+  <xsl:variable name="selectattr"><xsl:value-of select='@select'/></xsl:variable>
+    (<xsl:for-each select="xalan:tokenize(@name, ',')"><xsl:if test="position()!=1"> or </xsl:if>@name='<xsl:if test="$selectattr != ''"><xsl:value-of select="$selectattr"/><xsl:text>_</xsl:text></xsl:if><xsl:value-of select="."/>'</xsl:for-each>)
   </xsl:template>
 
 	<xsl:template match="gsf:text">
