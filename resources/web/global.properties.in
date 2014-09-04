@@ -37,3 +37,5 @@ proxy.password=
 
 # flax auxiliary external server url for collocation retrieval
 flax.aux.server=flax.nzdl.org/greenstone3/flax
+wikipedia.server=http://wdm.cs.waikato.ac.nz:8080/services/
+wikipedia.url=http://en.wikipedia.org/wiki/
