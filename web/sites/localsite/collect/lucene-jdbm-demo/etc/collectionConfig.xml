@@ -22,22 +22,11 @@
   </metadataList>
   <displayItemList>
     <displayItem assigned="true" lang="en" name="name">Demo Collection</displayItem> 
-    <displayItem assigned="true" lang="en" name="description">
-      This is a demonstration collection for the Greenstone3 digital library software. 
-      It contains a small subset (11 books) of the Humanitarian and Development Libraries. 
-      It is the Greenstone 3 equivalent of the Greenstone 2 demo collection, built with 
-      Lucene for indexing and JDBM as the database for metadata.
+    <displayItem assigned="true" lang="en" name="description">This is a demonstration collection for the Greenstone3 digital library software. It contains a small subset (11 books) of the Humanitarian and Development Libraries. It is the Greenstone 3 equivalent of the Greenstone 2 demo collection, built with Lucene for indexing and JDBM as the database for metadata.
     </displayItem>
-    <displayItem lang="en" name="shortDescription">
-      Demonstration collection containing a few books from the Humanitarian and Development 
-      Libraries. Uses Lucene and JDBM.
+    <displayItem assigned="true" lang="en" name="shortDescription">Demonstration collection containing a few books from the Humanitarian and Development Libraries. Uses Lucene and JDBM.
     </displayItem> 
-    <displayItem assigned="true" lang="en" name="name">Demo Collection</displayItem>
-    <displayItem assigned="true" lang="en" name="shortDescription">
-      Demonstration collection containing a few books from the Humanitarian and Development 
-      Libraries. Uses Lucene and JDBM.
-    </displayItem>
-  </displayItemList>
+ </displayItemList>
   <format>
     <!-- Define any global format statements here -->
 
@@ -70,13 +59,10 @@
       <displayItem lang="en" name="name">organisations</displayItem>
     </index>
     <sort name="rank">
-      <displayItem lang="en" name="name">ranks</displayItem>
+      <displayItem lang="en" name="name">rank</displayItem>
     </sort>    
     <sort name="dls.Organization">
       <displayItem lang="en" name="name">organisation</displayItem>
-    </sort>
-    <sort name="FileSize">
-      <displayItem lang="en" name="name">filesize</displayItem>
     </sort>
     <sort name="none">
       <displayItem lang="en" name="name">natural (build) order</displayItem>
@@ -94,17 +80,11 @@
 	<td>
 	  <gsf:choose-metadata>
 	    <gsf:metadata name="dc.Title"/>
-	    <gsf:metadata name="exp.Title"/>
-	    <gsf:metadata name="ex.dc.Title"/>
 	    <gsf:metadata name="Title"/>
 	    <gsf:default>Untitled</gsf:default>
 	  </gsf:choose-metadata>
 	</td>
-	<td>
-	  <gsf:choose-metadata><gsf:metadata name="dls.Organization" select="root"/><gsf:metadata name="dls.Organization"/></gsf:choose-metadata></td>
-	<td><gsf:choose-metadata><gsf:metadata name="FileSize" select="root"/><gsf:metadata name="FileSize"/></gsf:choose-metadata>(rank <gsf:rank/>)
-	</td>
-      </gsf:template>
+    </gsf:template>
     </format>
   </search>
   <infodb type="jdbm"/>
