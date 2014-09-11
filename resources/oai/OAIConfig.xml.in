@@ -4,7 +4,7 @@
 <OAIConfig>       
   <!-- The name of this oai repository, which is human readable. -->
   <repositoryName>Greenstone3 OAI repository</repositoryName>
-  <!-- The unique id of this repository - if using version 2.0 should correspond to your domaine name -->
+  <!-- The unique id of this repository - if using version 2.0 should correspond to your domain name -->
   <repositoryIdentifier></repositoryIdentifier>
   <!-- The base url to request metadata from this repository.
   TODO: this element should be determined and overriden dynamically given the osi request url in OAIServer.java. 
@@ -18,7 +18,7 @@
   <earliestDatestamp>1970-01-01</earliestDatestamp>
   <!-- The manner in which the repository supports the notion of deleted records -->
   <deletedRecord>no</deletedRecord>
-  <!-- The granularity of the datestamp -->
+  <!-- The granularity of the datestamp. May be YYYY-MM-DD (day granularity) or YYYY-MM-DDThh:mm:ssZ (seconds granularity) -->
   <granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
   <!-- The repository maintainer email address. There can be more than one. -->
   <adminEmail></adminEmail>
