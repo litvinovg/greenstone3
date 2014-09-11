@@ -334,7 +334,20 @@
 							</xsl:call-template>
 						</xsl:variable>
 						<span class="termInfo">
-							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, $occursTextKey, concat(@name,';', @freq,';',  @numDocsMatch,';',  $levelText))"/>
+						  <!--<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, $occursTextKey, concat(@name,';', @freq,';',  @numDocsMatch,';',  $levelText))"/>-->
+						  <!-- For solr collections, display: 
+						         term x occured y times
+						         term a occured b times
+						       For collections using all other indexers, display: 
+						         term x occurred y times in n sections/documents
+						         term a occurred b times in m sections/docs
+						    -->
+							<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, $occursTextKey, concat(@name,';', @freq))"/>
+							<xsl:choose>
+							  <xsl:when test="/page/pageResponse/collection[@type != 'solr']">
+							    <xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termSectionFreq', concat(@numDocsMatch,';',  $levelText))"/>
+							  </xsl:when>
+							</xsl:choose>
 						</span>
 						<br/>
 					</xsl:for-each>
