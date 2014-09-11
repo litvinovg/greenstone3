@@ -83,13 +83,19 @@ public class OAICollection extends Collection
 		macro_resolver.addMacro("_httpcollection_", this.site_http_address + "/collect/" + this.cluster_name);
 
 		Element coll_config_xml = loadCollConfigFile();
-		GSXSLT.modifyCollectionConfigForDebug(coll_config_xml);
-		Element build_config_xml = loadBuildConfigFile();
+		if (coll_config_xml == null) {
+		  logger.error("Collection: couldn't configure collection: " + this.cluster_name + ", " + "Couldn't load collection config file");
 
-		if (coll_config_xml == null || build_config_xml == null)
-		{
-			return false;
+		  return false;
 		}
+		Element build_config_xml = loadBuildConfigFile();
+		if (build_config_xml == null)
+		{
+		  logger.error("Collection: couldn't configure collection: " + this.cluster_name + ", " + "Couldn't load build config file");
+
+		  return false;
+		}
+		GSXSLT.modifyCollectionConfigForDebug(coll_config_xml);
 
 		// process the metadata and display items and default library params
 		super.configureLocalData(coll_config_xml);
