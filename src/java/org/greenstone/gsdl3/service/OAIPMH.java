@@ -344,10 +344,10 @@ public class OAIPMH extends ServiceRack {
 
     Document doc = XMLConverter.newDOM();
     ArrayList<String> keys = new ArrayList<String>(info.getKeys());
-    String oailastmodified = info.getInfo(OAIXML.OAI_LASTMODIFIED);
-    if (!oailastmodified.equals("")) {
-      // format into a string
-      oailastmodified = OAIXML.getTime(Long.parseLong(oailastmodified)*1000); // java wants dates in milliseconds
+    long millis = getDateStampMillis(info);
+    String oailastmodified = ""; 
+    if (millis != -1) {
+      oailastmodified = OAIXML.getTime(millis);
     }
 
     Element get_record_response = doc.createElement(GSXML.RESPONSE_ELEM);
@@ -443,18 +443,15 @@ public class OAIPMH extends ServiceRack {
         continue;
       }
       
-      String oailastmodified = info.getInfo(OAIXML.OAI_LASTMODIFIED);
-      long oailastmodifiedmillis = 0;
+      long millis = getDateStampMillis(info);
       Date this_date = null;
-      if (oailastmodified.equals("")) {
+      if (millis == -1) {
 	if (from_date != null || until_date !=null) {
 	  continue; // if this doc doesn't have a date for some reason, and
 	  // we are doing a date range, then don't include it.
 	}
-      } else { // check the date against date range from query (if any)
-	oailastmodifiedmillis = Long.parseLong(oailastmodified)*1000; // greenstone dates are in secods, and Java wants dates in milliseconds
-	this_date = new Date(oailastmodifiedmillis); 
- 
+      } else {
+	this_date = new Date(millis);
 	if (from_date != null) {
 	  if(this_date.before(from_date)) {
 	    continue;
@@ -466,6 +463,7 @@ public class OAIPMH extends ServiceRack {
 	  }
 	}    
       }  
+ 
       //Now check that this id has metadata for the required prefix.
       if (documentContainsMetadata(info, set_of_elems)) {
 	// YES, it does have some metadata for this prefix
@@ -474,12 +472,12 @@ public class OAIPMH extends ServiceRack {
 	  Element record = doc.createElement(OAIXML.RECORD);
 	  list_items.appendChild(record);
 	  //compose the header element
-	  record.appendChild(createHeaderElement(doc, oid, OAIXML.getTime(oailastmodifiedmillis)));      
+	  record.appendChild(createHeaderElement(doc, oid, OAIXML.getTime(millis)));      
 	  //compose the metadata element
 	  record.appendChild(createMetadataElement(doc, prefix, info));
  	} else {
 	  //compose the header element and append it
-	  list_items.appendChild(createHeaderElement(doc, oid, OAIXML.getTime(oailastmodifiedmillis)));      
+	  list_items.appendChild(createHeaderElement(doc, oid, OAIXML.getTime(millis)));      
 	}
       } // otherwise we won't include this oid.
     }//end of for(int i=0; i<oid_list.size(); i++) of doing thru each record
@@ -740,6 +738,24 @@ public class OAIPMH extends ServiceRack {
     return false;
   }
 
+  protected long getDateStampMillis(DBInfo info) {
+    // gs.OAIDateStamp is in YYYY-MM-DD
+    String time_stamp = info.getInfo(OAIXML.GS_OAI_DATE_STAMP);
+    long millis = -1;
+    if (!time_stamp.equals("")) {
+      millis = OAIXML.getTime(time_stamp);
+    }
+    if (millis == -1) {
+      // oailastmodified is in seconds
+      time_stamp = info.getInfo(OAIXML.OAI_LASTMODIFIED);
+      if (!time_stamp.equals("")) {
+	millis = Long.parseLong(time_stamp)*1000;
+      }
+    }
+    return millis;
+    
+
+  }
 }
 
 
