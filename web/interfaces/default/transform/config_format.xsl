@@ -454,7 +454,17 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 			<xsl:variable name="separator">
 				<xsl:choose>
 					<xsl:when test="@separator">
-						<xsl:value-of disable-output-escaping='yes' select="@separator"/>
+					  <xsl:choose>
+					    <xsl:when test="@separator = ' '">
+					      <!-- http://stackoverflow.com/questions/1461649/how-to-insert-nbsp-in-xslt -->
+					      <xsl:text>&#160;</xsl:text>
+					      <!--<xsl:text> </xsl:text> only works in GLI's Format panel-->
+					      <!--<xsl:text disable-output-escaping="yes"><![CDATA[&nbsp;]]></xsl:text>-->
+					    </xsl:when>
+					    <xsl:otherwise>
+					      <xsl:value-of disable-output-escaping='yes' select="@separator"/>
+					    </xsl:otherwise>
+					  </xsl:choose>
 					</xsl:when>
 					<xsl:when test="separator">
 						<xsl:copy-of select="separator/node()"/>
