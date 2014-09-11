@@ -135,6 +135,7 @@ public class OAIXML {
   public static final String SELECT_FIRST_VALID_META = "firstvalidmetadata";
   public static final String SELECT_ALL_VALUES = "allvalues";
   // code constants
+  public static final String GS_OAI_DATE_STAMP = "gs.OAIDateStamp";
    public static final String GS_OAI_RESOURCE_URL = "gs.OAIResourceURL";
    public static final String ILLEGAL_OAI_VERB = "Illegal OAI verb";
    public static final String LASTMODIFIED = "lastmodified";
