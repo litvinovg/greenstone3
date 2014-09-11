@@ -125,7 +125,8 @@ public class OAIReceptionist implements ModuleInterface {
       return false;
     }
 
-    //clear out expired resumption tokens stored in OAIResumptionToken.xml
+    // load in tokens from OAIResumptionToken.xml, and then clear out any
+    // expired ones. 
     OAIResumptionToken.init();
     OAIResumptionToken.clearExpiredTokens();
     
@@ -912,17 +913,7 @@ public class OAIReceptionist implements ModuleInterface {
   /** split the identifier into <collection + OID> as an array 
       It has already been checked that the 'identifier' contains at least one ':'
   */
-  // private String[] splitNames(String identifier) {
-  //   logger.info(identifier);
-  //   String [] strs = new String[2];
-  //   int first_colon = identifier.indexOf(":");
-  //   if(first_colon == -1) {
-  //     return null;
-  //   }
-  //   strs[0] = identifier.substring(0, first_colon);
-  //   strs[1] = identifier.substring(first_colon + 1);
-  //   return strs;
-  // }
+
   /** validate if the specified metadata prefix value is supported by the repository
    *  by checking it in the OAIConfig.xml
    */
