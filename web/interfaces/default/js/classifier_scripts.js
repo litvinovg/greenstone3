@@ -118,10 +118,10 @@ function httpRequest(sectionID)
 		
 		var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/browse/" + sectionID.replace(/\./g, "/") + "?excerptid=div" + sectionID;
 
-		if(gs.cgiParams.berryBasket == "on")
+		if(gs.cgiParams.berrybasket == "on")
 		{
 			url = url + "&berrybasket=on";
-		}
+		} 
 
 		if(url.indexOf("#") != -1)
 		{
@@ -139,7 +139,7 @@ function httpRequest(sectionID)
 			sectionToggle.attr("src", gs.imageURLs.collapse);
 			openClassifiers[sectionID] = true;	
 			
-			if(gs.cgiParams.berryBasket == "on")
+			if(gs.cgiParams.berrybasket == "on")
 			{
 				checkout();
 			}
