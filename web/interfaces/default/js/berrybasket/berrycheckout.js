@@ -160,7 +160,7 @@ function showFullView(){
 			li.appendChild(document.createTextNode(doc['root_title']+": ")); 
 		}
 		li.appendChild(a);
-
+		li.appendChild(document.createTextNode(" ("+doc['collection']+")"));
 		var metadata = "";
 		for (var metaItem in doc && metaItem != 'title'){
 			metadata = "\n"+metaItem+": "+ doc[metaItem]+"\n";
@@ -385,8 +385,9 @@ function populateUrlsAndMetadata(parea){
 	for (var i in docList){
 		var doc = docList[i];
 		var url =root_url+"?a=d&c="+doc['collection']+"&d="+doc['name']+"\n";
+		var metadata = "";
 		for (var metaItem in doc){
-			var metadata = metaItem+": "+ doc[metaItem]+"\n";
+			metadata += metaItem+": "+ doc[metaItem]+"\n";
 		}
 		fulltext +=url+metadata+"\n";
 	}
