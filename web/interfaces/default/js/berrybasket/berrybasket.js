@@ -206,8 +206,9 @@ function showBasket() {
 		}
 
 		title = root_title+title;
-		if (title.length > 50){
-			title = title.substring(0,20)+" ... "+title.substr(title.length-35,35);
+		title += " ("+berryItem.getAttribute('collection')+")";
+		if (title.length > 76){
+			title = title.substring(0,30)+" ... "+title.substr(title.length-45,45);
 		}
 		
 		berryElement.setAttribute("class","berryitem");
