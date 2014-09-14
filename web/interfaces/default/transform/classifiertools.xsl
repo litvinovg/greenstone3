@@ -32,7 +32,7 @@
 		</div>
 	</xsl:template>
   
-	<!-- this is a wrapper node, which the interface can use to add stuff into the query results that isn't part of and doesn't depend on the documentNode template which may come from the collection -->
+	<!-- this is a wrapper node, which the interface can use to add stuff into the classifier display that isn't part of and doesn't depend on the documentNode template which may come from the collection -->
 	<xsl:template name="documentNodeWrapper">
 		<xsl:param name="collName"/>
 		<xsl:param name="serviceName"/> 
