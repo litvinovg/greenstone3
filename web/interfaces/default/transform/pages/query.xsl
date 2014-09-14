@@ -42,6 +42,7 @@
 		<xsl:call-template name="resultsPagePre"/>
 		<xsl:call-template name="displayMatchDocs"/>
 		<xsl:call-template name="displayTermInfo"/>
+		<xsl:call-template name="displayBaskets"/>
 		<xsl:call-template name="displayResults"/>
 		<xsl:call-template name="resultsPagePost"/>
 	</xsl:template>
@@ -49,6 +50,19 @@
 	<!-- optional cgi-params for links to document pages -->
 	<xsl:variable name="opt-doc-link-args">p.s=<gsvar:this-service/>
 	</xsl:variable>
+
+	<xsl:template name="displayBaskets">
+	  <!-- add in document basket here??? see classifier.xsl -->
+	  <xsl:if test="$berryBasketOn">
+	    <div id="rightSidebar">
+	      <xsl:if test="$berryBasketOn">
+		<!-- show the berry basket if it's turned on -->
+		<gslib:berryBasket/>
+		<xsl:text> </xsl:text>
+	      </xsl:if>
+	    </div>
+	  </xsl:if>
+	</xsl:template>
 
 	<xsl:template name="displayResults">
 		<xsl:if test="/page/pageResponse/facetList/facet">
@@ -114,6 +128,11 @@
 				<xsl:for-each select="pageResponse/documentNodeList/documentNode">
 					<tr id="div{@nodeID}" class="document">
 						<xsl:apply-templates select="."/>
+						<!-- The berry (optional) -->
+						<td>
+						  <xsl:call-template name="documentBerryForClassifierOrSearchPage"/>
+						</td>
+
 						<xsl:call-template name="documentNodePost"/>
 					</tr>
 				</xsl:for-each>
