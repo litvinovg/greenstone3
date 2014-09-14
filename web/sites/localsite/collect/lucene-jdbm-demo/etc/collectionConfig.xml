@@ -146,18 +146,8 @@
 	  </gsf:link>
 	</td>
 	<td valign="top">
-	  <gsf:link type="source">
-	    <gsf:choose-metadata>
-	      <gsf:metadata name="thumbicon"/>
-	      <gsf:metadata name="srcicon"/>
-	    </gsf:choose-metadata>
-	  </gsf:link>
-	</td>
-	<td valign="top">
 	  <gsf:choose-metadata>
 	    <gsf:metadata name="dc.Title"/>
-	    <gsf:metadata name="exp.Title"/>
-	    <gsf:metadata name="ex.dc.Title"/>
 	    <gsf:metadata name="Title"/>
 	    <gsf:default>Untitled</gsf:default>
 	  </gsf:choose-metadata>
