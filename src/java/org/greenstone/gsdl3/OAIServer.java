@@ -216,8 +216,6 @@ public class OAIServer extends BaseGreenstoneServlet
 		}
 		// also, we have something we want to get from here - useOAIStylesheet
 		this.configure(oai_config);
-		// Initialise the resumption tokens
-		OAIResumptionToken.init();
 
 	}//end of init()
 
