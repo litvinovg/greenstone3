@@ -276,6 +276,7 @@ public class GSXML
 
 	//security tags and attributes
 	public static final String SECURITY_ELEM = "security";
+        public static final String DISABLED_ATT = "disabled";
 	public static final String SCOPE_ATT = "scope";
 	public static final String DEFAULT_ACCESS_ATT = "default_access";
 	public static final String EXCEPTION_ELEM = "exception";
