@@ -636,7 +636,7 @@ public class DocumentAction extends Action
 				}
 			}
 		}
-		logger.debug("(DocumentAction) Page:\n" + GSXML.xmlNodeToString(result));
+		//logger.debug("(DocumentAction) Page:\n" + GSXML.xmlNodeToString(result));
 		return result;
 	}
 
