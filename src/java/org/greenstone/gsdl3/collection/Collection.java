@@ -302,6 +302,12 @@ public class Collection extends ServiceCluster
 			return;
 		}
 
+		String disabled = securityBlock.getAttribute(GSXML.DISABLED_ATT);
+		if (!disabled.equals("")) {
+		  // security block has been disabled.
+		  logger.warn("Security block has been disabled. Not implementing any security for collection "+this.cluster_name);
+		  return;
+		}
 		String scope = securityBlock.getAttribute(GSXML.SCOPE_ATT);
 		String defaultAccess = securityBlock.getAttribute(GSXML.DEFAULT_ACCESS_ATT);
 
@@ -373,7 +379,12 @@ public class Collection extends ServiceCluster
 					String docSetName = docSet.getAttribute(GSXML.NAME_ATT);
 					exceptionSets.add(docSetName);
 				}
-
+				if (_securityScopeCollection) {
+				  // we don't add in any exceptions that have document sets
+				  if (!exceptionSets.isEmpty()) {
+				    continue;
+				  }
+				}
 				securityException.put("groups", exceptionGroups);
 				securityException.put("sets", exceptionSets);
 				_securityExceptions.add(securityException);
