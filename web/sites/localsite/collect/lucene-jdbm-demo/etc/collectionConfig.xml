@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CollectionConfig xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-  <!--<security scope="document" default_access="private">
+  <security scope="document" default_access="private" disabled="true">
+    <!-- a sample security configuration. enable it by removing the 'disabled'
+	 attribute above -->
+    <!-- Document level security. All documents are private -->
+
+    <!-- except if you are in demo group -->
     <exception>
       <group name="demo"/>
     </exception>
+    <!-- except for the publicset list of documents which are fully public -->
     <exception>
       <documentSet name="publicset"/>
       <group name=""/>
@@ -14,7 +20,7 @@
       <match>b20cre</match>
       <match>b21wae</match>
     </documentSet>
-  </security>-->
+  </security>
   <metadataList>
     <metadata lang="en" name="creator"></metadata>
     <metadata lang="en" name="maintainer"></metadata>
