@@ -330,8 +330,8 @@ public class MessageRouter implements ModuleInterface
 
 		} // for each request
 
-		logger.debug("MR returned response");
-		logger.debug(XMLConverter.getString(mainResult));
+		//	logger.debug("MR returned response");
+		//logger.debug(XMLConverter.getString(mainResult));
 
 		return mainResult;
 	}
