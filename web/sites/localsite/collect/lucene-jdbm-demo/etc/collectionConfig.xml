@@ -4,13 +4,12 @@
     <!-- a sample security configuration. enable it by removing the 'disabled'
 	 attribute above -->
     <!-- Document level security. All documents are private -->
-
-    <!-- except if you are in demo group -->
     <exception>
+      <!-- except if you are in demo group -->
       <group name="demo"/>
     </exception>
-    <!-- except for the publicset list of documents which are fully public -->
     <exception>
+      <!-- except for the publicset list of documents which are fully public -->
       <documentSet name="publicset"/>
       <group name=""/>
     </exception>
