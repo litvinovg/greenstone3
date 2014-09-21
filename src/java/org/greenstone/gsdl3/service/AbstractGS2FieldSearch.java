@@ -359,8 +359,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			}
 			else if (service_id.equals(ADVANCED_FIELD_QUERY_SERVICE))
 			{
-				createParameter(LEVEL_PARAM, param_list, lang);
-				createParameter(RANK_PARAM, param_list, lang);
+				addCustomQueryParamsAdvField(param_list, lang);
 				createParameter(MAXDOCS_PARAM, param_list, lang);
 				if (!default_index_subcollection.equals(""))
 				{
@@ -427,6 +426,11 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	{
 		createParameter(LEVEL_PARAM, param_list, lang);
 		super.addCustomQueryParams(param_list, lang);
+	}
+	/** add in the level params to TextQuery */
+	protected void addCustomQueryParamsAdvField(Element param_list, String lang)
+	{
+		createParameter(LEVEL_PARAM, param_list, lang);
 	}
 
 	/** create a param and add to the list */

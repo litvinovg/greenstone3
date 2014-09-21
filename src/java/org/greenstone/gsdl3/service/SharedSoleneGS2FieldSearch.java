@@ -116,6 +116,14 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 		createParameter(RANK_PARAM, param_list, lang);
 		createParameter(SORT_ORDER_PARAM, param_list, lang);
 	}
+  /** add in Lucene/SOLR specific params for AdvancedFieldQuery */
+  protected void addCustomQueryParamsAdvField(Element param_list, String lang)
+	{
+		super.addCustomQueryParamsAdvField(param_list, lang);
+		createParameter(RANK_PARAM, param_list, lang);
+		createParameter(SORT_ORDER_PARAM, param_list, lang);
+		
+	}
 
 	/** create a param and add to the list */
 	/** we override this to do a special rank param */
