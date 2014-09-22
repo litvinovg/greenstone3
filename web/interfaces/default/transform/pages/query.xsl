@@ -52,12 +52,15 @@
 	</xsl:variable>
 
 	<xsl:template name="displayBaskets">
-	  <!-- add in document basket here??? see classifier.xsl -->
-	  <xsl:if test="$berryBasketOn">
+	  <xsl:if test="$berryBasketOn or ($documentBasketOn and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor)))">
 	    <div id="rightSidebar">
 	      <xsl:if test="$berryBasketOn">
 		<!-- show the berry basket if it's turned on -->
 		<gslib:berryBasket/>
+		<xsl:text> </xsl:text>
+	      </xsl:if>
+	      <xsl:if test="$documentBasketOn and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor)))">
+		<gslib:documentBasket/>
 		<xsl:text> </xsl:text>
 	      </xsl:if>
 	    </div>
