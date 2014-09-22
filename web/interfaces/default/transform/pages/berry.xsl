@@ -24,9 +24,6 @@
 			<xsl:text disable-output-escaping="yes">
 				var doc;
 				var docList = new Array();
-				
-				//Slight hack so we can do things in the dev skin specifically
-				window.interfaceName = "dev";
 			</xsl:text>
 			<xsl:for-each select="/page/pageResponse/berryList/item">
 				<xsl:text disable-output-escaping="yes">doc = new Array();</xsl:text>
