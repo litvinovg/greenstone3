@@ -75,16 +75,15 @@
 					
 			function assembleURLFromForm(formElem)
 			{
-				var url = "dev";
+				var url = gs.xsltParams.library_name + "?";
 				var selectNodes = formElem.getElementsByTagName("select");
 				var inputNodes = formElem.getElementsByTagName("input");
 
 				for (var i = 0; i &lt; selectNodes.length; i++)
 				{
 					var current = selectNodes[i];
-					url += (url == "dev") ? "?" : "&amp;";
 					url += current.name + "=";
-					url += current.options[current.selectedIndex].text;
+					url += current.options[current.selectedIndex].text + "&amp;";
 				}
 				
 				for (var i = 0; i &lt; inputNodes.length; i++)
@@ -92,9 +91,8 @@
 					var current = inputNodes[i];
 					if (current.type == "hidden" || current.type == "text")
 					{
-						url += (url == "dev") ? "?" : "&amp;";
 						url += current.name + "=";
-						url += current.value;
+						url += current.value + "&amp;";
 					}
 				}
 				return url;
