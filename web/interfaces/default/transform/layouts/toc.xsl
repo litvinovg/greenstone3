@@ -296,8 +296,8 @@
 							<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'highlight_image')"/></xsl:attribute>
 						</img>
 						<input id="highlightOption" type="checkbox" class="optionCheckBox" onclick="swapHighlight(false);">
-							<xsl:if test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'on'">
-								<xsl:attribute name="checked">true</xsl:attribute>
+							<xsl:if test="/page/pageRequest/paramList/param[@name = 'hl']/@value != 'off'">
+								<xsl:attribute name="checked">checked</xsl:attribute>
 							</xsl:if>
 						</input>
 					</li>
@@ -314,13 +314,13 @@
 						<xsl:text disable-output-escaping="yes">
 							$("#zoomToggle").change(function()
 							{
-								_imageZoomEnabled = $("#zoomToggle").attr("checked");
+								_imageZoomEnabled = $("#zoomToggle").prop("checked");
 							});
 							
 							$("#zoomToggleImage").click(function()
 							{
-								$("#zoomToggle").attr("checked", !$("#zoomToggle").attr("checked"));
-								_imageZoomEnabled = $("#zoomToggle").attr("checked");
+								$("#zoomToggle").prop("checked", !$("#zoomToggle").prop("checked"));
+								_imageZoomEnabled = $("#zoomToggle").prop("checked");
 							});
 						</xsl:text>
 					</script>
@@ -336,16 +336,16 @@
 						<input id="floatTOCToggle" type="checkbox"/>
 						<script type="text/javascript">
 							<xsl:text disable-output-escaping="yes">
-								$("#floatTOCToggle").attr("checked", false);
+								$("#floatTOCToggle").prop("checked", false);
 								$("#floatTOCToggle").click(function()
 								{
-									floatMenu($("#floatTOCToggle").attr("checked"));
+									floatMenu($("#floatTOCToggle").prop("checked"));
 								});
 								
 								$("#floatTOCToggleImage").click(function()
 								{
-									$("#floatTOCToggle").attr("checked", !$("#floatTOCToggle").attr("checked"))
-									floatMenu($("#floatTOCToggle").attr("checked"));
+									$("#floatTOCToggle").prop("checked", !$("#floatTOCToggle").prop("checked"))
+									floatMenu($("#floatTOCToggle").prop("checked"));
 								});
 							</xsl:text>
 						</script>
@@ -355,7 +355,7 @@
 							<xsl:text disable-output-escaping="yes">
 								$(window).load(function()
 								{
-									$("#floatTOCToggle").attr("checked", true);
+									$("#floatTOCToggle").prop("checked", true);
 									floatMenu(true);
 								});
 							</xsl:text>
