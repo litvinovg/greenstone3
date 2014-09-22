@@ -965,15 +965,14 @@ function SliderWidget(_links)
 function swapHighlight(imageClicked)
 {
 	var hlCheckbox = $("#highlightOption");
-
 	if(imageClicked)
 	{
-		$(hlCheckbox).attr("checked", !$(hlCheckbox).attr("checked"));
+	  // toggle the state of the checkbox
+	  $(hlCheckbox).prop("checked", !$(hlCheckbox).prop("checked"));
 	}
-	
 	var from;
 	var to;
-	if(hlCheckbox.attr("checked"))
+	if(hlCheckbox.prop("checked"))
 	{
 		from = "noTermHighlight";
 		to = "termHighlight";
@@ -1035,13 +1034,13 @@ function swapLinkJavascript(rbOn)
 	{
 		option.attr("onclick", "hideText(); showBook(); swapLinkJavascript(false);");
 		optionImage.attr("onclick", "hideText(); showBook(); swapLinkJavascript(false);");
-		$(option).attr("checked", false);
+		$(option).prop("checked", false);
 	}
 	else
 	{
 		option.attr("onclick", "hideBook(); showText(); swapLinkJavascript(true);");
 		optionImage.attr("onclick", "hideBook(); showText(); swapLinkJavascript(true);");
-		$(option).attr("checked", true);
+		$(option).prop("checked", true);
 	}
 }
 
@@ -1415,7 +1414,7 @@ function floatMenu(enabled)
 		menu.css("z-index", menu.data("z-index"));
 		
 		$("#unfloatTOCButton").hide();
-		$("#floatTOCToggle").attr("checked", false);
+		$("#floatTOCToggle").prop("checked", false);
 	}
 	
 	var url = gs.xsltParams.library_name + "?a=d&ftoc=" + (enabled ? "1" : "0") + "&c=" + gs.cgiParams.c;
