@@ -149,12 +149,7 @@ function showFullView(){
 		li.appendChild(img);
 		
 		a.href =gs.xsltParams.library_name + "?a=d&c="+doc['collection']+"&d="+doc['name'];
-		
-		if(window.interfaceName && window.interfaceName == "dev")
-		{
-			a.href +="&dt=hierarchy&ed=1";
-		}
-		
+				
 		a.appendChild(document.createTextNode(doc['title'])); 
 		if (doc['root_title'] != ""){
 			li.appendChild(document.createTextNode(doc['root_title']+": ")); 
