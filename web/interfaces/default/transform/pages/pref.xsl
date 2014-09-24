@@ -33,6 +33,7 @@
 	<input type='hidden' name='sa' value='pref'/>
 	<input type='hidden' name='c' value="{$collName}"/>
 
+	<p id="SaveInstructions" style="color:red; text-align:center; display:none;"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.set_prefs_help')"/></p>
 	<xsl:call-template name="presentation-prefs"/>
 	<xsl:call-template name="search-prefs"/>
 	<br/>
@@ -64,64 +65,20 @@
 </xsl:template>
     <xsl:template name="prefs-javascript">
 		<!-- 
-		Add some javascript to the page that notices when a preference is changed 
-		so that, if the user tries to navigate away from the page without clicking
-		the "Set preferences" button, it asks them if they want their preferences
-		saved or not 
-		-->
+		Add some javascript to the page that notices when a preference 
+		   is changed so that, if the user tries to navigate away from 
+		   the page without clicking the "Set preferences" button, it 
+		   gives a stay/leave dialog. -->
 		<script type="text/javascript"><xsl:text disable-output-escaping="yes">
 			var modified = false;
 			var bypass = false;
 					
-			function assembleURLFromForm(formElem)
-			{
-				var url = gs.xsltParams.library_name + "?";
-				var selectNodes = formElem.getElementsByTagName("select");
-				var inputNodes = formElem.getElementsByTagName("input");
-
-				for (var i = 0; i &lt; selectNodes.length; i++)
-				{
-					var current = selectNodes[i];
-					url += current.name + "=";
-					url += current.options[current.selectedIndex].text + "&amp;";
-				}
-				
-				for (var i = 0; i &lt; inputNodes.length; i++)
-				{
-					var current = inputNodes[i];
-					if (current.type == "hidden" || current.type == "text")
-					{
-						url += current.name + "=";
-						url += current.value + "&amp;";
-					}
-				}
-				return url;
+			function unsavedChanges(e) {
+			if (modified &amp;&amp; !bypass) {
+			document.getElementById("SaveInstructions").style.display="block";
+			return "Provide the prompt";
 			}
-					
-			function checkModified(e)
-			{
-				if (modified &amp;&amp; !bypass)
-				{
-					var ok = confirm("Would you like to save your preferences?");
-					
-					if (ok)
-					{
-						var formElem = document.getElementById("prefform");
-						formElem.submit();
-						var xmlhttp;
-						if (window.XMLHttpRequest)
-						{
-							xmlhttp=new XMLHttpRequest();
-						}
-						else
-						{
-							xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-						}
-
-						xmlhttp.open("GET",assembleURLFromForm(formElem),false);
-						xmlhttp.send();
-					}
-				}
+			// no return statement - no dialog will be shown
 			}
 			
 			function changed()
@@ -150,7 +107,7 @@
 			}
 			
 			YAHOO.util.Event.addListener(window, 'load', pageLoad);
-			YAHOO.util.Event.addListener(window, 'beforeunload', checkModified);
+			$(window).bind("beforeunload", unsavedChanges);
 		</xsl:text></script>
     </xsl:template>
 
