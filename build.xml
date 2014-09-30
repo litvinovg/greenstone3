@@ -623,7 +623,10 @@
     <echo message="*****************ENVIRONMENT OUTPUT:****************${line.separator}" file="environment.txt" append="true" />
 
     <if><bool><istrue value="${current.os.iswindows}"/></bool>
-      <exec executable="set" dir="${basedir}" failonerror="false" output="environment.txt" append="true" />      
+      <exec executable="set" dir="${basedir}" failonerror="false" output="environment.txt" append="true">      
+	<arg value="/c" />
+	<arg value="set" />
+      </exec>
       <else>
 	<exec executable="env" dir="${basedir}" failonerror="false" output="environment.txt" append="true" />
       </else>
