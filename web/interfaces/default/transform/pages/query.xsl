@@ -59,7 +59,7 @@
 		<gslib:berryBasket/>
 		<xsl:text> </xsl:text>
 	      </xsl:if>
-	      <xsl:if test="$documentBasketOn and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor)))">
+	      <xsl:if test="$documentBasketOn and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 		<gslib:documentBasket/>
 		<xsl:text> </xsl:text>
 	      </xsl:if>
