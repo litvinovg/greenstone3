@@ -619,7 +619,7 @@
   </target>
 
   <!-- Appends the current env to the file environment.txt. For debugging env vars used by the release-kit. -->
-  <target name="write-env">
+  <target name="write-env" description="Writes out the environment that this build.xml is executed in to file environment.txt. For debugging.">
     <echo message="*****************ENVIRONMENT OUTPUT:****************${line.separator}" file="environment.txt" append="true" />
 
     <if><bool><istrue value="${current.os.iswindows}"/></bool>
