@@ -55,7 +55,14 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>COMMAND_STRING</key>
-					<string>@gsdl3srchome@/gli/client-gli.sh</string>
+					<string>logdir=/tmp
+if test -w @gsdl3srchome@/web/logs; then
+  logdir=@gsdl3srchome@/web/logs
+fi
+exec 2&gt;$logdir/client-gli.output
+&gt;&amp;2 echo "GSDL3SRCHOME is |@gsdl3srchome@|"
+printenv 1&gt;&amp;2
+@gsdl3srchome@/gli/client-gli.sh</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>
