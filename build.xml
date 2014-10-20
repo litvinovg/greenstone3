@@ -3043,7 +3043,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
   </target>
 
   <target name="dist-tidy"
-    description="'tidies-up' a greenstone3 installation for distribution.">
+    description="'tidies-up' a greenstone3 installation for distribution."
+    unless="${properties.keep.src}">
 
     <!-- delete unneeded things -->
     <delete dir="${packages.home}/axis"/>
