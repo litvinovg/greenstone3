@@ -12,10 +12,16 @@
 	  <div id="rightSidebar">
 	    <xsl:choose>
 	      <xsl:when test="@docType = 'simple'">
-		<xsl:text>  </xsl:text>
+		<xsl:for-each select=".">
+		  <xsl:call-template name="displayCoverImage"/>
+		</xsl:for-each>
+		<xsl:call-template name="viewOptions"/>
+		<!--<xsl:text>  </xsl:text>-->
 	      </xsl:when>
 	    <xsl:otherwise>
-	      <xsl:call-template name="displayCoverImage"/>
+	      <xsl:for-each select="documentNode[1]">
+		<xsl:call-template name="displayCoverImage"/>
+	      </xsl:for-each>
 	      <xsl:call-template name="viewOptions"/>
 	      <xsl:call-template name="displayTOC"/>
 	    </xsl:otherwise>
@@ -23,20 +29,18 @@
 	  </div>
 	</xsl:template>
 	
+	<!-- this is called in the context of the top level node with the metadataList. For a simple doc, this is the document node. For a comples document, this is the first documentNode hcild of the document node. -->
 	<xsl:template name="displayCoverImage">
-		<!-- Need to be in the context of the top-level documentNode rather than the document for the gsf:metadata call to work -->
-		<xsl:for-each select="documentNode">
-			<xsl:variable name="hasCover"><gsf:metadata name="hascover"/></xsl:variable>
-			<xsl:if test="$hasCover = '1' and (not(/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']) or /page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true')">
-				<!-- the book's cover image -->
-				<div id="coverImage">
-					<img>
-						<xsl:attribute name="src"><xsl:value-of select="$httpPath"/>/index/assoc/<gsf:metadata name="assocfilepath"/>/cover.jpg</xsl:attribute>
-					</img><xsl:text> </xsl:text>
-				</div>
-			</xsl:if>
-		</xsl:for-each>
-	</xsl:template>
+	  <xsl:variable name="hasCover"><gsf:metadata name="hascover"/></xsl:variable>
+	  <xsl:if test="$hasCover = '1' and (not(/page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']) or /page/pageResponse/format[@type='display']/gsf:option[@name='coverImage']/@value='true')">
+	    <!-- the book's cover image -->
+	    <div id="coverImage">
+	      <img>
+		<xsl:attribute name="src"><xsl:value-of select="$httpPath"/>/index/assoc/<gsf:metadata name="assocfilepath" pos="1"/>/cover.jpg</xsl:attribute>
+	      </img><xsl:text> </xsl:text>
+	    </div>
+	  </xsl:if>
+	</xsl:template> 
 	
 	<xsl:template name="displayTOC">
 		<div class="tableOfContentsContainer ui-state-default">
@@ -228,17 +232,10 @@
 	<xsl:template name="viewOptions">
 		<div id="viewAndZoomOptions" class="ui-state-default ui-corner-all">
 			<ul id="viewOptions">
-				<!-- Paged-image options -->
+				<!-- Paged-image document options -->
+	                        <xsl:if test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageResponse/document/@docType = 'paged' or /page/pageResponse/document/@docType = 'pagedhierarchy'">
+                                <!-- view selection option -->
 				<li id="pagedImageOptions">
-					<xsl:attribute name="style">
-						<xsl:choose>
-							<xsl:when test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageResponse/document/@docType = 'paged' or /page/pageResponse/document/@docType = 'pagedhierarchy'">
-							</xsl:when>
-							<xsl:otherwise>
-								display:none;
-							</xsl:otherwise>
-						</xsl:choose>
-					</xsl:attribute>
 					<select id="viewSelection" onchange="changeView();">
 						<xsl:choose>
 							<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
@@ -263,20 +260,11 @@
 				<!-- Slide-show options -->
 				<li id="slideShowOptions">
 					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.slideshowTooltip')"/></xsl:attribute>
-					<xsl:attribute name="style">
-						<xsl:choose>
-							<xsl:when test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageResponse/document/@docType = 'paged' or /page/pageResponse/document/@docType = 'pagedhierarchy'">
-							</xsl:when>
-							<xsl:otherwise>
-								display:none;
-							</xsl:otherwise>
-						</xsl:choose>
-					</xsl:attribute>
 					<img onclick="showSlideShow()">
 						<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'slideshow_image')"/></xsl:attribute>
 					</img>
 				</li>
-			
+			        </xsl:if> 
 				<!-- Realistic books link -->
 				<xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
 					<li>
@@ -296,7 +284,7 @@
 							<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'highlight_image')"/></xsl:attribute>
 						</img>
 						<input id="highlightOption" type="checkbox" class="optionCheckBox" onclick="swapHighlight(false);">
-							<xsl:if test="/page/pageRequest/paramList/param[@name = 'hl']/@value != 'off'">
+							<xsl:if test="not(/page/pageRequest/paramList/param[@name = 'hl']/@value = 'off')">
 								<xsl:attribute name="checked">checked</xsl:attribute>
 							</xsl:if>
 						</input>
