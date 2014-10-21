@@ -460,11 +460,11 @@
 	<!-- Highlight annotations if requested -->
 	<xsl:template name="displayAnnotation">
 		<xsl:choose>
-			<xsl:when test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'on'">
-				<span class="termHighlight"><xsl:value-of select="."/></span>
+			<xsl:when test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'off'">
+				<span class="noTermHighlight"><xsl:value-of select="."/></span>
 			</xsl:when>
 			<xsl:otherwise>
-				<span class="noTermHighlight"><xsl:value-of select="."/></span>
+				<span class="termHighlight"><xsl:value-of select="."/></span>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
