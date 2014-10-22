@@ -277,7 +277,7 @@
 				</xsl:if>
 				
 				<!-- Highlight on/off button -->
-				<xsl:if test="util:contains(/page/pageRequest/paramList/param[@name = 'p.s']/@value, 'Query')">
+				<xsl:if test="util:contains(/page/pageRequest/paramList/param[@name = 'p.s']/@value, 'Query') and not(metadataList/metadata[@name='NoText'])">
 					<li>
 						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.highlightTooltip')"/></xsl:attribute>
 						<img onclick="swapHighlight(true);">
