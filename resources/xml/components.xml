@@ -5,6 +5,8 @@
 	<patternset id="greenstone3.source.component">
 		<include name="gli/src"/>
 		<include name="gli/src/**/*"/>
+		<include name="gli/classes/images"/>
+		<include name="gli/classes/images/**/*"/>
 		<include name="src"/>
 		<include name="src/**/*"/>
 		<include name="gs2build/common-src"/>
