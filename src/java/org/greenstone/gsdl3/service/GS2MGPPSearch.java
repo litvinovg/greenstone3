@@ -62,6 +62,7 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 	{
 		super.cleanUp();
 		mgpp_src.unloadIndexData();
+		mgpp_src.reset(); // reset stored settings to defaults
 	}
 
 	/** process a query */
