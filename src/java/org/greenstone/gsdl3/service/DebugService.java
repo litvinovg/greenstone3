@@ -88,22 +88,6 @@ public class DebugService extends ServiceRack
 			return result;
 		}
 
-		UserContext context = new UserContext(request);
-		boolean found = false;
-		for (String group : context.getGroups())
-		{
-			if (group.equals("administrator"))
-			{
-				found = true;
-			}
-		}
-
-		if (!found)
-		{
-			GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-			return result;
-		}
-
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 
@@ -115,9 +99,15 @@ public class DebugService extends ServiceRack
 
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
+		String collectionName = (String) params.get("collectionName");
+
+		// check permissions
+		if (!userHasEditPermissions(collectionName, request)) {
+		  GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		  return result;
+		}
 		String interfaceName = (String) params.get("interfaceName");
 		String siteName = (String) params.get("siteName");
-		String collectionName = (String) params.get("collectionName");
 		String fileName = (String) params.get("fileName");
 		String nameToGet = (String) params.get("templateName");
 
@@ -163,22 +153,6 @@ public class DebugService extends ServiceRack
 			return result;
 		}
 
-		UserContext context = new UserContext(request);
-		boolean found = false;
-		for (String group : context.getGroups())
-		{
-			if (group.equals("administrator"))
-			{
-				found = true;
-			}
-		}
-
-		if (!found)
-		{
-			GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-			return result;
-		}
-
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 
@@ -190,16 +164,25 @@ public class DebugService extends ServiceRack
 
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
+
+		String collectionName = (String) params.get("collectionName");
+		// check permissions
+		if (!userHasEditPermissions(collectionName, request)) {
+		  GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		  return result;
+		}
+
 		String locationName = (String) params.get("locationName");
 		String interfaceName = (String) params.get("interfaceName");
 		String siteName = (String) params.get("siteName");
-		String collectionName = (String) params.get("collectionName");
 		String fileName = (String) params.get("fileName");
 		String namespace = (String) params.get("namespace");
 		String nodeName = (String) params.get("nodename");
 		String nameToGet = (String) params.get("name");
 		String matchToGet = (String) params.get("match");
 		String xPath = (String) params.get("xpath");
+
+
 
 		String fullNamespace;
 		if (namespace.toLowerCase().equals("gsf"))
@@ -317,22 +300,6 @@ public class DebugService extends ServiceRack
 			return result;
 		}
 
-		UserContext context = new UserContext(request);
-		boolean foundGroup = false;
-		for (String group : context.getGroups())
-		{
-			if (group.equals("administrator"))
-			{
-				foundGroup = true;
-			}
-		}
-
-		if (!foundGroup)
-		{
-			GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-			return result;
-		}
-
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 
@@ -344,11 +311,17 @@ public class DebugService extends ServiceRack
 
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
+		String collectionName = (String) params.get("collectionName");
+		// check permissions
+		if (!userHasEditPermissions(collectionName, request)) {
+		  GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		  return result;
+		}
+
 		String locationName = (String) params.get("locationName");
 		String fileName = (String) params.get("fileName");
 		String interfaceName = (String) params.get("interfaceName");
 		String siteName = (String) params.get("siteName");
-		String collectionName = (String) params.get("collectionName");
 		String namespace = (String) params.get("namespace");
 		String nodeName = (String) params.get("nodename");
 		String nameToSave = (String) params.get("name");
@@ -484,22 +457,6 @@ public class DebugService extends ServiceRack
 			return result;
 		}
 
-		UserContext context = new UserContext(request);
-		boolean found = false;
-		for (String group : context.getGroups())
-		{
-			if (group.equals("administrator"))
-			{
-				found = true;
-			}
-		}
-
-		if (!found)
-		{
-			GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-			return result;
-		}
-
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 
@@ -511,9 +468,14 @@ public class DebugService extends ServiceRack
 
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
+		String collectionName = (String) params.get("collectionName");
+		// check permissions
+		if (!userHasEditPermissions(collectionName, request)) {
+		  GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		  return result;
+		}
 		String locationName = (String) params.get("locationName");
 		String siteName = (String) params.get("siteName");
-		String collectionName = (String) params.get("collectionName");
 		String interfaceName = (String) params.get("interfaceName");
 		String fileName = (String) params.get("fileName");
 
@@ -596,22 +558,6 @@ public class DebugService extends ServiceRack
 			return result;
 		}
 
-		UserContext context = new UserContext(request);
-		boolean found = false;
-		for (String group : context.getGroups())
-		{
-			if (group.equals("administrator"))
-			{
-				found = true;
-			}
-		}
-
-		if (!found)
-		{
-			GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-			return result;
-		}
-
 		// Get the parameters of the request
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 
@@ -623,9 +569,14 @@ public class DebugService extends ServiceRack
 
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
+		String collectionName = (String) params.get("collectionName");
+		// check permissions
+		if (!userHasEditPermissions(collectionName, request)) {
+		  GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		  return result;
+		}
 		String interfaceName = (String) params.get("interfaceName");
 		String siteName = (String) params.get("siteName");
-		String collectionName = (String) params.get("collectionName");
 
 		Element fileList = result_doc.createElement("fileListJSON");
 		StringBuilder fileListString = new StringBuilder("[");
@@ -699,4 +650,27 @@ public class DebugService extends ServiceRack
 
 		return result;
 	}
+
+  protected boolean userHasEditPermissions(String collection, Element request) {
+    UserContext context = new UserContext(request);
+    for (String group : context.getGroups()) {
+      // administrator always has permission
+      if (group.equals("administrator")) {
+	return true;
+      }
+      // all-collections-editor can edit any collection
+      if (!collection.equals("")) {
+	if (group.equals("all-collections-editor")) {
+	  return true;
+	}
+	if (group.equals(collection+"-collection-editor")) {
+	  return true;
+	}
+      }
+    }
+    // haven't found a group with edit permissions
+    return false;
+    
+  }
 }
+

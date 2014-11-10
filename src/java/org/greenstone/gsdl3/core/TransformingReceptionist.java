@@ -677,8 +677,8 @@ public class TransformingReceptionist extends Receptionist
 			}
 
 			inlineTemplate = (String) params.get(GSParams.INLINE_TEMPLATE);
-
-			if (params.get(GSParams.DEBUG) != null && (((String) params.get(GSParams.DEBUG)).equals("on") || ((String) params.get(GSParams.DEBUG)).equals("1") || ((String) params.get(GSParams.DEBUG)).equals("true")))
+			String debug_p = (String) params.get(GSParams.DEBUG);
+			if (debug_p != null && (debug_p.equals("on") || debug_p.equals("1") || debug_p.equals("true")))
 			{
 				String[] groups = new UserContext(request).getGroups();
 
@@ -688,6 +688,18 @@ public class TransformingReceptionist extends Receptionist
 					if (g.equals("administrator"))
 					{
 						found = true;
+						break;
+					}
+					if (!collection.equals("")) {
+					  if (g.equals("all-collections-editor")) {
+					    found = true;
+					    break;
+					  }
+					 
+					  if (g.equals(collection+"-collection-editor")) {
+					    found = true;
+					    break;
+					  }
 					}
 				}
 				if (found)
@@ -1034,6 +1046,7 @@ public class TransformingReceptionist extends Receptionist
 		{
 			formatFile = "text_fragment_format.xsl";
 		}
+
 		String configStylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), collection, (String) this.config_params.get(GSConstants.INTERFACE_NAME), base_interfaces, formatFile);
 		Document configStylesheet_doc = this.converter.getDOM(new File(configStylesheet_file));
 
