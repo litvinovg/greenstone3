@@ -65,11 +65,11 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 		String index = "didx";
 		String physical_index_language_name = null;
 		String physical_sub_index_name = null;
-		int maxdocs = 100;
-		int hits_per_page = 20;
-		int start_page = 1;
-		String sort_field = GS2LuceneQuery.SORT_RANK;
-		String sort_order = SORT_ORDER_ASCENDING;
+		int maxdocs = Integer.parseInt(paramDefaults.get(MAXDOCS_PARAM));
+		int hits_per_page = Integer.parseInt(paramDefaults.get(HITS_PER_PAGE_PARAM));
+		int start_page = Integer.parseInt(paramDefaults.get(START_PAGE_PARAM));
+		String sort_field = getLuceneSort(default_sort);
+		String sort_order = paramDefaults.get(SORT_ORDER_PARAM);
 		// set up the query params
 		Set entries = params.entrySet();
 		Iterator i = entries.iterator();
@@ -105,14 +105,9 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 			}
 			else if (name.equals(RANK_PARAM))
 			{
-				if (value.equals(RANK_PARAM_RANK))
-				{
-					value = GS2LuceneQuery.SORT_RANK;
-				} else if (value.equals(RANK_PARAM_NONE)) {
-				  value = GS2LuceneQuery.SORT_NATURAL;
-				}
-				this.lucene_src.setSortField(value);
-				sort_field = value;
+			  sort_field = getLuceneSort(value);
+			  this.lucene_src.setSortField(sort_field);
+
 			}
 			else if (name.equals(SORT_ORDER_PARAM)) {
 			  sort_order = value;
@@ -263,4 +258,15 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 	{
 		return null;
 	}
+
+  protected String getLuceneSort(String gs3_sort) {
+
+    if (gs3_sort.equals(RANK_PARAM_RANK)) {
+      return GS2LuceneQuery.SORT_RANK;
+    }
+    if (gs3_sort.equals(RANK_PARAM_NONE)) {
+      return GS2LuceneQuery.SORT_NATURAL;
+    }
+    return gs3_sort;
+  }
 }
