@@ -39,14 +39,15 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
   protected static String RANK_PARAM_NONE = "none";
 
   protected static final String SORT_ELEM = "sort";
+  protected static final String DEFAULT_SORT_ELEM = "defaultSort";
   protected static final String SORT_ORDER_PARAM = "sortOrder";
   protected static final String SORT_ORDER_DESCENDING = "1";
   protected static final String SORT_ORDER_ASCENDING = "0";
 
-	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.SharedSoleneGS2FieldSearch.class.getName());
+  static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.SharedSoleneGS2FieldSearch.class.getName());
 
-	protected SharedSoleneQuery solene_src = null;
-
+  protected SharedSoleneQuery solene_src = null;
+  protected String default_sort = "";
   
 	public SharedSoleneGS2FieldSearch()
 	{
@@ -99,6 +100,14 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 			  }
 		      }
 		  } // for each sortfield
+
+		// get the default sort field
+		Element def = (Element) GSXML.getChildByTagName(info, DEFAULT_SORT_ELEM);
+		if (def != null)
+		{
+			this.default_sort = def.getAttribute(GSXML.SHORTNAME_ATT);
+		}
+		
 		// Lucene/Solr doesn't do case folding or stemming or accent folding at the 
 		// moment
 		does_case = false;
@@ -137,20 +146,26 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 			// get the fields
 			ArrayList<String> fields = new ArrayList<String>();
 			ArrayList<String> field_names = new ArrayList<String>();
+			param_default = default_sort;
 			if (!getSortData(fields, field_names, lang)) {
 			  fields.add(RANK_PARAM_RANK);
 			  fields.add(RANK_PARAM_NONE);
 			  field_names.add(getTextString("param." + RANK_PARAM + "." + RANK_PARAM_RANK, lang));
 			  field_names.add(getTextString("param." + RANK_PARAM + "." + RANK_PARAM_NONE, lang));
+			  param_default = RANK_PARAM_RANK;
 			}
-			
-			param = GSXML.createParameterDescription2(doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, fields.get(0), fields, field_names);
+			else {
+			  if (param_default == null) {
+			    param_default = fields.get(0);
+			  }
+			}
+			param = GSXML.createParameterDescription2(doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, fields, field_names);
 			
 		} else if (name.equals(SORT_ORDER_PARAM)) {
 	    String[] vals = { SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING };
 	    String[] vals_texts = { getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_ASCENDING, lang), getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_DESCENDING, lang) };
 
-	    param = GSXML.createParameterDescription(doc, SORT_ORDER_PARAM, getTextString("param." + SORT_ORDER_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, SORT_ORDER_DESCENDING, vals, vals_texts);
+	    param = GSXML.createParameterDescription(doc, SORT_ORDER_PARAM, getTextString("param." + SORT_ORDER_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, vals, vals_texts);
 	  }
 
 		if (param != null)
