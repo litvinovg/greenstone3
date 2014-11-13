@@ -81,7 +81,7 @@ public abstract class AbstractSearch extends ServiceRack
 	{
 	  paramDefaults = new HashMap<String, String>();
 	  paramDefaults.put(MAXDOCS_PARAM, "100");
-	  paramDefaults.put(HITS_PER_PAGE_PARAM, "10");
+	  paramDefaults.put(HITS_PER_PAGE_PARAM, "20");
 	  paramDefaults.put(START_PAGE_PARAM, "1");
 	}
 
