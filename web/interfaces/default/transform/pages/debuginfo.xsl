@@ -54,6 +54,21 @@
 			</dd>
 		</dl>	  
 
+		<dl>
+		  <dt>ilt=your-inline-template
+		  </dt>
+		  <dd>
+		    <xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.inlinetemplate')"/>
+		  </dd>
+		</dl>
+		<dl>
+		  <dt>dmd=
+		  </dt>
+		  <dd>
+		    <xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.displaymetadata')"/>
+		  </dd>
+		</dl>
+
 		<!-- better to do the following with a util:getInterfaceText
 	       so language independent -->
 		<p>
@@ -71,8 +86,15 @@
 			</dd>
 		</dl>
 
-		<a href="{$library_name}?a=de&amp;c={/page/pageResponse/collection/@name}">Depositor</a>
-
+		<dl>
+		  <dt>
+		    <a href="{$library_name}?a=de&amp;c={/page/pageResponse/collection/@name}">Depositor (a=de&amp;c=your-collection)</a>
+		  </dt>
+		  <dd>
+		    <xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.depositor')"/>
+		  </dd>
+		</dl>
+		
 	</xsl:template>
 </xsl:stylesheet>  
 
