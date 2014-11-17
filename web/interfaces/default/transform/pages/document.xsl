@@ -281,6 +281,8 @@
 			<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']) or /page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']/@value='true'">
 				<xsl:call-template name="rightSidebar"/>
 			</xsl:if>
+			<!-- add in some text just in case nothing has been added to this div-->
+			<xsl:text> </xsl:text>
 			</div>
 			<script type="text/javascript"> 
 			  if (keep_editing_controls_visible) {
