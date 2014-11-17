@@ -519,7 +519,7 @@
 								});
 
 								$("#zoomOptions input").prop("checked", false);
-								$("#zoomOptions").css("display", null);
+								$("#zoomOptions").css("display", "");
 							}
 						</xsl:text>
 					</script>
