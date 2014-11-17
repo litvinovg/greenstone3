@@ -1647,6 +1647,16 @@
     </if>
   </target>
 
+  <target name="clear-tomcat-sessions" description="Clear the Tomcat Session info." depends="init">
+    <exec executable="cmd" osfamily="windows" dir="${catalina.home}/work/Catalina/localhost/greenstone3" spawn="false">
+      <arg line="/c echo. > SESSIONS.ser"/>
+    </exec>
+    <exec executable="rm" os="${os.unix}" dir="${catalina.home}/work/Catalina/localhost/greenstone3" spawn="false">
+      <arg value="-f"/>
+      <arg value="SESSIONS.ser"/>
+    </exec>
+
+  </target>
   <!-- ======================= ant Targets ============================ --> 
   <target name="prepare-ant" depends="init">
     <if>
