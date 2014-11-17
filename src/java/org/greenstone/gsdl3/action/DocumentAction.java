@@ -196,15 +196,14 @@ public class DocumentAction extends Action
 		{
 			document_type = getDocumentType(basic_doc_list, collection, userContext, page_response);
 		}
-		if (document_type != null)
+		if (document_type == null)
 		{
-			// set the doctype from the cgi arg or from the server as an attribute
-			the_document.setAttribute(GSXML.DOC_TYPE_ATT, document_type);
+		    logger.error("doctype is null!!!***********");
+		    document_type = GSXML.DOC_TYPE_SIMPLE;
 		}
-		else
-		{
-			logger.error("doctype is null!!!***********");
-		}
+		
+		the_document.setAttribute(GSXML.DOC_TYPE_ATT, document_type);
+		
 
 		// Create a parameter list to specify the required structure information
 		Element ds_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -771,6 +770,9 @@ public class DocumentAction extends Action
 		String[] links = { GSXML.RESPONSE_ELEM, GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER, GSXML.DOC_NODE_ELEM, "nodeStructureInfo" };
 		String path = GSPath.createPath(links);
 		Element info_elem = (Element) GSXML.getNodeByPath(ds_response_message, path);
+		if (info_elem == null) {
+		    return null;
+		}
 		Element doctype_elem = GSXML.getNamedElement(info_elem, "info", "name", "documentType");
 		if (doctype_elem != null)
 		{
