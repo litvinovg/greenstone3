@@ -79,6 +79,10 @@ public class ModifyUsersDB
 			{
 				accountstatus = args[i].substring("accountstatus=".length());
 			}
+			else if (args[i].startsWith("status="))
+			{
+				accountstatus = args[i].substring("status=".length());
+			}
 			else if (args[i].startsWith("comment="))
 			{
 				comment = args[i].substring("comment=".length());
