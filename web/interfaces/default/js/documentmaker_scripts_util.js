@@ -674,6 +674,7 @@ function onVisibleMetadataSetChange()
 
 function changeVisibleMetadata(metadataSetName)
 {
+        var metaSetList = metadataSetName.split(",");
 	var tables = document.getElementsByTagName("TABLE");
 	for(var i = 0; i < tables.length; i++)
 	{
@@ -699,7 +700,7 @@ function changeVisibleMetadata(metadataSetName)
 					else
 					{
 						var setName = cellName.substring(0, cellName.lastIndexOf("."));
-						if(setName == metadataSetName)
+						if (metaSetList.indexOf(setName)!= -1) 
 						{
 							rows[j].style.display = "table-row";
 						}
