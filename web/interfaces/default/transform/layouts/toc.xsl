@@ -43,6 +43,7 @@
 	</xsl:template> 
 	
 	<xsl:template name="displayTOC">
+	  <xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">
 		<div class="tableOfContentsContainer ui-state-default">
 			<table class="tocTable ui-widget-content">
 				<tr>
@@ -135,6 +136,7 @@
 				</td></tr>
 			</table>
 		</div>
+	  </xsl:if>
 	</xsl:template>
 	
 	<!-- This template is used to display the table of contents -->
