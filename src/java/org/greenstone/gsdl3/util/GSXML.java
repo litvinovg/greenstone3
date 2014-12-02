@@ -1040,7 +1040,7 @@ public class GSXML
 		for (int i = 0; i < children.getLength(); i++)
 		{
 			Node child = children.item(i);
-			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI().equals(namespace_uri) && child.getLocalName().equals(node_local_name))
+			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI() != null && child.getNamespaceURI().equals(namespace_uri) && child.getLocalName().equals(node_local_name))
 			{
 				if (((Element) child).getAttribute(attribute_name).equals(attribute_value))
 					return (Element) child;
@@ -1057,7 +1057,7 @@ public class GSXML
 		for (int i = 0; i < children.getLength(); i++)
 		{
 			Node child = children.item(i);
-			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI().equals(namespace_uri) && child.getLocalName().equals(node_local_name))
+			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI() != null && child.getNamespaceURI().equals(namespace_uri) && child.getLocalName().equals(node_local_name))
 			{
 				if (((Element) child).getAttribute(attribute_name).equals(attribute_value))
 					result.addNode(child);
@@ -1140,7 +1140,7 @@ public class GSXML
 		for (int i = children.getLength() - 1; i >= 0; i--)
 		{
 			Node child = children.item(i);
-			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI().equals(namespace) && child.getLocalName() != null && child.getLocalName().equals(node_local_name))
+			if (child.getNodeType() == Node.ELEMENT_NODE && child.getNamespaceURI() != null && child.getNamespaceURI().equals(namespace) && child.getLocalName() != null && child.getLocalName().equals(node_local_name))
 			{
 				if (((Element) child).getAttribute(attribute_name).equals(attribute_value))
 					parent.removeChild(child);
@@ -1219,6 +1219,18 @@ public class GSXML
 		return cloned_elem;
 	}
 
+  public static String getMetadataValue(Element metadata_list, String name) {
+    Element meta = getNamedElement(metadata_list, METADATA_ELEM, NAME_ATT, name);
+    if (meta == null) {
+      return "";
+    }
+    String att_value = meta.getAttribute(VALUE_ATT);
+    if (att_value.equals("")) {
+      // try the text
+      att_value = getNodeText(meta);
+    }
+    return att_value;
+  }
 	/**
 	 * Returns the appropriate language element from a display elem, display is
 	 * the containing element, name is the name of the element to look for, lang
