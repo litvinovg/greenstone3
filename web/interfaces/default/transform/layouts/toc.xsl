@@ -237,7 +237,7 @@
 				<!-- Paged-image document options -->
 	                        <xsl:if test="count(//documentNode/metadataList/metadata[@name = 'Screen']) > 0 or /page/pageResponse/document/@docType = 'paged' or /page/pageResponse/document/@docType = 'pagedhierarchy'">
                                 <!-- view selection option -->
-				  <xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='ViewSelection']) or /page/pageResponse/format[@type='display']/gsf:option[@name='ViewSelection']/@value='true')">
+				  <xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='ViewSelection']) or /page/pageResponse/format[@type='display']/gsf:option[@name='ViewSelection']/@value='true'">
 				<li id="pagedImageOptions">
 					<select id="viewSelection" onchange="changeView();">
 						<xsl:choose>
@@ -261,7 +261,7 @@
 				</li>
 				</xsl:if>
 				<!-- Slide-show options -->
-				<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='SlideShow']) or /page/pageResponse/format[@type='display']/gsf:option[@name='SlideShow']/@value='true')">
+				<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='SlideShow']) or /page/pageResponse/format[@type='display']/gsf:option[@name='SlideShow']/@value='true'">
 				<li id="slideShowOptions">
 					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.slideshowTooltip')"/></xsl:attribute>
 					<img onclick="showSlideShow()">
