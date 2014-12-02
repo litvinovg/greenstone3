@@ -522,6 +522,7 @@
   <property name="compile.debug"       value="true"/>
   <property name="compile.deprecation" value="true"/>
   <property name="compile.optimize"    value="true"/>
+  <property name="compile.encoding"    value="UTF8"/>
   <property name="compile.includeantruntime" value="false"/> <!-- to get rid of annoying 'ant' warning -->
 
   <!--
@@ -1210,7 +1211,8 @@
       includeantruntime="${compile.includeantruntime}"
       debug="${compile.debug}"
       deprecation="${compile.deprecation}"
-      optimize="${compile.optimize}">
+      optimize="${compile.optimize}"
+      encoding="${compile.encoding}">
       <classpath><path refid="compile.classpath"/></classpath>
     </javac>
   </target>
@@ -1908,7 +1910,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       includeantruntime="${compile.includeantruntime}"
       debug="${compile.debug}"
       deprecation="${compile.deprecation}"
-      optimize="${compile.optimize}">
+      optimize="${compile.optimize}"
+      encoding="${compile.encoding}">
       <classpath refid="compile.classpath"/>
       <include name="org/greenstone/gsdl3/${axis.servicesname}${axis.sitename}.java" />
     </javac>
@@ -1953,7 +1956,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 	       includeantruntime="${compile.includeantruntime}"
 	       debug="${compile.debug}"
 	       deprecation="${compile.deprecation}"
-	       optimize="${compile.optimize}">
+	       optimize="${compile.optimize}"
+	       encoding="${compile.encoding}">
 	  <classpath>
             <path refid="compile.classpath"/>
 	  </classpath>
@@ -1965,7 +1969,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 		 includeantruntime="${compile.includeantruntime}"
 		 debug="${compile.debug}"
 		 deprecation="${compile.deprecation}"
-		 optimize="${compile.optimize}">
+		 optimize="${compile.optimize}"
+		 encoding="${compile.encoding}">
 	    <classpath>
               <path refid="compile.classpath"/>
 	    </classpath>
@@ -3176,7 +3181,8 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 				        includeantruntime="${compile.includeantruntime}"
 					debug="${compile.debug}" 
 					deprecation="${compile.deprecation}" 
-					optimize="${compile.optimize}">
+					optimize="${compile.optimize}"
+					encoding="${compile.encoding}">
 					<classpath>
 						<fileset dir="${basedir}/ext/testing/lib/java">
 							<include name="*.jar"/>
