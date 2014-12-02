@@ -228,62 +228,162 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
     int index = metadata.indexOf(GSConstants.META_RELATION_SEP);
     if (index == -1) {
       // metadata is for this node
-      Vector<String> values = info.getMultiInfo(metadata);
-      return values;
+      return info.getMultiInfo(metadata);
     }
     // we need to get metadata for one or more different nodes
     String relation = metadata.substring(0, index);
     String relation_id="";
     metadata = metadata.substring(index + 1);
-    if (relation.equals("parent") || relation.equals("ancestors")) {
+    if (relation.equals("root")) {
+      relation_id = OID.getTop(node_id);
+      if (relation_id.equals(node_id)) {
+	// use the current node info
+	return info.getMultiInfo(metadata);
+      } else {
+	return getMetaValuesForOID(relation_id, metadata);
+      }
+    }
+    if (relation.equals("parent")) {
       relation_id = OID.getParent(node_id);
       if (relation_id.equals(node_id)) {
+	// no parent
 	return null;
       }
-    } else if (relation.equals("root")) {
-      relation_id = OID.getTop(node_id);
+      return getMetaValuesForOID(relation_id, metadata);
     }
 
-    DBInfo relation_info;
-    if (relation_id.equals(node_id)) {
-      relation_info = info;
-    } else {
-      relation_info = this.coll_db.getInfo(relation_id);
-    }
-    if (relation_info == null)
-      {
+    if (relation.equals("ancestors")) {
+      if (OID.isTop(node_id)) {
 	return null;
       }
-
-    Vector<String> values = relation_info.getMultiInfo(metadata);
-    // do resolving
-    if (!relation.equals("ancestors")){
-      return values;
-    }
-
-    // ancestors: go up the chain
-
-    String current_id = relation_id;
-    relation_id = OID.getParent(current_id);
-    while (!relation_id.equals(current_id))
-      {
-	relation_info = this.coll_db.getInfo(relation_id);
-	if (relation_info == null)
-	  return values;
+      String current_id = node_id;
+      relation_id = OID.getParent(current_id);
+      Vector<String> values = new Vector<String>();
+      while (!relation_id.equals(current_id)) {
 	
-	Vector<String> more_values = relation_info.getMultiInfo(metadata);
-	if (more_values != null)
-	  {
-	    values.addAll(0, more_values);
-	  }
-	
-			
+	Vector<String> more_values = getMetaValuesForOID(relation_id, metadata);
+	if (more_values != null) {
+	  values.addAll(0, more_values);
+	}
 	current_id = relation_id;
 	relation_id = OID.getParent(current_id);
       }
-    return values; // for now
+      return values;
+    }
+    if (relation.equals("siblings")) {
+      String parent_id = OID.getParent(node_id);
+      if (parent_id.equals(node_id)) {
+	// no parent, therefore no siblings
+	return null;
+      }
+      // siblings is the same as asking for children of the parent
+      node_id = parent_id;
+      relation = "children";
+      current_info = this.coll_db.getInfo(parent_id);
+      if (current_info == null) {
+	return null;
+      }
+    }
+    if (relation.equals("children")) {
+      Vector<String> values = new Vector<String>();
+      String contains = current_info.getInfo("contains");
+      contains = StringUtils.replace(contains, "\"", node_id);
+      String[] children = contains.split(";"); 
+      for (int i = 0; i < children.length; i++) {
+	
+	String child_id = children[i];
+	Vector<String> more_values = getMetaValuesForOID(child_id, metadata);
+	if (more_values != null) {
+	  values.addAll(more_values);
+	}
+      }
+      return values;
+    } 
+    if (relation.equals("descendents")) {
+      return null;
+    }
+    // unknown relation
+    logger.error("asked for relation "+relation+" and don't understand it.");
+    return null;
   }
+      
+  //   } else {
+  //   if (relation.equals("parent") || relation.equals("ancestors")) {
+  //     relation_id = OID.getParent(node_id);
+  //     if (relation_id.equals(node_id)) {
+  // 	return null;
+  //     }
+  //   } else if (relation.equals("root")) {
+  //     relation_id = OID.getTop(node_id);
+  //   }
 
+  //   DBInfo relation_info;
+  //   if (relation_id.equals(node_id)) {
+  //     relation_info = info;
+  //   } else {
+  //     relation_info = this.coll_db.getInfo(relation_id);
+  //   }
+  //   if (relation_info == null)
+  //     {
+  // 	return null;
+  //     }
+
+  //   Vector<String> values = relation_info.getMultiInfo(metadata);
+  //   // do resolving
+  //   if (!relation.equals("ancestors")){
+  //     return values;
+  //   }
+
+  //   // ancestors: go up the chain
+
+  //   String current_id = relation_id;
+  //   relation_id = OID.getParent(current_id);
+  //   while (!relation_id.equals(current_id))
+  //     {
+  // 	relation_info = this.coll_db.getInfo(relation_id);
+  // 	if (relation_info == null)
+  // 	  return values;
+	
+  // 	Vector<String> more_values = relation_info.getMultiInfo(metadata);
+  // 	if (more_values != null)
+  // 	  {
+  // 	    values.addAll(0, more_values);
+  // 	  }
+	
+			
+  // 	current_id = relation_id;
+  // 	relation_id = OID.getParent(current_id);
+  //     }
+  //   return values; // for now
+  // }
+
+    protected Vector<String> getMetaValuesForOID(String oid, String metadata) {
+      DBInfo info = this.coll_db.getInfo(oid);
+      if (info == null) {
+	return null;
+      }
+      
+      Vector<String> values = info.getMultiInfo(metadata);
+      // lets look through the values and look for [xxx] things. We need to look up metadata for them.
+      if (values == null) { return values; }
+      
+      for (int j = 0; j < values.size(); j++) {
+	String val = values.elementAt(j);
+	if (val.contains("[")) {
+	  // look for metadata refs
+	  String [] metas = StringUtils.substringsBetween(val, "[", "]");
+	  for (int i=0; i<metas.length; i++) {
+	    String meta = metas[i];
+	    String meta_val = info.getInfo(meta);
+	    if (!meta_val.equals("")) {
+	      val = StringUtils.replace(val,"["+meta+"]",meta_val);
+	    }
+	  }
+	  values.set(j,val);
+	}
+      }
+      return values;
+    }
 	protected int getNumChildren(String node_id)
 	{
 	  return this.gs_doc.getNumChildren(node_id);
