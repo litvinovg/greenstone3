@@ -2155,10 +2155,11 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     
     <!-- unix: -->
     <echo>compile javagdbm</echo>
-    <exec executable="make" os="${os.unix}" dir="${javagdbm.home}" failonerror="true"/>
+    <exec executable="make" os="${os.unix}" dir="${javagdbm.home}" failonerror="true">
+      <arg value="JAVACOPTIONS=-encoding UTF8"/>
+    </exec>
     <exec executable="make" os="${os.unix}" dir="${javagdbm.home}" failonerror="true">
       <arg value="install"/>
-      <arg value="JAVACOPTIONS='-encoding ${compile.encoding}'"/>
     </exec>
 
     <!-- windows: Calling without the "compile" argument first will run winMake.bat with 
