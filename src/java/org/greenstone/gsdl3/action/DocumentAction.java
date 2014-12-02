@@ -119,6 +119,32 @@ public class DocumentAction extends Action
 			logger.error("rl value was 0, shouldn't get here");
 			return result;
 		}
+
+		UserContext userContext = new UserContext(request);
+
+		//append site metadata
+		addSiteMetadata(page_response, userContext);
+		addInterfaceOptions(page_response);
+
+		// get the additional data needed for the page
+		getBackgroundData(page_response, collection, userContext);
+		Element format_elem = (Element) GSXML.getChildByTagName(page_response, GSXML.FORMAT_ELEM);
+
+		if (format_elem != null) {
+		  // lets look for param defaults set in config file
+		  NodeList param_defaults = format_elem.getElementsByTagName("paramDefault");
+		  for (int i=0; i<param_defaults.getLength(); i++) {
+		    Element p = (Element)param_defaults.item(i);
+		    String name = p.getAttribute(GSXML.NAME_ATT);
+		    if (params.get(name) ==null) {
+		      // wasn't set from interface
+		      String value = p.getAttribute(GSXML.VALUE_ATT);
+		      params.put(name, value );
+		      // also add into request param xml so that xslt knows it too
+		      GSXML.addParameterToList(cgi_paramList, name, value);
+		    }
+		  }
+		}
 		String document_type = (String) params.get(GSParams.DOCUMENT_TYPE);
 		if (document_type != null && document_type.equals(""))
 		{
@@ -162,15 +188,15 @@ public class DocumentAction extends Action
 			}
 		}
 
-		UserContext userContext = new UserContext(request);
+		// UserContext userContext = new UserContext(request);
 
-		//append site metadata
-		addSiteMetadata(page_response, userContext);
-		addInterfaceOptions(page_response);
+		// //append site metadata
+		// addSiteMetadata(page_response, userContext);
+		// addInterfaceOptions(page_response);
 
-		// get the additional data needed for the page
-		getBackgroundData(page_response, collection, userContext);
-		Element format_elem = (Element) GSXML.getChildByTagName(page_response, GSXML.FORMAT_ELEM);
+		// // get the additional data needed for the page
+		// getBackgroundData(page_response, collection, userContext);
+		// Element format_elem = (Element) GSXML.getChildByTagName(page_response, GSXML.FORMAT_ELEM);
 
 		// the_document is where all the doc info - structure and metadata etc
 		// is added into, to be returned in the page
@@ -520,6 +546,24 @@ public class DocumentAction extends Action
 					doc_nodes.item(i).appendChild(doc.importNode(content, true));
 				}
 				//GSXML.mergeMetadataLists(doc_nodes.item(i), dm_response_docs.item(i));
+			}
+			if (has_dummy && document_type.equals(GSXML.DOC_TYPE_SIMPLE)) {
+			  Element dummy_node = (Element) doc_nodes.item(0);
+			  the_document.removeChild(dummy_node);
+			  the_document.setAttribute(GSXML.NODE_ID_ATT, dummy_node.getAttribute(GSXML.NODE_ID_ATT));
+			  NodeList dummy_children = dummy_node.getChildNodes();
+			  for (int i = dummy_children.getLength() - 1; i >= 0; i--)
+			    {
+			      // special case as we don't want more than one metadata list
+			      if (dummy_children.item(i).getNodeName().equals(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER))
+				{
+				  GSXML.mergeMetadataFromList(the_document, dummy_children.item(i));
+				}
+			      else
+				{
+				  the_document.appendChild(dummy_children.item(i));
+				}
+			    }
 			}
 		}
 		else
