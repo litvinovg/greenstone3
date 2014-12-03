@@ -321,9 +321,16 @@
 				<div id="gs-document">
 				  <xsl:call-template name="documentPre"/>
 				  <div id="gs-document-text" class="documenttext" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
+				    <xsl:choose>
+				      <xsl:when test="@docType='simple'">
+					<xsl:call-template name="wrapDocumentNodes"/>
+				      </xsl:when>
+				      <xsl:otherwise>
 				    <xsl:for-each select="documentNode">
 				      <xsl:call-template name="wrapDocumentNodes"/>
 				    </xsl:for-each>
+				      </xsl:otherwise>
+				    </xsl:choose>
 				  </div>
 				</div>
 			</xsl:when>
