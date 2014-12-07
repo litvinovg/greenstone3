@@ -40,12 +40,17 @@ import org.w3c.dom.Element;
 
 public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 {
+  protected static final String SORT_ORDER_PARAM = "reverseSort";
+  protected static final String SORT_ORDER_REVERSE = "1";
+  protected static final String SORT_ORDER_NORMAL = "0";
+
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.GS2LuceneSearch.class.getName());
 
 	private GS2LuceneQuery lucene_src = null;
 
 	public GS2LuceneSearch()
 	{
+		paramDefaults.put(SORT_ORDER_PARAM, SORT_ORDER_NORMAL);
 		this.lucene_src = new GS2LuceneQuery();
 	}
 
@@ -55,6 +60,43 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 		this.lucene_src.cleanUp();
 	}
 
+	/** add in the Lucene specific params to TextQuery */
+	protected void addCustomQueryParams(Element param_list, String lang)
+	{
+		super.addCustomQueryParams(param_list, lang);
+		/** Add in the reverse sort on/off param */
+		createParameter(SORT_ORDER_PARAM, param_list, lang);
+	}
+  /** add in Lucene specific params for AdvancedFieldQuery */
+  protected void addCustomQueryParamsAdvField(Element param_list, String lang)
+	{
+		super.addCustomQueryParamsAdvField(param_list, lang);
+		createParameter(SORT_ORDER_PARAM, param_list, lang);
+		
+	}
+	/** create a param and add to the list */
+  protected void createParameter(String name, Element param_list, String lang)
+  {
+    Document doc = param_list.getOwnerDocument();
+    Element param = null;
+    String param_default = paramDefaults.get(name);
+    if (name.equals(SORT_ORDER_PARAM)) {
+	    String[] vals = { SORT_ORDER_REVERSE, SORT_ORDER_NORMAL };
+	    String[] vals_texts = { getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_REVERSE, lang), getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_NORMAL, lang) };
+
+	    param = GSXML.createParameterDescription(doc, SORT_ORDER_PARAM, getTextString("param." + SORT_ORDER_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, vals, vals_texts);
+    }
+
+    if (param != null)
+      {
+	param_list.appendChild(param);
+      }
+    else
+      {
+	super.createParameter(name, param_list, lang);
+      }
+    
+  }
 	/** methods to handle actually doing the query */
 
 	/** do any initialisation of the query object */
@@ -154,21 +196,10 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 			}
 		}
 
-		// default order for rank is descending, while for other
-		// fields it is ascending. So reverse_sort is different for
-		// the two cases.
-		if (sort_field.equals(GS2LuceneQuery.SORT_RANK)) {
-		  if (sort_order.equals(SORT_ORDER_ASCENDING)) {
-		    this.lucene_src.setReverseSort(true);
-		  } else {
-		    this.lucene_src.setReverseSort(false);
-		  }
+		if (sort_order.equals(SORT_ORDER_REVERSE)) {
+		  this.lucene_src.setReverseSort(true);
 		} else {
-		  if (sort_order.equals(SORT_ORDER_DESCENDING)) {
-		    this.lucene_src.setReverseSort(true);
-		  } else {
-		    this.lucene_src.setReverseSort(false);
-		  }
+		  this.lucene_src.setReverseSort(false);
 		}
 		this.lucene_src.setIndexDir(indexdir + index);
 		this.lucene_src.initialise();
