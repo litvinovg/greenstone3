@@ -40,9 +40,9 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 
   protected static final String SORT_ELEM = "sort";
   protected static final String DEFAULT_SORT_ELEM = "defaultSort";
-  protected static final String SORT_ORDER_PARAM = "sortOrder";
-  protected static final String SORT_ORDER_DESCENDING = "1";
-  protected static final String SORT_ORDER_ASCENDING = "0";
+  protected static final String SORT_ORDER_PARAM = "reverseSort";
+  protected static final String SORT_ORDER_REVERSE = "1";
+  protected static final String SORT_ORDER_NORMAL = "0";
 
   static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.SharedSoleneGS2FieldSearch.class.getName());
 
@@ -61,7 +61,7 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 
 		does_paging = true;
 		does_chunking = true;
-		paramDefaults.put(SORT_ORDER_PARAM, SORT_ORDER_DESCENDING);
+		paramDefaults.put(SORT_ORDER_PARAM, SORT_ORDER_NORMAL);
 	}
 
 	/** configure this service */
@@ -162,8 +162,8 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 			param = GSXML.createParameterDescription2(doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, fields, field_names);
 			
 		} else if (name.equals(SORT_ORDER_PARAM)) {
-	    String[] vals = { SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING };
-	    String[] vals_texts = { getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_ASCENDING, lang), getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_DESCENDING, lang) };
+	    String[] vals = { SORT_ORDER_REVERSE, SORT_ORDER_NORMAL };
+	    String[] vals_texts = { getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_REVERSE, lang), getTextString("param." + SORT_ORDER_PARAM + "." + SORT_ORDER_NORMAL, lang) };
 
 	    param = GSXML.createParameterDescription(doc, SORT_ORDER_PARAM, getTextString("param." + SORT_ORDER_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, param_default, vals, vals_texts);
 	  }
