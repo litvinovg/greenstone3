@@ -72,6 +72,7 @@
     <sort name="none">
       <displayItem lang="en" name="name">natural (build) order</displayItem>
     </sort>
+    <defaultSort name="rank"/>
     <searchType name="plain"/>
     <searchType name="simpleform"/>
     <searchType name="advancedform"/>
