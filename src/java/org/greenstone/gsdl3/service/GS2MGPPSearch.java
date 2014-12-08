@@ -52,6 +52,7 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 	/** constructor */
 	public GS2MGPPSearch()
 	{
+	  does_chunking = true;
 		if (mgpp_src == null)
 		{
 			mgpp_src = new MGPPSearchWrapper();
@@ -89,6 +90,8 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 		// return term info
 		mgpp_src.setReturnTerms(true);
 		mgpp_src.setMaxNumeric(this.maxnumeric);
+		// mgpp internal default is 50, so set it here so the interface params agree
+		paramDefaults.put(MAXDOCS_PARAM, "50");
 		return true;
 	}
 

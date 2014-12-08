@@ -40,6 +40,7 @@ import org.w3c.dom.Element;
 
 public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 {
+
   protected static final String SORT_ORDER_PARAM = "reverseSort";
   protected static final String SORT_ORDER_REVERSE = "1";
   protected static final String SORT_ORDER_NORMAL = "0";
@@ -50,6 +51,7 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 
 	public GS2LuceneSearch()
 	{
+	  does_paging = true;
 		paramDefaults.put(SORT_ORDER_PARAM, SORT_ORDER_NORMAL);
 		this.lucene_src = new GS2LuceneQuery();
 	}
@@ -97,6 +99,7 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
       }
     
   }
+   
 	/** methods to handle actually doing the query */
 
 	/** do any initialisation of the query object */
@@ -107,11 +110,11 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 		String index = "didx";
 		String physical_index_language_name = null;
 		String physical_sub_index_name = null;
-		int maxdocs = Integer.parseInt(paramDefaults.get(MAXDOCS_PARAM));
 		int hits_per_page = Integer.parseInt(paramDefaults.get(HITS_PER_PAGE_PARAM));
 		int start_page = Integer.parseInt(paramDefaults.get(START_PAGE_PARAM));
 		String sort_field = getLuceneSort(default_sort);
 		String sort_order = paramDefaults.get(SORT_ORDER_PARAM);
+	       
 		// set up the query params
 		Set entries = params.entrySet();
 		Iterator i = entries.iterator();
@@ -121,13 +124,13 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 			String name = (String) m.getKey();
 			String value = (String) m.getValue();
 
-			if (name.equals(MAXDOCS_PARAM) && !value.equals(""))
+			if (name.equals(HITS_PER_PAGE_PARAM))
 			{
-				maxdocs = Integer.parseInt(value);
-			}
-			else if (name.equals(HITS_PER_PAGE_PARAM))
-			{
-				hits_per_page = Integer.parseInt(value);
+			  if (value.equals("all")) {
+			    hits_per_page = -1;
+			  } else {
+			    hits_per_page = Integer.parseInt(value);
+			  }
 			}
 			else if (name.equals(START_PAGE_PARAM))
 			{
@@ -176,11 +179,14 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 		}
 		// set up start and end results if necessary
 		int start_results = 1;
-		if (start_page != 1)
+		if (start_page > 1 && hits_per_page > 0)
 		{
 			start_results = ((start_page - 1) * hits_per_page) + 1;
 		}
-		int end_results = hits_per_page * start_page;
+		int end_results = Integer.MAX_VALUE;
+		if (hits_per_page > 0) {
+		  end_results = hits_per_page * start_page;
+		}
 		this.lucene_src.setStartResults(start_results);
 		this.lucene_src.setEndResults(end_results);
 

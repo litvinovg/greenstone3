@@ -40,6 +40,8 @@ public class IViaSearch
     protected ArrayList<String> index_ids = null;
     public IViaSearch()
     {
+	does_paging = true;
+	does_multi_index_search = true;
     }
     
     //Configure IViaSearch Service
@@ -59,8 +61,6 @@ public class IViaSearch
 	    logger.error("no url for the iViaServer element");
 	    return false;
 	}
-	does_paging = true;
-	does_multi_index_search = true;
 	this.default_index = ",kw,au,su,ti,de,fu,"; // all of them
 	index_ids = new ArrayList<String>();
 	index_ids.add("kw");

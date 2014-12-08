@@ -327,7 +327,6 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			{
 
 				addCustomQueryParams(param_list, lang);
-				createParameter(MAXDOCS_PARAM, param_list, lang);
 				if (!default_index_subcollection.equals(""))
 				{
 					createParameter(INDEX_SUBCOLLECTION_PARAM, param_list, lang);
@@ -337,6 +336,9 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 					createParameter(INDEX_LANGUAGE_PARAM, param_list, lang);
 				}
 
+				if (does_chunking) {
+				  createParameter(MAXDOCS_PARAM, param_list, lang);
+				}
 				if (does_paging)
 				{
 					createParameter(HITS_PER_PAGE_PARAM, param_list, lang);
@@ -360,7 +362,6 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			else if (service_id.equals(ADVANCED_FIELD_QUERY_SERVICE))
 			{
 				addCustomQueryParamsAdvField(param_list, lang);
-				createParameter(MAXDOCS_PARAM, param_list, lang);
 				if (!default_index_subcollection.equals(""))
 				{
 					createParameter(INDEX_SUBCOLLECTION_PARAM, param_list, lang);
@@ -393,6 +394,9 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				if (this.does_accent)
 				{
 					createParameter(FIELD_ACCENT_PARAM, multiparam, lang);
+				}
+				if (does_chunking) {
+				  createParameter(MAXDOCS_PARAM, param_list, lang);
 				}
 				if (does_paging)
 				{
@@ -672,17 +676,21 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		String[] doc_ranks = getDocRanks(query_result);
 
 		// add a metadata item to specify docs returned
-		int docs_returned = docs.length;
-		if (does_paging)
+		if (does_chunking) // this means we have a max docs param, and might ask for only a subset of results
 		{
+		  logger.error("does_chunking = true");
+		        int docs_returned = docs.length;
 			String maxdocs_str = (String) params.get(MAXDOCS_PARAM);
 			if (maxdocs_str != null)
 			{
 				int maxdocs = Integer.parseInt(maxdocs_str);
-				docs_returned = (maxdocs < (int) totalDocs ? maxdocs : (int) totalDocs);
+				if (maxdocs > 0) { // maxdocs==-1 means return all
+				  docs_returned = (maxdocs < (int) totalDocs ? maxdocs : (int) totalDocs);
+				}
 			}
+			GSXML.addMetadata(metadata_list, "numDocsReturned", "" + docs_returned);
 		}
-		GSXML.addMetadata(metadata_list, "numDocsReturned", "" + docs_returned);
+		
 
 		// add a metadata item to specify what actual query was done - eg if stuff was stripped out etc. and then we can use the query later, cos we don't know which parameter was the query
 		GSXML.addMetadata(metadata_list, "query", query);

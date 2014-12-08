@@ -30,7 +30,7 @@ import org.apache.log4j.*;
 
 /**
  *
- * @author <a href="mailto:shaoqun@cs.waikato.ac.nz">Shaoqun Wu</a>
+ * @author Shaoqun Wu
  */
 
 public class GoogleNgramMGPPSearch
@@ -41,7 +41,7 @@ public class GoogleNgramMGPPSearch
   protected String default_hits_per_page = "30";
     /** constructor */
     public GoogleNgramMGPPSearch(){
-	super();	
+	this.does_paging = true;
     }
     
   /** configure this service */
@@ -53,7 +53,6 @@ public class GoogleNgramMGPPSearch
 	this.default_max_docs = "-1";
 	this.default_hits_per_page = "30";
         this.does_stem = false;
-	this.does_paging = true;
 	return true;
     }
   

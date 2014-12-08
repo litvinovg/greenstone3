@@ -90,7 +90,6 @@ public class FedoraSearch
 	tq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
 	tq_service.setAttribute(GSXML.NAME_ATT, QUERY_SERVICE);
 	this.short_service_info.appendChild(tq_service);
-	//does_paging = true;
 	
 	// add some format info to service map if there is any
 	String path = GSPath.appendLink(GSXML.SEARCH_ELEM, GSXML.FORMAT_ELEM);

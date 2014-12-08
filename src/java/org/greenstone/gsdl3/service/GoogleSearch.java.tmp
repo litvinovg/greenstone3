@@ -55,6 +55,8 @@ public class GoogleSearch
     
     public GoogleSearch()
     {
+	does_paging = true;
+	does_chunking = false;
       QUERY_SERVICE = "TextQuery";
     }
 	    
@@ -77,8 +79,6 @@ public class GoogleSearch
 	    return false;
 	}
 	
-	does_paging = true;
-	does_chunking = false;
 
 	// are we behind a proxy??
 	// all the details should have been set up by the Message Router

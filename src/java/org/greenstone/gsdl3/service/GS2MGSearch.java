@@ -55,6 +55,7 @@ extends AbstractGS2TextSearch {
     
     /** constructor */
     public GS2MGSearch () {
+        does_chunking = true;
 	if(this.mg_src == null){
 	    this.mg_src = new MGSearchWrapper ();
         }
@@ -69,8 +70,9 @@ extends AbstractGS2TextSearch {
         if (!super.configure (info, extra_info)){
             return false;
         }
-        
         this.mg_src.setMaxNumeric (this.maxnumeric);
+	// internally mg uses 50, so set this here
+	paramDefaults.put(MAXDOCS_PARAM, "50");
         return true;
     }
     

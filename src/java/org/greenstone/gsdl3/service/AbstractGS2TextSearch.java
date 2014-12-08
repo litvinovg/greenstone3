@@ -116,7 +116,7 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 		this.gs_doc = gs_doc_db;
 
 		// do we support any of the extended features?
-		does_chunking = true;
+		//does_chunking = true;
 
 		// Get the default index out of <defaultIndex> (buildConfig.xml)
 		Element def = (Element) GSXML.getChildByTagName(info, DEFAULT_INDEX_ELEM);

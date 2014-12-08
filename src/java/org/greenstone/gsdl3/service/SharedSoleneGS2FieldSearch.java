@@ -48,7 +48,9 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
   
 	public SharedSoleneGS2FieldSearch()
 	{
-	  super();
+		does_paging = true;
+		does_chunking = false; // actually it can but we don't want to do a max docs, as we are already paging results
+
 		// Lucene/Solr uses double operators, not single
 		//AND_OPERATOR = "&&";
 		//OR_OPERATOR = "||";
@@ -56,8 +58,6 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 		OR_OPERATOR = "OR";
 		NOT_OPERATOR = "NOT";
 
-		does_paging = true;
-		does_chunking = true;
 	}
 
 	/** configure this service */

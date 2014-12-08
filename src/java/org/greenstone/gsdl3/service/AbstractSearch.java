@@ -27,6 +27,7 @@ import org.greenstone.gsdl3.util.AbstractBasicDocument;
 import org.greenstone.gsdl3.util.BasicDocument;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.XMLConverter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -75,14 +76,12 @@ public abstract class AbstractSearch extends ServiceRack
 	 */
 	protected String default_index = "";
 
+  protected Element service_metadata_list = null;
   protected HashMap<String, String> paramDefaults = null;
 
 	public AbstractSearch()
 	{
 	  paramDefaults = new HashMap<String, String>();
-	  paramDefaults.put(MAXDOCS_PARAM, "100");
-	  paramDefaults.put(HITS_PER_PAGE_PARAM, "20");
-	  paramDefaults.put(START_PAGE_PARAM, "1");
 	}
 
 	/**
@@ -110,6 +109,15 @@ public abstract class AbstractSearch extends ServiceRack
 		tq_service.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_QUERY);
 		tq_service.setAttribute(GSXML.NAME_ATT, QUERY_SERVICE);
 		this.short_service_info.appendChild(tq_service);
+
+		// load up paging defaults
+		if (does_chunking) {
+		  paramDefaults.put(MAXDOCS_PARAM, "100");
+		}
+		if (does_paging) {
+		  paramDefaults.put(HITS_PER_PAGE_PARAM, "20");
+		  paramDefaults.put(START_PAGE_PARAM, "1");
+		}
 
 		// load up any search param defaults
 		Element search_elem = (Element) GSXML.getChildByTagName(extra_info, GSXML.SEARCH_ELEM);
@@ -206,6 +214,17 @@ public abstract class AbstractSearch extends ServiceRack
 			addCustomQueryParams(param_list, lang);
 			addStandardQueryParams(param_list, lang);
 			tq_service.appendChild(param_list);
+		}
+		if (subset == null || subset.equals(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER)) {
+
+		  if (service_metadata_list == null) {
+		    Document ml_doc = XMLConverter.newDOM();
+		    service_metadata_list = ml_doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+		    if (does_paging) {
+		      service_metadata_list.appendChild(GSXML.createMetadataElement(ml_doc, "does_paging", "true"));
+		    }
+		  }
+		  tq_service.appendChild(doc.importNode(service_metadata_list, true));
 		}
 		return tq_service;
 
