@@ -250,8 +250,6 @@ public class URLFilter implements Filter
 
 						additionalParameters = new String[] { GSParams.ACTION };
 						defaultParamValues = new String[] { "d" };
-						//additionalParameters = new String[] { GSParams.ACTION, GSParams.DOCUMENT_TYPE };
-						//defaultParamValues = new String[] { "d", "hierarchy" };
 					}
 					//PAGE
 					else if (segments[i].equals(PAGE_PATH) && (i + 1) < segments.length)
@@ -369,23 +367,15 @@ public class URLFilter implements Filter
 						{
 							if (serviceName.equals("TextQuery") || serviceName.equals("RawQuery"))
 							{
-								additionalParameters = new String[] { GSParams.ACTION, GSParams.SUBACTION, GSParams.REQUEST_TYPE, "s1.maxDocs", "s1.hitsPerPage", "s1.level", "s1.sortBy", "s1.index", "s1.startPage" };
-								defaultParamValues = new String[] { "q", "", "rd", "100", "20", "Sec", "rank", "ZZ", "1" };
 
 								gRequest.setParameter("s1.query", segments[i + 2]);
 							}
 							else if (serviceName.equals("FieldQuery"))
 							{
-								additionalParameters = new String[] { GSParams.ACTION, GSParams.SUBACTION, GSParams.REQUEST_TYPE, "s1.maxDocs", "s1.hitsPerPage", "s1.level", "s1.sortBy", "s1.fqf", "s1.startPage" };
-								defaultParamValues = new String[] { "q", "", "rd", "100", "20", "Sec", "rank", "ZZ", "1" };
-
 								gRequest.setParameter("s1.fqv", segments[i + 2]);
 							}
 							else if (serviceName.equals("AdvancedFieldQuery"))
 							{
-								additionalParameters = new String[] { GSParams.ACTION, GSParams.SUBACTION, GSParams.REQUEST_TYPE, "s1.maxDocs", "s1.hitsPerPage", "s1.level", "s1.sortBy", "s1.fqf", "s1.fqk", "s1.startPage" };
-								defaultParamValues = new String[] { "q", "", "rd", "100", "20", "Sec", "rank", "ZZ", "0", "1" };
-
 								gRequest.setParameter("s1.fqv", segments[i + 2]);
 							}
 						}
