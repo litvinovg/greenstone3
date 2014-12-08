@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.core.ModuleInterface;
+import org.greenstone.gsdl3.util.Dictionary;
 import org.greenstone.gsdl3.util.GSConstants;
 import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSXML;
@@ -313,4 +314,53 @@ abstract public class Action
 		}
 		return format_elem;
 	}
+
+	protected String getTextString(String key, String lang, String dictionary, String[] args)
+	{
+	  logger.error("lang = "+lang);
+		if (dictionary != null)
+		{
+			// just try the one specified dictionary
+		  Dictionary dict = new Dictionary(dictionary, lang);
+			String result = dict.get(key, args);
+			if (result == null)
+			{ // not found
+				return "_" + key + "_";
+			}
+			return result;
+		}
+
+		// otherwise we try class names for dictionary names
+		String class_name = this.getClass().getName();
+		class_name = class_name.substring(class_name.lastIndexOf('.') + 1);
+		Dictionary dict = new Dictionary(class_name, lang);
+		String result = dict.get(key, args);
+		if (result != null)
+		{
+			return result;
+		}
+
+		// we have to try super classes
+		Class c = this.getClass().getSuperclass();
+		while (result == null && c != null)
+		{
+			class_name = c.getName();
+			class_name = class_name.substring(class_name.lastIndexOf('.') + 1);
+			if (class_name.equals("ServiceRack"))
+			{
+				// this is as far as we go
+				break;
+			}
+			dict = new Dictionary(class_name, lang);
+			result = dict.get(key, args);
+			c = c.getSuperclass();
+		}
+		if (result == null)
+		{
+			return "_" + key + "_";
+		}
+		return result;
+
+	}
+
 }
