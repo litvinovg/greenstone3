@@ -163,36 +163,10 @@
 						</xsl:attribute>
 					</input>
 					<input type="hidden" name="rt" value="rd"/>
-					<xsl:choose>
-						<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.maxDocs']">
-							<input type="hidden" name="s1.maxDocs">
-								<xsl:attribute name="value">
-									<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.maxDocs']/@value"/>
-								</xsl:attribute>
-							</input>
-						</xsl:when>
-						<xsl:otherwise>
-							<input type="hidden" name="s1.maxDocs" value="100"/>
-						</xsl:otherwise>
-					</xsl:choose>
-					<xsl:choose>
-						<xsl:when test="/page/pageRequest/paramList/param[@name = 's1.hitsPerPage']">
-							<input type="hidden" name="s1.hitsPerPage">
-								<xsl:attribute name="value">
-									<xsl:value-of select="/page/pageRequest/paramList/param[@name = 's1.hitsPerPage']/@value"/>
-								</xsl:attribute>
-							</input>
-						</xsl:when>
-						<xsl:otherwise>
-							<input type="hidden" name="s1.hitsPerPage" value="20"/>
-						</xsl:otherwise>
-					</xsl:choose>
 
 					<xsl:variable name="ns">s1.</xsl:variable>
 					<xsl:for-each select="paramList/param">
 						<xsl:choose>
-							<xsl:when test="@name = 'maxDocs' or @name = 'hitsPerPage'">
-							</xsl:when>
 							<xsl:when test="@type='multi'">
 								<xsl:apply-templates select=".">
 									<xsl:with-param name="ns" select="$ns"/>
@@ -219,10 +193,7 @@
 	<xsl:template name="displayMatchDocs">
 		<div id="matchdocs">
 			<xsl:variable name="numDocsMatched" select="/page/pageResponse/metadataList/metadata[@name='numDocsMatched']"/>
-			<xsl:variable name="numDocsReturned">
-				<xsl:call-template name="numDocsReturned"/>
-			</xsl:variable>
-			<!-- select="/page/pageResponse/metadataList/metadata[@name='numDocsReturned']"/>-->
+			<xsl:variable name="numDocsReturned" select="/page/pageResponse/metadataList/metadata[@name='numDocsReturned']"/>
 			<xsl:variable name="docLevel">
 				<xsl:call-template name="documentLevel"/>
 			</xsl:variable>
@@ -249,31 +220,6 @@
 			</xsl:choose>
 		</div>
 
-	</xsl:template>
-
-	<xsl:template name="numDocsMatched">
-		<xsl:choose>
-			<xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'numDocsMatched']">
-				<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'numDocsMatched']"/>
-			</xsl:when>
-			<xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']">
-				<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']"/>
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:value-of select="count(/page/pageResponse/documentNodeList/documentNode)"/>
-			</xsl:otherwise>
-		</xsl:choose>   
-	</xsl:template>
-
-	<xsl:template name="numDocsReturned">
-		<xsl:choose>
-			<xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']">
-				<xsl:value-of select="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']"/>
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:value-of select="count(/page/pageResponse/documentNodeList/documentNode)"/>
-			</xsl:otherwise>
-		</xsl:choose>   
 	</xsl:template>
 
 	<xsl:template name="documentLevel">
@@ -398,15 +344,13 @@
 				<xsl:otherwise>1</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-
 		<xsl:variable name="usesS1">
 			<xsl:choose>
 				<xsl:when test="/page/pageResponse/service/paramList/param[@name='startPage']">true</xsl:when>
 				<xsl:otherwise>false</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-
-		<!-- Find the total number of documents returned -->
+		<!-- Find the total number of documents returned/matched -->
 		<xsl:variable name="docMax">
 			<xsl:choose>
 				<xsl:when test="/page/pageResponse/metadataList/metadata[@name = 'numDocsReturned']">
@@ -420,31 +364,21 @@
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-
 		<!-- Find the number of documents displayed per page -->
 		<xsl:variable name="docsPerPage">
 			<xsl:choose>
-				<xsl:when test="/page/pageRequest/paramList/param[@name='hitsPerPage']">
-					<xsl:value-of select="/page/pageRequest/paramList/param[@name='hitsPerPage']/@value" />
-				</xsl:when>
 				<xsl:when test="/page/pageRequest/paramList/param[@name='s1.hitsPerPage']">
 					<xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.hitsPerPage']/@value" />
 				</xsl:when>
-				<xsl:otherwise>20</xsl:otherwise>
+				<xsl:when test="$usesS1 = 'true' and /page/pageResponse/service/paramList/param[@name='hitsPerPage']">
+				  <xsl:value-of select="/page/pageResponse/service/paramList/param[@name='hitsPerPage']/@default" />
+				  </xsl:when>
+				<xsl:otherwise><xsl:value-of select="count(/page/pageResponse/documentNodeList/documentNode)"/></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-
-		<!-- Find the number of documents displayed per page -->
+		<!-- Find the level -->
 		<xsl:variable name="level">
-			<xsl:choose>
-				<xsl:when test="/page/pageRequest/paramList/param[@name='level']">
-					<xsl:value-of select="/page/pageRequest/paramList/param[@name='level']/@value" />
-				</xsl:when>
-				<xsl:when test="/page/pageRequest/paramList/param[@name='s1.level']">
-					<xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.level']/@value" />
-				</xsl:when>
-				<xsl:otherwise>Doc</xsl:otherwise>
-			</xsl:choose>
+		  <xsl:call-template name="documentLevel"/>
 		</xsl:variable>
 
 		<table id="searchResultNavTable">
@@ -467,7 +401,7 @@
 				</td>
 
 				<!-- Search result status bar (in english it reads "Displaying X to Y of Z documents") -->
-				<xsl:if test="$docMax &gt; 0">
+				<xsl:if test="$docsPerPage &gt; 0">
 					<xsl:variable name="startdoc" select="($currentPage - 1) * $docsPerPage + 1"/>
 					<xsl:variable name="enddoc">
 						<xsl:choose>
@@ -512,12 +446,12 @@
 
 				<!-- Next button -->
 				<td id="nextTD">
-					<xsl:if test="($currentPage * $docsPerPage + 1) &lt; $docMax">
+					<xsl:if test="$docsPerPage &gt; 0 and ($currentPage * $docsPerPage + 1) &lt; $docMax">
 						<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/paramList/param[@name = 'sa']/@value}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage + 1}&amp;qs={/page/pageRequest/paramList/param[@name='qs']/@value}">Next</a>
 					</xsl:if>
 				</td>
 				<td id="nextArrowTD">
-					<xsl:if test="($currentPage * $docsPerPage + 1) &lt; $docMax">
+					<xsl:if test="$docsPerPage &gt; 0 and ($currentPage * $docsPerPage + 1) &lt; $docMax">
 						<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/paramList/param[@name = 'sa']/@value}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage + 1}&amp;qs={/page/pageRequest/paramList/param[@name='qs']/@value}">
 							<img src="interfaces/default/images/next.png"/>
 						</a>
