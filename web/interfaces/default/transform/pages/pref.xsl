@@ -35,7 +35,6 @@
 
 	<p id="SaveInstructions" style="color:red; text-align:center; display:none;"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.set_prefs_help')"/></p>
 	<xsl:call-template name="presentation-prefs"/>
-	<xsl:call-template name="search-prefs"/>
 	<br/>
 	
 	<input type='submit' onclick="bypass=true;"><xsl:attribute name="value"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.set_prefs')"/></xsl:attribute></input>
@@ -56,13 +55,7 @@
     <xsl:call-template name="theme-change-param"/>
       </div>
   </xsl:template>
-<xsl:template name="search-prefs">
-				<h3><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.searchpref')"/></h3>
-				<div id="searchprefs">
-	<xsl:call-template name="hits-param"/>
-	<xsl:call-template name="max-docs-param"/>
-				</div>
-</xsl:template>
+
     <xsl:template name="prefs-javascript">
 		<!-- 
 		Add some javascript to the page that notices when a preference 
@@ -239,84 +232,4 @@
 				</xsl:if>
 </xsl:template>
 
-<xsl:template name="hits-param">
-					<xsl:variable name="hits">
-						<xsl:choose>
-							<xsl:when test="/page/pageRequest/paramList/param[@name='hitsPerPage']">
-								<xsl:value-of select="/page/pageRequest/paramList/param[@name='hitsPerPage']/@value"/>
-							</xsl:when>
-							<xsl:when test="/page/pageRequest/paramList/param[@name='s1.hitsPerPage']">
-								<xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.hitsPerPage']/@value"/>
-							</xsl:when>
-							<xsl:otherwise>
-								20
-							</xsl:otherwise>
-						</xsl:choose>
-					</xsl:variable> 
-					<div class="paramLabel">
-						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.hitsperpage')"/>
-					</div>
-					<div class="paramValue">
-						<select name="s1.hitsPerPage">
-							<option value="20">
-								<xsl:if test="$hits=20">
-									<xsl:attribute name="selected" />
-								</xsl:if>
-								20
-							</option> 
-							<option value="50">
-								<xsl:if test="$hits=50">
-									<xsl:attribute name="selected" />
-								</xsl:if>
-								50
-							</option>
-							<option value="100">
-								<xsl:if test="$hits=100">
-									<xsl:attribute name="selected" />
-								</xsl:if>
-								100
-							</option>
-							<option value="-1">
-								<xsl:if test="$hits=-1">
-									<xsl:attribute name="selected" />
-								</xsl:if>
-								<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.all')"/>
-							</option>
-						</select>
-					</div>
-					
-					<br class="clear"/>
-					</xsl:template>
-	<xsl:template name="max-docs-param">
-					<xsl:variable name="mdocs">
-						<xsl:choose>
-							<xsl:when test="/page/pageRequest/paramList/param[@name='maxDocs']">
-								<xsl:value-of select="/page/pageRequest/paramList/param[@name='maxDocs']/@value"/>
-							</xsl:when>
-							<xsl:when test="/page/pageRequest/paramList/param[@name='s1.maxDocs']">
-								<xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.maxDocs']/@value"/>
-							</xsl:when>
-							<xsl:otherwise>100</xsl:otherwise>
-						</xsl:choose>
-					</xsl:variable> 
-					<div class="paramLabel">
-						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.maxDocs')"/>
-					</div>
-					<div class="paramValue">
-						<input name="s1.maxDocs" size="3" value="{$mdocs}" />
-					</div>
-					
-					<br class="clear"/>
-</xsl:template>
-
-  <!-- what happens if more than one query service??-->
-  <xsl:template name="casefold-param">
-    <xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']/paramList/param[@name='case']"><xsl:call-template name="param-display"/></xsl:for-each>
-  </xsl:template>
-  <xsl:template name="stem-param">
-    <xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']/paramList/param[@name='stem']"><xsl:call-template name="param-display"/></xsl:for-each>
-  </xsl:template>
-  <xsl:template name="accentfold-param">
-    <xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']/paramList/param[@name='accent']"><xsl:call-template name="param-display"/></xsl:for-each>
-  </xsl:template>
 </xsl:stylesheet>
