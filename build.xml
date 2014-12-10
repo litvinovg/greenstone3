@@ -114,7 +114,7 @@
   <!-- version properties for external packages -->
   <!-- for Java versions < 1.4, we print out the message that Java is too old.
 	For Java 1.4, we use Tomcat 5.5, for Java5 and higher, we use Tomcat 7.0-->
-  <condition property="tomcat.version" value="apache-tomcat-5.5.25" else="apache-tomcat-7.0.26"> 
+  <condition property="tomcat.version" value="apache-tomcat-5.5.25" else="apache-tomcat-7.0.57"> 
     <equals arg1="1.4" arg2="${ant.java.version}"/>
   </condition>
   <condition property="tomcat.version.major" value="5" else="7"> 
