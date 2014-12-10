@@ -2,6 +2,7 @@ package org.greenstone.gsdl3.build;
 
 // greenstome classes
 import org.greenstone.gsdl3.util.*;
+import org.greenstone.util.Misc;
 import org.greenstone.util.GlobalProperties;
 
 // xml classes
@@ -55,7 +56,8 @@ public class GS2PerlConstructor extends CollectionConstructor
 		// try to get the environment variables
 		this.gsdl3home = GlobalProperties.getGSDL3Home();
 		this.gsdl2home = this.gsdl3home + File.separator + ".." + File.separator + "gs2build";
-		this.gsdlos = System.getProperty("os.name").startsWith("Windows") ? "Windows" : "Linux";
+		this.gsdlos = Misc.getGsdlOS();
+            
 		this.path = System.getenv("PATH");
 
 		if (this.gsdl2home == null)
@@ -324,6 +326,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 		args.add("GSDL3SRCHOME=" + srcHome);
 		args.add("GSDLOS=" + this.gsdlos);
 		args.add("GSDL-RUN-SETUP=true");
+		args.add("PERL_PERTURB_KEYS=0");
 
 		for (String a : System.getenv().keySet())
 		{
@@ -358,6 +361,8 @@ public class GS2PerlConstructor extends CollectionConstructor
 
 			BufferedWriter bw = new BufferedWriter(new FileWriter(GSFile.collectDir(this.site_home) + File.separator + this.collection_name + File.separator + "log" + File.separator + "build_log." + (System.currentTimeMillis()) + ".txt"));
 			bw.write("Document Editor Build \n");
+
+			bw.write("Command = " + command_str + "\n");
 
 			String eline = null;
 			String stdinline = null;

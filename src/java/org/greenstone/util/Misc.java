@@ -78,6 +78,16 @@ public class Misc {
         }
         return false;
     }
+
+    public static String getGsdlOS() {
+		if (isWindows()) {
+			return "windows";
+		}
+        if (isMac()) {
+			return "darwin";
+		}
+		return "linux";
+    }
     
     public static boolean isBigEndian() {
 
