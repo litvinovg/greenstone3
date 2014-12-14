@@ -70,9 +70,9 @@ extends AbstractGS2TextSearch {
         if (!super.configure (info, extra_info)){
             return false;
         }
-        this.mg_src.setMaxNumeric (this.maxnumeric);
 	// internally mg uses 50, so set this here
 	paramDefaults.put(MAXDOCS_PARAM, "50");
+        this.mg_src.setMaxNumeric (this.maxnumeric);
         return true;
     }
     
@@ -219,9 +219,10 @@ extends AbstractGS2TextSearch {
     protected boolean setStandardQueryParams(HashMap<String, Serializable> params)
     {
 	// set the default settings that gs uses
+      this.mg_src.setMaxDocs(paramDefaults.get(MAXDOCS_PARAM));
 	this.mg_src.setReturnTerms(true);
-	this.mg_src.setCase(true);
-	this.mg_src.setStem(false);	
+	this.mg_src.setCase(paramDefaults.get(CASE_PARAM).equals(BOOLEAN_PARAM_ON) ? true : false);
+	this.mg_src.setStem(paramDefaults.get(STEM_PARAM).equals(BOOLEAN_PARAM_ON) ? true : false);	
 	Set entries = params.entrySet();
 	Iterator i = entries.iterator();
 	while (i.hasNext()) {
