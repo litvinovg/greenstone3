@@ -219,7 +219,7 @@ extends AbstractGS2TextSearch {
     protected boolean setStandardQueryParams(HashMap<String, Serializable> params)
     {
 	// set the default settings that gs uses
-      this.mg_src.setMaxDocs(paramDefaults.get(MAXDOCS_PARAM));
+      this.mg_src.setMaxDocs(Integer.parseInt(paramDefaults.get(MAXDOCS_PARAM)));
 	this.mg_src.setReturnTerms(true);
 	this.mg_src.setCase(paramDefaults.get(CASE_PARAM).equals(BOOLEAN_PARAM_ON) ? true : false);
 	this.mg_src.setStem(paramDefaults.get(STEM_PARAM).equals(BOOLEAN_PARAM_ON) ? true : false);	
