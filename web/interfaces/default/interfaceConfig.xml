@@ -11,7 +11,7 @@
 			<subaction name="gli4gs3" xslt="gli4gs3.xsl"/>
 			<subaction name="nav" xslt="nav.xsl"/>
 			<!-- used for the collection header frame -->
-			<subaction name="html" xslt="html.xsl"/>
+			<subaction name="html" xslt="pages/html.xsl"/>
 			<!-- use to put an external page into a frame with a collection header-->
 		</action>
 
@@ -200,3 +200,4 @@
 		</language>
 	</languageList>
 </interfaceConfig>
+
