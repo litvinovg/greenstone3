@@ -2033,8 +2033,15 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
     <!-- phind also needs xercesImpl.jar and xml-apis.jar to be in web/applet -->
     <if>
       <bool><istrue value="${tomcat.islocal}"/></bool>
-      <copy file="${web.lib}/xercesImpl.jar" todir="${web.applet}"/>
-      <copy file="${web.lib}/xml-apis.jar" todir="${web.applet}"/>
+      <if><bool><available file="${catalina.home}/lib/xercesImpl.jar"/></bool><!-- moved for solr -->
+	<copy file="${catalina.home}/lib/xercesImpl.jar" todir="${web.applet}"/>
+	<copy file="${catalina.home}/lib/xml-apis.jar" todir="${web.applet}"/>
+	
+	<else><!-- get from default GS3 web lib location-->
+	  <copy file="${web.lib}/xercesImpl.jar" todir="${web.applet}"/>
+	  <copy file="${web.lib}/xml-apis.jar" todir="${web.applet}"/>
+	</else>
+      </if>
     </if>
 
 
