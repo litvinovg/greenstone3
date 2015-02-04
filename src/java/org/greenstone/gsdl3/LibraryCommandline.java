@@ -76,7 +76,8 @@ final public class LibraryCommandline
 
     /*
      *  On Linux, run as:
-     *  GS3> java -classpath "web/WEB-INF/lib/*":"lib/jni/*" org.greenstone.gsdl3.LibraryCommandline localsite default
+     *  GS3> source ./gs3-setup.sh
+     *  GS3> java -classpath "web/WEB-INF/lib/*":"lib/jni/*":"web/WEB-INF/classes/." org.greenstone.gsdl3.LibraryCommandline localsite default
      *  Press enter to accept the default cgi-args to pass in.
      * 
      *  For how to include all jars in a folder into the classpath to run a java program, see
