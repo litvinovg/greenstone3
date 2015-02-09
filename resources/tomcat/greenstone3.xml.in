@@ -7,7 +7,8 @@
 	aliases="/interfaces=@gsdl3webhome@/interfaces,/sites=@gsdl3webhome@/sites"
 	debug="1" reloadable="true" 
 	@privilegedattribute@
-	allowLinking="false">
+	allowLinking="false"
+	xmlBlockExternal="false">
   
 	<Realm className="org.apache.catalina.realm.JDBCRealm" 
 		driverName="org.apache.derby.jdbc.EmbeddedDriver"
