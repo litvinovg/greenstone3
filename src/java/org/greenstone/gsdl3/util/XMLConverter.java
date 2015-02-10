@@ -159,6 +159,20 @@ public class XMLConverter
     return null;
 	}
 
+  public static Document getDOM(File in, EntityResolver er) {
+    
+    try {      
+      InputSource xml_source = new InputSource(new FileInputStream(in));
+      Document doc = getDOM(xml_source, er);      
+      return doc;      
+    }
+    catch (Exception e)
+      {
+	logger.error(e.getMessage());
+      }
+    return null;
+  }
+
   public static Document getDOM(InputSource source, EntityResolver er) {
     
     try {

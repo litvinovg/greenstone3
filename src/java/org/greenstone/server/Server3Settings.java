@@ -3,15 +3,18 @@ package org.greenstone.server;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.*;
 
 import org.w3c.dom.*;
+import org.xml.sax.InputSource;
 
 import org.greenstone.util.ScriptReadWrite;
 
 import org.greenstone.util.GlobalProperties;
+import org.greenstone.gsdl3.util.GSEntityResolver;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.XMLConverter;
 
@@ -40,7 +43,10 @@ public class Server3Settings extends BaseServerSettings
 
 	File web_xml = new File(GlobalProperties.getGSDL3Home() + File.separator + "WEB-INF" + File.separator + "web.xml");
 	XMLConverter converter = new XMLConverter();
-	Document web_config = converter.getDOM(web_xml);
+	// web.xml now includes the new file servlets.xml which defines entities used therein
+	// So when loading web.xml's DOM, need to resolve entities in web.xml. And for this, 
+	// need to instruct the entity resolver to load included files relative to web.xml's location
+	Document web_config = converter.getDOM(web_xml, new GSEntityResolver(web_xml.getParentFile()));	
 	if (web_config == null) {
 	    logger.error("web.xml is null! "+web_xml.getAbsolutePath());
 	    return null;

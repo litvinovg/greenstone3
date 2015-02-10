@@ -32,8 +32,20 @@ import org.apache.log4j.*;
 public class GSEntityResolver implements EntityResolver {
 
     ClassLoader class_loader = null;
+    File baseFilepath = null;
     
      static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.GSEntityResolver.class.getName());
+
+    public GSEntityResolver() {}
+
+    public GSEntityResolver(File baseFilepath) {
+	this.baseFilepath = baseFilepath;
+    }
+
+    /* Methods with the ClassLoader parameter are unused at present */
+    public GSEntityResolver(ClassLoader loader) {
+	this.class_loader = loader;
+    }
 
     public void setClassLoader(ClassLoader loader) {
 	this.class_loader = loader;
@@ -55,6 +67,12 @@ public class GSEntityResolver implements EntityResolver {
 		temp_id = temp_id.substring(temp_id.lastIndexOf("/")+1);
 	    }
 	}
+	
+	// use the baseFilepath, if one was provided
+	if(this.baseFilepath != null) {
+	    return new InputSource("file://" + this.baseFilepath + File.separator + temp_id);
+	}
+
 	// try using a class loader
 	if (this.class_loader==null) {
 	    this.class_loader = this.getClass().getClassLoader();
