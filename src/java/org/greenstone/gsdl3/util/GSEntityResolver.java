@@ -60,9 +60,9 @@ public class GSEntityResolver implements EntityResolver {
 	    if (f.exists()) {
 		return new InputSource(system_id);
 	    } else {
-		temp_id = temp_id.substring(temp_id.lastIndexOf("/")+1);
+		temp_id = f.getName(); //temp_id = temp_id.substring(temp_id.lastIndexOf("/")+1);
 	    }
-	} else {
+	} else { // not a file
 	    if (temp_id.indexOf("/")!= -1) {
 		temp_id = temp_id.substring(temp_id.lastIndexOf("/")+1);
 	    }
