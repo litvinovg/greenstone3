@@ -84,6 +84,8 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	protected String default_level = null;
 	// default level for collection db
 	protected String default_db_level = null;
+        // metadata for service, such as does_paging = true
+        protected Element service_metadata_list = null;
 	// which search services will we offer??
 	protected boolean plain_search = false;
 	protected boolean simple_form_search = false;
@@ -420,6 +422,16 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				createParameter(RAW_PARAM, param_list, lang);
 				service.appendChild(param_list);
 			}
+		}
+		if (subset == null || subset.equals(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER)) {
+		  if (service_metadata_list == null) {
+		    Document ml_doc = XMLConverter.newDOM();
+		    service_metadata_list = ml_doc.createElement(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+		    if (does_paging) {
+		      service_metadata_list.appendChild(GSXML.createMetadataElement(ml_doc, "does_paging", "true"));
+		    }
+		  }
+		  service.appendChild(doc.importNode(service_metadata_list, true));
 		}
 		return service;
 
