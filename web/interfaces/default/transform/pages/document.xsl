@@ -59,7 +59,7 @@
 	</xsl:template>
 	
 	<xsl:template name="documentHeading">
-		<b><gsf:metadata name="Title"/></b><br/>
+		<b><xsl:text> </xsl:text><gsf:metadata name="Title"/></b><br/>
 	</xsl:template>
 	
 	<xsl:template name="documentContent">
