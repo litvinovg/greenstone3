@@ -18,6 +18,7 @@
  */
 package org.greenstone.gsdl3.util;
 
+import org.greenstone.util.Misc;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.EntityResolver;
@@ -70,7 +71,17 @@ public class GSEntityResolver implements EntityResolver {
 	
 	// use the baseFilepath, if one was provided
 	if(this.baseFilepath != null) {
-	    return new InputSource("file://" + this.baseFilepath + File.separator + temp_id);
+	
+		// The file protocol for windows starts with file:/// and has URL slashes
+		// http://en.wikipedia.org/wiki/File_URI_scheme#Windows
+	    String newpath = this.baseFilepath + File.separator + temp_id;		
+		if(Misc.isWindows()) {			
+			newpath = "file:///" + newpath.replace("\\", "/");
+			System.err.println("### entity resolver for "+"file:///" + newpath);			
+		} else { // linux version, file protocol starts with file:// and slashes are already URL-style
+			newpath = "file://" + newpath;
+		}
+		return new InputSource(newpath);
 	}
 
 	// try using a class loader
