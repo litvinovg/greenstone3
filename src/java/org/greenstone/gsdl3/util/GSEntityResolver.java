@@ -76,8 +76,7 @@ public class GSEntityResolver implements EntityResolver {
 		// http://en.wikipedia.org/wiki/File_URI_scheme#Windows
 	    String newpath = this.baseFilepath + File.separator + temp_id;		
 		if(Misc.isWindows()) {			
-			newpath = "file:///" + newpath.replace("\\", "/");
-			System.err.println("### entity resolver for "+"file:///" + newpath);			
+			newpath = "file:///" + newpath.replace("\\", "/");			
 		} else { // linux version, file protocol starts with file:// and slashes are already URL-style
 			newpath = "file://" + newpath;
 		}
