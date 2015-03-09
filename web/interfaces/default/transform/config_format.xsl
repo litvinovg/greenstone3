@@ -542,7 +542,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
     <xslt:for-each>
       <xsl:attribute name="select">
 	(<xsl:if test="@type='collection'">/page/pageResponse/collection/</xsl:if>.//metadataList)[last()]/metadata[@name='<xsl:value-of select="$meta_name"/>'<xsl:if test="@lang"><xsl:text> and @lang=</xsl:text><xsl:value-of select="@lang"/></xsl:if><xsl:text>]</xsl:text>
-      </xsl:attribute><xsl:if test='@separator'><xslt:if test='position()>1'><xsl:value-of select='@separator'/></xslt:if></xsl:if>
+      </xsl:attribute><xsl:choose><xsl:when test='@sort'><xslt:sort/></xsl:when><xsl:when test="gsf:sort"><xslt:sort><xsl:copy-of select="gsf:sort/@*"/></xslt:sort></xsl:when></xsl:choose><xsl:if test='@separator'><xslt:if test='position()>1'><xsl:value-of select='@separator'/></xslt:if></xsl:if>
       <xsl:apply-templates/>
     </xslt:for-each>
   </xsl:template>
