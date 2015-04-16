@@ -531,7 +531,8 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		// We clean up the cache session_ids_table if system
 		// commands are issued (and also don't need to do caching for this request)
 		boolean should_cache = true;
-		if (action != null && action.equals(GSParams.SYSTEM_ACTION))
+		if (action != null && action.equals(GSParams.SYSTEM_ACTION) 
+		    && !subaction.equals(GSXML.SYSTEM_TYPE_PING)) // don't 'clean' anything on a mere ping
 		{
 			should_cache = false;
 
@@ -562,8 +563,9 @@ public class LibraryServlet extends BaseGreenstoneServlet
 			}
 			if (clean_all)
 			{
+			    // TODO
 				session_ids_table = new Hashtable<String, UserSessionCache>();
-				session.removeAttribute(GSXML.USER_SESSION_CACHE_ATT);
+				session.removeAttribute(GSXML.USER_SESSION_CACHE_ATT); // triggers valueUnbound(), which removes the session id from the session_ids_table
 			}
 			else
 			{
