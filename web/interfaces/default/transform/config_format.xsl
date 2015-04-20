@@ -556,13 +556,19 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
       <xsl:value-of select='@select'/>
       <xsl:text>_</xsl:text>
     </xsl:if>
-    <xsl:value-of select="@name"/>
+    <xsl:call-template name="stripEx"><xsl:with-param name="meta-name" select="@name"/></xsl:call-template>
+  </xsl:template>
+
+  <!-- we allow ex.Title in gsf:metadata. Need to strip off the ex. as the metadata in the database will be just Title. However, metadata like ex.dc.Title does keep its ex. in the database, so don't remove ex. if there is another . in the name -->
+  <xsl:template name="stripEx">
+    <xsl:param name="meta-name"/>
+    <xsl:choose><xsl:when test="starts-with($meta-name, 'ex.') and not(contains(substring($meta-name, 4), '.'))"><xsl:value-of select="substring($meta-name, 4)"/></xsl:when><xsl:otherwise><xsl:value-of select="$meta-name"/></xsl:otherwise></xsl:choose>
   </xsl:template>
 
   <!-- if we have metadata name="dc.Date,Date" will make a test like (@name = 'dc.Date' or @name = 'Date') -->
   <xsl:template name="getMetadataTest">
   <xsl:variable name="selectattr"><xsl:value-of select='@select'/></xsl:variable>
-    (<xsl:for-each select="xalan:tokenize(@name, ',')"><xsl:if test="position()!=1"> or </xsl:if>@name='<xsl:if test="$selectattr != ''"><xsl:value-of select="$selectattr"/><xsl:text>_</xsl:text></xsl:if><xsl:value-of select="."/>'</xsl:for-each>)
+    (<xsl:for-each select="xalan:tokenize(@name, ',')"><xsl:if test="position()!=1"> or </xsl:if>@name='<xsl:if test="$selectattr != ''"><xsl:value-of select="$selectattr"/><xsl:text>_</xsl:text></xsl:if><xsl:call-template name="stripEx"><xsl:with-param name="meta-name"><xsl:value-of select="."/></xsl:with-param></xsl:call-template>'</xsl:for-each>)
   </xsl:template>
 
 	<xsl:template match="gsf:text">
