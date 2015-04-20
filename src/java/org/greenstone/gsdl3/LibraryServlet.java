@@ -532,7 +532,8 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		// commands are issued (and also don't need to do caching for this request)
 		boolean should_cache = true;
 		if (action != null && action.equals(GSParams.SYSTEM_ACTION) 
-		    && !subaction.equals(GSXML.SYSTEM_TYPE_PING)) // don't 'clean' anything on a mere ping
+		    && !subaction.equals(GSXML.SYSTEM_TYPE_PING) 
+		    && !subaction.equals(GSXML.SYSTEM_TYPE_AUTHENTICATED_PING)) // don't 'clean' anything on a mere ping
 		{
 			should_cache = false;
 
