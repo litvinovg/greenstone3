@@ -16,12 +16,10 @@ import org.greenstone.util.ScriptReadWrite;
 public class Server2Settings extends BaseServerSettings
 {
     protected JComboBox prefix_combobox;
-    protected JCheckBox allowConnections;
     protected JRadioButton[] hostRadioButtons = new JRadioButton[4];
 
     // 0 to 3: 0 is resolved (hostname) from local IP, 1 is local IP address, 2 is localhost, 3 is 127.0.0.1
     protected int address_resolution_method = 2;
-    protected int externalaccess = 0;
 
     public Server2Settings(BaseServer server) 
     {
@@ -32,15 +30,6 @@ public class Server2Settings extends BaseServerSettings
     {
 	JPanel server2panel = new JPanel();
 	server2panel.setLayout(new BorderLayout());
-
-	boolean allowCons = false;
-	String externalAccess = server.config_properties.getProperty("externalaccess", "").trim();
-	if(!externalAccess.equals("") && externalAccess.equals("1")) {
-	    this.externalaccess = 1;
-	    allowCons = true;
-	}
-	allowConnections = new JCheckBox(server.dictionary.get(BaseServer.Property.SERVER_SETTINGS+".ExternalAccess"), allowCons);
-	allowConnections.setBackground(bg_color);
 	
 	JPanel connect_panel = new JPanel(new GridLayout(4, 1));
 	connect_panel.setBackground(bg_color);
@@ -66,7 +55,6 @@ public class Server2Settings extends BaseServerSettings
 	hostRadioButtons[address_resolution_method].setSelected(true);
 
 	JPanel comb_panel = new JPanel(new BorderLayout());	
-	comb_panel.add(allowConnections, BorderLayout.NORTH);
 	comb_panel.add(connect_panel, BorderLayout.CENTER);
 	return comb_panel;
     }
@@ -74,7 +62,7 @@ public class Server2Settings extends BaseServerSettings
     public boolean[] onSave()
     {
 	// superclass detects changes to port and autoenter
-	// handle changes to address_resolution_method and externalAccess/allowConnections here
+	// handle changes to address_resolution_method here
 
 	boolean hasChanged = false;
 	boolean requireRestart = false;
@@ -86,14 +74,6 @@ public class Server2Settings extends BaseServerSettings
 		requireRestart = true;
 		server.reconfigRequired();
 	    }
-	}
-
-	int oldExternalAccess = externalaccess;
-	externalaccess = allowConnections.isSelected() ? 1 : 0;
-	if (oldExternalAccess != externalaccess) {
-	    hasChanged = true;
-	    requireRestart = true;
-	    server.reconfigRequired();
 	}
 
 	boolean[] returnValues = { hasChanged, requireRestart };
@@ -115,7 +95,8 @@ public class Server2Settings extends BaseServerSettings
 	}
 
 	// external access - onSave() would have updated this value
-	newFileLines = scriptReadWrite.queryReplace(newFileLines, "externalaccess", Integer.toString(externalaccess));
+	// Its possible values are specific to the version of Greenstone: 0 or 1 for GS2 (true or false for GS3)
+	newFileLines = scriptReadWrite.queryReplace(newFileLines, BaseServer.Property.ALLOW_EXTERNAL_ACCESS, externalaccess ? "1" : "0");
 	
 	// work out the host (default is address_resolution_method 2: localhost)
 	String hostIP = "127.0.0.1";

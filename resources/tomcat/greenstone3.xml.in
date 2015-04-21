@@ -24,4 +24,8 @@
 	     To manually clear session info, stop Tomcat and delete the session
 	     file. -->
 	<Manager pathname="SESSIONS.ser" />
+
+	<!-- Allow all machines or just this machine: 127.0.0.1 (IPv4) and 0:0:0:0:0:0:0:1 (IPv6, needed on windows)
+	     https://tomcat.apache.org/tomcat-7.0-doc/config/valve.html -->
+	<Valve className="org.apache.catalina.valves.RemoteAddrValve" allow="@allowedIPs@"/>
 </Context>

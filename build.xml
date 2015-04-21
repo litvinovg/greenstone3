@@ -124,6 +124,14 @@
     <equals arg1="7" arg2="${tomcat.version.major}"/>
   </condition>
 
+  <!-- external access to the GS3 pages or not 
+       https://tomcat.apache.org/tomcat-7.0-doc/config/valve.html -->
+  <condition property="allowed.IPs" 
+	     value=".*" 
+	     else="(127\.0\.0\.1|::1|0:0:0:0:0:0:0:1)"> 
+    <matches pattern="^(1|true|yes)$" string="${server.external.access}"/>
+  </condition>
+
   <property name="axis.zip.version" value="axis-bin-1_4.zip"/>
   <property name="axis.dir.version" value="axis-1_4"/>
   <property name="sqlite.targz.version" value="sqlite-autoconf-3070602.tar.gz"/>
@@ -1341,7 +1349,8 @@
       <filterset>
         <filter token="gsdl3webhome" value="${web.home}"/>
         <filter token="gsdl3webwritablehome" value="${web.writablehome}"/>
-	<filter token="privilegedattribute" value ="${privileged.attribute}"/>
+	<filter token="privilegedattribute" value="${privileged.attribute}"/>
+	<filter token="allowedIPs" value="${allowed.IPs}"/>
       </filterset>
     </copy>
 	<if>

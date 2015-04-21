@@ -104,6 +104,10 @@ public class Server3Settings extends BaseServerSettings
 
 	String newKeepPort = (new Boolean(keepPortToggle.isSelected())).toString();
 	newFileLines = scriptReadWrite.queryReplace(newFileLines, BaseServer.Property.KEEPPORT, newKeepPort);
+	
+	// external access - BaseServerSettings.actionPerformed() would have updated this value
+	// Its possible values are specific to the version of Greenstone: 0 or 1 for GS2 (true or false for GS3)
+	newFileLines = scriptReadWrite.queryReplace(newFileLines, BaseServer.Property.ALLOW_EXTERNAL_ACCESS, externalaccess ? "true" : "false");
 
 	String newServletDef = (String) servlet_combobox.getSelectedItem();
 	String servletDefName = url_mappings.get(newServletDef);

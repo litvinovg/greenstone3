@@ -7,6 +7,7 @@ public class BaseProperty {
     public final String AUTOSTART;
     public final String KEEPPORT;
     public final String START_BROWSER;
+    public final String ALLOW_EXTERNAL_ACCESS;
 
     public final String DEFAULT_SERVLET = "server.default.servlet";
 
@@ -21,7 +22,12 @@ public class BaseProperty {
     public final String SERVER_CONTROL;
     public final String SERVER_SETTINGS;
     
-    protected BaseProperty(String version, String web_port, String autostart, String startbrowser, String keepport) 
+    protected BaseProperty(String version, 
+			   String web_port,
+			   String autostart, 
+			   String startbrowser, 
+			   String keepport,
+			   String allowExternalAccess) 
     {
 	// property names
 	WEB_PORT = web_port;
@@ -32,6 +38,7 @@ public class BaseProperty {
 	AUTOSTART = autostart;
 	START_BROWSER = startbrowser;
 	KEEPPORT = keepport;
+	ALLOW_EXTERNAL_ACCESS = allowExternalAccess;
     }
 
 }

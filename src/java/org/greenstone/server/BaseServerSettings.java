@@ -21,6 +21,7 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 
     protected JCheckBox autoEnter;
     protected JCheckBox keepPortToggle;
+    protected JCheckBox allowConnections;
 
     protected JSpinner portNumber_spinner = null;
     protected JTextField program_path_field = null;
@@ -34,6 +35,7 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
     protected boolean keepPort = false;
     protected String browserPath = "";
     protected boolean useDefaultBrowser = true;
+    protected boolean externalaccess = false;
 
     protected JDialog self;
     protected BaseServer server;
@@ -101,6 +103,18 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 	}
 	keepPortToggle.setBackground(bg_color);
 
+	boolean allowCons = false;
+	String externalAccessStr = server.config_properties.getProperty(BaseServer.Property.ALLOW_EXTERNAL_ACCESS, "1").trim();
+	allowConnections = new JCheckBox(server.dictionary.get("ServerSettings.ExternalAccess"), allowCons);
+	if(externalAccessStr.equals("1") || externalAccessStr.equals("true")) {
+	    this.externalaccess = true;
+	    allowCons = true;
+	    allowConnections.setSelected(true);
+	} else {
+	    allowConnections.setSelected(false);
+	}
+	
+	allowConnections.setBackground(bg_color);
 
 	JButton save_button = new JButton(BaseServer.dictionary.get("ServerSettings.OK"));
 	save_button.addActionListener(new SaveActionListener());
@@ -124,10 +138,11 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 	port_panel.add(portNumber_spinner);
 	port_panel.setBackground(bg_color);
 
-	JPanel top_panel = new JPanel(new GridLayout(3,1));
+	JPanel top_panel = new JPanel(new GridLayout(4,1));
 	top_panel.add(port_panel);
 	top_panel.add(keepPortToggle);
 	top_panel.add(autoEnter);
+	top_panel.add(allowConnections);
 
 	JPanel comb_panel = createServletPanel();
 	comb_panel.setBackground(bg_color);
@@ -251,6 +266,13 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
             	has_changed = true;
 	    }
 
+	    boolean oldExternalAccess = externalaccess;
+	    externalaccess = allowConnections.isSelected() ? true : false;
+	    if (oldExternalAccess != externalaccess) {
+		has_changed = true;
+		require_restart = true;
+		server.reconfigRequired();
+	    } // else require_restart remains what it had been
 
 	    // call subclass' onSave method, which may indicate (further) changes,
 	    // and which may or may not require a restart
@@ -286,6 +308,7 @@ public abstract class BaseServerSettings extends JDialog implements ActionListen
 		newFileLines = scriptReadWrite.queryReplace(oldFileLines, BaseServer.Property.WEB_PORT, portNum+"");
 		
 		// call the subclass' save() method to save custom elements
+		// and to save externalAccess in a custom manner for both GS2 and GS3
 		save(scriptReadWrite, newFileLines);
 		
 		String osName = System.getProperty("os.name");
