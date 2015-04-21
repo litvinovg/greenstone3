@@ -34,8 +34,8 @@ public class Server2Settings extends BaseServerSettings
 	server2panel.setLayout(new BorderLayout());
 
 	boolean allowCons = false;
-	String externalAccess = server.config_properties.getProperty("externalaccess").trim();
-	if(externalAccess != null && externalAccess.equals("1")) {
+	String externalAccess = server.config_properties.getProperty("externalaccess", "").trim();
+	if(!externalAccess.equals("") && externalAccess.equals("1")) {
 	    this.externalaccess = 1;
 	    allowCons = true;
 	}
@@ -59,8 +59,8 @@ public class Server2Settings extends BaseServerSettings
 	    hostRadioButtons[i].setBackground(bg_color);
 	}	
 
-	String addressResolutionMethod = server.config_properties.getProperty("address_resolution_method").trim();
-	if(addressResolutionMethod != null) {
+	String addressResolutionMethod = server.config_properties.getProperty("address_resolution_method", "").trim();
+	if(!addressResolutionMethod.equals("")) {
 	    this.address_resolution_method = Integer.parseInt(addressResolutionMethod);
 	}
 	hostRadioButtons[address_resolution_method].setSelected(true);
