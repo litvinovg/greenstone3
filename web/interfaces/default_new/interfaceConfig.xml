@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interfaceConfig>
+	<actionList>
+		<action class="PageAction" name="p">
+			<subaction name="home" xslt="pages/home.xsl"/>
+			<subaction name="about" xslt="pages/about.xsl"/>
+			<subaction name="debug" xslt="pages/debuginfo.xsl"/>
+			<subaction name="pref" xslt="pages/pref.xsl"/>
+			<subaction name="help" xslt="pages/help.xsl"/>
+			<subaction name="login" xslt="pages/login.xsl"/>
+			<subaction name="gli4gs3" xslt="gli4gs3.xsl"/>
+			<subaction name="nav" xslt="nav.xsl"/>
+			<!-- used for the collection header frame -->
+			<subaction name="html" xslt="pages/html.xsl"/>
+			<!-- use to put an external page into a frame with a collection header-->
+		</action>
+
+		<action class="RSSAction" name="rss" xslt="pages/rss.xsl"/> 
+		<action class="QueryAction" name="q" xslt="pages/query.xsl"/>
+		<action class="GS2BrowseAction" name="b" xslt="pages/classifier.xsl"/>
+		<action class="DocumentAction" name="d" xslt="pages/document.xsl"/>
+
+		<action class="AppletAction" name="a" xslt="pages/applet.xsl"/>
+		<action class="XMLDocumentAction" name="xd">
+			<subaction name="toc" xslt="pages/document-toc.xsl"/>
+			<subaction name="text" xslt="pages/document-content.xsl"/>
+		</action>
+		<action class="ProcessAction" name="pr" xslt="process.xsl"/>
+		<action class="SystemAction" name="s" xslt="pages/system.xsl"/>
+
+		<action class="FormatAction" name="f"/>
+		<!-- xslt='formatString.xsl'/> -->
+
+		<action class="GeneralAction" name="g">
+			<subaction name="authen" xslt="pages/authen.xsl"/>
+			<subaction name="berry" xslt="pages/berry.xsl"/>
+			<subaction name="documentbasket" xslt="pages/documentbasket.xsl"/>
+		</action>
+
+		<action class="DepositorAction" name="de" xslt="pages/depositor_home.xsl">
+			<subaction name="getwizard" xslt="depositor/compiledDepositor.xsl"/>
+		</action>
+	</actionList>
+	<optionList>
+		<option name="cssTheme" value="interfaces/default/style/themes/main/jquery-ui-1.8.16.custom.css"/>
+		<option name="highlightQueryTerms" value="true"/>
+		<option name="berryBaskets" value="true"/>
+		<option name="documentBasket" value="true"/>
+	</optionList>
+	<languageList>
+		<language name="en">
+			<displayItem name="name">English</displayItem>
+		</language>
+		<language name="fr">
+			<displayItem name="name">Français</displayItem>
+		</language>
+		<language name="es">
+			<displayItem name="name">Español</displayItem>
+		</language>
+		<language name="ar">
+			<displayItem name="name">Arabic</displayItem>
+		</language>
+		<language name="bg">
+			<displayItem name="name">Bulgarian</displayItem>
+		</language>
+		<language name="bn">
+			<displayItem name="name">বাংলা (Bengali)</displayItem>
+		</language>
+		<language name="ca">
+			<displayItem name="name">Català (Catalan)</displayItem>
+		</language>
+		<language name="cs">
+			<displayItem name="name">Česky (Czech)</displayItem>
+		</language>
+		<language name="de">
+			<displayItem name="name">Deutsch (German)</displayItem>
+		</language>
+		<language name="el">
+			<displayItem name="name">Ελληνικά (Greek)</displayItem>
+		</language>
+		<language name="fa">
+			<displayItem name="name">Farsi</displayItem>
+		</language>
+		<language name="fi">
+			<displayItem name="name">Finnish</displayItem>
+		</language>
+		<language name="gd">
+			<displayItem name="name">Gaelic (Scottish)</displayItem>
+		</language>
+		<language name="gl">
+			<displayItem name="name">Galician</displayItem>
+		</language>
+		<language name="he">
+			<displayItem name="name">Hebrew</displayItem>
+		</language>
+		<language name="hi">
+			<displayItem name="name">Hindi</displayItem>
+		</language>
+		<language name="hu">
+			<displayItem name="name">Hungarian</displayItem>
+		</language>
+		<language name="hy">
+			<displayItem name="name">Armenian</displayItem>
+		</language>
+		<language name="id">
+			<displayItem name="name">Bahasa Indonesia (Indonesian)</displayItem>
+		</language>
+		<language name="it">
+			<displayItem name="name">Italiano</displayItem>
+		</language>    
+		<language name="jp">
+			<displayItem name="name">日本語</displayItem>
+		</language>
+		<language name="ka">
+			<displayItem name="name">Georgian</displayItem>
+		</language>
+		<language name="kk">
+			<displayItem name="name">Қазақ (Kazakh)</displayItem>
+		</language>
+		<language name="kn">
+			<displayItem name="name">Kannada</displayItem>
+		</language>
+		<language name="ky">
+			<displayItem name="name">Кыргызча (Kirghiz)</displayItem>
+		</language>    
+		<language name="lv">
+			<displayItem name="name">Latvian</displayItem>
+		</language>
+		<language name="mi">
+			<displayItem name="name">Māori</displayItem>
+		</language>
+		<language name="ml">
+			<displayItem name="name">Malayalam</displayItem>
+		</language>
+		<language name="mn">
+			<displayItem name="name">Монгол (Mongolian)</displayItem>
+		</language>
+		<language name="mr">
+			<displayItem name="name">Marathi</displayItem>
+		</language>
+		<language name="nl">
+			<displayItem name="name">Nederlands (Dutch)</displayItem>
+		</language>
+		<language name="pl">
+			<displayItem name="name">polski (Polish)</displayItem>
+		</language>
+		<language name="pt-br">
+			<displayItem name="name">português-BR (Brasil)</displayItem>
+		</language>
+		<language name="pt-pt">
+			<displayItem name="name">português-PT (Portugal)</displayItem>
+		</language>
+		<language name="ps">
+			<displayItem name="name">Pushto</displayItem>
+		</language>
+		<language name="prs">
+			<displayItem name="name">Dari</displayItem>
+		</language>
+		<language name="ro">
+			<displayItem name="name">Romanian</displayItem>
+		</language>
+		<language name="ru">
+			<displayItem name="name">русский (Russian)</displayItem>
+		</language>
+		<language name="si">
+			<displayItem name="name">Sinhalese</displayItem>
+		</language>
+		<language name="sk">
+			<displayItem name="name">Slovenčina (Slovak)</displayItem>
+		</language>
+		<language name="sr">
+			<displayItem name="name">Serbian</displayItem>
+		</language>
+		<language name="ta">
+			<displayItem name="name">Tamil</displayItem>
+		</language>	
+		<language name="te">
+			<displayItem name="name">Telugu</displayItem>
+		</language>
+		<language name="th">
+			<displayItem name="name">Thai</displayItem>
+		</language>
+		<language name="tr">
+			<displayItem name="name">Turkish</displayItem>
+		</language>
+		<language name="uk">
+			<displayItem name="name">Ukrainian</displayItem>
+		</language>
+		<language name="ur">
+			<displayItem name="name">Urdu</displayItem>
+		</language>
+		<language name="vi">
+			<displayItem name="name">Tiếng Việt</displayItem>
+		</language>
+		<language name="zh">
+			<displayItem name="name">简体中文 (Simplified Chinese)</displayItem>
+		</language>
+		<language name="zh-tr">
+			<displayItem name="name">繁體中文 (Traditional Chinese)</displayItem>
+		</language>
+	</languageList>
+</interfaceConfig>
+

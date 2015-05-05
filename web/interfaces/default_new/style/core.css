@@ -1,0 +1,1125 @@
+html {
+	height: 100%;
+	margin-bottom: 1px;
+}
+body {
+	font-family: Arial, "Segoe UI", Candara, "Bitstream Vera Sans", "DejaVu Sans", "Bitstream Vera Sans", "Trebuchet MS", Verdana, "Verdana Ref", sans-serif;
+	margin: 0;
+	background-color: #eae4d9;
+}
+
+h3 {
+	margin-top:2px;
+	margin-bottom:2px;
+}
+
+p {
+	margin-top:0px;
+	margin-bottom:0.75em;
+}
+
+pre {
+ white-space: pre-wrap;       /* css-3 */
+ white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+ white-space: -pre-wrap;      /* Opera 4-6 */
+ white-space: -o-pre-wrap;    /* Opera 7 */
+ word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+.sectionHeader {
+	margin-top:0px;
+	margin-bottom:0px;
+}
+
+.headerTD {
+	vertical-align: middle;
+}
+
+/* Styles for the different depths */
+.sectionHeaderDepthTitle{
+	font-size:1.4em;
+	line-height:1em;
+	font-weight:bold;
+}
+
+.sectionHeaderDepth1{
+	font-size:1.3em;
+	line-height:1em;
+	font-weight:bold;
+}
+
+.sectionHeaderDepth2{
+	font-size:1.2em;
+	line-height:1em;
+	font-weight:bold;
+	font-style:italic;
+}
+
+.sectionHeaderDepth3{
+	font-size:1.1em;
+	line-height:1em;
+	font-style:italic;
+}
+
+.sectionHeaderDepth4{
+	font-size:1em;
+	line-height:1em;
+	font-weight:italic;
+}
+
+.sectionNumberSpan{
+	/*Comment out this line to enable automatic section numbering*/
+	display:none;
+}
+
+.sectionContainer{
+	padding-top:0.5em;
+	padding-bottom:1em;
+	padding-left:1.5em;
+}
+
+.classifierContainer {
+	padding-left:1.5em;
+}
+
+.horizontalContainer {
+	padding-left:0px;
+	margin:0px;
+	text-transform: capitalize; /* To get the bookshelves and buckets titlecased (they're stored lowercased) */
+}
+
+.selectedHorizontalClassifierNode a{
+	font-weight: bold;
+	text-decoration: none;
+}
+
+.horizontalClassifierNode {
+	padding:0px 0px 10px 10px;
+	list-style:none;
+	display: inline-block;
+}
+
+.icon{
+	cursor:pointer;
+	padding:2px;
+	border:0px;
+}
+
+.emptyIcon {
+	height:16px;
+	width:16px;
+}
+
+.backToTop {
+	font-size:0.7em;
+	padding-left: 2em;
+	text-align:center;
+}
+
+.hidden{
+	display:none;
+}
+
+#prevArrowTD {
+	text-align:right; 
+	width:10%;
+}
+
+#nextArrowTD {
+	text-align:left; 
+	width:10%;
+}
+
+#prevTD {
+	text-align:left; 
+	width:20%;
+}
+
+#nextTD {
+	text-align:right; 
+	width:20%;
+}
+
+#searchResultNavTable {
+	width:100%;
+}
+
+#searchResultsStatusBar {
+	text-align:center;
+}
+
+#container {
+	position: relative;
+	margin: 0 auto 20px auto;
+	max-width: 1000px;
+	padding: 0;
+	line-height: 120%;
+	background-color: #fff;
+	border-top-width: 0px;
+}
+
+#topArea {
+	border: none;
+	max-width: 1000px;
+	margin: 20px auto 0;
+}
+
+#topArea table {
+	width: 100%;
+}
+
+#topArea td {
+	width: 50%;
+}
+
+#gs_banner {
+	padding:0px;
+	position: relative;
+	border: 0px;
+}
+
+#gs_content {
+	margin-top:-10px;
+	padding: 20px 20px 10px;
+	min-height: 300px;
+}
+
+#gs_footer {
+	position: relative;
+	display: block;
+	margin: -1px auto;
+	text-align: center;
+	vertical-align: middle;
+	font-size: 70%;
+	padding-top:5px;
+	padding-bottom:5px;
+}
+
+.termList {
+	font-size:12px;
+	line-height:14px;
+}
+
+.noTermHighlight{
+
+}
+
+.termHighlight{
+	background:yellow;
+}
+
+#viewAndZoomOptions {
+	margin-bottom:10px;
+	border:0px;
+}
+
+#viewOptions {
+	margin: 0px;
+	padding: 0px;
+}
+
+#viewOptions li {
+	list-style:none;
+	float:left;
+	padding: 5px;
+	cursor:pointer;
+}
+
+.tableOfContentsTitle{
+	font-weight:bold;
+	text-align:left;
+}
+
+.viewOptions a:link, .viewOptions a:hover, .viewOptions a:active, .viewOptions a:visited {
+	text-decoration:none;
+}
+
+#rightSidebar {
+	width: 30%;
+	min-width:180px;
+	float:right;
+	margin: 0 0 10px 20px;
+}
+
+#contentsArea {
+	padding:0px 10px;
+}
+
+#collectionLinks {
+	position: relative;
+}
+
+/*
+#collectionLinks a div{
+	display: block;
+	float: left;
+	border: 1px solid #888;
+	margin: 0 20px 20px 0;
+	font-size: 150%;
+	color: #444;
+	text-decoration: none;
+	background: url(../images/collectionIconStripe.gif) scroll no-repeat 0 0;
+	padding: 20px;
+	min-width: 200px;
+	text-align:center;
+}
+*/
+
+#collectionLinks a img{
+	display: block;
+	float: left;
+	border: 1px solid #888;
+	margin: 0 20px 20px 0;
+	font-size: 150%;
+	color: #444;
+	text-decoration: none;
+	height:60px;
+}
+
+.collectionLink {
+	display: block;
+	float: left;
+	border: 1px solid #888;
+	margin: 0 20px 20px 0;
+	font-size: 150%;
+	color: #444;
+	text-decoration: none;
+	min-width: 200px;
+	text-align:center;
+}
+
+.collectionLinkText {
+	padding: 15px 15px 10px;
+}
+
+/* some text should not be rendered as it is just there for search engines */
+#collectionLinks a b {
+	display: none;
+}
+
+/* make sure h1s and h2s are readable on the green banner */
+#breadcrumbs, #gs_banner h2, #breadcrumbs a, #gs_banner h2 a {
+	/*color: #fff;*/
+}
+body.dAction #gs_banner h2 {
+	max-width: 600px;
+	font-size: 100;
+}
+
+#titlesearchcontainer {	
+	padding-top: 20px;
+	width: 100%;
+}
+
+#titlesearchcontainer, #titlesearchcontainer form, #titlesearchcontainer h2{
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+#titlearea {
+	float: left;
+	padding-left: 20px;
+}
+
+#titlearea  h2{	
+	padding-left: 0px;
+	padding-bottom: 20px;
+}
+
+#quicksearcharea {
+	float: right;
+	text-align: right;
+	padding-right: 20px;
+}
+
+#quicksearcharea ul{
+	margin:0;
+}
+
+#quicksearcharea li{
+	display:inline;
+	list-style:none;
+	margin-left:5px; 
+	padding: 2px 3px 2px 5px;
+	font-size: 10px;
+}
+
+#quicksearcharea a{
+	text-transform:lowercase;
+}
+
+#breadcrumbs {
+	margin-left: 20px;
+}
+
+#breadcrumbs a{
+	text-decoration:underline;
+}
+
+
+/* css to make the page links work (home, help, preference) */
+#bannerLinks {
+	text-align: right;
+	list-style: none;
+	margin: 0 20px;
+	font-size: 90%;
+}
+
+#bannerLinks li {
+	/*display: inline;*/
+	float:right;
+	padding: 1px 4px 1px 0px;
+}
+
+#bannerLinks ul {
+	padding: 0px 3px 0px 0px;
+	text-align: right;
+	list-style: none;
+}
+
+#bannerLinks li.current a {
+	cursor: default;
+}
+
+#bannerLinks li:hover, #bannerLinks li.current { background-position: 100% 0; }
+
+#bannerLinks li.current a { text-decoration: underline; background-position: 0 0;}
+#bannerLinks img.spacer { display: table-cell; }
+
+
+/* css to make the classifier list pretty */
+.navList {
+	margin: 0 0 10px 0;
+	padding: 0;
+	background-color: #0a0;
+}
+
+.navList ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.navList td {
+	/*float: left;*/
+	padding-left: 3em;
+	padding-right: 3em;
+	text-align:center;
+	cursor: pointer;
+	color: #fff;
+}
+.navList li a, .navList li span {
+	padding: 0 1em;
+	display: block;
+	text-decoration: none;
+	color: #fff;
+}
+
+.navList td.current {
+	background-color: #efea6e;
+	color: #444;
+	cursor: default;
+}
+
+.navList li.current a, .navList li.current span {
+	color: #444;
+	cursor: default;
+}
+
+/* css to make the tabs work */
+#gs-nav {
+	list-style: none outside none;
+	padding: 0px;
+	margin: 0 0 0 20px;
+	font-size: 14px;
+}
+
+#gs-nav ul {
+	margin:0px;
+	padding:0px;
+}
+
+#gs-nav li {
+	float:left;
+	display: inline;
+	margin-right: 5px;
+	padding: 3px 5px 5px 7px;
+	text-transform: capitalize;
+	text-align: center;
+	border-bottom: 0px;
+}
+
+#gs-nav a{
+	margin:0px;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+#gs-nav li:hover, #gs-nav li.current { background-position: 100% 0; }
+#gs-nav li:hover a, #gs-nav li.current a { background-position: 0 0; cursor:default; }
+
+/* style the search and classifier results */
+#resultsTable {
+	line-height: 160%;
+	margin: 0;
+	padding: 0;
+	/* border: 1px solid #f00; */
+}
+
+#resultsTable ul {
+	margin: 0 0 0 20px;
+	padding: 0;
+}
+
+#resultsTable li {
+	list-style: none;
+	margin: 0 0 .2em 0;
+	/* border: 1px solid #00f; */
+}
+
+#resultsTable li a {
+	padding: 3px 3px 3px 3px;
+	background-repeat: no-repeat;
+	background-position: 0 .1em;
+}
+
+
+#resultsTable .document a { /*background-image: url('../images/book.png'); */}
+#resultsTable .document a:visited { background-image: url('../images/book-visited.png'); color: #999; }
+#resultsTable .shelf>a { background-image: url('../images/bookshelf.png'); }
+
+/* corners of the banner */
+/*
+.corner {
+	position: absolute;
+	background-image: url('../images/layout/corners.png');
+	background-repeat: no-repeat;
+	width: 20px;
+	height: 20px;
+}
+
+#cornerTopLeft {
+	left: 0; top: 0;
+	background-position: 0 0;
+}
+#cornerTopRight {
+	right: 0; top: 0;
+	background-position: -20px 0;
+}
+#cornerBottomLeft {
+	left: 0; bottom: 0;
+	background-position: 0 -20px;
+}
+#cornerBottomRight {
+	right: 0; bottom: 0;
+	background-position: -20px -20px;
+}
+*/
+.clear {
+	clear: both;
+}
+
+
+/*a:link, a:hover, a:active, a:visited { color: #050; }*/
+
+/* bg image set in style macro */
+div.divbar { 
+  clear: both; 
+  background-image: url('../images/bg_green.png'); 
+  width: 100%; 
+  text-align: center;
+  font-size:80%
+}
+
+
+/** query form style**/
+div#queryform{
+
+}
+
+/** search result style */
+div#terminfo{
+
+}
+
+div#matchdocs{
+
+}
+
+div.resultnavigation{
+ margin: 0;
+ padding:0;
+}
+
+ul#resultlist li{
+  display:block;
+}
+
+div#documentheading{
+  font-size: 16pt;
+  font-weight: bold;
+}
+
+div#documentinfo { 
+  float:left;
+  padding:0;
+  margin:0;
+  width:24%;
+} 
+
+div#toc{
+  float:left;
+  text-align:left;
+  width:60%;
+  padding:0;
+  margin:0; 
+}
+
+ul#docbuttons li {
+   display: block;
+  font-size: 11px;
+  font-weight: bold;
+  background: #f7e7c5;
+  margin: 1px;
+  border: 1px solid #eeddbb;
+  text-align: center;
+  vertical-align: middle;
+  height: 30px; /* IE6 and NS4 treat width/height as min-width/min-height */
+  width: 110px;
+}
+
+
+ul#tocnodes li{
+ margin: 0;
+ padding: 5px 0 0 0;
+ display:block;
+}
+
+ul.tocnode {
+  margin:0;
+  padding:5px 0 0 20px;
+}
+
+ul.tocnode  a{
+ margin: 0;
+ padding:0 5px 0 0;
+ }
+
+span.bold{
+  font-weight: bold;	   
+}
+
+div.documentarrows{
+  margin: 0 0 0 0;
+  padding: 1em 0 0 0;   
+}
+
+img.lessarrow{
+  float:left;
+  border: none;  
+}
+
+img.morearrow{
+  float:right;
+  border:none; 
+}
+
+div.formheading{
+  font-size: 16pt;
+  font-weight: bold;
+  margin: .5em 0 0;
+  padding:0;
+}
+
+ul#presprefs li, ul#berrybasketprefs li, ul#searchprefs li{
+  display: block;
+} 
+
+
+div.phrasebrowse{
+  text-align:center;
+  padding:0;
+  margin: .5em 0 .5em 0;   
+}
+
+div.QuickSearch {
+  float: right;
+}
+
+#coverImage {
+	text-align: center;
+	margin: 20px;
+}
+
+/* ----- TABLE OF CONTENTS ------ */
+.tocTable {
+	width: 100%;
+	background: white !important;
+}
+
+.tocTextCell {
+	padding-left:5px;
+}
+
+.tableOfContentsContainer {
+	padding:1px;
+	max-height:500px;
+	overflow:auto;
+}
+
+#tableOfContents {
+	margin: 0;
+	padding: 0;
+	font-size: 70%;
+}
+
+#tableOfContents li {
+	list-style: none;
+	margin: 0;
+	padding: 2px;
+}
+
+#tableOfContents a {text-decoration: underline; color: #444 !important;}
+#tableOfContents a:visited{text-decoration: underline; color: #444 !important;}
+#tableOfContents a:link{text-decoration: underline; color: #444 !important;}
+
+#tableOfContents li.current {
+	background-color: #090;
+}
+#tableOfContents li.current a {
+	color: #fff;
+}
+
+#tableOfContents li.current li {
+	background-color: #fff;
+}
+
+#tableOfContents li.current li a {
+	color: #444;
+}
+
+#tableOfContents ul {
+	padding: 0 0 0 0;
+}
+
+#tableOfContents ul ul{
+	padding: 0 0 0 0;
+}
+
+#tableOfContents ul ul ul{
+	padding: 0 0 0 16px;
+}
+
+/* -------- SEARCH ------- */
+.paramLabel {
+	margin: 2px;
+	float: left;
+	min-width: 250px;
+}
+.paramValue {
+	margin: 2px;
+	float: left;
+}
+
+
+table{
+	border-collapse:collapse;
+	border-spacing:0;
+}
+
+/* ------- BROWSE -------*/
+
+.childrenlist {
+	margin:0 0 0 10px;
+
+}
+.childrenlist td {
+	padding:3px 0px 0px 10px;
+}
+
+/* ------- PAGED IMAGE ------- */
+
+.pageSlider {
+	width: 250px;
+	overflow: auto;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 2px;
+}
+
+.pageSliderSpacer {
+	width:2px;
+}
+
+.pageSliderCol {
+	height:100px;
+	padding: 2px;
+	text-align: center;
+	vertical-align: top;
+}
+
+/* ------- SPATIAL COLLECTIONS ------- */
+
+#nearbyDocs td, #nearbyDocs th {
+	padding: 5px;
+	border: 1px solid black;
+}
+
+#nearbyDocs th {
+	font-weight: bold;
+}
+
+#auth_navbar {
+	width: 90%;
+	margin: 10px auto;
+}
+
+#auth_navbar span{
+	padding:3px;
+}
+
+#userListTable {
+	text-align: center;
+	width: 90%;
+	margin: auto;
+}
+
+#userListTable td{
+	border: black 1px solid;
+	padding: 5px;
+}
+
+#gs_error{
+	padding: 5px;
+	margin: auto;
+	width: 50%;
+	text-align: center;
+}
+
+#loginTable{
+	margin: auto;
+	width: 25%;
+}
+
+.map_canvas_full{
+	margin:0px auto;
+	width:900px; 
+	height:500px;
+}
+
+.map_canvas_half{
+	float: right;
+	width:450px; 
+	height:500px;
+}
+
+.pano_canvas_full{
+	margin:0px auto;
+	width:900px;
+	height:500px;
+}
+
+.pano_canvas_fullscreen{
+	margin-left:0px auto;
+	margin-right:0px auto;
+	width:1024px;
+	height:768px;;
+}
+
+.pano_canvas_half{
+	z-index: 1;
+	float: right;
+	width:450px;
+	height:500px;
+	background-color:#000000;
+}
+
+.navigate-point {
+	z-index: 97;
+  	position: absolute;
+	overflow: hidden;
+	width: 80px;
+	height: 80px;
+	margin-left: -40px;
+	margin-top: -40px;
+	background-image: url("../images/navMarker.png");
+	cursor: pointer;
+}
+
+.fullscreenToggle{
+	z-index: 2;
+	position: relative;
+	float: right;
+	top: 28px;
+	left: 128px;
+	padding: 5px;
+}
+
+dl dt { font-weight:bold;
+      padding-top:10px; }
+dl dd { padding-bottom:10px}
+
+#facetSelector{
+	padding: 0px;
+	width:30%; 
+	float:right;
+}
+
+.facetTable{
+	list-style:none; 
+	margin: 0px 0px 20px; 
+	padding: 0px; 
+	overflow:auto; 
+}
+
+.facetTable li{
+	margin-bottom:5px;
+}
+
+.checkboxList{
+	list-style:none; 
+	padding-left:0px;
+}
+
+.facetedResults{
+	float:left;
+	width:65%;
+}
+
+.slideshowImage{
+	width:100%;
+}
+
+/* GREENBUG */
+#gbEnableButton{
+	position:fixed;
+	left:0px;
+	bottom:0px;
+}
+
+.gbTemplateContainer{
+	float:left;
+	cursor:pointer;
+	margin:0 1em;
+	font-size:1.1em;
+	text-align:center;
+	overflow:hidden;
+	min-width:4em;
+	padding: 0.5em;
+}
+
+.gbSpacer{
+	margin:0;
+	float:left;
+	height:1.2em;
+	text-align:center;
+}
+
+/* VISUAL XML EDITOR (GREENBUG)*/
+#veMainDiv{
+	margin:0;
+	padding:0;
+}
+
+#veTemplateSelector{
+	float:left;
+	padding:0.5em;
+	margin:0 0.5em 0 0;
+}
+
+#veFileSelector{
+	float:left;
+	padding:0.5em;
+	margin:0 0.5em 0 0 ;
+}
+
+#veToolboxDiv{
+	float:left;
+	width:10%;
+	margin:0;
+	padding:0;
+	overflow:auto;
+	height:300px;
+}
+
+#veEditorDiv{
+	width:100%;
+}
+
+#veEditorContainer{
+	position:relative;
+	float:left;
+	width:70%;
+	margin:0;
+	padding:0;
+	overflow:hidden;
+	border: 3px groove;
+	background-image: url(../images/veBackground.gif);
+}
+
+#veSpacerDiv{
+	float:left;
+	width:1%;
+	height:1px;
+	margin:0;
+	padding:0;
+}
+
+#veInfoDiv{
+	float:left;
+	width:17%;
+	margin:0 0 10px 0;
+	padding:0;
+	overflow:auto;
+}
+
+.veElement{
+	border:1px solid black;
+	float:left;
+	margin:5px -1px;
+	overflow:hidden;
+	color:black;
+	cursor:pointer;
+}
+
+.veDropArea{
+	margin:5px 0;
+	float:left;
+	height:1em;
+	background:#FFAAAA;
+}
+
+.veContainerElement{
+	width:90%;
+	margin:0 auto;
+}
+
+.veTitleElement{
+	text-align:center;
+}
+
+.veGSFElement{
+	background:#DFD;
+}
+
+.veGSLIBElement{
+	background:#FF9;
+}
+
+.veXSLElement{
+	background:#DDF;
+}
+
+.veHTMLElement{
+	background:#FFFFFF;
+}
+
+.veTextElement{
+	background:#F9F;
+}
+
+.veTempElement{
+	background:#9FF;
+}
+
+.veTab{
+	font-size:0.8em;
+	padding:0.5em;
+}
+
+.veInfoDivTitle{
+	text-align:center;
+	margin-bottom:1em;
+}
+
+.veAttributeTableContainer{
+	text-align:center;
+	width:100%;
+	margin-bottom:1em;
+}
+
+.veAttributeTableContainer td{
+	border:1px solid black;
+}
+
+.veAttributeTableRow{
+	min-height:1.1em;
+}
+
+.veNameCell{
+	width:25%;
+}
+
+.veValueCell{
+	width:50%;
+}
+
+.veUtilCell{
+	font-size:0.8em;
+	width:25%;
+}
+
+#veTrash{
+	position:absolute;
+	right:0px;
+	bottom:0px;
+	text-align:center;
+}
+
+.toolbarElem{
+	border:1px dashed black;
+	text-align:center;
+	margin-bottom:2px;
+}
+
+/* DEPOSITOR STYLES */
+
+#wizardBar {
+	display: table;
+	margin: 0 auto;
+}
+
+#wizardBar li {
+	display: inline;
+	list-style-type: none;
+	padding: 0 10px;
+	margin: 0 5px;
+}
+
+#wizardContainer {
+	display: table;
+	margin: 0 auto;
+}
+
+#depositorform {
+	min-height: 300px;
+}
+
+/*
+ul.childrenlist li {
+list-style-type:none;
+}
+ul#classifierlist,ul#classifiernodelist {
+	list-style-type:none;
+	margin:0;
+	padding:0
+}
+ul#classifierlist li{
+list-style:none;
+margin:0 0 5px 0;
+padding:0;display:block;
+}
+ul#classifiernodelist li{
+list-style:none;
+margin:0;
+padding:5px 0 0 0;
+display:block
+}
+ul.childrenlist{
+list-style:none;
+margin:0;
+padding:0 0 0 20px;
+display:block;
+width:100%
+}
+*/

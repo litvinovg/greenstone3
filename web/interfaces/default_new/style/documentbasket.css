@@ -1,0 +1,154 @@
+#documentbasket {
+	min-height: 22px;
+	padding: 5px;
+	background: transparent url("../images/kete2.png") scroll repeat 0 0;
+	z-index:10;
+	font-size: 80%;
+	min-height: 2em;
+}
+
+#documenthandle {
+	cursor: move;
+	padding: 0;
+	margin: 0;
+	height: 30px;
+	width: auto;
+	background-color: #7f7;
+	display: none;
+}
+
+#documentpages {
+	text-align: left;
+	height: auto;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;   
+}
+
+#documentpages img {
+	margin: 3px 2px;
+}
+
+#documentpagesFullViewLink {
+	display:block;
+	cursor: pointer;
+	text-align: left;
+	margin-bottom:0;
+}
+
+li.documentitem {
+   padding: 0;
+   margin: 0 ;
+   color: black;
+   font-size: 90%;
+}
+#urlcheck{
+ float: left;
+ padding: 0;
+ margin: 0;
+ 
+}
+
+.pick {
+  visibility:hidden;
+}
+.content{
+ font-family:sans-serif;
+ text-align:left;
+}
+ 
+textarea#pretextarea {
+  font-family:sans-serif;
+  border:1px solid #2E8B57; 
+  width: 100%;
+  height: 25em;
+  font-size: 90%;
+  margin: 0.5em 0 0 0;
+  padding:0;
+}
+
+/****************************
+* MAIN DOCUMENT MAKER STYLE *
+****************************/
+
+.dragList{
+	margin-left:1.5em;
+	padding-left:0px;
+	background-color:rgba(50,255,50,0.2);
+	list-style-type:none;
+}
+
+.dragItem{
+	cursor:pointer;
+	list-style-type:none;
+	padding: 3px;
+	border: 1px dashed #FFFFFF;
+}
+
+.renderedText{
+	padding: 3px 3px 3px 3px;
+	background: #FFFFFF;
+	border:1px solid #000000;
+}
+
+.menuLink{
+	font-size:0.6em;
+}
+
+.topLevel{
+	padding-left:0px;
+}
+
+.deleteLink{
+	float:right;
+}
+
+.placeHolder{
+	height: 1em;
+	list-style-type:none;
+	padding: 3px;
+}
+
+.emptyList{
+	border: 1px dashed #000000;
+}
+
+.newSection{
+	background: #BBFFBB;
+}
+
+.headerTableTD{
+	padding-left:10px;
+	padding-right:10px;
+}
+
+.metaTableCellName{
+	border:1px solid black;
+	background:#BBFFBB;
+	padding-left:3px;
+	padding-right:3px;
+}
+
+.metaTableCell{
+	border:1px solid black;
+	background:white;
+	padding-left:3px;
+	padding-right:3px;
+	min-width:100px;
+}
+
+.metaTableCellRemove{
+	border:1px solid black;
+	background:white;
+	padding-left:3px;
+	padding-right:3px;
+}
+
+.statusBar{
+	margin-top:10px;
+	text-align:center;
+}
+
+.statusMessage{
+	font-size:1.1em;
+}
