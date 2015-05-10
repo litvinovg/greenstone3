@@ -14,11 +14,6 @@ var save_button_text = "Save changes";
 var rebuild_button_text = "Rebuild";
 var save_and_rebuild_button_text = "Save and Rebuild";
 
-/*Array to store init states of metadata fields and text*/
-var editableInitStates = new Array();
-/*Array to store last states of metadata fields and text*/
-var editableLastStates = new Array();
-
 /* What kind of metadata element selection do we provide?
    plain: just a text input box
    fixedlist: a drop down menu with a fixed list of options (provided by the availableMetadataElements list)
@@ -1084,50 +1079,6 @@ function loadBook()
 }
 
 /************************
-*    CHANGES SCRIPTS    *
-************************/
-function addEditableState(editable,stateArray)
-{
-        stateArray.push({
-                editableNode : editable,
-                initHTML : editable.innerHTML
-        });
-}
-
-function getLastEditableStates()
-{	
-	editableLastStates = [];
-        $(".sectionText").each(function(){addEditableState(this,editableLastStates);});
-        $(".metaTableCell").each(function(){addEditableState(this,editableLastStates);});
-
-}
-
-function changesToUpdate() 
-{
-	var resultArray = new Array();
-	getLastEditableStates();
-	for (var j in editableLastStates) 
-	{	
-		if (isNodeChanged(editableLastStates[j])) 
-		{
-			resultArray.push(editableLastStates[j].editableNode);
-		}
-	}
-	return resultArray;
-}
-
-function isNodeChanged(StateToCheck){
-	for (var i in editableInitStates) 
-	{
-		if ((StateToCheck.editableNode === editableInitStates[i].editableNode) && StateToCheck.initHTML === editableInitStates[i].initHTML )
-		{
-			return false;
-		}
-	
-	}
-	return true;
-}
-/************************
 * METADATA EDIT SCRIPTS *
 ************************/
 
@@ -1245,9 +1196,9 @@ function readyPageForEditing()
 	}
 
 	$("#editContentButton").html("Hide Editor");
-	//wait for 0.5 sec to let ckeditor up 
-	setTimeout(function(){ $(".sectionText").each(function(){addEditableState(this,editableInitStates);}); }, 500);	
-
+	
+	var textDivs = $(".sectionText").each(function(){de.doc.registerEditSection(this);});
+	
 	var editBar = $("#editBarLeft");
 	
 	var visibleMetadataList = $("<select>", {"id": "metadataSetList", "class": "ui-state-default"});

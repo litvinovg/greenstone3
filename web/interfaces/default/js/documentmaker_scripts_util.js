@@ -301,7 +301,9 @@ function saveAndRebuild(rebuild)
     }
   }
 
-  var changes = de.Changes.getChangedEditableSections();
+  var changes = changesToUpdate();
+  //Clean changes
+  editableInitStates = editableLastStates;
 	for(var i = 0; i < changes.length; i++)
 	{
 		var changedElem = changes[i];
@@ -384,7 +386,6 @@ function saveAndRebuild(rebuild)
 	}
 	  
 	/* need to clear the changes from the page so that we don't process them again next time */
-	de.Changes.clear();
 	while (_deletedMetadata.length>0) {
 	  _deletedMetadata.pop();
 	}
@@ -719,7 +720,7 @@ function asyncRegisterEditSection(cell)
 {
 	//This registering can cause a sizeable delay so we'll thread it (effectively) so the browser is not paused
 	cell.originalValue = cell.innerHTML;
-	setTimeout(function(){de.doc.registerEditSection(cell)}, 0);
+	setTimeout(function(){addEditableState(cell, editableInitStates)}, 0);
 }
 
 function addOptionToList(list, optionvalue, optiontext, selected) {
@@ -814,6 +815,7 @@ function addFunctionalityToTable(table)
 		var nameCell = $("<td>" + name + "</td>");
 		nameCell.attr("class", "metaTableCellName");
 		var valueCell = $("<td>", {"class": "metaTableCell"});
+		valueCell.attr("contenteditable","true");
 		
 		newRow.append(nameCell);
 		newRow.append(valueCell);
@@ -826,8 +828,6 @@ function addFunctionalityToTable(table)
 		undo.removeTransaction = false;
 		_undoOperations.push(undo);
 		
-		//Threading this function here probably isn't necessary like the other times it is called
-		de.doc.registerEditSection(valueCell[0]);
 	});
 	table.addRowButton = addRowButton;
 	metaNameField.after(addRowButton);

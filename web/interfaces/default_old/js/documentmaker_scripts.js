@@ -211,7 +211,7 @@ function createSectionTextDiv(text)
 	textDiv.setAttribute("class", "renderedText editable");
 	
 	//This registering can cause a sizeable delay so we'll thread it (effectively) so the browser is not paused
-	setTimeout(function(){addEditableState(textDiv, editableInitStates)}, 0);
+	setTimeout(function(){de.doc.registerEditSection(textDiv)}, 0);
 
 	renderedDiv.appendChild(textDiv);
 	textDiv.parentDiv = renderedDiv;

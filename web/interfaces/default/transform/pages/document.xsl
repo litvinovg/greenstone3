@@ -87,7 +87,8 @@
 	</xsl:template>
 	
 	<xsl:template name="wrappedSectionText">
-		<div id="text{@nodeID}" class="sectionText"><!-- *** -->
+		<br /><br />
+		<div id="text{@nodeID}" contenteditable="true" class="sectionText"><!-- *** -->
 			<xsl:attribute name="style">
 				<xsl:choose>
 					<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
@@ -205,7 +206,7 @@
 						<xsl:if test="util:checkMetadataNotDuplicate(@name, .)">
 							<tr>
 								<td class="metaTableCellName"><xsl:value-of select="@name"/></td>
-								<td class="metaTableCell"><xsl:value-of select="."/></td>
+								<td class="metaTableCell" contenteditable="true"><xsl:value-of select="."/></td>
 							</tr>
 						</xsl:if>
 					</xsl:for-each>
