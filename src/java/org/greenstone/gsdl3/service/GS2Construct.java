@@ -23,8 +23,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.build.GS2PerlConstructor;
@@ -62,6 +65,7 @@ public class GS2Construct extends ServiceRack
 	private static final String BUILD_AND_ACTIVATE_SERVICE = "BuildAndActivateCollection";
 	private static final String DELETE_SERVICE = "DeleteCollection";
 	private static final String RELOAD_SERVICE = "ReloadCollection";
+    private static final String SET_METADATA_SERVICE = "SetMetadata";
 
 	// params used
 	private static final String COL_PARAM = "collection";
@@ -119,7 +123,7 @@ public class GS2Construct extends ServiceRack
 				param = GSXML.createParameterDescription(doc, BUILDTYPE_PARAM, getTextString("param." + BUILDTYPE_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, BUILDTYPE_MGPP, types, type_texts);
 				param_list.appendChild(param);
 			}
-			else if (service.equals(ACTIVATE_SERVICE) || service.equals(IMPORT_SERVICE) || service.equals(BUILD_SERVICE) || service.equals(RELOAD_SERVICE) || service.equals(DELETE_SERVICE))
+			else if (service.equals(ACTIVATE_SERVICE) || service.equals(IMPORT_SERVICE) || service.equals(BUILD_SERVICE) || service.equals(RELOAD_SERVICE) || service.equals(DELETE_SERVICE) || service.equals(SET_METADATA_SERVICE))
 			{
 
 				this.collection_list = getCollectionList();
@@ -139,12 +143,25 @@ public class GS2Construct extends ServiceRack
 
 	protected Element processNewCollection(Element request)
 	{
-		return runCommand(request, GS2PerlConstructor.NEW);
+	    if (!userHasCollectionEditPermissions(request)) {
+		Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, "processNewCollection");
+		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		return result;
+	    }
+	    return runCommand(request, GS2PerlConstructor.NEW);
 	}
 
 	/** TODO:implement this */
 	protected Element processAddDocument(Element request)
 	{
+	    if (!userHasCollectionEditPermissions(request)) {
+		Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, "processAddDocument");
+		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		return result;
+	    }
+
 	  Document result_doc = XMLConverter.newDOM();
 		// decode the file name, add it to the import directory
 		String name = GSPath.getFirstLink(request.getAttribute(GSXML.TO_ATT));
@@ -162,7 +179,14 @@ public class GS2Construct extends ServiceRack
 
 	protected Element processBuildAndActivateCollection(Element request)
 	{
-	  
+	    // check permissions
+		if (!userHasCollectionEditPermissions(request)) {
+		    Document result_doc = XMLConverter.newDOM();
+		    Element result = GSXML.createBasicResponse(result_doc, "processBuildAndActivateCollection");
+		    GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		    return result;
+		}
+
 		waitUntilReady(request);
 		Element buildResponse = processBuildCollection(request);
 		if (buildResponse.getElementsByTagName(GSXML.ERROR_ELEM).getLength() > 0)
@@ -196,6 +220,13 @@ public class GS2Construct extends ServiceRack
 
 	protected Element processImportCollection(Element request)
 	{
+	    if (!userHasCollectionEditPermissions(request)) {
+		Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, "processImportCollection");
+		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		return result;
+	    }
+
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
 
@@ -259,11 +290,38 @@ public class GS2Construct extends ServiceRack
 
 	protected Element processBuildCollection(Element request)
 	{
+	    if (!userHasCollectionEditPermissions(request)) {
+		Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, "processBuildCollection");
+		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		return result;
+	    }
+
 		return runCommand(request, GS2PerlConstructor.BUILD);
+	}
+
+    protected Element processSetMetadata(Element request)
+	{
+	    if (!userHasCollectionEditPermissions(request)) {
+		Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, "processSetMetadata");
+		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		return result;
+	    }
+
+	    return runCommand(request, GS2PerlConstructor.SET_METADATA_SERVER);
 	}
 
 	protected Element processActivateCollection(Element request)
 	{
+
+	    if (!userHasCollectionEditPermissions(request)) {
+		Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, "processActivateCollection");
+		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		return result;
+	    }
+
 		// this activates the collection on disk. but now we need to tell
 		// the MR about it. but we have to wait until the process is finished.
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -333,6 +391,13 @@ public class GS2Construct extends ServiceRack
 
 	protected Element processDeleteCollection(Element request)
 	{
+	    if (!userHasCollectionEditPermissions(request)) {
+		Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, "processDeleteCollection");
+		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		return result;
+	    }
+
 	  Document result_doc = XMLConverter.newDOM();
 		// the response to send back
 		String name = GSPath.getFirstLink(request.getAttribute(GSXML.TO_ATT));
@@ -390,6 +455,13 @@ public class GS2Construct extends ServiceRack
 
 	protected Element processReloadCollection(Element request)
 	{
+	    if (!userHasCollectionEditPermissions(request)) {
+		Document result_doc = XMLConverter.newDOM();
+		Element result = GSXML.createBasicResponse(result_doc, "processReloadCollection");
+		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		return result;
+	    }
+
 	  Document result_doc = XMLConverter.newDOM();
 		// the response to send back
 		String name = GSPath.getFirstLink(request.getAttribute(GSXML.TO_ATT));
@@ -538,6 +610,11 @@ public class GS2Construct extends ServiceRack
 		//e.setAttribute(GSXML.NAME_ATT, ADD_DOC_SERVICE);
 		//this.short_service_info.appendChild(e);
 
+		e = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
+		e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
+		e.setAttribute(GSXML.NAME_ATT, SET_METADATA_SERVICE);
+		this.short_service_info.appendChild(e);
+
 		return true;
 	}
 
@@ -591,7 +668,7 @@ public class GS2Construct extends ServiceRack
 
 		}
 
-		// do teh actual command
+		// do the actual command
 		String coll_name = null;
 		if (type == GS2PerlConstructor.NEW)
 		{
@@ -623,6 +700,29 @@ public class GS2Construct extends ServiceRack
 		if (type == GS2PerlConstructor.IMPORT)
 		{
 			constructor.setManifestFile(this.site_home + File.separator + "collect" + File.separator + params.get(COL_PARAM) + File.separator + "manifests" + File.separator + "tempManifest.xml");
+		}
+		else if (type == GS2PerlConstructor.SET_METADATA_SERVER) {
+		    StringBuffer querystring = new StringBuffer();
+		    
+		    // convert params into a single string again?
+		    Set<Map.Entry<String, Serializable>> entries = params.entrySet();
+		    Iterator<Map.Entry<String, Serializable>> i = entries.iterator();
+		    while(i.hasNext()) {
+			
+			Map.Entry<String, Serializable> entry = i.next();
+			String paramname = entry.getKey();
+			paramname = paramname.replace("s1.", ""); // replaces all occurrences
+			if(paramname.equals("collection")) {
+			    paramname = "c";
+			}
+			String paramvalue = (String)entry.getValue();
+
+			querystring.append(paramname + "=" + paramvalue);
+			if(i.hasNext()) {
+			    querystring.append("&");
+			}
+		    }
+		    constructor.setQueryString(querystring.toString());
 		}
 
 		GS2PerlListener listener = new GS2PerlListener();
@@ -804,4 +904,37 @@ public class GS2Construct extends ServiceRack
 		}
 		return false;
 	}
+
+
+    /** Copy from DebugService.userHasEditPermissions
+     This function checks that the user is logged in and that the user 
+     is in the right group to edit the collection */
+    protected boolean userHasCollectionEditPermissions(Element request) {
+	Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+	HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
+	String collection = (String) params.get(COL_PARAM); // could be null on newcoll operation
+
+    UserContext context = new UserContext(request);
+    if(collection == null) {
+	return !context.getUsername().equals("");
+    }
+    for (String group : context.getGroups()) {
+      // administrator always has permission
+      if (group.equals("administrator")) {
+	return true;
+      }
+      // all-collections-editor can edit any collection
+      if (!collection.equals("")) {
+	if (group.equals("all-collections-editor")) {
+	  return true;
+	}
+	if (group.equals(collection+"-collection-editor")) {
+	  return true;
+	}
+      }
+    }
+    // haven't found a group with edit permissions
+    return false;
+    
+  }
 }

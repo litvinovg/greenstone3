@@ -32,6 +32,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 	public static final int IMPORT = 1;
 	public static final int BUILD = 2;
 	public static final int ACTIVATE = 3;
+    public static final int SET_METADATA_SERVER = 4;
 
 	/**
 	 * gsdlhome for greenstone 2 - we use the perl modules and building scripts
@@ -118,6 +119,9 @@ public class GS2PerlConstructor extends CollectionConstructor
 		case ACTIVATE:
 			activateCollection();
 			break;
+		case SET_METADATA_SERVER:
+			setMetadataForCollection();
+			break;
 		default:
 			msg = "wrong type of action specified!";
 			evt = new ConstructionEvent(this, GSStatus.ERROR, msg);
@@ -201,6 +205,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 		command.add(this.site_name);
 		command.add("-collectdir");
 		command.add(GSFile.collectDir(this.site_home));
+		command.add("-removeold"); // saves some seconds processing time when this flag's added in explicitly
 		command.addAll(extractParameters(this.process_params));
 		command.add(this.collection_name);
 
@@ -271,6 +276,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 		command.add(this.site_name);
 		command.add("-collectdir");
 		command.add(GSFile.collectDir(this.site_home));
+		command.add("-removeold"); // saves some seconds processing time when this flag's added in explicitly
 		command.addAll(extractParameters(this.process_params));
 		command.add(this.collection_name);
 
@@ -278,6 +284,46 @@ public class GS2PerlConstructor extends CollectionConstructor
 		command_str = command.toArray(command_str);
 
 		if (runPerlCommand(command_str))
+		{
+			// success!! - need to send the final completed message
+			sendProcessComplete(new ConstructionEvent(this, GSStatus.COMPLETED, ""));
+		}// else an error message has already been sent, do nothing	    
+
+	}
+
+
+    protected void setMetadataForCollection()
+	{
+		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "Collection metadata: setMetadata for collection."));
+
+		Vector<String> command = new Vector<String>();
+
+		String perlPath = GlobalProperties.getProperty("perl.path", "perl");
+		if (perlPath.charAt(perlPath.length() - 1) != File.separatorChar)
+		{
+			perlPath = perlPath + File.separator;
+		}
+
+		String cgi_directory = GlobalProperties.getGSDL3Home() + File.separator + "WEB-INF" + File.separator + "cgi";
+		command.add(perlPath + "perl");
+		command.add("-S");
+		//command.add(GlobalProperties.getGSDL3Home() + File.separator + "WEB-INF" + File.separator + "cgi" + File.separator + "metadata-server.pl");
+		command.add(cgi_directory + File.separator + "metadata-server.pl");
+		
+		// Need to set QUERY_STRING and REQUEST_METHOD=GET in environment
+		// http://www.cgi101.com/class/ch3/text.html
+		String[] envvars = {
+		    "QUERY_STRING=" + this.query_string,
+		    "REQUEST_METHOD=GET"
+		};
+
+		String[] command_str = {};
+		command_str = command.toArray(command_str);
+
+		// http://www.cgi101.com/class/ch3/text.html
+		// setenv QUERY_STRING and REQUEST_METHOD = GET.
+		if (runPerlCommand(command_str, envvars, new File(cgi_directory)))
+				   //new File(GlobalProperties.getGSDL3Home() + File.separator + "WEB-INF" + File.separator + "cgi")))
 		{
 			// success!! - need to send the final completed message
 			sendProcessComplete(new ConstructionEvent(this, GSStatus.COMPLETED, ""));
@@ -315,7 +361,11 @@ public class GS2PerlConstructor extends CollectionConstructor
 	}
 
 	/** returns true if completed correctly, false otherwise */
-	protected boolean runPerlCommand(String[] command)
+    protected boolean runPerlCommand(String[] command) {
+	return runPerlCommand(command, null, null);
+    }
+
+    protected boolean runPerlCommand(String[] command, String[] envvars, File dir)
 	{
 		int sepIndex = this.gsdl3home.lastIndexOf(File.separator);
 		String srcHome = this.gsdl3home.substring(0, sepIndex);
@@ -327,6 +377,12 @@ public class GS2PerlConstructor extends CollectionConstructor
 		args.add("GSDLOS=" + this.gsdlos);
 		args.add("GSDL-RUN-SETUP=true");
 		args.add("PERL_PERTURB_KEYS=0");
+
+		if(envvars != null) {
+		    for(int i = 0; i < envvars.length; i++) {
+			args.add(envvars[i]);
+		    }
+		}
 
 		for (String a : System.getenv().keySet())
 		{
@@ -344,7 +400,9 @@ public class GS2PerlConstructor extends CollectionConstructor
 		{
 			Runtime rt = Runtime.getRuntime();
 			sendProcessBegun(new ConstructionEvent(this, GSStatus.ACCEPTED, "starting"));
-			Process prcs = rt.exec(command, args.toArray(new String[args.size()]));
+			Process prcs = (dir == null) 
+			    ? rt.exec(command, args.toArray(new String[args.size()]))
+			    : rt.exec(command, args.toArray(new String[args.size()]), dir);
 
 			InputStreamReader eisr = new InputStreamReader(prcs.getErrorStream());
 			InputStreamReader stdinisr = new InputStreamReader(prcs.getInputStream());

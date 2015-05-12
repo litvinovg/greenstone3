@@ -27,6 +27,8 @@ public abstract class CollectionConstructor extends Thread
 	protected boolean cancel = false;
 	/** Stores the name of the manifest file (if one is needed) */
 	protected String manifest_file = null;
+    /** The URL params constructed as a query string, representing the CGI QUERY_STRING to */
+    protected String query_string = null;
 
 	public CollectionConstructor(String name)
 	{
@@ -63,6 +65,11 @@ public abstract class CollectionConstructor extends Thread
 	public void setCollectionName(String coll_name)
 	{
 		this.collection_name = coll_name;
+	}
+
+    	public void setQueryString(String querystring)
+	{
+		this.query_string = querystring;
 	}
 
 	public void setProcessParams(Element params)

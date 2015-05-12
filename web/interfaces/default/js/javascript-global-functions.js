@@ -423,6 +423,12 @@ gs.functions.hashString = function(str)
 
 function callMetadataServer(callingFunction, url, responseFunction)
 {
+    // rewrite URLs to call GS2Construct's SetMetadata service instead
+    url = url.replace("&c=",  "&collection="); // c is a special param name for GS2Construct
+    url = url.replace(/(&|\?)([^=]*=)/g, "$1"+"s1.$2"); // prefix param names with "s1."
+    url = url.replace("cgi-bin/metadata-server.pl?",  gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=SetMetadata&");
+
+
 	$.ajax(url)
 	.success(function(response)
 	{
