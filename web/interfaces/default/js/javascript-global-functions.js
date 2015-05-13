@@ -423,11 +423,15 @@ gs.functions.hashString = function(str)
 
 function callMetadataServer(callingFunction, url, responseFunction)
 {
-    // rewrite URLs to call GS2Construct's SetMetadata service instead
+    // rewrite URLs to call GS2Construct's SetMetadata service instead. 
+    // From:
+    // <gs3server>/cgi-bin/metadata-server.pl?a=set-archives-metadata&c=smallcol&site=localsite&d=HASH01454f31011f6b6b26eaf8d7&metaname=Title&metavalue=Moo&prevmetavalue=Blabla&metamode=override
+    // To:
+    // <gs3server>/library?a=g&rt=r&ro=1&s=SetMetadata&s1.collection=smallcol&s1.site=localsite&s1.d=HASH01454f31011f6b6b26eaf8d7&s1.metaname=Title&s1.metavalue=Moo&s1.prevmetavalue=Blabla&s1.metamode=override
+
     url = url.replace("&c=",  "&collection="); // c is a special param name for GS2Construct
     url = url.replace(/(&|\?)([^=]*=)/g, "$1"+"s1.$2"); // prefix param names with "s1."
     url = url.replace("cgi-bin/metadata-server.pl?",  gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=SetMetadata&");
-
 
 	$.ajax(url)
 	.success(function(response)
