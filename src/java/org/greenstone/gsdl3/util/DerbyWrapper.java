@@ -34,8 +34,9 @@ import org.greenstone.util.GlobalProperties;
 
 public class DerbyWrapper
 {
-	static final String PROTOCOL = "jdbc:derby:";
-	static final String DRIVER = "org.apache.derby.jdbc.EmbeddedDriver";
+    static final String PORT = GlobalProperties.getProperty("derby.server.port");//, "1527");
+    static final String PROTOCOL = "jdbc:derby://localhost:"+PORT+"/"; // "jdbc:derby:";
+    static final String DRIVER = "org.apache.derby.jdbc.ClientDriver"; //"org.apache.derby.jdbc.EmbeddedDriver";
 	static final String USERSDB = "usersDB";
 	static final String USERS = "users";
 	static final String ROLES = "roles";
@@ -133,7 +134,11 @@ public class DerbyWrapper
 		try
 		{
 			//  shutdown the whole server
+		    // but not if we're a derby client using the derby network server 
+		    // only if we're using an embedded derby
+		    if(DRIVER.equals("org.apache.derby.jdbc.EmbeddedDriver")) {
 			DriverManager.getConnection(PROTOCOL + ";shutdown=true");
+		    }
 		}
 		catch (SQLException se)
 		{

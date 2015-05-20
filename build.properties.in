@@ -15,6 +15,9 @@ tomcat.installed.path=
 # uncomment the following if you have moved the greenstone3 web directory to tomcats webapps dir 
 #web.home=${tomcat.installed.path}/webapps/greenstone3
 
+# Default derby networked server portnumber is 1527, can change this here in case of conflict
+derby.server.port=1527
+
 ## Collection building options
 # uncomment if you don't want to have collection building enabled
 #disable.collection.building=true

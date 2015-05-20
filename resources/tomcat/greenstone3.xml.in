@@ -9,10 +9,15 @@
 	@privilegedattribute@
 	allowLinking="false"
 	xmlBlockExternal="false">
-  
+
+<!--
+   For embedded derby db:
+   driverName="org.apache.derby.jdbc.EmbeddedDriver"
+   connectionURL="jdbc:derby:@gsdl3webhome@/etc/usersDB"
+-->  
 	<Realm className="org.apache.catalina.realm.JDBCRealm" 
-		driverName="org.apache.derby.jdbc.EmbeddedDriver"
-		connectionURL="jdbc:derby:@gsdl3webhome@/etc/usersDB"
+		driverName="org.apache.derby.jdbc.ClientDriver"
+		connectionURL="jdbc:derby://localhost:@derbyserverport@/@gsdl3webhome@/etc/usersDB"
 		userTable="users" userNameCol="username" userCredCol="password"
 		userRoleTable="roles" roleNameCol="role"
 		/>

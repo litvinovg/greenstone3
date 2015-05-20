@@ -18,6 +18,7 @@ perl.path=@perlpath@
 tomcat.server=@tomcat.server@
 tomcat.port=@tomcat.port@
 tomcat.context=greenstone3
+derby.server.port=@derbyserver.port@
 
 ## Proxy setup - set these if you are behind a firewall and you want services that access the internet
 # The proxy server name 

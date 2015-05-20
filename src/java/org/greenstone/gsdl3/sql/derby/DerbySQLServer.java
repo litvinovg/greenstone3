@@ -7,9 +7,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import org.greenstone.util.GlobalProperties;
+
 public class DerbySQLServer implements SQLServer{
-    static final String PROTOCOL = "jdbc:derby:";
-    static final String DRIVER = "org.apache.derby.jdbc.EmbeddedDriver";
+   
+    static final String PORT = GlobalProperties.getProperty("derby.server.port");//, "1527");
+    static final String PROTOCOL = "jdbc:derby://localhost:"+PORT+"/"; //"jdbc:derby:";
+    static final String DRIVER = "org.apache.derby.jdbc.ClientDriver"; //"org.apache.derby.jdbc.EmbeddedDriver";
     static Logger logger = Logger.getLogger(org.greenstone.gsdl3.sql.derby.DerbySQLServer.class.getName());     
 
     public DerbySQLServer(){
@@ -50,8 +54,13 @@ public class DerbySQLServer implements SQLServer{
 
     public boolean disconnect(String databasePath){
 	try{
-	    String protocol_str = PROTOCOL + databasePath + ";shutdown=true"; 
-	    DriverManager.getConnection(protocol_str);
+	    // Only shutdown if using embedded derby, 
+	    // not if it's a networked derby server, which is what we now use
+
+	    if(DRIVER.equals("org.apache.derby.jdbc.EmbeddedDriver")) {
+		String protocol_str = PROTOCOL + databasePath + ";shutdown=true"; 	    
+		DriverManager.getConnection(protocol_str);
+	    }
 	}catch (SQLException se){
 	    String theError = (se).getSQLState();
 	    if (!theError.equals("08006")){
