@@ -439,6 +439,10 @@ public class DocumentAction extends Action
 			dm_doc_list.appendChild(dm_doc_node);
 			dm_doc_node.setAttribute(GSXML.NODE_ID_ATT, doc_node_id);
 			dm_doc_node.setAttribute(GSXML.NODE_TYPE_ATT, doc_node.getAttribute(GSXML.NODE_TYPE_ATT));
+			if (document_id == null){
+				dm_doc_node.setAttribute(GSXML.HREF_ID_ATT, href );
+				}
+
 		}
 
 		// we also want a metadata request to the top level document to get
@@ -467,13 +471,13 @@ public class DocumentAction extends Action
 		{
 			doc_node.setAttribute(GSXML.NODE_ID_ATT, document_id + ".rt");
 		}
-		else
+		/*else
 		{
 			doc_node.setAttribute(GSXML.HREF_ID_ATT, href);// + ".rt");
 			// can we assume that href is always a top level doc??
 			//doc_node.setAttribute(GSXML.ID_MOD_ATT, ".rt");
 			//doc_node.setAttribute("externalURL", has_rl);
-		}
+		}*/
 		doc_list.appendChild(doc_node);
 
 		Element dm_response_message = (Element) this.mr.process(dm_message);
