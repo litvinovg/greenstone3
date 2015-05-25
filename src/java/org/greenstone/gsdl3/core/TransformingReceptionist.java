@@ -432,6 +432,7 @@ public class TransformingReceptionist extends Receptionist
 			{
 				return subdivided_page;
 			}
+			else return null;
 		}
 
 		return transformed_page;
