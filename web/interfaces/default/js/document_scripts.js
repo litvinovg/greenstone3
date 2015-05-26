@@ -1333,7 +1333,8 @@ function saveMetadataChangesOld() {
     }
   }
 
-  var changes = de.Changes.getChangedEditableSections();
+  /*var changes = null;
+	//var changes = de.Changes.getChangedEditableSections();
   for(var i = 0; i < changes.length; i++) {
     
     var changedElem = changes[i];
@@ -1354,7 +1355,7 @@ function saveMetadataChangesOld() {
     changedElem.originalValue = changedElem.innerHTML;
     
   }
-
+*/
   if (metadataChanges.length ==0) {
     console.log ("... No changes detected. ");
     return;
@@ -1388,7 +1389,6 @@ function saveMetadataChangesOld() {
     }
   processChangesLoop(0);
   /* need to clear the changes from the page */
-  de.Changes.clear();
   while (_deletedMetadata.length>0) {
     _deletedMetadata.pop();
   }
