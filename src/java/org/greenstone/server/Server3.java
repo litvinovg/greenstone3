@@ -25,11 +25,11 @@ public class Server3 extends BaseServer
 		String frame_title = dictionary.get("ServerControl.Frame_Title");
 		server_control_ = new Server3Control(this, frame_title);
 
-		/** Ant command tagets for managing Web server */
+		/** Ant command targets for managing Web server */
 		START_CMD = "start";
 		RESTART_CMD = "restart";
 		CONFIGURE_CMD = "configure";
-		STOP_CMD = "force-stop-tomcat";
+		STOP_CMD = "force-stop-tomcat stop-derby";
 
 		String is_read_only = System.getProperty("gsdl3home.isreadonly","false");
 		if (is_read_only.equals("true")) {
