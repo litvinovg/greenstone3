@@ -103,11 +103,36 @@
 		</style>
 	</xsl:template>
 
+	<!-- a template for 'div' that doesn't trigger the
+	     self-closing problem when being rendered as HTML by using
+	     xslt:value-of="''" to ensure element doesn't become empty
+	     when the XSLT processes it (which would then result in it
+	     being changed into a self-closing element, which then is
+	     incorrectly rendered as HTML).  Doing thing with the
+	     value-of is better then injecting an xsl:comment in
+	     (another approach we have used in the past) as the
+	     comment approach then actually turns up in the final
+	     HTML.  This can lead to further complications if
+	     Javascript using the 'empty' div truely expects it to
+	     have no connent of any form. 
+	-->
+
+	<xsl:template match="gsf:div">
+	  <div>
+	    <xsl:for-each select="@*">
+	      <xsl:attribute name="{name()}">
+		<xsl:value-of select="."/>
+	      </xsl:attribute>
+	    </xsl:for-each>
+            <xsl:apply-templates/>
+	    <xslt:value-of select="''" />
+	  </div>
+	</xsl:template>
 
 	<xsl:template match="gsf:image">
 		<xslt:variable name="metaName">
 			<xsl:choose>
-				<xsl:when test="@type = 'thumb'">Thumb</xsl:when>
+				<xsl:when test="@type =	'thumb'">Thumb</xsl:when>
 				<xsl:when test="@type = 'screen'">Screen</xsl:when>
 				<xsl:when test="@type = 'source'">SourceFile</xsl:when>
 			</xsl:choose>
