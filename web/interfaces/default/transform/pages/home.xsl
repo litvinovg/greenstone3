@@ -36,6 +36,8 @@
 			<br class="clear"/>
 		</div>
 
+	        <div style="clear: both; padding-top: 4px; padding-bottom: 4px;"><hr/></div>
+
 		<gslib:serviceClusterList/>
 
 		<xsl:for-each select="serviceList/service[@type='query']">
