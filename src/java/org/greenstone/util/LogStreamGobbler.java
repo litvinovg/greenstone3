@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 
 import org.apache.log4j.*;
 
-class StreamGobbler{
-    static Logger logger = Logger.getLogger(org.greenstone.util.StreamGobbler.class.getName());
+class LogStreamGobbler{
+    static Logger logger = Logger.getLogger(org.greenstone.util.LogStreamGobbler.class.getName());
     
     public static void logError(InputStream in)
       {

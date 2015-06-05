@@ -5,7 +5,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.greenstone.util.StreamGobbler;
+import org.greenstone.util.LogStreamGobbler;
 
 import org.apache.log4j.*;
 
