@@ -329,17 +329,19 @@ public class GS2Construct extends ServiceRack
 		String coll_name = (String) params.get(COL_PARAM);
 		String lang = request.getAttribute(GSXML.LANG_ATT);
 
-		Element response = runCommand(request, GS2PerlConstructor.ACTIVATE);
-		Element status = (Element) GSXML.getChildByTagName(response, GSXML.STATUS_ELEM);
-
-		String request_type = request.getAttribute(GSXML.TYPE_ATT);
-		if (request_type.equals(GSXML.REQUEST_TYPE_STATUS))
-		{
-			return response;
-		}
-
 		UserContext userContext = new UserContext(request);
-		systemRequest("delete", coll_name, null, userContext);
+		String request_type = request.getAttribute(GSXML.TYPE_ATT);
+		
+		// now we de-activate the collection before running activate.pl, and then re-activate at end 
+		// So activate.pl only does the moving, no activation. This way will prevent java from launching 
+		// perl, exiting and then leaving dangling file handles (on index/text/col.gdb) in perl.
+		if (!request_type.equals(GSXML.REQUEST_TYPE_STATUS)) {			
+			systemRequest("delete", coll_name, null, userContext); // deactivate collection
+		}	
+
+		Element response = runCommand(request, GS2PerlConstructor.ACTIVATE); // if request is for STATUS, then this won't run activate.pl
+
+		Element status = (Element) GSXML.getChildByTagName(response, GSXML.STATUS_ELEM);
 
 		// check for finished
 		int status_code = Integer.parseInt(status.getAttribute(GSXML.STATUS_ERROR_CODE_ATT));
@@ -383,7 +385,7 @@ public class GS2Construct extends ServiceRack
 		t = status.getOwnerDocument().createTextNode("\n");
 		status.appendChild(t);
 		// once have got here, we assume
-		// the first bit proceeded successfully, now reload the collection
+		// the first bit proceeded successfully, now reload the collection (sends a collection reactivation request)
 		systemRequest("reload", coll_name, status, userContext); // this will append more messages to the status, and overwrite the error code att
 		return response;
 

@@ -12,9 +12,11 @@ import org.w3c.dom.NodeList;
 //general java classes
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -277,6 +279,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 		command.add("-collectdir");
 		command.add(GSFile.collectDir(this.site_home));
 		command.add("-removeold"); // saves some seconds processing time when this flag's added in explicitly
+		command.add("-skipactivation"); // gsdl3/util/GS2Construct does the activation and reactivation
 		command.addAll(extractParameters(this.process_params));
 		command.add(this.collection_name);
 
@@ -364,9 +367,11 @@ public class GS2PerlConstructor extends CollectionConstructor
     protected boolean runPerlCommand(String[] command) {
 	return runPerlCommand(command, null, null);
     }
-
-    protected boolean runPerlCommand(String[] command, String[] envvars, File dir)
+	
+	protected boolean runPerlCommand(String[] command, String[] envvars, File dir)
 	{
+		boolean success = true;
+	
 		int sepIndex = this.gsdl3home.lastIndexOf(File.separator);
 		String srcHome = this.gsdl3home.substring(0, sepIndex);
 
@@ -396,18 +401,21 @@ public class GS2PerlConstructor extends CollectionConstructor
 		}
 
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "command = " + command_str));
+		Process prcs = null;
+		BufferedReader ebr = null;
+		BufferedReader stdinbr = null;
 		try
 		{
 			Runtime rt = Runtime.getRuntime();
 			sendProcessBegun(new ConstructionEvent(this, GSStatus.ACCEPTED, "starting"));
-			Process prcs = (dir == null) 
+			prcs = (dir == null) 
 			    ? rt.exec(command, args.toArray(new String[args.size()]))
 			    : rt.exec(command, args.toArray(new String[args.size()]), dir);
 
 			InputStreamReader eisr = new InputStreamReader(prcs.getErrorStream());
 			InputStreamReader stdinisr = new InputStreamReader(prcs.getInputStream());
-			BufferedReader ebr = new BufferedReader(eisr);
-			BufferedReader stdinbr = new BufferedReader(stdinisr);
+			ebr = new BufferedReader(eisr);
+			stdinbr = new BufferedReader(stdinisr);
 			// Captures the std err of a program and pipes it into
 			// std in of java
 
@@ -439,25 +447,27 @@ public class GS2PerlConstructor extends CollectionConstructor
 					sendProcessStatus(new ConstructionEvent(this, GSStatus.CONTINUING, stdinline));
 				}
 			}
-			bw.close();
-
+			closeResource(bw); 
+			
 			if (!this.cancel)
 			{
 				// Now display final message based on exit value
 				prcs.waitFor();
 
 				if (prcs.exitValue() == 0)
-				{
+				{	
 					//status = OK;
 					sendProcessStatus(new ConstructionEvent(this, GSStatus.CONTINUING, "Success"));
-
+					
+					success = true;
 				}
 				else
 				{
 					//status = ERROR;
 					sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Failure"));
 
-					return false;
+					//return false;
+					success = false;
 
 				}
 			}
@@ -465,21 +475,48 @@ public class GS2PerlConstructor extends CollectionConstructor
 			{
 				// I need to somehow kill the child process. Unfortunately Thread.stop() and Process.destroy() both fail to do this. But now, thankx to the magic of Michaels 'close the stream suggestion', it works fine.
 				sendProcessStatus(new ConstructionEvent(this, GSStatus.HALTED, "killing the process"));
-				prcs.getOutputStream().close();
-				prcs.destroy();
-				//status = ERROR;
-				return false;
+				//prcs.getOutputStream().close();
+				//prcs.destroy();
+				////status = ERROR;
+				
+				//return false;
+				success = false;
 			}
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Exception occurred " + e.toString()));
+		} finally { 
+			// http://steveliles.github.io/invoking_processes_from_java.html
+			// http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
+			// http://mark.koli.ch/leaky-pipes-remember-to-close-your-streams-when-using-javas-runtimegetruntimeexec
+		
+			 if( prcs != null ) {
+				closeResource(prcs.getErrorStream());
+				closeResource(prcs.getOutputStream());
+				closeResource(prcs.getInputStream());
+				prcs.destroy();
+			}
+		
+			closeResource(ebr);
+			closeResource(stdinbr);
 		}
 
-		// we're done, but we dont send a process complete message here cos there ight be stuff to do after this has finished.
-		return true;
-
+		// we're done, but we don't send a process complete message here cos there might be stuff to do after this has finished.
+		//return true;		
+		return success;
 	}
-
+	
+	public static void closeResource(Closeable resourceHandle) {
+		try {
+			if(resourceHandle != null) {
+				resourceHandle.close();
+				resourceHandle = null;
+			}
+		} catch(Exception e) {
+			System.err.println("Exception closing resource: " + e.getMessage());
+			e.printStackTrace();
+		}
+    }
 }
