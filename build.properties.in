@@ -17,6 +17,9 @@ tomcat.installed.path=
 
 # Default derby networked server portnumber is 1527, can change this here in case of conflict
 derby.server.port=1527
+# The following is best left as it is, except if 'localhost' doesn't work on your machine,
+# then try setting it to 127.0.0.1 or its IPv6 equivalent 0:0:0:0:0:0:0:1
+derby.server=localhost
 
 ## Collection building options
 # uncomment if you don't want to have collection building enabled
