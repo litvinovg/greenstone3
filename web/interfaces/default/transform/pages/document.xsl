@@ -206,7 +206,7 @@
 						<xsl:if test="util:checkMetadataNotDuplicate(@name, .)">
 							<tr>
 								<td class="metaTableCellName"><xsl:value-of select="@name"/></td>
-								<td class="metaTableCell" contenteditable="true"><xsl:value-of select="."/></td>
+								<td class="metaTableCell"> <textarea autocomplete="off" class="metaTableCellArea"><xsl:value-of select="."/></textarea></td>
 							</tr>
 						</xsl:if>
 					</xsl:for-each>

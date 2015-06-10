@@ -1088,9 +1088,18 @@ function loadBook()
 ************************/
 function addEditableState(editable,stateArray)
 {
+	if(editable.tagName == 'TEXTAREA')
+	{
+		nodeText = editable.value;
+	}  
+	else 
+	{
+	 	nodeText = editable.innerHTML;
+	}
+
         stateArray.push({
                 editableNode : editable,
-                initHTML : editable.innerHTML
+                initHTML : nodeText
         });
 }
 
@@ -1098,7 +1107,7 @@ function getLastEditableStates()
 {	
 	editableLastStates = [];
         $(".sectionText").each(function(){addEditableState(this,editableLastStates);});
-        $(".metaTableCell").each(function(){addEditableState(this,editableLastStates);});
+        $(".metaTableCellArea").each(function(){addEditableState(this,editableLastStates);});
 
 }
 

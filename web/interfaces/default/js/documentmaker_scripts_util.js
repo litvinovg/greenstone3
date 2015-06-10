@@ -295,7 +295,7 @@ function saveAndRebuild(rebuild)
       var nameCell = cells[0];
       var name = nameCell.innerHTML;
       var valueCell = cells[1];
-      var value = valueCell.innerHTML;
+      var value = valueCell.getElementsByTagName("TEXTAREA")[0].value;
       metadataChanges.push({type:'delete', docID:docID, name:name, value:value});
       removeFromParent(currentRow);
     }
@@ -307,9 +307,8 @@ function saveAndRebuild(rebuild)
 	for(var i = 0; i < changes.length; i++)
 	{
 		var changedElem = changes[i];
-		
 		//Save metadata 	
-		if(gs.functions.hasClass(changedElem, "metaTableCell")) 
+		if(gs.functions.hasClass(changedElem, "metaTableCellArea")) 
 		{
 			//Get document ID
 			var currentElem = changedElem;
@@ -317,11 +316,11 @@ function saveAndRebuild(rebuild)
 			var docID = currentElem.getAttribute("id").substring(4);
 
 			//Get metadata name
-			var row = changedElem.parentNode;
+			var row = changedElem.parentNode.parentNode;
 			var cells = row.getElementsByTagName("TD");
 			var nameCell = cells[0];
 			var name = nameCell.innerHTML;
-			var value = changedElem.innerHTML;
+			var value = changedElem.value;
 			value = value.replace(/&nbsp;/g, " ");
 
 			var orig = changedElem.originalValue;
@@ -329,7 +328,7 @@ function saveAndRebuild(rebuild)
 			  orig = orig.replace(/&nbsp;/g, " ");
 			}
 			metadataChanges.push({collection:collection, docID:docID, name:name, value:value, orig:orig});
-			changedElem.originalValue = changedElem.innerHTML;
+			changedElem.originalValue = changedElem.value;
 			addCollectionToBuild(collection);
 		}
 		//Save content
@@ -719,7 +718,7 @@ function changeVisibleMetadata(metadataSetName)
 function asyncRegisterEditSection(cell)
 {
 	//This registering can cause a sizeable delay so we'll thread it (effectively) so the browser is not paused
-	cell.originalValue = cell.innerHTML;
+	cell.originalValue = cell.value;
 	setTimeout(function(){addEditableState(cell, editableInitStates)}, 0);
 }
 
@@ -792,7 +791,7 @@ function addFunctionalityToTable(table)
 			}
 		}
 			
-		asyncRegisterEditSection(cells[1]);
+		asyncRegisterEditSection(cells[1].getElementsByTagName("textarea")[0]);
 		addRemoveLinkToRow(this);
 	});
 
@@ -811,12 +810,12 @@ function addFunctionalityToTable(table)
 			return;
 		}
 		
-		var newRow = $("<tr>");
+		var newRow = $("<tr>", {"style": "display: table-row;"});
 		var nameCell = $("<td>" + name + "</td>");
 		nameCell.attr("class", "metaTableCellName");
-		var valueCell = $("<td>", {"class": "metaTableCell"});
-		valueCell.attr("contenteditable","true");
-		
+		var valueCell = $("<td>", {"class": "metaTableCell"}); 	
+		var textValue = $("<textarea>", {"class": "metaTableCellArea"}); 
+		valueCell.append(textValue);
 		newRow.append(nameCell);
 		newRow.append(valueCell);
 		addRemoveLinkToRow(newRow);
