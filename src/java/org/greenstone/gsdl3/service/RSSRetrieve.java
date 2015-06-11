@@ -25,6 +25,7 @@ import java.util.Vector;
 import java.util.HashMap;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+
 import org.apache.log4j.*;
 
 public class RSSRetrieve extends ServiceRack {
@@ -89,16 +90,18 @@ public class RSSRetrieve extends ServiceRack {
 	
 	//logger.error("**** collection metadata:");
 	//GSXML.elementToLogAsString(collMeta, true);
-
+	
 	// work out some commonly used variables such as lang and url_prefix
 	String lang = request.getAttribute("lang");
 	if(lang.equals("")) {
 	    lang = "en";
 	}
-
+	//Get baseUrl from request 
+	String baseURL = request.getAttribute("baseURL");
+	
 	// url_prefix is of the form http://domain/greenstone3/library/collection/_colname_/
-	String url_prefix = GlobalProperties.getFullGSDL3WebAddress()+"/"+this.library_name+"/collection/"+this.cluster_name;
-
+	//String url_prefix = GlobalProperties.getFullGSDL3WebAddress()+"/"+this.library_name+"/collection/"+this.cluster_name;
+	String url_prefix = baseURL+"library"+"/"+this.library_name+"/collection/"+this.cluster_name;
 
 	// generate the header and footer
 	Document rssDoc = XMLConverter.newDOM();

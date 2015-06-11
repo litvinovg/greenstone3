@@ -9,9 +9,7 @@ import org.w3c.dom.Element;
 
 // other java stuff
 import java.util.*;
-
 import java.io.Serializable;
-
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -26,6 +24,7 @@ public class RSSAction extends Action
 	/** process a request */
 	public Node process(Node message_node)
 	{
+		
 		Element message = GSXML.nodeToElement(message_node);
 	    Document doc = message.getOwnerDocument();
 	    
@@ -40,6 +39,9 @@ public class RSSAction extends Action
 		String service_name = "RSSFeed"; // RSSFeed service of RSSRetrieve.java
 		String collection = (String) params.get(GSParams.COLLECTION);
 		String to = GSPath.prependLink(service_name, collection); // collection/RSSFeed
+		// Get baseUrl for links in RSS Feed
+		String baseUrl = request.getAttribute("baseURL");
+		
 		
 		// the first part of the response is the service description 
 		// for now get this again from the service. 
@@ -47,8 +49,10 @@ public class RSSAction extends Action
     
 		Element mr_request_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		Element rss_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		//Pass baseURL to processRSSFeed
+		rss_request.setAttribute("baseURL", baseUrl);
 		mr_request_message.appendChild(rss_request);
-
+		
 		Element rss_response = (Element) this.mr.process(mr_request_message);
 		rss_response = (Element) GSXML.getChildByTagName(rss_response, GSXML.RESPONSE_ELEM); // just the response tag
 		// NEED ERROR PROCESSING ?
