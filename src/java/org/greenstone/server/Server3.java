@@ -29,7 +29,7 @@ public class Server3 extends BaseServer
 		START_CMD = "start";
 		RESTART_CMD = "restart";
 		CONFIGURE_CMD = "configure";
-		STOP_CMD = "force-stop-tomcat stop-derby";
+		STOP_CMD = "force-stop-tomcat force-stop-derby";
 
 		String is_read_only = System.getProperty("gsdl3home.isreadonly","false");
 		if (is_read_only.equals("true")) {

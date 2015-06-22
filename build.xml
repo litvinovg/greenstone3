@@ -786,36 +786,64 @@
 
   <target name="get-default-servlet-url">
     <echo>http://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet}</echo>
-  </target>	
-  
-  <target name="start-derby-java">
-    <echo>Launching derby on ${derby.server}:${derby.server.port}...</echo>
-    <java classname="org.apache.derby.drda.NetworkServerControl" fork="true" spawn="true" clonevm="true">      
-      <arg value="start"/>
-      <classpath refid="derby.server.classpath"/>
-    </java>
+  </target> 
+
+  <target name="check-derbyserver-running">
+    <condition property="derby.isrunning" value="true" else="false">
+      <!--<socket server="jdbc:derby://${derby.server}" port="${derby.server.port}"/>-->
+      <socket server="${derby.server}" port="${derby.server.port}"/><!-- like telnet machine port -->
+    </condition>
+    <echo>Derby is running: ${derby.isrunning}</echo>
+  </target>
+
+  <target name="start-derby-java" depends="check-derbyserver-running">
+    <if><bool><not><istrue value="${derby.isrunning}"/></not></bool>
+      <echo>Launching derby on ${derby.server}:${derby.server.port}...</echo>
+      <java classname="org.apache.derby.drda.NetworkServerControl" fork="true" spawn="true" clonevm="true">      
+	<arg value="start"/>
+	<classpath refid="derby.server.classpath"/>
+      </java>
+      <else>
+	<echo>Derby server ALREADY RUNNING on ${derby.server}:${derby.server.port}</echo>
+      </else>
+    </if>
   </target>
   
   <!-- Using derby 10.1.2.1
        See db-derby-10.1.2.1-bin/docs/html/adminguide/index.html -->
-  <target name="start-derby">
-    <echo>About to launch derby on ${derby.server}:${derby.server.port}</echo>
-    <property name="derby.server.classpath.prop" refid="derby.server.classpath" />
-
-    <exec executable="java" spawn="true"><!-- failonerror="true"-->
-      <env key="CLASSPATH" path="${derby.server.classpath.prop}"/>
-      <arg value="org.apache.derby.drda.NetworkServerControl"/>
-      <arg value="start"/>
-      <arg value="-p"/>
-      <arg value="${derby.server.port}"/>
-    </exec>   
+  <target name="start-derby" depends="check-derbyserver-running">
+    <if><bool><not><istrue value="${derby.isrunning}"/></not></bool>
+      <echo>About to launch derby on ${derby.server}:${derby.server.port}</echo>
+      <property name="derby.server.classpath.prop" refid="derby.server.classpath" />
+      
+      <exec executable="java" spawn="true"><!-- failonerror="true"-->
+	<env key="CLASSPATH" path="${derby.server.classpath.prop}"/>
+	<arg value="org.apache.derby.drda.NetworkServerControl"/>
+	<arg value="start"/>
+	<arg value="-p"/>
+	<arg value="${derby.server.port}"/>
+      </exec>
+      <else>
+	<echo>Derby networked server ALREADY RUNNING on ${derby.server}:${derby.server.port}</echo>
+      </else>
+    </if>
   </target>
 
-  <target name="stop-derby">
+  <target name="force-stop-derby">
     <java classname="org.apache.derby.drda.NetworkServerControl">
       <arg value="shutdown"/>
       <classpath refid="derby.server.classpath"/>
     </java>
+  </target>
+
+  <target name="stop-derby" description="Shutdown derby server only if running" depends="check-derbyserver-running"><!-- if="${derby.isrunning}" checks if true or false only from ant 1.8 on -->
+    <if><bool><istrue value="${derby.isrunning}"/></bool>
+      <!--<echo>Derby is |${derby.isrunning}| running</echo>-->
+      <antcall target="force-stop-derby"/>
+      <else>
+	<echo>Derby is not running</echo>
+      </else>
+    </if>
   </target>
 
   <target name="start" depends="init,configure-tomcat,configure-web,configure-solr-ext,start-derby,start-tomcat"
@@ -1487,7 +1515,12 @@
   
 
   <!-- Another way: http://ptrthomas.wordpress.com/2006/03/25/how-to-start-and-stop-tomcat-from-ant/ -->
-  <target name="start-tomcat" description="Startup only Tomcat" depends="init" if="tomcat.islocal">
+  <target name="start-tomcat" description="Startup only Tomcat" depends="init,check-tomcat-running" if="tomcat.islocal">
+    <if><bool><istrue value="${tomcat.isrunning}"/></bool>
+      <echo>**************************************</echo>
+      <echo>A TOMCAT IS ALREADY RUNNING ON http://${tomcat.server}:${tomcat.port}. NOT STARTING.</echo>
+      <echo>**************************************</echo>
+      <else>
     <property name="tomcat.classpath" refid="local.tomcat.classpath"/>
     <property name="tomcat.path" refid="local.tomcat.path"/>
 
@@ -1536,6 +1569,9 @@
         <http url="http://${tomcat.server}:${tomcat.port}${app.path}/index.html"/>
       </and>
     </waitfor>
+
+   </else>
+   </if>
   </target>
 
   <!--ant task http: http://www.jajakarta.org/ant/ant-1.6.1/docs/ja/manual/api/org/apache/tools/ant/taskdefs/condition/Http.html-->
