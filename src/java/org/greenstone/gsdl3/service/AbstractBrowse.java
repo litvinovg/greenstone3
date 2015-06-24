@@ -92,14 +92,31 @@ public abstract class AbstractBrowse extends ServiceRack
 		this.config_info = info;
 		if (macro_resolver != null)
 		{
-			macro_resolver.setSiteDetails(this.site_http_address, this.cluster_name, this.library_name);
-			// set up the macro resolver
-			Element replacement_elem = (Element) GSXML.getChildByTagName(extra_info, GSXML.REPLACE_ELEM + GSXML.LIST_MODIFIER);
-			if (replacement_elem != null)
+		  macro_resolver.setSiteDetails(this.site_http_address, this.cluster_name, this.getLibraryName());
+		  // set up the macro resolver
+		  Element replacement_elem = (Element) GSXML.getChildByTagName(extra_info, GSXML.REPLACE_ELEM + GSXML.LIST_MODIFIER);
+		  if (replacement_elem != null)
+		    {
+		      macro_resolver.addMacros(replacement_elem);
+		    }
+		  
+		  // look for any refs to global replace lists
+		  NodeList replace_refs_elems = extra_info.getElementsByTagName(GSXML.REPLACE_ELEM + GSXML.LIST_MODIFIER + GSXML.REF_MODIFIER);
+		  for (int i = 0; i < replace_refs_elems.getLength(); i++)
+		    {
+		      String id = ((Element) replace_refs_elems.item(i)).getAttribute("id");
+		      if (!id.equals(""))
 			{
-				macro_resolver.addMacros(replacement_elem);
+			  Element replace_list = GSXML.getNamedElement(this.router.config_info, GSXML.REPLACE_ELEM + GSXML.LIST_MODIFIER, "id", id);
+			  if (replace_list != null)
+			    {
+			      macro_resolver.addMacros(replace_list);
+			    }
 			}
+		    }
 		}
+
+		
 
 		// check that there are classifiers specified
 		Element class_list = (Element) GSXML.getChildByTagName(info, GSXML.CLASSIFIER_ELEM + GSXML.LIST_MODIFIER);
