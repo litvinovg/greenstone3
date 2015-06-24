@@ -27,6 +27,7 @@ import java.util.StringTokenizer;
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.BasicDocumentDatabase;
 import org.greenstone.gsdl3.util.DBInfo;
+import org.greenstone.gsdl3.util.MacroResolver;
 import org.greenstone.gsdl3.util.GS2MacroResolver;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
@@ -49,6 +50,7 @@ public class GS2Browse extends AbstractBrowse
   BasicDocumentDatabase gs_doc_db = null;
 	public GS2Browse()
 	{
+	  this.macro_resolver = new GS2MacroResolver(this.coll_db, this.class_loader);
 	}
 
 	public void cleanUp()
@@ -106,7 +108,7 @@ public class GS2Browse extends AbstractBrowse
 			logger.error("Could not open collection database!");
 			return false;
 		}
-		this.macro_resolver = new GS2MacroResolver(this.coll_db, this.class_loader);
+		
 		
 		gs_doc_db = new BasicDocumentDatabase(database_type, this.site_home, this.cluster_name, index_stem);
 		if (!gs_doc_db.isValid())
@@ -189,7 +191,7 @@ public class GS2Browse extends AbstractBrowse
 			{
 				String key = it.next();
 				String value = info.getInfo(key);
-				GSXML.addMetadata(metadata_list, key, value);
+				GSXML.addMetadata(metadata_list, key, this.macro_resolver.resolve(value, lang, MacroResolver.SCOPE_META, node_id));
 			}
 
 		}
@@ -199,7 +201,7 @@ public class GS2Browse extends AbstractBrowse
 			{
 				String meta_name = metadata_names.get(i);
 				String value = (String) info.getInfo(meta_name);
-				GSXML.addMetadata(metadata_list, meta_name, value);
+				GSXML.addMetadata(metadata_list, meta_name, this.macro_resolver.resolve(value, lang, MacroResolver.SCOPE_META, node_id));
 			}
 		}
 		return metadata_list;
