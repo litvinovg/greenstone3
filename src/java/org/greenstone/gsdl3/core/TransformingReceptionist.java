@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -382,6 +383,7 @@ public class TransformingReceptionist extends Receptionist
 
 		Document doc = XMLConverter.newDOM();
 		Element extraMetadataList = doc.createElement(GSXML.EXTRA_METADATA + GSXML.LIST_MODIFIER);
+		HashSet<String> name_set = new HashSet<String>();
 		for (File stylesheet : stylesheets)
 		{
 			ArrayList<String> requiredMetadata = _metadataRequiredMap.get(stylesheet.getAbsolutePath());
@@ -390,9 +392,12 @@ public class TransformingReceptionist extends Receptionist
 			{
 				for (String metadataString : requiredMetadata)
 				{
+				  if (!name_set.contains(metadataString)) {
+				      name_set.add(metadataString);
 					Element metadataElem = doc.createElement(GSXML.EXTRA_METADATA);
 					metadataElem.setAttribute(GSXML.NAME_ATT, metadataString);
 					extraMetadataList.appendChild(metadataElem);
+				    }
 				}
 			}
 		}
