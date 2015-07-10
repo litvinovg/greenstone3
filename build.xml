@@ -796,6 +796,19 @@
     <echo>Derby is running: ${derby.isrunning}</echo>
   </target>
 
+  <!-- Need a copy of the check-derby-running target with a distinct property, because ant restart runs 
+       both stop and start, which stop and start derby respectively. Both  need check the derby socket.
+       Because each property can be set only once during an invocation with ant, ant restart will need 
+       two check-derbyserver properties, one for each derby check. -->
+  <target name="check-derbyserver-started">
+    <condition property="derby.isstarted" value="true" else="false">
+      <socket server="${derby.server}" port="${derby.server.port}"/>
+    </condition>
+    <echo>Derby is running: ${derby.isstarted}</echo>
+  </target>
+
+
+  <!-- Unused -->
   <target name="start-derby-java" depends="check-derbyserver-running">
     <if><bool><not><istrue value="${derby.isrunning}"/></not></bool>
       <echo>Launching derby on ${derby.server}:${derby.server.port}...</echo>
@@ -809,11 +822,19 @@
     </if>
   </target>
   
+  <target name="start-derby" depends="check-derbyserver-started">
+    <if><bool><not><istrue value="${derby.isstarted}"/></not></bool>
+      <echo>About to launch derby on ${derby.server}:${derby.server.port}</echo>
+      <antcall target="force-start-derby"/>
+      <else>
+	<echo>Derby networked server ALREADY RUNNING on ${derby.server}:${derby.server.port}</echo>
+      </else>
+    </if>
+  </target>
+
   <!-- Using derby 10.1.2.1
        See db-derby-10.1.2.1-bin/docs/html/adminguide/index.html -->
-  <target name="start-derby" depends="check-derbyserver-running">
-    <if><bool><not><istrue value="${derby.isrunning}"/></not></bool>
-      <echo>About to launch derby on ${derby.server}:${derby.server.port}</echo>
+  <target name="force-start-derby">
       <property name="derby.server.classpath.prop" refid="derby.server.classpath" />
       
       <exec executable="java" spawn="true"><!-- failonerror="true"-->
@@ -823,10 +844,7 @@
 	<arg value="-p"/>
 	<arg value="${derby.server.port}"/>
       </exec>
-      <else>
-	<echo>Derby networked server ALREADY RUNNING on ${derby.server}:${derby.server.port}</echo>
-      </else>
-    </if>
+
   </target>
 
   <target name="force-stop-derby">
@@ -1513,14 +1531,21 @@
     </waitfor>
   </target>  
   
+  <target name="start-tomcat" description="Startup only Tomcat" depends="check-tomcat-started">
 
-  <!-- Another way: http://ptrthomas.wordpress.com/2006/03/25/how-to-start-and-stop-tomcat-from-ant/ -->
-  <target name="start-tomcat" description="Startup only Tomcat" depends="init,check-tomcat-running" if="tomcat.islocal">
-    <if><bool><istrue value="${tomcat.isrunning}"/></bool>
+    <if><bool><istrue value="${tomcat.isstarted}"/></bool>
       <echo>**************************************</echo>
       <echo>A WEB SERVER IS ALREADY RUNNING ON http://${tomcat.server}:${tomcat.port}. NOT STARTING.</echo>
       <echo>**************************************</echo>
       <else>
+	<antcall target="force-start-tomcat"/>
+      </else>
+      </if>
+  </target>
+
+  <!-- Another way: http://ptrthomas.wordpress.com/2006/03/25/how-to-start-and-stop-tomcat-from-ant/ -->
+  <target name="force-start-tomcat" description="Startup only Tomcat" depends="init" if="tomcat.islocal">
+
     <property name="tomcat.classpath" refid="local.tomcat.classpath"/>
     <property name="tomcat.path" refid="local.tomcat.path"/>
 
@@ -1570,8 +1595,6 @@
       </and>
     </waitfor>
 
-   </else>
-   </if>
   </target>
 
   <!--ant task http: http://www.jajakarta.org/ant/ant-1.6.1/docs/ja/manual/api/org/apache/tools/ant/taskdefs/condition/Http.html-->
@@ -1621,6 +1644,17 @@
       <http url="http://${tomcat.server}:${tomcat.port}"/>
     </condition>
   </target>
+  
+  <!-- Need a copy of the check-tomcat-running target with a distinct property, because ant restart runs 
+       both stop and start, both of which need to do tomcat checks. Each property can be set only once during 
+       an invocation with ant. So ant restart will need two properties to store each of the tomcat checks -->
+  <target name="check-tomcat-started">
+    <condition property="tomcat.isstarted">
+      <http url="http://${tomcat.server}:${tomcat.port}"/>
+    </condition>
+  </target>
+
+
 
   <!-- stop-tomcat checks if the tomcat server is already running. If it appears to be running
        (regardless of whether tomcat was just starting to shut down), this target calls force-stop-tomcat
@@ -1649,7 +1683,7 @@
      </if>
   </target>
 
-  <target name="restart-tomcat" description="Shutdown and restart only Tomcat" depends="init,stop-tomcat,start-tomcat"/>
+  <target name="restart-tomcat" description="Shutdown and restart only Tomcat" depends="init,stop-tomcat,force-start-tomcat"/>
 
   <target name="setup-catalina-ant-tasks">
     <!-- Configure the custom Ant tasks for the Tomcat Manager application -->
@@ -1843,7 +1877,7 @@
       <bool>
 	<istrue value="${tomcat.isrunning}"/>
 	</bool>
-      <antcall target="start-tomcat"/>
+      <antcall target="force-start-tomcat"/>
     </if>
     -->
   </target>
@@ -1930,7 +1964,7 @@
   with the default servicename of localsite-->
   <target name="deploy-localsite" depends="init" 
     description="Deploy the SOAP server for localsite. Will start and stop Tomcat.">
-    <antcall target="start-tomcat"/>
+    <antcall target="force-start-tomcat"/>
     <echo>Deploying ${base.webservice.name} web services for localsite under service name: localsite</echo>
     <antcall target="create-deployment-files">
       <param name="axis.sitename" value="localsite"/>
