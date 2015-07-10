@@ -1518,7 +1518,7 @@
   <target name="start-tomcat" description="Startup only Tomcat" depends="init,check-tomcat-running" if="tomcat.islocal">
     <if><bool><istrue value="${tomcat.isrunning}"/></bool>
       <echo>**************************************</echo>
-      <echo>A TOMCAT IS ALREADY RUNNING ON http://${tomcat.server}:${tomcat.port}. NOT STARTING.</echo>
+      <echo>A WEB SERVER IS ALREADY RUNNING ON http://${tomcat.server}:${tomcat.port}. NOT STARTING.</echo>
       <echo>**************************************</echo>
       <else>
     <property name="tomcat.classpath" refid="local.tomcat.classpath"/>
