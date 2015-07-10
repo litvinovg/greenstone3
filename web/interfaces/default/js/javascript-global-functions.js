@@ -427,11 +427,16 @@ function callMetadataServer(callingFunction, url, responseFunction)
     // From:
     // <gs3server>/cgi-bin/metadata-server.pl?a=set-archives-metadata&c=smallcol&site=localsite&d=HASH01454f31011f6b6b26eaf8d7&metaname=Title&metavalue=Moo&prevmetavalue=Blabla&metamode=override
     // To:
-    // <gs3server>/library?a=g&rt=r&ro=1&s=SetMetadata&s1.collection=smallcol&s1.site=localsite&s1.d=HASH01454f31011f6b6b26eaf8d7&s1.metaname=Title&s1.metavalue=Moo&s1.prevmetavalue=Blabla&s1.metamode=override
+    // <gs3server>/library?a=g&rt=r&ro=1&s=SetMetadata&s1.a=set-archives-metadata&s1.collection=smallcol&s1.site=localsite&s1.d=HASH01454f31011f6b6b26eaf8d7&s1.metaname=Title&s1.metavalue=Moo&s1.prevmetavalue=Blabla&s1.metamode=override
 
-    url = url.replace("&c=",  "&collection="); // c is a special param name for GS2Construct
-    url = url.replace(/(&|\?)([^=]*=)/g, "$1"+"s1.$2"); // prefix param names with "s1."
-    url = url.replace("cgi-bin/metadata-server.pl?",  gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=SetMetadata&");
+    // if we're doing a set- metdata operation, then we'll be changing the URL to make sure we go through GS3's authentication
+    if(url.indexOf("set-") != -1) {
+	url = url.replace("&c=",  "&collection="); // c is a special param name for GS2Construct
+	url = url.replace(/(&|\?)([^=]*=)/g, "$1"+"s1.$2"); // prefix param names with "s1."
+	url = url.replace("cgi-bin/metadata-server.pl?",  gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=SetMetadata&");
+
+	console.log("@@@@@ URL is " + url);
+    } // otherwise, such as for get- metadata operation, we proceed as before, which will not require authentication
 
 	$.ajax(url)
 	.success(function(response)
