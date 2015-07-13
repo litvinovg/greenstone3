@@ -88,7 +88,12 @@
 	
 	<xsl:template name="wrappedSectionText">
 		<br /><br />
-		<div id="text{@nodeID}" contenteditable="true" class="sectionText"><!-- *** -->
+		<div id="text{@nodeID}" class="sectionText"><!-- *** -->
+			<xsl:if test="/page/pageRequest/paramList/param[(@name='docEdit') and (@value='on' or @value='true' or @value='1')]">
+            			<xsl:attribute name="contenteditable">
+					<xsl:text>true</xsl:text>
+				</xsl:attribute>
+		        </xsl:if>
 			<xsl:attribute name="style">
 				<xsl:choose>
 					<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
