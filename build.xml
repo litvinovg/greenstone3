@@ -1425,6 +1425,15 @@
         <filter token="shutdown-port" value="${tomcat.shutdown.port}"/>
       </filterset>
     </copy>
+
+    <!-- set up the solr context -->
+    <copy file="${basedir}/ext/solr/solr-tomcat-context.xml.in" tofile="${packages.home}/tomcat/conf/Catalina/localhost/solr.xml" overwrite="true">
+      <filterset>
+        <filter token="gsdl3webhome" value="${web.writablehome}"/>
+	<filter token="tomcathome" value="${basedir}/packages/tomcat"/>
+      </filterset>
+    </copy>
+
     <!-- set up the greenstone3 context, it may have a custom name specified in build.properties -->
 	<if><bool><not><equals arg1="greenstone3" arg2="${custom.context}"></equals></not></bool>
 		<copy file="${basedir}/resources/tomcat/greenstone3.xml" tofile="${basedir}/resources/tomcat/${custom.context}.xml" overwrite="true"/>
