@@ -489,9 +489,12 @@ public class OAIReceptionist implements ModuleInterface {
       }
 
       //if there are any date params, check they're of the right format
+      Date from_date = null;
+      Date until_date = null;
+
       from = param_map.get(OAIXML.FROM);
       if(from != null) {	
-	Date from_date = OAIXML.getDate(from);
+	from_date = OAIXML.getDate(from);
 	if(from_date == null) {
 	  logger.error("invalid date: " + from);
 	  return OAIXML.createErrorMessage(OAIXML.BAD_ARGUMENT, "invalid format for "+ OAIXML.FROM);
@@ -499,18 +502,39 @@ public class OAIReceptionist implements ModuleInterface {
       }
       until = param_map.get(OAIXML.UNTIL);
       if(until != null) {	
-	Date until_date = OAIXML.getDate(until);
+	until_date = OAIXML.getDate(until);
 	if(until_date == null) {
 	  logger.error("invalid date: " + until);
 	  return OAIXML.createErrorMessage(OAIXML.BAD_ARGUMENT, "invalid format for "+ OAIXML.UNTIL);
 	} 
       }    
+
       if(from != null && until != null) { // check they are of the same date-time format (granularity)
 	if(from.length() != until.length()) {
 	  logger.error("The request has different granularities (date-time formats) for the From and Until date parameters.");
 	  return OAIXML.createErrorMessage(OAIXML.BAD_ARGUMENT, "The request has different granularities (date-time formats) for the From and Until date parameters.");
 	}
+
+	if(from_date.compareTo(until_date) > 0) { // from date can't be later than until date
+	    return OAIXML.createErrorMessage(OAIXML.NO_RECORDS_MATCH, "");
+	}
       }
+      
+      if(until_date != null) {
+	  
+	  // Also call until_date.compareTo(earliestdatestamp) as the until date can't precede the earliest timestamp
+	  // Unfortunately, this test has to be done after the granularity test
+	  // compareTo() returns the value 0 if the argument Date is equal to this Date; a value less than 0 if this Date is before 
+	  // the Date argument; and a value greater than 0 if this Date is after the Date argument.    
+	  long earliestDatestamp = getEarliestDateStamp(collection_list);
+	  String earliestDatestamp_str = OAIXML.getTime(earliestDatestamp);
+	  Date earliestDatestamp_date = OAIXML.getDate(earliestDatestamp_str);
+	  
+	  if(until_date.compareTo(earliestDatestamp_date) < 0) {
+	      return OAIXML.createErrorMessage(OAIXML.NO_RECORDS_MATCH, "");
+	  }
+      }
+      
   
       // check the set arg is a set we know about
       set_requested = param_map.containsKey(OAIXML.SET);
