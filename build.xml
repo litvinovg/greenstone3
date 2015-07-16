@@ -1427,10 +1427,16 @@
     </copy>
 
     <!-- set up the solr context -->
+    
+    <exec executable="${basedir}/IPv4.sh" os="${os.unix}" failonerror="false" outputproperty="ipv4.val"/>
+    <exec executable="${basedir}/IPv4.bat" osfamily="windows" failonerror="false" outputproperty="ipv4.val"/>
+
+
     <copy file="${basedir}/ext/solr/solr-tomcat-context.xml.in" tofile="${packages.home}/tomcat/conf/Catalina/localhost/solr.xml" overwrite="true">
       <filterset>
         <filter token="gsdl3webhome" value="${web.writablehome}"/>
 	<filter token="tomcathome" value="${basedir}/packages/tomcat"/>
+	<filter token="IPv4" value="${ipv4.val}"/>
       </filterset>
     </copy>
 
