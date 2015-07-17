@@ -1412,7 +1412,14 @@
 
     </if>
 
+  </target>  
+
+  <target name="test-ipv4">
+    <exec executable="${basedir}/bin/script/IPv4.sh" os="${os.unix}" failonerror="false" outputproperty="ipv4.val"/>
+    <exec executable="${basedir}/IPv4.bat" osfamily="windows" failonerror="false" outputproperty="ipv4.val"/>
+    <echo>IPv4 was: ${ipv4.val}</echo>
   </target>
+  
   
   <target name="configure-tomcat" depends="init,configure-tomcat-local,configure-tomcat-external"/>
   
@@ -1428,8 +1435,8 @@
 
     <!-- set up the solr context -->
     
-    <exec executable="${basedir}/IPv4.sh" os="${os.unix}" failonerror="false" outputproperty="ipv4.val"/>
-    <exec executable="${basedir}/IPv4.bat" osfamily="windows" failonerror="false" outputproperty="ipv4.val"/>
+    <exec executable="${basedir}/bin/script/IPv4.sh" os="${os.unix}" failonerror="false" outputproperty="ipv4.val"/>
+    <exec executable="${basedir}/bin/script/IPv4.bat" osfamily="windows" failonerror="false" outputproperty="ipv4.val"/>
 
 
     <copy file="${basedir}/ext/solr/solr-tomcat-context.xml.in" tofile="${packages.home}/tomcat/conf/Catalina/localhost/solr.xml" overwrite="true">
