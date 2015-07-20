@@ -54,14 +54,19 @@ public class DerbySQLServer implements SQLServer{
     } 
 
     public boolean disconnect(String databasePath){
-	try{
-	    // Only shutdown if using embedded derby, 
-	    // not if it's a networked derby server, which is what we now use
 
-	    if(DRIVER.equals("org.apache.derby.jdbc.EmbeddedDriver")) {
-		String protocol_str = PROTOCOL + databasePath + ";shutdown=true"; 	    
-		DriverManager.getConnection(protocol_str);
-	    }
+	// Only shutdown if using embedded derby, 
+	// not if it's a networked derby server, which is what we now use
+
+	if(!DRIVER.equals("org.apache.derby.jdbc.EmbeddedDriver")) {
+	    return true;
+	}
+
+	// embedded derby driver
+	try{
+	    String protocol_str = PROTOCOL + databasePath + ";shutdown=true"; 	    
+	    DriverManager.getConnection(protocol_str);
+	    
 	}catch (SQLException se){
 	    String theError = (se).getSQLState();
 	    if (!theError.equals("08006")){

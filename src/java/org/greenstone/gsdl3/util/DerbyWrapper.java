@@ -130,16 +130,18 @@ public class DerbyWrapper
 
 	public static void shutdownDatabaseServer()
 	{
-		boolean gotSQLExc = false;
 
+		// shutdown the server if we're using an embedded derby
+		// if we're a derby client using the derby network server
+		
+		if(!DRIVER.equals("org.apache.derby.jdbc.EmbeddedDriver")) {
+		    return;
+		}
+
+		boolean gotSQLExc = false;
 		try
 		{
-			//  shutdown the whole server
-		    // but not if we're a derby client using the derby network server 
-		    // only if we're using an embedded derby
-		    if(DRIVER.equals("org.apache.derby.jdbc.EmbeddedDriver")) {
-			DriverManager.getConnection(PROTOCOL + ";shutdown=true");
-		    }
+		    DriverManager.getConnection(PROTOCOL + ";shutdown=true");
 		}
 		catch (SQLException se)
 		{
