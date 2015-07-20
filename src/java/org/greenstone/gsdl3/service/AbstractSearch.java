@@ -65,6 +65,9 @@ public abstract class AbstractSearch extends ServiceRack
 	protected boolean does_chunking = false;
 	/** does this service support faceting search results */
 	protected boolean does_faceting = false;
+	/** does this service support highlighting snippets results */
+	protected boolean does_highlight_snippets = false;
+	protected boolean does_full_field_highlighting = false;
 	/**
 	 * the default document type - use if all documents are the same type
 	 */

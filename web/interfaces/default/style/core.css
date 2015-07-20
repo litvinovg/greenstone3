@@ -148,6 +148,10 @@ pre {
 	text-align:center;
 }
 
+.HighlightSnippet {
+	font-size:0.7em;
+}
+
 #container {
 	position: relative;
 	margin: 0 auto 20px auto;
@@ -207,6 +211,11 @@ pre {
 .termHighlight{
 	background:yellow;
 }
+.snippetText{
+        font-weight:bold;
+        font-style:italic;
+}
+
 
 #viewAndZoomOptions {
 	margin-bottom:10px;

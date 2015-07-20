@@ -135,7 +135,11 @@
 						<td>
 						  <xsl:call-template name="documentBerryForClassifierOrSearchPage"/>
 						</td>
-
+						<xsl:call-template name="highlightSnippet">
+							<xsl:with-param name="nodeHASH">
+								<xsl:value-of select="@nodeID"/>
+							</xsl:with-param>
+						</xsl:call-template>
 						<xsl:call-template name="documentNodePost"/>
 					</tr>
 				</xsl:for-each>
@@ -152,6 +156,21 @@
 		</xsl:if>
 	</xsl:template>
 
+	<xsl:template name="highlightSnippet">
+		<xsl:param name="nodeHASH">
+		</xsl:param>
+		<xsl:for-each select="/page/pageResponse/highlightSnippetList/highlightSnippet[@nodeID = $nodeHASH]">
+                        <tr>
+                        	<td>
+                                </td>
+                                <td>
+        	                        <div class="HighlightSnippet">
+                	               		<xsl:value-of select="." disable-output-escaping="yes"/>
+	                                </div>
+                	        </td>
+        	        </tr>
+	        </xsl:for-each>
+	</xsl:template>
 	<xsl:template name="queryPage">
 		<xsl:for-each select="pageResponse/service">
 			<form name="QueryForm" method="get" action="{$library_name}/collection/{$collName}/search/{@name}">

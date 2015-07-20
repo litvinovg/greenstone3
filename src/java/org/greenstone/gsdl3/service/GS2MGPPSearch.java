@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -32,12 +33,10 @@ import org.greenstone.gsdl3.util.FacetWrapper;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.XMLConverter;
-
 import org.greenstone.mgpp.MGPPDocInfo;
 import org.greenstone.mgpp.MGPPQueryResult;
 import org.greenstone.mgpp.MGPPSearchWrapper;
 import org.greenstone.mgpp.MGPPTermInfo;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -355,6 +354,13 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 
 	protected ArrayList<FacetWrapper> getFacets(Object query_result)
 	{
+		return null;
+	}
+
+	@Override
+	protected Map<String, Map<String, List<String>>> getHighlightSnippets(
+			Object query_result) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

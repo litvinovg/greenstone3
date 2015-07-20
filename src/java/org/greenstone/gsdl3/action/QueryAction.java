@@ -156,6 +156,7 @@ public class QueryAction extends Action
 
 		Element query_response = (Element) GSXML.getChildByTagName(mr_query_response, GSXML.RESPONSE_ELEM);
 		Element query_result_metadata_list = (Element) GSXML.getChildByTagName(query_response, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		
 		if (query_result_metadata_list == null)
 		{
 			logger.error("No query result metadata.\n");
@@ -259,18 +260,21 @@ public class QueryAction extends Action
 
 		Element mr_metadata_response = (Element) this.mr.process(mr_metadata_message);
 
+		Element query_result_snippet_list = (Element) GSXML.getChildByTagName(query_response, GSXML.HL_SNIPPET_ELEM + GSXML.LIST_MODIFIER);
+		
 		// check for errors
 		processErrorElements(mr_metadata_response, page_response);
 
 		Element metadata_response = (Element) GSXML.getChildByTagName(mr_metadata_response, GSXML.RESPONSE_ELEM);
 
 		Element query_result_document_list = (Element) GSXML.getChildByTagName(metadata_response, GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
-
+				
 		if (query_result_document_list != null)
 		{
 			page_response.appendChild(doc.importNode(query_result_document_list, true));
+			page_response.appendChild(doc.importNode(query_result_snippet_list,true));
 		}
-
+		
 		//logger.debug("Query page:\n" + this.converter.getPrettyString(page_response));
 		//append site metadata
 		addSiteMetadata(page_response, userContext);

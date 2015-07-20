@@ -167,6 +167,7 @@ public class GSXML
 	public static final String NODE_STRUCTURE_ELEM = "nodeStructure";
 	public static final String NODE_ID_ATT = "nodeID";
 	public static final String HREF_ID_ATT = "hrefId"; // for ids that need translating
+	public static final String HL_SNIPPET_ELEM = "highlightSnippet";
 	public static final String ID_MOD_ATT = "idMod"; // might hold .rt etc for hrefIds
 	public static final String NODE_OID = "oid";
 	public static final String NODE_NAME_ATT = "nodeName";

@@ -870,10 +870,18 @@ public class DocumentAction extends Action
 
 		Element query_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		GSXML.addParametersToList(query_param_list, service_params);
+		GSXML.addParameterToList(query_param_list, "hldocOID", (String) params.get(GSParams.DOCUMENT));
 		mr_query_request.appendChild(query_param_list);
 
 		// do the query
 		Element mr_query_response = (Element) this.mr.process(mr_query_message);
+				
+		String pathNode = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.NODE_CONTENT_ELEM);
+		Element highlighted_Node = (Element) GSXML.getNodeByPath(mr_query_response, pathNode);
+		if (highlighted_Node != null)
+		{
+			return highlighted_Node;
+		}
 
 		String path = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.TERM_ELEM + GSXML.LIST_MODIFIER);
 		Element query_term_list_element = (Element) GSXML.getNodeByPath(mr_query_response, path);
@@ -1209,7 +1217,6 @@ public class DocumentAction extends Action
 			String remaining_text = new String(content_characters, last_wrote, (content_characters.length - last_wrote));
 			content_element.appendChild(doc.createTextNode(remaining_text));
 		}
-
 		return content_element;
 	}
 

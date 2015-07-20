@@ -21,12 +21,13 @@ package org.greenstone.gsdl3.service;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.FacetWrapper;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.XMLConverter;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -91,6 +92,10 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	protected boolean simple_form_search = false;
 	protected boolean advanced_form_search = false;
 	protected boolean raw_search = false;
+	//Parameters to get full field with highlighted terms
+	protected String hldocOID = null;
+	//index Field for highlighting
+	protected String indexField = null;
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.AbstractGS2FieldSearch.class.getName());
 
@@ -590,6 +595,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	/** process a query */
 	protected Element processAnyQuery(Element request, int query_type)
 	{
+				
 		String service_name = null;
 		String empty_query_test_param = null;
 		// set up the type specific bits
@@ -632,8 +638,11 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		}
 
 		// Process the request parameters
+		
 		HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
-
+		//Save as variable to make it accessable from GS2SolrSearch
+		hldocOID = (String) params.get("hldocOID");
+		//System.out.println("@@@@@Extracted hldocOID is " + hldocOID);
 		// Make sure a query has been specified
 		String query = (String) params.get(empty_query_test_param);
 		if (query == null || query.equals(""))
@@ -643,11 +652,13 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 
 		// If a field hasn't been specified, use the default - for textQuery
 		String field = (String) params.get(INDEX_PARAM);
+		//Save as variable to make it accessable from GS2SolrSearch
+		
 		if (field == null)
 		{
 			field = default_index;
 		}
-
+		indexField = field;
 		// set up the appropriate query system
 		if (!setUpQueryer(params))
 		{
@@ -667,10 +678,20 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			query = parseAdvancedFieldQueryParams(params);
 			break;
 		}
-
+		
 		// run the query
 		Object query_result = runQuery(query);
-
+		
+		// We want highlighted text to be returned right now!
+		if (hldocOID != null && does_full_field_highlighting)
+		{
+			Element nodeContentElement = result_doc.createElement(GSXML.NODE_CONTENT_ELEM);
+			nodeContentElement.setTextContent((String) query_result);
+			result.appendChild(nodeContentElement);
+			return result;
+		}
+		
+			
 		// build up the response
 
 		// Create a metadata list to store information about the query results
@@ -703,17 +724,42 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			GSXML.addMetadata(metadata_list, "numDocsReturned", "" + docs_returned);
 		}
 		
-
+		Map<String, Map<String, List<String>>> hlResults = null;
+		if (does_highlight_snippets)
+		{
+			hlResults = getHighlightSnippets(query_result);
+		}
+		
 		// add a metadata item to specify what actual query was done - eg if stuff was stripped out etc. and then we can use the query later, cos we don't know which parameter was the query
 		GSXML.addMetadata(metadata_list, "query", query);
 		if (docs.length > 0)
 		{
 			Element document_list = result_doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 			result.appendChild(document_list);
+			Element snippet_list = result_doc.createElement(GSXML.HL_SNIPPET_ELEM + GSXML.LIST_MODIFIER);
+			result.appendChild(snippet_list);
 			for (int d = 0; d < docs.length; d++)
 			{
 				String doc_id = internalNum2OID(docs[d]);
 				Element doc_node = createDocNode(result_doc, doc_id, doc_ranks[d]);
+				if (hlResults != null && hlResults.get(docs[d]) != null && hlResults.get(docs[d]).get(indexField) != null) {
+					for (String snippet : hlResults.get(docs[d]).get(indexField)){
+						//remove html tags
+						snippet = snippet.replaceAll("\\<.*?>", "");
+						//remove truncated tags
+						snippet = snippet.replaceAll(".*>", "");
+						snippet = snippet.replaceAll("\\<.*", "");
+						//remove unwanted symbols at start of line
+						snippet = snippet.replaceAll("^[ .,»):;-–]+", "");
+						//highlighting tags transformation
+						snippet = snippet.replaceAll("&lt;", "<");
+						snippet = snippet.replaceAll("&gt;", ">");
+						Element snippet_node = result_doc.createElement(GSXML.HL_SNIPPET_ELEM);
+						snippet_node.setAttribute(GSXML.NODE_ID_ATT, doc_id);
+						snippet_node.setTextContent(snippet);
+						snippet_list.appendChild(snippet_node);
+					}
+				}
 				document_list.appendChild(doc_node);
 			}
 		}
@@ -755,6 +801,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 			}
 		}
 
+		
 		return result;
 
 	}
@@ -777,6 +824,9 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	
 	/** get the list of facets */
 	abstract protected ArrayList<FacetWrapper> getFacets(Object query_result);
+	
+	/** get the map of highlighting snippets */
+	abstract protected Map<String, Map<String, List<String>>> getHighlightSnippets(Object query_result);
 
 	/** add in term info if available */
 	abstract protected boolean addTermInfo(Element term_list, HashMap<String, Serializable> params, Object query_result);
