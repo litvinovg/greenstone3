@@ -35,7 +35,9 @@ import org.greenstone.gsdl3.util.XMLConverter;
 // XML classes
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 
 // General Java classes
 import java.io.File;
@@ -85,6 +87,7 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 	protected boolean does_content = true;
 	protected boolean does_structure = true;
 
+	protected Element highlightedNode = null;
 	/** constructor */
 	public AbstractDocumentRetrieve()
 	{
@@ -549,7 +552,9 @@ public abstract class AbstractDocumentRetrieve extends ServiceRack
 		Element result = result_doc.createElement(GSXML.RESPONSE_ELEM);
 		result.setAttribute(GSXML.FROM_ATT, DOCUMENT_CONTENT_RETRIEVE_SERVICE);
 		result.setAttribute(GSXML.TYPE_ATT, GSXML.REQUEST_TYPE_PROCESS);
-
+		//import highlighted node to result
+		highlightedNode = (Element) GSXML.getChildByTagName(request, GSXML.NODE_CONTENT_ELEM);
+		
 		if (!does_content)
 		{
 			// shouldn't get here

@@ -880,7 +880,31 @@ public class DocumentAction extends Action
 		Element highlighted_Node = (Element) GSXML.getNodeByPath(mr_query_response, pathNode);
 		if (highlighted_Node != null)
 		{
-			return highlighted_Node;
+			// Build a request to process highlighted text
+			
+			Element hl_message = doc.createElement(GSXML.MESSAGE_ELEM);
+			to = GSPath.appendLink(collection, "DocumentContentRetrieve");
+			Element dc_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+			hl_message.appendChild(dc_request);
+
+			// Create a parameter list to specify the request parameters - empty for now
+			Element dc_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			dc_request.appendChild(dc_param_list);
+
+			// get the content
+			Element doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+			dc_request.appendChild(doc_list);
+			Element current_doc = doc.createElement(GSXML.DOC_NODE_ELEM);
+			doc_list.appendChild(current_doc);
+			current_doc.setAttribute(GSXML.NODE_ID_ATT, (String) params.get(GSParams.DOCUMENT));
+			//Append highlighted content to request for processing
+			dc_request.appendChild(doc.importNode(highlighted_Node, true));
+							
+			Element hl_response_message = (Element) this.mr.process(hl_message);
+			//Get results
+			NodeList contentList = hl_response_message.getElementsByTagName(GSXML.NODE_CONTENT_ELEM);
+			Element content = (Element) contentList.item(0);	
+			return content;
 		}
 
 		String path = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.TERM_ELEM + GSXML.LIST_MODIFIER);
