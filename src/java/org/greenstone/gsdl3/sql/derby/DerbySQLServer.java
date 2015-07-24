@@ -11,8 +11,8 @@ import org.greenstone.util.GlobalProperties;
 
 public class DerbySQLServer implements SQLServer{
    
-    static final String PORT = GlobalProperties.getProperty("derby.server.port");//, "1527");
-    static final String DERBYSERVER = GlobalProperties.getProperty("derby.server");//, "localhost");
+    static final String PORT = GlobalProperties.getProperty("derby.server.port", "1527");
+    static final String DERBYSERVER = GlobalProperties.getProperty("derby.server", "localhost");
     static final String PROTOCOL = "jdbc:derby://"+DERBYSERVER+":"+PORT+"/"; // "jdbc:derby://localhost:1527";
     static final String DRIVER = "org.apache.derby.jdbc.ClientDriver"; //"org.apache.derby.jdbc.EmbeddedDriver";
     static Logger logger = Logger.getLogger(org.greenstone.gsdl3.sql.derby.DerbySQLServer.class.getName());     

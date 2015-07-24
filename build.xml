@@ -1831,7 +1831,7 @@
     See http://www.dcepler.net/post.cfm/hiding-password-input-in-ant 
     But you can do: echo mypassword | ant config-admin -->
   <target name="config-admin" description="Reset admin password">
-    <input addproperty="admin.password" defaultvalue="admin" message="New admin password (3-8 characters):&gt;">
+    <input addproperty="admin.password" defaultvalue="admin" message="New admin password (3-20 characters):&gt;">
       <handler classname="org.apache.tools.ant.input.SecureInputHandler" /> <!-- password won't be visible on screen -->
     </input>
     <!--<echo>PWD: ${admin.password}</echo>-->
@@ -1849,7 +1849,7 @@
 
   <target name="get-user-data" description="Get user details">
     <input addproperty="user.username" message="Username:&gt;"/>
-    <input addproperty="user.password" defaultvalue="" message="Password (3-8 characters):&gt;">
+    <input addproperty="user.password" defaultvalue="" message="Password (3-20 characters):&gt;">
       <handler classname="org.apache.tools.ant.input.SecureInputHandler" /> <!-- password won't be visible on screen -->
     </input>
     <input addproperty="user.groups" defaultvalue="" message="Groups (comma-separated list):&gt;"/>
@@ -1858,10 +1858,10 @@
     <input addproperty="user.email" defaultvalue="" message="Email:&gt;"/>
   </target>
 
-<!-- This target won't work with Eclipse because the SecureInputHandler used below conflicts with it. 
-    See http://www.dcepler.net/post.cfm/hiding-password-input-in-ant 
-    But you can do: echo mypassword | ant config-admin -->
-  <target name="update-userdb" description="Add or modify users" depends="check-tomcat-running">
+  <!-- This target won't work with Eclipse because the SecureInputHandler used below conflicts with it. 
+       See http://www.dcepler.net/post.cfm/hiding-password-input-in-ant 
+       But you can do: echo mypassword | ant config-admin -->
+  <target name="update-userdb" description="Add or modify users" depends="start-derby">
 
     <!-- 
        We're now using derby networked server, so stopping and starting tomcat is not necessary.
@@ -1869,14 +1869,19 @@
        and only allows connections from one jvm instance at a time
 	 See http://db.apache.org/derby/papers/DerbyTut/embedded_intro.html
 	 The ${tomcat.isrunning} property is set by the depends-target "check-tomcat-running" -->
-    <!--
-    <if>
-      <bool>
-	<istrue value="${tomcat.isrunning}"/>
-      </bool>
-      <antcall target="stop-tomcat"/>
-    </if>
-    -->
+   
+    <!-- Need the derby networked server to be running in order to modify the usersDB.
+	 The start-derby task will check if derby is already running (if not, ${derby.isstarted} will 
+	 be false) and will only start up networked derby if it is not already running. 
+	 The ${derby.isstarted} property is set by the depends-target "start-derby", since it won't
+	 set the property if called with antcall (like launching in a subshell). Have to use 'depends'.
+	 We'll check ${derby.isstarted} at the end to stop derby again if we had to start it up now.-->
+    <!--<antcall target="start-derby"/>-->
+
+    <!-- wait a max of 5 seconds for the derbyserver to have started up -->
+    <waitfor maxwait="5" maxwaitunit="second">
+      <socket server="${derby.server}" port="${derby.server.port}"/>
+    </waitfor>
 
     <!--<echo>${admin.password}</echo>--> <!-- for testing -->
     <java classname="org.greenstone.gsdl3.util.ModifyUsersDB">
@@ -1889,16 +1894,17 @@
       <arg value="comment=${user.comment}"/>
       <arg value="email=${user.email}"/>
     </java>
-    
-    <!-- run tomcat again if it used to be running -->
-    <!--
+
+    <!-- Need to stop networked derby again if we ran it for this target with the depends=start-derby call. 
+	 The test here is for <not>derby.isstarted</not>, as the property would be the same as before 
+	 derby was started, since properties are immutable within a single ant command. -->
     <if>
       <bool>
-	<istrue value="${tomcat.isrunning}"/>
-	</bool>
-      <antcall target="force-start-tomcat"/>
+	<not><istrue value="${derby.isstarted}"/></not>
+      </bool>
+      <antcall target="force-stop-derby"/>
     </if>
-    -->
+
   </target>
 
 

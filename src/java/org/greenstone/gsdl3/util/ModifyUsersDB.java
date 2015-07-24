@@ -26,6 +26,8 @@ import org.greenstone.gsdl3.service.Authentication;
 // java -cp /full/path/to/GS3/web/WEB-INF/lib/gsdl3.jar:/full/path/to/GS3/web/WEB-INF/lib/derby.jar org.greenstone.gsdl3.util.usersDB2txt web/etc/usersDB/
 public class ModifyUsersDB
 {
+    public static int PWD_MIN_LENGTH = 3;
+    public static int PWD_MAX_LENGTH = 20;
 
 	public static void main(String[] args) throws SQLException
 	{
@@ -48,18 +50,18 @@ public class ModifyUsersDB
 		boolean noAdd = false;
 
 		// If the user specifically sets any of the fields on the cmdline, they'll be overwritten in the db, 
-		// even if the user had set them to empty. Except the password which must be between 3 and 8 characters.
+		// even if the user had set them to empty. Except the password which must be between PWD_MIN_LENGTH and PWD_MAX_LENGTH characters.
 		for (int i = 2; i < args.length; i++)
 		{
 			if (args[i].startsWith("password="))
 			{
 				password = args[i].substring("password=".length());
 
-				if (password.length() < 3 || password.length() > 8)
+				if (password.length() < PWD_MIN_LENGTH || password.length() > PWD_MAX_LENGTH)
 				{
 					if (!password.equals(""))
 					{
-						System.out.println("Password not updated. It should be between 3 and 8 characters (inclusive).");
+						System.out.println("Password not updated. It should be between " + PWD_MIN_LENGTH + " and " + PWD_MAX_LENGTH + " characters (inclusive).");
 					}
 				}
 				else
