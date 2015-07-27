@@ -335,14 +335,14 @@ function saveAndRebuild(rebuild)
 		else if(gs.functions.hasClass(changedElem, "renderedText"))
 		{
 			var section = changedElem.parentDiv.parentItem;
-			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + section.collection + '", "oid":"' + section.nodeID + '"}'); //'
+			saveTransaction('{"operation":"setText", "text":"' + CKEDITOR.instances[changedElem.getAttribute("id")].getData().replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + section.collection + '", "oid":"' + section.nodeID + '"}'); //'
 			addCollectionToBuild(section.collection);
 		}
 		else if(gs.functions.hasClass(changedElem, "sectionText"))
 		{
 			var id = changedElem.getAttribute("id");
 			var sectionID = id.substring(4);
-			saveTransaction('{"operation":"setText", "text":"' + changedElem.innerHTML.replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + gs.cgiParams.c + '", "oid":"' + sectionID + '"}'); //'
+			saveTransaction('{"operation":"setText", "text":"' + CKEDITOR.instances[changedElem.getAttribute("id")].getData().replace(/"/g, "\\\"").replace(/&/g, "%26") + '", "collection":"' + gs.cgiParams.c + '", "oid":"' + sectionID + '"}'); //'
 			addCollectionToBuild(gs.cgiParams.c);
 		}
 	}
