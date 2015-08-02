@@ -81,26 +81,24 @@
         <format><gsf:option name="TOC" value="true"/></format>
     </display>
     <replaceListRef id="gs2-standard"/>
-		<serviceRackList>
-		<!-- comment out the following serviceRack if you want to disable OAI for this collection -->
-		<serviceRack name="OAIPMH">
-			<ListMetadataFormats>
-			<!--What metadata sets to support is collection specific. To support other metadata schema, simply add a metadataFormat element here.
-			The support of unqualified Dublin Core metadata set is mendatory in the oai specification.
-			-->
-				<metadataFormat metadataPrefix="oai_dc">
-					<metadataPrefix>oai_dc</metadataPrefix>
-					<schema>http://www.openarchives.org/OAI/2.0/oai_dc.xsd</schema>
-					<metadataNamespace>http://www.openarchives.org/OAI/2.0/oai_dc/</metadataNamespace>
-					<!--   a custom mapping as this collection doesn't have dc metadata -->
-					<mappingList>
-						<mapping>dc:title,dc.Title</mapping>
-						<mapping>dc:subject,dc.Subject</mapping>
-						<mapping>dc:language,dc.Language</mapping>
-						<mapping>dc:publisher,dls.Organization</mapping>
-					</mappingList>
-				</metadataFormat>
-			</ListMetadataFormats>
-		</serviceRack> 
-	</serviceRackList>
+    <serviceRackList>
+      <!-- comment out the following serviceRack if you want to disable OAI for this collection -->
+      <serviceRack name="OAIPMH">
+	<setName>MG demo collection</setName>
+	<setDescription>A demo collection for greenstone, using MG and GDBM.</setDescription>
+	<!-- uncomment the following and set the name attribute if you want this
+	     collection to be part of a super set. -->
+	<!--<oaiSuperSet name="xxx"/>-->
+	<ListMetadataFormats>
+	  <!--What metadata sets to support for this collection. You can select any set that is specified in OAIConfig.xml. To use a new set, you need to add a set definition in OAIConfig.xml, then reference it here, like:
+		   <metadataFormat metadataPrefix="prefix"/> -->
+	  <metadataFormat metadataPrefix="oai_dc">
+	    <!--   a custom mapping as this collection doesn't have exclusive dc metadata --><!-- this will replace the dc:publisher element from the main set -->
+	    <element name="dc:publisher">
+	      <mapping elements="dls.Organization"/>
+	    </element>
+	  </metadataFormat>
+	</ListMetadataFormats>
+      </serviceRack>
+    </serviceRackList>
 </CollectionConfig>

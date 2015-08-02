@@ -192,7 +192,7 @@
     <!-- comment out the following serviceRack if you want to disable OAI for this collection -->
     <serviceRack name="OAIPMH">
       <setName>Lucene demo collection</setName>
-      <setDescription>A demo collection for greenstone</setDescription>
+      <setDescription>A demo collection for greenstone, using Lucene and JDBM.</setDescription>
       <!-- uncomment the following and set the name attribute if you want this
 	   collection to be part of a super set. -->
       <!--<oaiSuperSet name="xxx"/>-->
