@@ -132,7 +132,9 @@
 	</init-param>-->
 </servlet>
 
-
+<!-- the /* in the url-pattern below is necessary for the restful URLs to work.
+     e.g. greenstone3/library/collection/lucene-jdbm-demo/page/about
+-->
 <servlet-mapping>
     <servlet-name>library</servlet-name>
     <url-pattern>/library/*</url-pattern>
