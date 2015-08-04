@@ -272,7 +272,10 @@ public class QueryAction extends Action
 		if (query_result_document_list != null)
 		{
 			page_response.appendChild(doc.importNode(query_result_document_list, true));
-			page_response.appendChild(doc.importNode(query_result_snippet_list,true));
+			if (query_result_snippet_list != null) 
+			{
+				page_response.appendChild(doc.importNode(query_result_snippet_list,true));
+			}
 		}
 		
 		//logger.debug("Query page:\n" + this.converter.getPrettyString(page_response));
