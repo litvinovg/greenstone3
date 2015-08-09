@@ -434,9 +434,12 @@
 			<td id="editBarLeft" style="width:70%"><xsl:text> </xsl:text></td>
 			<td id="editBarRight">
 				<div style="text-align:center;">
-					<div style="margin:5px;" class="ui-state-default ui-corner-all">
+				  <!-- edit structure button -->
+				  <!-- comment this out as its not working -->
+				<!--	<div style="margin:5px;" class="ui-state-default ui-corner-all">
 						<a style="padding: 3px; text-decoration:none;" href="{$library_name}?a=g&amp;sa=documentbasket&amp;c=&amp;s=DisplayDocumentList&amp;rt=r&amp;p.c={/page/pageResponse/collection/@name}&amp;docToEdit={/page/pageResponse/document/documentNode/@nodeID}"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.edit_structure')"/></a>
-					</div>
+					</div>-->
+					<!-- edit content button -->
 					<div style="margin:5px;" class="ui-state-default ui-corner-all">
 						<a id="editContentButton" style="padding: 3px; text-decoration:none;">
 							<xsl:attribute name="href">

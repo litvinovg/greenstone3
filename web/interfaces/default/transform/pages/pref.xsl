@@ -50,7 +50,7 @@
      <!-- <xsl:call-template name="encoding-param"/>-->
       <xsl:call-template name="format-edit-param"/>
     <xsl:call-template name="berry-basket-param"/>
-    <xsl:call-template name="document-maker-param"/>
+    <!--<xsl:call-template name="document-maker-param"/> not working at moment-->
     <xsl:call-template name="book-param"/>
     <xsl:call-template name="theme-change-param"/>
       </div>
