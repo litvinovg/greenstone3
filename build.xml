@@ -1503,9 +1503,9 @@
 
     <if><bool>
 	<isset property="fedora.maxpermsize"/></bool>
-      <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx400M ${fedora.maxpermsize}"/>
+      <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx800M ${fedora.maxpermsize}"/>
       <else>
-	<property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx400M"/>
+	<property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx800M"/>
       </else>
     </if>
 
@@ -1570,9 +1570,9 @@
 
     <if><bool>
 	<isset property="fedora.maxpermsize"/></bool>
-      <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx400M ${fedora.maxpermsize}"/>
+      <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx800M ${fedora.maxpermsize}"/>
       <else>
-	<property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx400M"/>
+	<property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx800M"/>
       </else>
     </if>
 
