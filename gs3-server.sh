@@ -103,6 +103,9 @@ ant $opt_properties configure-web
 
 # JRE_HOME or JAVA_HOME must be set correctly to run this program
 HINT="`pwd`/packages/jre"
+if [ "$GSDLOS" = "darwin" ] && [ ! -d "$HINT" ]; then
+    HINT=`/usr/libexec/java_home`
+fi
 javapath=`search4j -p "$HINT" -m $java_min_version -e` 
 if [ "$?" == "0" ]; then
     # In Java code, '...getResourceAsStream("build.properties")'

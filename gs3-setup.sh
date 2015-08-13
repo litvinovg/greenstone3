@@ -178,16 +178,21 @@ function setGS3ENV() {
 
 function checkJava() {
 
+  # we now include a JRE with Mac (Mountain) Lion too, because from Yosemite onwards there's no system Java on Macs
   HINT="`pwd`/packages/jre"
-  if [ $GSDLOS = darwin ]; then
-        HINT=/System/Library/Frameworks/JavaVM.framework/Home
+  if [ "$GSDLOS" = "darwin" ] && [ ! -d "$HINT" ]; then
+      HINT=`/usr/libexec/java_home`
+      # old code used as fallback:
+      if [ ! -d "$HINT" ]; then
+          HINT=/System/Library/Frameworks/JavaVM.framework/Home
+      fi
   fi
 
   #if search4j is present, use it
   if [ -x bin/search4j ] ; then
     FOUNDJAVAHOME="`bin/search4j -p \"$HINT\" -m $java_min_version`"
     if [ "$?" == "0" ]; then
-      #found a suitible java
+      #found a suitable java
       setupJavaAt "$FOUNDJAVAHOME"
     else
       #no suitable java exists
