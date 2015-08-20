@@ -203,7 +203,7 @@ function checkJava() {
 
   #otherwise manually try the hint
   elif [ -d "$HINT" ]; then
-      #found a suitible java
+      #found a suitable java
       setupJavaAt "$HINT"
 
   #lastly, check if java already setup
@@ -228,9 +228,15 @@ function checkJava() {
 }
 
 function setupJavaAt() {
-  export JAVA_HOME="$1"
-  addtopath PATH "$JAVA_HOME/bin"
-  echo "  - Exported JAVA_HOME to $JAVA_HOME"
+  if [[ $1 == *"/jre"* ]]; then
+    export JRE_HOME="$1"
+    addtopath PATH "$JRE_HOME/bin"
+    echo "  - Exported JRE_HOME to $JRE_HOME"
+  else
+    export JAVA_HOME="$1"
+    addtopath PATH "$JAVA_HOME/bin"
+    echo "  - Exported JAVA_HOME to $JAVA_HOME"
+  fi
 }
 
 function pauseAndExit(){
