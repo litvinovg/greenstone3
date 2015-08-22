@@ -103,9 +103,17 @@ ant $opt_properties configure-web
 
 # JRE_HOME or JAVA_HOME must be set correctly to run this program
 HINT="`pwd`/packages/jre"
-if [ "$GSDLOS" = "darwin" ] && [ ! -d "$HINT" ]; then
-    HINT=`/usr/libexec/java_home`
+if [ "$GSDLOS" = "darwin" ]; then
+    if [ ! -d "$HINT" ]; then
+	HINT=`/usr/libexec/java_home`
+    fi
+    
+    # set the mac icon for when launching this script manually 
+    if [ -f "gs3-server.app/Contents/Resources/AutomatorApplet.icns" ]; then
+	opt_properties="$opt_properties -Xdock:icon=gs3-server.app/Contents/Resources/AutomatorApplet.icns"
+    fi
 fi
+
 javapath=`search4j -p "$HINT" -m $java_min_version -e` 
 if [ "$?" == "0" ]; then
     # In Java code, '...getResourceAsStream("build.properties")'
