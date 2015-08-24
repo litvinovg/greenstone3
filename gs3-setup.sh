@@ -228,15 +228,9 @@ function checkJava() {
 }
 
 function setupJavaAt() {
-  if [[ $1 == *"/jre"* ]]; then
-    export JRE_HOME="$1"
-    addtopath PATH "$JRE_HOME/bin"
-    echo "  - Exported JRE_HOME to $JRE_HOME"
-  else
-    export JAVA_HOME="$1"
-    addtopath PATH "$JAVA_HOME/bin"
-    echo "  - Exported JAVA_HOME to $JAVA_HOME"
-  fi
+  export JAVA_HOME="$1"
+  addtopath PATH "$JAVA_HOME/bin"
+  echo "  - Exported JAVA_HOME to $JAVA_HOME"
 }
 
 function pauseAndExit(){
