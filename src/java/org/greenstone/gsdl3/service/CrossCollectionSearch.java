@@ -45,7 +45,9 @@ public class CrossCollectionSearch extends ServiceRack
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.CrossCollectionSearch.class.getName());
 	protected static final String QUERY_PARAM = "query";
 	protected static final String COLLECTION_PARAM = "collection";
-
+  protected static final String MAXDOCS_PARAM = "maxDocs"; // matches standard maxDocs, but in this case, means max docs per collection
+  protected static final String HITS_PER_PAGE_PARAM = "hitsPerPage";
+  protected static final String MAXDOCS_DEFAULT = "20";
 	// the services on offer - these proxy the actual collection ones
 	protected static final String TEXT_QUERY_SERVICE = "TextQuery";
 	protected static final String DOCUMENT_METADATA_RETRIEVE_SERVICE = "DocumentMetadataRetrieve";
@@ -87,7 +89,7 @@ public class CrossCollectionSearch extends ServiceRack
 		else
 		{
 			// add in a default format statement
-			String format_string = "<format xmlns:gsf='" + GSXML.GSF_NAMESPACE + "' xmlns:xsl='" + GSXML.XSL_NAMESPACE + "'><gsf:template match='documentNode'><td><a><xsl:attribute name='href'>?a=d&amp;c=<xsl:value-of select='@collection'/>&amp;d=<xsl:value-of select='@nodeID'/><xsl:if test=\"@nodeType='leaf'\">&amp;sib=1</xsl:if>&amp;dt=<xsl:value-of select='@docType'/>&amp;p.a=q&amp;p.s=" + TEXT_QUERY_SERVICE + "&amp;p.c=";
+			String format_string = "<format xmlns:gsf='" + GSXML.GSF_NAMESPACE + "' xmlns:xsl='" + GSXML.XSL_NAMESPACE + "'><gsf:template match='documentNode'><td>poos<a><xsl:attribute name='href'>?a=d&amp;c=<xsl:value-of select='@collection'/>&amp;d=<xsl:value-of select='@nodeID'/><xsl:if test=\"@nodeType='leaf'\">&amp;sib=1</xsl:if>&amp;dt=<xsl:value-of select='@docType'/>&amp;p.a=q&amp;p.s=" + TEXT_QUERY_SERVICE + "&amp;p.c=";
 			if (this.cluster_name != null)
 			{
 				format_string += this.cluster_name;
@@ -128,6 +130,9 @@ public class CrossCollectionSearch extends ServiceRack
 					addCollectionNames(lang);
 				}
 				Element param = GSXML.createParameterDescription(doc, COLLECTION_PARAM, getTextString("param." + COLLECTION_PARAM, lang), GSXML.PARAM_TYPE_ENUM_MULTI, "all", coll_ids_list, coll_names_map.get(lang));
+				param_list.appendChild(param);
+				// max docs param
+				param = GSXML.createParameterDescription(doc, MAXDOCS_PARAM, getTextString("param." + MAXDOCS_PARAM, lang), GSXML.PARAM_TYPE_INTEGER, MAXDOCS_DEFAULT, null, null);
 				param_list.appendChild(param);
 				// query param
 				param = GSXML.createParameterDescription(doc, QUERY_PARAM, getTextString("param." + QUERY_PARAM, lang), GSXML.PARAM_TYPE_STRING, null, null, null);
@@ -175,7 +180,13 @@ public class CrossCollectionSearch extends ServiceRack
 				colls_list = coll_list.split(",");
 			}
 		}
-
+		
+		String maxdocs = MAXDOCS_DEFAULT;
+		Element maxdocs_param = GSXML.getNamedElement(param_list, GSXML.PARAM_ELEM, GSXML.NAME_ATT, MAXDOCS_PARAM);
+		if (maxdocs_param != null) {
+		  maxdocs = GSXML.getValue(maxdocs_param);
+		}
+		
 		Document msg_doc = XMLConverter.newDOM();
 		Element query_message = msg_doc.createElement(GSXML.MESSAGE_ELEM);
 		// we are sending the same request to each collection - build up the to
@@ -197,44 +208,26 @@ public class CrossCollectionSearch extends ServiceRack
 		Element new_param_list = msg_doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		query_request.appendChild(new_param_list);
 		new_param_list.appendChild(msg_doc.importNode(GSXML.getNamedElement(param_list, GSXML.PARAM_ELEM, GSXML.NAME_ATT, QUERY_PARAM), true));
+
+		// for cross coll search, we only want maxdocs from each collection
+		// some colls use maxdocs, some use hits per page so lets send both
+		new_param_list.appendChild(GSXML.createParameter(msg_doc, MAXDOCS_PARAM, maxdocs));
+		new_param_list.appendChild(GSXML.createParameter(msg_doc, HITS_PER_PAGE_PARAM, maxdocs));
 		Element query_result = (Element) this.router.process(query_message);
 
-		// gather up the data from each response
-		int numDocsMatched = 0;
-		int numDocsReturned = 0;
-
-		//term info??
-
-		NodeList metadata = query_result.getElementsByTagName(GSXML.METADATA_ELEM);
-		for (int j = 0; j < metadata.getLength(); j++)
-		{
-			Element meta = (Element) metadata.item(j);
-			if (meta.getAttribute(GSXML.NAME_ATT).equals("numDocsReturned"))
-			{
-				numDocsReturned += Integer.parseInt(GSXML.getValue(meta));
-			}
-			else if (meta.getAttribute(GSXML.NAME_ATT).equals("numDocsMatched"))
-			{
-				numDocsMatched += Integer.parseInt(GSXML.getValue(meta));
-			}
-		}
-
-		Element metadata_list = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		result.appendChild(metadata_list);
-		GSXML.addMetadata(metadata_list, "numDocsReturned", "" + numDocsReturned);
-		//GSXML.addMetadata(metadata_list, "numDocsMatched", ""+numDocsMatched);
-
+		// create the doc list for the response
 		Element doc_node_list = result_doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(doc_node_list);
 
 		NodeList responses = query_result.getElementsByTagName(GSXML.RESPONSE_ELEM);
-
+		int num_docs = 0;
 		for (int k = 0; k < responses.getLength(); k++)
 		{
 			String coll_name = GSPath.removeLastLink(((Element) responses.item(k)).getAttribute(GSXML.FROM_ATT));
 			NodeList nodes = ((Element) responses.item(k)).getElementsByTagName(GSXML.DOC_NODE_ELEM);
 			if (nodes == null || nodes.getLength() == 0)
 				continue;
+			num_docs += nodes.getLength();
 			Element last_node = null;
 			Element this_node = null;
 			for (int n = 0; n < nodes.getLength(); n++)
@@ -257,6 +250,9 @@ public class CrossCollectionSearch extends ServiceRack
 
 			}
 		}
+		// just send back num docs returned. Too hard to work out number of matches etc as each index type
+		// does it differently
+		GSXML.addMetadata(metadata_list, "numDocsReturned", "" + num_docs);
 		return result;
 	}
 
