@@ -109,6 +109,9 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 		String indexdir = GSFile.collectionBaseDir(this.site_home, this.cluster_name) + File.separatorChar + "index" + File.separatorChar;
 
 		String index = "didx";
+		if (this.default_level.toUpperCase().equals("SEC")) {
+		  index = "sidx";
+		}
 		String physical_index_language_name = null;
 		String physical_sub_index_name = null;
 		int hits_per_page = Integer.parseInt(paramDefaults.get(HITS_PER_PAGE_PARAM));
