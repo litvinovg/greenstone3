@@ -182,10 +182,11 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 			} // ignore any others
 		}
 		// set up start and end results if necessary
-		int start_results = 1;
+		// start results always start at 0
+		int start_results = 0; 
 		if (start_page > 1 && hits_per_page > 0)
 		{
-			start_results = ((start_page - 1) * hits_per_page) + 1;
+		  start_results = ((start_page - 1) * hits_per_page) ; 
 		}
 		int end_results = Integer.MAX_VALUE;
 		if (hits_per_page > 0) {
