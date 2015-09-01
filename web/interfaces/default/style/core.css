@@ -469,7 +469,7 @@ body.dAction #gs_banner h2 {
 
 /* style the search and classifier results */
 #resultsTable {
-	line-height: 160%;
+	line-height: 130%;
 	margin: 0;
 	padding: 0;
 	/* border: 1px solid #f00; */
