@@ -252,6 +252,8 @@ public class CrossCollectionSearch extends ServiceRack
 		}
 		// just send back num docs returned. Too hard to work out number of matches etc as each index type
 		// does it differently
+		Element metadata_list = result_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER); 
+		result.appendChild(metadata_list);
 		GSXML.addMetadata(metadata_list, "numDocsReturned", "" + num_docs);
 		return result;
 	}
