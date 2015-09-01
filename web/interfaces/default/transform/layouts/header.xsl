@@ -253,7 +253,7 @@
 			</li>
 
 			<!-- help -->
-			<li>
+			<!--<li>
 				<a href="{$library_name}/collection/{$collNameChecked}/page/help">
 					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_tip')"/></xsl:attribute>
 					<span id="helpButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></span>
@@ -264,7 +264,7 @@
 						</xsl:text>
 					</script>
 				</a>
-			</li>
+			</li>-->
 			
 			<!-- login/logout -->
 			<li id="userMenuButton">
