@@ -12,6 +12,11 @@
 			.banner {
 			  text-align:center; font-family:sans-serif; background-color: #49a006; color: white; padding: 10px; 
 			}
+			
+			.ext_link {
+			background: url('interfaces/default/images/Icon_External_Link.png') center right no-repeat;
+			padding-right: 13px;
+			}
 
 		</style> 
 	</head>  
@@ -20,15 +25,19 @@
 		<h1 class="banner" style="font-size:110%;">Welcome to your Greenstone3 installation!</h1>
 			
 		<ul>	
-			<li><a href="library">Run the main servlet for Greenstone 3.</a> This is an interface that demonstrates the wide variety of capabilities in Greenstone 3.</li>
-			<li><a href="gs2-library">Run the Greenstone 2 look and feel servlet. (Deprecated)</a> View the demo collections that come with Greenstone, using the Greenstone 2 look and feel.</li>
-			<li><a href="basic-library">Run the basic servlet. (Deprecated)</a> View the same collections using a basic look and feel. </li>
-			<li><a href="gateway">Run the gateway servlet.</a> This uses the standard Greenstone 3 look and feel, and talks via SOAP to the site with the demo collections (localsite).
-				<ul>
-					<li>Note that SOAP needs to be installed, and a SOAP server needs to be running for localsite.</li>
-				</ul>
-			</li>
-			<li><a href="testing">Run the 'Hello World' test servlet.</a> Use this link to check that your server can run the simplest of Java servlets.</li>
+			<li>Enter your <a href="library">Greenstone 3 library.</a> </li>
+		</ul>
+
+		<h3 style="padding: 10px;">Want to customise this?</h3>
+		<ul>
+		  <li>Try out the provided halftone interface by visiting <a href="clibrary">this library</a>. The same content, but using a different interface.</li>
+		  <li>Take a look at the <a class="ext_link" href="http://wiki.greenstone.org/doku.php?id=en:tutorials#customization">customization tutorials</a>.</li>
+		</ul>
+			<h3 style="padding: 10px;">Need some help?</h3>
+			<ul>
+			<li>Visit the <a class="ext_link" href="http://wiki.greenstone.org">Greenstone wiki</a> which contains extensive documentation about Greenstone, including tutorials and release notes.</li>
+			<li>Visit <a class="ext_link" href="http://www.greenstone.org">greenstone.org</a>, the main greenstone website. In particular, visit the <a class="ext_link" href="http://www.greenstone.org/support">support page</a> for links to the mailing lists and regional support groups.</li>
+			<li>If your library is not running, you can run the <a href="testing">'Hello World' test servlet.</a> to check that your web server is set up properly.</li>
 
 		</ul>
 
