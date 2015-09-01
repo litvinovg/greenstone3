@@ -219,7 +219,7 @@
 			<xsl:variable name="docLevelText">
 				<xsl:call-template name="documentLevelText">
 					<xsl:with-param name="numDocsMatched" select="$numDocsMatched"/>
-					<xsl:with-param name="level" select="$docLevelText"/>
+					<xsl:with-param name="level" select="$docLevel"/>
 				</xsl:call-template>
 			</xsl:variable>
 			<xsl:choose>
