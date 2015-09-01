@@ -277,13 +277,13 @@
 						<div class="recent-post cf">
 							<a href="http://www.greenstone.org/download" class="thumb"><img src="interfaces/{$interface_name}/images/54x54.jpg" alt="Post" /></a>
 							<div class="post-head">
-								<a href="http://www.greenstone.org/download">Greenstone 2.86 Released!</a><span> 30 October 2013</span>
+								<a href="http://www.greenstone.org/download">Greenstone 3.07 Released!</a><span>September 2015</span>
 							</div>
 						</div>
 						<div class="recent-post cf">
 							<a href="http://wiki.greenstone.org" class="thumb"><img src="interfaces/{$interface_name}/images/54x54.jpg" alt="Post" /></a>
 							<div class="post-head">
-								<a href="http://wiki.greenstone.org">New Wiki Launched!</a><span>20 October 2013</span>
+								<a href="http://wiki.greenstone.org">New Wiki Launched!</a><span>October 2013</span>
 							</div>
 						</div>
 					</div>
@@ -303,7 +303,7 @@
 						<ul>
 						<xsl:call-template name="loginLinks"/>
 						<li class="cat-item"><a href="{$library_name}/collection/{$collNameChecked}/page/pref">Preferences</a></li>
-						<li class="cat-item"><a href="{$library_name}/collection/{$collNameChecked}/page/help">Help</a></li>
+						<!--<li class="cat-item"><a href="{$library_name}/collection/{$collNameChecked}/page/help">Help</a></li>-->
 						</ul>
 		     			</div>
 		     		</div>	
@@ -314,8 +314,8 @@
 						<ul>
 							<li class="cat-item"><a href="http://www.greenstone.org" >Greenstone</a></li>
 							<li class="cat-item"><a href="http://wiki.greenstone.org">Greenstone Wiki</a></li>							
-							<li class="cat-item"><a href="http://www.nzdl.org/cgi-bin/library.cgi" >NZDL</a></li>
-							<li class="cat-item"><a href="http://www.greenstone.org/greenstone3-home">Download Greenstone3</a></li>
+							<li class="cat-item"><a href="http://www.nzdl.org/cgi-bin/library.cgi" >New Zealand Digital Library</a></li>
+							<li class="cat-item"><a href="http://www.greenstone.org/download">Download Greenstone3</a></li>
 						</ul>
 					</div>
 		     		
