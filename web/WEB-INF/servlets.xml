@@ -23,8 +23,33 @@
 		<param-value>en</param-value>
 	</init-param>
 </servlet>
-
 <servlet>
+	<servlet-name>halftone-library</servlet-name>
+	<description>A library servlet using the standard content, but with the halftone interface.</description>
+	<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
+	<init-param>
+		<param-name>library_name</param-name>
+		<param-value>ht-library</param-value>
+	</init-param>
+	<init-param>
+		<param-name>site_name</param-name>
+		<param-value>localsite</param-value>
+	</init-param>
+	<init-param>
+		<param-name>interface_name</param-name>
+		<param-value>halftone</param-value>
+	</init-param>
+	<init-param>
+		<param-name>receptionist_class</param-name>
+		<param-value>DefaultReceptionist</param-value>
+	</init-param>
+	<init-param>
+		<param-name>default_lang</param-name>
+		<param-value>en</param-value>
+	</init-param>
+</servlet>
+
+<!--<servlet>
 	<servlet-name>gs2-library</servlet-name>
 	<description>Greenstone 2 lookalike library program: uses localsite with the gs2 interface</description>
 	<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
@@ -52,9 +77,9 @@
 		<param-name>params_class</param-name>
 		<param-value>GS2Params</param-value>
 	</init-param>
-</servlet>
+</servlet-->
 
-<servlet>
+<!--<servlet>
 	<servlet-name>nzdl-library</servlet-name>
 	<description>gsdl3 library program</description>
 	<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
@@ -82,9 +107,9 @@
 		<param-name>session_expiration</param-name>
 		<param-value>600</param-value>
 	</init-param>
-</servlet>
+</servlet>-->
 
-<servlet>
+<!--<servlet>
 	<servlet-name>gateway</servlet-name>
 	<description>gsdl3 library based on gateway site and basic interface. It uses SOAP to talk to localsite</description>
 	<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
@@ -104,9 +129,9 @@
 		<param-name>default_lang</param-name>
 		<param-value>en</param-value>
 	</init-param>
-</servlet>
+</servlet>-->
 
-<servlet>
+<!--<servlet>
 	<servlet-name>basic-library</servlet-name>
 	<description>basic gsdl3 library program: uses localsite and the basic interface</description>
 	<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
@@ -126,11 +151,11 @@
 		<param-name>default_lang</param-name>
 		<param-value>en</param-value>
 	</init-param>
-	<!--<init-param>
+	<init-param>
 		<param-name>allow_client_side_xslt</param-name>
 		<param-value>true</param-value>
-	</init-param>-->
-</servlet>
+	</init-param>
+</servlet>-->
 
 <!-- the /* in the url-pattern below is necessary for the restful URLs to work.
      e.g. greenstone3/library/collection/lucene-jdbm-demo/page/about
@@ -139,8 +164,12 @@
     <servlet-name>library</servlet-name>
     <url-pattern>/library/*</url-pattern>
 </servlet-mapping>
-
 <servlet-mapping>
+    <servlet-name>halftone-library</servlet-name>
+    <url-pattern>/ht-library/*</url-pattern>
+</servlet-mapping>
+
+<!--<servlet-mapping>
     <servlet-name>gs2-library</servlet-name>
     <url-pattern>/gs2-library</url-pattern>
 </servlet-mapping>
@@ -158,5 +187,5 @@
 <servlet-mapping>
     <servlet-name>basic-library</servlet-name>
     <url-pattern>/basic-library</url-pattern>
-</servlet-mapping>
+</servlet-mapping> -->
 
