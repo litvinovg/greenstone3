@@ -29,7 +29,7 @@
 	<servlet-class>org.greenstone.gsdl3.LibraryServlet</servlet-class>
 	<init-param>
 		<param-name>library_name</param-name>
-		<param-value>ht-library</param-value>
+		<param-value>halftone-library</param-value>
 	</init-param>
 	<init-param>
 		<param-name>site_name</param-name>
@@ -166,7 +166,7 @@
 </servlet-mapping>
 <servlet-mapping>
     <servlet-name>halftone-library</servlet-name>
-    <url-pattern>/ht-library/*</url-pattern>
+    <url-pattern>/halftone-library/*</url-pattern>
 </servlet-mapping>
 
 <!--<servlet-mapping>
