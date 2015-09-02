@@ -850,6 +850,8 @@
   <target name="force-stop-derby">
     <java classname="org.apache.derby.drda.NetworkServerControl">
       <arg value="shutdown"/>
+      <arg value="-p"/>
+      <arg value="${derby.server.port}"/>
       <classpath refid="derby.server.classpath"/>
     </java>
   </target>
