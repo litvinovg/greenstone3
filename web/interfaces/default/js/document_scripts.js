@@ -1,4 +1,12 @@
 var _imageZoomEnabled = false;
+// Choose which types of filtering you want: sectionnum, or sectiontitle.
+var _filter_on_types = ["sectiontitle", "sectionnum"];
+// the text strings for the two radio buttons
+var _filter_on_num_text = "pagenum";
+var _filter_on_title_text = "title";
+// are titles numeric match?
+var _filter_title_numeric = false;
+
 var _linkCellMap = new Array();
 var _onCells = new Array();
 
@@ -673,6 +681,7 @@ function replaceLinksWithSlider()
 	});
 }
 
+
 function SliderWidget(_links)
 {
 	//****************
@@ -710,75 +719,116 @@ function SliderWidget(_links)
 	//*****************
 	//PRIVATE FUNCTIONS
 	//*****************
-	
-	var setUpFilterBox = function()
-	{
-		var filter = $("#filterText");
-		filter.keyup(function()
+
+	//  _filter_on_types can be "sectionnum", "sectiontitle"
+ var setUpFilterButtons = function() {
+
+  var button_div = $("#filterOnButtons");
+  button_div.onclick = doFiltering;
+  button_div.html("radio");
+  if (_filter_on_types.length == 0) {
+    _filter_on_types = ["sectionnum", "sectiontitle"];
+  }
+  else if (_filter_on_types.length == 1) {
+    if (_filter_on_types[0] == "sectionnum") {
+      button_div.html("(<input type='radio' name='filterOn' value='num' checked>"+_filter_on_num_text+"</input>)");
+    } else {
+      button_div.html("(<input type='radio' name='filterOn' value='title' checked>"+_filter_on_title_text+"</input>)");
+    }
+  } else {
+    // should be both options
+    button_div.html("<input type='radio' name='filterOn' value='num' checked>"+_filter_on_num_text+"</input><input type='radio' name='filterOn' value='title'>"+_filter_on_title_text+"</input>");
+  }
+}
+
+	var doFiltering = function () {
+  if (typeof _titles == "undefined") {
+    return;
+  }
+
+  var filter_string = $("#filterText").val();
+  var filter_type = $('input[name="filterOn"]:checked').val();
+  
+  var index = 2; // section num
+  var numeric_match = true;
+  if (filter_type == "title") {
+    index = 3;
+    if (_filter_title_numeric != true) {
+      numeric_match = false;
+    }
+      
+  }
+  var values = filter_string.split(",");
+			
+  var matchingTitles = new Array();
+  
+  for (var l = 0; l < values.length; l++)
+    {
+      var currentValue = values[l].replace(/^ +/g, "").replace(/ +$/g, "");
+      if (numeric_match) {
+	var isRange = (currentValue.search(/\d+-\d+/) != -1);
+	if (isRange) {
+	  var firstNumber = currentValue.replace(/(\d+)-\d+/, "$1");
+	  var secondNumber = currentValue.replace(/\d+-(\d+)/, "$1");
+	  
+	  if(firstNumber <= secondNumber)
+	    {
+	      for(var i = firstNumber; i <= secondNumber; i++)
 		{
-			var fullValue = filter.val();
-			var values = fullValue.split(",");
-			
-			var matchingTitles = new Array();
-			
-			for (var l = 0; l < values.length; l++)
-			{
-				var currentValue = values[l].replace(/^ +/g, "").replace(/ +$/g, "");
-				var isRange = (currentValue.search(/\d+-\d+/) != -1)
-				
-				var found = false;
-				for(var i = 0; i < _titles.length; i++)
-				{
-					if(_titles[i][0] == currentValue)
-					{
-						found = true;
-					}
-				}
-				
-				if(!found && isRange)
-				{
-					var firstNumber = currentValue.replace(/(\d+)-\d+/, "$1");
-					var secondNumber = currentValue.replace(/\d+-(\d+)/, "$1");
-					
-					if(firstNumber <= secondNumber)
-					{
-						for(var i = firstNumber; i <= secondNumber; i++)
-						{
-							var numString = i + "";
-							for(var j = 0; j < _titles.length; j++)
-							{
-								var currentTitle = _titles[j];
-								if(currentTitle[0].search(numString) != -1)
-								{
-									matchingTitles.push(currentTitle);
-								}
-							}
-						}
-					}
-				}
-				else
-				{
-					for(var i = 0; i < _titles.length; i++)
-					{
-						var currentTitle = _titles[i];
-						if(currentTitle[0].search(currentValue.replace(/\./g, "\\.")) != -1)
-						{
-							matchingTitles.push(currentTitle);
-						}
-					}
-				}
-			}
-			
-			for(var i = 0; i < _titles.length; i++)
-			{
-				$(_titles[i][1].cell).css("display", "none");
-			}
-			
-			for(var i = 0; i < matchingTitles.length; i++)
-			{
-				$(matchingTitles[i][1].cell).css("display", "table-cell");
-			}
-		});
+		  var numString = i + "";
+		  for(var j = 0; j < _titles.length; j++) {
+		    
+		    var currentTitle = _titles[j];
+		    if(currentTitle[index] == numString) {
+		      matchingTitles.push(currentTitle);
+		    }
+		  }
+		}
+	    }
+	} // if isRange
+	else {
+	  for(var j = 0; j < _titles.length; j++) {
+	    if (_titles[j][index]==currentValue) {
+	      matchingTitles.push(_titles[j]);
+	    }
+	  }
+
+	}
+	
+      } else { // not numeric match.
+	// need to do a search
+	  for(var i = 0; i < _titles.length; i++)
+	    {
+	      var currentTitle = _titles[i];
+	      if(currentTitle[index].toLowerCase().search(currentValue.toLowerCase().replace(/\./g, "\\.")) != -1)
+		{
+		  matchingTitles.push(currentTitle);
+		}
+	    }
+      }
+    } // for each value from filter string
+  
+  // set all to hide...
+  for(var i = 0; i < _titles.length; i++)
+    {
+      $(_titles[i][1].cell).css("display", "none");
+    }
+  
+  // .. then display the matching ones
+  for(var i = 0; i < matchingTitles.length; i++)
+    {
+      $(matchingTitles[i][1].cell).css("display", "table-cell");
+    }
+}
+
+	var setUpFilterBox = function() 
+	{
+	  var filter = $("#filterText");
+	  
+	 filter.keyup(function() 
+	{
+	  doFiltering();
+	});
 	}
 	
 	var getImage = function(page, attemptNumber)
@@ -945,24 +995,28 @@ function SliderWidget(_links)
 		_links[i].image = image;
 
 		var title = $(_links[i]).html();
-		if(title.search(/^[^ ]+ [^ ]+$/) != -1)
-		{
-			var section = title.replace(/^([^ ]+) [^ ]+$/, "$1");
-			var page = title.replace(/^[^ ]+ ([^ ]+)$/, "$1");
-			if(page.search(/^[0-9]+$/) != -1)
-			{
-				title = page;
-			}
-		}
-		_titles.push([title, _links[i]]);
+		var t_section = "";
+		var t_title = "";
+		if (title.search(/tocSectionNumber/) != -1)
+		  {
+		    var matching_regex = /<span class=\"tocSectionNumber\">([0-9]+)<\/span>\s*(.+)$/; 
+		    var matches_array = matching_regex.exec(title);
+		    if (matches_array.length == 3) {
+		      t_section = matches_array[1];
+		      t_title = matches_array[2];
+		      }
+		  }
+		
+		_titles.push([title, _links[i], t_section, t_title]);
 
 		col.append($("<br>"));
 		col.append(title);
 	}
 
 	setUpFilterBox();
+	setUpFilterButtons();
 	startCheckFunction();
-}
+	}
 
 /***********************
 * HIGHLIGHTING SCRIPTS *
