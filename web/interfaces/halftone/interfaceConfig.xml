@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interfaceConfig baseInterface="default">
+	<actionList>
+		<action class="PageAction" name="p">
+			<subaction name="home" xslt="pages/home.xsl"/>
+			<subaction name="about" xslt="pages/about.xsl"/>
+			<subaction name="debug" xslt="pages/debuginfo.xsl"/>
+			<subaction name="pref" xslt="pages/pref.xsl"/>
+			<subaction name="help" xslt="pages/help.xsl"/>
+			<subaction name="login" xslt="pages/login.xsl"/>
+			<subaction name="gli4gs3" xslt="gli4gs3.xsl"/>
+			<subaction name="nav" xslt="nav.xsl"/>
+			<!-- used for the collection header frame -->
+			<subaction name="html" xslt="html.xsl"/>
+			<!-- use to put an external page into a frame with a collection header-->
+		</action>
+
+		<action class="RSSAction" name="rss" xslt="pages/rss.xsl"/> 
+		<action class="QueryAction" name="q" xslt="pages/query.xsl"/>
+		<action class="GS2BrowseAction" name="b" xslt="pages/classifier.xsl"/>
+		<action class="DocumentAction" name="d" xslt="pages/document.xsl"/>
+
+		<action class="AppletAction" name="a" xslt="pages/applet.xsl"/>
+		<action class="XMLDocumentAction" name="xd">
+			<subaction name="toc" xslt="pages/document-toc.xsl"/>
+			<subaction name="text" xslt="pages/document-content.xsl"/>
+		</action>
+		<action class="ProcessAction" name="pr" xslt="process.xsl"/>
+		<action class="SystemAction" name="s" xslt="pages/system.xsl"/>
+
+		<action class="FormatAction" name="f"/>
+		<!-- xslt='formatString.xsl'/> -->
+
+		<action class="GeneralAction" name="g">
+			<subaction name="authen" xslt="pages/authen.xsl"/>
+			<subaction name="berry" xslt="pages/berry.xsl"/>
+			<subaction name="documentbasket" xslt="pages/documentbasket.xsl"/>
+		</action>
+
+		<action class="DepositorAction" name="de" xslt="pages/depositor_home.xsl">
+			<subaction name="getwizard" xslt="depositor/compiledDepositor.xsl"/>
+		</action>
+	</actionList>
+	<languageList>
+		<language name="en">
+			<displayItem name="name">English</displayItem>
+		</language>
+	</languageList>
+</interfaceConfig>
