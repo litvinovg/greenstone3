@@ -1003,7 +1003,7 @@ function containsDocumentNode(node)
 
 function isExpanded(textDiv)
 {
-	if(!textDiv.style.display || textDiv.style.display == "block")
+	if(typeof textDiv.style == "undefined" || typeof textDiv.style.display == "undefined" || textDiv.style.display == "block")
 	{
 		return true;
 	}
