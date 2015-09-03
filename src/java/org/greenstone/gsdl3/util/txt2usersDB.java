@@ -26,6 +26,17 @@ import java.sql.SQLException;
 
 import org.greenstone.gsdl3.service.Authentication;
 
+/** 
+    To run this from the command-line, first make sure that the derby networked server is running (ant start-derby),
+    then run:
+
+    java -Dgsdl3.writablehome=/full/path/to/GS3/web -cp web/WEB-INF/lib/gsdl3.jar:web/WEB-INF/lib/gutil.jar:web/WEB-INF/lib/derby.jar:./web/WEB-INF/lib/derbyclient.jar:./web/WEB-INF/lib/log4j-1.2.8.jar:./web/WEB-INF/classes org.greenstone.gsdl3.util.txt2usersDB <filename>.txt web/etc/usersDB/ [-append]
+
+    Don't forget to stop the networked derby server again at the end, if you had started it: ant stop-derby
+
+    Or if using embedded derby, ensure that tomcat is stopped, then run:
+    java -cp /full/path/to/GS3/web/WEB-INF/lib/gsdl3.jar:/full/path/to/GS3/web/WEB-INF/lib/derby.jar org.greenstone.gsdl3.util.txt2usersDB <filename>.txt web/etc/usersDB/ [-append]
+*/
 public class txt2usersDB
 {
 

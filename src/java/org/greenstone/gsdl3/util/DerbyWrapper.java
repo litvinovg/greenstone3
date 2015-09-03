@@ -34,10 +34,34 @@ import org.greenstone.util.GlobalProperties;
 
 public class DerbyWrapper
 {
-    static final String PORT = GlobalProperties.getProperty("derby.server.port", "1527");
-    static final String DERBYSERVER = GlobalProperties.getProperty("derby.server", "localhost");
-    static final String PROTOCOL = "jdbc:derby://"+DERBYSERVER+":"+PORT+"/"; // "jdbc:derby://localhost:1527";
-    static final String DRIVER = "org.apache.derby.jdbc.ClientDriver"; //"org.apache.derby.jdbc.EmbeddedDriver";
+    static final String PORT;
+    static final String DERBYSERVER;
+    static final String PROTOCOL;	
+
+    // static code block to initialise the above
+    static {
+	// GlobalProperties won't be loaded at this point if running ant config-admin or ant config-user 
+	// from the command line (both of which call ant update-userdb which in turn calls ModifyUsersDB.java)
+	// In such a case, the ant command will have set the system property (-Dgsdl3_writablehome) 
+	// and passed this to ModifyUsersDB.java. Use that to load the GlobalProperties at this point
+
+	if(GlobalProperties.getGSDL3Home() == null) { // testing whether GlobalProperties is already loaded
+	    String gsdl3_writablehome = System.getProperty("gsdl3.writablehome"); // set by 'ant update-userdb' cmd
+
+	    //System.err.println("@@@@@ writablehome: " + gsdl3_writablehome);
+	    GlobalProperties.loadGlobalProperties(gsdl3_writablehome);
+	}
+	
+	//System.err.println("@@@@@ GlobalProperties.getGSDL3Home(): " + GlobalProperties.getGSDL3Home()); //test
+	
+	// No more fallback values, use exactly what's propagated into global.properties from build.properties
+	PORT = GlobalProperties.getProperty("derby.server.port");//, "1527");
+	DERBYSERVER = GlobalProperties.getProperty("derby.server");//, "localhost");
+	PROTOCOL = "jdbc:derby://"+DERBYSERVER+":"+PORT+"/"; // "jdbc:derby://localhost:1527"; // by default
+    }
+   
+
+	static final String DRIVER = "org.apache.derby.jdbc.ClientDriver"; //"org.apache.derby.jdbc.EmbeddedDriver";
 	static final String USERSDB = "usersDB";
 	static final String USERS = "users";
 	static final String ROLES = "roles";

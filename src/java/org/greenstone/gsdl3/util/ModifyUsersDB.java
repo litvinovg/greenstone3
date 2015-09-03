@@ -22,8 +22,17 @@ import java.sql.SQLException;
 import org.greenstone.gsdl3.service.Authentication;
 //import org.greenstone.admin.guiext.PropertiesStep;
 
-// To run this from the command-line, first make sure that the tomcat server is stopped, then run:
-// java -cp /full/path/to/GS3/web/WEB-INF/lib/gsdl3.jar:/full/path/to/GS3/web/WEB-INF/lib/derby.jar org.greenstone.gsdl3.util.usersDB2txt web/etc/usersDB/
+/** 
+    To run this from the command-line, first make sure that the networked derby server is running (ant start-derby),
+    then run:
+
+    java -Dgsdl3.writablehome=/Scratch/ak19/gs3-svn-2Sep2015/web -cp web/WEB-INF/lib/gsdl3.jar:web/WEB-INF/lib/gutil.jar:web/WEB-INF/lib/derby.jar:web/WEB-INF/lib/derbyclient.jar:web/WEB-INF/lib/log4j-1.2.8.jar:web/WEB-INF/lib/commons-codec-1.7.jar:web/WEB-INF/classes org.greenstone.gsdl3.util.ModifyUsersDB web/etc/usersDB/ <username> [options specifying user fields to change, e.g.: password=me!]
+    
+    Don't forget to stop the networked derby server again at the end, if you had started it: ant stop-derby
+
+    or if using embedded derby, ensure that tomcat is stopped, then run:
+    java -cp /full/path/to/GS3/web/WEB-INF/lib/gsdl3.jar:/full/path/to/GS3/web/WEB-INF/lib/derby.jar org.greenstone.gsdl3.util.ModifyUsersDB web/etc/usersDB/
+*/ 
 public class ModifyUsersDB
 {
     public static int PWD_MIN_LENGTH = 3;

@@ -28,7 +28,20 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.Properties;
 
-// Run as java org.greenstone.gsdl3.util.usersDB2txt <usersDB file>
+/** 
+    To run this from the command-line, first make sure that the networked derby server is running (ant start-derby)
+    then run: 
+ 
+    java -Dgsdl3.writablehome=/full/path/to/GS3/web -cp ./web/WEB-INF/lib/gsdl3.jar:./web/WEB-INF/lib/gutil.jar:./web/WEB-INF/lib/derby.jar:./web/WEB-INF/lib/derbyclient.jar:./web/WEB-INF/lib/log4j-1.2.8.jar:./web/WEB-INF/classes org.greenstone.gsdl3.util.usersDB2txt web/etc/usersDB/
+
+    if redirecting to a file append ">& filename.txt" to the above command 
+    since the usersDB2txt program output goes to System.err and needs to be redirected to the file too
+
+    Don't forget to stop the networked derby server again at the end, if you had started it: ant stop-derby
+
+    Or if using embedded derby, ensure that tomcat is stopped, then run:
+    java -cp /full/path/to/GS3/web/WEB-INF/lib/gsdl3.jar:/full/path/to/GS3/web/WEB-INF/lib/derby.jar org.greenstone.gsdl3.util.usersDB2txt web/etc/usersDB/ [>& <output file>]
+*/
 public class usersDB2txt
 {
     public static void main(String[] args) throws SQLException{

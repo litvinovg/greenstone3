@@ -1854,7 +1854,7 @@
     <input addproperty="user.password" defaultvalue="" message="Password (3-20 characters):&gt;">
       <handler classname="org.apache.tools.ant.input.SecureInputHandler" /> <!-- password won't be visible on screen -->
     </input>
-    <input addproperty="user.groups" defaultvalue="" message="Groups (comma-separated list):&gt;"/>
+    <input addproperty="user.groups" defaultvalue="" message="Groups (comma-separated list, e.g. personal-collections-editor):&gt;"/>
     <input addproperty="user.status" defaultvalue="true" message="Enabled (true/false):&gt;"/>
     <input addproperty="user.comment" defaultvalue="" message="Comment:&gt;"/>
     <input addproperty="user.email" defaultvalue="" message="Email:&gt;"/>
@@ -1888,6 +1888,7 @@
     <!--<echo>${admin.password}</echo>--> <!-- for testing -->
     <java classname="org.greenstone.gsdl3.util.ModifyUsersDB">
       <classpath refid="compile.classpath"/> <!--for ${web.lib}/gsdl3.jar and supporting files-->
+      <sysproperty key="gsdl3.writablehome" value="${gsdl3.writablehome}" /> <!-- passes -D<syspropKey=syspropVal> to java class ModifyUsersDB. Available in java code as System.getProperty("syspropKey") -->
       <arg file="${web.home}/etc/usersDB"/>
       <arg value="${user.username}"/>
       <arg value="password=${user.password}"/>
