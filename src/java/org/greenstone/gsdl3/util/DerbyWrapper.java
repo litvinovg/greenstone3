@@ -55,8 +55,9 @@ public class DerbyWrapper
 	//System.err.println("@@@@@ GlobalProperties.getGSDL3Home(): " + GlobalProperties.getGSDL3Home()); //test
 	
 	// No more fallback values, use exactly what's propagated into global.properties from build.properties
-	PORT = GlobalProperties.getProperty("derby.server.port");//, "1527");
-	DERBYSERVER = GlobalProperties.getProperty("derby.server");//, "localhost");
+	// Fallback values are only for the installer to use
+	PORT = GlobalProperties.getProperty("derby.server.port", "1527");
+	DERBYSERVER = GlobalProperties.getProperty("derby.server", "localhost");
 	PROTOCOL = "jdbc:derby://"+DERBYSERVER+":"+PORT+"/"; // "jdbc:derby://localhost:1527"; // by default
     }
    
