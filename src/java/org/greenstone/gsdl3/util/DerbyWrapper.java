@@ -34,39 +34,43 @@ import org.greenstone.util.GlobalProperties;
 
 public class DerbyWrapper
 {
-    static final String PORT;
-    static final String DERBYSERVER;
-    static final String PROTOCOL;	
+    static String PORT = null;
+    static String DERBYSERVER = null;
+    static String PROTOCOL = null;	
 
     // static code block to initialise the above
     static {
-	// GlobalProperties won't be loaded at this point if running ant config-admin or ant config-user 
-	// from the command line (both of which call ant update-userdb which in turn calls ModifyUsersDB.java)
-	// In such a case, the ant command will have set the system property (-Dgsdl3_writablehome) 
-	// and passed this to ModifyUsersDB.java. Use that to load the GlobalProperties at this point
+	try {
+	    // GlobalProperties won't be loaded at this point if running ant config-admin or ant config-user 
+	    // from the command line (both of which call ant update-userdb which in turn calls ModifyUsersDB.java)
+	    // In such a case, the ant command will have set the system property (-Dgsdl3_writablehome) 
+	    // and passed this to ModifyUsersDB.java. Use that to load the GlobalProperties at this point
 
-	if(GlobalProperties.getGSDL3Home() == null) { // testing whether GlobalProperties is already loaded
-	    String gsdl3_writablehome = System.getProperty("gsdl3.writablehome"); // set by 'ant update-userdb' cmd
-
-	    try {
+	    if(GlobalProperties.getGSDL3Home() == null) { // testing whether GlobalProperties is already loaded
+		String gsdl3_writablehome = System.getProperty("gsdl3.writablehome"); // set by 'ant update-userdb' cmd
 		System.err.println("@@@@@ writablehome: " + gsdl3_writablehome);
 		GlobalProperties.loadGlobalProperties(gsdl3_writablehome);
-	    } catch (Exception ex){
-		PORT = "1527";
-		DERBYSERVER = "localhost";
 	    }
+	    
+	    System.err.println("@@@@@ GlobalProperties.getGSDL3Home(): " + GlobalProperties.getGSDL3Home()); //test
+	    
+	    // No more fallback values, use exactly what's propagated into global.properties from build.properties
+	    // Fallback values are only for the installer to use
+	    PORT = GlobalProperties.getProperty("derby.server.port");// "1527");
+	    DERBYSERVER = GlobalProperties.getProperty("derby.server");// "localhost");	    
+	    System.err.println("@@@ PORT " + PORT); //check in installer
+	    System.err.println("@@@ DERBYSERVER " + DERBYSERVER); //check in installer
+
+	} catch (Exception ex){
+	    System.err.println("@@@ Got exception: " + ex.getMessage());
+	    System.err.println("@@@ Using default derby port and servername");
+	    PORT = "1527";
+	    DERBYSERVER = "localhost";
+	} finally {
+
+	    PROTOCOL = "jdbc:derby://"+DERBYSERVER+":"+PORT+"/"; // "jdbc:derby://localhost:1527"; // by default	    
+	    System.err.println("@@@ PROTOCOL:" + PROTOCOL); //check in installer
 	}
-	
-	System.err.println("@@@@@ GlobalProperties.getGSDL3Home(): " + GlobalProperties.getGSDL3Home()); //test
-	
-	// No more fallback values, use exactly what's propagated into global.properties from build.properties
-	// Fallback values are only for the installer to use
-	if (PORT == null) { // if these constants are not set yet because of exceptions
-	    PORT = GlobalProperties.getProperty("derby.server.port", "1527");
-	    DERBYSERVER = GlobalProperties.getProperty("derby.server", "localhost");
-	    PROTOCOL = "jdbc:derby://"+DERBYSERVER+":"+PORT+"/"; // "jdbc:derby://localhost:1527"; // by default
-	}
-	System.err.println("@@@ PROTOCOL:" + PROTOCOL); //check in installer
     }
    
 
