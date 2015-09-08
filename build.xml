@@ -1886,7 +1886,7 @@
     </waitfor>
 
     <!--<echo>${admin.password}</echo>--> <!-- for testing -->
-    <echo>gsdl3.writablehome: ${gsdl3.writablehome}</echo>--> <!-- for testing -->
+    <echo>gsdl3.writablehome: ${gsdl3.writablehome}</echo> <!-- for testing -->
     <echo>web.home: ${web.home}</echo>--> <!-- for testing -->
     <java classname="org.greenstone.gsdl3.util.ModifyUsersDB">
       <classpath refid="compile.classpath"/> <!--for ${web.lib}/gsdl3.jar and supporting files-->
