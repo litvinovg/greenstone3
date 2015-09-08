@@ -1887,7 +1887,7 @@
 
     <!--<echo>${admin.password}</echo>--> <!-- for testing -->
     <echo>gsdl3.writablehome: ${gsdl3.writablehome}</echo> <!-- for testing -->
-    <echo>web.home: ${web.home}</echo>--> <!-- for testing -->
+    <echo>web.home: ${web.home}</echo> <!-- for testing -->
     <java classname="org.greenstone.gsdl3.util.ModifyUsersDB">
       <classpath refid="compile.classpath"/> <!--for ${web.lib}/gsdl3.jar and supporting files-->
       <sysproperty key="gsdl3.writablehome" value="${gsdl3.writablehome}" /> <!-- passes -D<syspropKey=syspropVal> to java class ModifyUsersDB. Available in java code as System.getProperty("syspropKey") -->
