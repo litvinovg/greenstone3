@@ -52,24 +52,24 @@ public class DerbyWrapper
 		GlobalProperties.loadGlobalProperties(gsdl3_writablehome);
 	    }
 	    
-	    System.err.println("@@@@@ GlobalProperties.getGSDL3Home(): " + GlobalProperties.getGSDL3Home()); //test
+	    System.out.println("@@@@@ GlobalProperties.getGSDL3Home(): " + GlobalProperties.getGSDL3Home()); //test
 	    
 	    // No more fallback values, use exactly what's propagated into global.properties from build.properties
 	    // Fallback values are only for the installer to use
 	    PORT = GlobalProperties.getProperty("derby.server.port");// "1527");
 	    DERBYSERVER = GlobalProperties.getProperty("derby.server");// "localhost");	    
-	    System.err.println("@@@ PORT " + PORT); //check in installer
-	    System.err.println("@@@ DERBYSERVER " + DERBYSERVER); //check in installer
+	    System.out.println("@@@ PORT " + PORT); //check in installer
+	    System.out.println("@@@ DERBYSERVER " + DERBYSERVER); //check in installer
 
 	} catch (Exception ex){
-	    System.err.println("@@@ Got exception: " + ex.getMessage());
-	    System.err.println("@@@ Using default derby port and servername");
+	    System.out.println("@@@ Got exception: " + ex.getMessage());
+	    System.out.println("@@@ Using default derby port and servername");
 	    PORT = "1527";
 	    DERBYSERVER = "localhost";
 	} finally {
 
 	    PROTOCOL = "jdbc:derby://"+DERBYSERVER+":"+PORT+"/"; // "jdbc:derby://localhost:1527"; // by default	    
-	    System.err.println("@@@ PROTOCOL:" + PROTOCOL); //check in installer
+	    System.out.println("@@@ PROTOCOL:" + PROTOCOL); //check in installer
 	}
     }
    
