@@ -64,7 +64,7 @@ public class DerbyWrapper
 	    DERBYSERVER = "localhost";
 	}
 	PROTOCOL = "jdbc:derby://"+DERBYSERVER+":"+PORT+"/"; // "jdbc:derby://localhost:1527"; // by default
-	System.out.println("@@@ PROTOCOL:" + PROTOCOL); //check in installer
+	//System.out.println("@@@ PROTOCOL:" + PROTOCOL); //check in installer
     }
    
 
