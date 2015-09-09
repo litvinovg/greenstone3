@@ -34,43 +34,37 @@ import org.greenstone.util.GlobalProperties;
 
 public class DerbyWrapper
 {
-    static String PORT = null;
-    static String DERBYSERVER = null;
-    static String PROTOCOL = null;	
+    static final String PORT;
+    static final String DERBYSERVER;
+    static final String PROTOCOL;	
 
     // static code block to initialise the above
     static {
-	try {
-	    // GlobalProperties won't be loaded at this point if running ant config-admin or ant config-user 
-	    // from the command line (both of which call ant update-userdb which in turn calls ModifyUsersDB.java)
-	    // In such a case, the ant command will have set the system property (-Dgsdl3_writablehome) 
-	    // and passed this to ModifyUsersDB.java. Use that to load the GlobalProperties at this point
+	// GlobalProperties won't be loaded at this point if running ant config-admin or ant config-user 
+	// from the command line (both of which call ant update-userdb which in turn calls ModifyUsersDB.java)
+	// In such a case, the ant command will have set the system property (-Dgsdl3_writablehome) 
+	// and passed this to ModifyUsersDB.java. Use that to load the GlobalProperties at this point
 
-	    if(GlobalProperties.getGSDL3Home() == null) { // testing whether GlobalProperties is already loaded
-		String gsdl3_writablehome = System.getProperty("gsdl3.writablehome"); // set by 'ant update-userdb' cmd
-		System.err.println("@@@@@ writablehome: " + gsdl3_writablehome);
-		GlobalProperties.loadGlobalProperties(gsdl3_writablehome);
-	    }
-	    
-	    System.out.println("@@@@@ GlobalProperties.getGSDL3Home(): " + GlobalProperties.getGSDL3Home()); //test
-	    
-	    // No more fallback values, use exactly what's propagated into global.properties from build.properties
-	    // Fallback values are only for the installer to use
-	    PORT = GlobalProperties.getProperty("derby.server.port");// "1527");
-	    DERBYSERVER = GlobalProperties.getProperty("derby.server");// "localhost");	    
-	    System.out.println("@@@ PORT " + PORT); //check in installer
-	    System.out.println("@@@ DERBYSERVER " + DERBYSERVER); //check in installer
+	if(GlobalProperties.getGSDL3Home() == null) { // testing whether GlobalProperties is already loaded
+	    String gsdl3_writablehome = System.getProperty("gsdl3.writablehome"); // set by 'ant update-userdb' cmd
 
-	} catch (Exception ex){
-	    System.out.println("@@@ Got exception: " + ex.getMessage());
-	    System.out.println("@@@ Using default derby port and servername");
+	    //System.err.println("@@@@@ writablehome: " + gsdl3_writablehome);
+	    GlobalProperties.loadGlobalProperties(gsdl3_writablehome);
+	}
+	
+	//System.err.println("@@@@@ GlobalProperties.getGSDL3Home(): " + GlobalProperties.getGSDL3Home()); //test
+	
+	// No more fallback values, use exactly what's propagated into global.properties from build.properties
+	String port = GlobalProperties.getProperty("derby.server.port");//, "1527");
+	if(port.indexOf("@") == -1) { // if there are still @placeholders@ in global.properties, then use fallback values
+	    PORT = port;
+	    DERBYSERVER = GlobalProperties.getProperty("derby.server");//, "localhost");
+	} else {
 	    PORT = "1527";
 	    DERBYSERVER = "localhost";
-	} finally {
-
-	    PROTOCOL = "jdbc:derby://"+DERBYSERVER+":"+PORT+"/"; // "jdbc:derby://localhost:1527"; // by default	    
-	    System.out.println("@@@ PROTOCOL:" + PROTOCOL); //check in installer
 	}
+	PROTOCOL = "jdbc:derby://"+DERBYSERVER+":"+PORT+"/"; // "jdbc:derby://localhost:1527"; // by default
+	System.out.println("@@@ PROTOCOL:" + PROTOCOL); //check in installer
     }
    
 
