@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import org.apache.axis.encoding.Base64;
 import org.apache.log4j.Logger;
 import org.greenstone.util.GlobalProperties;
+import org.greenstone.gsdl3.util.DBHelper;
 
 /**
  * GSFile - utility class for Greenstone.
@@ -342,24 +343,17 @@ public class GSFile
 		return site_home + File.separatorChar + "collect" + File.separatorChar + coll_name + File.separatorChar + "index" + File.separatorChar + "phind" + phind_index;
 	}
 
-	/** the collection database file - */
-	static public String collectionDatabaseFile(String site_home, String collection_name, String index_stem, String database_type)
-	{
-
-		String db_ext = null;
-		if (database_type.equalsIgnoreCase("jdbm"))
-		{
-			db_ext = ".jdb";
-		}
-		else
-		{
-			// assume gdbm
-			db_ext = ".gdb";
-		}
-
-		return site_home + File.separatorChar + "collect" + File.separatorChar + collection_name + File.separatorChar + "index" + File.separatorChar + "text" + File.separatorChar + index_stem + db_ext;
-
+    /** the collection database file - */
+    static public String collectionDatabaseFile(String site_home, String collection_name, String index_stem, String database_type)
+    {
+	String db_ext = DBHelper.getDBExtFromDBType(database_type);
+	if (null == db_ext || db_ext.equals("")) {
+	    logger.warn("Could not recognise database type \"" + database_type + "\", defaulting to GDBM and extension \".gdb\"");
+	    // assume gdbm
+	    db_ext = ".gdb";
 	}
+	return site_home + File.separatorChar + "collect" + File.separatorChar + collection_name + File.separatorChar + "index" + File.separatorChar + "text" + File.separatorChar + index_stem + db_ext;
+    }
 
 	// some file utility methods
 
