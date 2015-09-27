@@ -40,7 +40,6 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable
 
 	public SimpleCollectionDatabase(String db_type)
 	{
-
 	    if (db_type.toLowerCase().endsWith("server")) {
 			db_type = db_type.substring(0, db_type.length() - 6);
 	       }
@@ -71,6 +70,10 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable
 				logger.info(ae.getMessage());
 			}
 		}
+		catch (Exception ae) {
+		    logger.error("Couldn't create SimpleCollectionDatabase of type " + db_type);
+		    logger.info(ae.getMessage());
+		}
 
 		try
 		{
@@ -79,6 +82,7 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable
 		catch (Exception e)
 		{
 			logger.error("Failed to call the constructor " + dbwrap_name + "()");
+			logger.info(e.getMessage());
 		}
 
 	}
