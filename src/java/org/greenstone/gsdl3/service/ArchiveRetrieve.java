@@ -20,6 +20,7 @@
 */
 package org.greenstone.gsdl3.service;
 
+import org.greenstone.gsdl3.util.DBHelper;
 import org.greenstone.gsdl3.util.DBInfo;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
@@ -138,7 +139,13 @@ public class ArchiveRetrieve extends ServiceRack
 		
 		return result;
 	}
-	
+
+
+     /** @function processSourceFileOIDRetrieveService(Element)
+     *  @brief
+     *  @param request
+     *  @return Element
+     */
 	protected Element processSourceFileOIDRetrieveService(Element request)
 	{
 		//Create a new (empty) result message
@@ -167,23 +174,24 @@ public class ArchiveRetrieve extends ServiceRack
 		{
 			databaseType = "gdbm"; // the default
 		}
-		
-		String dbExt = null;
-		if (databaseType.equalsIgnoreCase("jdbm")) 
-		{
-			dbExt = ".jdb";
-		} 
-		else 
-		{
-			dbExt = ".gdb"; // assume gdbm
-		}
-		
+
 		coll_db = new SimpleCollectionDatabase(databaseType);
 		if (!coll_db.databaseOK()) 
 		{
 			logger.error("Couldn't create the collection database of type "+databaseType);
 			return null;
 		}
+
+	// Moved to ensure that the appropriate FlatDatabaseWrapper
+	// has been initialised during the SimpleCollectionDatabase
+	// call above. That way we can easily retrieve the database
+	// extension from the DBHelper [jmt12]
+	String dbExt = DBHelper.getDBExtFromDBType(databaseType);
+	if (null == dbExt || dbExt.equals("")) {
+	   // assume gdbm
+	   logger.warn("Could not recognise database type \"" + databaseType + "\", defaulting to GDBM and extension \".gdb\"");
+	   dbExt = ".gdb";
+	}
 
 		coll_db.openDatabase
 		(
@@ -210,7 +218,8 @@ public class ArchiveRetrieve extends ServiceRack
 		
 		return result;
 	}
-	
+	/** processSourceFileOIDRetrieveService(Element) **/
+
 	protected Element processAssociatedImportFilesRetrieve(Element request)
 	{
 		//Create a new (empty) result message
@@ -239,16 +248,6 @@ public class ArchiveRetrieve extends ServiceRack
 			databaseType = "gdbm"; // the default
 		}
 		
-		String dbExt = null;
-		if (databaseType.equalsIgnoreCase("jdbm")) 
-		{
-			dbExt = ".jdb";
-		} 
-		else 
-		{
-			dbExt = ".gdb"; // assume gdbm
-		}
-		
 		coll_db = new SimpleCollectionDatabase(databaseType);
 		if (!coll_db.databaseOK()) 
 		{
@@ -256,6 +255,18 @@ public class ArchiveRetrieve extends ServiceRack
 			return null;
 		}
 
+	// Moved to ensure that the appropriate FlatDatabaseWrapper
+	// has been initialised during the SimpleCollectionDatabase
+	// call above. That way we can easily retrieve the database
+	// extension from the DBHelper.
+	String dbExt = DBHelper.getDBExtFromDBType(databaseType);
+	if (null == dbExt || dbExt.equals(""))
+	{
+	    // assume gdbm
+	    logger.warn("Could not recognise database type \"" + databaseType + "\", defaulting to GDBM and extension \".gdb\"");
+	    dbExt = ".gdb";
+	}
+		
 		coll_db.openDatabase
 		(
 			this.site_home + File.separatorChar + 
