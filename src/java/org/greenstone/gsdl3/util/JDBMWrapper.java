@@ -60,6 +60,8 @@ public class JDBMWrapper implements FlatDatabaseWrapper
 		{
 			System.out.println(e);
 		}
+		// Register this wrapper with DBHelper
+		DBHelper.registerDBTypeExt("jdbm",".jdb");
 	}
 
 	/** open database named filename, using mode */

@@ -37,6 +37,12 @@ public class GDBMWrapper implements FlatDatabaseWrapper
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.GDBMWrapper.class.getName());
 
+    static
+    {
+	/** Register this Wrapper with the DBHelper */
+	DBHelper.registerDBTypeExt("gdbm",".gdb");
+    }
+
 	/*
 	 * GdbmFile modes: READER - read access, many readers may share the database
 	 * WRITER - read/write access, exclusive access WRCREAT - read/write access,
