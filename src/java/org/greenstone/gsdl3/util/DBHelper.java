@@ -22,17 +22,26 @@ import java.util.HashMap;
 
 public class DBHelper
 {
-	protected static final HashMap<String, String> _extMap;
-	static 
-	{
-		HashMap<String, String> extMap = new HashMap<String, String>();
-		extMap.put("jdbm", ".jdb");
-		extMap.put("gdbm", ".gdb");
-		_extMap = extMap;
-	}
-	
-	public static String getDBExtFromDBType(String dbtype)
-	{
-		return _extMap.get(dbtype);
-	}
+    protected static final HashMap<String, String> _extMap = new HashMap<String, String>();
+
+    public static String getDBExtFromDBType(String dbtype)
+    {
+	String lc_dbtype = dbtype.toLowerCase();
+	return _extMap.get(lc_dbtype);
+    }
+
+    /** @function registerDBTypeExt(String, String)
+     *
+     *  Given a database type name and the matching extension, register in
+     *  the static hashmap of mappings.
+     *
+     *  @param dbtype a String containing the database type's name
+     *  @param dbext a String containing the database type's extension
+     *
+     */
+    public static void registerDBTypeExt(String dbtype, String dbext)
+    {
+	_extMap.put(dbtype, dbext);
+    }
+    /** registerDBTypeExt(String, String) **/
 }
