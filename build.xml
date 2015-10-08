@@ -199,14 +199,17 @@
       
 	<else>
 	  <!-- else assume Unix -->
-	  <!-- Can't go through the OS-independant <copy> task as it fails to preserve exec permissions -->
+	  <!-- Can't go through the OS-independent <copy> task as it fails to preserve exec permissions -->
 	  <echo>Copying to ${gsdl3.writablehome}/packages/tomcat</echo>
 	  <exec executable="cp" output="/dev/null" spawn="false">
             <arg value="-r"/>
             <arg value="${readonly-packages.home}/tomcat"/>
             <arg value="${gsdl3.writablehome}/packages/."/>
 	  </exec>
-	  
+
+	  <!-- the packages folder in tmp only has read permissions at this stage, it needs more permissions to work when running GS3 off a disc -->
+	  <chmod perm="a+rwx" file="${gsdl3.writablehome}/packages/**" />
+
 	</else>
       </if>
       
