@@ -142,8 +142,25 @@
   <if><bool><istrue value="${gsdl3home.isreadonly}"/></bool>
     <property name="readonly-packages.home" value="${basedir}/packages"/>
     <property name="packages.home" value="${gsdl3.writablehome}/packages"/>
+    <!-- 
+	 To run solr from a readonly location (like a DVD-ROM), its locktype needs to be "single",
+	 else solr tries to write out a lock file to the collection's index folder which is read-only.
+
+	 https://cwiki.apache.org/confluence/display/solr/IndexConfig+in+SolrConfig
+	 says that the "single" locktype is "for special situations of a read-only index directory, or ...."
+	 
+	 See also http://wiki.apache.org/lucene-java/AvailableLockFactories
+	 and look for the documentation on "locktype" in solr collection's etc/conf/solrconfig.xml
+	 for further information on the different locktypes/
+
+	 To set the locktype property from the commandline (it's a property to the server web), pass in 
+	 "-Dsolr.lock.type=..." to the web server, as explained in
+	 http://lucene.472066.n3.nabble.com/Where-can-we-set-the-parameters-in-Solr-Config-td4183706.html
+      -->
+    <property name="readonly.catalina.opts" value="-Dsolr.lock.type=single"/>
   <else>
     <property name="packages.home" value="${basedir}/packages"/>
+    <property name="readonly.catalina.opts" value=""/>
   </else>
   </if>
 
@@ -1508,9 +1525,9 @@
 
     <if><bool>
 	<isset property="fedora.maxpermsize"/></bool>
-      <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx800M ${fedora.maxpermsize}"/>
+      <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx800M ${readonly.catalina.opts} ${fedora.maxpermsize}"/>
       <else>
-	<property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx800M"/>
+	<property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx800M ${readonly.catalina.opts}"/>
       </else>
     </if>
 
@@ -1575,9 +1592,9 @@
 
     <if><bool>
 	<isset property="fedora.maxpermsize"/></bool>
-      <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx800M ${fedora.maxpermsize}"/>
+      <property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx800M ${readonly.catalina.opts} ${fedora.maxpermsize}"/>
       <else>
-	<property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx800M"/>
+	<property name="catalina.opts" value="-Djava.util.prefs.syncInterval=2000000 -DGSDL3HOME=$GSDL3HOME -DGSDLOS=$GSDLOS -DPATH=$PATH -Xmx800M ${readonly.catalina.opts}"/>
       </else>
     </if>
 
