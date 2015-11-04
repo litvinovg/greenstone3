@@ -28,6 +28,11 @@
 		</xsl:if>
 	</xsl:template>
 
+	<!-- do we display the line 'displaying 0 to 20 of 40 documents'-->
+	<!-- on by default. To turn off, add the following in <search> element in collectionConfig.xml:
+	     <gsf:option name="hideStatus" value="true"/> -->
+	<xsl:variable name="display_status_bar">
+	  <xsl:if test="/page/pageResponse/format[@type='search']/gsf:option[@name='hideStatus']/@value='true'">false</xsl:if></xsl:variable>
 	<!-- the page content -->
 	<xsl:template match="/page">
 		<xsl:if test="not(/page/pageRequest/paramList/param[@name = 'qs']) or /page/pageRequest/paramList/param[@name = 'qs']/@value = ''">
@@ -409,7 +414,7 @@
 				<td id="prevArrowTD">
 					<xsl:if test="$currentPage != 1">
 						<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/@subaction}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage - 1}&amp;qs={/page/pageRequest/paramList/param[@name='qs']/@value}">
-							<img src="interfaces/default/images/previous.png"/>
+						  <xsl:call-template name="previousArrowImage"/>
 						</a>
 					</xsl:if>
 				</td>
@@ -419,6 +424,7 @@
 					</xsl:if>
 				</td>
 
+				<xsl:if test="$display_status_bar != 'false'">
 				<!-- Search result status bar (in english it reads "Displaying X to Y of Z documents") -->
 				<xsl:if test="$docsPerPage &gt; 0">
 					<xsl:variable name="startdoc" select="($currentPage - 1) * $docsPerPage + 1"/>
@@ -462,7 +468,7 @@
 						<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.displayingnumdocs', concat($startdoc,';', $enddoc, ';', $docMax, ';', $levelString))"/>
 					</td>
 				</xsl:if>
-
+				</xsl:if>
 				<!-- Next button -->
 				<td id="nextTD">
 					<xsl:if test="$docsPerPage &gt; 0 and ($currentPage * $docsPerPage + 1) &lt; $docMax">
@@ -472,7 +478,7 @@
 				<td id="nextArrowTD">
 					<xsl:if test="$docsPerPage &gt; 0 and ($currentPage * $docsPerPage + 1) &lt; $docMax">
 						<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/paramList/param[@name = 'sa']/@value}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage + 1}&amp;qs={/page/pageRequest/paramList/param[@name='qs']/@value}">
-							<img src="interfaces/default/images/next.png"/>
+							<xsl:call-template name="nextArrowImage"/>
 						</a>
 					</xsl:if>
 				</td>
@@ -480,6 +486,12 @@
 		</table>
 	</xsl:template>
 
+	<xsl:template name="previousArrowImage">
+	  <img src="interfaces/default/images/previous.png"/>
+	</xsl:template>
+	<xsl:template name="nextArrowImage">
+	  <img src="interfaces/default/images/next.png"/>
+	</xsl:template>
 	<!-- puts all the params into a=p&p=h type form - need to change this if use 
 	multi params  -->
 	<xsl:template match="paramList" mode="cgi">
