@@ -235,6 +235,9 @@
 		</div>	
 	</xsl:template>
 
+	<xsl:template name="javascriptForDocumentView">
+	    <script type="text/javascript" src="interfaces/{$interface_name}/js/document_scripts.js"><xsl:text> </xsl:text></script>
+        </xsl:template>
 	<xsl:template name="javascriptForDocumentEditing">
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
@@ -255,8 +258,7 @@
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse/document">
 	  <xsl:if test="$bookswitch = 'off'">
-	    <script type="text/javascript" src="interfaces/{$interface_name}/js/document_scripts.js"><xsl:text> </xsl:text></script>
-			
+	  <xsl:call-template name="javascriptForDocumentView"/>
 	    <xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
 	      <script type="text/javascript">
 		<xsl:text disable-output-escaping="yes">
