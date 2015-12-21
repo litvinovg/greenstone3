@@ -20,6 +20,8 @@ package org.greenstone.gsdl3.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -539,6 +541,20 @@ public class XSLTUtil
 	{
 
 		return new Locale(display_lang).getDisplayLanguage(new Locale(lang));
+	}
+	public static String uriEncode(String input)
+	{
+		String result = "";
+		if (input != null && input != "") {
+			try {
+				result = URLEncoder.encode(input, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		
+		}
+		return result;
+		
 	}
 
 	public static String cgiSafe(String original, String lang)
