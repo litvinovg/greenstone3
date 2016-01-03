@@ -545,14 +545,12 @@ public class XSLTUtil
 	public static String uriEncode(String input)
 	{
 		String result = "";
-		if (input != null && input != "") {
-			try {
-				result = URLEncoder.encode(input, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-		
+		try {
+			result = URLEncoder.encode(input, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
+		
 		return result;
 		
 	}
