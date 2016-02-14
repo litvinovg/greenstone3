@@ -1,4 +1,4 @@
-Greenstone 3 (GSDL3)
+Greenstone 3 (GSDL3)  
 Copyright (C) 2003 New Zealand Digital Libraries, University Of Waikato
 Greenstone3 comes with ABSOLUTELY NO WARRANTY; for details see LICENSE.txt
 This is free software, and you are welcome to redistribute it
