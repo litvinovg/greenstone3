@@ -1146,6 +1146,8 @@ width:100%
 
 .metaDataHierarchyMenu{
         position: absolute;
+	margin-left: -1px;
+	z-index:1;
 
 }
 .metaDataHierarchyMenu ul{

@@ -191,7 +191,7 @@ function createHierarchyMenuButton(row)
 		//Menu element
 		var mainmenu = '<td class="metaDataHierarchyMenu" style="display: none;"><ul><li id="hierarchyLevel"><button class="hierarchyMenuButton"  title="Menu">' + hierarchyMenuName + '</button></li></ul></td>'
 		//Insert hierarchy menu
-		$(row).find('.metaTableCell').after(mainmenu);
+		$(row).find('.metaTableCellRemove').after(mainmenu);
 		//Set hover event on hierarchy menu
 		$(row).each(function(){setHierarchyHoverEvent($(this),".metaDataHierarchyMenu ul li")});
 		//Set menu name or SuggestionsMenu on change of textarea set menu name to appropriate menu item if exists
