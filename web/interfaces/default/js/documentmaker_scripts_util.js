@@ -230,7 +230,7 @@ function saveAndRebuild(rebuild)
 		var statusID;
 		var ajax = new gs.functions.ajaxRequest();
 		ajax.open("POST", gs.xsltParams.library_name, true);
-		ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		ajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=UTF-8");
 		ajax.onreadystatechange = function()
 		{
 			if(ajax.readyState == 4 && ajax.status == 200)
