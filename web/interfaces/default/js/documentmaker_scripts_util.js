@@ -826,6 +826,11 @@ function addFunctionalityToTable(table)
 		undo.srcElem = newRow;
 		undo.removeTransaction = false;
 		_undoOperations.push(undo);
+		if ( hierarchyStorage && hierarchyStorage[name])
+                {
+                        setHierarchyEventsWrappers(name);
+                }
+
 		
 	});
 	table.addRowButton = addRowButton;
