@@ -1143,3 +1143,53 @@ display:block;
 width:100%
 }
 */
+
+.metaDataHierarchyMenu{
+        position: absolute;
+
+}
+.metaDataHierarchyMenu ul{
+        margin: 0;
+        padding: 0;
+        display: block;
+        position: absolute;
+
+}
+.metaDataHierarchyMenu ul li {
+        margin: 0;
+        padding: 0;
+        display: block;
+        position: relative;
+        width: 200px;
+}
+.metaDataHierarchyMenu ul li button{
+        display: block;
+        padding:10px 10px 10px 10px;
+        width: 180px;
+   	margin: 0;
+        color: #000000;
+        text-decoration: none;
+        font-size: 90%;
+        border:1px dotted #999;
+        text-align: left;
+	white-space: normal;
+   	overflow: auto;
+}
+.metaDataHierarchyMenu ul li button:HOVER{
+        color: #0000CC;
+}
+.metaDataHierarchyMenu li ul { 
+	position: absolute;
+        left: 180px;
+        top: 0;
+        display: none;
+}
+
+.metaDataHierarchyMenu button:focus {
+        outline: none;
+}
+
+.active {
+    	background-color:#eee;
+}
+

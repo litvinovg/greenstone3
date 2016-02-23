@@ -241,6 +241,7 @@
 	<xsl:template name="javascriptForDocumentEditing">
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
+			<script type="text/javascript" src="interfaces/{$interface_name}/js/hierarchy.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript">
 				<xsl:text disable-output-escaping="yes">
 					$(window).load(function()
@@ -251,6 +252,15 @@
 						}
 					});
 				</xsl:text>
+				<!-- download and process hierarchy files -->
+                                <xsl:text disable-output-escaping="yes">$(document).ready(function(){</xsl:text>
+                                <xsl:for-each select="//classifier[@hfile]">
+                                        <xsl:text disable-output-escaping="yes">downloadAndProcessHierarchyFile('</xsl:text>
+                                        <xsl:text>sites/localsite/collect/</xsl:text><xsl:value-of select="$collName"/><xsl:text>/etc/</xsl:text><xsl:value-of select="@hfile"/>
+                                        <xsl:text disable-output-escaping="yes">','</xsl:text><xsl:value-of select="@metadata"/><xsl:text disable-output-escaping="yes">');</xsl:text>
+                                </xsl:for-each>
+                                <xsl:text disable-output-escaping="yes">});</xsl:text>
+
 			</script>
 	  
 	</xsl:template>
