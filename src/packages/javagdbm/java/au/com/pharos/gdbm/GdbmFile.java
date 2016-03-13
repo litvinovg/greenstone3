@@ -512,7 +512,25 @@ public class GdbmFile implements Closeable {
 	if (libraryFile != null) {
 	    System.load(libraryFile);
 	} else {
-	    System.loadLibrary("gdbmjava");
+	    
+	    String gsdlos = System.getenv("GSDLOS");
+	    if (gsdlos!=null && gsdlos.equals("darwin")) {
+		// As of MacOX 10.11 (El Capitan), effectivly supresses DYLD_LIBRARY_PATH (does
+		// not propagate it to child processes).  This is a result of changes to their
+		// security model, and seems to come into effect for 'untrusted' executables.
+		// Greenstone run as a regular user, is 'unstrusted'.  It is possible, with
+		// admin rights, to override this, however that is not really a viable solution
+		// for our project.  Hence the change here to use Systen.load() with an
+		// absolute pathname, rather than rely of System.loadLibrary().
+
+		String gsdl3srchome = System.getenv("GSDL3SRCHOME");
+		String full_jni_library = gsdl3srchome + "/lib/jni/libgdbmjava.jnilib";
+		System.load(full_jni_library);
+	    }
+	    else {
+
+		System.loadLibrary("gdbmjava");
+	    }
 	}
     }
 
