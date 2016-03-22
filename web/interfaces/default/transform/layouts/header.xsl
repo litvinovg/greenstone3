@@ -119,7 +119,7 @@
 	<!-- This template should be overridden in the collectionConfig.xml file if you want to add extra header content -->
 	<xsl:template name="additionalHeaderContent-collection">
 	</xsl:template>
-<!--
+
 	<xsl:template name="init-direct-edit">
 		<script type="text/javascript">
 			<xsl:text disable-output-escaping="yes">
@@ -137,7 +137,7 @@
 			</xsl:text>
 		</script>
 	</xsl:template> 
--->
+
 		
 	<!-- ***** HEADER LAYOUT TEMPLATE ***** -->
 	<xsl:template name="create-banner">		
