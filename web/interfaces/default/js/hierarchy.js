@@ -230,30 +230,18 @@ function createSuggestionsMenu(row)
 	var hierarchyData = hierarchyStorage[metaName];
 	
 	var input = $(row.getElementsByClassName("metaTableCellArea")[0]).val();
-	//RegExp to get SuggestionsMenu with dot
-	var SuggestionsMenuExp = new RegExp("^" + input.replace(/\./g, '\\.') + "[0-9]+$");
-	//RegExp to get SuggestionsMenu without dot
-	var ChildrenExp = new RegExp("^" + input.replace(/\./g, '\\.') + "\\.[0-9]+$")
+	
+	//RegExp to get SuggestionsMenu
+	var SuggestionsMenuExp = new RegExp("^0*" + input.replace(/\./g, '\\.0*') + "\\.?[0-9]+$")
 	//Hierarchy suggestions menu
 	var SuggestionsMenu = "";
-	//Item number for SuggestionsMenu						
-	var i = 1;
 	for(var key in hierarchyData)
 	{
 	var SuggestionsMenuItems = {};
-	// Test if input ends with dot and key relates to appropriate input
-		if (SuggestionsMenuExp.test(key) && /\.$/.test(input)) 
-		{
-			
-			SuggestionsMenuItems[key]='<li class="hierarchySuggestionsMenu" id="'+key+'" ><button onclick="setHierarchyId(this)" >' + i + " "  + hierarchyData[key] + '</button></li>';
-			i++;						
-		}
 		
-		if (ChildrenExp.test(key)) 
+		if (SuggestionsMenuExp.test(key)) 
 		{
-			
-			SuggestionsMenuItems[key]='<li class="hierarchySuggestionsMenu" id="'+key+'" ><button onclick="setHierarchyId(this)" >.' + i + " "  + hierarchyData[key] + '</button></li>';
-			i++;						
+			SuggestionsMenuItems[key]='<li class="hierarchySuggestionsMenu" id="'+key+'" ><button onclick="setHierarchyId(this)" >' + key.substring(String(input).length) + " "  + hierarchyData[key] + '</button></li>';
 		}
 		
 		for(var key in SuggestionsMenuItems)
