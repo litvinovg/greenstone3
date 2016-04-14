@@ -365,7 +365,7 @@ public class QueryAction extends Action
 
   protected boolean addHitsParamToService(Document doc, Element service_description, String lang) {
     Element param_list = (Element)GSXML.getChildByTagName(service_description, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
-    Element param = GSXML.createParameterDescription(doc, HITS_PER_PAGE, getTextString("param." + HITS_PER_PAGE, lang, "AbstractSearch", null), GSXML.PARAM_TYPE_INTEGER, "20", null, null);
+    Element param = GSXML.createParameterDescription(doc, HITS_PER_PAGE, getTextString("param." + HITS_PER_PAGE, lang, "ServiceRack", null), GSXML.PARAM_TYPE_INTEGER, "20", null, null);
     Element query_param = GSXML.getNamedElement(param_list, GSXML.PARAM_ELEM, GSXML.NAME_ATT, "query");
     if (query_param != null) {
       param_list.insertBefore(param, query_param);

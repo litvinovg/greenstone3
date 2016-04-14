@@ -494,7 +494,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 		else if (name.equals(FIELD_CASE_PARAM) || name.equals(FIELD_STEM_PARAM) || name.equals(FIELD_ACCENT_PARAM))
 		{
 			String[] bool_ops = { "0", "1" };
-			String[] bool_texts = { getTextString("param.boolean.off", lang, "AbstractTextSearch"), getTextString("param.boolean.on", lang, "AbstractTextSearch") };
+			String[] bool_texts = { getTextString("param.boolean.off", lang), getTextString("param.boolean.on", lang) };
 			param = GSXML.createParameterDescription(doc, name, getTextString("param." + name, lang), GSXML.PARAM_TYPE_BOOLEAN, param_default, bool_ops, bool_texts);
 
 		}
