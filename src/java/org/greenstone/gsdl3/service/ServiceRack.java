@@ -473,9 +473,9 @@ public abstract class ServiceRack implements ModuleInterface
 		}
 
 		// now we try class names for dictionary names
-		String class_name = this.getClass().getName();
-		class_name = class_name.substring(class_name.lastIndexOf('.') + 1);
-		Dictionary dict = new Dictionary(class_name, lang, this.class_loader);
+		String original_class_name = this.getClass().getName();
+		original_class_name = original_class_name.substring(original_class_name.lastIndexOf('.') + 1);
+		Dictionary dict = new Dictionary(original_class_name, lang, this.class_loader);
 		String result = dict.get(key, args);
 		if (result != null)
 		{
@@ -483,6 +483,7 @@ public abstract class ServiceRack implements ModuleInterface
 		}
 
 		// we have to try super classes
+		String class_name;
 		Class c = this.getClass().getSuperclass();
 		while (result == null && c != null)
 		{
@@ -499,10 +500,22 @@ public abstract class ServiceRack implements ModuleInterface
 		}
 		if (result == null)
 		{
-			return "_" + key + "_";
+		  // try the ServiceRack properties
+		  // at the moment we look for original_class_name.key, then just key
+		  // if there is lots of inheritance, may want to try down the list of superclasses too...
+		  class_name = "ServiceRack";
+		  dict = new Dictionary(class_name, lang, this.class_loader);
+		  String full_key = original_class_name+"."+key;
+		  result = dict.get(full_key, args);
+		  if(result == null) {
+		    result = dict.get(key, args);
+		  }
+		  if(result == null) {
+		    return "_" + key + "_";
+		  }
 		}
 		return result;
-
+	
 	}
 
 	protected String getMetadataNameText(String key, String lang)
