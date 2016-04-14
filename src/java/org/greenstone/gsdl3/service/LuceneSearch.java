@@ -1,3 +1,7 @@
+/** This is a simple Lucene XML Search class. This is NOT the one 
+    used by Greenstone Lucene collections. This is used by the custom 
+    gberg collection */
+
 package org.greenstone.gsdl3.service;
 
 // Greenstone classes
