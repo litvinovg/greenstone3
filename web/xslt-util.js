@@ -65,6 +65,53 @@ function getInterfaceTextSubstituteArgs(initial,argsStr)
     return complete;
 }
 
+var xsltUtil_stringVariables = {};
+
+//public static void storeString(String name, String value)
+function storeString(name,value)
+{
+    xsltUtil_stringVariables[name] = value;
+}
+
+//public static String getString(String name)
+function getString(name)
+{
+    return xsltUtil_stringVariables[name];
+}
+
+
+//public static String escapeNewLines(String str)
+function escapeNewLines(str)
+{
+    if (str == null || str.length < 1)
+    {
+	return null;
+    }
+    return str.replace("\n", "\\\n");
+}
+
+//public static String escapeQuotes(String str)
+function escapeQuotes(str)
+{
+    if (str == null || str.length < 1)
+    {
+	return null;
+    }
+    return str.replace("\"", "\\\"");
+}
+
+//public static String escapeNewLinesAndQuotes(String str)
+function escapeNewLinesAndQuotes(str)
+{
+    if (str == null || str.length < 1)
+    {
+	return null;
+    }
+    return escapeNewLines(escapeQuotes(str));
+}
+
+
+
 function getNumberedItem(list, number)
 {
     var items = list.split(","); 
@@ -77,6 +124,89 @@ function getNumberedItem(list, number)
     return ""; // index out of bounds
 }
 
+
+
+
+//public static boolean oidIsMatchOrParent(String first, String second)
+function oidIsMatchOrParent(first, second)
+{
+    if (first == second)
+    {
+	return true;
+    }
+
+    var firstParts = first.split(".");
+    var secondParts = second.split(".");
+
+    if (firstParts.length >= secondParts.length)
+    {
+	return false;
+    }
+    
+    for (var i = 0; i < firstParts.length; i++)
+    {
+	if (!firstParts[i].equals(secondParts[i]))
+	{
+	    return false;
+	}
+    }
+    
+    return true;
+}
+
+//public static String oidDocumentRoot(String oid)
+function oidDocumentRoot(oid)
+{
+    var oidParts = oid.split("\\.");
+    
+    return oidParts[0];
+}
+
+
+
+//public static String hashToSectionId(String hashString)
+function hashToSectionId(hashString)
+{
+    if (hashString == null || hashString.length == 0)
+    {
+	return "";
+    }
+    
+    var firstDotIndex = hashString.indexOf(".");
+    if (firstDotIndex == -1)
+    {
+	return "";
+    }
+    
+    var sectionString = hashString.substring(firstDotIndex + 1);
+    
+    return sectionString;
+}
+
+//public static String hashToDepthClass(hashString)
+function hashToDepthClass(hashString)
+{
+    if (hashString == null || hashString.length == 0)
+    {
+	return "";
+    }
+    
+    var sectionString = hashToSectionId(hashString);
+    
+    var count = sectionString.split("\\.").length;
+
+    if (sectionString == "")
+    {
+	return "sectionHeaderDepthTitle";
+    }
+    else
+    {
+	return "sectionHeaderDepth" + count;
+    }
+}
+
+//alert("hashToDepthClass(\"HASH134B.1\")=" + hashToDepthClass("HASH134B.1"));
+//alert("hashToSectionId(\"HASH134B.1\")=" + hashToSectionId("HASH134B.1"));
 
 //alert(getInterfaceTextSubstituteArgs("test {0} test {1} test" ,"1;2"));
 //alert(getNumberedItem("item0,item1,item2" ,1));
