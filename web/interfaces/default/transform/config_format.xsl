@@ -10,6 +10,7 @@
 	<xsl:param name="interface_name"/>
 	<xsl:param name="library_name"/>
 	<xsl:param name="site_name"/>
+	<xsl:param name="use_client_side_xslt"/>
 	<xsl:param name="collName"/>
 
 	<xsl:output method="xml"/>
@@ -154,7 +155,7 @@
 
 	<xsl:template match="gsf:link">
 
-		<xslt:variable name="collName" select="/page/pageResponse/collection/@name"/>
+		<xslt:variable name="collNameLocal" select="/page/pageResponse/collection/@name"/>
 		<xsl:variable name="opt-title">					
 			<xsl:choose>
 				<xsl:when test="@title">
@@ -164,7 +165,7 @@
 				</xsl:when>
 				<xsl:when test="@titlekey">
 					<xslt:attribute name="title">
-						<xslt:value-of disable-output-escaping="yes" select="util:getCollectionText($collName, $site_name, /page/@lang, '{@titlekey}')"/>
+						<xslt:value-of disable-output-escaping="yes" select="util:getCollectionText($collNameLocal, $site_name, /page/@lang, '{@titlekey}')"/>
 					</xslt:attribute>
 				</xsl:when>
 			</xsl:choose>

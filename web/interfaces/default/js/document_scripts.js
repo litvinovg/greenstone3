@@ -407,6 +407,33 @@ function loadTopLevelPage(callbackFunction, customURL)
 	});
 }
 
+function retrieveFullTableOfContentsSuccess(newTOCElem)
+{
+    var tocStart = newTOCElem.indexOf(">") + 1;
+    var tocEnd = newTOCElem.lastIndexOf("<");
+    
+    var newTOC = newTOCElem.substring(tocStart, tocEnd);
+    
+    //Add the "Expand document"/"Collapse document" links
+    newTOC = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">Expand document</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">Collapse document</a></td></tr></table>" + newTOC;
+    
+    //Collapse the TOC
+    newTOC = newTOC.replace(/display:block/g, "display:none");
+    newTOC = newTOC.replace(/display:none/, "display:block");
+    newTOC = newTOC.replace(/images\/collapse/g, "images/expand");
+    
+    var tocElem = $("#tableOfContents");
+    tocElem.html(newTOC);
+    
+    gs.variables.tocLoaded = true;
+}
+
+function retrieveFullTableOfContentsSuccessClientSideXSLT(newTOCElem)
+{
+    $('#client-side-xslt-ajax').remove();
+    retrieveFullTableOfContentsSuccess(newTOCElem)
+}
+
 function retrieveFullTableOfContents()
 {
 	var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "?excerptid=tableOfContents&ed=1";
@@ -418,32 +445,18 @@ function retrieveFullTableOfContents()
 	{
 		url += "&a=d&d=&alb=1&rl=1&href=" + gs.cgiParams.href;
 	}
-
+    
+    if (gs.xsltParams.use_client_side_xslt == "true") { // note xsltParams are of type string, so test needs to be in quotes
+	url += "&callback=retrieveFullTableOfContentsSuccessClientSideXSLT"; // used in client-side-xslt.js, in combination with 'excerptid'
+        $('<iframe src="'+url+'" id="client-side-xslt-ajax" tabindex="-1" style="position: absolute; width: 0px; height: 0px; border: none;"></iframe>').appendTo('body');
+    }
+    else {	
 	$.ajax(url)
-	.success(function(newTOCElem)
-	{
-		var tocStart = newTOCElem.indexOf(">") + 1;
-		var tocEnd = newTOCElem.lastIndexOf("<");
-		
-		var newTOC = newTOCElem.substring(tocStart, tocEnd);
-		
-		//Add the "Expand document"/"Collapse document" links
-		newTOC = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">Expand document</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">Collapse document</a></td></tr></table>" + newTOC;
-		
-		//Collapse the TOC
-		newTOC = newTOC.replace(/display:block/g, "display:none");
-		newTOC = newTOC.replace(/display:none/, "display:block");
-		newTOC = newTOC.replace(/images\/collapse/g, "images/expand");
-		
-		var tocElem = $("#tableOfContents");
-		tocElem.html(newTOC);
-		
-		gs.variables.tocLoaded = true;
-	})
-	.error(function()
-	{
+	    .success(retrieveFullTableOfContentsSuccess)
+	    .error(function() {
 		setTimeout(retrieveFullTableOfContents, 1000);
-	});
+	    });
+    }
 }
 
 function isExpanded(sectionID)

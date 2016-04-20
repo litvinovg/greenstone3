@@ -271,5 +271,8 @@
 
 	</xsl:template>
 
+	<xsl:template match="/page/xsltparams">
+	  <!-- suppress xsltparam block in page -->
+	</xsl:template>
 </xsl:stylesheet>
 

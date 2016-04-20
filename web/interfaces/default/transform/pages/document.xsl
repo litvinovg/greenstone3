@@ -116,6 +116,7 @@
 	<!-- Used to make sure that regardless what the collection designer uses for the title and content we can wrap it properly -->
 	<!-- If editing, be aware that the Document Basket looks for specific classes that this template bakes in (key points marked with ***) -->
 	<xsl:template name="wrapDocumentNodes">
+	        <xsl:variable name="nodeID" select="@nodeID"/>
 		<a name="{@nodeID}"><xsl:text> </xsl:text></a>
 		
 		<!-- Section header -->
@@ -127,7 +128,7 @@
 					<img id="dtoggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
 						<xsl:attribute name="src">
 							<xsl:choose>
-								<xsl:when test="/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or util:oidIsMatchOrParent(@nodeID, /page/pageResponse/document/@selectedNode)">
+								<xsl:when test="/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or util:oidIsMatchOrParent($nodeID, /page/pageResponse/document/@selectedNode)">
 									<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'collapse_image')"/>
 								</xsl:when>
 								<xsl:otherwise>
@@ -584,7 +585,7 @@
 				<xsl:for-each select="node()">
 					<xsl:choose>
 						<xsl:when test="not(name())">
-							<xsl:value-of select="." disable-output-escaping="yes"/>
+						  <xsl:value-of select="." disable-output-escaping="yes"/>
 						</xsl:when>
 						<xsl:when test="name() = 'annotation'">
 							<xsl:call-template name="displayAnnotation"/>

@@ -121,8 +121,11 @@
 	</xsl:template>
 
 	<xsl:template name="init-direct-edit">
+	         <!-- might be worth moving loading the JS file to earlier, to give time to load  -->
+	  	 <script type="text/javascript" src="interfaces/{$interface_name}/js/direct-edit.js"><xsl:text> </xsl:text></script>	
 		<script type="text/javascript">
-			<xsl:text disable-output-escaping="yes">
+		  <xsl:text disable-output-escaping="yes">
+		    $(document).ready(function() {		    
 				de.onready(function() 
 				{
 					try
@@ -134,6 +137,7 @@
 						alert("Seaweed failed to initialise: " + err.message);
 					}
 				});
+		     });						
 			</xsl:text>
 		</script>
 	</xsl:template> 
@@ -507,7 +511,11 @@
 							</xsl:variable>
 							<nobr>
 								<xsl:apply-templates select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@name='TextQuery']/paramList/param[@name='query']">
-									<xsl:with-param name="default" select="java:org.greenstone.gsdl3.util.XSLTUtil.tidyWhitespace($qs, /page/@lang)"/>
+<!--
+    <xsl:with-param name="default" select="java:org.greenstone.gsdl3.util.XSLTUtil.tidyWhitespace($qs, /page/@lang)"/>
+    -->
+								  <xsl:with-param name="default" select="normalize-space($qs)"/>
+								  
 								</xsl:apply-templates>
 							</nobr>
 						</span>

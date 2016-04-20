@@ -9,6 +9,7 @@
 	<xsl:param name="interface_name"/>
 	<xsl:param name="library_name"/>
 	<xsl:param name="site_name"/>
+	<xsl:param name="use_client_side_xslt"/>
 	<xsl:param name="collName"/>
 	<xsl:param name="lang"/>
   

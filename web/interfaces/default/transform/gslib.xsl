@@ -18,6 +18,7 @@
   <xsl:param name="interface_name"/>
   <xsl:param name="library_name"/>
   <xsl:param name="site_name"/>
+  <xsl:param name="use_client_side_xslt"/>
   <!-- every pages ....................................................................... -->
 
   <xsl:template name="siteName">
@@ -158,7 +159,7 @@
   </xsl:template>
   
   <xsl:template name="noTextBar">
-    <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text>
+    <xsl:text disable-output-escaping="yes">&amp;nbsp;</xsl:text><!-- could also be expressed &#160; -->
   </xsl:template>
   
   <xsl:template name="poweredByGS3TextBar">
@@ -166,7 +167,7 @@
   </xsl:template>
   
   <xsl:template name="rightArrow">
-    <xsl:text disable-output-escaping="yes"> &amp;raquo; </xsl:text>
+    <xsl:text disable-output-escaping="yes"> &amp;raquo; </xsl:text> <!-- could also be expressed &#187; -->
   </xsl:template>
   
   <!-- site home ....................................................................... -->
@@ -291,7 +292,10 @@
   <xsl:variable name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
   <xsl:variable name="httpPath" select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']"/>
   <xsl:variable name="siteName" select="$site_name"/>
-  <xsl:param name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
+  <!--
+      Already defined above as a variable, not sure why if way being defined here again as a 'param'
+      <xsl:param name="collName" select="/page/pageRequest/paramList/param[@name='c']/@value"/>
+      -->
   <xsl:param name="pageType"/>
   <xsl:variable name="this-element" select="/page/pageResponse/collection|/page/pageResponse/serviceCluster"/>
   <xsl:variable name="this-service" select="/page/pageRequest/paramList/param[@name = 's']/@value"/>

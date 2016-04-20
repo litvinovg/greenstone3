@@ -42,7 +42,7 @@
 
 	</xsl:template>
 
-<xsl:template name="collectionLinks">
+	<xsl:template name="collectionLinks">
 		<div id="collectionLinks">
 			<xsl:if test="count(collectionList/collection) = 0">
 				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.no_collections')"/>
@@ -53,7 +53,12 @@
 			</xsl:for-each>
 			<br class="clear"/>
 		</div>
-</xsl:template>
+	</xsl:template>
+
+	<xsl:template match="/page/xsltparams">
+	  <!-- suppress xsltparam block in page -->
+	</xsl:template>
+
 </xsl:stylesheet>
 
 
