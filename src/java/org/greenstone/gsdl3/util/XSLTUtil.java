@@ -344,6 +344,17 @@ public class XSLTUtil
 		return result;
 	}
 
+
+    	public static String getInterfaceTextSubstituteArgs(String value, String args_str)
+	{
+	    String[] args = null;
+	    if (args_str != null && !args_str.equals("")) {
+		args = StringUtils.split(args_str, ";");
+	    }
+
+	    return Dictionary.processArgs(value,args);
+	}
+	    
 	public static Node getCollectionText(String collection, String site_name, String lang, String key)
 	{
 		return getCollectionTextWithArgs(collection, site_name, lang, key, null);

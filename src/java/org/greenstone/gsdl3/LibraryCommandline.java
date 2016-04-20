@@ -59,7 +59,7 @@ final public class LibraryCommandline
 		//config_params.put(GSConstants.GSDL3_HOME, gsdl_home);
 		config_params.put(GSConstants.SITE_NAME, site_name);
 		config_params.put(GSConstants.INTERFACE_NAME, interface_name);
-		config_params.put(GSConstants.ALLOW_CLIENT_SIDE_XSLT, false);
+		config_params.put(GSConstants.USE_CLIENT_SIDE_XSLT, false);
 
 		// new message router - create it and pass a handle to recept.
 		// the servlet wont use this directly

@@ -7,6 +7,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -26,6 +28,7 @@ import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
 import org.greenstone.gsdl3.util.XMLTransformer;
+import org.greenstone.gsdl3.util.XSLTUtil;
 import org.greenstone.util.GlobalProperties;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
@@ -199,6 +202,14 @@ public class TransformingReceptionist extends Receptionist
 		//First exploratory pass
 		for (File currentFile : xslFiles)
 		{
+
+		    String full_filename = currentFile.getPath();
+		    int sep_pos = full_filename.lastIndexOf(File.separator)+1;
+		    String local_filename = full_filename.substring(sep_pos);
+		    if (local_filename.startsWith(".")) {
+			logger.warn("Greenstone does not normally rely on 'dot' files for XSL transformations.\n Is the following file intended to be part of the digital library installation?\n XSL File being read in:\n    " + currentFile.getPath());
+		    }
+				
 			Document currentDoc = this.converter.getDOM(currentFile);
 			if (currentDoc == null)
 			{
@@ -400,7 +411,7 @@ public class TransformingReceptionist extends Receptionist
 				    }
 				}
 			}
-		}
+	}
 		request.appendChild(request.getOwnerDocument().importNode(extraMetadataList, true));
 	}
 
@@ -408,14 +419,34 @@ public class TransformingReceptionist extends Receptionist
 	{
 		// might need to add some data to the page
 		addExtraInfo(page);
-		// transform the page using xslt
-		Node transformed_page = transformPage(page);
 
+		
+		// transform the page using xslt
+
+		String currentInterface = (String) config_params.get(GSConstants.INTERFACE_NAME);
+
+		Element request = (Element) GSXML.getChildByTagName(page, GSXML.PAGE_REQUEST_ELEM);
+		String output = request.getAttribute(GSXML.OUTPUT_ATT);
+
+		boolean useClientXSLT = (Boolean) config_params.get(GSConstants.USE_CLIENT_SIDE_XSLT);
+		//logger.info("Client side transforms allowed? " + allowsClientXSLT);
+
+		if (useClientXSLT)
+		{
+		    // if not specified, output defaults to 'html', but this isn't what we want when useClientXSLT is on
+		    if (output.equals("html")) {
+			output = "xsltclient";
+		    }
+		}
+		Node transformed_page = transformPage(page,currentInterface,output);
+
+		if (useClientXSLT) {
+		    return transformed_page;
+		}
 		// if the user has specified they want only a part of the full page then subdivide it
 		boolean subdivide = false;
 		String excerptID = null;
 		String excerptTag = null;
-		Element request = (Element) GSXML.getChildByTagName(page, GSXML.PAGE_REQUEST_ELEM);
 		Element cgi_param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		if (cgi_param_list != null)
 		{
@@ -516,6 +547,164 @@ public class TransformingReceptionist extends Receptionist
 		return null;
 	}
 
+        protected void replaceNodeWithInterfaceText(Document doc, String interface_name, String lang,
+						    Element elem, String attr_name, String attr_val)
+        {
+	    String pattern_str_3arg = "util:getInterfaceText\\([^,]+,[^,]+,\\s*'(.+?)'\\s*\\)";
+	    String pattern_str_4arg = "util:getInterfaceText\\([^,]+,[^,]+,\\s*'(.+?)'\\s*,\\s*(.+?)\\s*\\)$";
+    
+	    Pattern pattern3 = Pattern.compile(pattern_str_3arg);
+	    Matcher matcher3 = pattern3.matcher(attr_val);
+	    if (matcher3.find()) {
+		String dict_key = matcher3.group(1);
+		String dict_val = XSLTUtil.getInterfaceText(interface_name,lang,dict_key);
+		
+		Node parent_node = elem.getParentNode();
+
+		Text replacement_text_node = doc.createTextNode(dict_val);
+	        parent_node.replaceChild(replacement_text_node,elem);
+	    }	    
+	    else {
+		Pattern pattern4 = Pattern.compile(pattern_str_4arg);
+		Matcher matcher4 = pattern4.matcher(attr_val);
+		StringBuffer string_buffer4 = new StringBuffer();
+
+		if (matcher4.find()) {
+		    String dict_key = matcher4.group(1);
+		    String args     = matcher4.group(2);
+		    args = args.replaceAll("\\$","\\\\\\$");
+		    
+		    String dict_val = XSLTUtil.getInterfaceText(interface_name,lang,dict_key);
+
+		    matcher4.appendReplacement(string_buffer4, "js:getInterfaceTextSubstituteArgs('"+dict_val+"',string("+args+"))");
+		    matcher4.appendTail(string_buffer4);
+
+		    attr_val = string_buffer4.toString();
+		    elem.setAttribute(attr_name,attr_val);
+		}
+		else {
+		    logger.error("Failed to find match in attribute: " + attr_name + "=\"" + attr_val + "\"");
+		    attr_val = attr_val.replaceAll("util:getInterfaceText\\(.+?,.+?,\\s*(.+?)\\s*\\)","$1");
+		    elem.setAttribute(attr_name,attr_val);
+		}
+	    }
+	
+	}
+    
+        protected void resolveExtendedNamespaceAttributesXSLT(Document doc, String interface_name, String lang)
+        {
+	    String[] attr_list = new String[] {"select","test"};
+
+	    // http://stackoverflow.com/questions/13220520/javascript-replace-child-loop-issue
+	    // go through nodeList in reverse to avoid the 'skipping' problem, due to
+	    // replaceChild() calls removing items from the "live" nodeList
+	    
+	    NodeList nodeList = doc.getElementsByTagName("*");
+	    for (int i=nodeList.getLength()-1; i>=0; i--) {
+		Node node = nodeList.item(i);
+		if (node.getNodeType() == Node.ELEMENT_NODE) {
+		    Element elem = (Element)node;		
+		    for (String attr_name : attr_list) {
+			if (elem.hasAttribute(attr_name)) {
+			    String attr_val = elem.getAttribute(attr_name);
+			    
+			    if (attr_val.startsWith("util:getInterfaceText(")) {
+				// replace the node with dictionary lookup
+				replaceNodeWithInterfaceText(doc, interface_name,lang, elem,attr_name,attr_val);
+			    }							
+			    else if (attr_val.contains("util:")) {
+
+				attr_val = attr_val.replaceAll("util:getInterfaceStringsAsJavascript\\(.+?,.+?,\\s*(.+?)\\)","$1");
+
+				//attr_val = attr_val.replaceAll("util:escapeNewLinesAndQuotes\\(\\s*(.+?)\\s*\\)","'escapeNLandQ $1'");
+				//attr_val = attr_val.replaceAll("util:escapeNewLinesAndQuotes\\(\\s*(.+?)\\s*\\)","$1");					
+
+				// 'contains()' supported in XSLT 1.0, so OK to change any util:contains() into contains()
+				attr_val = attr_val.replaceAll("util:(contains\\(.+?\\))","$1");
+
+				elem.setAttribute(attr_name,attr_val);
+			    }
+
+			    if (attr_val.contains("java:")) {
+				if (attr_val.indexOf("getInterfaceTextSubstituteArgs")>=4) {
+				    
+				    attr_val = attr_val.replaceAll("java:.+?\\.(\\w+)\\((.*?)\\)$","js:$1($2)");
+				}
+				
+				elem.setAttribute(attr_name,attr_val);
+			    }
+			}
+		    }
+		    
+		}
+	    }
+	}
+
+
+        protected void resolveExtendedNamespaceAttributesXML(Document doc, String interface_name, String lang)
+        {
+	    String[] attr_list = new String[] {"src", "href"};
+
+	    // http://stackoverflow.com/questions/13220520/javascript-replace-child-loop-issue
+	    // go through nodeList in reverse to avoid the 'skipping' problem, due to
+	    // replaceChild() calls removing items from the "live" nodeList
+	    
+	    NodeList nodeList = doc.getElementsByTagName("*");
+	    for (int i=nodeList.getLength()-1; i>=0; i--) {
+		Node node = nodeList.item(i);
+		if (node.getNodeType() == Node.ELEMENT_NODE) {
+		    Element elem = (Element)node;
+		    for (String attr_name : attr_list) {
+			if (elem.hasAttribute(attr_name)) {
+			    String attr_val = elem.getAttribute(attr_name);
+
+			    if (attr_val.contains("util:getInterfaceText(")) {
+				String pattern_str_3arg = "util:getInterfaceText\\([^,]+,[^,]+,\\s*'(.+?)'\\s*\\)";
+				Pattern pattern3 = Pattern.compile(pattern_str_3arg);
+				Matcher matcher3 = pattern3.matcher(attr_val);
+				
+				StringBuffer string_buffer3 = new StringBuffer();
+				
+				boolean found_match = false;
+				
+				while (matcher3.find()) {
+				    found_match = true;
+				    String dict_key = matcher3.group(1);
+				    String dict_val = XSLTUtil.getInterfaceText(interface_name,lang,dict_key);
+				    
+				    matcher3.appendReplacement(string_buffer3, dict_val);
+				}
+				matcher3.appendTail(string_buffer3);
+				
+				if (found_match) {
+				    attr_val = string_buffer3.toString();
+				    elem.setAttribute(attr_name,attr_val);				    
+				}
+				else {			    
+				    logger.error("Failed to find match in attribute: " + attr_name + "=\"" + attr_val + "\"");
+				    attr_val = attr_val.replaceAll("util:getInterfaceText\\(.+?,.+?,\\s*(.+?)\\s*\\)","$1");
+				    elem.setAttribute(attr_name,attr_val);
+				}
+			    }
+			    else if (attr_val.contains("util:")) {
+
+				logger.error("Encountered unexpected 'util:' prefix exension: " + attr_name + "=\"" + attr_val + "\"");
+			    }
+
+			    if (attr_val.contains("java:")) {
+				// make anything java: safe from the point of an XSLT without extensions
+				logger.error("Encountered unexpected 'java:' prefix exension: " + attr_name + "=\"" + attr_val + "\"");
+
+			    }
+			}
+		    }
+		    
+		}
+	    }
+	}
+
+    
+    
 	/**
 	 * overwrite this to add any extra info that might be needed in the page
 	 * before transformation
@@ -528,39 +717,14 @@ public class TransformingReceptionist extends Receptionist
 	 * transform the page using xslt we need to get any format element out of
 	 * the page and add it to the xslt before transforming
 	 */
-	protected Node transformPage(Element page)
+        protected Node transformPage(Element page,String currentInterface,String output)
 	{
 		_debug = false;
 
-		boolean allowsClientXSLT = (Boolean) config_params.get(GSConstants.ALLOW_CLIENT_SIDE_XSLT);
-		//System.out.println("Client side transforms allowed? " + allowsClientXSLT);
-
-		String currentInterface = (String) config_params.get(GSConstants.INTERFACE_NAME);
-
 		Element request = (Element) GSXML.getChildByTagName(page, GSXML.PAGE_REQUEST_ELEM);
-		String output = request.getAttribute(GSXML.OUTPUT_ATT);
 
-		//System.out.println("Current output mode is: " + output + ", current interface name is: " + currentInterface);
-
-		if (allowsClientXSLT)
-		{
-			if (!currentInterface.endsWith(GSConstants.CLIENT_SIDE_XSLT_INTERFACE_SUFFIX) && output.equals("html"))
-			{
-				System.out.println("output is html and we are not currently using a client side version, switching");
-				// Switch the interface
-				config_params.put(GSConstants.INTERFACE_NAME, currentInterface.concat(GSConstants.CLIENT_SIDE_XSLT_INTERFACE_SUFFIX));
-			}
-			else if ((currentInterface.endsWith(GSConstants.CLIENT_SIDE_XSLT_INTERFACE_SUFFIX) && !output.equals("html")) || output.equals("server"))
-			{
-				// The reverse needs to happen too
-				config_params.put(GSConstants.INTERFACE_NAME, currentInterface.substring(0, currentInterface.length() - GSConstants.CLIENT_SIDE_XSLT_INTERFACE_SUFFIX.length()));
-			}
-		}
-		else if (currentInterface.endsWith(GSConstants.CLIENT_SIDE_XSLT_INTERFACE_SUFFIX))
-		{
-			config_params.put(GSConstants.INTERFACE_NAME, currentInterface.substring(0, currentInterface.length() - GSConstants.CLIENT_SIDE_XSLT_INTERFACE_SUFFIX.length()));
-		}
-
+		//logger.info("Current output mode is: " + output + ", current interface name is: " + currentInterface);
+		
 		// DocType defaults in case the skin doesn't have an "xsl:output" element
 		String qualifiedName = "html";
 		String publicID = "-//W3C//DTD HTML 4.01 Transitional//EN";
@@ -572,24 +736,50 @@ public class TransformingReceptionist extends Receptionist
 
 		if (output.equals("xsltclient"))
 		{
+		        String baseURL = request.getAttribute(GSXML.BASE_URL);
+				
 			// If you're just getting the client-side transform page, why bother with the rest of this?
 			Element html = docWithDoctype.createElement("html");
 			Element img = docWithDoctype.createElement("img");
-			img.setAttribute("src", "interfaces/default/images/loading.gif"); // Make it dynamic
+			img.setAttribute("src", "loading.gif"); // Make it dynamic
 			img.setAttribute("alt", "Please wait...");
 			Text title_text = docWithDoctype.createTextNode("Please wait..."); // Make this language dependent
 			Element head = docWithDoctype.createElement("head");
+
+			// e.g., <base href="http://localhost:8383/greenstone3/" /><!-- [if lte IE 6]></base><![endif] -->
+			Element base = docWithDoctype.createElement("base");
+			base.setAttribute("href",baseURL);
+			Comment opt_end_base = docWithDoctype.createComment("[if lte IE 6]></base><![endif]");
+			
 			Element title = docWithDoctype.createElement("title");
 			title.appendChild(title_text);
+
 			Element body = docWithDoctype.createElement("body");
-			Element script = docWithDoctype.createElement("script");
-			Element jquery = docWithDoctype.createElement("script");
-			jquery.setAttribute("src", "jquery.js");
-			jquery.setAttribute("type", "text/javascript");
+
+			Element jquery_script = docWithDoctype.createElement("script");
+			jquery_script.setAttribute("src", "jquery-1.10-min.js");
+			jquery_script.setAttribute("type", "text/javascript");
 			Comment jquery_comment = docWithDoctype.createComment("jQuery");
+			jquery_script.appendChild(jquery_comment);
+
+			Element saxonce_script = docWithDoctype.createElement("script");
+			saxonce_script.setAttribute("src", "Saxonce/Saxonce.nocache.js");
+			saxonce_script.setAttribute("type", "text/javascript");
+			Comment saxonce_comment = docWithDoctype.createComment("SaxonCE");
+			saxonce_script.appendChild(saxonce_comment);
+
+			Element xsltutil_script = docWithDoctype.createElement("script");
+			xsltutil_script.setAttribute("src", "xslt-util.js");
+			xsltutil_script.setAttribute("type", "text/javascript");
+			Comment xsltutil_comment = docWithDoctype.createComment("JavaScript version of XSLTUtil.java");
+			xsltutil_script.appendChild(xsltutil_comment);
+
+			Element script = docWithDoctype.createElement("script");
 			Comment script_comment = docWithDoctype.createComment("Filler for browser");
-			script.setAttribute("src", "test.js");
+			script.setAttribute("src", "client-side-xslt.js");
 			script.setAttribute("type", "text/javascript");
+			script.appendChild(script_comment);
+			
 			Element pagevar = docWithDoctype.createElement("script");
 			Element style = docWithDoctype.createElement("style");
 			style.setAttribute("type", "text/css");
@@ -598,16 +788,18 @@ public class TransformingReceptionist extends Receptionist
 			Text page_var_text = docWithDoctype.createTextNode("var placeholder = true;");
 
 			html.appendChild(head);
+			head.appendChild(base); head.appendChild(opt_end_base);
 			head.appendChild(title);
 			head.appendChild(style);
 			style.appendChild(style_text);
 			html.appendChild(body);
 			head.appendChild(pagevar);
-			head.appendChild(jquery);
+			head.appendChild(jquery_script);
+			head.appendChild(saxonce_script);
+			head.appendChild(xsltutil_script);
 			head.appendChild(script);
 			pagevar.appendChild(page_var_text);
-			jquery.appendChild(jquery_comment);
-			script.appendChild(script_comment);
+
 			body.appendChild(img);
 			docWithDoctype.appendChild(html);
 
@@ -652,6 +844,12 @@ public class TransformingReceptionist extends Receptionist
 			Text siteNameText = theXML.createTextNode((String) config_params.get(GSConstants.SITE_NAME));
 			siteName.appendChild(siteNameText);
 
+			Element clientSideXSLTName = theXML.createElement("param");
+			clientSideXSLTName.setAttribute("name", "use_client_side_xslt");
+			Boolean useClientXSLT = (Boolean) config_params.get(GSConstants.USE_CLIENT_SIDE_XSLT);
+			Text clientSideXSLTNameText = theXML.createTextNode(useClientXSLT.toString());
+			clientSideXSLTName.appendChild(clientSideXSLTNameText);
+			
 			Element filepath = theXML.createElement("param");
 			filepath.setAttribute("name", "filepath");
 			Text filepathtext = theXML.createTextNode(GlobalProperties.getGSDL3Home());
@@ -660,6 +858,7 @@ public class TransformingReceptionist extends Receptionist
 			root.appendChild(libname);
 			root.appendChild(intname);
 			root.appendChild(siteName);
+			root.appendChild(clientSideXSLTName);
 			root.appendChild(filepath);
 
 			if ((output.equals("xml")) || output.equals("json"))
@@ -915,27 +1114,11 @@ public class TransformingReceptionist extends Receptionist
 		{
 			return converter.getDOM(getStringFromDocument(skinAndLibraryXsl));
 		}
-		if (output.equals("skinandlibdoc") || output.equals("clientside"))
+		if (output.equals("skinandlibdoc"))
 		{
 
 			Node skinAndLib = converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
-
-			if (output.equals("skinandlibdoc"))
-			{
-				return skinAndLib;
-			}
-			else
-			{
-				// Send XML and skinandlibdoc down the line together
-				Document finalDoc = converter.newDOM();
-				Node finalDocSkin = finalDoc.importNode(skinAndLibraryDoc.getDocumentElement(), true);
-				Node finalDocXML = finalDoc.importNode(theXML.getDocumentElement(), true);
-				Element root = finalDoc.createElement("skinlibPlusXML");
-				root.appendChild(finalDocSkin);
-				root.appendChild(finalDocXML);
-				finalDoc.appendChild(root);
-				return (Node) finalDoc.getDocumentElement();
-			}
+			return skinAndLib;			
 		}
 		if (output.equals("oldskindoc"))
 		{
@@ -1017,9 +1200,35 @@ public class TransformingReceptionist extends Receptionist
 			return doc;
 		}
 
-		if (output.equals("skinandlibdocfinal"))
+		if (output.equals("skinandlibdocfinal") || output.equals("clientside"))
 		{
-			return converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
+			if (output.equals("skinandlibdocfinal"))
+			{
+			        Node skinAndLibFinal = converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
+				return skinAndLibFinal;
+			}
+			else
+			{
+			        // Go through and 'fix up' any 'util:...' or 'java:...' attributes the skinAndLibraryDoc has
+			        String lang = (String)config_params.get("lang");
+			        resolveExtendedNamespaceAttributesXSLT(skinAndLibraryDoc,currentInterface,lang); // test= and select= attributes
+				resolveExtendedNamespaceAttributesXML(skinAndLibraryDoc,currentInterface,lang);  // href= and src= attributes
+				Node skinAndLibFinal = converter.getDOM(getStringFromDocument(skinAndLibraryDoc));
+				
+				// Send XML and skinandlibdoc down the line together
+				Document finalDoc = converter.newDOM();
+				Node finalDocSkin = finalDoc.importNode(skinAndLibraryDoc.getDocumentElement(), true);
+				Node finalDocXML = finalDoc.importNode(theXML.getDocumentElement(), true);
+				Element root = finalDoc.createElement("skinlibfinalPlusXML");
+				root.appendChild(finalDocSkin);
+				root.appendChild(finalDocXML);
+				finalDoc.appendChild(root);
+				return (Node) finalDoc.getDocumentElement();
+			}
+
+
+
+			
 		}
 
 		// The transformer will now work out the resulting doctype from any set in the (merged) stylesheets and

@@ -125,8 +125,8 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		library_name = config.getInitParameter(GSConstants.LIBRARY_NAME);
 		String interface_name = config.getInitParameter(GSConstants.INTERFACE_NAME);
 
-		String allowXslt = (String) config.getInitParameter(GSConstants.ALLOW_CLIENT_SIDE_XSLT);
-		supports_client_xslt = allowXslt != null && allowXslt.equals("true");
+		String useXslt = (String) config.getInitParameter(GSConstants.USE_CLIENT_SIDE_XSLT);
+		supports_client_xslt = useXslt != null && useXslt.equals("true");
 
 		this.default_lang = config.getInitParameter(GSConstants.DEFAULT_LANG);
 		String sess_expire = config.getInitParameter(GSXML.SESSION_EXPIRATION);
@@ -173,7 +173,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 
 		config_params.put(GSConstants.LIBRARY_NAME, library_name);
 		config_params.put(GSConstants.INTERFACE_NAME, interface_name);
-		config_params.put(GSConstants.ALLOW_CLIENT_SIDE_XSLT, supports_client_xslt);
+		config_params.put(GSConstants.USE_CLIENT_SIDE_XSLT, supports_client_xslt);
 
 		if (site_name != null)
 		{
@@ -784,7 +784,7 @@ public class LibraryServlet extends BaseGreenstoneServlet
 		encodeURLs(xml_result, response);
 
 		String xml_string = XMLConverter.getPrettyString(xml_result);
-
+		
 		if (output.equals("json"))
 		{
 			try

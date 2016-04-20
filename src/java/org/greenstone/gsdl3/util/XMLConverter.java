@@ -93,6 +93,8 @@ public class XMLConverter
 		catch (Exception e)
 		{
 			logger.error(e.getMessage());
+			logger.error("Input string was:\n" + in);
+			e.printStackTrace();
 		}
 		return null;
 	}
@@ -112,6 +114,8 @@ public class XMLConverter
 		catch (Exception e)
 		{
 			logger.error(e.getMessage());
+			logger.error("Input string was:\n" + in);
+			e.printStackTrace();
 		}
 		return null;
 	}
@@ -130,6 +134,8 @@ public class XMLConverter
 		catch (Exception e)
 		{
 			logger.error(e.getMessage(), e);
+			logger.error("File was:\n" + in.getPath());
+			e.printStackTrace();
 
 		}
 		return null;
@@ -155,6 +161,8 @@ public class XMLConverter
     catch (Exception e)
       {
 	logger.error(e.getMessage());
+	logger.error("File was:\n" + in.getPath());
+	e.printStackTrace();
       }
     return null;
 	}
@@ -169,6 +177,8 @@ public class XMLConverter
     catch (Exception e)
       {
 	logger.error(e.getMessage());
+	logger.error("File was:\n" + in.getPath());
+	e.printStackTrace();
       }
     return null;
   }
@@ -198,6 +208,8 @@ public class XMLConverter
     } catch (Exception e) {
       
       logger.error(e.getMessage());
+      logger.error("InputSource:\n");
+      e.printStackTrace();
     }
     return null;
     
@@ -336,7 +348,21 @@ public class XMLConverter
 				xmlRepresentation.append(" ");
 				xmlRepresentation.append(attribute.getNodeName());
 				xmlRepresentation.append("=\"");
-				xmlRepresentation.append(attribute.getNodeValue());
+				String attr_val = attribute.getNodeValue();
+				
+				attr_val = attr_val.replaceAll("&","&amp;");
+				attr_val = attr_val.replaceAll("<","&lt;");
+				attr_val = attr_val.replaceAll(">","&gt;");
+				attr_val = attr_val.replaceAll("\"","&quot;");
+				// assume that any of the above chars that was already entity escaped
+				// was already correct => return back to how they were
+				attr_val = attr_val.replaceAll("&amp;amp;","&amp;");
+				attr_val = attr_val.replaceAll("&amp;lt;","&lt;");
+				attr_val = attr_val.replaceAll("&amp;gt;","&gt;");
+				attr_val = attr_val.replaceAll("&amp;quot;","&quot;");
+				
+				
+				xmlRepresentation.append(attr_val);
 				xmlRepresentation.append("\"");
 			}
 

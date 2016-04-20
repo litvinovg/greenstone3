@@ -139,6 +139,52 @@ public class Dictionary
 		return get(key, null);
 	}
 
+        public static String processArgs(String initial, String args[])
+        {
+	    // If the string contains arguments we have to insert them.
+	    StringBuffer complete = new StringBuffer();
+	    // While we still have initial string left.
+	    while (initial.length() > 0 && initial.indexOf('{') != -1 && initial.indexOf('}') != -1)
+		{
+		    // Remove preamble
+		    int opening = initial.indexOf('{');
+		    int closing = initial.indexOf('}');
+		    int comment_mark = initial.indexOf('-', opening); // May not exist
+		    if (comment_mark > closing)
+			{ // May also be detecting a later comment
+			    comment_mark = -1;
+			}
+		    complete.append(initial.substring(0, opening));
+		    
+		    // Parse arg_num
+		    String arg_str = null;
+		    if (comment_mark != -1)
+			{
+			    arg_str = initial.substring(opening + 1, comment_mark);
+			}
+		    else
+			{
+			    arg_str = initial.substring(opening + 1, closing);
+			}
+		    if (closing + 1 < initial.length())
+			{
+			    initial = initial.substring(closing + 1);
+			}
+		    else
+			{
+			    initial = "";
+			}
+		    int arg_num = Integer.parseInt(arg_str);
+		    // Insert argument
+		    if (args != null && 0 <= arg_num && arg_num < args.length)
+			{
+			    complete.append(args[arg_num]);
+			}
+		}
+	    complete.append(initial);
+	    return complete.toString();	    
+	}
+    
 	/**
 	 * Used to retrieve a property value from the Locale specific
 	 * ResourceBundle, based upon the key and arguments supplied. If the key
@@ -161,6 +207,9 @@ public class Dictionary
 	 */
 	public String get(String key, String args[])
 	{
+	    // The following 'argsStr' doesn't appear to be used in rest of method, so
+	    // commenting out
+	    /*
 		String argsStr = "";
 		if (args != null)
 		{
@@ -169,7 +218,8 @@ public class Dictionary
 				argsStr += arg + " ";
 			}
 		}
-
+	    */
+	    
 		if (this.raw == null)
 		{
 			return null;
@@ -185,6 +235,9 @@ public class Dictionary
 			{
 				return initial;
 			}
+
+			return processArgs(initial,args);
+			/*
 			// If the string contains arguments we have to insert them.
 			StringBuffer complete = new StringBuffer();
 			// While we still have initial string left.
@@ -227,6 +280,7 @@ public class Dictionary
 			}
 			complete.append(initial);
 			return complete.toString();
+			*/
 		}
 		catch (Exception e)
 		{
