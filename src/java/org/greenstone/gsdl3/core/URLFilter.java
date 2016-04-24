@@ -125,10 +125,6 @@ public class URLFilter implements Filter
 					return;
 				}
 
-				//MessageRouter gsRouter = (MessageRouter) request.getServletContext().getAttribute("GSRouter");
-				// The above line didn't work in i-jetty (failed to find class)
-				// (See node below about ServletContext for more details)
-				//				// Changed to the following (but hasn't been exhaustively tested)
 				MessageRouter gsRouter = (MessageRouter) context.getAttribute("GSRouter");
 				
 				if (gsRouter == null)
@@ -204,33 +200,10 @@ public class URLFilter implements Filter
 				}
 			}
 			else if (url.contains(INTERFACE_PATH))
-			{
-			    ////String fileURL = url.replaceFirst(request.getServletContext().getContextPath(), "");
-			        //
-			        // The above line was changed to the line below to work on i-jetty.  The above caused
-			        // an exception to be thrown trying to load in the class at init time:
-			        //   javax.servlet.http.ServletContext
-			        //
-			        // And then later in the life-time the servlet, the above line fails when run
-			        // The following (older) way to do this was found to work as a replacment
-			    
+			{			    
 				String fileURL = url.replaceFirst(context.getContextPath(), "");
-
-				// A different theory is that the problem could be to do with version of Servlet
-				// Container implemented by the web-server:
-				//  http://stackoverflow.com/questions/7860782/request-getservletcontext-not-found-even-with-new-jar
-				
-				// Similar change in the following needed also ...			
-
-				// Replacement line known to be deprecated, but very useful for us to use in this situation
-				// 
-				// If this method is every offically removed, and the newer getServletContext()
-				// still can't be relied upon to work in all web servers Greenstone uses,
-				// then an alternative approach would be to get the core information (servlet context name,
-				// and where it is on the file system) from the gsdl properties file
-				
-				////File requestedFile = new File(request.getServletContext().getRealPath(fileURL));
 				File requestedFile = new File(context.getRealPath(fileURL));
+
 				if (!requestedFile.exists())
 				{
 					int interfaceNameStart = fileURL.indexOf(INTERFACE_PATH) + INTERFACE_PATH.length();
