@@ -9,10 +9,12 @@ import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
@@ -69,11 +71,15 @@ public class URLFilter implements Filter
 		this._filterConfig = null;
 	}
 
+        @SuppressWarnings("deprecation")
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
 	{
 		if (request instanceof HttpServletRequest)
 		{
 			HttpServletRequest hRequest = ((HttpServletRequest) request);
+			HttpSession hSession = hRequest.getSession();
+			ServletContext context = hSession.getServletContext();
+
 			GSHttpServletRequestWrapper gRequest = new GSHttpServletRequestWrapper(hRequest);
 
 			String url = hRequest.getRequestURI().toString();
@@ -119,7 +125,12 @@ public class URLFilter implements Filter
 					return;
 				}
 
-				MessageRouter gsRouter = (MessageRouter) request.getServletContext().getAttribute("GSRouter");
+				//MessageRouter gsRouter = (MessageRouter) request.getServletContext().getAttribute("GSRouter");
+				// The above line didn't work in i-jetty (failed to find class)
+				// (See node below about ServletContext for more details)
+				//				// Changed to the following (but hasn't been exhaustively tested)
+				MessageRouter gsRouter = (MessageRouter) context.getAttribute("GSRouter");
+				
 				if (gsRouter == null)
 				{
 					_logger.error("Receptionist is null, stopping filter");
@@ -194,15 +205,39 @@ public class URLFilter implements Filter
 			}
 			else if (url.contains(INTERFACE_PATH))
 			{
-				String fileURL = url.replaceFirst(request.getServletContext().getContextPath(), "");
-				File requestedFile = new File(request.getServletContext().getRealPath(fileURL));
+			    ////String fileURL = url.replaceFirst(request.getServletContext().getContextPath(), "");
+			        //
+			        // The above line was changed to the line below to work on i-jetty.  The above caused
+			        // an exception to be thrown trying to load in the class at init time:
+			        //   javax.servlet.http.ServletContext
+			        //
+			        // And then later in the life-time the servlet, the above line fails when run
+			        // The following (older) way to do this was found to work as a replacment
+			    
+				String fileURL = url.replaceFirst(context.getContextPath(), "");
+
+				// A different theory is that the problem could be to do with version of Servlet
+				// Container implemented by the web-server:
+				//  http://stackoverflow.com/questions/7860782/request-getservletcontext-not-found-even-with-new-jar
+				
+				// Similar change in the following needed also ...			
+
+				// Replacement line known to be deprecated, but very useful for us to use in this situation
+				// 
+				// If this method is every offically removed, and the newer getServletContext()
+				// still can't be relied upon to work in all web servers Greenstone uses,
+				// then an alternative approach would be to get the core information (servlet context name,
+				// and where it is on the file system) from the gsdl properties file
+				
+				////File requestedFile = new File(request.getServletContext().getRealPath(fileURL));
+				File requestedFile = new File(context.getRealPath(fileURL));
 				if (!requestedFile.exists())
 				{
 					int interfaceNameStart = fileURL.indexOf(INTERFACE_PATH) + INTERFACE_PATH.length();
 					int interfaceNameEnd = fileURL.indexOf("/", interfaceNameStart);
 					String interfaceName = fileURL.substring(interfaceNameStart, interfaceNameEnd);
 					String interfacesDir = fileURL.substring(0, interfaceNameStart);
-					File interfaceConfigFile = new File(request.getServletContext().getRealPath(interfacesDir + interfaceName + "/interfaceConfig.xml"));
+					File interfaceConfigFile = new File(context.getRealPath(interfacesDir + interfaceName + "/interfaceConfig.xml"));
 
 					if (interfaceConfigFile.exists())
 					{
@@ -211,7 +246,7 @@ public class URLFilter implements Filter
 						String baseInterface = interfaceConfigDoc.getDocumentElement().getAttribute("baseInterface");
 						if (baseInterface.length() > 0)
 						{
-							File baseInterfaceFile = new File(request.getServletContext().getRealPath(fileURL.replace("/" + interfaceName + "/", "/" + baseInterface + "/")));
+							File baseInterfaceFile = new File(context.getRealPath(fileURL.replace("/" + interfaceName + "/", "/" + baseInterface + "/")));
 							if (baseInterfaceFile.exists())
 							{
 								ServletOutputStream out = response.getOutputStream();
@@ -415,59 +450,4 @@ public class URLFilter implements Filter
 		return false;
 	}
 
-	private class GSHttpServletRequestWrapper extends HttpServletRequestWrapper
-	{
-		private HashMap<String, String[]> _newParams = new HashMap<String, String[]>();
-
-		public GSHttpServletRequestWrapper(ServletRequest request)
-		{
-			super((HttpServletRequest) request);
-		}
-
-		public void setParameter(String paramName, String[] paramValues)
-		{
-			_newParams.put(paramName, paramValues);
-		}
-
-		public void setParameter(String paramName, String paramValue)
-		{
-			_newParams.put(paramName, new String[] { paramValue });
-		}
-
-		public String getParameter(String paramName)
-		{
-			if (super.getParameter(paramName) != null)
-			{
-				return super.getParameter(paramName);
-			}
-			else
-			{
-				if (_newParams.get(paramName) != null && _newParams.get(paramName)[0] != null)
-				{
-					return _newParams.get(paramName)[0];
-				}
-				return null;
-			}
-		}
-
-		public String[] getParameterValues(String paramName)
-		{
-			if (super.getParameterValues(paramName) != null)
-			{
-				return super.getParameterValues(paramName);
-			}
-			else
-			{
-				return _newParams.get(paramName);
-			}
-		}
-
-		public Map<String, String[]> getParameterMap()
-		{
-			HashMap<String, String[]> returnMap = new HashMap<String, String[]>();
-			returnMap.putAll(super.getParameterMap());
-			returnMap.putAll(_newParams);
-			return returnMap;
-		}
-	}
 }
