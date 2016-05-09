@@ -43,7 +43,7 @@ public class JDBMWrapper implements FlatDatabaseWrapper
 	static String TNAME = "greenstone";
 
 	RecordManager recman_ = null;
-	HTree hashtable_;
+	HTree hashtable_ = null;
 
 	String db_filename_;
 
@@ -158,7 +158,11 @@ public class JDBMWrapper implements FlatDatabaseWrapper
 	/** returns the value associated with the key */
 	public String getValue(String key)
 	{
-
+		if (hashtable_ == null) {
+			logger.error("Database was not opened or not exist!");
+			return null;
+		}
+		
 		String val;
 
 		try

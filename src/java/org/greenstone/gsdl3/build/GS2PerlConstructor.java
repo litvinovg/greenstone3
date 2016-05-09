@@ -202,12 +202,15 @@ public class GS2PerlConstructor extends CollectionConstructor
 
 		command.add(perlPath + "perl");
 		command.add("-S");
-		command.add(GlobalProperties.getGS2Build() + File.separator + "bin" + File.separator + "script" + File.separator + "buildcol.pl");
+		command.add(GlobalProperties.getGS2Build() + File.separator + "bin" + File.separator + "script" + File.separator + "incremental-buildcol.pl");
+		command.add("-incremental");
+		command.add("-builddir");
+		command.add(GSFile.collectDir(this.site_home) + File.separator + this.collection_name + File.separator +"index");
 		command.add("-site");
 		command.add(this.site_name);
 		command.add("-collectdir");
 		command.add(GSFile.collectDir(this.site_home));
-		command.add("-removeold"); // saves some seconds processing time when this flag's added in explicitly
+//		command.add("-removeold"); // saves some seconds processing time when this flag's added in explicitly
 		command.addAll(extractParameters(this.process_params));
 		command.add(this.collection_name);
 
@@ -227,7 +230,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 
 		// first check that we have a building directory
 		// (don't want to bother running activate.pl otherwise)
-		File build_dir = new File(GSFile.collectionBuildDir(this.site_home, this.collection_name));
+		File build_dir = new File(GSFile.collectionIndexDir(this.site_home, this.collection_name));
 		if (!build_dir.exists())
 		{
 			sendMessage(new ConstructionEvent(this, GSStatus.ERROR, "build dir doesn't exist!"));
@@ -274,11 +277,14 @@ public class GS2PerlConstructor extends CollectionConstructor
 		command.add(perlPath + "perl");
 		command.add("-S");
 		command.add(GlobalProperties.getGS2Build() + File.separator + "bin" + File.separator + "script" + File.separator + "activate.pl");
+		command.add("-incremental");
+		command.add("-builddir");
+		command.add(GSFile.collectDir(this.site_home) + File.separator + this.collection_name + File.separator +"index");
 		command.add("-site");
 		command.add(this.site_name);
 		command.add("-collectdir");
 		command.add(GSFile.collectDir(this.site_home));
-		command.add("-removeold"); // saves some seconds processing time when this flag's added in explicitly
+//		command.add("-removeold"); // saves some seconds processing time when this flag's added in explicitly
 		command.add("-skipactivation"); // gsdl3/util/GS2Construct does the activation and reactivation
 		command.addAll(extractParameters(this.process_params));
 		command.add(this.collection_name);

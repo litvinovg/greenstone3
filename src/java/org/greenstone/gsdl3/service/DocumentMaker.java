@@ -35,7 +35,12 @@ import java.util.Set;
 
 import org.apache.log4j.*;
 
+import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
+
+
 import org.greenstone.gsdl3.util.GSDocumentModel;
+import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
@@ -90,7 +95,7 @@ public class DocumentMaker extends ServiceRack
 			service.setAttribute(GSXML.NAME_ATT, services[i]);
 			this.short_service_info.appendChild(service);
 		}
-
+		
 		_GSDM = new GSDocumentModel(this.site_home, this.router);
 
 		return true;
@@ -444,6 +449,9 @@ public class DocumentMaker extends ServiceRack
 					String newContent = (String) keyValueMap.get("text");
 
 					_GSDM.documentXMLSetText(oid, collection, newContent, userContext);
+					
+					markDocumentInFlatDatabase("R", collection, oid);
+
 				}
 
 				if (_GSDM.checkError(result, DOCUMENT_EXECUTE_TRANSACTION))
@@ -453,5 +461,43 @@ public class DocumentMaker extends ServiceRack
 			}
 		}
 		return result;
+		
+	}
+	protected void markDocumentInFlatDatabase(String mark, String collection, String oid) {
+	
+		Document msg_doc = XMLConverter.newDOM();
+		Element message = msg_doc.createElement(GSXML.MESSAGE_ELEM);
+		UserContext userContext = new UserContext();
+		Element query_request = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_DESCRIBE , collection, userContext);		
+		message.appendChild(query_request);
+		Element result = (Element) this.router.process(message);
+		Element resp_elem = (Element) GSXML.getChildByTagName(result, GSXML.RESPONSE_ELEM);
+		Element coll_elem = (Element) GSXML.getChildByTagName(resp_elem, GSXML.COLLECTION_ELEM);
+		String dbtype = coll_elem.getAttribute(GSXML.DB_TYPE_ATT);
+		
+		SimpleCollectionDatabase coll_db = new SimpleCollectionDatabase(dbtype);
+		if (!coll_db.databaseOK())
+		{
+			logger.error("Couldn't create the collection database of type " + dbtype);
+			return;
+		}
+		
+		// Open database for reading
+		String coll_db_file = GSFile.archivesDatabaseFile(this.site_home, collection, dbtype);
+		if (!coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.READ))
+		{
+			logger.error("Could not open collection archives database. Somebody already using this database!");
+		}
+		String old_value = coll_db.getValue(oid);
+		String new_value = old_value.replace("<index-status>B", "<index-status>" + mark);
+		// Close database for reading
+		coll_db.closeDatabase();
+		if (!coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.WRITE))
+		{
+			logger.error("Could not open collection archives database. Somebody already using this database!");
+		}
+		coll_db.setValue(oid, new_value);
+		coll_db.closeDatabase();
+		
 	}
 }

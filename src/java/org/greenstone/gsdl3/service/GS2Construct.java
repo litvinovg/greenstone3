@@ -37,6 +37,7 @@ import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSStatus;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
 
@@ -78,6 +79,9 @@ public class GS2Construct extends ServiceRack
 	private static final String BUILDTYPE_MG = "mg";
 	private static final String BUILDTYPE_MGPP = "mgpp";
 
+	protected static String DATABASE_TYPE = null;
+	protected SimpleCollectionDatabase coll_db = null;
+	
 	// the list of the collections - store between some method calls
 	private String[] collection_list = null;
 
@@ -709,21 +713,31 @@ public class GS2Construct extends ServiceRack
 		    // convert params into a single string again?
 		    Set<Map.Entry<String, Serializable>> entries = params.entrySet();
 		    Iterator<Map.Entry<String, Serializable>> i = entries.iterator();
-		    while(i.hasNext()) {
 			
-			Map.Entry<String, Serializable> entry = i.next();
-			String paramname = entry.getKey();
-			paramname = paramname.replace("s1.", ""); // replaces all occurrences
-			if(paramname.equals("collection")) {
-			    paramname = "c";
-			}
-			String paramvalue = (String)entry.getValue();
+		    String oid = null;
+		    
+		    while (i.hasNext()) {
 
-			querystring.append(paramname + "=" + paramvalue);
-			if(i.hasNext()) {
-			    querystring.append("&");
-			}
+				Map.Entry<String, Serializable> entry = i.next();
+				String paramname = entry.getKey();
+				paramname = paramname.replace("s1.", ""); // replaces all
+															// occurrences
+				if (paramname.equals("collection")) {
+					paramname = "c";
+				}
+				if (paramname.equals("d")){
+					oid = (String) entry.getValue();
+				}
+				String paramvalue = (String) entry.getValue();
+
+				querystring.append(paramname + "=" + paramvalue);
+				if (i.hasNext()) {
+					querystring.append("&");
+				}
 		    }
+		    
+		    markDocumentInFlatDatabase("R", coll_name, oid);
+		    
 		    constructor.setQueryString(querystring.toString());
 		}
 
@@ -939,4 +953,41 @@ public class GS2Construct extends ServiceRack
     return false;
     
   }
+    protected void markDocumentInFlatDatabase(String mark, String collection, String oid) {
+		
+		Document msg_doc = XMLConverter.newDOM();
+		Element message = msg_doc.createElement(GSXML.MESSAGE_ELEM);
+		UserContext userContext = new UserContext();
+		Element query_request = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_DESCRIBE , collection, userContext);		
+		message.appendChild(query_request);
+		Element result = (Element) this.router.process(message);
+		Element resp_elem = (Element) GSXML.getChildByTagName(result, GSXML.RESPONSE_ELEM);
+		Element coll_elem = (Element) GSXML.getChildByTagName(resp_elem, GSXML.COLLECTION_ELEM);
+		String dbtype = coll_elem.getAttribute(GSXML.DB_TYPE_ATT);
+		
+		SimpleCollectionDatabase coll_db = new SimpleCollectionDatabase(dbtype);
+		if (!coll_db.databaseOK())
+		{
+			logger.error("Couldn't create the collection database of type " + dbtype);
+			return;
+		}
+		
+		// Open database for reading
+		String coll_db_file = GSFile.archivesDatabaseFile(this.site_home, collection, dbtype);
+		if (!coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.READ))
+		{
+			logger.error("Could not open collection archives database. Somebody already using this database!");
+		}
+		String old_value = coll_db.getValue(oid);
+		String new_value = old_value.replace("<index-status>B", "<index-status>" + mark);
+		// Close database for reading
+		coll_db.closeDatabase();
+		if (!coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.WRITE))
+		{
+			logger.error("Could not open collection archives database. Somebody already using this database!");
+		}
+		coll_db.setValue(oid, new_value);
+		coll_db.closeDatabase();
+		
+	}
 }
