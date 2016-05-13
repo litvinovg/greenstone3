@@ -24,6 +24,8 @@
 		</div>
 
 		<h2><gslib:selectACollectionTextBar/></h2>
+		
+		<xsl:call-template name="groupLinks"/>
 
 		<xsl:call-template name="collectionLinks"/>
 
@@ -42,6 +44,20 @@
 
 	</xsl:template>
 
+	<xsl:template name="groupLinks">
+		<div id="groupLinks">
+			<!-- <xsl:if test="count(groupList/group) = 0">
+				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.no_collections')"/>
+				<br/>
+			</xsl:if>
+			-->
+			<xsl:for-each select="groupList/group">
+				<gslib:groupLinkWithImage/>
+			</xsl:for-each>
+			<br class="clear"/>
+		</div>
+	</xsl:template>
+	
 	<xsl:template name="collectionLinks">
 		<div id="collectionLinks">
 			<xsl:if test="count(collectionList/collection) = 0">
