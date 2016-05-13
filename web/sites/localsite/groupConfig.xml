@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<groupConfig>
+	<hierarchy>
+		<group name="group1">
+			<collection name="solr-jdbm-demo" />
+
+		</group>
+		<group name="group2">
+			<collection name="lucene-jdbm-demo" />
+			<group name="group3">
+				<collection name="solr-jdbm-demo" />
+				<group name="group1">
+					<collection name="solr-jdbm-demo" />
+					<group name="group1">
+						<collection name="solr-jdbm-demo" />
+
+					</group>
+				</group>
+			</group>
+		</group>
+		<collection name="solr-jdbm-demo" />
+		<collection name="lucene-jdbm-demo" />
+	</hierarchy>
+	<groupDescriptions>
+		<group name="group1">
+			<title>Group of collections</title>
+			<description>some description</description>
+			<shortDescription>Short description</shortDescription>
+			<backgroundImage>Group1.jpg</backgroundImage>
+		</group>
+		<group name="group2">
+			<title>Group 2 of collections</title>
+			<description>second full description</description>
+			<shortDescription>second short description</shortDescription>
+			<backgroundImage>Group2.jpg</backgroundImage>
+		</group>
+		<group name="group3">
+			<title>Group 3 of collections</title>
+			<description>3 full description</description>
+			<shortDescription>3 short description</shortDescription>
+			<backgroundImage>Group3.jpg</backgroundImage>
+		</group>
+	</groupDescriptions>
+</groupConfig>

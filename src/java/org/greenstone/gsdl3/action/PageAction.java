@@ -95,19 +95,76 @@ public class PageAction extends Action
 		// first, get the message router info
 		Element info_message = doc.createElement(GSXML.MESSAGE_ELEM);
 		Element coll_list_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
+		//Create param list
+		Element param_list_element = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		coll_list_request.appendChild(param_list_element);
+		//Describe params without collectionlist. Collectionlist provided by CollectionGroup service
+		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.CLUSTER_ELEM + GSXML.LIST_MODIFIER);
+		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.SITE_ELEM + GSXML.LIST_MODIFIER);
+		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		//GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
+		
 		info_message.appendChild(coll_list_request);
+		
 		Element info_response_message = (Element) this.mr.process(info_message);
+		//Check if it is not null
 		if (info_response_message == null)
 		{
 			logger.error(" couldn't query the message router!");
 			return null;
 		}
+		//Check if it is not null
 		Element info_response = (Element) GSXML.getChildByTagName(info_response_message, GSXML.RESPONSE_ELEM);
 		if (info_response == null)
 		{
 			logger.error("couldn't query the message router!");
 			return null;
 		}
+		
+		Element resp_service_list = (Element) GSXML.getChildByTagName(info_response, GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		
+		if (resp_service_list != null) {
+			Element groupInfoService = GSXML.getNamedElement(resp_service_list, GSXML.SERVICE_ELEM, GSXML.TYPE_ATT,	GSXML.SERVICE_TYPE_GROUPINFO);
+			if (groupInfoService != null) {
+				//Prepare request for CollectionGroup service to get current collections and groups list
+				Element group_info_message = doc.createElement(GSXML.MESSAGE_ELEM);
+				Element group_info_request = GSXML.createBasicRequest(doc, GSXML.TO_ATT, groupInfoService.getAttribute(GSXML.NAME_ATT), userContext);
+				group_info_message.appendChild(group_info_request);
+				Element group_info_response_message = (Element) this.mr.process(group_info_message);
+				Element group_info_response = (Element) GSXML.getChildByTagName(group_info_response_message, GSXML.RESPONSE_ELEM);
+			//	logger.error("GROUPINFORESPONSEGROUPINFORESPONSEGROUPINFORESPONSEGROUPINFORESPONSEGROUPINFORESPONSE");
+			//	logger.error(GSXML.elementToString(group_info_response, true));
+				Element collection_list = (Element) GSXML.getChildByTagName(group_info_response,GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
+				//To add Collection List from CollectionGroup Service to response from message router
+				info_response = (Element) doc.importNode(info_response, true);
+				info_response.appendChild(doc.importNode(collection_list, true));
+				Element group_list = (Element) GSXML.getChildByTagName(group_info_response, GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
+				info_response.appendChild(doc.importNode(group_list, true));
+				
+				//Send message to groupInfoType Services
+			} else {
+				// If no service with type SERVICE_TYPE_GROUPINFO could be provided ask messagerouter for available collections 
+				GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM,GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
+				info_response_message = (Element) this.mr.process(info_message);
+				
+				if (info_response_message == null)
+				{
+					logger.error(" couldn't query the message router!");
+					return null;
+				}
+				info_response = (Element) GSXML.getChildByTagName(info_response_message, GSXML.RESPONSE_ELEM);
+				if (info_response == null)
+				{
+					logger.error("couldn't query the message router!");
+					return null;
+				}
+			}
+		} else {
+			logger.error("No services available. Couldn't query the message router!");
+			return null;
+		}
+
 
 		// second, get the metadata for each collection - we only want specific
 		// elements but for now, we'll just get it all
@@ -148,6 +205,8 @@ public class PageAction extends Action
 		addSiteMetadata(info_response, userContext);
 		addInterfaceOptions(info_response);
 		// all the components have been merged into info_response
+		//logger.error("HOME PAGE RESPONSE _--------------------------------------------------------------------------------------");
+		logger.error(GSXML.elementToString(info_response, true));
 		return info_response;
 
 	} // homePage

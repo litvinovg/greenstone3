@@ -232,6 +232,7 @@ public class GSXML
 	public static final String SERVICE_TYPE_QUERY = "query";
 	public static final String SERVICE_TYPE_RETRIEVE = "retrieve";
 	public static final String SERVICE_TYPE_BROWSE = "browse";
+	public static final String SERVICE_TYPE_GROUPINFO = "groupinfo";
 	public static final String SERVICE_TYPE_APPLET = "applet";
 	public static final String SERVICE_TYPE_PROCESS = "process";
 	public static final String SERVICE_TYPE_ENRICH = "enrich";
@@ -305,6 +306,17 @@ public class GSXML
 	public static final String JAVA_NAMESPACE = "http://xml.apache.org/xslt/java";
 	public static final String UTIL_NAMESPACE = "xalan://org.greenstone.gsdl3.util.XSLTUtil";
 
+	//Groups configuration
+	public static final String HIERARCHY_ELEM = "hierarchy";
+	public static final String GROUP_DESC_ELEM = "groupDescriptions";
+	//Declared above. Also used in group configuration file
+	//public static final String COLLECTION_ELEM = "collection";
+	public static final String TITLE_ELEM = "title";
+	public static final String DESCRIPTION_ELEM = "description";
+	public static final String SHORT_DESCRIPTION_ELEM = "shortDescription";
+	public static final String BACKGROUND_IMAGE_ELEM = "backgroundImage";
+	
+	
 	/**
 	 * takes a list of elements, and returns an array of strings of the values
 	 * of attribute att_name

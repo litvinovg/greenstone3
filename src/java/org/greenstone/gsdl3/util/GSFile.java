@@ -53,6 +53,20 @@ public class GSFile
 		return site_home + File.separatorChar + "siteConfig.xml";
 
 	}
+	
+	/** site config file path */
+	static public String groupConfigFile(String site_home)
+	{
+		return site_home + File.separatorChar + "groupConfig.xml";
+
+	}
+	
+	/** site images file path */
+	static public String imagesFilePath(String site_home)
+	{
+		return site_home + File.separatorChar + "images";
+
+	}
 
 	/** interface config file path */
 	static public String interfaceConfigFile(String interface_home)
