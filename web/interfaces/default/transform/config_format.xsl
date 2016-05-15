@@ -151,6 +151,7 @@
 		</xslt:if>
 	</xsl:template>
 
+	<!-- make this empty so we don't process the params element again inside the gsf:link type=query-->
 	<xsl:template match="params"></xsl:template>
 
 	<xsl:template match="gsf:link">
@@ -193,7 +194,8 @@
 								<xsl:text>TextQuery</xsl:text>
 							</xsl:otherwise>
 						</xsl:choose>
-	    <xsl:if test="params">?rt=rd&amp;<xsl:copy-of select="params/node()"/></xsl:if>
+						<xsl:for-each select="params">?rt=rd&amp;<xsl:apply-templates/></xsl:for-each>
+	   
 					</xslt:attribute>
 					<xsl:copy-of select="$opt-title"/>
 					<xsl:apply-templates/>
