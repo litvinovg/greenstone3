@@ -24,11 +24,17 @@
 		</div>
 
 		<h2><gslib:selectACollectionTextBar/></h2>
-		
-		<xsl:call-template name="groupLinks"/>
 
-		<xsl:call-template name="collectionLinks"/>
-
+		<xsl:for-each select="collectionList/collection|groupList/group">
+                	<xsl:sort select="@position"/>
+			<xsl:if test="name() = 'collection'">
+                                <gslib:collectionLinkWithImage/>
+			</xsl:if>
+			<xsl:if test="name() = 'group'">
+                                <gslib:groupLinkWithImage/>
+			</xsl:if>			
+                </xsl:for-each>
+	
 	        <div style="clear: both; padding-top: 4px; padding-bottom: 4px;"><hr/></div>
 
 		<gslib:serviceClusterList/>

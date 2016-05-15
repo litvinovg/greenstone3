@@ -309,13 +309,11 @@ public class GSXML
 	//Groups configuration
 	public static final String HIERARCHY_ELEM = "hierarchy";
 	public static final String GROUP_DESC_ELEM = "groupDescriptions";
-	//Declared above. Also used in group configuration file
-	//public static final String COLLECTION_ELEM = "collection";
 	public static final String TITLE_ELEM = "title";
 	public static final String DESCRIPTION_ELEM = "description";
 	public static final String SHORT_DESCRIPTION_ELEM = "shortDescription";
 	public static final String BACKGROUND_IMAGE_ELEM = "backgroundImage";
-	
+	public static final String POSITION_ATT = "position";
 	
 	/**
 	 * takes a list of elements, and returns an array of strings of the values
