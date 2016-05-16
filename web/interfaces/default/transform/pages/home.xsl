@@ -14,7 +14,11 @@
 	<xsl:template name="pageTitle"><gslib:siteName/></xsl:template>
 
 	<!-- set page breadcrumbs -->
-	<xsl:template name="breadcrumbs"></xsl:template>
+	<xsl:template name="breadcrumbs">
+		<xsl:if test="/page/pageRequest/paramList/param[@name='group']">
+			<gslib:siteLink/>
+		</xsl:if>
+	</xsl:template>
 
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse">

@@ -1,15 +1,11 @@
 package org.greenstone.gsdl3.service;
 
 import java.io.File;
-import java.util.Iterator;
-
 import org.apache.log4j.Logger;
-import org.greenstone.gsdl3.util.GSDocumentModel;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -75,53 +71,60 @@ public class CollectionGroups extends ServiceRack {
 		if (paramList != null) {
 			Element paramGroup = GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, GSXML.GROUP_ELEM);
 			if (paramGroup != null) {
-				logger.error(GSXML.elementToString(paramGroup, true));
 				groupPath = paramGroup.getAttribute(GSXML.VALUE_ATT);
 			}
 		}
+		//Remove leading, ending / and dupliclated /
 		groupPath = groupPath.replaceAll("(/+)", "/");
 		groupPath = groupPath.replaceAll("(^/+)|(/+$)", "");
 
-		// first, get the message router info
-		Element info_message = doc.createElement(GSXML.MESSAGE_ELEM);
-		Element coll_list_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
-		info_message.appendChild(coll_list_request);
-		Element info_response_message = (Element) this.router.process(info_message);
-		if (info_response_message == null) {
+		// Get the message router info
+		Element mr_info_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element mr_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
+		mr_info_message.appendChild(mr_request);
+		Element mr_info_response_message = (Element) this.router.process(mr_info_message);
+		if (mr_info_response_message == null) {
 			logger.error(" couldn't query the message router!");
 			return null;
 		}
-		Element info_response = (Element) GSXML.getChildByTagName(info_response_message, GSXML.RESPONSE_ELEM);
-		if (info_response == null) {
+		Element mr_info_response = (Element) GSXML.getChildByTagName(mr_info_response_message, GSXML.RESPONSE_ELEM);
+		if (mr_info_response == null) {
 			logger.error("couldn't query the message router!");
 			return null;
 		}
 
-		Element collection_list = (Element) GSXML.getChildByTagName(info_response,
+		Element mr_collection_list = (Element) GSXML.getChildByTagName(mr_info_response,
 				GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
-		//collection_list = (Element) doc.importNode(collection_list, true);
-		//Collections not defined in groups config file
-		
+		//Get current groups and collections
 		Element groupContent = getCurrentContent(groupPath);
+	
+		//Get ungrouped collection list
+		Element ungroupedCollections = getUngroupedCollections(mr_collection_list);
 		
 		// Prepare basic response
-		Element response = GSXML.createBasicResponse(doc, GSXML.SERVICE_TYPE_GROUPINFO);
+		Element result = GSXML.createBasicResponse(doc, GSXML.SERVICE_TYPE_GROUPINFO);
 
-		// Temporary
 		// If groupContent is empty return empty collection list
 		if (groupContent == null) {
-			response.appendChild(doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER));
-			return response;
+			// If config file is broken
+			if (hierarchy == null || groupDesc == null) {
+				//Get ungrouped collection list
+				result.appendChild(doc.importNode(ungroupedCollections, true));
+			} else {
+				//If config is ok, but in this group no any collection or group
+				result.appendChild(doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER));
+			}
+			return result;
 		}
 		NodeList currentContent = groupContent.getChildNodes();
 		if (currentContent != null && currentContent.getLength() > 0) {
 			// Create CollectionList element in response
-			Element collection_list_element = doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
-			response.appendChild(collection_list_element);
-			Element group_list_element = doc.createElement(GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
-			response.appendChild(group_list_element);
-			logger.warn("GROUPCONTENT ----------- " + GSXML.elementToString(groupContent, true));
+			Element result_collection_list = doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
+			result.appendChild(result_collection_list);
+			Element result_group_list = doc.createElement(GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
+			result.appendChild(result_group_list);
 			// Iterate over collections from current view
+			// i represents current position in groupConfig.xml
 			int i;
 			for (i=0; i < currentContent.getLength(); i++) {
 				//logger.warn("NODE CuR Content" + GSXML.xmlNodeToString(currentContent.item(i)));
@@ -130,37 +133,33 @@ public class CollectionGroups extends ServiceRack {
 					
 					Element collection = (Element) currentContent.item(i);
 					String collection_name = collection.getAttribute(GSXML.NAME_ATT);
-					// Check wether collection from current view available also
-					// by Message Router
-					Element checkedCollection = GSXML.getNamedElement(collection_list, GSXML.COLLECTION_ELEM,GSXML.NAME_ATT, collection_name);
+					// Check whether collection from current view exists in message router response
+					Element checkedCollection = GSXML.getNamedElement(mr_collection_list, GSXML.COLLECTION_ELEM,GSXML.NAME_ATT, collection_name);
 					//Set position value
 					checkedCollection.setAttribute(GSXML.POSITION_ATT, String.valueOf(i));
 					if (checkedCollection != null) {
 						// Add collection to response
-						collection_list_element.appendChild(doc.importNode(checkedCollection, true));
+						result_collection_list.appendChild(doc.importNode(checkedCollection, true));
 					}
 					
 					//Iterate over groups in current view
 				} else if (currentContent.item(i).getNodeName() == GSXML.GROUP_ELEM) {
-					((Element)currentContent.item(i)).setAttribute(GSXML.POSITION_ATT, String.valueOf(i));
 					Element currentGroup = (Element) currentContent.item(i);
 					String currentGroupName = currentGroup.getAttribute(GSXML.NAME_ATT);
+					//Get group description
 					Element group = getGroupDescription(currentGroupName);
 					//Set position value
-					group.setAttribute(GSXML.POSITION_ATT, String.valueOf(i));
 					if (group != null) {
-						group_list_element.appendChild(doc.importNode(group, true));
+						group.setAttribute(GSXML.POSITION_ATT, String.valueOf(i));
+						result_group_list.appendChild(doc.importNode(group, true));
 					}
 
 				}
 
 			}
-			logger.warn("i " + i);
-			//logger.warn("GROUP LIST" + GSXML.elementToString(group_list_element, true));
 			//Add ungrouped collections if groupPath /+ or "" or null
 			if (groupPath.isEmpty()) {
-				//Get ungrouped collection list
-				Element ungroupedCollections = getUngroupedCollections(collection_list);
+				
 				
 				//Add each ungrouped collection to the collection list in loop
 				NodeList ungroupedCollectionNodes = GSXML.getChildrenByTagName(ungroupedCollections, GSXML.COLLECTION_ATT);
@@ -169,7 +168,7 @@ public class CollectionGroups extends ServiceRack {
 						//logger.warn("UNGROUPED COLL ELEM" + GSXML.xmlNodeToString(ungroupedCollections).intern());
 						Element ungroupedCollection = (Element) doc.importNode(ungroupedCollectionNodes.item(j), true);
 						ungroupedCollection.setAttribute(GSXML.POSITION_ATT, String.valueOf(i++));
-						collection_list_element.appendChild(ungroupedCollection);
+						result_collection_list.appendChild(ungroupedCollection);
 					}
 				}
 				
@@ -179,18 +178,23 @@ public class CollectionGroups extends ServiceRack {
 
 		}
 
-		return response;
+		return result;
 	}
 
-	protected Element getCurrentContent(String path) {
+	private Element getCurrentContent(String path) {
 
+		if (hierarchy == null || groupDesc == null) {
+			return null;
+		}
+		
 		Document doc = XMLConverter.newDOM();
 		
-		if (path == null || path.isEmpty()) {
-			// Return to the main page
+		if (path == null) {
+			 path = "";
 		}
 		String[] pathSteps = path.split("/");
 
+		
 		Element currentView = (Element) hierarchy.cloneNode(true);
 		// Get the current view
 		for (int i = 0; i < pathSteps.length; i++) {
@@ -202,11 +206,10 @@ public class CollectionGroups extends ServiceRack {
 			// Return to the main page
 			return null;
 		}
-		logger.error("CURRENT VIEW" + GSXML.elementToString(currentView, true));
 		return currentView;
 	}
 
-	protected void readGroupConfiguration() {
+	private void readGroupConfiguration() {
 
 		File configFile = new File(GSFile.groupConfigFile(site_home));
 		//
@@ -228,43 +231,47 @@ public class CollectionGroups extends ServiceRack {
 			}
 			
 		} catch (XPathExpressionException e) {
-			// TODO Auto-generated catch block
+			logger.error("Error occurred while trying to remove emtpy nodes from groupConfig.xml");
 			e.printStackTrace();
 		}  
-		
 		
 		hierarchy = (Element) GSXML.getChildByTagName(content, GSXML.HIERARCHY_ELEM);
 		groupDesc = (Element) GSXML.getChildByTagName(content, GSXML.GROUP_DESC_ELEM);
 	}
 
-	protected Element getGroupDescription(String name) {
+	private Element getGroupDescription(String name) {
 		if (groupDesc != null) {
-			// logger.error(GSXML.elementToString(groupDesc, true));
 			Element description = (Element) GSXML.getNamedElement(groupDesc, GSXML.GROUP_ELEM, GSXML.NAME_ATT, name);
 			if (description != null) {
 				return description;
 			}
-
-		} else {
-			logger.error("GroupDescription is not defined.");
-		}
-		// In case
+			logger.error("GroupDescription is not defined. Check your groupConfig.xml");
+		} 
+			
+		logger.error("No group descriptions found. Check your groupConfig.xml");
 		return null;
 	}
 
-	protected Element getUngroupedCollections(Element mr_collection_list) {
+	private Element getUngroupedCollections(Element mr_collection_list) {
+		
+		if (groupDesc == null || hierarchy == null) {
+			logger.error("No group descriptions in groupConfig.xml. Check your groupConfig.xml");
+			//return mr_collection_list
+			return mr_collection_list;
+		}
 		Document doc = XMLConverter.newDOM();
 		// Create Set
 		Set<String> hierarchy_unique_collections = new HashSet<String>();
 		// Element hierarchyCollections = doc.createElement("coll_list");
 		// Get collection nodes
 		
-		NodeList coll_list = hierarchy.getElementsByTagName(GSXML.COLLECTION_ELEM);
-
-		for (int i = 0; i < coll_list.getLength(); i++) {
-			Element collection_element = (Element) coll_list.item(i);
+		NodeList hierarchy_all_collection_list = hierarchy.getElementsByTagName(GSXML.COLLECTION_ELEM);
+		// Save hierarchy collection names to Hashset
+		for (int i = 0; i < hierarchy_all_collection_list.getLength(); i++) {
+			Element collection_element = (Element) hierarchy_all_collection_list.item(i);
 			hierarchy_unique_collections.add(collection_element.getAttribute(GSXML.NAME_ATT));
 		}
+		// Save available by message router collection names to Hashset
 		Set<String> mr_collections = new HashSet<String>();
 		NodeList mr_coll_list = mr_collection_list.getElementsByTagName(GSXML.COLLECTION_ELEM);
 
@@ -272,24 +279,20 @@ public class CollectionGroups extends ServiceRack {
 			Element collection_element = (Element) mr_coll_list.item(i);
 			mr_collections.add(collection_element.getAttribute(GSXML.NAME_ATT));
 		}
+		//Save collections available by message router and not existed in hierarchy to ungrouped collections set
 		Set<String> ungrouped_collections = new HashSet<String>();
 		for (String string : mr_collections) {
 			if (!hierarchy_unique_collections.contains(string)){
 				ungrouped_collections.add(string);
 			}
 		}
+		//Output
 		Element result = doc.createElement(GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
 		for (String name : ungrouped_collections) {
-			logger.error("RESULT GETUNGROUPED - NAME " + name);
 			Element collection = doc.createElement(GSXML.COLLECTION_ELEM);
 			collection.setAttribute(GSXML.NAME_ATT, name);
 			result.appendChild(collection);
-			
 		}
-		
-		
-		
-		
 		return result;
 
 	}

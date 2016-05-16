@@ -96,16 +96,16 @@ public class PageAction extends Action
 		UserContext userContext = new UserContext(request);
 		// first, get the message router info
 		Element info_message = doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
+		Element info_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
 		//Create param list
 		Element param_list_element = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		mr_request.appendChild(param_list_element);
+		info_request.appendChild(param_list_element);
 		//Describe params without collectionlist. Collectionlist provided by CollectionGroup service
 		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.CLUSTER_ELEM + GSXML.LIST_MODIFIER);
 		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
 		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.SITE_ELEM + GSXML.LIST_MODIFIER);
 		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		info_message.appendChild(mr_request);
+		info_message.appendChild(info_request);
 		//Send request to message router
 		Element info_response_message = (Element) this.mr.process(info_message);
 		//Check if it is not null
@@ -137,6 +137,7 @@ public class PageAction extends Action
 			Element group_info_request = GSXML.createBasicRequest(doc, GSXML.TO_ATT,
 					groupInfoService.getAttribute(GSXML.NAME_ATT), userContext);
 			group_info_message.appendChild(group_info_request);
+			//Append group request if exists
 			Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			if (paramList != null) {
 				group_info_request.appendChild(doc.importNode(paramList, true));
@@ -146,7 +147,7 @@ public class PageAction extends Action
 					GSXML.RESPONSE_ELEM);
 			Element collection_list = (Element) GSXML.getChildByTagName(group_info_response,
 					GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
-			// To add Collection List from CollectionGroup Service to response
+			// Add Collection List from CollectionGroup Service to response
 			// from message router
 			info_response = (Element) doc.importNode(info_response, true);
 			if (collection_list != null) {
@@ -215,8 +216,6 @@ public class PageAction extends Action
 		addSiteMetadata(info_response, userContext);
 		addInterfaceOptions(info_response);
 		// all the components have been merged into info_response
-		//logger.error("HOME PAGE RESPONSE _--------------------------------------------------------------------------------------");
-		//logger.error(GSXML.elementToString(info_response, true));
 		return info_response;
 
 	} // homePage
