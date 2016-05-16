@@ -285,6 +285,28 @@ pre {
 	height:60px;
 }
 
+#groupLinks a img{
+        display: block;
+        float: left;
+        border: 1px solid #888;
+        margin: 0 20px 20px 0;
+        font-size: 150%;
+        color: #444;
+        text-decoration: none;
+        height:60px;
+}
+
+.groupLink {
+	display: block;
+	float: left;
+	border: 1px solid #888;
+	margin: 0 20px 20px 0;
+	font-size: 150%;
+	color: #444;
+	text-decoration: none;
+	min-width: 200px;
+	text-align:center;
+}
 .collectionLink {
 	display: block;
 	float: left;
@@ -301,9 +323,17 @@ pre {
 	padding: 15px 15px 10px;
 }
 
+.groupLinkText {
+        padding: 15px 15px 10px;
+}
+
 /* some text should not be rendered as it is just there for search engines */
 #collectionLinks a b {
 	display: none;
+}
+
+#groupLinks a b {
+        display: none;
 }
 
 /* make sure h1s and h2s are readable on the green banner */

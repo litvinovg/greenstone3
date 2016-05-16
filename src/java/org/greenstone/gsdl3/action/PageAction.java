@@ -25,6 +25,7 @@ public class PageAction extends Action
 	public static final String GLI4GS3_PAGE = "gli4gs3";
 
 	public Node process(Node message_node)
+	
 	{
 		Element message = GSXML.nodeToElement(message_node);
 		Document doc = XMLConverter.newDOM();
@@ -91,28 +92,95 @@ public class PageAction extends Action
 	{
 	  Document doc = XMLConverter.newDOM();
 		
+
 		UserContext userContext = new UserContext(request);
 		// first, get the message router info
 		Element info_message = doc.createElement(GSXML.MESSAGE_ELEM);
-		Element coll_list_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
-		info_message.appendChild(coll_list_request);
+		Element info_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
+		//Create param list
+		Element param_list_element = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		info_request.appendChild(param_list_element);
+		//Describe params without collectionlist. Collectionlist provided by CollectionGroup service
+		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.CLUSTER_ELEM + GSXML.LIST_MODIFIER);
+		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.SITE_ELEM + GSXML.LIST_MODIFIER);
+		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		info_message.appendChild(info_request);
+		//Send request to message router
 		Element info_response_message = (Element) this.mr.process(info_message);
+		//Check if it is not null
 		if (info_response_message == null)
 		{
 			logger.error(" couldn't query the message router!");
 			return null;
 		}
+		//Check if it is not null
 		Element info_response = (Element) GSXML.getChildByTagName(info_response_message, GSXML.RESPONSE_ELEM);
 		if (info_response == null)
 		{
 			logger.error("couldn't query the message router!");
 			return null;
 		}
+		
+		Element resp_service_list = (Element) GSXML.getChildByTagName(info_response, GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		
+		if (resp_service_list == null) {
+			logger.error("No services available. Couldn't query the message router!");
+			return null;
+		}
+		Element groupInfoService = GSXML.getNamedElement(resp_service_list, GSXML.SERVICE_ELEM, GSXML.TYPE_ATT,
+				GSXML.SERVICE_TYPE_GROUPINFO);
+		if (groupInfoService != null) {
+			// Prepare request for CollectionGroup service to get current
+			// collections and groups list
+			Element group_info_message = doc.createElement(GSXML.MESSAGE_ELEM);
+			Element group_info_request = GSXML.createBasicRequest(doc, GSXML.TO_ATT,
+					groupInfoService.getAttribute(GSXML.NAME_ATT), userContext);
+			group_info_message.appendChild(group_info_request);
+			//Append group request if exists
+			Element paramList = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			if (paramList != null) {
+				group_info_request.appendChild(doc.importNode(paramList, true));
+			}
+			Element group_info_response_message = (Element) this.mr.process(group_info_message);
+			Element group_info_response = (Element) GSXML.getChildByTagName(group_info_response_message,
+					GSXML.RESPONSE_ELEM);
+			Element collection_list = (Element) GSXML.getChildByTagName(group_info_response,
+					GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
+			// Add Collection List from CollectionGroup Service to response
+			// from message router
+			info_response = (Element) doc.importNode(info_response, true);
+			if (collection_list != null) {
+				info_response.appendChild(doc.importNode(collection_list, true));
+			}
+			Element group_list = (Element) GSXML.getChildByTagName(group_info_response,
+					GSXML.GROUP_ELEM + GSXML.LIST_MODIFIER);
+			if (group_list != null) {
+				info_response.appendChild(doc.importNode(group_list, true));
+			}
+			// Send message to groupInfoType Services
+		} else {
+			// If no service with type SERVICE_TYPE_GROUPINFO could be provided
+			// request message router for all available collections
+			GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM,
+					GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
+			info_response_message = (Element) this.mr.process(info_message);
+
+			if (info_response_message == null) {
+				logger.error(" couldn't query the message router!");
+				return null;
+			}
+			info_response = (Element) GSXML.getChildByTagName(info_response_message, GSXML.RESPONSE_ELEM);
+			if (info_response == null) {
+				logger.error("couldn't query the message router!");
+				return null;
+			}
+		}
 
 		// second, get the metadata for each collection - we only want specific
 		// elements but for now, we'll just get it all
 		Element collection_list = (Element) GSXML.getChildByTagName(info_response, GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
-		logger.debug(GSXML.xmlNodeToString(collection_list));
+		//logger.debug(GSXML.xmlNodeToString(collection_list));
 		if (collection_list != null)
 		{
 			NodeList colls = GSXML.getChildrenByTagName(collection_list, GSXML.COLLECTION_ELEM);

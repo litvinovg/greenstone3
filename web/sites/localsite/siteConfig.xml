@@ -11,6 +11,7 @@
 		</serviceRack>
 		
 		<serviceRack name="ArchiveIO"/>
+		<serviceRack name="CollectionGroups"/>
 		<serviceRack name="DocumentMaker"/>
 		<serviceRack name="DocXMLUtil"/>
 		<serviceRack name="DocumentBasket"/>
