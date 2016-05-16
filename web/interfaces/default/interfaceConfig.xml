@@ -57,6 +57,9 @@
 		<language name="es">
 			<displayItem name="name">Español</displayItem>
 		</language>
+		<language name="am">
+		  <displayItem name="name">Amharic</displayItem>
+		</language>
 		<language name="ar">
 			<displayItem name="name">Arabic</displayItem>
 		</language>
@@ -75,6 +78,10 @@
 		<language name="de">
 			<displayItem name="name">Deutsch (German)</displayItem>
 		</language>
+		<language name="dv">
+		  <displayItem name="name">Dhivehi</displayItem>
+		</language>
+
 		<language name="el">
 			<displayItem name="name">Ελληνικά (Greek)</displayItem>
 		</language>
@@ -90,12 +97,20 @@
 		<language name="gl">
 			<displayItem name="name">Galician</displayItem>
 		</language>
+		<language name="gu">
+		  <displayItem name="name">Gujarati</displayItem>
+		</language>
+
 		<language name="he">
 			<displayItem name="name">Hebrew</displayItem>
 		</language>
 		<language name="hi">
 			<displayItem name="name">Hindi</displayItem>
 		</language>
+		<language name="hr">
+		  <displayItem name="name">Croatian</displayItem>
+		</language>
+
 		<language name="hu">
 			<displayItem name="name">Hungarian</displayItem>
 		</language>
@@ -108,7 +123,7 @@
 		<language name="it">
 			<displayItem name="name">Italiano</displayItem>
 		</language>    
-		<language name="jp">
+		<language name="ja">
 			<displayItem name="name">日本語</displayItem>
 		</language>
 		<language name="ka">
@@ -122,7 +137,11 @@
 		</language>
 		<language name="ky">
 			<displayItem name="name">Кыргызча (Kirghiz)</displayItem>
-		</language>    
+		</language>  
+  		<language name="lo">
+		  <displayItem name="name">Laotian</displayItem>
+		</language>
+
 		<language name="lv">
 			<displayItem name="name">Latvian</displayItem>
 		</language>
@@ -138,23 +157,31 @@
 		<language name="mr">
 			<displayItem name="name">Marathi</displayItem>
 		</language>
+		<language name="my">
+		  <displayItem name="name">Burmese</displayItem>
+		</language>
+		<language name="ne">
+		  <displayItem name="name">Nepali</displayItem>
+		</language>
+
 		<language name="nl">
-			<displayItem name="name">Nederlands (Dutch)</displayItem>
+		  <displayItem name="name">Nederlands (Dutch)</displayItem>
 		</language>
 		<language name="pl">
-			<displayItem name="name">polski (Polish)</displayItem>
+		  <displayItem name="name">polski (Polish)</displayItem>
 		</language>
-		<language name="pt-br">
-			<displayItem name="name">português-BR (Brasil)</displayItem>
-		</language>
-		<language name="pt-pt">
-			<displayItem name="name">português-PT (Portugal)</displayItem>
+
+		<language name="prs">
+			<displayItem name="name">Dari</displayItem>
 		</language>
 		<language name="ps">
 			<displayItem name="name">Pushto</displayItem>
 		</language>
-		<language name="prs">
-			<displayItem name="name">Dari</displayItem>
+		<language name="pt-br">
+		  <displayItem name="name">português-BR (Brasil)</displayItem>
+		</language>
+		<language name="pt-pt">
+			<displayItem name="name">português-PT (Portugal)</displayItem>
 		</language>
 		<language name="ro">
 			<displayItem name="name">Romanian</displayItem>
@@ -166,11 +193,21 @@
 			<displayItem name="name">Sinhalese</displayItem>
 		</language>
 		<language name="sk">
-			<displayItem name="name">Slovenčina (Slovak)</displayItem>
+		  <displayItem name="name">Slovenčina (Slovak)</displayItem>
 		</language>
-		<language name="sr">
-			<displayItem name="name">Serbian</displayItem>
+		<language name="sr-bh-cyr">
+			<displayItem name="name">Serbian (Cyrillic - Bosnia and Herzegovina)</displayItem>
 		</language>
+		<language name="sr-bh-lat">
+			<displayItem name="name">Serbian (Latin - Bosnia and Herzegovina</displayItem>
+		</language>
+		<language name="sr-cyr">
+			<displayItem name="name">Serbian (Cyrillic)</displayItem>
+		</language>
+		<language name="sr-lat">
+			<displayItem name="name">Serbian (Latin)</displayItem>
+		</language>
+
 		<language name="ta">
 			<displayItem name="name">Tamil</displayItem>
 		</language>	
@@ -180,6 +217,10 @@
 		<language name="th">
 			<displayItem name="name">Thai</displayItem>
 		</language>
+		<language name="ti">
+		  <displayItem name="name">Tigrinya</displayItem>
+		</language>
+
 		<language name="tr">
 			<displayItem name="name">Turkish</displayItem>
 		</language>
