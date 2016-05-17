@@ -135,9 +135,9 @@ public class CollectionGroups extends ServiceRack {
 					String collection_name = collection.getAttribute(GSXML.NAME_ATT);
 					// Check whether collection from current view exists in message router response
 					Element checkedCollection = GSXML.getNamedElement(mr_collection_list, GSXML.COLLECTION_ELEM,GSXML.NAME_ATT, collection_name);
-					//Set position value
-					checkedCollection.setAttribute(GSXML.POSITION_ATT, String.valueOf(i));
 					if (checkedCollection != null) {
+						//Set position value
+						checkedCollection.setAttribute(GSXML.POSITION_ATT, String.valueOf(i));
 						// Add collection to response
 						result_collection_list.appendChild(doc.importNode(checkedCollection, true));
 					}
