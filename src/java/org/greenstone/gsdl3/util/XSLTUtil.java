@@ -553,6 +553,23 @@ public class XSLTUtil
 
 		return new Locale(display_lang).getDisplayLanguage(new Locale(lang));
 	}
+	
+	public static boolean checkFileExistence(String site_name, String filePath){
+
+		String gsdl3_home = GlobalProperties.getGSDL3Home();
+		//Remove leading file separator
+		filePath = filePath.replaceAll("^/+", "");
+		//Remove duplicates and replace by separator for current platform
+		filePath = filePath.replaceAll("/+", File.separator);
+		//Create full path to check
+		String fullPath = GSFile.siteHome(gsdl3_home, site_name) + File.separator + filePath;
+		File file = new File(fullPath);
+		if (file.exists() && file.isFile()) {
+			return true;
+		}
+		return false;
+	}
+	
 	public static String uriEncode(String input)
 	{
 		String result = "";

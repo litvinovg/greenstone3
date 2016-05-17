@@ -203,12 +203,13 @@
   <xsl:template name="groupLinkWithImage">
     <xsl:variable name="desc"><xsl:value-of select="description"/></xsl:variable>
     <xsl:variable name="group_href"><xsl:value-of select="$library_name"/>?a=p&amp;sa=home&amp;group=<xsl:value-of select="/page/pageRequest/paramList/param[@name='group']/@value"/>/<xsl:value-of select="@name"/></xsl:variable>
+	
     <xsl:choose>
-      <xsl:when test="backgroundImage">
+      <xsl:when test="util:checkFileExistence($site_name, backgroundImage)">
         <a href="{$group_href}" title="{$desc}">
           <img class="groupLinkImage">
             <xsl:attribute name="alt"><xsl:value-of select="displayItem[@name='name']"/></xsl:attribute>
-            <xsl:attribute name="src">sites/<xsl:value-of select="$site_name"/>/images/<xsl:value-of select="backgroundImage"/></xsl:attribute>
+            <xsl:attribute name="src">sites/<xsl:value-of select="$site_name"/>/<xsl:value-of select="backgroundImage"/></xsl:attribute>
           </img>
         </a>
       </xsl:when>
@@ -216,7 +217,14 @@
         <a href="{$group_href}" title="{$desc}">
           <div class="groupLink ui-corner-all">
 			<div class="groupLinkText ui-widget-content ui-corner-top">
-				<xsl:value-of select="title"/>
+				<xsl:choose>
+					<xsl:when test="boolean(title)">
+						<xsl:value-of select="title"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:value-of select="@name"/>
+					</xsl:otherwise>
+				</xsl:choose>
 			</div>
 			<div style="height:15px;" class="ui-state-default ui-corner-bottom"><xsl:text> </xsl:text></div>
           </div>
