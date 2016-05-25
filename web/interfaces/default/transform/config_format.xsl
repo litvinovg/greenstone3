@@ -669,6 +669,11 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 	     <gsf:headMetaTags> exists for controlling the <meta name="x" content="y"> elements that appear in the HTML <head></head>
 	     XPATH is used to select this item (in header.xsl).  It does not need an explicit definition here in this file 
 	-->
+	<!-- this template is used to avoid the user having to type 
+	<xsl:text disable-output-escaping="yes">..</xsl:text> when they are trying to add unbalanced html tags into the xml (eg using suffix and prefix with metadata display -->
+	<xsl:template match="gsf:html">
+	  <xslt:text disable-output-escaping="yes"><xsl:value-of select="."/></xslt:text>
+	</xsl:template>
 
 	<xsl:template match="*">
 		<xsl:copy>
