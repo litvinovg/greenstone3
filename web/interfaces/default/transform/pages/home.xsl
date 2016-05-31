@@ -30,7 +30,7 @@
 		<h2><gslib:selectACollectionTextBar/></h2>
 
 		<xsl:for-each select="collectionList/collection|groupList/group">
-                	<xsl:sort select="@position"/>
+                	<xsl:sort data-type="number" select="@position"/>
 			<xsl:if test="name() = 'collection'">
                                 <gslib:collectionLinkWithImage/>
 			</xsl:if>
