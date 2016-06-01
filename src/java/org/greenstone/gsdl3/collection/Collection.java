@@ -31,6 +31,13 @@ import java.util.HashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrServer.RemoteSolrException;
+import org.apache.solr.client.solrj.request.CoreAdminRequest;
+import org.apache.solr.client.solrj.response.CoreAdminResponse;
+import org.apache.solr.common.params.CoreAdminParams.CoreAdminAction;
+import org.apache.solr.common.util.NamedList;
 import org.greenstone.gsdl3.core.ModuleInterface;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
@@ -136,8 +143,16 @@ public class Collection extends ServiceCluster
 		if (search != null)
 		{
 			col_type = search.getAttribute(GSXML.TYPE_ATT);
+			//If use Solr check if cores loaded
+			if (col_type.equals("solr"))
+			{
+				if (!loadSolrCores()) {
+					logger.error("Collection: couldn't configure collection: " + this.cluster_name + ", " + "Couldn't activate Solr cores");
+					return false;
+				}
+			}
 		}
-
+		
 		Element browse = (Element) GSXML.getChildByTagName(coll_config_xml, GSXML.INFODB_ELEM);
 		if (browse != null)
 		{
@@ -908,4 +923,87 @@ public class Collection extends ServiceCluster
 
 		return response;
 	}
+
+	private boolean loadSolrCores() {
+
+		// Solr servlet url
+		String solrUrl = "http://localhost:8383/solr/";
+		HttpSolrServer solrServer = new HttpSolrServer(solrUrl);
+		// Max retries
+		solrServer.setMaxRetries(1);
+		// Connection Timeout
+		solrServer.setConnectionTimeout(3000);
+		//Cores
+		String coreSecName = this.router.getSiteName() + "-" + cluster_name + "-sidx";
+		String coreDocName = this.router.getSiteName() + "-" + cluster_name + "-didx";
+
+		if (!checkSolrCore(coreSecName, solrServer)){
+			if (!activateSolrCore(coreSecName, solrServer)){
+				logger.error("Couldn't activate Solr core " + coreSecName + " for collection " + cluster_name);
+				return false;
+			}
+		}
+		if (!checkSolrCore(coreDocName, solrServer)){
+			if (!activateSolrCore(coreDocName, solrServer)){
+				logger.error("Couldn't activate Solr core " + coreDocName + " for collection " + cluster_name);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean checkSolrCore(String coreName, HttpSolrServer solrServer) {
+
+		CoreAdminRequest adminRequest = new CoreAdminRequest();
+		adminRequest.setAction(CoreAdminAction.STATUS);
+		adminRequest.setCoreName(coreName);
+
+		try {
+			CoreAdminResponse adminResponse = adminRequest.process(solrServer);
+			NamedList<NamedList<Object>> coreStatus = adminResponse.getCoreStatus();
+			NamedList<Object> coreList = coreStatus.getVal(0);
+			if (coreList != null) {
+				if (coreList.get("name") == null) {
+					logger.warn("Solr core " + coreName + " for collection " + cluster_name + " not exists.");
+					return false;
+				} 
+			}
+			
+		} catch (SolrServerException e) {
+			e.printStackTrace();
+			return false;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		} catch (RemoteSolrException e1){
+			e1.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean activateSolrCore(String coreName, HttpSolrServer solrServer) {
+		
+		String dataDir = GSFile.collectionIndexDir(site_home, cluster_name) + File.separator + coreName.substring(coreName.length() - 4);
+		String instanceDir = GSFile.collectionEtcDir(site_home, cluster_name);
+	
+		try {
+			CoreAdminRequest.createCore(coreName, instanceDir, solrServer, "", "", dataDir, "");
+			logger.warn("Solr core " + coreName + " for collection " + cluster_name + " activated.");
+		} catch (SolrServerException e1) {
+			e1.printStackTrace();
+			return false;
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			return false;
+		} catch (RemoteSolrException e1){
+			logger.error("Activation solr core " + coreName + " for collection " + cluster_name + "failed.");
+			e1.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
+
 }
+
