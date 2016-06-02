@@ -31,7 +31,6 @@ import org.w3c.dom.NodeList;
 
 // General Java classes
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.io.File;
@@ -121,9 +120,6 @@ public class DocumentAction extends Action
 			return result;
 		}
 
-		String query_terms = (String) params.get("terms");
-		logger.error("terms = "+query_terms);
-		String query = (String) params.get("query");
 		UserContext userContext = new UserContext(request);
 
 		//append site metadata
@@ -549,7 +545,7 @@ public class DocumentAction extends Action
 				{
 					if (highlight_query_terms)
 					{
-					  content = highlightQueryTermsOld(request, (Element) content); // highlightQueryTerms(query_terms, query, request.getOwnerDocument(), (Element) content); //request, (Element) content);
+						content = highlightQueryTerms(request, (Element) content);
 					}
 					doc_nodes.item(i).appendChild(doc.importNode(content, true));
 				}
@@ -600,7 +596,7 @@ public class DocumentAction extends Action
 			{
 				dc_response_doc.removeChild(dc_response_doc_content);
 
-				dc_response_doc_content = highlightQueryTermsOld(request, dc_response_doc_content); //highlightQueryTerms(query_terms, query, request.getOwnerDocument(), dc_response_doc_content); //request, dc_response_doc_content);
+				dc_response_doc_content = highlightQueryTerms(request, dc_response_doc_content);
 				dc_response_doc.appendChild(dc_response_doc.getOwnerDocument().importNode(dc_response_doc_content, true));
 			}
 
@@ -842,132 +838,7 @@ public class DocumentAction extends Action
 	 * also doesn't handle phrases properly - just highlights all the terms
 	 * found in the text.
 	 */
-  protected Element highlightQueryTerms(String terms, String performed_query, Document doc, Element dc_response_doc_content) {
-    logger.error("in highlight, terms = "+terms);
-    if (terms == null || performed_query == null) {
-      return dc_response_doc_content;
-    }
-    HashMap<String, HashSet<String>> term_to_variants_map = new HashMap<String, HashSet<String>>();
-    HashSet<String> query_term_variants = new HashSet<String>();
-
-    // terms in the form snail:snail,SNAILS,Snail;farm:farm,farming,Farming
-    String[] term_list = terms.split(";");
-    for (int i=0; i<term_list.length; i++) {
-      String term_x = term_list[i];
-      int colon_index = term_x.indexOf(';');
-      String main_term;
-      String term_variants;
-      if (colon_index == -1) {
-	main_term = term_x;
-	term_variants = main_term;
-      } else {
-	main_term = term_x.substring(0, colon_index);
-	term_variants = term_x.substring(colon_index+1);
-      }
-      query_term_variants.add(main_term);
-      term_to_variants_map.put(main_term, new HashSet<String>(Arrays.asList(term_variants.split(","))));
-    }
-  
-    String content = GSXML.getNodeText(dc_response_doc_content);
-
-    ArrayList<ArrayList<HashSet<String>>> phrase_query_term_variants_hierarchy = new ArrayList<ArrayList<HashSet<String>>>();
-
-//Element query_element = GSXML.getNamedElement(metadata_list, GSXML.METADATA_ELEM, GSXML.NAME_ATT, "query");
-//String performed_query = //GSXML.getNodeText(query_element) + " ";
-
-		ArrayList<HashSet<String>> phrase_query_p_term_variants_list = new ArrayList<HashSet<String>>();
-		int term_start = 0;
-		boolean in_term = false;
-		boolean in_phrase = false;
-		for (int i = 0; i < performed_query.length(); i++)
-		{
-			char character = performed_query.charAt(i);
-			boolean is_character_letter_or_digit = Character.isLetterOrDigit(character);
-
-			// Has a query term just started?
-			if (in_term == false && is_character_letter_or_digit == true)
-			{
-				in_term = true;
-				term_start = i;
-			}
-
-			// Or has a term just finished?
-			else if (in_term == true && is_character_letter_or_digit == false)
-			{
-				in_term = false;
-				String term = performed_query.substring(term_start, i);
-				HashSet<String> phrase_query_p_term_x_variants = term_to_variants_map.get(term);
-				// Element term_element = GSXML.getNamedElement(query_term_list_element, GSXML.TERM_ELEM, GSXML.NAME_ATT, term);
-				// if (term_element != null)
-				// {
-
-				// 	HashSet<String> phrase_query_p_term_x_variants = new HashSet<String>();
-
-				// 	NodeList term_equivalent_terms_nodelist = term_element.getElementsByTagName("equivTermList");
-				// 	if (term_equivalent_terms_nodelist == null || term_equivalent_terms_nodelist.getLength() == 0)
-				// 	{
-				// 		String termValueU = null;
-				// 		String termValueL = null;
-
-				// 		if (term.length() > 1)
-				// 		{
-				// 			termValueU = term.substring(0, 1).toUpperCase() + term.substring(1);
-				// 			termValueL = term.substring(0, 1).toLowerCase() + term.substring(1);
-				// 		}
-				// 		else
-				// 		{
-				// 			termValueU = term.substring(0, 1).toUpperCase();
-				// 			termValueL = term.substring(0, 1).toLowerCase();
-				// 		}
-
-				// 		phrase_query_p_term_x_variants.add(termValueU);
-				// 		phrase_query_p_term_x_variants.add(termValueL);
-				// 	}
-				// 	else
-				// 	{
-				// 		for (int j = 0; j < term_equivalent_terms_nodelist.getLength(); j++)
-				// 		{
-				// 			Element term_equivalent_terms_element = (Element) term_equivalent_terms_nodelist.item(j);
-				// 			String[] term_equivalent_terms = GSXML.getAttributeValuesFromList(term_equivalent_terms_element, GSXML.NAME_ATT);
-				// 			for (int k = 0; k < term_equivalent_terms.length; k++)
-				// 			{
-				// 				phrase_query_p_term_x_variants.add(term_equivalent_terms[k]);
-				// 			}
-				// 		}
-				// 	}
-				if (phrase_query_p_term_x_variants != null) {
-					phrase_query_p_term_variants_list.add(phrase_query_p_term_x_variants);
-
-					if (in_phrase == false)
-					{
-						phrase_query_term_variants_hierarchy.add(phrase_query_p_term_variants_list);
-						phrase_query_p_term_variants_list = new ArrayList<HashSet<String>>();
-					}
-				}
-				//}
-			}
-			// Watch for phrases (surrounded by quotes)
-			if (character == '\"')
-			{
-				// Has a phrase just started?
-				if (in_phrase == false)
-				{
-					in_phrase = true;
-				}
-				// Or has a phrase just finished?
-				else if (in_phrase == true)
-				{
-					in_phrase = false;
-					phrase_query_term_variants_hierarchy.add(phrase_query_p_term_variants_list);
-				}
-
-				phrase_query_p_term_variants_list = new ArrayList<HashSet<String>>();
-			}
-		}
-
-    return  highlightQueryTermsInternal(doc, content, query_term_variants, phrase_query_term_variants_hierarchy);
-  }
-	protected Element highlightQueryTermsOld(Element request, Element dc_response_doc_content)
+	protected Element highlightQueryTerms(Element request, Element dc_response_doc_content)
 	{
 		Document doc = request.getOwnerDocument();
 		
@@ -1193,8 +1064,6 @@ public class DocumentAction extends Action
 	 */
 	private Element highlightQueryTermsInternal(Document doc, String content, HashSet<String> query_term_variants, ArrayList<ArrayList<HashSet<String>>> phrase_query_term_variants_hierarchy)
 	{
-
-	  logger.error("size = "+ query_term_variants.size());
 		// Convert the content string to an array of characters for speed
 		char[] content_characters = new char[content.length()];
 		content.getChars(0, content.length(), content_characters, 0);
