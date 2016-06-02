@@ -555,8 +555,10 @@ public class OAIPMH extends ServiceRack {
   /** a simple addMetadata where we look for meta_name metadata, and add as that name*/
   protected void addMetadata(Element meta_list_elem, String meta_name, DBInfo info) {
     Vector<String> values = info.getMultiInfo(meta_name);
-    for (int i=0; i<values.size(); i++) {
-      addMetadataElement(meta_list_elem, meta_name, values.get(i));
+    if (values != null && values.size()!=0) {
+      for (int i=0; i<values.size(); i++) {
+	addMetadataElement(meta_list_elem, meta_name, values.get(i));
+      }
     }
   }
 
