@@ -92,6 +92,8 @@ public class ServiceCluster implements ModuleInterface
   /** language specific display items */
 
 	protected Element display_item_list = null;
+  /** extra stuff */
+  protected Element extra_info = null;
   /** default values for servlet params */
   protected Element library_param_list = null;
 	/** the element that will have any descriptions passed back in */
@@ -145,6 +147,7 @@ public class ServiceCluster implements ModuleInterface
 		this.metadata_list = this.desc_doc.createElement(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		this.library_param_list = this.desc_doc.createElement(GSXML.LIBRARY_PARAM_ELEM+GSXML.LIST_MODIFIER);
 		this.service_list = this.desc_doc.createElement(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		this.extra_info = this.desc_doc.createElement(GSXML.EXTRA_INFO_ELEM);
 		//this.plugin_item_list = this.desc_doc.createElement(GSXML.PLUGIN_ELEM + GSXML.LIST_MODIFIER);
 	}
 
@@ -272,8 +275,16 @@ public class ServiceCluster implements ModuleInterface
 		    logger.error("couldn't configure the library param list");
 		  }
 		}
+		
+		// get any extra info
+		Element info = (Element) GSXML.getChildByTagName(service_cluster_info, GSXML.EXTRA_INFO_ELEM);
+		if (info != null) {
+		  if (!addExtraInfo(info)) {
+		    logger.error("couldn't add extra info");
+		  }
+		}
 
-  }
+    }
 	/**
 	 * adds metadata from a metadataList into the metadata_list xml
 	 */
@@ -335,6 +346,17 @@ public class ServiceCluster implements ModuleInterface
 
 		return true;
 	}
+
+  protected boolean addExtraInfo(Element info) {
+    if (info == null) {
+      return false;
+    }
+    NodeList children = info.getChildNodes();
+    for(int i=0; i<children.getLength(); i++) {
+      this.extra_info.appendChild(this.desc_doc.importNode(children.item(i), true));
+    }
+    return true;
+  }
 
 	// protected boolean addPlugins(Element plugin_list)
 	// {
@@ -651,6 +673,7 @@ public class ServiceCluster implements ModuleInterface
 				description.appendChild(result_doc.importNode(this.service_list, true));
 				description.appendChild(result_doc.importNode(this.metadata_list, true));
 				description.appendChild(result_doc.importNode(this.library_param_list, true));
+				description.appendChild(result_doc.importNode(this.extra_info, true));
 				//description.appendChild(this.plugin_item_list);
 				return response;
 			}
@@ -680,6 +703,9 @@ public class ServiceCluster implements ModuleInterface
 					else if (info.equals(GSXML.LIBRARY_PARAM_ELEM+GSXML.LIST_MODIFIER))
 					{
 					  description.appendChild(result_doc.importNode(this.library_param_list, true));
+					}
+					else if (info.equals(GSXML.EXTRA_INFO_ELEM)) {
+					  description.appendChild(result_doc.importNode(this.extra_info, true));
 					}
 				}
 			}
@@ -768,6 +794,7 @@ public class ServiceCluster implements ModuleInterface
 		 * 
 		 * }
 		 */
+
 		if (type.equals(GSXML.REQUEST_TYPE_SYSTEM))
 		{
 			response = processSystemRequest(request);
@@ -779,7 +806,6 @@ public class ServiceCluster implements ModuleInterface
 		}
 		return response;
 	}
-
 	protected Element processSystemRequest(Element request)
 	{
 	  Document result_doc = XMLConverter.newDOM();

@@ -925,6 +925,7 @@ public class TransformingReceptionist extends Receptionist
 		  // 	{
 		  // 	  return XMLTransformer.constructErrorXHTMLPage("Cannot parse the xslt file\n");// + errorPage);
 		  // 	}
+		  logger.error("style_doc is null, returning the page");
 			return page;
 		}
 
