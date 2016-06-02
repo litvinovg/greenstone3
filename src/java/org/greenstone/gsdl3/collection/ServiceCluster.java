@@ -806,6 +806,7 @@ public class ServiceCluster implements ModuleInterface
 		}
 		return response;
 	}
+
 	protected Element processSystemRequest(Element request)
 	{
 	  Document result_doc = XMLConverter.newDOM();
