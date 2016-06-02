@@ -155,10 +155,47 @@
 		</div>
 	</xsl:template>
 	
+	<xsl:template name="additionalNavTabs">
+	  <xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/extraInfo/navigationTab">
+	    <li>
+	      <xsl:choose>
+		<!-- if we are in frame type and this is the current page, colour it differently-->
+		<xsl:when test="@type='frame' and /page/pageRequest[@subaction='html'] and /page/pageRequest/paramList/param[@name='url']/@value = @url">
+		  <xsl:attribute name='class'>ui-state-default ui-corner-top ui-tabs-selected ui-state-active</xsl:attribute>
+		</xsl:when>
+		<xsl:otherwise>
+		  <xsl:attribute name="class">ui-state-default ui-corner-top</xsl:attribute>
+		</xsl:otherwise>
+	      </xsl:choose>
+	      <a>
+		<xsl:if test="displayItem[@name='description']">
+		  <xsl:attribute name='title'><xsl:value-of select="displayItem[@name='description']"/></xsl:attribute>
+		</xsl:if>
+		<xsl:choose>
+		  <xsl:when test="@type='external-link'">
+		    <xsl:attribute name="href"><xsl:value-of select="@url"/></xsl:attribute>
+		  </xsl:when>
+		  <xsl:when test="@type='frame'">
+		    <xsl:attribute name="href"><xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="/page/pageResponse/collection[@name=$collNameChecked]/@name"/>/page/html?url=<xsl:value-of select="@url"/></xsl:attribute>
+		  </xsl:when>
+		</xsl:choose>
+		<xsl:choose>
+		  <xsl:when test="displayItem[@name='name']">
+		    <xsl:value-of select="displayItem[@name='name']"/>
+		  </xsl:when>
+		  <xsl:otherwise>link</xsl:otherwise>
+		</xsl:choose>
+	      </a>
+	    </li>
+	  </xsl:for-each>
+	  
+	</xsl:template>
 	<!-- ***** BROWSING TABS ***** -->
 	<xsl:template name="browsing-tabs">
-		<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service">
+		<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service or /page/pageResponse/collection[@name=$collNameChecked]/extraInfo/navigationTab">
 			<ul id="gs-nav">
+			  <!-- if this collection has additional tabs, add them here -->
+			  <xsl:call-template name="additionalNavTabs"/>
 				<!-- If this collection has a ClassifierBrowse service then add a tab for each classifier-->
 				<xsl:if test="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='browse' and @name='ClassifierBrowse']">
 					<!-- Loop through each classifier -->
