@@ -172,7 +172,13 @@
 					</tr>
 				</xsl:for-each>
 			</xsl:when>
-			<xsl:otherwise/>
+			<xsl:when test="@childType = 'HTML'">
+			  <xsl:variable name="URL"><xsl:value-of select="documentNode/@nodeID"/></xsl:variable>
+	  <iframe width="100%" height="600" frameborder="0"><xsl:attribute name="src"><xsl:value-of select="$URL"/></xsl:attribute>Frame for <xsl:value-of select="$URL"/></iframe>
+			</xsl:when>
+			<xsl:otherwise>
+			  we are in the other wise
+			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 
