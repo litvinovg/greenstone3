@@ -98,7 +98,7 @@ public class GSXML
 	public static final String DISPLAY_ELEM = "display";
 	public static final String LEVEL_ELEM = "level";
 	public static final String REPLACE_ELEM = "replace";
-
+  public static final String EXTRA_INFO_ELEM = "extraInfo";
 	public static final String DBINFO_ELEM = "dbInfo";
 	public static final String DBNAME_ATT = "dbname";
 	public static final String DBPATH_ATT = "dbpath";
