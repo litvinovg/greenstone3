@@ -87,7 +87,7 @@
 	<!-- Template controlling the footer. -->
 	<xsl:template name="gs_footer">
 		<div id="gs_footer" class="ui-widget-header ui-corner-bottom">
-			<a href="http://www.greenstone.org/greenstone3-home"><xsl:call-template name="poweredByGS3TextBar"/></a>
+			<a href="http://www.greenstone.org"><xsl:call-template name="poweredByGS3TextBar"/></a>
 		</div>
 	</xsl:template>
 	
