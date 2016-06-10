@@ -15,6 +15,16 @@ tomcat.installed.path=
 # uncomment the following if you have moved the greenstone3 web directory to tomcats webapps dir 
 #web.home=${tomcat.installed.path}/webapps/greenstone3
 
+## If creating a distributed GS3 set up, with GS3 in a read-only location, then it will need a
+## distinct user web folder for content (sites and collections), and need to run tomcat from TMP.
+## You need to configure 4 properties to get a distributed GS3 to work on windows:
+## - set web.home above to the writable location where collections and sites should be created (use forward slashes)
+## - uncomment using.user.web below and set to true, 
+## To make tomcat run from TMP folder (a writable location):
+## - set gsdl3home.isreadonly to true and 
+## - set gsdl3.writablehome to ${java.io.tmpdir}/greenstone/web (use forward slashes)
+# using.user.web=true
+
 # Default derby networked server portnumber is 1527, can change this here in case of conflict
 derby.server.port=1527
 # The following is best left as it is, except if 'localhost' doesn't work on your machine,

@@ -35,6 +35,23 @@ del !TMP!\setgsdl3.bat
 
 :: set GSDL3HOME to the 'web' subdirectory
 set GSDL3HOME=!GSDL3SRCHOME!\web
+set TOMCATWEB=!GSDL3SRCHOME!\web
+:: set GSDL3HOME to any web.home property provided, and create that folder if it doesn't exist
+:: Replace forward slashes in web.home with back slashes 
+:: http://scripts.dragon-it.co.uk/scripts.nsf/docs/batch-search-replace-substitute!OpenDocument&ExpandSection=3&BaseTarget=East&AutoFramed
+if exist "!GSDL3SRCHOME!\build.properties" for /F "tokens=1,2 delims==" %%G in (!GSDL3SRCHOME!\build.properties) do ( 
+	if "%%G"=="web.home" (
+		set GSDL3HOME=%%H
+		set GSDL3HOME=!GSDL3HOME:/=\!
+		set TOMCATWEB=!GSDL3HOME!
+		if not exist "!GSDL3HOME!" cmd /c "!GSDL3SRCHOME!\userweb.cmd"
+	)
+)
+
+:: Whatever the web directory is, it should contain the WEB-INF\classes folder, else go back to using default for this
+:: The WEB-INF\classes folder will be absent in a userweb folder, but will be present if GSDL3HOME=GSDL3SRCHOME\web
+:: or if web.home points to GS3 as a webapp inside tomcat
+if not exist "!GSDL3HOME!\WEB-INF\classes" set TOMCATWEB=!GSDL3SRCHOME!\web
 
 :: change if using external tomcat or ant
 set TOMCAT_HOME=!GSDL3SRCHOME!\packages\tomcat
@@ -45,7 +62,7 @@ set GSDLOS=windows
 
 :: ---- Set the CLASSPATH and PATH environment variables ----
 if "!GS_CP_SET!" == "yes" goto skipSetCp
-set CLASSPATH=!GSDL3HOME!\WEB-INF\classes;!GSDL3SRCHOME!\resources\java;!GSDL3SRCHOME!\cp.jar;!CLASSPATH!;
+set CLASSPATH=!TOMCATWEB!\WEB-INF\classes;!GSDL3SRCHOME!\resources\java;!GSDL3SRCHOME!\cp.jar;!CLASSPATH!;
 set PATH=!GSDL3SRCHOME!\bin;!GSDL3SRCHOME!\bin\script;!GSDL3SRCHOME!\lib\jni;!ANT_HOME!\bin;!PATH!
 
 :: Override Imagemagick and Ghostscript paths to the bundled applications shipped with greenstone if they exists otherwise use default environment variables.

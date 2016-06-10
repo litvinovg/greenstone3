@@ -168,10 +168,19 @@
        tomcats webapps directory -->
   <property name="web.home" value="${basedir}/web"/>
   <property name="web.writablehome" value="${gsdl3.writablehome}"/>
-
+  <!-- If using a distributed GS3, then the user web would not contain everything in the default GS3 web 
+  (it won't contain a CGI or lib folder inside WEB-INF, for instance) -->
+  <if>
+    <bool><available file="${web.home}/WEB-INF/cgi" type="dir"/></bool>
+    <property name="full.web.dir" value="${web.home}"/>
+	<else>
+		<property name="full.web.dir" value="${basedir}/web"/>
+	</else>
+  </if>  
+  
   <!-- jar files needed by applets go here -->
   <property name="web.applet" value="${web.home}/applet"/>
-
+  
   <!-- jar files needed by the servlet (and extra ones) go here -->
   <property name="web.lib" value="${web.home}/WEB-INF/lib"/>
   <property name="web.writablelib" value="${web.writablehome}/WEB-INF/lib"/>
@@ -234,7 +243,7 @@
       <copy todir="${gsdl3.writablehome}/WEB-INF" 
 	    preservelastmodified="true"
 	    failonerror="true" >  
-	<fileset dir="${web.home}/WEB-INF" includes="**"/>  
+	<fileset dir="${full.web.dir}/WEB-INF" includes="**"/>  
       </copy>
 
       <copy todir="${gsdl3.writablehome}" 
@@ -630,8 +639,8 @@
   </path>
   
   <path id="derby.server.classpath">
-    <pathelement location="${web.lib}/derbynet.jar"/>
-    <pathelement location="${web.lib}/derby.jar"/>
+    <pathelement location="${web.writablelib}/derbynet.jar"/>
+    <pathelement location="${web.writablelib}/derby.jar"/>
   </path>
 
 
@@ -1271,9 +1280,9 @@
       <if>
 	<bool><not><equals arg1="${web.home}" arg2="${web.writablehome}"></equals></not></bool>
 	<mkdir dir="${web.writablehome}"/>
-	<copy file="${web.home}/WEB-INF/cgi/gliserver.pl"       tofile="${web.writablehome}/WEB-INF/cgi/gliserver.pl"       overwrite="true"/>
-	<copy file="${web.home}/WEB-INF/cgi/metadata-server.pl" tofile="${web.writablehome}/WEB-INF/cgi/metadata-server.pl" overwrite="true"/>
-	<copy file="${web.home}/WEB-INF/cgi/checksum.pl"        tofile="${web.writablehome}/WEB-INF/cgi/checksum.pl"        overwrite="true"/>
+	<copy file="${full.web.dir}/WEB-INF/cgi/gliserver.pl"       tofile="${web.writablehome}/WEB-INF/cgi/gliserver.pl"       overwrite="true"/>
+	<copy file="${full.web.dir}/WEB-INF/cgi/metadata-server.pl" tofile="${web.writablehome}/WEB-INF/cgi/metadata-server.pl" overwrite="true"/>
+	<copy file="${full.web.dir}/WEB-INF/cgi/checksum.pl"        tofile="${web.writablehome}/WEB-INF/cgi/checksum.pl"        overwrite="true"/>
       </if>
 
       <rsr verbosity="1" file="${web.writablehome}/WEB-INF/cgi/gliserver.pl" pattern="^#!.*" replacement="#!${perl.exec} -w" lines="1"/>
