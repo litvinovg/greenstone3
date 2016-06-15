@@ -168,8 +168,8 @@
        tomcats webapps directory -->
   <property name="web.home" value="${basedir}/web"/>
   <property name="web.writablehome" value="${gsdl3.writablehome}"/>
-  <!-- If using a distributed GS3, then the user web would not contain everything in the default GS3 web 
-  (it won't contain a CGI or lib folder inside WEB-INF, for instance) -->
+  <!-- If using a dispersed GS3 web folder, then the user web would not contain everything in the
+       default GS3 web (it won't contain a CGI or lib folder inside WEB-INF, for instance) -->
   <if>
     <bool><available file="${web.home}/WEB-INF/cgi" type="dir"/></bool>
     <property name="full.web.dir" value="${web.home}"/>
