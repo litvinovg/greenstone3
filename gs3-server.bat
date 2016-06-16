@@ -52,6 +52,7 @@ cmd /c ant.bat %opt_properties% configure-web
 
 
 set GSDL3PATH=
+set USE_TMPDIR_FOR_TOMCAT=
 
 "%RUNJAVA%" -cp "%CLASSPATH%" %opt_properties% org.greenstone.server.Server3 "%GSDL3SRCHOME%"
 
