@@ -245,9 +245,8 @@ public class Receptionist implements ModuleInterface
 		Element page = doc.createElement(GSXML.PAGE_ELEM);
 		page.setAttribute(GSXML.LANG_ATT, request.getAttribute(GSXML.LANG_ATT));
 		// just in case these namespaces end up in the page and we want to display the XML
-		page.setAttribute("xmlns:gsf", GSXML.GSF_NAMESPACE);
-		page.setAttribute("xmlns:xsl", GSXML.XSL_NAMESPACE);
-
+		GSXML.addGSNamespaces(page, false);
+		
 		//logger.info(a+" mesa=" + this.converter.getPrettyString(message));
 		// get the page data from the action
 
