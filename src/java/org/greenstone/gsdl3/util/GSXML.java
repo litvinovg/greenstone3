@@ -303,8 +303,13 @@ public class GSXML
 	//for namespaces
 	public static final String XSL_NAMESPACE = "http://www.w3.org/1999/XSL/Transform";
 	public static final String GSF_NAMESPACE = "http://www.greenstone.org/greenstone3/schema/ConfigFormat";
+  public static final String GSLIB_NAMESPACE = "http://www.greenstone.org/skinning";
 	public static final String JAVA_NAMESPACE = "http://xml.apache.org/xslt/java";
 	public static final String UTIL_NAMESPACE = "xalan://org.greenstone.gsdl3.util.XSLTUtil";
+
+  // all the namespaces in a string for easy addition to a string
+  public  static final String ALL_NAMESPACES_ATTS = "xmlns:gsf='" + GSF_NAMESPACE + "' xmlns:xsl='" + XSL_NAMESPACE + "' xmlns:gslib='" + GSLIB_NAMESPACE + "' xmlns:java='" + JAVA_NAMESPACE + "' xmlns:util='" + UTIL_NAMESPACE +"' ";
+  public static final String STD_NAMESPACES_ATTS = "xmlns:gsf='" + GSF_NAMESPACE + "' xmlns:xsl='" + XSL_NAMESPACE + "' xmlns:gslib='" + GSLIB_NAMESPACE +"' ";
 
 	//Groups configuration
 	public static final String HIERARCHY_ELEM = "hierarchy";
@@ -513,6 +518,19 @@ public class GSXML
 		return addError(doc, error.toString(), error_type);
 	}
 
+  public static boolean addGSNamespaces(Element elem, boolean include_extension_ns) {
+    if (elem == null) {
+      return false;
+    }
+    elem.setAttribute("xmlns:gsf", GSF_NAMESPACE);
+    elem.setAttribute("xmlns:xsl", XSL_NAMESPACE);
+    elem.setAttribute("xmlns:gslib", GSLIB_NAMESPACE);
+    if (include_extension_ns) {
+      elem.setAttribute("xmlns:util", UTIL_NAMESPACE);
+      elem.setAttribute("xmlns:java", JAVA_NAMESPACE);
+    }
+    return true;
+  }
 	public static Element createMetadataParamList(Document owner, Vector meta_values)
 	{
 
