@@ -21,6 +21,7 @@ package org.greenstone.gsdl3.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -403,6 +404,134 @@ public class GSXSLT
 		}
 	}
 
+
+  public static void findExtraMetadataNames(Element xsl_elem, HashSet<String> meta_names) {
+
+    // gsf:metadata and gsf:foreach-metadata
+    NodeList metadata_nodes = xsl_elem.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata"); 
+    NodeList foreach_metadata_nodes = xsl_elem.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "foreach-metadata");
+    int num_meta_nodes = metadata_nodes.getLength();
+    int total_nodes = num_meta_nodes +foreach_metadata_nodes.getLength();
+    for (int i = 0; i < total_nodes; i++) {
+      Element current;
+      if (i<num_meta_nodes) {
+	current = (Element) metadata_nodes.item(i);
+      } else {
+	current = (Element) foreach_metadata_nodes.item(i-num_meta_nodes);
+      }
+      String full_name = current.getAttribute("name");
+      String select = current.getAttribute("select");
+      
+      String [] names = full_name.split(",");
+      for(int j=0; j<names.length; j++) {
+	
+	String name = names[j];
+	if (!name.equals("")) {
+	  if (!select.equals("")) {
+	    name = select + GSConstants.META_RELATION_SEP + name;
+	  }
+	  meta_names.add(name);
+	}
+      }
+    }
+    
+    // gsf:link
+    boolean getEquivLinkMeta = false;
+    NodeList link_nodes = xsl_elem.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "link");
+    for (int i = 0; i < link_nodes.getLength(); i++) {
+      
+      Element elem = (Element) link_nodes.item(i);
+      String type = elem.getAttribute("type");
+      if (type.equals("source"))
+	{
+	  meta_names.add("assocfilepath");
+	  meta_names.add("srclinkFile");
+	}
+      else if (type.equals("web"))
+	{
+	  meta_names.add("weblink");
+	  meta_names.add("webicon");
+	  meta_names.add("/weblink");
+	}
+      else if (type.equals("equivdoc"))
+	{
+	  getEquivLinkMeta = true; // equivalent to gsf:equivlinkgs3
+	}
+    }
+    // gsf:equivlinkgs3
+    link_nodes = xsl_elem.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "equivlinkgs3");
+    if (getEquivLinkMeta || link_nodes.getLength() > 0) {
+      
+      String[] equivlink_metanames = { "equivDocIcon", "equivDocLink", "/equivDocLink" };
+
+      for (int i = 0; i < equivlink_metanames.length; i++)
+	{
+	  StringBuffer metadata = new StringBuffer();
+	  metadata.append("all"); // this means the attr multiple = true;
+	  metadata.append(GSConstants.META_RELATION_SEP);
+	  
+	  metadata.append(GSConstants.META_SEPARATOR_SEP);
+	  metadata.append(','); // attr separator = ","
+	  metadata.append(GSConstants.META_SEPARATOR_SEP);
+	  metadata.append(GSConstants.META_RELATION_SEP);
+	  
+	  // the name of the metadata we're retrieving
+	  metadata.append(equivlink_metanames[i]);
+	  meta_names.add(metadata.toString());
+	}
+    }
+    
+    // gsf:icon
+    NodeList icon_nodes = xsl_elem.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "icon");
+    for (int i = 0; i < icon_nodes.getLength(); i++) {
+      Element current = (Element) icon_nodes.item(i);
+      String type = current.getAttribute(GSXML.TYPE_ATT);
+      if (type == null || type.length() == 0) {
+	continue;
+      }
+      if (type.equals("web")) {
+	meta_names.add("webicon");
+	break; // this is the only one we are looking for at the moment
+      }
+    }
+    
+    // gsf:image
+    NodeList image_nodes = xsl_elem.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "image");
+    for (int i = 0; i < image_nodes.getLength(); i++) {
+      Element current = (Element) image_nodes.item(i);
+      String type = current.getAttribute(GSXML.TYPE_ATT);
+      if (type == null || type.length() == 0) {
+	continue;
+      }
+      
+      if (type.equals("source")) {
+	
+	String[] standardSourceMeta = new String[] { "SourceFile", "ImageHeight", "ImageWidth", "ImageType", "srcicon" };
+	for (String meta : standardSourceMeta) {
+	  meta_names.add(meta);
+	}
+	
+      }
+      else if (type.equals("screen")) {
+	
+	String[] standardScreenMeta = new String[] { "Screen", "ScreenHeight", "ScreenWidth", "ScreenType", "screenicon" };
+	for (String meta : standardScreenMeta) {
+	  meta_names.add(meta);
+	}
+      }
+      else if (type.equals("thumb")) {
+	String[] standardThumbMeta = new String[] { "Thumb", "ThumbHeight", "ThumbWidth", "ThumbType", "thumbicon" };
+	for (String meta : standardThumbMeta) {
+	  meta_names.add(meta);
+	}
+      }
+      else if (type.equals("cover")) {
+	meta_names.add("hascover");
+	logger.error("adding hascover");
+      }
+    }  
+  }
+  
 	/**
 	 * looks through a stylesheet for <xxx:template match='template_name'>
 	 * inside this template it looks for any <xxx:value-of
