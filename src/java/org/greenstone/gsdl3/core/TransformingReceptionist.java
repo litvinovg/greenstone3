@@ -218,78 +218,15 @@ public class TransformingReceptionist extends Receptionist
 				continue;
 			}
 
-			NodeList metadataElems = currentDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "metadata"); //gsf:metadata
-			NodeList foreachMetadataElems = currentDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "foreach-metadata"); //gsf:foreach-metadata
-			NodeList imageElems = currentDoc.getElementsByTagNameNS(GSXML.GSF_NAMESPACE, "image"); //gsf:image
+			HashSet<String> extra_meta_names = new HashSet<String>();
+			GSXSLT.findExtraMetadataNames(currentDoc.getDocumentElement(), extra_meta_names);
+			ArrayList<String> names = new ArrayList<String>(extra_meta_names);			
+
+			metaNames.put(currentFile.getAbsolutePath(), names);
+
 			NodeList includeElems = currentDoc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "include");
 			NodeList importElems = currentDoc.getElementsByTagNameNS(GSXML.XSL_NAMESPACE, "import");
 
-			ArrayList<String> names = new ArrayList<String>();
-			for (int i = 0; i < metadataElems.getLength(); i++)
-			{
-				Element current = (Element) metadataElems.item(i);
-				String name = current.getAttribute(GSXML.NAME_ATT);
-				if (name != null && name.length() > 0 && !names.contains(name))
-				{
-					names.add(name);
-				}
-			}
-
-			for (int i = 0; i < foreachMetadataElems.getLength(); i++)
-			{
-				Element current = (Element) foreachMetadataElems.item(i);
-				String name = current.getAttribute(GSXML.NAME_ATT);
-				if (name != null && name.length() > 0 && !names.contains(name))
-				{
-					names.add(name);
-				}
-			}
-
-			for (int i = 0; i < imageElems.getLength(); i++)
-			{
-				Element current = (Element) imageElems.item(i);
-				String type = current.getAttribute(GSXML.TYPE_ATT);
-				if (type == null || type.length() == 0)
-				{
-					continue;
-				}
-
-				if (type.equals("source"))
-				{
-					String[] standardSourceMeta = new String[] { "SourceFile", "ImageHeight", "ImageWidth", "ImageType", "srcicon" };
-					for (String meta : standardSourceMeta)
-					{
-						if (!names.contains(meta))
-						{
-							names.add(meta);
-						}
-					}
-				}
-				else if (type.equals("screen"))
-				{
-					String[] standardScreenMeta = new String[] { "Screen", "ScreenHeight", "ScreenWidth", "ScreenType", "screenicon" };
-					for (String meta : standardScreenMeta)
-					{
-						if (!names.contains(meta))
-						{
-							names.add(meta);
-						}
-					}
-				}
-				else if (type.equals("thumb"))
-				{
-					String[] standardThumbMeta = new String[] { "Thumb", "ThumbHeight", "ThumbWidth", "ThumbType", "thumbicon" };
-					for (String meta : standardThumbMeta)
-					{
-						if (!names.contains(meta))
-						{
-							names.add(meta);
-						}
-					}
-				}
-			}
-
-			metaNames.put(currentFile.getAbsolutePath(), names);
 
 			ArrayList<String> includeAndImportList = new ArrayList<String>();
 			for (int i = 0; i < includeElems.getLength(); i++)
@@ -1167,7 +1104,7 @@ public class TransformingReceptionist extends Receptionist
 		{
 			try
 			{
-				Document inlineTemplateDoc = this.converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"" + GSXML.XSL_NAMESPACE + "\" xmlns:java=\"" + GSXML.JAVA_NAMESPACE + "\" xmlns:util=\"" + GSXML.UTIL_NAMESPACE + "\" xmlns:gsf=\"" + GSXML.GSF_NAMESPACE + "\">" + inlineTemplate + "</xsl:stylesheet>", "UTF-8");
+				Document inlineTemplateDoc = this.converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xsl:stylesheet version=\"1.0\" "+GSXML.ALL_NAMESPACES_ATTS +  "\">" + inlineTemplate + "</xsl:stylesheet>", "UTF-8");
 
 				if (_debug)
 				{
