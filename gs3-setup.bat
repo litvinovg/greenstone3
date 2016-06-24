@@ -39,7 +39,7 @@ set WEB_CONTAINING_CLASSES=!GSDL3SRCHOME!\web
 :: set GSDL3HOME to any web.home property provided, and create that folder if it doesn't exist
 :: Replace forward slashes in web.home with back slashes 
 :: http://scripts.dragon-it.co.uk/scripts.nsf/docs/batch-search-replace-substitute!OpenDocument&ExpandSection=3&BaseTarget=East&AutoFramed
-if exist "!GSDL3SRCHOME!\build.properties" for /F "tokens=1,2 delims==" %%G in (!GSDL3SRCHOME!\build.properties) do ( 
+if exist "!GSDL3SRCHOME!\build.properties" for /F "usebackq tokens=1,2 delims==" %%G in ("!GSDL3SRCHOME!\build.properties") do ( 
 	if "%%G"=="web.home" (
 		set GSDL3HOME=%%H
 		set GSDL3HOME=!GSDL3HOME:/=\!

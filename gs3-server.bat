@@ -16,7 +16,7 @@ set GSDL3PATH=
 if "%GSDL3SRCHOME%" == "" call "%GSDL3PATH%\gs3-setup.bat" SetEnv > nul
 
 set USE_TMPDIR_FOR_TOMCAT=
-for /F "tokens=1,2 delims==" %%G in (%GSDL3SRCHOME%\build.properties) do ( 
+for /F "usebackq tokens=1,2 delims==" %%G in ("%GSDL3SRCHOME%\build.properties") do ( 
 	if "%%G"=="gsdl3home.isreadonly" set USE_TMPDIR_FOR_TOMCAT=%%H
 )
 
