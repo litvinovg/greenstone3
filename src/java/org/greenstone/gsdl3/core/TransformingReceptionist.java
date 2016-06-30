@@ -1104,7 +1104,7 @@ public class TransformingReceptionist extends Receptionist
 		{
 			try
 			{
-				Document inlineTemplateDoc = this.converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xsl:stylesheet version=\"1.0\" "+GSXML.ALL_NAMESPACES_ATTS +  "\">" + inlineTemplate + "</xsl:stylesheet>", "UTF-8");
+				Document inlineTemplateDoc = this.converter.getDOM("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xsl:stylesheet version=\"1.0\" "+GSXML.ALL_NAMESPACES_ATTS +  ">" + inlineTemplate + "</xsl:stylesheet>", "UTF-8");
 
 				if (_debug)
 				{
