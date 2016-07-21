@@ -5,8 +5,8 @@
 # specify full paths to the various key Greenstone directories.
 # GSDL3HOME is optional, set it if your Greenstone web folder
 # is located somewhere other than the default gsdl3srchome/web
-gsdl3srchome @gsdl3srchome@
-gsdlhome @gsdlhome@
+gsdl3srchome @gsdl3srchomequoted@
+gsdlhome @gsdlhomequoted@
 #gsdl3home /full/path/to/greenstone3/web
 
 # cgi gateway URL suffix

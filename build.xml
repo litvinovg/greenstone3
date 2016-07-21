@@ -1307,8 +1307,11 @@
     <antcall target="set-perl-shebangs" inheritAll="true" />
 	
     <filter token="gsdlhome" value="${gs2build.home}"/>
+    <filter token="gsdlhomequoted" value="&quot;${gs2build.home}&quot;"/>
     <filter token="gsdl3srchome" value="${basedir}"/>
+    <filter token="gsdl3srchomequoted" value="&quot;${basedir}&quot;"/>
     <filter token="gsdl3home" value="${src.gsdl3.home.unix}"/>
+    <filter token="gsdl3homequoted" value="&quot;${src.gsdl3.home.unix}&quot;"/>
     <filter token="gsdl3writablehome" value="${src.gsdl3.writablehome.unix}"/>
     <filter token="gsdl3version" value="${app.version}"/>
     <filter token="tomcat.server" value="${tomcat.server}"/>
