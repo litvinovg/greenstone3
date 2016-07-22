@@ -972,12 +972,14 @@ public class GS2Construct extends ServiceRack
 			return;
 		}
 		
-		// Open database for reading
+		// Open database for reading. It may not exist if collection is pre-built without archives (such as demo collections)
 		String coll_db_file = GSFile.archivesDatabaseFile(this.site_home, collection, dbtype);
 		if (!coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.READ))
 		{
-			logger.error("Could not open collection archives database. Somebody already using this database!");
+			logger.error("Could not open collection archives database. Database doesn't exist or else somebody is already using it?");
+			return;
 		}
+		// now we know we have an archives folder
 		String old_value = coll_db.getValue(oid);
 		String new_value = old_value.replace("<index-status>B", "<index-status>" + mark);
 		// Close database for reading

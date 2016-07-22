@@ -36,6 +36,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
 /**
  * ServiceRack - abstract base class for services
  * 
@@ -293,8 +296,15 @@ public abstract class ServiceRack implements ModuleInterface
 						catch (Exception e)
 						{
 							logger.error("Trying to call a processService type method (process" + to + ") on a subclass(" + this.getClass().getName() + "), but an exception happened:" + e.toString(), e);
+							// for debugging, it's useful to see what's really causing this supposed "invocationTargetException"
+							// When the error message is displayed in the "Net" tab in the browser's web inspector, scroll down to "Caused by"
+							StringWriter errors = new StringWriter();
+							e.printStackTrace(new PrintWriter(errors));
+							String errStr = errors.toString();
+							errStr += XMLConverter.getString(request);
 
-							error_string.append("Trying to call a processService type method (process" + to + ") on a subclass(" + this.getClass().getName() + "), but an exception happened:" + e.toString());
+
+							error_string.append("Trying to call a processService type method (process" + to + ") on a subclass(" + this.getClass().getName() + "), but an exception happened:" + e.toString() + "\n" + errStr );
 						}
 					}
 					else
