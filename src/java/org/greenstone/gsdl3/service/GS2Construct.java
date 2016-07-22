@@ -66,7 +66,8 @@ public class GS2Construct extends ServiceRack
 	private static final String BUILD_AND_ACTIVATE_SERVICE = "BuildAndActivateCollection";
 	private static final String DELETE_SERVICE = "DeleteCollection";
 	private static final String RELOAD_SERVICE = "ReloadCollection";
-    private static final String SET_METADATA_SERVICE = "SetMetadata";
+	private static final String MODIFY_METADATA_SERVICE = "ModifyMetadata"; // set or remove metadata
+
 
 	// params used
 	private static final String COL_PARAM = "collection";
@@ -127,7 +128,7 @@ public class GS2Construct extends ServiceRack
 				param = GSXML.createParameterDescription(doc, BUILDTYPE_PARAM, getTextString("param." + BUILDTYPE_PARAM, lang), GSXML.PARAM_TYPE_ENUM_SINGLE, BUILDTYPE_MGPP, types, type_texts);
 				param_list.appendChild(param);
 			}
-			else if (service.equals(ACTIVATE_SERVICE) || service.equals(IMPORT_SERVICE) || service.equals(BUILD_SERVICE) || service.equals(RELOAD_SERVICE) || service.equals(DELETE_SERVICE) || service.equals(SET_METADATA_SERVICE))
+			else if (service.equals(ACTIVATE_SERVICE) || service.equals(IMPORT_SERVICE) || service.equals(BUILD_SERVICE) || service.equals(RELOAD_SERVICE) || service.equals(DELETE_SERVICE) || service.equals(MODIFY_METADATA_SERVICE))
 			{
 
 				this.collection_list = getCollectionList();
@@ -184,13 +185,14 @@ public class GS2Construct extends ServiceRack
 	protected Element processBuildAndActivateCollection(Element request)
 	{
 	    // check permissions
-		if (!userHasCollectionEditPermissions(request)) {
+	    if (!userHasCollectionEditPermissions(request)) {
 		    Document result_doc = XMLConverter.newDOM();
 		    Element result = GSXML.createBasicResponse(result_doc, "processBuildAndActivateCollection");
 		    GSXML.addError(result, "This user does not have the required permissions to perform this action.");
 		    return result;
-		}
+	    }
 
+		    
 		waitUntilReady(request);
 		Element buildResponse = processBuildCollection(request);
 		if (buildResponse.getElementsByTagName(GSXML.ERROR_ELEM).getLength() > 0)
@@ -304,16 +306,16 @@ public class GS2Construct extends ServiceRack
 		return runCommand(request, GS2PerlConstructor.BUILD);
 	}
 
-    protected Element processSetMetadata(Element request)
+	protected Element processModifyMetadata(Element request)
 	{
 	    if (!userHasCollectionEditPermissions(request)) {
 		Document result_doc = XMLConverter.newDOM();
-		Element result = GSXML.createBasicResponse(result_doc, "processSetMetadata");
+		Element result = GSXML.createBasicResponse(result_doc, "processModifyMetadata");
 		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
 		return result;
 	    }
 
-	    return runCommand(request, GS2PerlConstructor.SET_METADATA_SERVER);
+	    return runCommand(request, GS2PerlConstructor.MODIFY_METADATA_SERVER);
 	}
 
 	protected Element processActivateCollection(Element request)
@@ -618,7 +620,7 @@ public class GS2Construct extends ServiceRack
 
 		e = this.desc_doc.createElement(GSXML.SERVICE_ELEM);
 		e.setAttribute(GSXML.TYPE_ATT, GSXML.SERVICE_TYPE_PROCESS);
-		e.setAttribute(GSXML.NAME_ATT, SET_METADATA_SERVICE);
+		e.setAttribute(GSXML.NAME_ATT, MODIFY_METADATA_SERVICE);
 		this.short_service_info.appendChild(e);
 
 		return true;
@@ -707,7 +709,7 @@ public class GS2Construct extends ServiceRack
 		{
 			constructor.setManifestFile(this.site_home + File.separator + "collect" + File.separator + params.get(COL_PARAM) + File.separator + "manifests" + File.separator + "tempManifest.xml");
 		}
-		else if (type == GS2PerlConstructor.SET_METADATA_SERVER) {
+		else if (type == GS2PerlConstructor.MODIFY_METADATA_SERVER) {
 		    StringBuffer querystring = new StringBuffer();
 		    
 		    // convert params into a single string again?
@@ -976,7 +978,7 @@ public class GS2Construct extends ServiceRack
 		String coll_db_file = GSFile.archivesDatabaseFile(this.site_home, collection, dbtype);
 		if (!coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.READ))
 		{
-			logger.error("Could not open collection archives database. Database doesn't exist or else somebody is already using it?");
+			logger.error("Could not open collection archives database. Database doesn't exist or else somebody's already using it?");
 			return;
 		}
 		// now we know we have an archives folder
@@ -987,6 +989,7 @@ public class GS2Construct extends ServiceRack
 		if (!coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.WRITE))
 		{
 			logger.error("Could not open collection archives database. Somebody already using this database!");
+			return;
 		}
 		coll_db.setValue(oid, new_value);
 		coll_db.closeDatabase();

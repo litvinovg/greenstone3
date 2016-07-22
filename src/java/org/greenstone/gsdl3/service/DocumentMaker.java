@@ -486,7 +486,8 @@ public class DocumentMaker extends ServiceRack
 		String coll_db_file = GSFile.archivesDatabaseFile(this.site_home, collection, dbtype);
 		if (!coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.READ))
 		{
-			logger.error("Could not open collection archives database. Somebody already using this database!");
+			logger.error("Could not open collection archives database. Database doesn't exist or else somebody's already using it?");
+			return;
 		}
 		String old_value = coll_db.getValue(oid);
 		String new_value = old_value.replace("<index-status>B", "<index-status>" + mark);
@@ -495,6 +496,7 @@ public class DocumentMaker extends ServiceRack
 		if (!coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.WRITE))
 		{
 			logger.error("Could not open collection archives database. Somebody already using this database!");
+			return;
 		}
 		coll_db.setValue(oid, new_value);
 		coll_db.closeDatabase();

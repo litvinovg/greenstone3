@@ -34,7 +34,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 	public static final int IMPORT = 1;
 	public static final int BUILD = 2;
 	public static final int ACTIVATE = 3;
-    public static final int SET_METADATA_SERVER = 4;
+    public static final int MODIFY_METADATA_SERVER = 4;
 
 	/**
 	 * gsdlhome for greenstone 2 - we use the perl modules and building scripts
@@ -121,8 +121,8 @@ public class GS2PerlConstructor extends CollectionConstructor
 		case ACTIVATE:
 			activateCollection();
 			break;
-		case SET_METADATA_SERVER:
-			setMetadataForCollection();
+		case MODIFY_METADATA_SERVER:
+			modifyMetadataForCollection();
 			break;
 		default:
 			msg = "wrong type of action specified!";
@@ -284,7 +284,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 		command.add(this.site_name);
 		command.add("-collectdir");
 		command.add(GSFile.collectDir(this.site_home));
-//		command.add("-removeold"); // saves some seconds processing time when this flag's added in explicitly
+//		command.add("-removeold"); // saves some seconds processing time when this flag's added in explicitly. Shouldn't be added for incremental building
 		command.add("-skipactivation"); // gsdl3/util/GS2Construct does the activation and reactivation
 		command.addAll(extractParameters(this.process_params));
 		command.add(this.collection_name);
@@ -301,9 +301,9 @@ public class GS2PerlConstructor extends CollectionConstructor
 	}
 
 
-    protected void setMetadataForCollection()
+    protected void modifyMetadataForCollection()
 	{
-		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "Collection metadata: setMetadata for collection."));
+		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "Collection metadata: modifyMetadata (set or remove meta) for collection."));
 
 		Vector<String> command = new Vector<String>();
 

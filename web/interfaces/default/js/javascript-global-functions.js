@@ -423,22 +423,22 @@ gs.functions.hashString = function(str)
 
 function callMetadataServer(callingFunction, url, responseFunction)
 {
-    // rewrite URLs to call GS2Construct's SetMetadata service instead. 
+    // If doing set- or remove- (not get-) metadata, then rewrite URLs to call GS2Construct's ModfiyMetadata service instead (which will ensure this only works when authenticated). 
     // From:
     // <gs3server>/cgi-bin/metadata-server.pl?a=set-archives-metadata&c=smallcol&site=localsite&d=HASH01454f31011f6b6b26eaf8d7&metaname=Title&metavalue=Moo&prevmetavalue=Blabla&metamode=override
     // To:
-    // <gs3server>/library?a=g&rt=r&ro=1&s=SetMetadata&s1.a=set-archives-metadata&s1.collection=smallcol&s1.site=localsite&s1.d=HASH01454f31011f6b6b26eaf8d7&s1.metaname=Title&s1.metavalue=Moo&s1.prevmetavalue=Blabla&s1.metamode=override
+    // <gs3server>/library?a=g&rt=r&ro=1&s=ModifyMetadata&s1.a=set-archives-metadata&s1.collection=smallcol&s1.site=localsite&s1.d=HASH01454f31011f6b6b26eaf8d7&s1.metaname=Title&s1.metavalue=Moo&s1.prevmetavalue=Blabla&s1.metamode=override
 
-    // if we're doing a set- metdata operation, then we'll be changing the URL to make sure we go through GS3's authentication
-    if(url.indexOf("set-") != -1) {
+    // if we're doing a set- or remove- metadata operations, then we'll be changing the URL to make sure we go through GS3's authentication
+    if(url.indexOf("set-") != -1 || url.indexOf("remove-") != -1) {
+	
 	url = url.replace("&c=",  "&collection="); // c is a special param name for GS2Construct
 	url = url.replace(/(&|\?)([^=]*=)/g, "$1"+"s1.$2"); // prefix param names with "s1."
-	url = url.replace("cgi-bin/metadata-server.pl?",  gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=SetMetadata&");
-
+	url = url.replace("cgi-bin/metadata-server.pl?",  gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=ModifyMetadata&");
 	console.log("@@@@@ URL is " + url);
     } // otherwise, such as for get- metadata operation, we proceed as before, which will not require authentication
-
-	$.ajax(url)
+    
+    $.ajax(url, {async: false})
 	.success(function(response)
 	{
 		console.log("(" + callingFunction + ") Response received from server: " + response);
