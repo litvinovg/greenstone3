@@ -21,8 +21,8 @@
     </documentSet>
   </security>
   <metadataList>
-    <metadata lang="en" name="creator"></metadata>
-    <metadata lang="en" name="maintainer"></metadata>
+    <metadata lang="en" name="creator">Greenstone Project</metadata>
+    <metadata lang="en" name="maintainer">Greenstone Project</metadata>
     <metadata lang="en" name="public">true</metadata>
   </metadataList>
   <displayItemList>
@@ -42,36 +42,22 @@
   </format>
   <search type="lucene">
     <level name="section">
-      <displayItem lang="en" name="name">chapter</displayItem>
+      <displayItem name="name" key="level.chapter"/>
     </level>
     <level name="document">
-      <displayItem lang="en" name="name">book</displayItem>
+      <displayItem name="name" key="level.book"/>
     </level>
     <defaultLevel name="section"/>
-    <index name="allfields">
-      <displayItem lang="en" name="name">all fields</displayItem>
-    </index>
-    <index name="text">
-      <displayItem lang="en" name="name">text</displayItem>
-    </index>
-    <index name="dc.Title,Title">
-      <displayItem lang="en" name="name">titles</displayItem>
-    </index>
-    <index name="dc.Subject">
-      <displayItem lang="en" name="name">subjects</displayItem>
-    </index>
-    <index name="dls.Organization">
-      <displayItem lang="en" name="name">organisations</displayItem>
-    </index>
-    <sort name="rank">
-      <displayItem lang="en" name="name">rank</displayItem>
-    </sort>    
+    <index name="allfields"/>
+    <index name="text"/>
+    <index name="dc.Title,Title"/>
+    <index name="dc.Subject"/>
+    <index name="dls.Organization"/>
+    <sort name="rank"/>
     <sort name="dls.Organization">
-      <displayItem lang="en" name="name">organisation</displayItem>
+      <displayItem name="name" key="Organisation.buttonname"/>
     </sort>
-    <sort name="none">
-      <displayItem lang="en" name="name">natural (build) order</displayItem>
-    </sort>
+    <sort name="none"/>
     <defaultSort name="rank"/>
     <searchType name="plain"/>
     <searchType name="simpleform"/>
