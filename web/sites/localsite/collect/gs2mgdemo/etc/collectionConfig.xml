@@ -7,18 +7,11 @@
   </metadataList>
   <displayItemList>
     <displayItem assigned="true" lang="en" name="description">This is a demonstration collection for the Greenstone3 digital library software. It contains a small subset (11 books) of the Humanitarian and Development Libraries. It is the Greenstone 3 equivalent of the Greenstone 2 demo collection, built with MG.</displayItem>
-    <!--
-        <displayItem assigned="true" lang="en" name="smallicon">gs2mgdemo_sm.gif</displayItem>
-        <displayItem assigned="true" lang="en" name="icon">gs2mgdemo.gif</displayItem>
-    -->
     <displayItem assigned="true" lang="en" name="name">MG demo</displayItem>
   </displayItemList>
   <search type="mg">
     <index name="section:text">
-      <displayItem lang="ru" name="name">Главы</displayItem>
-      <displayItem lang="en" name="name">chapters</displayItem>
-      <displayItem lang="es" name="name">capítulos</displayItem>
-      <displayItem lang="fr" name="name">chapitres</displayItem>
+      <displayItem name="name" key="level.chapter"/>
     </index>
     <index name="document:text">
       <displayItem lang="ru" name="name">Полные документы</displayItem>
