@@ -180,7 +180,7 @@ public abstract class SharedSoleneGS2FieldSearch extends AbstractGS2FieldSearch
 	    Element sort = (Element) sorts.item(i);
 	    String shortname = sort.getAttribute(GSXML.SHORTNAME_ATT);
 	    sort_ids.add(shortname);
-	    String display_name = GSXML.getDisplayText(sort, GSXML.DISPLAY_TEXT_NAME, lang, "en");
+	    String display_name = getDisplayText(sort, GSXML.DISPLAY_TEXT_NAME, lang, "en");
 	    if (display_name.equals(""))
 	      {
 		display_name = sort.getAttribute(GSXML.NAME_ATT);
