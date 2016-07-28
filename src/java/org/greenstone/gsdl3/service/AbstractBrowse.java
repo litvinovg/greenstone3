@@ -233,33 +233,35 @@ public abstract class AbstractBrowse extends ServiceRack
 			{
 				Element cl = (Element) classifiers.item(i);
 				Element new_cl = (Element) doc.importNode(cl, false); // just import this node, not the children
+				cl_list.appendChild(new_cl);
 
-				//String content = cl.getAttribute(GSXML.CLASSIFIER_CONTENT_ATT);
-
+				// have we got a displayItem for the classifier title?
+				String text = getDisplayText(cl, GSXML.DISPLAY_TEXT_NAME, lang, "en", "metadata_names");
 				//get the classify title  from the database
 				String class_id = cl.getAttribute(GSXML.NAME_ATT);
 				String content = getMetadata(class_id, "Title");
-
-				cl_list.appendChild(new_cl);
-				String text = GSXML.getDisplayText(cl, GSXML.DISPLAY_TEXT_NAME, lang, "en");
-				if (text == null || text.equals(""))
-				{
-					// no display element was specified, use the metadata name
-					// for now this looks in the class properties file
-					// this needs to use a general metadata thing instead
-					text = getMetadataNameText(content + ".buttonname", lang);
+				if (text == null || text.equals("")) {
+				
+				  // no display element was specified, use the metadata name
+				  if (!content.equals("")) {
+				    
+				    text = getTextString(content + ".buttonname", lang, "metadata_names");
+				    if (text == null) {
+				      
+				      text = content;
+				    }
+				  }
+				  
+				  if (text == null) {
+				    text=class_id;
+				  }
 				}
-				if (text == null)
-				{
-					text = content;
-				}
-
 				Element cl_name = GSXML.createDisplayTextElement(doc, GSXML.DISPLAY_TEXT_NAME, text);
 				new_cl.appendChild(cl_name);
 
 				// description
 
-				String meta_name = getMetadataNameText(content, lang);
+				String meta_name = getTextString(content, lang, "metadata_names");
 				if (meta_name == null)
 				{
 					meta_name = content;

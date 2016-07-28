@@ -252,7 +252,7 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 				continue;
 			}
 			index_ids.add(shortname);
-			String display_name = GSXML.getDisplayText(index, GSXML.DISPLAY_TEXT_NAME, lang, "en");
+			String display_name = getDisplayText(index, GSXML.DISPLAY_TEXT_NAME, lang, "en", "metadata_names");
 			if (display_name.equals(""))
 			{
 				display_name = index.getAttribute(GSXML.NAME_ATT);
@@ -260,11 +260,35 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 				{
 					display_name = shortname;
 				}
+				String d_name = getTextString(display_name+".buttonname", lang, "metadata_names");
+				if (d_name == null) {
+				  d_name = getTextString(cleanUpMetadata(display_name)+".buttonname", lang, "metadata_names");
+				}
+				if (d_name == null) {
+				  d_name = getTextString(display_name, lang, "metadata_names");
+				}
+				if (d_name != null) {
+
+				  display_name = d_name;
+				}
 			}
 			index_names.add(display_name);
 		}
 	}
 
+  protected String cleanUpMetadata(String meta) {
+    // remove namespace, and only take the first item if there is a list of them.
+    
+    logger.error("clean up "+meta);
+    String[] parts = meta.split("[,;]");
+    String cleaned = parts[0];
+    if (cleaned.lastIndexOf('.') != -1) {
+      cleaned = cleaned.substring(cleaned.lastIndexOf('.')+1);
+    }
+    logger.error("returning "+cleaned);
+    return cleaned;
+    
+  }
 	protected void getIndexSubcollectionData(ArrayList<String> index_sub_ids, ArrayList<String> index_sub_names, String lang)
 	{
 		// the index info -
@@ -281,7 +305,7 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 				continue;
 			}
 			index_sub_ids.add(shortname);
-			String display_name = GSXML.getDisplayText(indexsub, GSXML.DISPLAY_TEXT_NAME, lang, "en");
+			String display_name = getDisplayText(indexsub, GSXML.DISPLAY_TEXT_NAME, lang, "en");
 			if (display_name.equals(""))
 			{
 				display_name = indexsub.getAttribute(GSXML.NAME_ATT);
@@ -310,7 +334,7 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 				continue;
 			}
 			index_lang_ids.add(shortname);
-			String display_name = GSXML.getDisplayText(indexlang, GSXML.DISPLAY_TEXT_NAME, lang, "en");
+			String display_name = getDisplayText(indexlang, GSXML.DISPLAY_TEXT_NAME, lang, "en", "metadata_names");
 			if (display_name.equals(""))
 			{
 				display_name = indexlang.getAttribute(GSXML.NAME_ATT);
