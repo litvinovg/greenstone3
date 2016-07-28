@@ -322,7 +322,7 @@ public class CrossCollectionSearch extends ServiceRack
 				continue;
 			// use the name of the response in case we are talking to a remote collection, not the name of the collection.
 			String coll_id = response.getAttribute(GSXML.FROM_ATT);
-			String coll_name = GSXML.getDisplayText(coll, GSXML.DISPLAY_TEXT_NAME, lang, "en");
+			String coll_name = getDisplayText(coll, GSXML.DISPLAY_TEXT_NAME, lang, "en");
 			valid_colls.add(coll_id);
 			valid_coll_names.add(coll_name);
 		}
@@ -385,7 +385,7 @@ public class CrossCollectionSearch extends ServiceRack
 		{
 			Element response = (Element) coll_responses.item(i);
 			Element coll = (Element) GSXML.getChildByTagName(response, GSXML.COLLECTION_ELEM);
-			String coll_name = GSXML.getDisplayText(coll, GSXML.DISPLAY_TEXT_NAME, lang, "en");
+			String coll_name = getDisplayText(coll, GSXML.DISPLAY_TEXT_NAME, lang, "en");
 			coll_names.add(coll_name);
 		}
 
