@@ -92,7 +92,7 @@ public class LuceneSearch extends AbstractTextSearch
 			for (int i = 0; i < len; i++)
 			{
 				Element index = (Element) indexes.item(i);
-				index_names.add(GSXML.getDisplayText(index, GSXML.DISPLAY_TEXT_NAME, lang, "en"));
+				index_names.add(getDisplayText(index, GSXML.DISPLAY_TEXT_NAME, lang, "en"));
 
 			}
 		}

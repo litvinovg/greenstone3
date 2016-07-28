@@ -152,7 +152,7 @@ public class MapSearch
 // 	for (int i=0; i<indexes.getLength(); i++) {
 // 	    Element index = (Element)indexes.item(i);
 // 	    index_ids.add( index.getAttribute(GSXML.NAME_ATT));
-// 	    index_names.add(GSXML.getDisplayText(index, GSXML.DISPLAY_TEXT_NAME, lang, "en"));
+// 	    index_names.add(getDisplayText(index, GSXML.DISPLAY_TEXT_NAME, lang, "en"));
 		
 // 	}
     }
