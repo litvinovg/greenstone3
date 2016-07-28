@@ -138,6 +138,7 @@ public class GSXML
 	public static final String USER_ID_ATT = "uid";
 	public static final String FROM_ATT = "from";
 	public static final String LANG_ATT = "lang";
+  public static final String KEY_ATT = "key";
 	public static final String HREF_ATT = "href";
 	public static final String TYPE_ATT = "type";
 	public static final String DB_TYPE_ATT = "dbType";
@@ -1260,56 +1261,6 @@ public class GSXML
     }
     return att_value;
   }
-	/**
-	 * Returns the appropriate language element from a display elem, display is
-	 * the containing element, name is the name of the element to look for, lang
-	 * is the preferred language, lang_default is the fall back lang if neither
-	 * lang is found, will return the first one it finds
-	 */
-	public static String getDisplayText(Element display, String name, String lang, String lang_default)
-	{
-
-		String def = null;
-		String first = null;
-		NodeList elems = display.getElementsByTagName(DISPLAY_TEXT_ELEM);
-		if (elems.getLength() == 0)
-			return "";
-		for (int i = 0; i < elems.getLength(); i++)
-		{
-			Element e = (Element) elems.item(i);
-			String n = e.getAttribute(NAME_ATT);
-			if (name.equals(n))
-			{
-				String l = e.getAttribute(LANG_ATT);
-				if (lang.equals(l))
-				{
-					return getNodeText(e);
-				}
-				else if (lang_default.equals(l))
-				{
-					def = getNodeText(e);
-				}
-				else if (first == null)
-				{
-					first = getNodeText(e);
-				}
-			}
-			else
-			{
-				continue;
-			}
-		}
-
-		if (def != null)
-		{
-			return def;
-		}
-		if (first != null)
-		{
-			return first;
-		}
-		return "";
-	}
 
 	// replaces < > " ' & in the original with their entities
 	public static String xmlSafe(String original)

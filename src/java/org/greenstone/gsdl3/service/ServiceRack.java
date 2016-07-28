@@ -446,6 +446,82 @@ public abstract class ServiceRack implements ModuleInterface
 	  return null;
 	}
 
+
+	/**
+	 * Returns the appropriate language element from a display elem, display is
+	 * the containing element, name is the name of the element to look for, lang
+	 * is the preferred language, lang_default is the fall back lang, if neither
+	 * lang is found will return the first one it finds
+	 */
+  public String getDisplayText(Element display, String name, String lang, String lang_default) {
+    return getDisplayText(display, name, lang, lang_default, null);
+  }
+
+  public String getDisplayText(Element display, String name, String lang, String lang_default, String dictionary_name) {
+	
+
+		String def = null;
+		String first = null;
+		String key = null;
+		NodeList elems = display.getElementsByTagName(GSXML.DISPLAY_TEXT_ELEM);
+		if (elems.getLength() == 0)
+			return "";
+		for (int i = 0; i < elems.getLength(); i++)
+		{
+			Element e = (Element) elems.item(i);
+			String n = e.getAttribute(GSXML.NAME_ATT);
+			if (name.equals(n))
+			{
+				String l = e.getAttribute(GSXML.LANG_ATT);
+				String k = e.getAttribute(GSXML.KEY_ATT);
+				// if we have a specific lang value, return that
+				if (!l.equals("") && lang.equals(l))
+				{
+					return GSXML.getNodeText(e);
+				}
+				else if (!l.equals("") && lang_default.equals(l))
+				{
+					def = GSXML.getNodeText(e);
+				}
+				else if (!k.equals("")) {
+				  if ( key == null) {
+				  // a key specified. only allowed one spec with key
+				    key = k;
+				  }
+				}
+				// we have no key and we don't match the languages
+				else if (first == null)
+				{
+				  // but we are the first one, so we remember the value
+					first = GSXML.getNodeText(e);
+				}
+			}
+			else
+			{
+				continue;
+			}
+		}
+
+		
+		if (key != null) {
+		  String s = getTextString(key, lang, dictionary_name);
+		  // only use this one if a value was actually found
+		  if (!s.equals( "_"+key +"_")) {
+		    return s;
+		  }
+		}
+
+		if (def != null)
+		{
+			return def;
+		}
+		if (first != null)
+		{
+			return first;
+		}
+		return "";
+	}
+
 	/** overloaded version for no args case */
 	protected String getTextString(String key, String lang)
 	{
@@ -477,7 +553,8 @@ public abstract class ServiceRack implements ModuleInterface
 			String result = dict.get(key, args);
 			if (result == null)
 			{ // not found
-				return "_" + key + "_";
+			  //return "_" + key + "_";
+			  return null;
 			}
 			return result;
 		}
@@ -512,7 +589,7 @@ public abstract class ServiceRack implements ModuleInterface
 		{
 		  // try the ServiceRack properties
 		  // at the moment we look for original_class_name.key, then just key
-		  // if there is lots of inheritance, may want to try down the list of superclasses too...
+		  // if there is lots of inheritance, may want to try down the list of superclasses too...?
 		  class_name = "ServiceRack";
 		  dict = new Dictionary(class_name, lang, this.class_loader);
 		  String full_key = original_class_name+"."+key;
