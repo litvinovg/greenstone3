@@ -549,10 +549,10 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				continue;
 			}
 			level_ids.add(shortname);
-			String display_name = GSXML.getDisplayText(level, GSXML.DISPLAY_TEXT_NAME, lang, "en");
+			String display_name = getDisplayText(level, GSXML.DISPLAY_TEXT_NAME, lang, "en");
 			if (display_name.equals(""))
 			{
-				// we'll use the name, and the dictionary
+				// we'll use the name, and look it up in the dictionary
 				display_name = level.getAttribute(GSXML.NAME_ATT);
 				if (display_name.equals(""))
 				{
