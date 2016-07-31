@@ -506,9 +506,12 @@ public abstract class ServiceRack implements ModuleInterface
 		if (key != null) {
 		  String s = getTextString(key, lang, dictionary_name);
 		  // only use this one if a value was actually found
-		  if (!s.equals( "_"+key +"_")) {
+		  if (s!= null) {
 		    return s;
 		  }
+		  //if (!s.equals( "_"+key +"_")) {
+		  //  return s;
+		  //}
 		}
 
 		if (def != null)
@@ -598,7 +601,8 @@ public abstract class ServiceRack implements ModuleInterface
 		    result = dict.get(key, args);
 		  }
 		  if(result == null) {
-		    return "_" + key + "_";
+		    //return "_" + key + "_";
+		    return null;
 		  }
 		}
 		return result;
