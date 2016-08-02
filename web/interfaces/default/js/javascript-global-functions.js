@@ -423,6 +423,8 @@ gs.functions.hashString = function(str)
 
 function callMetadataServer(callingFunction, url, responseFunction)
 {
+    var async_setting = true; // Internal processing of 'read' operations (get meta) is not order dependent
+
     // If doing set- or remove- (not get-) metadata, then rewrite URLs to call GS2Construct's ModfiyMetadata service instead (which will ensure this only works when authenticated). 
     // From:
     // <gs3server>/cgi-bin/metadata-server.pl?a=set-archives-metadata&c=smallcol&site=localsite&d=HASH01454f31011f6b6b26eaf8d7&metaname=Title&metavalue=Moo&prevmetavalue=Blabla&metamode=override
@@ -435,10 +437,15 @@ function callMetadataServer(callingFunction, url, responseFunction)
 	url = url.replace("&c=",  "&collection="); // c is a special param name for GS2Construct
 	url = url.replace(/(&|\?)([^=]*=)/g, "$1"+"s1.$2"); // prefix param names with "s1."
 	url = url.replace("cgi-bin/metadata-server.pl?",  gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=ModifyMetadata&");
-	console.log("@@@@@ URL is " + url);
+	
+	//console.log("@@@@@ URL is " + url);
+
+	async_setting = false; // for 'write' operations (set/remove meta), we force sequential processing of the internal operation.
+
     } // otherwise, such as for get- metadata operation, we proceed as before, which will not require authentication
-    
-    $.ajax(url, {async: false})
+
+
+    $.ajax(url, {async: async_setting})
 	.success(function(response)
 	{
 		console.log("(" + callingFunction + ") Response received from server: " + response);
