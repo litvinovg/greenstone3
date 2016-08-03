@@ -26,10 +26,9 @@
     <metadata lang="en" name="public">true</metadata>
   </metadataList>
   <displayItemList>
-    <displayItem assigned="true" lang="en" name="name">Demo Collection</displayItem> 
-    <displayItem assigned="true" lang="en" name="description">This is a demonstration collection for the Greenstone3 digital library software. It contains a small subset (11 books) from the Humanity Development Library. It is built with Lucene for indexing and JDBM as the database for metadata.
-    </displayItem>
-    <displayItem assigned="true" lang="en" name="shortDescription">Demonstration collection using Lucene for the indexer, and JDBM for the database.</displayItem> 
+    <displayItem name="name" key="name" dictionary="collectionConfig"/>
+    <displayItem name="description" key="description" dictionary="collectionConfig"/>
+    <displayItem name="shortDescription" key="shortDescription" dictionary="collectionConfig"/>
  </displayItemList>
   <format>
     <!-- Define any global format statements here -->
