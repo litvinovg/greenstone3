@@ -139,6 +139,7 @@ public class GSXML
 	public static final String FROM_ATT = "from";
 	public static final String LANG_ATT = "lang";
   public static final String KEY_ATT = "key";
+  public static final String DICTIONARY_ATT = "dictionary";
 	public static final String HREF_ATT = "href";
 	public static final String TYPE_ATT = "type";
 	public static final String DB_TYPE_ATT = "dbType";
@@ -1046,7 +1047,8 @@ public class GSXML
 		return p;
 	}
 
-	/** returns the element parent/node_name[@attribute_name='attribute_value'] */
+	/** returns the element parent/node_name[@attribute_name='attribute_value'] 
+	 if attribute_value is null, just returns the first one with that attribute */
 	public static Element getNamedElement(Element parent, String node_name, String attribute_name, String attribute_value)
 	{
 
@@ -1056,10 +1058,14 @@ public class GSXML
 			Node child = children.item(i);
 			if (child.getNodeName().equals(node_name))
 			{
-				if (((Element) child).getAttribute(attribute_name).equals(attribute_value))
-					return (Element) child;
+			  String att_val = ((Element) child).getAttribute(attribute_name);
+			  if (!att_val.equals("") ) {
+			    if (attribute_value == null || att_val.equals(attribute_value)) {
+			      return (Element) child;
+			    }
+			  }
 			}
-		}
+		} // for each child
 		// not found
 		return null;
 	}
