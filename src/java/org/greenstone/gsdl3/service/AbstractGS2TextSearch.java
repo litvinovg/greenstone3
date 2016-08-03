@@ -278,14 +278,11 @@ public abstract class AbstractGS2TextSearch extends AbstractTextSearch
 
   protected String cleanUpMetadata(String meta) {
     // remove namespace, and only take the first item if there is a list of them.
-    
-    logger.error("clean up "+meta);
     String[] parts = meta.split("[,;]");
     String cleaned = parts[0];
     if (cleaned.lastIndexOf('.') != -1) {
       cleaned = cleaned.substring(cleaned.lastIndexOf('.')+1);
     }
-    logger.error("returning "+cleaned);
     return cleaned;
     
   }
