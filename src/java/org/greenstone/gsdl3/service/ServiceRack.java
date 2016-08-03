@@ -457,12 +457,13 @@ public abstract class ServiceRack implements ModuleInterface
     return getDisplayText(display, name, lang, lang_default, null);
   }
 
-  public String getDisplayText(Element display, String name, String lang, String lang_default, String dictionary_name) {
+  public String getDisplayText(Element display, String name, String lang, String lang_default, String default_dictionary) {
 	
 
 		String def = null;
 		String first = null;
 		String key = null;
+		String dictionary_name = default_dictionary;
 		NodeList elems = display.getElementsByTagName(GSXML.DISPLAY_TEXT_ELEM);
 		if (elems.getLength() == 0)
 			return "";
@@ -487,6 +488,10 @@ public abstract class ServiceRack implements ModuleInterface
 				  if ( key == null) {
 				  // a key specified. only allowed one spec with key
 				    key = k;
+				    String d =  e.getAttribute(GSXML.DICTIONARY_ATT);
+				    if (!d.equals("")) {
+				      dictionary_name = d;
+				    }
 				  }
 				}
 				// we have no key and we don't match the languages
