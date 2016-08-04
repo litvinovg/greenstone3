@@ -17,7 +17,7 @@ perl.path=@perlpath@
 # tomcat info
 tomcat.server=@tomcat.server@
 tomcat.port=@tomcat.port@
-tomcat.context=greenstone3
+tomcat.context=@greenstone.context@
 derby.server.port=@derbyserver.port@
 derby.server=@derbyserver@
 
