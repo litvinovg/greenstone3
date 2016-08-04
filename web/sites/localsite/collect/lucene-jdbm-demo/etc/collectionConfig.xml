@@ -26,9 +26,9 @@
     <metadata lang="en" name="public">true</metadata>
   </metadataList>
   <displayItemList>
-    <displayItem name="name" key="name" dictionary="collectionConfig"/>
-    <displayItem name="description" key="description" dictionary="collectionConfig"/>
-    <displayItem name="shortDescription" key="shortDescription" dictionary="collectionConfig"/>
+    <displayItem assigned="true" name="name" key="name" dictionary="collectionConfig"/>
+    <displayItem assigned="true" name="description" key="description" dictionary="collectionConfig"/>
+    <displayItem assigned="true" name="shortDescription" key="shortDescription" dictionary="collectionConfig"/>
  </displayItemList>
   <format>
     <!-- Define any global format statements here -->
