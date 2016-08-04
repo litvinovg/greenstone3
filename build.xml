@@ -1316,6 +1316,7 @@
     <filter token="gsdl3version" value="${app.version}"/>
     <filter token="tomcat.server" value="${tomcat.server}"/>
     <filter token="tomcat.port" value="${tomcat.port}"/>
+    <filter token="greenstone.context" value="${greenstone.context}"/>
     <filter token="derbyserver" value="${derby.server}"/>
     <filter token="derbyserver.port" value="${derby.server.port}"/>
     <filter token="perlpath" value="${escaped.perl.path}"/>
@@ -1479,10 +1480,10 @@
     </copy>
 
     <!-- set up the greenstone3 context, it may have a custom name specified in build.properties -->
-	<if><bool><not><equals arg1="greenstone3" arg2="${custom.context}"></equals></not></bool>
-		<copy file="${basedir}/resources/tomcat/greenstone3.xml" tofile="${basedir}/resources/tomcat/${custom.context}.xml" overwrite="true"/>
+	<if><bool><not><equals arg1="greenstone3" arg2="${greenstone.context}"></equals></not></bool>
+		<copy file="${basedir}/resources/tomcat/greenstone3.xml" tofile="${basedir}/resources/tomcat/${greenstone.context}.xml" overwrite="true"/>
 	</if>
-    <copy file="${basedir}/resources/tomcat/${custom.context}.xml" tofile="${packages.home}/tomcat/conf/Catalina/localhost/${custom.context}.xml" overwrite="true">
+    <copy file="${basedir}/resources/tomcat/${greenstone.context}.xml" tofile="${packages.home}/tomcat/conf/Catalina/localhost/${greenstone.context}.xml" overwrite="true">
       <filterset>
         <filter token="gsdl3webhome" value="${web.home}"/>
         <filter token="gsdl3webwritablehome" value="${web.writablehome}"/>
@@ -1496,7 +1497,7 @@
 		<bool>
 			<and>
 				<available file="${packages.home}/tomcat/conf/Catalina/localhost/greenstone3.xml"/>
-				<not><equals arg1="greenstone3" arg2="${custom.context}"></equals></not>
+				<not><equals arg1="greenstone3" arg2="${greenstone.context}"></equals></not>
 			</and>
 		</bool>
 		<delete file="${packages.home}/tomcat/conf/Catalina/localhost/greenstone3.xml"/>
