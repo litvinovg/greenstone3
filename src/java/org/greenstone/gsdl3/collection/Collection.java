@@ -32,6 +32,8 @@ import java.util.HashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.core.ModuleInterface;
+import org.greenstone.gsdl3.util.CollectionClassLoader;
+import org.greenstone.gsdl3.util.Dictionary;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSXSLT;
@@ -82,6 +84,11 @@ public class Collection extends ServiceCluster
 	protected ArrayList<HashMap<String, ArrayList<String>>> _securityExceptions = new ArrayList<HashMap<String, ArrayList<String>>>();
 
 	protected XMLTransformer transformer = null;
+	/**
+	 * A class loader that knows about the collection resources directory can
+	 * put properties files, dtds etc in here
+	 */
+	CollectionClassLoader class_loader = null;
 
 	/** same as setClusterName */
 	public void setCollectionName(String name)
@@ -112,6 +119,8 @@ public class Collection extends ServiceCluster
 			logger.error("Collection: site_home and collection_name must be set before configure called!");
 			return false;
 		}
+		// set up the class loader
+		this.class_loader = new CollectionClassLoader(this.getClass().getClassLoader(), this.site_home, this.cluster_name);
 
 		macro_resolver.addMacro("_httpcollection_", this.site_http_address + "/collect/" + this.cluster_name);
 
@@ -908,4 +917,18 @@ public class Collection extends ServiceCluster
 
 		return response;
 	}
+
+  // override this to use collection class loader
+  protected String getTextString(String key, String lang, String dictionary, String[] args)
+  {
+    Dictionary dict = new Dictionary(dictionary, lang, this.class_loader);
+    String result = dict.get(key, args);
+    if (result == null)
+      { // not found
+	//return "_" + key + "_";
+	return null;
+      }
+    return result;
+  }
+
 }

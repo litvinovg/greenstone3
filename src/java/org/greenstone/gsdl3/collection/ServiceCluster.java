@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.core.MessageRouter;
 import org.greenstone.gsdl3.core.ModuleInterface;
 import org.greenstone.gsdl3.service.ServiceRack;
+import org.greenstone.gsdl3.util.Dictionary;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
@@ -325,12 +326,6 @@ public class ServiceCluster implements ModuleInterface
 			for (int k = 0; k < displaynodes.getLength(); k++)
 			{
 				Element d = (Element) displaynodes.item(k);
-				String lang = d.getAttribute(GSXML.LANG_ATT);
-				if (lang == null || lang.equals(""))
-				{
-					//set the lang to teh default
-					d.setAttribute(GSXML.LANG_ATT, DEFAULT_LANG);
-				}
 				String name = d.getAttribute(GSXML.NAME_ATT);
 				Element this_item = GSXML.getNamedElement(this.display_item_list, GSXML.DISPLAY_TEXT_ELEM, GSXML.NAME_ATT, name);
 				if (this_item == null)
@@ -358,21 +353,6 @@ public class ServiceCluster implements ModuleInterface
     return true;
   }
 
-	// protected boolean addPlugins(Element plugin_list)
-	// {
-	// 	if (plugin_list == null)
-	// 		return false;
-	// 	NodeList pluginNodes = plugin_list.getElementsByTagName(GSXML.PLUGIN_ELEM);
-	// 	if (pluginNodes.getLength() > 0)
-	// 	{
-	// 		for (int k = 0; k < pluginNodes.getLength(); k++)
-	// 		{
-	// 			this.plugin_item_list.appendChild(this.doc.importNode(pluginNodes.item(k), true));
-	// 		}
-	// 	}
-
-	// 	return true;
-	// }
 	protected boolean resolveMacros(Element display_list)
 	{
 		if (display_list == null)
@@ -951,55 +931,61 @@ public class ServiceCluster implements ModuleInterface
 		}
 
 	}
+  // from our store of displayItems, (eg name, description etc) add one of each to response. PIck the best fit for request lang.
 
-	protected boolean addAllDisplayInfo(Element description, String lang)
-	{
-	  Document doc = description.getOwnerDocument();
-		NodeList items = this.display_item_list.getChildNodes();
-		for (int i = 0; i < items.getLength(); i++)
-		{ // for each key
-			Element m = (Element) items.item(i);
-			// findthe child with the correct language
-			Element new_m = GSXML.getNamedElement(m, GSXML.DISPLAY_TEXT_ELEM, GSXML.LANG_ATT, lang);
-			if (new_m == null && lang != DEFAULT_LANG)
-			{
-				// use the default lang
-				new_m = GSXML.getNamedElement(m, GSXML.DISPLAY_TEXT_ELEM, GSXML.LANG_ATT, DEFAULT_LANG);
-			}
-			if (new_m == null)
-			{
-				// just get the first one
-				new_m = (Element) GSXML.getChildByTagName(m, GSXML.DISPLAY_TEXT_ELEM);
-			}
-			description.appendChild(doc.importNode(new_m, true));
-		}
-		return true;
-
+  protected boolean addAllDisplayInfo(Element description, String lang)
+  {
+    Document doc = description.getOwnerDocument();
+    NodeList items = this.display_item_list.getChildNodes();
+    for (int i = 0; i < items.getLength(); i++)
+      { // for each key
+	Element m = (Element) items.item(i);
+	// is there one with the specified language?
+	Element new_m = GSXML.getNamedElement(m, GSXML.DISPLAY_TEXT_ELEM, GSXML.LANG_ATT, lang);
+	if (new_m == null) {
+	  // if not, have we got one with a key?
+	  new_m = GSXML.getNamedElement(m, GSXML.DISPLAY_TEXT_ELEM, GSXML.KEY_ATT, null);
+	  if (new_m != null) {
+	    // look up the dictionary
+	    String value = getTextString(new_m.getAttribute(GSXML.KEY_ATT), lang, new_m.getAttribute(GSXML.DICTIONARY_ATT));
+	    if (value != null) {
+	      GSXML.setNodeText(new_m, value);
+	    }
+	    else {
+	      // haven't found the key in the dictionary, ignore this display item
+	      new_m = null;
+	    }
+	  }
 	}
-
-	protected Element getDisplayTextElement(String key, String lang)
-	{
-
-		Element this_item = GSXML.getNamedElement(this.display_item_list, GSXML.DISPLAY_TEXT_ELEM, GSXML.NAME_ATT, key);
-		if (this_item == null)
-		{
-			return null;
-		}
-
-		Element this_lang = GSXML.getNamedElement(this_item, GSXML.DISPLAY_TEXT_ELEM, GSXML.LANG_ATT, lang);
-		if (this_lang == null && lang != DEFAULT_LANG)
-		{
-			// try the default
-			this_lang = GSXML.getNamedElement(this_item, GSXML.DISPLAY_TEXT_ELEM, GSXML.LANG_ATT, DEFAULT_LANG);
-		}
-		if (this_lang == null)
-		{
-			// just return the first one
-			return GSXML.getFirstElementChild(this_item);//(Element)this_item.getFirstChild().cloneNode(true);
-		}
-		return (Element) this_lang.cloneNode(true);
-
+	if (new_m == null && lang != DEFAULT_LANG) {
+	  // still haven't got a value. can we use the defualt lang?
+	  new_m = GSXML.getNamedElement(m, GSXML.DISPLAY_TEXT_ELEM, GSXML.LANG_ATT, DEFAULT_LANG);
 	}
+	if (new_m == null)
+	  {
+	    // STILL haven't found one, lets use the first one with a lang att (so we don't just get the key one back
+	    new_m = (Element) GSXML.getNamedElement(m, GSXML.DISPLAY_TEXT_ELEM, GSXML.LANG_ATT, null);
+	  }
+	if (new_m != null) {
+	  description.appendChild(doc.importNode(new_m, true));
+	}
+      } // for each key
+    return true;
+    
+  }
+  
+
+  protected String getTextString(String key, String lang, String dictionary) {
+    return getTextString(key, lang, dictionary, null);
+  }
+
+  protected String getTextString(String key, String lang, String dictionary, String[] args)
+  {
+    Dictionary dict = new Dictionary(dictionary, lang);
+    String result = dict.get(key, args);
+    return result;
+  }
+  
 
 	public HashMap<String, ServiceRack> getServiceMap()
 	{
