@@ -249,7 +249,12 @@
         <a href="{$coll_href}" title="{$desc}">
           <div class="collectionLink ui-corner-all">
 			<div class="collectionLinkText ui-widget-content ui-corner-top">
-				<xsl:value-of select="displayItem[@name='name']"/>
+				<xsl:choose><xsl:when test="displayItem[@name='name']"><xsl:value-of select="displayItem[@name='name']"/></xsl:when>
+				<xsl:otherwise>
+				  <xsl:value-of select="@name"/>
+				</xsl:otherwise>
+			      </xsl:choose>
+				  
 			</div>
 			<div style="height:15px;" class="ui-state-default ui-corner-bottom"><xsl:text> </xsl:text></div>
           </div>
