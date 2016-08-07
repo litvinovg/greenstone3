@@ -136,17 +136,30 @@
 				<xsl:when test="@type =	'thumb'">Thumb</xsl:when>
 				<xsl:when test="@type = 'screen'">Screen</xsl:when>
 				<xsl:when test="@type = 'source'">SourceFile</xsl:when>
+				<xsl:when test="@type = 'cover'">hascover</xsl:when>
 			</xsl:choose>
 		</xslt:variable>
-		<xslt:if test="(.//metadataList)[last()]/metadata[@name = $metaName]">
+		  <xslt:if test="./metadataList/metadata[@name = $metaName]">
 			<img>
 				<xslt:attribute name='src'>
 					<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name = 'httpPath']"/>
 					<xsl:text>/index/assoc/</xsl:text>
-					<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name = 'assocfilepath']"/>
+					<xslt:value-of disable-output-escaping="yes" select="./metadataList/metadata[@name = 'assocfilepath']"/>
 					<xsl:text>/</xsl:text>
-					<xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name = $metaName]"/>
+					<xslt:choose>
+					  <xslt:when test="$metaName = 'hascover'">cover.jpg</xslt:when>
+					  <xslt:otherwise>
+					    <xslt:value-of disable-output-escaping="yes" select="./metadataList/metadata[@name = $metaName]"/>
+					  </xslt:otherwise>
+					</xslt:choose>
 				</xslt:attribute>
+				<!-- copy any other attributes apart from type-->
+				<xsl:for-each select="@*[name() != 'type']">
+				  <xslt:attribute name="{name()}">
+				    <xsl:value-of select="."/>
+				  </xslt:attribute>
+				</xsl:for-each>
+				  
 			</img>
 		</xslt:if>
 	</xsl:template>
