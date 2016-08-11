@@ -9,7 +9,7 @@
 
 	<!-- use the 'main' layout -->
 	<xsl:include href="layouts/main.xsl"/>
-	<xsl:variable name="debug_property_file" select="concat($interface_name, '2')"/>
+	<xsl:variable name="debug_property_file">default2</xsl:variable>
 	<!-- set page title -->
 	<xsl:template name="pageTitle">
 		<gslib:collectionName/>
