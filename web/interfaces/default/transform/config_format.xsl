@@ -144,7 +144,7 @@
 				<xslt:attribute name='src'>
 					<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name = 'httpPath']"/>
 					<xsl:text>/index/assoc/</xsl:text>
-					<xslt:value-of disable-output-escaping="yes" select="./metadataList/metadata[@name = 'assocfilepath']"/>
+					<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name = 'assocfilepath']"/>
 					<xsl:text>/</xsl:text>
 					<xslt:choose>
 					  <xslt:when test="$metaName = 'hascover'">cover.jpg</xslt:when>
