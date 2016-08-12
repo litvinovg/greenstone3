@@ -1012,9 +1012,9 @@ function SliderWidget(_links)
 		var t_title = "";
 		if (title.search(/tocSectionNumber/) != -1)
 		  {
-		    var matching_regex = /<span class=\"tocSectionNumber\">([0-9]+)<\/span>\s*(.+)$/; 
+		    var matching_regex = /<span class=\"tocSectionNumber\">([0-9]+)<\/span>[\s\S]*<span class=\"tocSectionTitle\">(.+)<\/span>$/mg; 
 		    var matches_array = matching_regex.exec(title);
-		    if (matches_array.length == 3) {
+		    if (matches_array != null && matches_array.length == 3) {
 		      t_section = matches_array[1];
 		      t_title = matches_array[2];
 		      }

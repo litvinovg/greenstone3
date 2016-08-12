@@ -96,7 +96,7 @@
 								<div id="tocLoadingImage" style="text-align:center;">
 									<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.loading')"/><xsl:text>...</xsl:text>
 								</div>
-								<label for="filterText"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.filter_pages')"/><xsl:text>: </xsl:text></label><span id="filterOnButtons" style="float: right;">xx</span><input id="filterText" type="text" style="width: 100%;"/>
+								<label for="filterText"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.filter_pages')"/><xsl:text>: </xsl:text></label><span id="filterOnButtons" style="float: right;">...</span><input id="filterText" type="text" style="width: 100%;"/>
 								<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true'">
 								  <a href="javascript:extractFilteredPagesToOwnDocument();"><button id="extractDocButton">Extract these pages to document</button></a>
 								</xsl:if>
@@ -207,8 +207,8 @@
 				<td class="tocTextCell">				
 					<a id="toclink{@nodeID}" href="javascript:focusSection('{@nodeID}');">
 						<xsl:if test="util:hashToSectionId(@nodeID)">
-						  <span class="tocSectionNumber"><xsl:value-of select="util:hashToSectionId(@nodeID)"/><!--<xsl:text> </xsl:text>--></span></xsl:if><xsl:call-template name="sectionHeading"/>
-					</a>
+						  <span class="tocSectionNumber"><xsl:value-of select="util:hashToSectionId(@nodeID)"/><!--<xsl:text> </xsl:text>--></span></xsl:if><span class="tocSectionTitle"><xsl:call-template name="sectionHeading"/></span></a>
+					
 				</td>
 			</tr></table>
 		
