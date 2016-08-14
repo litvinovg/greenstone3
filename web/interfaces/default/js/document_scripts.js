@@ -271,7 +271,6 @@ function focusSection(sectionID, level, tocDisabled)
 	{
 		level = 0;
 	}
-
 	var parts = sectionID.split(".");
 	if(level >= parts.length)
 	{
@@ -291,7 +290,7 @@ function focusSection(sectionID, level, tocDisabled)
 		idToExpand += parts[i];
 	}
 	
-	if(!isExpanded(idToExpand))
+	if(!isSectionExpanded(idToExpand))
 	{
 		toggleSection(idToExpand, function(success)
 		{
@@ -318,7 +317,7 @@ function expandOrCollapseAll(expand)
 		if($(divs[i]).attr("id") && $(divs[i]).attr("id").search(/^doc/) != -1)
 		{
 			var id = $(divs[i]).attr("id").replace(/^doc(.*)/, "$1");
-			if(isExpanded(id) != expand)
+			if(isSectionExpanded(id) != expand)
 			{
 				//Don't collapse the top level
 				if(!expand && id.indexOf(".") == -1)
@@ -459,7 +458,7 @@ function retrieveFullTableOfContents()
     }
 }
 
-function isExpanded(sectionID)
+function isSectionExpanded(sectionID)
 {
 	var docElem = gs.jqGet("doc" + sectionID);
 	if(docElem.css("display") == "block")
