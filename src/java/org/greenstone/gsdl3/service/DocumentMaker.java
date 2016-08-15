@@ -43,6 +43,7 @@ import org.greenstone.gsdl3.util.GSDocumentModel;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.OID;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
 
@@ -450,7 +451,8 @@ public class DocumentMaker extends ServiceRack
 
 					_GSDM.documentXMLSetText(oid, collection, newContent, userContext);
 					
-					markDocumentInFlatDatabase("R", collection, oid);
+					// only top level doc ids are in database
+					markDocumentInFlatDatabase("R", collection, OID.getTop(oid));
 
 				}
 
@@ -464,7 +466,7 @@ public class DocumentMaker extends ServiceRack
 		
 	}
 	protected void markDocumentInFlatDatabase(String mark, String collection, String oid) {
-	
+	  
 		Document msg_doc = XMLConverter.newDOM();
 		Element message = msg_doc.createElement(GSXML.MESSAGE_ELEM);
 		UserContext userContext = new UserContext();

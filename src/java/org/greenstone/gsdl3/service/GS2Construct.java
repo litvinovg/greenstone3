@@ -37,6 +37,7 @@ import org.greenstone.gsdl3.util.GSParams;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSStatus;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.OID;
 import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
@@ -738,7 +739,7 @@ public class GS2Construct extends ServiceRack
 				}
 		    }
 		    
-		    markDocumentInFlatDatabase("R", coll_name, oid);
+		    markDocumentInFlatDatabase("R", coll_name, OID.getTop(oid));
 		    
 		    constructor.setQueryString(querystring.toString());
 		}
