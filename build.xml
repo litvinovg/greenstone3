@@ -1421,8 +1421,9 @@
       </move>
 	  
 	  <!-- To avoid the CGI permissions error appearing continuously in the (localhost) log, 
-		need privileged=true set in the root context.xml file too, not just greenstone context file -->
-	  <!-- http://antelope.stage.tigris.org/nonav/docs/manual/bk03ch05s02.html -->
+		need privileged=true set in the root context.xml file too, not just greenstone context file.
+		See http://stackoverflow.com/questions/9845936/tomcat-v7-0-load-exception-marking-servlet-ssi-as-unavailable/10305471#10305471
+	    For usage of IfTask IsLessThan: http://antelope.stage.tigris.org/nonav/docs/manual/bk03ch05s02.html -->
       <if><bool><not><islessthan arg1="${tomcat.version.major}" arg2="7"/></not></bool>	    
 		<copy file="${basedir}/resources/tomcat/root_context.xml" tofile="${packages.home}/tomcat/conf/context.xml" overwrite="true" />		
 	  </if>
