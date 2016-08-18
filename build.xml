@@ -1402,7 +1402,7 @@
         usetimestamp="true"/>
       <unzip src="${packages.home}/${tomcat.version}.zip" 
         dest="${packages.home}"/>
-      
+	  
       <!-- If we are using Java 1.4, we'd be using tomcat 5.5 in which case 
       we would need to have the tomcat compat package to work with Java 1.4-->
       <if>
@@ -1419,6 +1419,15 @@
       <move todir="${packages.home}/tomcat">
         <fileset dir="${packages.home}/${tomcat.version}"/>
       </move>
+	  
+	  <!-- To avoid the CGI permissions error appearing continuously in the (localhost) log, 
+		need privileged=true set in the root context.xml file too, not just greenstone context file -->
+	  <!-- http://antelope.stage.tigris.org/nonav/docs/manual/bk03ch05s02.html -->
+      <if><bool><not><islessthan arg1="${tomcat.version.major}" arg2="7"/></not></bool>	    
+		<copy file="${basedir}/resources/tomcat/root_context.xml" tofile="${packages.home}/tomcat/conf/context.xml" overwrite="true" />		
+	  </if>
+		
+	  
 	  <!--
       <copy file="${basedir}/resources/tomcat/setclasspath.bat"
         tofile="${packages.home}/tomcat/bin/setclasspath.bat"
