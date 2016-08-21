@@ -119,6 +119,7 @@ public class GS2BrowseAction extends Action
 		HashSet<String> class_meta_names = new HashSet<String>();
 		// add in the defaults
 		doc_meta_names.add("Title");
+		doc_meta_names.add("root_assocfilepath");
 		class_meta_names.add("Title");
 
 		// add the format info into the response
