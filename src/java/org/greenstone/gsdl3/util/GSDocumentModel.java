@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
 
+import org.apache.log4j.*;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Result;
@@ -27,6 +29,7 @@ import org.w3c.dom.NodeList;
 
 public class GSDocumentModel
 {
+  //static Logger logger = Logger.getLogger(org.greenstone.gsdl3.util.GSDocumentModel.class.getName());
 	//The two archive databases
 	protected static final String ARCHIVEINFSRC = "archiveinf-src";
 	protected static final String ARCHIVEINFDOC = "archiveinf-doc";
@@ -874,6 +877,13 @@ public class GSDocumentModel
 		{
 			metadataElems.get(position).getParentNode().removeChild(metadataElems.get(position));
 		}
+
+		//Write the new change back into the file
+		if (!writeXMLFile(docXML, oid, collection, userContext))
+		{
+			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
+		}
+
 	}
 
 	/**
@@ -913,6 +923,13 @@ public class GSDocumentModel
 		{
 			elem.getParentNode().removeChild(elem);
 		}
+
+		//Write the new change back into the file
+		if (!writeXMLFile(docXML, oid, collection, userContext))
+		{
+			_errorStatus = ERROR_COULD_NOT_WRITE_TO_DOC_XML;
+		}
+
 	}
 
 	/**
