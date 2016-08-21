@@ -448,9 +448,10 @@ public class DocumentMaker extends ServiceRack
 					String oid = (String) keyValueMap.get("oid");
 					String collection = (String) keyValueMap.get("collection");
 					String newContent = (String) keyValueMap.get("text");
-
-					_GSDM.documentXMLSetText(oid, collection, newContent, userContext);
 					
+					_GSDM.documentXMLSetText(oid, collection, newContent, userContext);
+					// make sure NoText metadata is not set (in case we have added text where there was none before)
+					_GSDM.documentXMLDeleteMetadata(oid, collection, "NoText", userContext);
 					// only top level doc ids are in database
 					markDocumentInFlatDatabase("R", collection, OID.getTop(oid));
 
