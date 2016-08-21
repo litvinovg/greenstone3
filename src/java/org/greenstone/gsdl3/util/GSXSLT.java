@@ -444,7 +444,7 @@ public class GSXSLT
       String type = elem.getAttribute("type");
       if (type.equals("source"))
 	{
-	  meta_names.add("assocfilepath");
+	  meta_names.add("root_assocfilepath");
 	  meta_names.add("srclinkFile");
 	}
       else if (type.equals("web"))
