@@ -139,13 +139,21 @@
 				<xsl:when test="@type = 'cover'">hascover</xsl:when>
 			</xsl:choose>
 		</xslt:variable>
+		<xslt:variable name="thisAssocfilepath">					
+		  <xslt:choose>
+		    <xslt:when test="/page/pageResponse/document">
+		      <xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name='assocfilepath']" />
+		    </xslt:when>
+		    <xslt:otherwise>
+		      <xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='root_assocfilepath']" />
+		    </xslt:otherwise>
+		  </xslt:choose>						
+		</xslt:variable>
 		  <xslt:if test="./metadataList/metadata[@name = $metaName]">
 			<img>
 				<xslt:attribute name='src'>
 					<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name = 'httpPath']"/>
-					<xsl:text>/index/assoc/</xsl:text>
-					<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name = 'assocfilepath']"/>
-					<xsl:text>/</xsl:text>
+					<xsl:text>/index/assoc/</xsl:text><xslt:value-of disable-output-escaping="yes" select="$thisAssocfilepath" /><xsl:text>/</xsl:text>
 					<xslt:choose>
 					  <xslt:when test="$metaName = 'hascover'">cover.jpg</xslt:when>
 					  <xslt:otherwise>
@@ -247,7 +255,7 @@
 							<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name='assocfilepath']" />
 						</xslt:when>
 						<xslt:otherwise>
-							<xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='assocfilepath']" />
+							<xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='root_assocfilepath']" />
 						</xslt:otherwise>
 					</xslt:choose>						
 				</xslt:variable>
