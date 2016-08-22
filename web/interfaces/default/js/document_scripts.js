@@ -1152,12 +1152,25 @@ function loadBook()
 /************************
 *    CHANGES SCRIPTS    *
 ************************/
+
+function addCKEEditableState(evt,stateArray) 
+{
+    // Event->Editor->CKE DOM Inline Element that editor was for->underlying jquery element 
+    element = evt.editor.element.$;
+    nodeText = element.innerHTML;
+         stateArray.push({
+             editableNode : element,
+             initHTML : nodeText
+         });
+   
+}
 function addEditableState(editable,stateArray)
 {
+
 	if(editable.tagName == 'TEXTAREA')
 	{
 		nodeText = editable.value;
-	}  
+	}
 	else 
 	{
 	 	nodeText = editable.innerHTML;
@@ -1167,6 +1180,7 @@ function addEditableState(editable,stateArray)
                 editableNode : editable,
                 initHTML : nodeText
         });
+
 }
 
 function getLastEditableStates()
@@ -1191,13 +1205,17 @@ function changesToUpdate()
 	return resultArray;
 }
 
+
 function isNodeChanged(StateToCheck){
 	for (var i in editableInitStates) 
 	{
-		if ((StateToCheck.editableNode === editableInitStates[i].editableNode) && StateToCheck.initHTML === editableInitStates[i].initHTML )
+	    if ((StateToCheck.editableNode === editableInitStates[i].editableNode)) {
+		if ( StateToCheck.initHTML === editableInitStates[i].initHTML ) 
 		{
 			return false;
 		}
+		return true;
+	    }
 	
 	}
 	return true;
@@ -1304,6 +1322,9 @@ function setStaticMetadataSets(list) {
 
 function readyPageForEditing()
 {
+    CKEDITOR.on('instanceReady', function(evt) {
+	addCKEEditableState(evt,editableInitStates);
+    });
 
 	if($("#metadataSetList").length)
 	{
@@ -1321,8 +1342,7 @@ function readyPageForEditing()
 
 	$("#editContentButton").html("Hide Editor");
 	//wait for 0.5 sec to let ckeditor up 
-	setTimeout(function(){ $(".sectionText").each(function(){addEditableState(this,editableInitStates);}); }, 500);	
-
+	//setTimeout(function(){ $(".sectionText").each(function(){addEditableState(this,editableInitStates);}); }, 500);	
 	var editBar = $("#editBarLeft");
 	
 	var visibleMetadataList = $("<select>", {"id": "metadataSetList", "class": "ui-state-default"});
