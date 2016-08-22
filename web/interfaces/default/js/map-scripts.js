@@ -34,7 +34,8 @@ function initializeMapScripts()
 		}
 		else
 		{
-			$("#map_canvas").css({visibility:"hidden", height:"0px"});
+			//$("#map_canvas").css({visibility:"hidden", height:"0px"});
+			$("#map_canvas").css({visibility:"hidden"});
 		}
 	}
 	
@@ -45,8 +46,11 @@ function initializeMapScripts()
 		var startStopCheckbox = $("<input>", {"type": "checkbox", "checked": "true", "id": "scrollCheckbox"});
 		startStopCheckbox.click(function()
 		{
-			if(startStopCheckbox.attr("checked"))
-			{
+			// http://stackoverflow.com/questions/901712/how-to-check-if-a-checkbox-is-checked-in-jquery
+			// http://stackoverflow.com/questions/5270689/attrchecked-checked-does-not-work
+		
+			if($('#scrollCheckbox').is(':checked')) // OR: if(document.getElementById('scrollCheckbox').checked)
+			{			
 				if(_intervalHandle == null)
 				{
 					_intervalHandle = setInterval(loopThroughMarkers, 2000);
@@ -170,11 +174,15 @@ function performSearchForMarkers()
 		}
 	}
 	
-	var url = gs.xsltParams.library_name + "?a=q&s=RawQuery&rt=rd&c=" + gs.cgiParams.c + "&s1.rawquery=" + query + "&excerptid=jsonNodes";
+	//var url = gs.xsltParams.library_name + "?a=q&s=RawQuery&rt=rd&c=" + gs.cgiParams.c + "&s1.rawquery=" + query + "&excerptid=jsonNodes";
+	var url = gs.xsltParams.library_name;
+	var data = "a=q&s=RawQuery&rt=rd&c=" + gs.cgiParams.c + "&s1.rawquery=" + query + "&excerptid=jsonNodes";
 	
-	$.ajax(url)
+	$.ajax({type:"POST", url:url, data:data})
 	.success(function(responseText)
 	{
+		//console.log("*** responseText (first 250) = " + responseText.substring(0,256));
+		
 		if(responseText.search("id=\"jsonNodes") != -1)
 		{
 			var startIndex = responseText.indexOf(">");
@@ -206,6 +214,10 @@ function performSearchForMarkers()
 		}
 		
 		_searchRunning = false;
+	}).fail(function(responseText, textStatus, errorThrown) // fail() has replaced error(), http://api.jquery.com/jquery.ajax/
+		{
+			console.log("In map-scripts.performSearchForMarkers(): Got an error in ajax call");
+			_searchRunning = false;
 	});
 }
 
@@ -630,14 +642,17 @@ function modifyFunctions()
 			return;
 		}
 		
-		if(section)
-		{
+		// Test if 'section' exists.  
+		// ==> Because we're using jQuery to do this we need to test the length of the object returned
+		// http://stackoverflow.com/questions/920236/how-can-i-detect-if-a-selector-returns-null
+		if(section.length !== 0)
+		{			
 			if(isExpanded(sectionID))
 			{
 				section.css("display", "none");
 				sectionToggle.attr("src", gs.imageURLs.expand);
 				
-				if(openClassifiers[sectionID] != undefined)
+				if(openClassifiers[sectionID].length !== 0) //if(openClassifiers[sectionID] != undefined)
 				{
 					delete openClassifiers[sectionID];
 				}
@@ -683,7 +698,7 @@ function modifyFunctions()
 			{
 				var newDiv = $("<div>");										
 				var sibling = gs.jqGet("title" + sectionID);
-				sibling.before(newDiv);
+				sibling.after(newDiv);
 				
 				newDiv.html(responseText);
 				sectionToggle.attr("src", gs.imageURLs.collapse);
