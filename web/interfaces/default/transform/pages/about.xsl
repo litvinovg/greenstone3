@@ -19,6 +19,20 @@
 	<!-- the page content -->
 	<xsl:template match="/page">
   
+		<xsl:choose>
+			<xsl:when test="$this-element/displayItem[@name='icon']">
+			  <img border="0">
+				<xsl:attribute name="src"><xsl:value-of select="$this-element/metadataList/metadata[@name='httpPath']"/>/images/<xsl:value-of select="$this-element/displayItem[@name='icon']"/></xsl:attribute>
+				<xsl:attribute name="alt">
+				  <xsl:value-of select="$this-element/displayItem[@name='name']"/>
+				</xsl:attribute>
+				<xsl:attribute name="title">
+				  <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'aboutpage')"/>
+				</xsl:attribute>
+			  </img>		
+			</xsl:when>      
+		</xsl:choose>	
+  
 		<!--Display the description text of the current collection,
 		and if some services are available then create a list
 		of links for each service within a <ul id="servicelist"> element.-->

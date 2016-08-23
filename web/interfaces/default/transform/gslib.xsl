@@ -237,11 +237,11 @@
     <xsl:variable name="desc"><xsl:value-of select="displayItem[@name='shortDescription']"/></xsl:variable>
     <xsl:variable name="coll_href"><xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="@name"/>/page/about<xsl:choose><xsl:when test="libraryParamList/param">?<xsl:for-each select="libraryParamList/param"><xsl:value-of select="@name"/>=<xsl:value-of select="@default"/>&amp;</xsl:for-each></xsl:when></xsl:choose></xsl:variable>
     <xsl:choose>
-      <xsl:when test="displayItem[@name='icon']">
+      <xsl:when test="displayItem[@name='smallicon']">
         <a href="{$coll_href}" title="{$desc}">
           <img class="collectionLinkImage">
             <xsl:attribute name="alt"><xsl:value-of select="displayItem[@name='name']"/></xsl:attribute>
-            <xsl:attribute name="src">sites/<xsl:value-of select="$site_name"/>/collect/<xsl:value-of select="@name"/>/images/<xsl:value-of select="displayItem[@name='icon']"/></xsl:attribute>
+            <xsl:attribute name="src">sites/<xsl:value-of select="$site_name"/>/collect/<xsl:value-of select="@name"/>/images/<xsl:value-of select="displayItem[@name='smallicon']"/></xsl:attribute>
           </img>
         </a>
       </xsl:when>
