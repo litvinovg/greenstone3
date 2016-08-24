@@ -615,6 +615,7 @@ function retrieveTableOfContentsAndTitles()
 	{
 		$("#tableOfContents").html(response);
 		replaceLinksWithSlider();
+	    addExpandContractButtons();
 		var loading = $("#tocLoadingImage");
 		loading.remove();
 	})
@@ -624,10 +625,16 @@ function retrieveTableOfContentsAndTitles()
 	});
 }
 
+function addExpandContractButtons() 
+{
+	var tableOfContents = $("#rightSidebar  div.tableOfContentsContainer");
+    var table = "<tr><td><table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">Expand document</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">Collapse document</a></td></tr></table></td></tr>" ;
+   tableOfContents.prepend(table);
+
+}
 function replaceLinksWithSlider()
 {
 	var tableOfContents = $("#tableOfContents");
-	
 	var leafSections = new Array();
 	var liElems = tableOfContents.find("li").each(function()
 	{
