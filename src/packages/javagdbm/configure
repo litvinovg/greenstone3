@@ -3943,6 +3943,9 @@ $as_echo "Darwin" >&6; }
   JNIINC="-I/System/Library/Frameworks/JavaVM.framework/Headers/ "
   JNISUFFIX="jnilib"
   JNILDFLAGS="-dynamiclib -fno-common -single_module -framework JavaVM"
+  if test -d "$JAVA_HOME/include/darwin"; then
+      JNICFLAGS="-I$JAVA_HOME/include -I$JAVA_HOME/include/darwin"
+  fi
 fi
 if test "`(uname -s) 2> /dev/null`" = 'SunOS'; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: Solaris" >&5
