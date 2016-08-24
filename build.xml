@@ -2325,6 +2325,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
       <arg value="--libdir=${lib.jni}"/>
       <arg value="--with-gdbm=${gdbm.home}"/>
       <arg line="${cross.configure.args}"/>
+      <arg line="${allargs}"/>
     </exec>    
   </target>
 
