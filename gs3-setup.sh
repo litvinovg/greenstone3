@@ -180,11 +180,17 @@ function checkJava() {
 
   # we now include a JRE with Mac (Mountain) Lion too, because from Yosemite onwards there's no system Java on Macs
   HINT="`pwd`/packages/jre"
-  if [ "$GSDLOS" = "darwin" ] && [ ! -d "$HINT" ]; then
-      HINT=`/usr/libexec/java_home`
-      # old code used as fallback:
-      if [ ! -d "$HINT" ]; then
-          HINT=/System/Library/Frameworks/JavaVM.framework/Home
+  
+  #if [ "$GSDLOS" = "darwin" ] && [ ! -d "$HINT" ]; then
+  if [ "$GSDLOS" = "darwin" ]; then
+      if [ "$JAVA_HOME" != "" ] && [ -d "$JAVA_HOME" ]; then
+	  HINT=$JAVA_HOME
+      elif [ ! -d "$HINT" ]; then
+	  HINT=`/usr/libexec/java_home`
+          # old code used as fallback:
+	  if [ ! -d "$HINT" ]; then
+              HINT=/System/Library/Frameworks/JavaVM.framework/Home
+	  fi
       fi
   fi
 
