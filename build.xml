@@ -389,7 +389,7 @@
         	<property name="pcpath.arg" value="PKG_CONFIG_PATH=&quot;${gnome-lib-dir}/lib/pkgconfig&quot;"/>
 	</else>
 	</if>
-
+<!--
 	<if><bool><equals arg1="${os.bin.dir}" arg2="darwin"/></bool>
 		<if><bool><isset property="env.DYLD_LIBRARY_PATH"/></bool>
 			<property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib:${env.DYLD_LIBRARY_PATH}&quot;"/>
@@ -406,6 +406,7 @@
 		</if>
 	</else>
 	</if>
+-->
 
 	<else>
 		<if><bool><isset property="env.CFLAGS"/></bool>
