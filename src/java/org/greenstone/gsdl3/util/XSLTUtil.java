@@ -754,6 +754,7 @@ public class XSLTUtil
 	// to be strings loaded from the interface_name.properties file for the language.    
 	public static String getInterfaceStringsAsJavascript(String interface_name, String lang, String prefix, String prependToPrefix)
 	{
+	  String prefixwithdot = prefix+".";
 		// 1. Generating Javascript of the form:
 		// if(!gs.text) { gs.text = new Array(); }
 		// if(!gs.text.dse) { gs.text.dse = new Array(); }
@@ -782,7 +783,7 @@ public class XSLTUtil
 			while (keys.hasMoreElements())
 			{
 				String key = (String) keys.nextElement();
-				if (key.startsWith(prefix))
+				if (key.startsWith(prefixwithdot))
 				{
 					String value = getInterfaceText(interface_name, dictName, lang, key, null);
 
