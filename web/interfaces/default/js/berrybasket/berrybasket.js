@@ -116,12 +116,13 @@ function updateBerryImages(){
 		berries.appendChild(img);
 	}
 
-	//show the help message if there are no berries
+	//show/hide the help message depending if there are berries or not
+        var help_elem = YAHOO.util.Dom.get('berryHelpMsg');
+    
 	if ( berryList.length == 0 ) {
-		var berryHelpMsg = document.createElement('span');
-		berries.appendChild(berryHelpMsg);
-		berryHelpMsg.appendChild(document.createTextNode('Drag & drop berries here to add documents to your Berry Basket'));
-		berryHelpMsg.setAttribute('id','berryHelpMsg');
+	    help_elem.style.display='block';
+	} else {
+	    help_elem.style.display='none';
 	}
 
 	//show the expand buttons
@@ -225,10 +226,8 @@ function showBasket() {
 	berryBasket.style.cursor = "default";
 	berryBasket.className = "show";
 
-	//put the full view link in
-	var fullView = document.createElement('a');
-	berries.appendChild(fullView);
-	
+	//set url and show full view link
+        var fullView = YAHOO.util.Dom.get('berryFullViewLink');
 	//Find the collection in the cgi parameters
 	var url = window.location.href;
 	var colstart = url.indexOf("&c=");
@@ -243,9 +242,8 @@ function showBasket() {
 		collectionName = url.substring(colstart + 3, colend);
 	}
 	
-	fullView.appendChild(document.createTextNode('Full View »'));
 	fullView.setAttribute("href",gs.xsltParams.library_name + "?a=g&sa=berry&c=&s=DisplayList&rt=r&p.c=" + collectionName);
-	fullView.setAttribute("id","berryFullViewLink");
+        fullView.style.display='block';
 
 	//toggle expand/collapse links
 	var expandLink = YAHOO.util.Dom.get('berryBasketExpandLink');
@@ -287,7 +285,9 @@ function hideBasket() {
 		expandLink.style.display = '';
 		collapseLink.style.display = 'none';
 	}
-	
+    // hide full view link
+	var fullView = YAHOO.util.Dom.get('berryFullViewLink');
+    fullView.style.display='none';
 }
 
 

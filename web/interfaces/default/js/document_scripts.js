@@ -1,9 +1,7 @@
 var _imageZoomEnabled = false;
-// Choose which types of filtering you want: sectionnum, or sectiontitle.
+// Choose which types of filtering you want: sectionnum, or sectiontitle or both
 var _filter_on_types = ["sectiontitle", "sectionnum"];
-// the text strings for the two radio buttons
-var _filter_on_num_text = "pagenum";
-var _filter_on_title_text = "title";
+
 // are titles numeric match?
 var _filter_title_numeric = false;
 
@@ -17,10 +15,8 @@ var dynamic_metadata_set_list = true;
 var keep_editing_controls_visible = true;
 /* Here you can choose which save buttons you like. Choose from 'save', 'rebuild', 'saveandrebuild' */
 var save_and_rebuild_buttons = ["saveandrebuild"];
+//var save_and_rebuild_buttons = ["save", "rebuild", "saveandrebuild"];
 
-var save_button_text = "Save changes";
-var rebuild_button_text = "Rebuild";
-var save_and_rebuild_button_text = "Save and Rebuild";
 
 /*Array to store init states of metadata fields and text*/
 var editableInitStates = new Array();
@@ -751,13 +747,13 @@ function SliderWidget(_links)
   }
   else if (_filter_on_types.length == 1) {
     if (_filter_on_types[0] == "sectionnum") {
-      button_div.html("(<input type='radio' name='filterOn' value='num' checked>"+_filter_on_num_text+"</input>)");
+      button_div.html("(<input type='radio' name='filterOn' value='num' checked>"+gs.text.doc.filter.pagenum+"</input>)");
     } else {
-      button_div.html("(<input type='radio' name='filterOn' value='title' checked>"+_filter_on_title_text+"</input>)");
+      button_div.html("(<input type='radio' name='filterOn' value='title' checked>"+gs.text.doc.filter.title+"</input>)");
     }
   } else {
     // should be both options
-    button_div.html("<input type='radio' name='filterOn' value='num' checked>"+_filter_on_num_text+"</input><input type='radio' name='filterOn' value='title'>"+_filter_on_title_text+"</input>");
+    button_div.html("<input type='radio' name='filterOn' value='num' checked>"+gs.text.doc.filter.pagenum+"</input><input type='radio' name='filterOn' value='title'>"+gs.text.doc.filter.title+"</input>");
   }
 }
 
@@ -1367,17 +1363,17 @@ function readyPageForEditing()
 	  if (button_type == "save") {
 	    var saveButton = $("<button>", {"id": "saveButton", "class": "ui-state-default ui-corner-all"});
 	    saveButton.click(save);
-	    saveButton.html(save_button_text);
+	    saveButton.html(gs.text.de.save);
 	    editBar.append(saveButton);
 	  } else if(button_type == "rebuild") {
 	    var rebuildButton = $("<button>", {"id": "rebuildButton", "class": "ui-state-default ui-corner-all"});
 	    rebuildButton.click(rebuildCurrentCollection);
-	    rebuildButton.html(rebuild_button_text);
+	    rebuildButton.html(gs.text.de.rebuild);
 	    editBar.append(rebuildButton);
 	  } else if (button_type == "saveandrebuild") {
 	    var saveAndRebuildButton = $("<button>", {"id": "saveAndRebuildButton", "class": "ui-state-default ui-corner-all"});
 	    saveAndRebuildButton.click(saveAndRebuild);
-	    saveAndRebuildButton.html(save_and_rebuild_button_text);
+	    saveAndRebuildButton.html(gs.text.de.saverebuild);
 	    editBar.append(saveAndRebuildButton);
 
 	  }
@@ -1460,7 +1456,7 @@ function saveMetadataChangesOld() {
   }
 */
   if (metadataChanges.length ==0) {
-    console.log ("... No changes detected. ");
+      console.log(gs.text.de.no_changes);
     return;
   }
 
