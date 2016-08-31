@@ -67,9 +67,11 @@ function expandFacetList(indexName, countSize)
 		}
 	}
 	
-	var link = $(".expandCollapseFacetListLink" + indexName);
-	link.html("See less...");
-	link.attr("href", "javascript:collapseFacetList(\"" + indexName + "\", " + countSize + ");");
+    // the above code has made both see more and see less links display=block, so we need to hide
+    // see more
+    var morelink = $(".expandFacetList" + indexName);
+    morelink.css("display", "none");
+
 }
 
 function collapseFacetList(indexName, countSize)
@@ -85,18 +87,20 @@ function collapseFacetList(indexName, countSize)
 			
 			for(var j = 0; j < items.length; j++)
 			{
-				var regex = new RegExp("expandCollapseFacetList" + indexName, "g");
-				if(j > countSize && ($(items[j]).attr("class") == null || $(items[j]).attr("class").search(regex) == -1))
-				{
-					$(items[j]).css("display", "none");
-				}
+			    if(j > countSize) 
+			    {
+				$(items[j]).css("display", "none");
+			    }
 			}
-			
+		    
 			break;
 		}
 	}
 	
-	var link = $(".expandCollapseFacetListLink" + indexName);
-	link.html("See more...");
-	link.attr("href", "javascript:expandFacetList(\"" + indexName + "\", " + countSize + ");");
+    // the above code has hidden both the see more and see less links.
+    // display the see more one
+    var morelink = $(".expandFacetList" + indexName);
+    morelink.css("display", "block");
+
 }
+
