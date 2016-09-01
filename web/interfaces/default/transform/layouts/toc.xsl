@@ -98,7 +98,7 @@
 								</div>
 								<label for="filterText"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.filter_pages')"/><xsl:text>: </xsl:text></label><span id="filterOnButtons" style="float: right;">...</span><input id="filterText" type="text" style="width: 100%;"/>
 								<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true'">
-								  <a href="javascript:extractFilteredPagesToOwnDocument();"><button id="extractDocButton">Extract these pages to document</button></a>
+								  <a href="javascript:extractFilteredPagesToOwnDocument();"><button id="extractDocButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'de.extract_pages')"/></button></a>
 								</xsl:if>
 								  
 							<!--	<table style="width:100%;"><tbody><tr>
@@ -245,19 +245,19 @@
 					<select id="viewSelection" onchange="changeView();">
 						<xsl:choose>
 							<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
-								<option>Default view</option>
-								<option selected="true">Image view</option>
-								<option>Text view</option>
+								<option><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.default_view')"/></option>
+								<option selected="true"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.image_view')"/></option>
+								<option><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.text_view')"/></option>
 							</xsl:when>
 							<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'text'">
-								<option>Default view</option>
-								<option>Image view</option>
-								<option selected="true">Text view</option>
+								<option><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.default_view')"/></option>
+								<option><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.image_view')"/></option>
+								<option selected="true"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.text_view')"/></option>
 							</xsl:when>
 							<xsl:otherwise>
-								<option selected="true">Default view</option>
-								<option>Image view</option>
-								<option>Text view</option>
+								<option selected="true"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.default_view')"/></option>
+								<option><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.image_view')"/></option>
+								<option><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.text_view')"/></option>
 							</xsl:otherwise>
 						</xsl:choose>
 					</select>
