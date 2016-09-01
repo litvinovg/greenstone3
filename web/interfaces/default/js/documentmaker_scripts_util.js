@@ -166,11 +166,11 @@ function undo()
 
 function enableSaveButtons(enabled) {
   if (enabled) {
-    $("#saveButton, #quickSaveButton").html(gs.text.dse.save_changes);
+    $("#saveButton, #quickSaveButton").html(gs.text.de.save_changes);
     $("#saveButton, #quickSaveButton").removeAttr("disabled");
 
   } else {
-    $("#saveButton, #quickSaveButton").html(gs.text.dse.saving + "...");
+    $("#saveButton, #quickSaveButton").html(gs.text.de.saving + "...");
     $("#saveButton, #quickSaveButton").attr("disabled", "disabled");
    
   }
@@ -193,7 +193,7 @@ function save() {
 
 function rebuildCurrentCollection() {
 
-  console.log("rebuilding collection");
+  console.log(gs.text.de.rebuilding_collection);
   enableSaveButtons(false);
   var collection = gs.cgiParams.c;
 
@@ -275,7 +275,7 @@ function saveAndRebuild(rebuild)
 			}
 			ajax.send("a=g&rt=r&s=DocumentExecuteTransaction&s1.transactions=" + request);
 		}
-	}
+	} // end sendBuildRequest definition
 
   var metadataChanges = new Array();
   if (_deletedMetadata.length > 0) {
@@ -426,7 +426,7 @@ function buildCollections(collections, documents, callback)
 	var buildFunction = function()
 	{
 		var ajax = new gs.functions.ajaxRequest();
-		ajax.open("GET", gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=" + buildOperation + "&s1.collection=" + collections[counter] + docs);
+		ajax.open("GET", gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=" + buildOperation + "&s1.incremental=true&s1.collection=" + collections[counter] + docs);
 		ajax.onreadystatechange = function()
 		{
 			if(ajax.readyState == 4 && ajax.status == 200)
@@ -753,9 +753,9 @@ function createMetadataElementSelector() {
 	minLength: 0,
 	  source: availableMetadataElements
 	  });
-    metaNameField.attr("title", "Enter a metadata name, or use the down arrow to select one, then click 'Add New Metadata'");
+      metaNameField.attr("title", gs.text.de.enter_meta_dropdwon); //"Enter a metadata name, or use the down arrow to select one, then click 'Add New Metadata'");
   } else {
-metaNameField.attr("title", "Enter a metadata name, then click 'Add New Metadata'");
+      metaNameField.attr("title", gs.text.de.enter_meta_name); //"Enter a metadata name, then click 'Add New Metadata'");
   }
   
   return metaNameField;
@@ -800,13 +800,13 @@ function addFunctionalityToTable(table)
 	table.metaNameField = metaNameField;
 	
 	var addRowButton = $("<button>",{"class": "ui-state-default ui-corner-all", "style": "margin: 5px;"});
-	addRowButton.html(gs.text.dse.add_new_metadata);
+	addRowButton.html(gs.text.de.add_new_metadata);
 	addRowButton.click(function() 
 	{ 
 	        var name = metaNameField.val();
 		if(!name || name == "")
 		{
-			console.log(gs.text.dse.no_value_given);
+			console.log(gs.text.de.no_meta_name_given);
 			return;
 		}
 		
@@ -873,13 +873,13 @@ function createTopMenuBar()
 	var metadataListCell = document.createElement("TD");
 	
 	var metadataListLabel = document.createElement("SPAN");
-	metadataListLabel.innerHTML = "Visible metadata: ";
+    metadataListLabel.innerHTML = gs.text.de.visible_metadata; //"Visible metadata: ";
 	var metadataList = document.createElement("SELECT");
 	metadataList.setAttribute("id", "metadataSetList");
 	metadataList.onchange = onVisibleMetadataSetChange;
 	var allMetadataOption = document.createElement("OPTION");
 	metadataList.appendChild(allMetadataOption);
-	allMetadataOption.innerHTML = "All";
+    allMetadataOption.innerHTML = gs.text.de.all_metadata; // "All";
 	metadataListCell.appendChild(metadataListLabel);
 	metadataListCell.appendChild(metadataList);
 
@@ -899,14 +899,14 @@ function createTopMenuBar()
 
 	//The "Save changes" button
 	var saveButton = document.createElement("BUTTON");
-	saveButton.innerHTML = gs.text.dse.save_changes;
+	saveButton.innerHTML = gs.text.de.save_changes;
 	saveButton.setAttribute("onclick", "saveAndRebuild();");
 	saveButton.setAttribute("id", "saveButton");
 	saveCell.appendChild(saveButton);
 	
 	//The "Undo" button
 	var undoButton = document.createElement("BUTTON");
-	undoButton.innerHTML = "Undo";
+    undoButton.innerHTML = gs.text.dse.undo; //"Undo";
 	undoButton.setAttribute("onclick", "undo();");
 	undoCell.appendChild(undoButton);
 
