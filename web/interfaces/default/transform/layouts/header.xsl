@@ -351,7 +351,7 @@
 												.attr("href", gs.xsltParams.library_name + "/admin/AccountSettings?s1.username=</xsl:text><xsl:value-of select="/page/pageRequest/userInformation/@username"/><xsl:text disable-output-escaping="yes">");
 											var settingsButton = $("&lt;LI&gt;")
 												.css("padding", "3px")
-												.html("Account settings")
+												.html("</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'menu.account_settings')"/><xsl:text disable-output-escaping="yes">")
 												.addClass("ui-state-default");
 											settingsLink.append(settingsButton);
 											
@@ -359,7 +359,7 @@
 												.attr("href", "javascript:;");
 											var editingButton = $("&lt;LI&gt;")
 												.css("padding", "3px")
-												.html((gs.userInformation.editEnabled == "true") ? "Disable edit mode" : "Enable edit mode")
+												.html((gs.userInformation.editEnabled == "true") ? "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'menu.disable_edit_mode')"/><xsl:text disable-output-escaping="yes">" : "</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'menu.enable_edit_mode')"/><xsl:text disable-output-escaping="yes">")
 												.addClass("ui-state-default")
 												.click(function()
 												{
@@ -387,7 +387,7 @@
 												.attr("href", url + (hasQueryString ? "&amp;" : "?") + "logout=" + (hashPart ? hashPart : ""));
 											var logoutButton = $("&lt;LI&gt;")
 												.css("padding", "3px")
-												.html("Logout")
+												.html("</xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'menu.logout')"/><xsl:text disable-output-escaping="yes">")
 												.addClass("ui-state-default");
 											logoutLink.append(logoutButton);
 
@@ -633,7 +633,7 @@
 	
 	<xsl:template name="map-scripts">
 		<meta content="initial-scale=1.0, user-scalable=no" name="viewport"/>
-		<script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"><xsl:text> </xsl:text></script>
+		<script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCofVTps3xHfMvIcTMHqYMMxe3xXfkAxnI" type="text/javascript"><xsl:text> </xsl:text></script>
 		<script src="interfaces/{$interface_name}/js/map-scripts.js" type="text/javascript"><xsl:text> </xsl:text></script>
 		<script type="text/javascript">$(window).load(initializeMapScripts);</script>
 	</xsl:template>
