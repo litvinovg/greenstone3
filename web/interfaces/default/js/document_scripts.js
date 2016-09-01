@@ -410,7 +410,7 @@ function retrieveFullTableOfContentsSuccess(newTOCElem)
     var newTOC = newTOCElem.substring(tocStart, tocEnd);
     
     //Add the "Expand document"/"Collapse document" links
-    newTOC = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">Expand document</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">Collapse document</a></td></tr></table>" + newTOC;
+    newTOC = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">"+gs.text.doc.expand_doc+"</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">"+gs.text.doc.collapse_doc+"</a></td></tr></table>" + newTOC;
     
     //Collapse the TOC
     newTOC = newTOC.replace(/display:block/g, "display:none");
@@ -624,7 +624,7 @@ function retrieveTableOfContentsAndTitles()
 function addExpandContractButtons() 
 {
     var tableOfContents = $("#tableOfContents");
-    var table = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">Expand document</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">Collapse document</a></td></tr></table>" ;
+    var table = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">"+gs.text.doc.expand_doc+"</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">"+gs.text.doc.collapse_doc+"</a></td></tr></table>" ;
     
    tableOfContents.prepend(table);
 
@@ -1238,8 +1238,8 @@ function addEditMetadataLink(cell)
 	var newCell = $("<td>", {"style": "font-size:0.7em; padding:0px 10px", "class": "editMetadataButton"});
 	var linkSpan = $("<span>", {"class": "ui-state-default ui-corner-all", "style": "padding: 2px; float:left;"});
 	
-	var linkLabel = $("<span>edit metadata</span>");	
-	var linkIcon = $("<span>", {"class": "ui-icon ui-icon-folder-collapsed"});
+        var linkLabel = $("<span>"+gs.text.de.edit_metadata+"</span>");
+ 	var linkIcon = $("<span>", {"class": "ui-icon ui-icon-folder-collapsed"});
 	newCell.linkIcon = linkIcon;
 	newCell.linkLabel = linkLabel;
 	
@@ -1257,7 +1257,7 @@ function addEditMetadataLink(cell)
 	{
 		if(metaTable.css("display") == "none")
 		{
-			linkLabel.html("hide metadata");
+		    linkLabel.html(gs.text.de.hide_metadata);
 			linkIcon.attr("class", "ui-icon ui-icon-folder-open");
 			metaTable.css("display", "block");
 			metaTable.metaNameField.css("display", "inline");
@@ -1265,7 +1265,7 @@ function addEditMetadataLink(cell)
 		}
 		else
 		{
-			linkLabel.html("edit metadata");
+		    linkLabel.html(gs.text.de.edit_metadata);
 			linkIcon.attr("class", "ui-icon ui-icon-folder-collapsed");
 			metaTable.css("display", "none");
 			metaTable.metaNameField.css("display", "none");
@@ -1287,12 +1287,12 @@ function setEditingFeaturesVisible(visible)
 {
 	if(visible)
 	{
-		$("#editContentButton").html("Hide editor");
+	    $("#editContentButton").html(gs.text.de.hide_editor); 
 		$("#editContentButtonDiv").attr("class", "ui-state-default ui-corner-all");
 	}
 	else
 	{
-		$("#editContentButton").html("Edit content");
+	    $("#editContentButton").html(gs.text.de.edit_content); 
 		$("#editContentButtonDiv").attr("class", "");
 	}
 	
@@ -1302,7 +1302,7 @@ function setEditingFeaturesVisible(visible)
 	$(".editMetadataButton").each(function()
 	{
 		$(this).css("display", visibility);
-		$(this.linkLabel).html("edit metadata");
+	    $(this.linkLabel).html(gs.text.de.edit_metadata); 
 		$(this.linkIcon).attr("class", "ui-icon ui-icon-folder-collapsed");
 	});
 	
@@ -1321,7 +1321,7 @@ function setEditingFeaturesVisible(visible)
    a different set of metadata sets 
   Use in conjunction with the dynamic_metadata_set_list variable. */
 function setStaticMetadataSets(list) {
-  addOptionToList(list, "All", "All");
+  addOptionToList(list, "All", gs.text.de.all_metadata);
 }
 
 function readyPageForEditing()
@@ -1344,7 +1344,7 @@ function readyPageForEditing()
 		return;
 	}
 
-	$("#editContentButton").html("Hide Editor");
+    $("#editContentButton").html(gs.text.de.hide_editor);
 	//wait for 0.5 sec to let ckeditor up 
 	//setTimeout(function(){ $(".sectionText").each(function(){addEditableState(this,editableInitStates);}); }, 500);	
 	var editBar = $("#editBarLeft");
@@ -1353,7 +1353,7 @@ function readyPageForEditing()
 	setStaticMetadataSets(visibleMetadataList);
 
 	var metadataListLabel = $("<span>", {"id": "metadataListLabel", "style": "margin-left:20px;"});
-	metadataListLabel.html("Visible metadata: ");
+    metadataListLabel.html(gs.text.de.visible_metadata); 
 	editBar.append(metadataListLabel);
 	editBar.append(visibleMetadataList);
 	visibleMetadataList.change(onVisibleMetadataSetChange);
