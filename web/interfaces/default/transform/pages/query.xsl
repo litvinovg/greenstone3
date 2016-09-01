@@ -119,8 +119,11 @@
 								</li>
 							</xsl:for-each>
 							<xsl:if test="count(count) > $countSize">
-								<li class="expandCollapseFacetList{$indexShortName}">
-									<a class="expandCollapseFacetListLink{$indexShortName}" href="javascript:expandFacetList('{$indexShortName}', {$countSize});">See more...</a>
+								<li class="expandFacetList{$indexShortName}">
+									<a class="expandFacetListLink{$indexShortName}" href="javascript:expandFacetList('{$indexShortName}', {$countSize});"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.facet.more')"/></a>
+								</li>
+								<li class="collapseFacetList{$indexShortName}" style="display: none;">
+									<a  class="collapseFacetListLink{$indexShortName}" href="javascript:collapseFacetList('{$indexShortName}', {$countSize});"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.facet.less')"/></a>
 								</li>
 							</xsl:if>
 						</ul>
@@ -427,7 +430,7 @@
 				<xsl:when test="/page/pageRequest/paramList/param[@name='s1.hitsPerPage']">
 					<xsl:value-of select="/page/pageRequest/paramList/param[@name='s1.hitsPerPage']/@value" />
 				</xsl:when>
-				<xsl:when test="$usesS1 = 'true' and /page/pageResponse/service/paramList/param[@name='hitsPerPage']">
+				<xsl:when test="/page/pageResponse/service/paramList/param[@name='hitsPerPage']">
 				  <xsl:value-of select="/page/pageResponse/service/paramList/param[@name='hitsPerPage']/@default" />
 				  </xsl:when>
 				<xsl:otherwise><xsl:value-of select="count(/page/pageResponse/documentNodeList/documentNode)"/></xsl:otherwise>
@@ -453,7 +456,7 @@
 				</td>
 				<td id="prevTD">
 					<xsl:if test="$currentPage != 1">
-						<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/@subaction}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage - 1}&amp;qs={/page/pageRequest/paramList/param[@name='qs']/@value}">Previous</a>
+						<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/@subaction}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage - 1}&amp;qs={/page/pageRequest/paramList/param[@name='qs']/@value}"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.results.previous')"/></a>
 					</xsl:if>
 				</td>
 
@@ -506,7 +509,7 @@
 				<!-- Next button -->
 				<td id="nextTD">
 					<xsl:if test="$docsPerPage &gt; 0 and ($currentPage * $docsPerPage + 1) &lt; $docMax">
-						<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/paramList/param[@name = 'sa']/@value}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage + 1}&amp;qs={/page/pageRequest/paramList/param[@name='qs']/@value}">Next</a>
+						<a href="{$library_name}?a=q&amp;sa={/page/pageRequest/paramList/param[@name = 'sa']/@value}&amp;c={$collName}&amp;s={/page/pageResponse/service/@name}&amp;rt=rd&amp;{$startPageName}={$currentPage + 1}&amp;qs={/page/pageRequest/paramList/param[@name='qs']/@value}"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.results.next')"/></a>
 					</xsl:if>
 				</td>
 				<td id="nextArrowTD">
