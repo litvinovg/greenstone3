@@ -70,8 +70,8 @@
 				<xsl:call-template name="documentNodeText"/>
 			</div>
 		</div>
-	</xsl:template>
-	
+	</xsl:template>	
+
 	<xsl:template name="sectionHeading">
 		<xsl:call-template name="sectionTitle"/>
 	</xsl:template>
@@ -245,6 +245,7 @@
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/hierarchy.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript">
 				<xsl:text disable-output-escaping="yes">
+
 					$(window).load(function()
 					{
 						if(gs.cgiParams.docEdit == "1")
@@ -270,6 +271,7 @@
 	<xsl:template match="/page/pageResponse/document">
 	  <xsl:if test="$bookswitch = 'off'">
 	  <xsl:call-template name="javascriptForDocumentView"/>
+	  <gslib:langfrag name="doc"/>
 	    <xsl:if test="/page/pageResponse/collection[@name = $collName]/metadataList/metadata[@name = 'tidyoption'] = 'tidy'">
 	      <script type="text/javascript">
 		<xsl:text disable-output-escaping="yes">
@@ -288,6 +290,7 @@
 	    <xsl:call-template name="javascriptForDocumentEditing"/>
 	    <gsf:metadata name="all"/>
 	    <gslib:langfrag name="dse"/>
+	    <gslib:langfrag name="de"/>
 	  </xsl:if>
 
 		<xsl:if test="$bookswitch = 'off'">
@@ -337,7 +340,7 @@
 			<!-- we want to do this stuff even if docType is simple or paged. Don't want to just set dt=hierarchy as that gives other unnecessary stuff-->
 			<!-- This is the first choice from wrappedDocument template-->
 			<xsl:when test="$canDoEditing = 'true' and /page/pageRequest/paramList/param[@name='docEdit']/@value = '1'">
-				<div id="gs-document">
+				<div id="gs-document" style="width: 67%">
 				  <xsl:call-template name="documentPre"/>
 				  <div id="gs-document-text" class="documenttext" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
 				    <xsl:choose>
@@ -450,7 +453,7 @@
 				  <!-- edit structure button -->
 				  <!-- comment this out as its not working -->
 				<!--	<div style="margin:5px;" class="ui-state-default ui-corner-all">
-						<a style="padding: 3px; text-decoration:none;" href="{$library_name}?a=g&amp;sa=documentbasket&amp;c=&amp;s=DisplayDocumentList&amp;rt=r&amp;p.c={/page/pageResponse/collection/@name}&amp;docToEdit={/page/pageResponse/document/documentNode/@nodeID}"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.edit_structure')"/></a>
+						<a style="padding: 3px; text-decoration:none;" href="{$library_name}?a=g&amp;sa=documentbasket&amp;c=&amp;s=DisplayDocumentList&amp;rt=r&amp;p.c={/page/pageResponse/collection/@name}&amp;docToEdit={/page/pageResponse/document/documentNode/@nodeID}"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'dse.edit_structure')"/></a>
 					</div>-->
 					<!-- edit content button -->
 					<div style="margin:5px;" class="ui-state-default ui-corner-all">
@@ -474,10 +477,10 @@
 							</xsl:attribute>
 							<xsl:choose>
 								<xsl:when test="/page/pageRequest/paramList/param[@name = 'docEdit']/@value = '1'">
-									<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.hide_editor')"/>
+									<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'de.hide_editor')"/>
 								</xsl:when>
 								<xsl:otherwise>
-									<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.edit_content')"/>
+									<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'de.edit_content')"/>
 								</xsl:otherwise>
 							</xsl:choose>
 						</a>
@@ -706,7 +709,7 @@
 	<xsl:template name="mapPlacesNearHere">
 		<xsl:if test="metadataList/metadata[@name = 'Latitude'] and metadataList/metadata[@name = 'Longitude']">
 			<div style="background:#BBFFBB; padding: 5px; margin:0px auto; width:890px;">
-				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.maps.nearby_docs')"/>
+				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.map_nearby_docs')"/>
 				<img id="nearbyDocumentsToggle" style="margin-left:5px;" src="interfaces/{$interface_name}/images/expand.png">
 					<xsl:attribute name="onclick">
 						<xsl:text>performDistanceSearch('</xsl:text>
