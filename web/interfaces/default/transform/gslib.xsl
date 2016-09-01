@@ -614,9 +614,10 @@ _httpjava_ {_httpweb_/java}
   </xsl:template>
   
   <!-- query page ............................................................................ -->
-  <xsl:template name="indexName">
+<!--  <xsl:template name="indexName">
     <xsl:value-of select="/page/pageResponse/service/displayItem[@name='name']"/>
   </xsl:template>
+
   <xsl:template name="queryPageCollectionName">
     <xsl:choose>
       <xsl:when test="/page/pageResponse/collection">
@@ -624,7 +625,7 @@ _httpjava_ {_httpweb_/java}
       </xsl:when>
       <xsl:otherwise>Cross-Collection</xsl:otherwise>
     </xsl:choose>
-  </xsl:template>
+  </xsl:template>-->
   
   <!--
 BERRY BASKET TEMPLATES
@@ -635,10 +636,10 @@ berry basket function to the site
   <xsl:template name="berryBasket">
     <xsl:if test="$berryBasketOn">
       <div id="berrybasket" class="hide">
-        <span>Berry Basket</span>
+        <span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'berry.title')"/><xsl:text> </xsl:text></span>
         <span id="berryBasketExpandCollapseLinks" style="display: none;">
-          <a id="berryBasketExpandLink" href="javascript:showBasket()">Expand</a>
-          <a id="berryBasketCollapseLink" style="display: none;" href="javascript:hideBasket()">Collapse</a>
+          <a id="berryBasketExpandLink" href="javascript:showBasket()"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'basket.expand')"/></a>
+          <a id="berryBasketCollapseLink" style="display: none;" href="javascript:hideBasket()"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'basket.collapse')"/></a>
         </span>
         <div id="baskethandle">
           <span>
@@ -649,8 +650,11 @@ berry basket function to the site
           <span>
             <xsl:text> </xsl:text>
           </span>
+	</div>
+	<div><a id="berryFullViewLink" style="display: none;"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'berry.full')"/></a></div>
+	<div id="berryHelpMsg"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'berry.help')"/></div>
         </div>
-      </div>
+     
     </xsl:if>
   </xsl:template>
   
@@ -658,10 +662,10 @@ berry basket function to the site
 	<xsl:template name="documentBasket">
 		<xsl:if test="$documentBasketOn and /page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true' and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 			<div id="documentbasket" class="hide">
-				<span>Document Basket</span>
+				<span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'db.doc_basket')"/><xsl:text> </xsl:text></span>
 				<span id="documentBasketExpandCollapseLinks" style="display: none;">
-					<a id="documentBasketExpandLink" href="javascript:showDocumentBox()">Expand</a>
-					<a id="documentBasketCollapseLink" style="display: none;" href="javascript:hideDocumentBox()">Collapse</a>
+					<a id="documentBasketExpandLink" href="javascript:showDocumentBox()"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'basket.expand')"/></a>
+					<a id="documentBasketCollapseLink" style="display: none;" href="javascript:hideDocumentBox()"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'basket.collapse')"/></a>
 				</span>
 				<div id="documenthandle">
 					<span>
@@ -674,7 +678,7 @@ berry basket function to the site
 					</span>
 				</div>
 				<div>
-					<a href="javascript:clearBasket();">Clear basket</a>
+					<a href="javascript:clearBasket();"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'basket.clear')"/></a>
 				</div>
 			</div>
 		</xsl:if>
