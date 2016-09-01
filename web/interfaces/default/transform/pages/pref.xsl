@@ -140,8 +140,8 @@
 							</div>
 							<div class="paramValue">
 								<select name="formatedit">
-									<option value="on"><xsl:if test="$formatedit='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.formatedit.on')"/></option>
-									<option value="off"><xsl:if test="$formatedit='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.formatedit.off')"/></option>
+									<option value="on"><xsl:if test="$formatedit='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.on')"/></option>
+									<option value="off"><xsl:if test="$formatedit='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.off')"/></option>
 								</select>
 							</div>
 							<br class="clear"/>
@@ -157,8 +157,8 @@
 					</div>
 					<div class="paramValue">
 						<select name="berrybasket">
-							<option value="on"><xsl:if test="$berrybasket='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.on')"/></option> 
-							<option value="off"><xsl:if test="$berrybasket='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.off')"/></option>
+							<option value="on"><xsl:if test="$berrybasket='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.on')"/></option> 
+							<option value="off"><xsl:if test="$berrybasket='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.off')"/></option>
 						</select>
 					</div>
 					<br class="clear"/>
@@ -168,11 +168,11 @@
 				<xsl:if test="/page/pageRequest/userInformation and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 					<div id="documentmakerprefs">
 						<xsl:variable name="documentbasket"><xsl:choose><xsl:when test="/page/pageRequest/paramList/param[@name='documentbasket']"><xsl:value-of select="/page/pageRequest/paramList/param[@name='documentbasket']/@value"/></xsl:when><xsl:otherwise>off</xsl:otherwise></xsl:choose></xsl:variable>
-						<div class="paramLabel">Document basket</div>
+						<div class="paramLabel"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.documentbasket')"/></div>
 						<div class="paramValue">
 							<select name="documentbasket">
-								<option value="on"><xsl:if test="$documentbasket='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.on')"/></option> 
-								<option value="off"><xsl:if test="$documentbasket='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.off')"/></option>
+								<option value="on"><xsl:if test="$documentbasket='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.on')"/></option> 
+								<option value="off"><xsl:if test="$documentbasket='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.off')"/></option>
 							</select>
 						</div>
 						<br class="clear"/>
@@ -199,8 +199,8 @@
 					</div>
 					<div class="paramValue">
 						<select name="s1.book">
-							<option value="on"><xsl:if test="$book='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.on')"/></option> 
-							<option value="off"><xsl:if test="$book='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.berrybasket.off')"/></option>
+							<option value="on"><xsl:if test="$book='on'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.on')"/></option> 
+							<option value="off"><xsl:if test="$book='off'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref.off')"/></option>
 						</select>
 					</div>
 					<br class="clear"/>
@@ -220,8 +220,8 @@
 											{title:"Greenstone Default", name:"custom-theme0", icon:"theme_90_greenstone.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/main/jquery-ui-1.8.16.custom.css"},
 											{title:"Greenstone Custom 1", name:"custom-theme1", icon:"theme_90_start_menu.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_1/jquery-ui-1.8.16.custom.css"},
 											{title:"Greenstone Custom 2", name:"custom-theme2", icon:"theme_90_mint_choco.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_2/jquery-ui-1.8.16.custom.css"},
-											{title:"Greenstone Custom 3", name:"custom-theme3", icon:"theme_90_trontastic.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_3/jquery-ui-1.8.16.custom.css"}
-										]
+
+]
 									});
 								});
 							</xsl:text>
