@@ -270,10 +270,12 @@ public class XMLTransformer
 				String doctype_system = props.getProperty(OutputKeys.DOCTYPE_SYSTEM);
 				
 				if(doctype_public == null) {
-				    doctype_public = ""; // or default to PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"?
+				  //doctype_public = ""; // or default to PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"?
+				  doctype_public = "-//W3C//DTD HTML 4.01 Transitional//EN";
 				}
 				if(doctype_system == null) {
-				    doctype_system = ""; // or default to "http://www.w3.org/TR/html4/loose.dtd"?
+				  //doctype_system = ""; // or default to "http://www.w3.org/TR/html4/loose.dtd"?
+				  doctype_system = "http://www.w3.org/TR/html4/loose.dtd";
 				}
 
 				Document docDocTypeFromTransformer = XMLConverter.newDOM(outputMethod, doctype_public, doctype_system);
