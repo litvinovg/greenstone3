@@ -391,14 +391,18 @@
 	</if>
 
 	<if><bool><equals arg1="${os.bin.dir}" arg2="darwin"/></bool>
-		<!--<if><bool><isset property="env.DYLD_LIBRARY_PATH"/></bool>
-			<property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib:${env.DYLD_LIBRARY_PATH}&quot;"/>
-		<else>
-			<property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib&quot;"/>
-		</else>
-		</if>
-		  -->
-		<property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${env.DYLD_LIBRARY_PATH}&quot;"/>
+	  <!--<if><bool><equals arg1="${env.THIS_MACHINE}" arg2="gilda"/></bool>-->
+	  <if><bool><isset property="env.THIS_MACHINE"/></bool>
+	    <if><bool><isset property="env.DYLD_LIBRARY_PATH"/></bool>
+	      <property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib:${env.DYLD_LIBRARY_PATH}&quot;"/>
+	      <else>
+		<property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib&quot;"/>
+	      </else>
+	    </if>
+	    <else>
+	      <property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${env.DYLD_LIBRARY_PATH}&quot;"/>
+	    </else>
+	  </if>
 	<else>
 		<if><bool><isset property="env.LD_LIBRARY_PATH"/></bool>
 			<property name="ldlpath.arg" value="LD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib:${env.LD_LIBRARY_PATH}&quot;"/>
