@@ -396,10 +396,10 @@
 	    <echo>@@@@## SET-LD-PATH property: ${set.ld.path}</echo>
 	    <if><bool><isset property="env.DYLD_LIBRARY_PATH"/></bool>
 	      <property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib:${env.DYLD_LIBRARY_PATH}&quot;"/>
-	      <echo>@@@@#### DYLD_LIB_PATH: ${env.DYLD_LIBRARY_PATH}</echo>
+	      <echo>@@@@#### DYLD_LIB_PATH: ${ldlpath.arg}</echo>
 	      <else>
 		<property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib&quot;"/>
-		<echo>@@@@#### DYLD_LIB_PATH: ${env.DYLD_LIBRARY_PATH}</echo>
+		<echo>@@@@#### DYLD_LIB_PATH: ${ldlpath.arg}</echo>
 	      </else>
 	    </if>
 	    <else>
