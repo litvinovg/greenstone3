@@ -392,8 +392,8 @@
 
 	<if><bool><equals arg1="${os.bin.dir}" arg2="darwin"/></bool>
 	  <!--<if><bool><equals arg1="${env.THIS_MACHINE}" arg2="gilda"/></bool>-->
-	  <if><bool><isset property="env.THIS_MACHINE"/></bool>
-	    <echo>@@@@## THIS MACHINE: ${env.THIS_MACHINE}</echo>
+	  <if><bool><isset property="set.ld.path"/></bool>
+	    <echo>@@@@## SET-LD-PATH property: ${set.ld.path}</echo>
 	    <if><bool><isset property="env.DYLD_LIBRARY_PATH"/></bool>
 	      <property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib:${env.DYLD_LIBRARY_PATH}&quot;"/>
 	      <else>
@@ -401,7 +401,7 @@
 	      </else>
 	    </if>
 	    <else>
-	      <echo>@@@@## THIS MACHINE NOT SET</echo>
+	      <echo>@@@@## SET-LD-PATH property NOT SET</echo>
 	      <property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${env.DYLD_LIBRARY_PATH}&quot;"/>
 	    </else>
 	  </if>
@@ -708,8 +708,12 @@
 
   <target name="install-common-src" depends="init" 
     description="Install (configure, compile, install) only the common-src package (shared code from Greenstone 2). " >
-    <antcall target="configure-common-src"/>
-    <antcall target="compile-common-src"/>
+    <antcall target="configure-common-src">
+      <param name="set.ld.path" value="true"/>
+    </antcall>
+    <antcall target="compile-common-src">
+      <param name="set.ld.path" value="true"/>
+    </antcall>
     <antcall target="install-auxiliary-jar-files"/>
     <antcall target="install-jni-files"/>
   </target>
