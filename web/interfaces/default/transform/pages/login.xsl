@@ -28,7 +28,7 @@
 			<table id="loginTable">
 				<tr><td><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.username')"/>: </td><td><input type="text" name="username"/></td></tr>
 				<tr><td><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.password')"/>: </td><td><input type="password" name="password"/></td></tr>
-				<tr><td><input type="submit" value="Login"/></td><td><xsl:text> </xsl:text></td></tr>
+				<tr><td><input type="submit"><xsl:attribute name="value"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_b')"/></xsl:attribute></input></td><td><xsl:text> </xsl:text></td></tr>
 			</table>
 		</form>
 		<script type="text/javascript">
