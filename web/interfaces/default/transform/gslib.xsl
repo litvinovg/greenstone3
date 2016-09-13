@@ -304,12 +304,11 @@
   <xsl:template name="registerLink">
     <xsl:for-each select="//serviceList/service[@type='authen']">
 		<div class="paramLabel">
-			<a href="{$library_name}/admin/Register">
-				<xsl:text>Register</xsl:text>
+			<a href="{$library_name}/admin/Register"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.register')"/>
 			</a>
 		</div>
 		<div class="paramValue">
-			<xsl:text>Register as a new user</xsl:text>
+<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.register_as_new')"/>
 		</div>
     </xsl:for-each>
   </xsl:template>
