@@ -440,7 +440,9 @@
 		<xsl:variable name="level">
 		  <xsl:call-template name="documentLevel"/>
 		</xsl:variable>
-
+		
+		<!-- we only need this if number of docs > docsperpage -->
+		<xsl:if test="$docMax &gt; $docsPerPage">
 		<table id="searchResultNavTable">
 			<tr>
 				<xsl:variable name="startPageName">
@@ -475,30 +477,14 @@
 						</xsl:choose>
 					</xsl:variable>
 					<xsl:variable name="levelString">
-						<xsl:choose>
-							<xsl:when test="$docMax = 1">
-								<xsl:text> </xsl:text>
-								<xsl:choose>
-									<xsl:when test="$level = 'Doc'">
-										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document')"/>
-									</xsl:when>
-									<xsl:otherwise>
-										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.section')"/>
-									</xsl:otherwise>
-								</xsl:choose>
-							</xsl:when>
-							<xsl:otherwise>
-								<xsl:text> </xsl:text>
-								<xsl:choose>
-									<xsl:when test="$level = 'Doc'">
-										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document_plural')"/>
-									</xsl:when>
-									<xsl:otherwise>
-										<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.section_plural')"/>
-									</xsl:otherwise>
-								</xsl:choose>
-							</xsl:otherwise>
-						</xsl:choose>
+					  <xsl:choose>
+					    <xsl:when test="$level = 'Doc'">
+					      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.document_plural')"/>
+					    </xsl:when>
+					    <xsl:otherwise>
+					      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.section_plural')"/>
+					    </xsl:otherwise>
+					  </xsl:choose>
 					</xsl:variable>
 					<td id="searchResultsStatusBar">
 					        <xsl:variable name="gitArgs" select="concat($startdoc,';', $enddoc, ';', $docMax, ';', $levelString)"/>
@@ -521,6 +507,7 @@
 				</td>
 			</tr>
 		</table>
+		</xsl:if>
 	</xsl:template>
 
 	<xsl:template name="previousArrowImage">
