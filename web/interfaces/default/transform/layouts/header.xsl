@@ -70,7 +70,6 @@
 		
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery.min.js"><xsl:text> </xsl:text></script>
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery-ui-1.10.2.custom/js/jquery-ui-1.10.2.custom.min.js"><xsl:text> </xsl:text></script>
-		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery.themeswitcher.min.js"><xsl:text> </xsl:text></script>
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/jquery.blockUI.js"><xsl:text> </xsl:text></script>
 		<script type="text/javascript" src="interfaces/{$interface_name}/js/ace/ace.js"><xsl:text> </xsl:text></script>
 		
@@ -99,6 +98,12 @@
 		</xsl:if>
 		
 		<xsl:call-template name="setup-gs-variable"/>
+		<xsl:if test="/page/pageRequest/@action ='p' and /page/pageRequest/@subaction='pref'">
+		  <script type="text/javascript">
+		    <xsl:value-of disable-output-escaping="yes" select="util:getInterfaceStringsAsJavascript($interface_name, /page/@lang, 'pref')"/>
+		  </script>
+		  <script type="text/javascript" src="interfaces/{$interface_name}/js/jquery.themeswitcher.min.js"><xsl:text> </xsl:text></script>
+		</xsl:if>
 		<xsl:call-template name="define-js-macro-variables"/>
 
 		<xsl:call-template name="additionalHeaderContent"/>
