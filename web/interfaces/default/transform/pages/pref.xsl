@@ -217,9 +217,9 @@
 									$("#switcher").themeswitcher({
 										imgpath: "interfaces/" + gs.xsltParams.interface_name + "/style/images/",
 										additionalThemes: [
-											{title:"Greenstone Default", name:"custom-theme0", icon:"theme_90_greenstone.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/main/jquery-ui-1.8.16.custom.css"},
-											{title:"Greenstone Custom 1", name:"custom-theme1", icon:"theme_90_start_menu.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_1/jquery-ui-1.8.16.custom.css"},
-											{title:"Greenstone Custom 2", name:"custom-theme2", icon:"theme_90_mint_choco.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_2/jquery-ui-1.8.16.custom.css"},
+											{title:gs.text.pref.theme_default, name:"custom-theme0", icon:"theme_90_greenstone.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/main/jquery-ui-1.8.16.custom.css"},
+											{title:gs.text.pref.theme_custom1, name:"custom-theme1", icon:"theme_90_start_menu.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_1/jquery-ui-1.8.16.custom.css"},
+											{title: gs.text.pref.theme_custom2, name:"custom-theme2", icon:"theme_90_mint_choco.png", url:"interfaces/" + gs.xsltParams.interface_name + "/style/themes/alt_theme_2/jquery-ui-1.8.16.custom.css"},
 
 ]
 									});
