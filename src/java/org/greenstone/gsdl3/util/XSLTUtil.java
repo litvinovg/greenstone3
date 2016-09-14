@@ -770,7 +770,8 @@ public class XSLTUtil
 
 		for (String dictName : new String[] { "interface_" + interface_name, "interface_default", "interface_default2" })
 		{
-			Dictionary dict = new Dictionary(dictName, lang);
+		  // get all the keys from the english dictionary as this is a complete set
+			Dictionary dict = new Dictionary(dictName, "en");
 			Enumeration keys = dict.getKeys();
 			if (keys == null)
 			{
@@ -785,6 +786,7 @@ public class XSLTUtil
 				String key = (String) keys.nextElement();
 				if (key.startsWith(prefixwithdot))
 				{
+				  // get the language dependent value for the key. This will return the english if no value found for the given lang
 					String value = getInterfaceText(interface_name, dictName, lang, key, null);
 
 					outputStr.append(prependToPrefix);
