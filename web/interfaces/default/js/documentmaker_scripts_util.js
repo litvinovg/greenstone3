@@ -841,7 +841,7 @@ function addFunctionalityToTable(table)
 function addRemoveLinkToRow(row)
 {
 	var newCell = $("<td>");
-	var removeLink = $("<a>remove</a>", {"href": "javascript:;"});
+	var removeLink = $("<a>"+gs.text.de.remove+"</a>", {"href": "javascript:;"});
 	removeLink.click(function()
 	{
 		var undo = new Array();
@@ -873,13 +873,13 @@ function createTopMenuBar()
 	var metadataListCell = document.createElement("TD");
 	
 	var metadataListLabel = document.createElement("SPAN");
-    metadataListLabel.innerHTML = gs.text.de.visible_metadata; //"Visible metadata: ";
+    metadataListLabel.innerHTML = gs.text.de.visible_metadata; 
 	var metadataList = document.createElement("SELECT");
 	metadataList.setAttribute("id", "metadataSetList");
 	metadataList.onchange = onVisibleMetadataSetChange;
 	var allMetadataOption = document.createElement("OPTION");
 	metadataList.appendChild(allMetadataOption);
-    allMetadataOption.innerHTML = gs.text.de.all_metadata; // "All";
+    allMetadataOption.innerHTML = gs.text.de.all_metadata; 
 	metadataListCell.appendChild(metadataListLabel);
 	metadataListCell.appendChild(metadataList);
 
@@ -906,7 +906,7 @@ function createTopMenuBar()
 	
 	//The "Undo" button
 	var undoButton = document.createElement("BUTTON");
-    undoButton.innerHTML = gs.text.dse.undo; //"Undo";
+    undoButton.innerHTML = gs.text.dse.undo; 
 	undoButton.setAttribute("onclick", "undo();");
 	undoCell.appendChild(undoButton);
 
