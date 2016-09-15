@@ -317,70 +317,54 @@
 
 			<!-- If there is only one or two search terms then show the expanded information -->
 			<xsl:choose>
-			              <xsl:when test="count(/page/pageResponse/termList/term) &lt; 3">
+			  <xsl:when test="count(/page/pageResponse/termList/term) &lt; 3">
 			    
-			    		<xsl:variable name="qtOneToOne"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termoccurs.1.1')"/></xsl:variable>
-					<xsl:variable name="qtManyToOne"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termoccurs.x.1')"/></xsl:variable>
-					<xsl:variable name="qtManyToMany"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termoccurs.x.x')"/></xsl:variable>
-
-					<xsl:for-each select="/page/pageResponse/termList/term">
-
-
-					        <xsl:variable name="occursTextValue">
-							<xsl:choose>
-								<xsl:when test="@freq = 1"><xsl:value-of select="$qtOneToOne"/></xsl:when>
-								<xsl:when test="@numDocsMatch = 1"><xsl:value-of select="$qtManyToOne"/></xsl:when>
-								<xsl:otherwise><xsl:value-of select="$qtManyToMany"/></xsl:otherwise>
-							</xsl:choose>
-						</xsl:variable>
-						<xsl:variable name="levelText">
-							<xsl:call-template name="documentLevelText">
-								<xsl:with-param name="level" select="$level"/>
-								<xsl:with-param name="numDocsMatched" select="@numDocsMatch"/>
-							</xsl:call-template>
-						</xsl:variable>
-						<span class="termInfo">
-						  <!-- For solr collections, display: 
-						         term x occured y times
-						         term a occured b times
-						       For collections using all other indexers, display: 
-						         term x occurred y times in n sections/documents
-						         term a occurred b times in m sections/docs
-						  -->
-						  <xsl:variable name="gitArg1" select="concat(@name,';', @freq)"/>
-
-							<xsl:choose>
-							  <xsl:when test="@freq = 1">
-							    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termoccurs.1.1',$gitArg1)"/>
-							  </xsl:when>
-							  <xsl:when test="@numDocsMatch = 1">
-							    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termoccurs.x.1',$gitArg1)"/>
-							  </xsl:when>
-							  <xsl:otherwise>
-							    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termoccurs.x.x',$gitArg1)"/>
-							  </xsl:otherwise>
-							</xsl:choose>
-							
-							<!--
-							    <xsl:value-of select="java:org.greenstone.gsdl3.util.XSLTUtil.getInterfaceTextSubstituteArgs($gitArgXXX,$gitArg1)"/>
--->
-						      
-<!--						  
-    <xsl:value-of select="java:org.greenstone.gsdl3.util.XSLTUtil.getInterfaceTextSubstituteArgs($occursTextValue,$gitArg1)"/>
-    -->
-						      
+			    <xsl:for-each select="/page/pageResponse/termList/term">
+			      <xsl:variable name="levelText">
+				<!-- this gets document, section, documents, sections, depending on level and number -->
+				<xsl:call-template name="documentLevelText">
+				  <xsl:with-param name="level" select="$level"/>
+				  <xsl:with-param name="numDocsMatched" select="@numDocsMatch"/>
+				</xsl:call-template>
+			      </xsl:variable>
+			      <span class="termInfo">
 						  
-							<xsl:choose>
-							  <xsl:when test="/page/pageResponse/collection[@type != 'solr']">
-							    <xsl:variable name="gitArg2" select="concat(@numDocsMatch,';',  $levelText)"/>
-							    <xsl:text> </xsl:text><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termSectionFreq', $gitArg2)"/>
-							  </xsl:when>
-							</xsl:choose>
-						</span>
-						<br/>
-					</xsl:for-each>
-				</xsl:when>
-				<xsl:otherwise>
+				<!-- For solr and mg collections, display: 
+				     term x occured y times
+				     term a occured b times
+				     For collections using all other indexers, display: 
+				     term x occurred y times in n sections/documents
+				     term a occurred b times in m sections/docs
+				-->
+				<!-- not all these args are used in every case -->
+				<xsl:variable name="args" select="concat(@name,';', @freq, ';', @numDocsMatch,';',  $levelText)"/>
+				<xsl:choose>
+				  <xsl:when test="@freq = 0">
+				    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termoccurs.0',$args)"/>
+				  </xsl:when>
+				  <xsl:when test="@freq = 1">
+				    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termoccurs.1',$args)"/>
+				  </xsl:when>
+				  <xsl:otherwise> <!-- more than one occurrance -->
+				    <xsl:choose>
+				      <xsl:when test="/page/pageResponse/collection[@type = 'solr'] or /page/pageResponse/collection[@type = 'mg']">
+					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termoccurs.x',$args)"/>
+				      </xsl:when>
+				      <xsl:when test="@numDocsMatch = 1">
+					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termoccurs.x.1',$args)"/>
+				      </xsl:when>
+				      <xsl:otherwise>
+					<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'query.termoccurs.x.x',$args)"/>
+				      </xsl:otherwise>
+				    </xsl:choose>
+				  </xsl:otherwise>
+				</xsl:choose>
+				
+			      </span>
+			      <br/>
+			    </xsl:for-each>
+			  </xsl:when>
+			  <xsl:otherwise>
 					<xsl:for-each select="/page/pageResponse/termList/term">
 						<span style="font-style:italic;">
 							<xsl:value-of select="@name"/>
