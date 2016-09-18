@@ -40,7 +40,11 @@
                 </xsl:for-each>
 	
 	        <div style="clear: both; padding-top: 4px; padding-bottom: 4px;"><hr/></div>
-
+		<xsl:variable name="siteDesc"><gslib:siteDescription/></xsl:variable>
+		<xsl:if test="$siteDesc != ''">
+		  <xsl:value-of select="$siteDesc"/>
+		  <div style="clear: both; padding-top: 4px; padding-bottom: 4px;"><hr/></div>
+		</xsl:if>
 		<gslib:serviceClusterList/>
 
 		<xsl:for-each select="serviceList/service[@type='query']">
