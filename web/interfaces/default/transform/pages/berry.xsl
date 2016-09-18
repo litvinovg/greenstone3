@@ -18,6 +18,7 @@
 
 	<!-- the page content -->
 	<xsl:template match="/page">
+	  <gslib:langfrag name="berry"/>
 		<xsl:variable name="clusterName"><xsl:value-of select="/page/pageRequest/paramList/param[@name='c']/@value"/></xsl:variable>
 		<script type="text/javascript" src="interfaces/default/js/berrybasket/berrycheckout.js"><xsl:text> </xsl:text></script>
 		<script type="text/javascript">
