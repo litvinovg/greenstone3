@@ -294,7 +294,7 @@ public class BerryBasket extends ServiceRack
 		if (metadata != null)
 		{
 			String rootTitle = GSXML.getNodeText(metadata).trim();
-			if (!rootTitle.equals(item.title))
+			if (!rootTitle.equals(item.title) && !rootTitle.equals(""))
 			{
 				item.rootTitle = rootTitle;
 			}
