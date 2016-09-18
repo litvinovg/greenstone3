@@ -25,6 +25,10 @@
     <xsl:value-of select="/page/pageResponse/metadataList/metadata[@name='siteName']"/>
   </xsl:template>
 
+  <xsl:template name="siteDescription">
+    <xsl:value-of select="/page/pageResponse/metadataList/metadata[@name='siteDescription']"/>
+  </xsl:template>
+
   <xsl:template name="siteLink">
     <a href="./{$library_name}">
       <xsl:call-template name="siteName"/>
