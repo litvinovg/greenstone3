@@ -1,10 +1,10 @@
 var docList = new Array();
 var urlonly = false;
 var mailinfo = new Array();
-mailinfo['address'] = "To: ";
-mailinfo['cc'] = "CC: ";
-mailinfo['bcc'] = "Bcc: ";
-mailinfo['subject'] = "Subject: ";
+mailinfo['address'] = gs.text.berry.to; 
+mailinfo['cc'] = gs.text.berry.cc; 
+mailinfo['bcc'] = gs.text.berry.bcc; 
+mailinfo['subject'] = gs.text.berry.subject; 
 var textwin;
 var mailwin;
 
@@ -46,7 +46,7 @@ function navigate(e){
 		var parea =YAHOO.util.Dom.get('pretextarea');
 		urlonly = false;
 		
-		this.value='URL only view';
+	    this.value=gs.text.berry.url_only; 
 		
 		populateUrlsAndMetadata(parea);
 		return;
@@ -59,7 +59,7 @@ function navigate(e){
 		populateUrls(parea);
 		urlonly = true;
 		
-		this.value='URL and Metadata view';
+	    this.value=gs.text.berry.url_and_metadata; 
 		
 		return;
 	}
@@ -113,7 +113,7 @@ function showFullView(){
 	berryCheckoutPageClear();
 
 	if (docList.length == 0){
-		content.appendChild(document.createTextNode("Your berry basket is empty."));
+	    content.appendChild(document.createTextNode(gs.text.berry.empty_basket));
 		return;
 	}
 
@@ -192,7 +192,7 @@ function showTextView(){
 
 	berryCheckoutPageClear();
 	if (docList.length == 0){
-		content.appendChild(document.createTextNode("Your berry basket is empty."));
+	    content.appendChild(document.createTextNode(gs.text.berry.empty_basket)); 
 		return;
 	}
 	buildPreview(content);
@@ -240,7 +240,7 @@ function getEmailContent(content){
 	input.setAttribute("id", 'sendmail');
 	input.setAttribute("class", "sendbutton");
 	input.setAttribute("type", "button");
-	input.setAttribute("value", "send");
+	input.setAttribute("value", gs.text.berry.send);
 	content.appendChild(input);
 }
 
@@ -251,7 +251,7 @@ function showEmail(){
 	berryCheckoutPageClear();
 
 	if (docList.length == 0){
-		content.appendChild(document.createTextNode("Your berry basket is empty."));
+	    content.appendChild(document.createTextNode(gs.text.berry.empty_basket));
 		return;
 	}
 
@@ -297,7 +297,7 @@ function showEmail(){
 	input.setAttribute("id", 'sendmail');
 	input.setAttribute("class", "sendbutton");
 	input.setAttribute("type", "button");
-	input.setAttribute("value", "send");
+	input.setAttribute("value", gs.text.berry.send);
 	content.appendChild(input);
 	
 	YAHOO.util.Event.addListener(input, 'click', navigate);
@@ -312,11 +312,11 @@ function buildPreview(parent){
 	cb.id = 'urlcheck';
 	if (urlonly)
 	{
-		cb.value='URL and Metadata view';
+	    cb.value=gs.text.berry.url_and_metadata; 
 	}
 	else
 	{
-		cb.value='URL only view';
+	    cb.value=gs.text.berry.url_only;
 	}
 
 	YAHOO.util.Event.addListener(cb, 'click', navigate);
@@ -381,9 +381,22 @@ function populateUrlsAndMetadata(parea){
 		var doc = docList[i];
 		var url =root_url+"?a=d&c="+doc['collection']+"&d="+doc['name']+"\n";
 		var metadata = "";
-		for (var metaItem in doc){
-			metadata += metaItem+": "+ doc[metaItem]+"\n";
-		}
+	    if (doc['title']) {
+		metadata += gs.text.berry.doc_title+": "+doc['title']+"\n";
+	    }
+	    if (doc['root_title']) {
+		metadata += gs.text.berry.doc_root_title+": "+doc['root_title']+"\n";
+
+	    }
+	    if (doc['name']) {
+		metadata += gs.text.berry.doc_name+": "+doc['name']+"\n";
+	    }
+	    if (doc['collection']) {
+		metadata += gs.text.berry.doc_collection+": "+doc['collection']+"\n";
+	    }
+	    if (doc['date']) {
+		metadata += gs.text.berry.doc_date+": "+doc['date']+"\n";
+	    }
 		fulltext +=url+metadata+"\n";
 	}
 
@@ -411,10 +424,10 @@ function sendMail(){
 	var callback = {
 		success: function(o) {
 			var result = o.responseText;
-			alert("Sending mail Succeeded");
+		    alert(gs.text.berry.send_success); 
 		} ,
 		failure: function(o) {
-			alert("Sending mail falied");
+		    alert(gs.text.berry.send_fail); 
 		}
 	}
 	YAHOO.util.Connect.asyncRequest(request_type , url , callback, postdata);
