@@ -365,6 +365,10 @@ body.dAction #gs_banner h2 {
 	padding-bottom: 20px;
 }
 
+#quickSearch {
+    float: right;
+}
+
 #quicksearcharea {
  	float: right;
 	text-align: right;
