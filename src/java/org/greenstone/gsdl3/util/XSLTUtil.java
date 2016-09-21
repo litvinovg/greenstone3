@@ -416,7 +416,7 @@ public class XSLTUtil
 		{
 			DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
-			CollectionClassLoader class_loader = new CollectionClassLoader(XSLTUtil.class.getClassLoader(), GSFile.siteHome(GlobalProperties.getGSDL3Home(), site_name), collection);
+			CustomClassLoader class_loader = new CustomClassLoader(XSLTUtil.class.getClassLoader(), GSFile.collectionResourceDir(GSFile.siteHome(GlobalProperties.getGSDL3Home(), site_name), collection));
 			Dictionary dict = new Dictionary(collection, lang, class_loader);
 			String result = dict.get(key, args);
 			if (result != null)
