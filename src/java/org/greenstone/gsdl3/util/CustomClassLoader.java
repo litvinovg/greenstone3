@@ -1,5 +1,5 @@
 /*
- *    CollectionClassLoader.java
+ *    CustomClassLoader.java
  *    Copyright (C) 2005 New Zealand Digital Library, http://www.nzdl.org
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -24,18 +24,17 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Looks for classes/resources in the collection resources directory
+ * Looks for classes/resources in the specified resources_dir directory
  */
-public class CollectionClassLoader extends ClassLoader
+public class CustomClassLoader extends ClassLoader
 {
 
 	String base_dir = null;
 
-	public CollectionClassLoader(ClassLoader parent, String site_home, String collection_name)
+  public CustomClassLoader(ClassLoader parent, String resources_dir)
 	{
 		super(parent);
-		// 'resources directory' in the collection
-		this.base_dir = GSFile.collectionResourceDir(site_home, collection_name);
+		this.base_dir = resources_dir; 
 	}
   
   // Resource Bundle loading with a class loader will call getResource(). 
