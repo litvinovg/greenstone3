@@ -1,4 +1,14 @@
 <siteConfig xmlns:gsf='http://www.greenstone.org/greenstone3/schema/ConfigFormat' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>
+	<metadataList xmlns:gsf="http://www.greenstone.org/greenstone3/schema/MetadataFormat" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+		<metadata name="siteAdmin">admin@example.com</metadata>
+	</metadataList>
+	<displayItemList>
+		<displayItem name="siteName" lang="en">My Greenstone Library</displayItem>
+		<displayItem name="siteName" key="siteName" dictionary="siteConfig"/>
+		<displayItem name="siteDescription" lang="en">This is a digital library built using the open-source Greenstone Digital Library software, version 3. Edit the site name and description in web/sites/localsite/siteConfig.xml or web/sites/localsite/resources/siteConfig_xx.properties.</displayItem>
+		<displayItem name="siteDescription" key="siteDescription" dictionary="siteConfig"/>
+	  
+	</displayItemList>
 	<siteList/>
 	<serviceRackList>
 		<!-- uncomment to provide the GATE tagging service -->	
@@ -72,12 +82,4 @@
 		<replace macro="[ScreenWidth]" scope="metadata" metadata="ScreenWidth" resolve="false"/> 
 		<replace macro="[ScreenHeight]" scope="metadata" metadata="ScreenHeight" resolve="false"/> 
 	</replaceList> 
-	<metadataList xmlns:gsf="http://www.greenstone.org/greenstone3/schema/MetadataFormat" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-		<!--<metadata name="siteURL">http://localhost:8080/greenstone3/</metadata>-->
-		<metadata name="siteName" lang="en">My Greenstone Library</metadata>
-		<metadata name="siteName" lang="fr">Mon site de dévelopment</metadata> 
-		<metadata name="siteDescription" lang="en">This is just a random site for testing stuff...</metadata>
-		<metadata name="siteDescription" lang="fr">C'est juste un site pour tester des trucs...</metadata>
-		<metadata name="siteAdmin">admin@example.com</metadata>
-	</metadataList>
 </siteConfig>
