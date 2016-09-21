@@ -570,42 +570,50 @@ public class GSXML
 	 * copies the metadata out of the metadataList of 'from' into the
 	 * metadataList of 'to'
 	 */
-	public static boolean mergeMetadataLists(Node to, Node from)
-	{
-		Node from_meta = getChildByTagName(from, METADATA_ELEM + LIST_MODIFIER);
-		if (from_meta == null)
-		{ // nothing to copy
-			return true;
-		}
-		return mergeMetadataFromList(to, from_meta);
-	}
+  public static boolean mergeMetadataLists(Node to, Node from) {
+    return mergeSpecifiedLists(to, from, METADATA_ELEM);
+  }
 
-	/**
-	 * copies the metadata out of the meta_list metadataList into the
-	 * metadataList of 'to'
-	 */
-	public static boolean mergeMetadataFromList(Node to, Node meta_list)
-	{
-		if (meta_list == null)
-			return false;
-		Node to_meta = getChildByTagName(to, METADATA_ELEM + LIST_MODIFIER);
-		Document to_owner = to.getOwnerDocument();
-		if (to_meta == null)
-		{
-			to.appendChild(to_owner.importNode(meta_list, true));
-			return true;
-		}
-		// copy individual metadata elements
-		NodeList meta_items = ((Element) meta_list).getElementsByTagName(METADATA_ELEM);
-		for (int i = 0; i < meta_items.getLength(); i++)
-		{
-			to_meta.appendChild(to_owner.importNode(meta_items.item(i), true));
-		}
-		return true;
-	}
+  /** copies metadata from meta_list into the metadataList of to **/
+  public static boolean mergeMetadataFromList(Node to, Node meta_list) {
+    return mergeSpecifiedFromList(to, meta_list, METADATA_ELEM);
+  }
 
-	/** copies all the children from from to to */
-	public static boolean mergeElements(Element to, Element from)
+
+  public static boolean mergeSpecifiedLists(Node to, Node from, String element_name) {
+    // find the list in the from element
+    Node from_list = getChildByTagName(from, element_name+LIST_MODIFIER);
+    if (from_list == null) {
+      // nothing to copy
+      return false;
+    }
+   
+    return mergeSpecifiedFromList(to, from_list, element_name);
+  }
+    public static boolean mergeSpecifiedFromList(Node to, Node from_list, String element_name) {
+      if (from_list == null) {
+	return false;
+      }
+      Document to_owner = to.getOwnerDocument();
+      Node to_list = getChildByTagName(to, element_name+LIST_MODIFIER);
+      if (to_list == null) {
+	// just copy over the whole list
+	to.appendChild(to_owner.importNode(from_list, true));
+	return true;
+      }
+      // otherwise we copy all the elements
+      NodeList from_items = ((Element) from_list).getElementsByTagName(element_name);
+
+      for (int i = 0; i < from_items.getLength(); i++)
+	{
+	  to_list.appendChild(to_owner.importNode(from_items.item(i), true));
+	}
+      return true;
+      
+    }
+  
+  /** copies all the children from from to to */
+  public static boolean mergeElements(Element to, Element from)
 	{
 
 		Document owner = to.getOwnerDocument();
