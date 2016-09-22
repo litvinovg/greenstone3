@@ -105,6 +105,7 @@ public class PageAction extends Action
 		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
 		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.SITE_ELEM + GSXML.LIST_MODIFIER);
 		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		GSXML.addParameterToList(param_list_element, GSXML.SUBSET_PARAM, GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
 		info_message.appendChild(info_request);
 		//Send request to message router
 		Element info_response_message = (Element) this.mr.process(info_message);
