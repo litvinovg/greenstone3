@@ -26,8 +26,9 @@ import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.collection.ServiceCluster;
 import org.greenstone.gsdl3.core.MessageRouter;
 import org.greenstone.gsdl3.core.ModuleInterface;
-import org.greenstone.gsdl3.util.CollectionClassLoader;
+import org.greenstone.gsdl3.util.CustomClassLoader;
 import org.greenstone.gsdl3.util.Dictionary;
+import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.XMLConverter;
@@ -99,7 +100,7 @@ public abstract class ServiceRack implements ModuleInterface
 	 * A class loader that knows about the collection resources directory can
 	 * put properties files, dtds etc in here
 	 */
-	CollectionClassLoader class_loader = null;
+	CustomClassLoader class_loader = null;
 
 	/** sets the cluster name */
 	public void setClusterName(String cluster_name)
@@ -184,7 +185,8 @@ public abstract class ServiceRack implements ModuleInterface
 	public boolean configure(Element info, Element extra_info)
 	{
 		// set up the class loader
-		this.class_loader = new CollectionClassLoader(this.getClass().getClassLoader(), this.site_home, this.cluster_name);
+	  // this needs modifying if we ever have serviceracks at siteconfig level that want to use class loader
+	  this.class_loader = new CustomClassLoader(this.getClass().getClassLoader(), GSFile.collectionResourceDir(this.site_home, this.cluster_name));
 		return true;
 	}
 
