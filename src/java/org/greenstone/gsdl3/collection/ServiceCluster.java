@@ -29,6 +29,7 @@ import org.greenstone.gsdl3.core.MessageRouter;
 import org.greenstone.gsdl3.core.ModuleInterface;
 import org.greenstone.gsdl3.service.ServiceRack;
 import org.greenstone.gsdl3.util.Dictionary;
+import org.greenstone.gsdl3.util.DisplayItemUtil;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
@@ -88,7 +89,7 @@ public class ServiceCluster implements ModuleInterface
         protected Document desc_doc = null;
 	/** list of services */
 	protected Element service_list = null;
-	/** list of metadata - all metadata, regardless of language goes in here */
+	/** list of metadata - all metadata, regardless of language goes in here . metadata should be language neutral. Language specific strings are displayItems*/
 	protected Element metadata_list = null;
   /** language specific display items */
 
@@ -104,6 +105,12 @@ public class ServiceCluster implements ModuleInterface
 	//protected Element plugin_item_list = null;
 
 	protected Element _globalFormat = null;
+
+  	/**
+	 * A class loader that knows where to find resources 
+	 * put properties files, dtds etc in here
+	 */
+	protected ClassLoader class_loader = null;
 
 	public void setSiteHome(String home)
 	{
@@ -224,8 +231,6 @@ public class ServiceCluster implements ModuleInterface
 		// empty the service map in case this is a reconfigure
 		//clearServices();
 		Element service_rack_list = (Element) GSXML.getChildByTagName(service_cluster_info, GSXML.SERVICE_CLASS_ELEM + GSXML.LIST_MODIFIER);
-		logger.error("cluster service rack list =");
-		logger.error(GSXML.xmlNodeToString(service_rack_list));
 		if (service_rack_list == null)
 		{
 			// is this an error? could you ever have a service cluster
@@ -262,7 +267,7 @@ public class ServiceCluster implements ModuleInterface
 		if (display_list != null)
 		{
 		  resolveMacros(display_list);
-			if (!addDisplayItems(display_list))
+		  if (!DisplayItemUtil.storeDisplayItems(this.display_item_list, display_list))
 			{
 
 				logger.error("couldn't configure the display items");
@@ -315,7 +320,7 @@ public class ServiceCluster implements ModuleInterface
         <displayItem name="" lang="">value</displayItem>
       </displayItem>
   */
-	protected boolean addDisplayItems(Element display_list)
+	protected boolean addDisplayItemsOld(Element display_list)
 	{
 
 		if (display_list == null)
@@ -649,7 +654,9 @@ public class ServiceCluster implements ModuleInterface
 			Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			if (param_list == null)
 			{
-				addAllDisplayInfo(description, lang);
+			  Element di_list = result_doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+			  description.appendChild(di_list);
+			  DisplayItemUtil.addLanguageSpecificDisplayItems(di_list, this.display_item_list, lang, DEFAULT_LANG, this.class_loader);
 				description.appendChild(result_doc.importNode(this.service_list, true));
 				description.appendChild(result_doc.importNode(this.metadata_list, true));
 				description.appendChild(result_doc.importNode(this.library_param_list, true));
@@ -678,7 +685,10 @@ public class ServiceCluster implements ModuleInterface
 					}
 					else if (info.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER))
 					{
-						addAllDisplayInfo(description, lang);
+					  Element di_list = result_doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+					  description.appendChild(di_list);
+					  DisplayItemUtil.addLanguageSpecificDisplayItems(di_list, this.display_item_list, lang, DEFAULT_LANG, this.class_loader);
+
 					}
 					else if (info.equals(GSXML.LIBRARY_PARAM_ELEM+GSXML.LIST_MODIFIER))
 					{
@@ -931,61 +941,6 @@ public class ServiceCluster implements ModuleInterface
 		}
 
 	}
-  // from our store of displayItems, (eg name, description etc) add one of each to response. PIck the best fit for request lang.
-
-  protected boolean addAllDisplayInfo(Element description, String lang)
-  {
-    Document doc = description.getOwnerDocument();
-    NodeList items = this.display_item_list.getChildNodes();
-    for (int i = 0; i < items.getLength(); i++)
-      { // for each key
-	Element m = (Element) items.item(i);
-	// is there one with the specified language?
-	Element new_m = GSXML.getNamedElement(m, GSXML.DISPLAY_TEXT_ELEM, GSXML.LANG_ATT, lang);
-	if (new_m == null) {
-	  // if not, have we got one with a key?
-	  new_m = GSXML.getNamedElement(m, GSXML.DISPLAY_TEXT_ELEM, GSXML.KEY_ATT, null);
-	  if (new_m != null) {
-	    // look up the dictionary
-	    String value = getTextString(new_m.getAttribute(GSXML.KEY_ATT), lang, new_m.getAttribute(GSXML.DICTIONARY_ATT));
-	    if (value != null) {
-	      GSXML.setNodeText(new_m, value);
-	    }
-	    else {
-	      // haven't found the key in the dictionary, ignore this display item
-	      new_m = null;
-	    }
-	  }
-	}
-	if (new_m == null && lang != DEFAULT_LANG) {
-	  // still haven't got a value. can we use the defualt lang?
-	  new_m = GSXML.getNamedElement(m, GSXML.DISPLAY_TEXT_ELEM, GSXML.LANG_ATT, DEFAULT_LANG);
-	}
-	if (new_m == null)
-	  {
-	    // STILL haven't found one, lets use the first one with a lang att (so we don't just get the key one back
-	    new_m = (Element) GSXML.getNamedElement(m, GSXML.DISPLAY_TEXT_ELEM, GSXML.LANG_ATT, null);
-	  }
-	if (new_m != null) {
-	  description.appendChild(doc.importNode(new_m, true));
-	}
-      } // for each key
-    return true;
-    
-  }
-  
-
-  protected String getTextString(String key, String lang, String dictionary) {
-    return getTextString(key, lang, dictionary, null);
-  }
-
-  protected String getTextString(String key, String lang, String dictionary, String[] args)
-  {
-    Dictionary dict = new Dictionary(dictionary, lang);
-    String result = dict.get(key, args);
-    return result;
-  }
-  
 
 	public HashMap<String, ServiceRack> getServiceMap()
 	{
