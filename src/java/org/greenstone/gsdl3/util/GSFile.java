@@ -210,6 +210,9 @@ public class GSFile
 		return collection_home + File.separatorChar + "resources";
 	}
 
+  static public String siteResourceDir(String site_home) {
+    return site_home+File.separatorChar+"resources";
+  }
 	/** absolute path for an associated file */
 	static public String assocFileAbsolutePath(String site_home, String collection_name, String assoc_file_path, String filename)
 	{
