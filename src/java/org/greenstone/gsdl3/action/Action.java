@@ -148,8 +148,9 @@ abstract public class Action
 		//ADD SITE METADATA
 		Element metadata_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
 		//create a hashmap of params
-		HashMap subset_params = new HashMap(1);
+		HashMap subset_params = new HashMap(2);
 		subset_params.put(GSXML.SUBSET_PARAM, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		subset_params.put(GSXML.SUBSET_PARAM, GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
 		//create the element to put the params in
 		Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		//put them in
@@ -163,7 +164,9 @@ abstract public class Action
 		//drill down to response
 		Element metadata_response = (Element) GSXML.getChildByTagName(metadata_response_message, GSXML.RESPONSE_ELEM);
 		//merge in metadata
+		// *************** need to merge the displayITem lists too
 		GSXML.mergeMetadataLists(element, metadata_response);
+		GSXML.mergeSpecifiedLists(element, metadata_response, GSXML.DISPLAY_TEXT_ELEM);
 	}
 
 	protected void addInterfaceOptions(Element elem)
