@@ -32,6 +32,8 @@ import org.greenstone.gsdl3.collection.ServiceCluster;
 import org.greenstone.gsdl3.comms.Communicator;
 import org.greenstone.gsdl3.comms.SOAPCommunicator;
 import org.greenstone.gsdl3.service.ServiceRack;
+import org.greenstone.gsdl3.util.CustomClassLoader;
+import org.greenstone.gsdl3.util.DisplayItemUtil;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
@@ -94,6 +96,12 @@ public class MessageRouter implements ModuleInterface
 	protected Element site_list = null;
 	/** list of metadata for the site */
 	protected Element metadata_list = null;
+  /** list of display items for all languages */
+  protected Element display_item_list = null;
+
+  /** a customised class loader so we can find resources in site resources folder*/
+  protected CustomClassLoader class_loader = null;
+  protected static final String DEFAULT_LANG = "en"; // hack for now, should be read from the coll cfg file? or site cfg file for cluster
 
 	//***************************************************************
 	// public methods
@@ -149,6 +157,9 @@ public class MessageRouter implements ModuleInterface
 			return false;
 		}
 		this.site_home = GSFile.siteHome(GlobalProperties.getGSDL3Home(), this.site_name);
+		// set up the class loader
+		this.class_loader = new CustomClassLoader(this.getClass().getClassLoader(), GSFile.siteResourceDir(this.site_home));
+
 		String web_address = GlobalProperties.getGSDL3WebAddress();
 		if (web_address.equals("")) {
 		    this.site_http_address = "sites/"+this.site_name;
@@ -250,6 +261,7 @@ public class MessageRouter implements ModuleInterface
 		// Note: if you add an element to another node in the same document, it
 		// gets removed from where it was. This changes the node list - you cant iterate over the node list in a normal manner if you are moving elements out of it
 		int num_requests = requests.getLength();
+		logger.error("**** num requests = "+num_requests);
 		for (int i = 0; i < num_requests; i++)
 		{
 			Node result = null;
@@ -330,8 +342,8 @@ public class MessageRouter implements ModuleInterface
 
 		} // for each request
 
-		//	logger.debug("MR returned response");
-		//logger.debug(XMLConverter.getString(mainResult));
+			logger.debug("MR returned response");
+		logger.debug(XMLConverter.getString(mainResult));
 
 		return mainResult;
 	}
@@ -479,6 +491,10 @@ public class MessageRouter implements ModuleInterface
 		Element metadata_list_elem = (Element) GSXML.getChildByTagName(config_info, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
 		loadMetadata(metadata_list_elem);
 
+		// load up the displayItems
+		this.display_item_list = doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+		Element display_item_list_elem = (Element) GSXML.getChildByTagName(config_info, GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+		DisplayItemUtil.storeDisplayItems(this.display_item_list, display_item_list_elem);
 		return true;
 
 	}
@@ -1054,6 +1070,7 @@ public class MessageRouter implements ModuleInterface
 		// message for self, should be type=describe/configure at this stage
 	        Document doc = XMLConverter.newDOM();
 		String type = req.getAttribute(GSXML.TYPE_ATT);
+		String lang = req.getAttribute(GSXML.LANG_ATT);
 		Element response = doc.createElement(GSXML.RESPONSE_ELEM);
 		response.setAttribute(GSXML.FROM_ATT, "");
 		if (type.equals(GSXML.REQUEST_TYPE_DESCRIBE))
@@ -1068,6 +1085,9 @@ public class MessageRouter implements ModuleInterface
 				response.appendChild(doc.importNode(this.site_list, true));
 				response.appendChild(doc.importNode(this.service_list, true));
 				response.appendChild(doc.importNode(this.metadata_list, true));
+				Element di_list = doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+				response.appendChild(di_list);
+				DisplayItemUtil.addLanguageSpecificDisplayItems(di_list, this.display_item_list, lang, DEFAULT_LANG, this.class_loader);
 				return response;
 			}
 
@@ -1101,6 +1121,13 @@ public class MessageRouter implements ModuleInterface
 					else if (info.equals(GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER))
 					{
 						response.appendChild(doc.importNode(this.metadata_list, true));
+					}
+					else if (info.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER))
+					{
+					  Element di_list = doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+					  response.appendChild(di_list);
+					  DisplayItemUtil.addLanguageSpecificDisplayItems(di_list, this.display_item_list, lang, DEFAULT_LANG, this.class_loader);
+					  
 					}
 				}
 			}
