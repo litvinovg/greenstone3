@@ -22,11 +22,11 @@
   <!-- every pages ....................................................................... -->
 
   <xsl:template name="siteName">
-    <xsl:value-of select="/page/pageResponse/metadataList/metadata[@name='siteName']"/>
+    <xsl:value-of select="/page/pageResponse/displayItemList/displayItem[@name='siteName']"/>
   </xsl:template>
 
   <xsl:template name="siteDescription">
-    <xsl:value-of select="/page/pageResponse/metadataList/metadata[@name='siteDescription']"/>
+    <xsl:value-of select="/page/pageResponse/displayItemList/displayItem[@name='siteDescription']"/>
   </xsl:template>
 
   <xsl:template name="siteLink">
@@ -58,7 +58,7 @@
   <xsl:template name="collectionName">
     <xsl:choose>
       <xsl:when test="/page/pageResponse/collection">
-        <xsl:value-of select="/page/pageResponse/collection/displayItem[@name='name']"/>
+        <xsl:value-of select="/page/pageResponse/collection/displayItemList/displayItem[@name='name']"/>
       </xsl:when>
       <xsl:otherwise>All Collections</xsl:otherwise>
     </xsl:choose>
@@ -212,7 +212,7 @@
       <xsl:when test="util:checkFileExistence($site_name, backgroundImage)">
         <a href="{$group_href}" title="{$desc}">
           <img class="groupLinkImage">
-            <xsl:attribute name="alt"><xsl:value-of select="displayItem[@name='name']"/></xsl:attribute>
+            <xsl:attribute name="alt"><xsl:value-of select="displayItemList/displayItem[@name='name']"/></xsl:attribute>
             <xsl:attribute name="src">sites/<xsl:value-of select="$site_name"/>/<xsl:value-of select="backgroundImage"/></xsl:attribute>
           </img>
         </a>
@@ -238,14 +238,14 @@
   </xsl:template>
   
   <xsl:template name="collectionLinkWithImage">
-    <xsl:variable name="desc"><xsl:value-of select="displayItem[@name='shortDescription']"/></xsl:variable>
+    <xsl:variable name="desc"><xsl:value-of select="displayItemList/displayItem[@name='shortDescription']"/></xsl:variable>
     <xsl:variable name="coll_href"><xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="@name"/>/page/about<xsl:choose><xsl:when test="libraryParamList/param">?<xsl:for-each select="libraryParamList/param"><xsl:value-of select="@name"/>=<xsl:value-of select="@default"/>&amp;</xsl:for-each></xsl:when></xsl:choose></xsl:variable>
     <xsl:choose>
-      <xsl:when test="displayItem[@name='smallicon']">
+      <xsl:when test="displayItemList/displayItem[@name='smallicon']">
         <a href="{$coll_href}" title="{$desc}">
           <img class="collectionLinkImage">
-            <xsl:attribute name="alt"><xsl:value-of select="displayItem[@name='name']"/></xsl:attribute>
-            <xsl:attribute name="src">sites/<xsl:value-of select="$site_name"/>/collect/<xsl:value-of select="@name"/>/images/<xsl:value-of select="displayItem[@name='smallicon']"/></xsl:attribute>
+            <xsl:attribute name="alt"><xsl:value-of select="displayItemList/displayItem[@name='name']"/></xsl:attribute>
+            <xsl:attribute name="src">sites/<xsl:value-of select="$site_name"/>/collect/<xsl:value-of select="@name"/>/images/<xsl:value-of select="displayItemList/displayItem[@name='smallicon']"/></xsl:attribute>
           </img>
         </a>
       </xsl:when>
@@ -253,7 +253,7 @@
         <a href="{$coll_href}" title="{$desc}">
           <div class="collectionLink ui-corner-all">
 			<div class="collectionLinkText ui-widget-content ui-corner-top">
-				<xsl:choose><xsl:when test="displayItem[@name='name']"><xsl:value-of select="displayItem[@name='name']"/></xsl:when>
+				<xsl:choose><xsl:when test="displayItemList/displayItem[@name='name']"><xsl:value-of select="displayItemList/displayItem[@name='name']"/></xsl:when>
 				<xsl:otherwise>
 				  <xsl:value-of select="@name"/>
 				</xsl:otherwise>
@@ -275,7 +275,7 @@
     <xsl:for-each select="serviceCluster">
       <a href="{$library_name}?a=p&amp;sa=about&amp;c={@name}">
         <xsl:value-of select="@name"/>
-        <xsl:value-of select="displayItem[@name='name']"/>
+        <xsl:value-of select="displayItemList/displayItem[@name='name']"/>
       </a>
     </xsl:for-each>
   </xsl:template>
@@ -382,18 +382,18 @@ _httpjava_ {_httpweb_/java}
 
   <xsl:template name="aboutCollectionPageTitle">
     <!-- put a space in the title in case the actual value is missing - mozilla will not display a page with no title-->
-    <xsl:value-of select="/page/pageResponse/collection/displayItem[@name='name']"/>
+    <xsl:value-of select="/page/pageResponse/collection/displayItemList/displayItem[@name='name']"/>
     <xsl:text> </xsl:text>
   </xsl:template>
   
   <xsl:template name="collectionHomeLinkWithLogoIfAvailable">
     <a href="{$library_name}?a=p&amp;sa=about&amp;c={$collName}">
       <xsl:choose>
-        <xsl:when test="$this-element/displayItem[@name='icon']">
+        <xsl:when test="$this-element/displayItemList/displayItem[@name='icon']">
           <img border="0">
-            <xsl:attribute name="src"><xsl:value-of select="$this-element/metadataList/metadata[@name='httpPath']"/>/images/<xsl:value-of select="$this-element/displayItem[@name='icon']"/></xsl:attribute>
+            <xsl:attribute name="src"><xsl:value-of select="$this-element/metadataList/metadata[@name='httpPath']"/>/images/<xsl:value-of select="$this-element/displayItemList/displayItem[@name='icon']"/></xsl:attribute>
             <xsl:attribute name="alt">
-              <xsl:value-of select="$this-element/displayItem[@name='name']"/>
+              <xsl:value-of select="$this-element/displayItemList/displayItem[@name='name']"/>
             </xsl:attribute>
             <xsl:attribute name="title">
               <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'aboutpage')"/>
@@ -401,7 +401,7 @@ _httpjava_ {_httpweb_/java}
           </img>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:value-of select="$this-element/displayItem[@name='name']"/>
+          <xsl:value-of select="$this-element/displayItemList/displayItem[@name='name']"/>
         </xsl:otherwise>
       </xsl:choose>
     </a>
@@ -500,7 +500,7 @@ _httpjava_ {_httpweb_/java}
     <xsl:apply-templates select="pageResponse/collection|serviceCluster"/>
   </xsl:template>
   <xsl:template match="collection|serviceCluster">
-    <xsl:value-of select="displayItem[@name='description']" disable-output-escaping="yes"/>
+    <xsl:value-of select="displayItemList/displayItem[@name='description']" disable-output-escaping="yes"/>
 <!-- Uncomment this section if you want the collection service links and their descriptions to appear -->
 	<!--<xsl:apply-templates select="serviceList">
       <xsl:with-param name="collName" select="$collName"/>
