@@ -20,11 +20,11 @@
 	<xsl:template match="/page">
   
 		<xsl:choose>
-			<xsl:when test="$this-element/displayItem[@name='icon']">
+			<xsl:when test="$this-element/displayItemList/displayItem[@name='icon']">
 			  <img border="0">
-				<xsl:attribute name="src"><xsl:value-of select="$this-element/metadataList/metadata[@name='httpPath']"/>/images/<xsl:value-of select="$this-element/displayItem[@name='icon']"/></xsl:attribute>
+				<xsl:attribute name="src"><xsl:value-of select="$this-element/metadataList/metadata[@name='httpPath']"/>/images/<xsl:value-of select="$this-element/displayItemList/displayItem[@name='icon']"/></xsl:attribute>
 				<xsl:attribute name="alt">
-				  <xsl:value-of select="$this-element/displayItem[@name='name']"/>
+				  <xsl:value-of select="$this-element/displayItemList/displayItem[@name='name']"/>
 				</xsl:attribute>
 				<xsl:attribute name="title">
 				  <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'aboutpage')"/>
