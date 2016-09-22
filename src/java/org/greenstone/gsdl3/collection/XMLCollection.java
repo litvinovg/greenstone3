@@ -41,7 +41,7 @@ public class XMLCollection
 	Element display_list = (Element)GSXML.getChildByTagName(coll_config_xml, GSXML.DISPLAY_TEXT_ELEM+GSXML.LIST_MODIFIER);
 	if (display_list != null) {
 	  resolveMacros(display_list);
-	    addDisplayItems(display_list);
+	  DisplayItemUtil.storeDisplayItems(this.display_item_list, display_list);
 	}
 
 	// are we a private collection??
@@ -86,7 +86,10 @@ public class XMLCollection
 	    // check the param list
 	    Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 	    if (param_list == null) {
-		addAllDisplayInfo(description, lang);
+	      Element di_list = response_doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+	      description.appendChild(di_list);
+	      DisplayItemUtil.addLanguageSpecificDisplayItems(di_list, this.display_item_list, lang, DEFAULT_LANG, this.class_loader);
+	      
 		description.appendChild(response_doc.importNode(this.service_list, true));
 		description.appendChild(response_doc.importNode(this.metadata_list, true));
 		description.appendChild(response_doc.importNode(this.library_param_list, true));
@@ -107,7 +110,10 @@ public class XMLCollection
 		    } else if (info.equals(GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER)) {
 			description.appendChild(response_doc.importNode(metadata_list, true));
 		    } else if (info.equals(GSXML.DISPLAY_TEXT_ELEM+GSXML.LIST_MODIFIER)) {
-			addAllDisplayInfo(description, lang);
+		      Element di_list = response_doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+		      description.appendChild(di_list);
+		      DisplayItemUtil.addLanguageSpecificDisplayItems(di_list, this.display_item_list, lang, DEFAULT_LANG, this.class_loader);
+		
 			
 		    } else if (info.equals(GSXML.DOCUMENT_ELEM+GSXML.LIST_MODIFIER)) {
 			description.appendChild(response_doc.importNode(this.document_list, true));
