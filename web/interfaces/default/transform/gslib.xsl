@@ -76,6 +76,11 @@
     </xsl:if>
   </xsl:template>
   
+  <xsl:template name="collectionMeta">
+    <xsl:param name="name"/>
+    <xsl:value-of select="/page/pageResponse/collection/metadataList/metadata[@name=$name]"/>
+  </xsl:template>
+
   <!-- text to get the name of the current service ("Browse","Search" etc) -->
   <xsl:template name="serviceName">
     <xsl:value-of select="/page/pageResponse/service/displayItem[@name='name']"/>
@@ -499,6 +504,7 @@ _httpjava_ {_httpweb_/java}
   <xsl:template name="collectionDescriptionTextAndServicesLinks">
     <xsl:apply-templates select="pageResponse/collection|serviceCluster"/>
   </xsl:template>
+  
   <xsl:template match="collection|serviceCluster">
     <xsl:value-of select="displayItemList/displayItem[@name='description']" disable-output-escaping="yes"/>
 <!-- Uncomment this section if you want the collection service links and their descriptions to appear -->
