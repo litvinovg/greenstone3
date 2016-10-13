@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -512,6 +513,48 @@ public class XSLTUtil
 
 	}
 
+  public static final int TS_SECS = 0;
+  public static final int TS_MILLISECS = 1;
+  public static final int F_DATE = 0;
+  public static final int F_TIME = 1;
+  public static final int F_DATETIME = 2;
+  public static final int F_DAYSAGO = 3;
+
+  public static String formatTimeStamp(String timestamp, int ts_type, int format_type, String lang) {
+    try {
+      long ts = Long.parseLong(timestamp);
+      if (ts_type == TS_SECS) {
+	ts = ts * 1000;
+      }
+      if (format_type == F_DAYSAGO) {
+	long current_time = new Date().getTime();
+	long days = (current_time - ts)/86400000;
+	return String.valueOf(days);
+      }
+      Date d = new Date(ts);
+      DateFormat df;
+      switch (format_type) {
+      case F_DATE:
+	df = DateFormat.getDateInstance(DateFormat.DEFAULT, new Locale(lang));
+	break;
+      case F_TIME:
+	df = DateFormat.getTimeInstance(DateFormat.DEFAULT, new Locale(lang));
+	break;
+      case F_DATETIME:
+	df = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, new Locale(lang));
+	break;
+      default:
+	df = DateFormat.getDateInstance(DateFormat.DEFAULT, new Locale(lang));
+	break;
+      }
+      
+      return df.format(d);
+    } catch (Exception e) {
+      
+      return timestamp + e.getMessage();
+    }
+    
+  }
 	public static String getDetailFromDate(String date, String detail, String lang)
 	{
 		String in_pattern = "yyyyMMdd";
