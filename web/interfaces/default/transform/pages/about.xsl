@@ -36,9 +36,12 @@
 		<!--Display the description text of the current collection,
 		and if some services are available then create a list
 		of links for each service within a <ul id="servicelist"> element.-->
-		<gslib:collectionDescriptionTextAndServicesLinks/>
+		<xsl:call-template name="coll-description"/>
 	</xsl:template>
-
+	
+	<xsl:template name="coll-description">
+	  <gslib:collectionDescriptionTextAndServicesLinks/>
+	</xsl:template>
 
 </xsl:stylesheet>  
 
