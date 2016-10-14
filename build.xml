@@ -398,9 +398,7 @@
               </else>
 	      </if>
             -->
-	      <property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${env.DYLD_LIBRARY_PATH}&quot;"/>
-	    </else>
-	  </if>
+	  <property name="ldlpath.arg" value="DYLD_LIBRARY_PATH=&quot;${env.DYLD_LIBRARY_PATH}&quot;"/>
 	<else>
 		<if><bool><isset property="env.LD_LIBRARY_PATH"/></bool>
 			<property name="ldlpath.arg" value="LD_LIBRARY_PATH=&quot;${gnome-lib-dir}/lib:${env.LD_LIBRARY_PATH}&quot;"/>
