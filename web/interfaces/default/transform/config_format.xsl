@@ -626,7 +626,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 
 	<xsl:template match="gsf:if-metadata-exists">
 		<xsl:variable name="meta-path">
-			<xsl:for-each select="gsf:metadata">(.//metadataList)[last()]/metadata[@name='<xsl:call-template name="getMetadataName"/>']</xsl:for-each>
+			<xsl:for-each select="gsf:metadata">(.//metadataList)[last()]/metadata[@name='<xsl:call-template name="getMetadataName"/>']<xsl:if test="@pos">[<xsl:value-of select="@pos"/>]</xsl:if></xsl:for-each>
 		</xsl:variable>
 		<xslt:choose>
 			<xslt:when test="{$meta-path}">
