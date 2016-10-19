@@ -50,8 +50,6 @@ import org.apache.commons.lang3.*;
 /**
  * Implements the generic retrieval and classifier services for GS2 collections.
  * 
- * @author Katherine Don
- * @author Michael Dewsnip
  */
 
 public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrieve
@@ -231,6 +229,7 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
       return info.getMultiInfo(metadata);
     }
     // we need to get metadata for one or more different nodes
+    // we have a relation root, parent, ancestors, siblings, children, descendents
     String relation = metadata.substring(0, index);
     String relation_id="";
     metadata = metadata.substring(index + 1);
@@ -303,59 +302,12 @@ public abstract class AbstractGS2DocumentRetrieve extends AbstractDocumentRetrie
       return null;
     }
     // unknown relation
-    logger.error("asked for relation "+relation+" and don't understand it.");
-    return null;
+    logger.error("asked for relation "+relation+" and don't understand it, so getting the full metadata name "+relation+GSConstants.META_RELATION_SEP+metadata);
+    // we assume that maybe the metadata has an _ in the name, so get the original name
+    return info.getMultiInfo(relation+GSConstants.META_RELATION_SEP+metadata);
+
   }
       
-  //   } else {
-  //   if (relation.equals("parent") || relation.equals("ancestors")) {
-  //     relation_id = OID.getParent(node_id);
-  //     if (relation_id.equals(node_id)) {
-  // 	return null;
-  //     }
-  //   } else if (relation.equals("root")) {
-  //     relation_id = OID.getTop(node_id);
-  //   }
-
-  //   DBInfo relation_info;
-  //   if (relation_id.equals(node_id)) {
-  //     relation_info = info;
-  //   } else {
-  //     relation_info = this.coll_db.getInfo(relation_id);
-  //   }
-  //   if (relation_info == null)
-  //     {
-  // 	return null;
-  //     }
-
-  //   Vector<String> values = relation_info.getMultiInfo(metadata);
-  //   // do resolving
-  //   if (!relation.equals("ancestors")){
-  //     return values;
-  //   }
-
-  //   // ancestors: go up the chain
-
-  //   String current_id = relation_id;
-  //   relation_id = OID.getParent(current_id);
-  //   while (!relation_id.equals(current_id))
-  //     {
-  // 	relation_info = this.coll_db.getInfo(relation_id);
-  // 	if (relation_info == null)
-  // 	  return values;
-	
-  // 	Vector<String> more_values = relation_info.getMultiInfo(metadata);
-  // 	if (more_values != null)
-  // 	  {
-  // 	    values.addAll(0, more_values);
-  // 	  }
-	
-			
-  // 	current_id = relation_id;
-  // 	relation_id = OID.getParent(current_id);
-  //     }
-  //   return values; // for now
-  // }
 
     protected Vector<String> getMetaValuesForOID(String oid, String metadata) {
       DBInfo info = this.coll_db.getInfo(oid);
