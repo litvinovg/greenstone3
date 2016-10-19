@@ -22,6 +22,7 @@
 				</xsl:when>
 				<xsl:otherwise>
 					<table id="classifiernodelist">
+						<xsl:text> </xsl:text>
 						<xsl:call-template name="processNodeChildren">
 							<xsl:with-param name='collName' select='$collName'/>
 							<xsl:with-param name='serviceName' select='$serviceName'/>
