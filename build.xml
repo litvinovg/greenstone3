@@ -369,10 +369,12 @@
 	</else>
 	</if>
 
+	<!--https://groups.google.com/forum/#!topic/openkinect/m-hfXeYwKtU
+	  compiling up libwv on ElCapitan needs -framework CoreFoundation -->
 	<if><bool><isset property="env.LDFLAGS"/></bool>
-		<property name="ldflags.arg" value="LDFLAGS=&quot;-L${gnome-lib-dir}/lib ${env.LDFLAGS}&quot;"/>
+		<property name="ldflags.arg" value="LDFLAGS=&quot;-L${gnome-lib-dir}/lib ${env.LDFLAGS} -framework CoreFoundation&quot;"/>
 	<else>
-        	<property name="ldflags.arg" value="LDFLAGS=&quot;-L${gnome-lib-dir}/lib&quot;"/>
+        	<property name="ldflags.arg" value="LDFLAGS=&quot;-L${gnome-lib-dir}/lib&quot; -framework CoreFoundation"/>
 	</else>
 	</if>
 
@@ -433,9 +435,9 @@
 		</if>
 
 		<if><bool><isset property="env.LDFLAGS"/></bool>
-			<property name="ldflags.arg" value="LDFLAGS=&quot;${env.LDFLAGS}&quot;"/>
+			<property name="ldflags.arg" value="LDFLAGS=&quot;${env.LDFLAGS} -framework CoreFoundation&quot;"/>
 		<else>
-			<property name="ldflags.arg" value=" "/>
+			<property name="ldflags.arg" value="LDFLAGS=&quot;-framework CoreFoundation&quot;"/>
 		</else>
 		</if>
 
