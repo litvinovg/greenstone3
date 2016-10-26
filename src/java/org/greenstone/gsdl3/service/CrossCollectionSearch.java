@@ -36,7 +36,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * 
+ * This ServiceRack gets specified in siteConfig.xml. So it is loaded by the MessaegRouter, and two services get activated: TextQuery, DocumentMetadataRetrieve.
+These are located at MR level, not inside a collection. QueryAction will send messages to "TextQuery", rather than eg "mgppdemo/TextQuery".
+These two services will requery the MR for search results/document metadata based on collections or documents listed.
  */
 
 public class CrossCollectionSearch extends ServiceRack
@@ -443,10 +445,6 @@ public class CrossCollectionSearch extends ServiceRack
 		// create teh individual requests
 		Document msg_doc = XMLConverter.newDOM();
 		Element meta_request_message = msg_doc.createElement(GSXML.MESSAGE_ELEM);
-		// get all the metadata params
-		Element new_param_list = msg_doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		Element param = GSXML.createParameter(msg_doc, "metadata", "Title");
-		new_param_list.appendChild(param);
 
 		Set mapping_set = coll_map.entrySet();
 		Iterator iter = mapping_set.iterator();
@@ -458,7 +456,7 @@ public class CrossCollectionSearch extends ServiceRack
 			Element doc_nodes = (Element) e.getValue();
 			Element meta_request = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_PROCESS, GSPath.appendLink(cname, DOCUMENT_METADATA_RETRIEVE_SERVICE), userContext);
 			meta_request.appendChild(msg_doc.importNode(doc_nodes, true));
-			meta_request.appendChild(new_param_list.cloneNode(true));
+			meta_request.appendChild(msg_doc.importNode(param_list, true));
 			meta_request_message.appendChild(meta_request);
 
 		}
