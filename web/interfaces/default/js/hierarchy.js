@@ -11,8 +11,8 @@ function findAncestorByTagName (element, tagName) {
 function setHierarchyId(a)
 {
 	
-	var id = a.parentElement.id;
-	//console.log("Try to set ID" + id)
+	var id = a.getAttribute("title");
+	
 // If ID defined and not null
 	if (id && (id != null)) 
 	{
@@ -71,7 +71,7 @@ function openHierarchyMenuLevel(menuItem)
                 for(var key in hierarchyData) 
                 {
    					if(childExpr.test(key)){
-   						levelItems[key]='<li id="'+key+'" ><button onclick="setHierarchyId(this)"  title='+ hierarchyData[key] +'>' + hierarchyData[key] + '</button></li>';
+   						levelItems[key]='<li id="'+key+'" ><button onclick="setHierarchyId(this)"  title='+ hierarchyData[key][0] +'>' + hierarchyData[key][1] + '</button></li>';
       					//console.log(levelItems[key]);
       					
    					}
@@ -136,16 +136,17 @@ function downloadAndProcessHierarchyFile(hierarchyFileName,metaName)
 			  var hierarchyFile = xmlhttp.responseText;
 			  var StringData = [];
 				var hierarchyData = {};
-				var expr = /^([0-9]+(?:\.[0-9]+)*)\ ([0-9]+(?:\.[0-9]+)*)\ (.*)/m;
+				//var expr = /^([0-9]+(?:\.[0-9]+)*)\ ([0-9]+(?:\.[0-9]+)*)\ (.*)/m;
+				var expr = /^(\S*|\"[^\"]*\")\ +([0-9]+(?:\.[0-9]+)*)\ +(.*)/m;
 				StringData = hierarchyFile.split('\n');
 				for (var i = 0; i < StringData.length; i++) 
 					{
 					var result = StringData[i].match(expr);
 					// If result not null
-					if (result != null && result[2] != null && result[3] != null) 
+					if (result != null && result.length == 4) 
 						{
 						// populate hierarchy object
-						hierarchyData[result[2]] = result[3];
+						hierarchyData[result[2]] = [result[1], result[3]];
 						}
 
 					}
@@ -241,7 +242,7 @@ function createSuggestionsMenu(row)
 		
 		if (SuggestionsMenuExp.test(key)) 
 		{
-			SuggestionsMenuItems[key]='<li class="hierarchySuggestionsMenu" id="'+key+'" ><button onclick="setHierarchyId(this)" >' + key.substring(String(input).length) + " "  + hierarchyData[key] + '</button></li>';
+			SuggestionsMenuItems[key]='<li class="hierarchySuggestionsMenu" id="'+key+'" ><button title='+ hierarchyData[key][0] +' onclick="setHierarchyId(this)" >' + key.substring(String(input).length) + " " + hierarchyData[key][1] + '</button></li>';
 		}
 		
 		for(var key in SuggestionsMenuItems)
