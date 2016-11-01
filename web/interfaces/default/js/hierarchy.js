@@ -11,17 +11,18 @@ function findAncestorByTagName (element, tagName) {
 function setHierarchyId(a)
 {
 	
-	var id = a.getAttribute("title");
+	var metaValue = a.getAttribute("metavalue");
+	var metaTitle = a.getAttribute("metatitle");
 	
 // If ID defined and not null
-	if (id && (id != null)) 
+	if (metaValue && (metaValue != null)) 
 	{
 		//find TR Ancestor to get TEXTAREA
 		var tr = findAncestorByTagName(a,"TR");
 		//Set value to id of clicked element
-		$(tr.getElementsByTagName("TEXTAREA")).val(id);
+		$(tr.getElementsByTagName("TEXTAREA")).val(metaValue);
 		//	Set button name
-		removeSuggestionsMenu(tr, $(a).text());
+		removeSuggestionsMenu(tr, metaTitle);
 		//Hide menu after click
 		$(tr).find(".metaDataHierarchyMenu").find("ul li ul li").hide();
 		//If we left TEXTAREA, hide all menus
@@ -71,7 +72,7 @@ function openHierarchyMenuLevel(menuItem)
                 for(var key in hierarchyData) 
                 {
    					if(childExpr.test(key)){
-   						levelItems[key]='<li id="'+key+'" ><button onclick="setHierarchyId(this)"  title='+ hierarchyData[key][0] +'>' + hierarchyData[key][1] + '</button></li>';
+   						levelItems[key]='<li id="'+key+'" ><button onclick="setHierarchyId(this)"  metavalue='+ hierarchyData[key][0] +' metatitle='+ hierarchyData[key][1] +'>' + hierarchyData[key][1] + '</button></li>';
       					//console.log(levelItems[key]);
       					
    					}
@@ -163,18 +164,14 @@ function setHierarchyHoverEvent(father,className)
 	 
 	$(father).find(className).hover(function() 
 	{
-	//	console.log("HOVER ENTERED")
 		openHierarchyMenuLevel(this);
 	}, function() {
-	//	console.log("HOVER EXITED")
 		closeHierarchyMenuLevel(this);
 	});
 	
 }
 function createHierarchyMenuButton(row)
 {
-	//console.log(row)
-	//console.log(metaName)
 		//get current MetaDataName
 		var metaName = $(row.getElementsByClassName("metaTableCellName")[0]).text();
 		
@@ -185,10 +182,12 @@ function createHierarchyMenuButton(row)
 		//Get current hierarchy from storages
 		var hierarchyData = hierarchyStorage[metaName];
 		
-		if (hierarchyData[textAreaValue]) 
+		if (hierarchyData[textAreaValue] && (hierarchyData[textAreaValue] != null)) 
 		{				
-			hierarchyMenuName = hierarchyData[textAreaValue];
+			hierarchyMenuName = hierarchyData[textAreaValue][1];
+			
 		}
+		
 		//Menu element
 		var mainmenu = '<td class="metaDataHierarchyMenu" style="display: none;"><ul><li id="hierarchyLevel"><button class="hierarchyMenuButton"  title="Menu">' + hierarchyMenuName + '</button></li></ul></td>'
 		//Insert hierarchy menu
@@ -242,7 +241,7 @@ function createSuggestionsMenu(row)
 		
 		if (SuggestionsMenuExp.test(key)) 
 		{
-			SuggestionsMenuItems[key]='<li class="hierarchySuggestionsMenu" id="'+key+'" ><button title='+ hierarchyData[key][0] +' onclick="setHierarchyId(this)" >' + key.substring(String(input).length) + " " + hierarchyData[key][1] + '</button></li>';
+			SuggestionsMenuItems[key]='<li class="hierarchySuggestionsMenu" id="'+key+'" ><button metavalue='+ hierarchyData[key][0] +' metatitle='+ hierarchyData[key][1] +' onclick="setHierarchyId(this)" >' + key.substring(String(input).length) + " " + hierarchyData[key][1] + '</button></li>';
 		}
 		
 		for(var key in SuggestionsMenuItems)
