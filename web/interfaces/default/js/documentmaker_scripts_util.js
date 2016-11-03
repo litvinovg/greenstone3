@@ -841,7 +841,7 @@ function addFunctionalityToTable(table)
 		valueCell.append(textValue);
 		newRow.append(nameCell);
 		newRow.append(valueCell);
-		addRemoveLinkToRow(newRow);
+		addRemoveLinkToRow(newRow.get(0));
 		table.append(newRow);
 		
 		var undo = new Array();
