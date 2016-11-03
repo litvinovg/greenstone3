@@ -795,7 +795,19 @@ function addFunctionalityToTable(table)
 		addRemoveLinkToRow(this);
 	});
 
-	var metaNameField = createMetadataElementSelector(); 	
+    // set up autocomplete values
+    var value_cells = $(".metaTableCellArea");
+    for (var k=0; k<autocompleteMetadata.length; k++) {
+	var source_name = autocompleteMetadata[k].replace(/[\.-]/g, "");
+	var source_obj = window[source_name+"_values"];
+	if (source_obj) {
+	    value_cells.filter("."+source_name).autocomplete({
+		minLength: 0,
+		source: source_obj
+	    });
+	}
+    }
+        var metaNameField = createMetadataElementSelector(); 	
 	table.after(metaNameField);
 	table.metaNameField = metaNameField;
 	
@@ -809,12 +821,23 @@ function addFunctionalityToTable(table)
 			console.log(gs.text.de.no_meta_name_given);
 			return;
 		}
-		
+	        var clean_name = name.replace(/[\.-]/g, "");
 		var newRow = $("<tr>", {"style": "display: table-row;"});
 		var nameCell = $("<td>" + name + "</td>");
 		nameCell.attr("class", "metaTableCellName");
 		var valueCell = $("<td>", {"class": "metaTableCell"}); 	
-		var textValue = $("<textarea>", {"class": "metaTableCellArea"}); 
+	        var textValue = $("<textarea>", {"class": "metaTableCellArea "+ clean_name}); 
+	    
+	    
+	        if (autocompleteMetadata.includes(name)) {
+		    var source_obje = window[clean_name +"_values"];
+		    if (source_obje) {
+			textValue.autocomplete({
+			    minLength: 0,
+			    source: source_obje
+			});
+		    }
+		}
 		valueCell.append(textValue);
 		newRow.append(nameCell);
 		newRow.append(valueCell);
