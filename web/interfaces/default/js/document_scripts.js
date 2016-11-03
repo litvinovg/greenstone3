@@ -31,6 +31,14 @@ var editableLastStates = new Array();
 var new_metadata_field_input_type = "plain";
 /* Metadata elements to be used in the fixedlist/autocomplete options above */
 var availableMetadataElements = ["dc.Title", "dc.Subject"];
+/* metadata elements that have a list of values/suggestions */
+var autocompleteMetadata = new Array();
+/* for each metadata element specified here, one should provide an array of values. The name is the meta_name + "_values", but you must strip . and _ from the name.
+for example
+var autocompleteMetadata = ["dc.Subject"];
+var dcSubject_values = ["Kings", "Queens", "others"];
+*/
+
 /********************
 * EXPANSION SCRIPTS *
 ********************/
