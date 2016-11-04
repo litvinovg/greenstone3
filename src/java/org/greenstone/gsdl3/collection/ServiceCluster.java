@@ -654,9 +654,9 @@ public class ServiceCluster implements ModuleInterface
 			Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			if (param_list == null)
 			{
-			    //Element di_list = result_doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
-			    //description.appendChild(di_list);
-			  DisplayItemUtil.addLanguageSpecificDisplayItems(description, this.display_item_list, lang, DEFAULT_LANG, this.class_loader);
+			  Element di_list = result_doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+			  description.appendChild(di_list);
+			  DisplayItemUtil.addLanguageSpecificDisplayItems(di_list, this.display_item_list, lang, DEFAULT_LANG, this.class_loader);
 				description.appendChild(result_doc.importNode(this.service_list, true));
 				description.appendChild(result_doc.importNode(this.metadata_list, true));
 				description.appendChild(result_doc.importNode(this.library_param_list, true));
@@ -685,9 +685,9 @@ public class ServiceCluster implements ModuleInterface
 					}
 					else if (info.equals(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER))
 					{
-					    //Element di_list = result_doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
-					    //description.appendChild(di_list);
-					  DisplayItemUtil.addLanguageSpecificDisplayItems(description, this.display_item_list, lang, DEFAULT_LANG, this.class_loader);
+					  Element di_list = result_doc.createElement(GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
+					  description.appendChild(di_list);
+					  DisplayItemUtil.addLanguageSpecificDisplayItems(di_list, this.display_item_list, lang, DEFAULT_LANG, this.class_loader);
 
 					}
 					else if (info.equals(GSXML.LIBRARY_PARAM_ELEM+GSXML.LIST_MODIFIER))
