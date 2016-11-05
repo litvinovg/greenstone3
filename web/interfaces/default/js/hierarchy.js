@@ -8,7 +8,7 @@ function findAncestorByTagName (element, tagName) {
     return element;
 }
 // Function to set Id as TEXTAREA value
-function setHierarchyId(a)
+function chooseHierarchyOption(a)
 {
 	
 	var metaValue = a.getAttribute("metavalue");
@@ -22,14 +22,11 @@ function setHierarchyId(a)
 		//Set value to id of clicked element
 		$(tr.getElementsByTagName("TEXTAREA")).val(metaValue);
 		//	Set button name
-		removeSuggestionsMenu(tr, metaTitle);
+		setHierarchyButtonText(tr, metaTitle);
+		removeSuggestionsMenu(tr);
 		//Hide menu after click
 		$(tr).find(".metaDataHierarchyMenu").find("ul li ul li").hide();
-		//If we left TEXTAREA, hide all menus
-		//if (document.activeElement.tagName != "TEXTAREA")
-		//{
-		//	$(tr).find(".metaDataHierarchyMenu").hide();
-		//}
+		//Set focus on textarea
 		tr.getElementsByTagName("TEXTAREA")[0].focus();
 		
 		createSuggestionsMenu(tr);
@@ -38,11 +35,9 @@ function setHierarchyId(a)
 }
 function openHierarchyMenuLevel(menuItem)
 {
-        //console.log(menuItem);
-			
-			var tr = findAncestorByTagName(menuItem,"TR");
-			//get current MetaDataName
-			var metaName = $(tr.getElementsByClassName("metaTableCellName")[0]).text();
+		   var tr = findAncestorByTagName(menuItem,"TR");
+		   //get current MetaDataName
+		   var metaName = getMetaName(tr);
 		   //Get current hierarchy from storages
 		   var hierarchyData = hierarchyStorage[metaName];
 		   menuItem = $(menuItem);
@@ -57,9 +52,7 @@ function openHierarchyMenuLevel(menuItem)
            		 if (menuItem.attr('id'))
            		 {
            		 	id = menuItem.attr('id').match(getIdExp);
-					 }
-                //console.log("ID " + id);
-                //id.match(getIdExp);
+			     }
                 if (id == null)
                 {
                 	childExpr = /^[0-9]+$/;
@@ -72,18 +65,15 @@ function openHierarchyMenuLevel(menuItem)
                 for(var key in hierarchyData) 
                 {
    					if(childExpr.test(key)){
-   						levelItems[key]='<li id="'+key+'" ><button onclick="setHierarchyId(this)"  metavalue='+ hierarchyData[key][0] +' metatitle='+ hierarchyData[key][1] +'>' + hierarchyData[key][1] + '</button></li>';
-      					//console.log(levelItems[key]);
-      					
+   						levelItems[key]='<li class="hierarchyOption" id="'+key+'" ><button onclick="chooseHierarchyOption(this)"  metavalue="'+ hierarchyData[key][0] +'" metatitle="'+ hierarchyData[key][1] +'">' + hierarchyData[key][1] + '</button></li>';
    					}
    				 }
-              //If no elements in hierarchy level
+                 //If no elements in hierarchy level
    				 if (jQuery.isEmptyObject(levelItems))
    				 {
    					 //add empty menu. Invisible. Used by checks in setHierarchyEventsWrappers focusout to prevent menu hiding while choosing suggestion menu item leaf
    					menuItem.append("<ul></ul>");
    				 	
-   				 //	console.log("no elements in hierarchy level");
    				 }
    				 else {
    				 //wrap elements in hierarchy level
@@ -103,9 +93,6 @@ function openHierarchyMenuLevel(menuItem)
 						
 						//menuItem.find('ul');
 						menuItem.children('ul').slideDown();
-                  
-									 
-   				 	//console.log("debug line 5");
    				 }
    				 
             } else {
@@ -134,25 +121,22 @@ function downloadAndProcessHierarchyFile(hierarchyFileName,metaName)
 	  {
 		  if (xmlhttp.readyState==4 && xmlhttp.status==200)
 		  {
-			  var hierarchyFile = xmlhttp.responseText;
-			  var StringData = [];
-				var hierarchyData = {};
-				//var expr = /^([0-9]+(?:\.[0-9]+)*)\ ([0-9]+(?:\.[0-9]+)*)\ (.*)/m;
-				var expr = /^(\S*|\"[^\"]*\")\ +([0-9]+(?:\.[0-9]+)*)\ +(.*)/m;
-				StringData = hierarchyFile.split('\n');
-				for (var i = 0; i < StringData.length; i++) 
-					{
-					var result = StringData[i].match(expr);
-					// If result not null
-					if (result != null && result.length == 4) 
-						{
-						// populate hierarchy object
-						hierarchyData[result[2]] = [result[1], result[3]];
-						}
+			var hierarchyFile = xmlhttp.responseText;
+			var StringData = [];
+			var hierarchyData = {};
+			var expr = /^(\S*|\"[^\"]*\")\ +([0-9]+(?:\.[0-9]+)*)\ +(.*)/m;
+			StringData = hierarchyFile.split('\n');
+			for (var i = 0; i < StringData.length; i++) {
+				var result = StringData[i].match(expr);
+				// If result not null
+				if (result != null && result.length == 4) {
+					// populate hierarchy object
+					hierarchyData[result[2]] = [ result[1].replace(/^\"|\"$/g, ''), result[3].replace(/^\"|\"$/g, '') ];
+				}
 
-					}
-				addHierarchyToStorage(metaName, hierarchyData);
-				setHierarchyEventsWrappers(metaName);
+			}
+			addHierarchyToStorage(metaName, hierarchyData);
+			setHierarchyEventsWrappers(metaName);
 		  }
 	  }
 
@@ -173,23 +157,28 @@ function setHierarchyHoverEvent(father,className)
 function createHierarchyMenuButton(row)
 {
 		//get current MetaDataName
-		var metaName = $(row.getElementsByClassName("metaTableCellName")[0]).text();
-		
-		var hierarchyMenuName = 'Menu';
+		var metaName = getMetaName(row);
+		defaultHierarchyButtonText = 'Top level menu';
+		var hierarchyButtonText = defaultHierarchyButtonText;
 		// Check if textarea already contain right menu key
 		var textAreaValue = $(row).find('TEXTAREA').val();
 		
 		//Get current hierarchy from storages
 		var hierarchyData = hierarchyStorage[metaName];
+		//TODO Modificate
 		
-		if (hierarchyData[textAreaValue] && (hierarchyData[textAreaValue] != null)) 
-		{				
-			hierarchyMenuName = hierarchyData[textAreaValue][1];
-			
+		
+		for(var key in hierarchyData)
+		{
+			if (hierarchyData[key][0] == textAreaValue)
+				{
+					hierarchyButtonText = hierarchyData[key][1];
+					break;
+				}
 		}
 		
 		//Menu element
-		var mainmenu = '<td class="metaDataHierarchyMenu" style="display: none;"><ul><li id="hierarchyLevel"><button class="hierarchyMenuButton"  title="Menu">' + hierarchyMenuName + '</button></li></ul></td>'
+		var mainmenu = '<td class="metaDataHierarchyMenu" style="display: none;"><ul><li id="hierarchyLevel"><button class="hierarchyMenuButton"  title="Menu">' + hierarchyButtonText + '</button></li></ul></td>'
 		//Insert hierarchy menu
 		$(row).find('.metaTableCellRemove').after(mainmenu);
 		//Set hover event on hierarchy menu
@@ -198,25 +187,27 @@ function createHierarchyMenuButton(row)
 		$(row).find('.metaTableCellArea').bind('input propertychange',function()
 		{
 			var input = $(this).val();
+			var hierarchyButtonText;
 			var row = this.parentElement.parentElement;
 			//RegExp to test a valid key in input 
 			var KeyExp = /^[0-9]+(?:\.[0-9]+)*$/;
 			//RegExp to test a valid key start in input
 			var KeyStartExp = /^(?:[0-9]+(?:\.[0-9]+)*)?\.$/;
 			//if input valid and key found 
-			if ( KeyExp.test(input) && hierarchyData[input]) 
+			removeSuggestionsMenu(row);
+			createSuggestionsMenu(row);
+			/*if ( KeyExp.test(input) && hierarchyData[input] || KeyStartExp.test(input)) 
 			{
-				removeSuggestionsMenu(row,hierarchyData[input]);
 				createSuggestionsMenu(row);
 			}
-			else if (KeyStartExp.test(input)) 
-			{
-				removeSuggestionsMenu(row,hierarchyMenuButton);
-				createSuggestionsMenu(row);
+			*/
+			if (hierarchyData[input]){
+				hierarchyButtonText = hierarchyData[input][1];
+			} else {
+				hierarchyButtonText = defaultHierarchyButtonText;
 			}
-			else {
-				removeSuggestionsMenu(row,hierarchyMenuButton);	
-			} 
+			setHierarchyButtonText(row, hierarchyButtonText);
+			
 		});
 		//Show created menu
 		$(row).find('.metaDataHierarchyMenu').show();
@@ -225,60 +216,63 @@ function createHierarchyMenuButton(row)
 function createSuggestionsMenu(row)
 {
 	//get current MetaDataName
-	var metaName = $(row.getElementsByClassName("metaTableCellName")[0]).text();
-	//Get current hierarchy from storages
+	var metaName = getMetaName(row); 
+	//Get current hierarchy from storage
 	var hierarchyData = hierarchyStorage[metaName];
+	//Hierarchy suggestions menu
+	var SuggestionsMenu = "";
 	
 	var input = $(row.getElementsByClassName("metaTableCellArea")[0]).val();
 	
-	//RegExp to get SuggestionsMenu
-	var SuggestionsMenuExp = new RegExp("^0*" + input.replace(/\./g, '\\.0*') + "\\.?[0-9]+$")
-	//Hierarchy suggestions menu
-	var SuggestionsMenu = "";
-	for(var key in hierarchyData)
+	if (input.replace(/[0-9\.\s]/g, '') === "")
 	{
-	var SuggestionsMenuItems = {};
+		//RegExp to get SuggestionsMenu
+		var SuggestionsMenuExp = new RegExp("^0*" + input.replace(/\./g, '\\.0*') + "\\.?[0-9]+$")
 		
-		if (SuggestionsMenuExp.test(key)) 
+			for(var key in hierarchyData)
 		{
-			SuggestionsMenuItems[key]='<li class="hierarchySuggestionsMenu" id="'+key+'" ><button metavalue='+ hierarchyData[key][0] +' metatitle='+ hierarchyData[key][1] +' onclick="setHierarchyId(this)" >' + key.substring(String(input).length) + " " + hierarchyData[key][1] + '</button></li>';
+			if (SuggestionsMenuExp.test(key)) 
+			{
+				SuggestionsMenu +='<li class="hierarchySuggestionsMenu hierarchyOption" id="'+key+'" ><button metavalue="'+ hierarchyData[key][0] +'" metatitle="'+ hierarchyData[key][1] +'" onclick="chooseHierarchyOption(this)" >' + key.substring(String(input).length) + " " + hierarchyData[key][1] + '</button></li>';
+			}
 		}
+	} else {
+		//RegExp to get SuggestionsMenu
+		var SuggestionsMenuExp = new RegExp(".*" + input + ".*","i")
 		
-		for(var key in SuggestionsMenuItems)
+			for(var key in hierarchyData)
 		{
-			//Fill menu with items
-			SuggestionsMenu += SuggestionsMenuItems[key];
+			if (SuggestionsMenuExp.test(hierarchyData[key][1]) && input !== hierarchyData[key][0]) 
+			{
+				SuggestionsMenu +='<li class="hierarchySuggestionsMenu hierarchyOption" id="'+key+'" ><button metavalue="'+ hierarchyData[key][0] +'" metatitle="'+ hierarchyData[key][1] +'" onclick="chooseHierarchyOption(this)" >' + hierarchyData[key][1] + '</button></li>';
+			}
 		}
-		
 	}
+	
+	
 	
 	//Append new SuggestionsMenu
 	$(row).find(".metaDataHierarchyMenu ul").append(SuggestionsMenu);
 	//Register event
 	$(row).each(function(){setHierarchyHoverEvent($(this),".hierarchySuggestionsMenu")});
 }
-function removeSuggestionsMenu(row,menuNewText)
+//function removeSuggestionsMenu(row,menuNewText)
+function removeSuggestionsMenu(row)
 {
-	//Remove old SuggestionsMenu
 	$(row).find(".hierarchySuggestionsMenu").remove();
-	//Replace text on Hierarchy menu to default
-	$(row).find(".hierarchyMenuButton").text(menuNewText);
+}
+function setHierarchyButtonText(row, title){
+	$(row).find(".hierarchyMenuButton").text(title);
 }
 
 function setHierarchyEventsWrappers(metaName)
 {
-	
 	//Loop through every metaTableCell
 	$(".metaTableCellName").each(function() {
 		//Check if it is a hierarchy row
-		//TODO implement real check
-	    //if($(this).text()=="rubricator")
 		var currentMetaName = $(this).text();
-		//console.log(metaName)
-		//console.log(metaDataName)
 		if (currentMetaName in hierarchyStorage && currentMetaName == metaName)
 	    {
-			//console.log('testXX')
 	    	var row = this.parentElement;
 	    	var textArea = row.getElementsByClassName("metaTableCellArea")[0];
 	    	
@@ -368,17 +362,16 @@ function setHierarchyEventsWrappers(metaName)
 	    		       function() 
 	    		       {
   	    		    	    var row = this.parentElement.parentElement;
-  	    		    	    //Test if there are open submenu
-  	    		    	    var found = $(row).find('.metaDataHierarchyMenu ul li ul').filter(":visible")[0];
   	    		    	    
-  	    		    	    //Hide hierarchy menu if there are no open submenus
-	    		       		if ( found === undefined) 
+  	    		    	    var found = $(row).find('.metaDataHierarchyMenu ul li ul').filter(":visible")[0];
+  	    		    	    //Test if there are open submenu and cursor left tr element
+	    		       		if ( found === undefined && !$(row).is(':hover')) 
 	    		       		{
-	    		       			//Hide menu
+	    		       			//Hide hierarchy menu if there are no open submenus
 	    		       			$(row).find('.metaDataHierarchyMenu').hide();
-	    		       			//console.log(this);
-	    		       			//console.log(row);
-	    		       			//console.log(found);
+	    		       			
+	    		       			//Set metadata value if textarea contains hierarchy path
+	    		       			substituteHierarchyMetaValue(row);
 	    		       		}
 	    		       		
 	    		       		
@@ -387,12 +380,25 @@ function setHierarchyEventsWrappers(metaName)
 	    }
 	  });
 }
+
+function substituteHierarchyMetaValue(row){
+	var text = $(row).find('TEXTAREA').val();
+	var metaName = getMetaName(row);
+	var hierarchyData = hierarchyStorage[metaName];
+	if (hierarchyData[text]){
+		var metaValue = hierarchyData[text][0];
+		$(row).find('TEXTAREA').val(metaValue);
+		
+	}
+
+}
+function getMetaName(row){
+	return $(row.getElementsByClassName("metaTableCellName")[0]).text();
+}
 var hierarchyStorage = {};
 function addHierarchyToStorage(metaDataName,processedHierarchy)
 {
 	hierarchyStorage[metaDataName] = processedHierarchy;
-	//console.log( hierarchyStorage)
-	//console.log( metaDataName)
 	
 }
 
