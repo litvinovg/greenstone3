@@ -1,7 +1,5 @@
 //hierarchy storage object
 
-//hierarchy menu Button text
-var hierarchyMenuButton = "Menu";
 //Find first ancestor element by tag name
 function findAncestorByTagName (element, tagName) {
     while ((element.tagName != tagName) && (element = element.parentElement));
@@ -158,7 +156,7 @@ function createHierarchyMenuButton(row)
 {
 		//get current MetaDataName
 		var metaName = getMetaName(row);
-		defaultHierarchyButtonText = 'Top level menu';
+                defaultHierarchyButtonText = gs.text.de.top_level_menu; //'Top level menu';
 		var hierarchyButtonText = defaultHierarchyButtonText;
 		// Check if textarea already contain right menu key
 		var textAreaValue = $(row).find('TEXTAREA').val();
