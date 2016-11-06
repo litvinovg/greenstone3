@@ -482,7 +482,7 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 
 	<!-- With gsf:displayItem, a user can request a displayItem from collectionConfig.xml -->
 	<xsl:template match="gsf:displayItem" name="gsf:displayItem">
-		<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/collection/displayItem[@name='{@name}']"/>
+		<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/collection/displayItemList/displayItem[@name='{@name}']"/>
 	</xsl:template>
 
 	<!-- With gsf:interfaceText, a user can request a string from the interface dictionaries in the current lang -->
