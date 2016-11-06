@@ -237,8 +237,9 @@ function createSuggestionsMenu(row)
 			}
 		}
 	} else {
+		var escapedInput = input.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 		//RegExp to get SuggestionsMenu
-		var SuggestionsMenuExp = new RegExp(".*" + input + ".*","i")
+		var SuggestionsMenuExp = new RegExp( escapedInput,"i");
 		
 			for(var key in hierarchyData)
 		{
