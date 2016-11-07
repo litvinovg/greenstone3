@@ -415,6 +415,7 @@
 									</td>
 									<td>
 										<select id="groupSelector">
+										  <option>COLLNAME-collection-editor</option>
 											<option>personal-collections-editor</option>
 											<option>all-collections-editor</option>
 											<option>administrator</option>
@@ -447,6 +448,7 @@
 										</script>
 									</td>
 								</tr>
+								<tr><td colspan="4"><xsl:value-of select="util:getInterfaceText('default', /page/@lang, 'authen.group_desc')"/><ul><li><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.admin_desc')"/></li><li><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.all_coll_edit_desc')"/> </li> <li><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.pers_coll_edit_desc')"/></li><li><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.single_coll_edit_desc')"/> </li></ul></td></tr>
 								<tr>
 									<td><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'authen.comment')"/><xsl:text>: </xsl:text></td>
 									<td>
