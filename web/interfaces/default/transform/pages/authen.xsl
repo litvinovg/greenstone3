@@ -274,6 +274,7 @@
 									</td>
 									<td>
 										<select id="groupSelector">
+											<option>COLLNAME-collection-editor</option>
 											<option>personal-collections-editor</option>
 											<option>all-collections-editor</option>
 											<option>administrator</option>
