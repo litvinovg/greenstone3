@@ -3,8 +3,11 @@
 rem This script will echo the IPv4 of this windows machine. E.g. 100.200.300.45
 rem If passed -format-for-tomcat-context, it will echo the same with a pipe
 rem symbol up front and all the . escaped with a "\". E.g. "|100\.200\.300\.45"
+rem The 3 spaces in front of the IPv4 match expression ensure we grab the line
+rem that starts with "IPv4 Address", not the many others containing "IPv4 Address".
+rem Without the spaces, it will grab the last line mentioning "IPv4" (ethernet).
 
-for /f "usebackq tokens=2 delims=:" %%a in (`ipconfig ^| find "IPv4"`) do (set result=%%a)
+for /f "usebackq tokens=2 delims=:" %%a in (`ipconfig ^| find "   IPv4"`) do (set result=%%a)
 
 :: To lop off the single extra space in front of IPv4 number, end with:
 ::do (set result=%a& echo %result:~1%)
