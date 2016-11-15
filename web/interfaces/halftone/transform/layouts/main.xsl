@@ -46,7 +46,7 @@
 			<div id="logo">
 				<div id="title"><a id="lib" href="{$library_name}"><xsl:call-template name="siteName"/></a>
 				<xsl:if test="/page/pageResponse/collection"><br/>
-				<a id="coll" href=""><xsl:value-of select="/page/pageResponse/collection/displayItem[@name='name']"/></a></xsl:if>
+				<xsl:value-of select="/page/pageResponse/collection/displayItem[@name='name']"/></xsl:if>
 				</div>
 			</div>
 			
