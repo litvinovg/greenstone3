@@ -214,7 +214,8 @@ public class CollectionGroups extends ServiceRack {
 		File configFile = new File(GSFile.groupConfigFile(site_home));
 		//
 		if (!configFile.exists()) {
-			logger.error("Groups config file " + configFile.getPath() + " does not exists");
+			logger.info("Groups config file " + configFile.getPath() + " does not exist.");
+			return;
 		}
 		// Try to read and catch exception if it fails
 		Document doc = XMLConverter.getDOM(configFile);
