@@ -572,7 +572,7 @@ gs.functions.getIndexMetadata = function(collection, site, documentID, metadataN
 
 gs.functions.removeImportMetadata = function(collection, site, documentID, metadataName, metadataValue, responseFunction)
 {
-	callMetadataServer("removeImportMetadata", "cgi-bin/metadata-server.pl?a=remove-import-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue, responseFunction);
+	callMetadataServer("removeImportMetadata", "cgi-bin/metadata-server.pl?a=remove-import-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metavalue=" + metadataValue + "&metaname=" + metadataName, responseFunction);
 }
 
 gs.functions.removeArchivesMetadata = function(collection, site, documentID, metadataName, metadataPosition, metadataValue, responseFunction)
@@ -583,7 +583,7 @@ gs.functions.removeArchivesMetadata = function(collection, site, documentID, met
 	}
 	else if(metadataValue != null)
 	{
-		callMetadataServer("removeArchiveMetadata", "cgi-bin/metadata-server.pl?a=remove-archives-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue, responseFunction);
+		callMetadataServer("removeArchiveMetadata", "cgi-bin/metadata-server.pl?a=remove-archives-metadata&c=" + collection + "&site=" + site + "&d=" + documentID  + "&metavalue=" + metadataValue + "&metaname=" + metadataName, responseFunction);
 	}
 }
 
@@ -595,7 +595,7 @@ gs.functions.removeIndexMetadata = function(collection, site, documentID, metada
 	}
 	else if(metadataValue != null)
 	{
-		callMetadataServer("removeIndexMetadata", "cgi-bin/metadata-server.pl?a=remove-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue, responseFunction);
+		callMetadataServer("removeIndexMetadata", "cgi-bin/metadata-server.pl?a=remove-metadata&c=" + collection + "&site=" + site + "&d=" + documentID  + "&metavalue=" + metadataValue + "&metaname=" + metadataName, responseFunction);
 	}
 }
 
@@ -606,6 +606,6 @@ gs.functions.removeMetadata = function(collection, site, documentID, metadataNam
 	
 	for(var i = 0; i < nameArray.length; i++)
 	{
-		callMetadataServer(nameArray[i], "cgi-bin/metadata-server.pl?a=" + functionArray[i] + "&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue, responseFunction);
+		callMetadataServer(nameArray[i], "cgi-bin/metadata-server.pl?a=" + functionArray[i] + "&c=" + collection + "&site=" + site + "&d=" + documentID + "&metavalue=" + metadataValue + "&metaname=" + metadataName, responseFunction);
 	}
 }
