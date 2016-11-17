@@ -316,7 +316,15 @@ public class GS2Construct extends ServiceRack
 		return result;
 	    }
 
-	    return runCommand(request, GS2PerlConstructor.MODIFY_METADATA_SERVER);
+		// wait until we can reserve the collection for processing
+		waitUntilReady(request);	
+		
+	    // process
+		Element response = runCommand(request, GS2PerlConstructor.MODIFY_METADATA_SERVER);
+		
+		// release hold on collection
+		signalReady(request);
+		return response;
 	}
 
 	protected Element processActivateCollection(Element request)
@@ -891,7 +899,7 @@ public class GS2Construct extends ServiceRack
 			return;
 		}
 
-		while (collectionOperationMap.get(collection) != null)
+		while (!checkCollectionIsNotBusy(collection)) // When the collection ceases to be busy, we place a hold on it
 		{
 			try
 			{
@@ -914,6 +922,7 @@ public class GS2Construct extends ServiceRack
 		collectionOperationMap.remove(collection);
 	}
 
+	// If collection is NOT busy, then reserve it
 	protected synchronized boolean checkCollectionIsNotBusy(String collection)
 	{
 		if (collectionOperationMap.get(collection) == null)
