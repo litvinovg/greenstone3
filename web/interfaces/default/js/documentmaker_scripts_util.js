@@ -828,8 +828,7 @@ function addFunctionalityToTable(table)
 		var valueCell = $("<td>", {"class": "metaTableCell"}); 	
 	        var textValue = $("<textarea>", {"class": "metaTableCellArea "+ clean_name}); 
 	    
-	    
-	        if (autocompleteMetadata.includes(name)) {
+	    if (jQuery.inArray(name, autocompleteMetadata) != -1) {
 		    var source_obje = window[clean_name +"_values"];
 		    if (source_obje) {
 			textValue.autocomplete({
