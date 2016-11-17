@@ -667,6 +667,17 @@
     <echo>os.unix: ${os.unix}</echo>
   </target>
 
+  <target name="needs-gs3-setup">
+    <!-- has the gs3-setup script been run?? -->
+    <condition property="gs3-setup-not-done">
+      <not>
+	<isset property="env.GSDL3HOME"/>
+      </not>
+    </condition>
+
+    <fail if="gs3-setup-not-done" message="Please run 'gs3-setup' (Windows) or 'source gs3-setup.sh' (Linux/Mac) before starting the Greenstone server."/>
+  </target>
+
   <!-- Appends the current env to the file environment.txt. For debugging env vars used by the release-kit. -->
   <target name="write-env" description="Writes out the environment that this build.xml is executed in to file environment.txt. For debugging.">
     <echo message="*****************ENVIRONMENT OUTPUT:****************${line.separator}" file="environment.txt" append="true" />
@@ -904,7 +915,7 @@
     </if>
   </target>
 
-  <target name="start" depends="init,configure-tomcat,configure-web,configure-solr-ext,start-derby,start-tomcat"
+  <target name="start" depends="needs-gs3-setup,init,configure-tomcat,configure-web,configure-solr-ext,start-derby,start-tomcat"
     description="Startup the Tomcat server." >
     <echo>${app.name} (${app.version}) server running using Apache Tomcat and Java</echo> 
     <echo>Tomcat: ${catalina.home}</echo> 
@@ -984,15 +995,6 @@
   
   <!-- this sets up some initial properties -->
   <target name="init">
-
-    <!-- has the gs3-setup script been run?? -->
-    <condition property="gs3-setup-not-done">
-      <not>
-	<isset property="env.GSDL3HOME"/>
-      </not>
-    </condition>
-
-    <!--<fail if="gs3-setup-not-done" message="please run 'gs3-setup' (Windows) or 'source gs3-setup.sh' (Linux/Mac) before running this target."/>-->
     
     <condition property="java.too.old">
       <or>
