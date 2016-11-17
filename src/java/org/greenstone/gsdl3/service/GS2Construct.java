@@ -198,6 +198,7 @@ public class GS2Construct extends ServiceRack
 		Element buildResponse = processBuildCollection(request);
 		if (buildResponse.getElementsByTagName(GSXML.ERROR_ELEM).getLength() > 0)
 		{
+			signalReady(request);
 			return buildResponse;
 		}
 
