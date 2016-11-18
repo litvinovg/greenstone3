@@ -6,6 +6,11 @@ var CONTINUING = 10;
 var COMPLETED = 11;
 var HALTED = 12;
 
+function encodeDelimiters(meta_value) {
+
+    var new_value = meta_value.replace(/;/g, "%253B");
+    return new_value.replace(/&/g, "%2526");
+}    
 
 function getElementsByClassName(cl, parent) 
 {
@@ -363,15 +368,15 @@ function saveAndRebuild(rebuild)
 			callbackFunction = function(){processChangesLoop(index + 1)};
 		}
 		if (change.type == "delete") {
-		  gs.functions.removeArchivesMetadata(collection, gs.xsltParams.site_name, change.docID, change.name, null, change.value, function(){callbackFunction();});
+		    gs.functions.removeArchivesMetadata(collection, gs.xsltParams.site_name, change.docID, change.name, null, encodeDelimiters(change.value), function(){callbackFunction();});
 		} else {
 		  if(change.orig)
 		    {
-		      gs.functions.setArchivesMetadata(change.collection, gs.xsltParams.site_name, change.docID, change.name, null, change.value, change.orig, "override", function(){callbackFunction();});
+			gs.functions.setArchivesMetadata(change.collection, gs.xsltParams.site_name, change.docID, change.name, null, encodeDelimiters(change.value), encodeDelimiters(change.orig), "override", function(){callbackFunction();});
 		    }
 		  else
 		    {
-		      gs.functions.setArchivesMetadata(change.collection, gs.xsltParams.site_name, change.docID, change.name, null, change.value, null, "accumulate", function(){callbackFunction();});
+			gs.functions.setArchivesMetadata(change.collection, gs.xsltParams.site_name, change.docID, change.name, null, encodeDelimiters(change.value), null, "accumulate", function(){callbackFunction();});
 		    }
 		}
 	}
