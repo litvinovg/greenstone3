@@ -316,23 +316,18 @@ public class GS2Construct extends ServiceRack
 		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
 		return result;
 	    }
-
 		
 		// wait until we can reserve the collection for processing
-		waitUntilReady(request);	
-		
-		logger.error("@@@ RESERVED");
+		waitUntilReady(request);
+	
 		
 		// process
 		Element response = runCommand(request, GS2PerlConstructor.MODIFY_METADATA_SERVER);
 		
 		if (response.getElementsByTagName(GSXML.ERROR_ELEM).getLength() <= 0) // if no errors, wait for process to finish
 		{
-			logger.error("@@@ NO ERRORS");
-			
 			Element statusElem = (Element) response.getElementsByTagName(GSXML.STATUS_ELEM).item(0);
 			String id = statusElem.getAttribute("pid");
-			logger.error("@@@ GOT PID: " + id);
 			
 			GS2PerlListener currentListener = this.listeners.get(id);
 			int statusCode = currentListener.getStatus();
@@ -341,8 +336,7 @@ public class GS2Construct extends ServiceRack
 				// wait for the process, and keep checking the status code
 				// there is probably a better way to do this.
 				try
-				{
-					logger.error("@@@ WAITING");
+				{		
 					Thread.currentThread().sleep(100);
 				}
 				catch (Exception e)
@@ -350,13 +344,12 @@ public class GS2Construct extends ServiceRack
 				}
 				statusCode = currentListener.getStatus();
 			}	    
-		}
+		}		
 		
-		else {
-			logger.error("@@@ GOT ERROR");			
-		}
-		
-		logger.error("@@@ RELEASING HOLD");
+		Element statusElem = (Element) response.getElementsByTagName(GSXML.STATUS_ELEM).item(0);
+		String statusString = GSXML.getNodeText(statusElem);
+		statusString += " and monitored until done."; 
+		GSXML.setNodeText(statusElem, statusString);
 		
 		// release hold on collection
 		signalReady(request);
