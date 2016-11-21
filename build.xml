@@ -1939,6 +1939,8 @@
       <socket server="${derby.server}" port="${derby.server.port}"/>
     </waitfor>
 
+    <antcall target="check-derbyserver-started" />
+
     <!--<echo>${admin.password}</echo>--> <!-- for testing -->
     <echo>gsdl3.writablehome: ${gsdl3.writablehome}</echo> <!-- for testing -->
     <echo>web.home: ${web.home}</echo> <!-- for testing -->
