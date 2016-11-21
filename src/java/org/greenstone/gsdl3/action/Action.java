@@ -147,14 +147,12 @@ abstract public class Action
 		
 		//ADD SITE METADATA
 		Element metadata_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
-		//create a hashmap of params
-		HashMap subset_params = new HashMap(2);
-		subset_params.put(GSXML.SUBSET_PARAM, GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
-		subset_params.put(GSXML.SUBSET_PARAM, GSXML.DISPLAY_TEXT_ELEM + GSXML.LIST_MODIFIER);
 		//create the element to put the params in
 		Element param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		//put them in
-		GSXML.addParametersToList(param_list, subset_params);
+		// want to get metadataList and displayItemList
+		GSXML.addParameterToList(param_list, GSXML.SUBSET_PARAM , GSXML.METADATA_ELEM + GSXML.LIST_MODIFIER);
+		GSXML.addParameterToList(param_list, GSXML.SUBSET_PARAM , GSXML.DISPLAY_TEXT_ELEM  + GSXML.LIST_MODIFIER);
+		
 		metadata_request.appendChild(param_list);
 		//create the message
 		Element metadata_message = doc.createElement(GSXML.MESSAGE_ELEM);
@@ -164,7 +162,7 @@ abstract public class Action
 		//drill down to response
 		Element metadata_response = (Element) GSXML.getChildByTagName(metadata_response_message, GSXML.RESPONSE_ELEM);
 		//merge in metadata
-		// *************** need to merge the displayITem lists too
+		// *************** need to merge the displayItem lists too
 		GSXML.mergeMetadataLists(element, metadata_response);
 		GSXML.mergeSpecifiedLists(element, metadata_response, GSXML.DISPLAY_TEXT_ELEM);
 	}
