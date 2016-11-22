@@ -1935,11 +1935,9 @@
     <!--<antcall target="start-derby"/>-->
 
     <!-- wait a max of 5 seconds for the derbyserver to have started up -->
-    <waitfor maxwait="15" maxwaitunit="second">
+    <waitfor maxwait="5" maxwaitunit="second">
       <socket server="${derby.server}" port="${derby.server.port}"/>
     </waitfor>
-
-    <antcall target="check-derbyserver-started" />
 
     <!--<echo>${admin.password}</echo>--> <!-- for testing -->
     <echo>gsdl3.writablehome: ${gsdl3.writablehome}</echo> <!-- for testing -->
