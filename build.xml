@@ -1935,7 +1935,7 @@
     <!--<antcall target="start-derby"/>-->
 
     <!-- wait a max of 5 seconds for the derbyserver to have started up -->
-    <waitfor maxwait="5" maxwaitunit="second">
+    <waitfor maxwait="15" maxwaitunit="second">
       <socket server="${derby.server}" port="${derby.server.port}"/>
     </waitfor>
 
