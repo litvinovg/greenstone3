@@ -81,6 +81,7 @@ public class GSXML
 	public static final String SYSTEM_ELEM = "system";
 	public static final String FORMAT_STRING_ELEM = "formatString";
 	public static final String EXTRA_METADATA = "extraMetadata";
+	public static final String PATH_ELEM = "path";
 
 	//config file elems
 	public static final String COLLECTION_CONFIG_ELEM = "collectionConfig";
@@ -161,6 +162,7 @@ public class GSXML
 	public static final String COLLECT_TYPE_ATT = "ct";
 	public static final String HIDDEN_ATT = "hidden";
 	public static final String FACET_ATT = "facet";
+	public static final String PATH_ATT = "path";
 
 	// document stuff
 	public static final String DOC_TYPE_ATT = "docType";

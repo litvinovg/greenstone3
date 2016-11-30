@@ -159,6 +159,11 @@ public class PageAction extends Action
 			if (group_list != null) {
 				info_response.appendChild(doc.importNode(group_list, true));
 			}
+			Element path_list = (Element) GSXML.getChildByTagName(group_info_response,
+					GSXML.PATH_ELEM + GSXML.LIST_MODIFIER);
+			if (path_list != null) {
+				info_response.appendChild(doc.importNode(path_list, true));
+			}
 			// Send message to groupInfoType Services
 		} else {
 			// If no service with type SERVICE_TYPE_GROUPINFO could be provided

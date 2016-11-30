@@ -172,10 +172,12 @@ public class CollectionGroups extends ServiceRack {
 					}
 				}
 				
+			} else {
+				Element groupDescription = getPathInfo(groupPath);
+				if (groupContent != null){
+					result.appendChild(doc.importNode(groupDescription, true));
+				}
 			}
-			
-			
-
 		}
 
 		return result;
@@ -296,6 +298,36 @@ public class CollectionGroups extends ServiceRack {
 		}
 		return result;
 
+	}
+	private Element getPathInfo(String path) {
+
+		if (hierarchy == null || groupDesc == null) {
+			return null;
+		}
+		
+		Document doc = XMLConverter.newDOM();
+		
+		if (path == null) {
+			 path = "";
+		}
+		String[] pathSteps = path.split("/");
+
+		Element pathInfo = doc.createElement(GSXML.PATH_ELEM + GSXML.LIST_MODIFIER);
+		
+		String currentPath = "";
+		for (int i = 0; i < pathSteps.length; i++) {
+			if (!pathSteps[i].isEmpty()) {
+				currentPath += "/" + pathSteps[i];
+				Element pathStepDescription = getGroupDescription(pathSteps[i]);
+				if (pathStepDescription != null){
+					pathStepDescription.setAttribute(GSXML.POSITION_ATT, String.valueOf(i));
+					pathStepDescription.setAttribute(GSXML.PATH_ATT, currentPath);
+					pathInfo.appendChild(doc.importNode(pathStepDescription, true));
+				}
+			}
+		}
+		
+		return pathInfo;
 	}
 
 }
