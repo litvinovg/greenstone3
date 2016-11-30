@@ -17,6 +17,22 @@
 	<xsl:template name="breadcrumbs">
 		<xsl:if test="/page/pageRequest/paramList/param[@name='group']">
 			<gslib:siteLink/>
+			<xsl:for-each select="/page/pageResponse/pathList/group">
+				<xsl:sort data-type="number" select="@position"/>
+				<gslib:rightArrow/>
+				<a>
+				<xsl:attribute name="href">
+				 	<xsl:value-of select="$library_name"/>
+				 	<xsl:text>?a=p&amp;sa=home&amp;group=</xsl:text>
+					<xsl:value-of select="@path"></xsl:value-of>
+				</xsl:attribute>
+				
+				<xsl:attribute name="title">
+					<xsl:value-of select="./title"></xsl:value-of>
+				</xsl:attribute>
+				<xsl:value-of select="./title"></xsl:value-of>
+				</a>
+			</xsl:for-each>
 		</xsl:if>
 	</xsl:template>
 
