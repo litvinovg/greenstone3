@@ -695,7 +695,9 @@ the gsf:equivlinkgs3 element (which resolves to the XSLT in config_format.xsl an
 	<xsl:template match="gsf:html">
 	  <xslt:text disable-output-escaping="yes"><xsl:value-of select="."/></xslt:text>
 	</xsl:template>
-
+	<!-- use this if you want a space after an element in the output.
+	e.g. <strong>Title:><gsf:space/></strong -->
+	<xsl:template match="gsf:space">&#160;</xsl:template>
 	<xsl:template match="*">
 		<xsl:copy>
 			<xsl:copy-of select="@*"/>
