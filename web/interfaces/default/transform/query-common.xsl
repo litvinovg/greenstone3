@@ -52,8 +52,8 @@
 		<xsl:param name="ns">s1.</xsl:param>
 		<xsl:param name="default"/>
 		<select name='{$ns}{@name}'>
-			<option value="0"><xsl:if test="$default='0'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="option[@name='0']/displayItem[@name='name']"/></option>
-			<option value="1"><xsl:if test="$default='1'"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="option[@name='1']/displayItem[@name='name']"/></option>
+			<option value="0"><xsl:if test="$default='0'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if><xsl:value-of select="option[@name='0']/displayItem[@name='name']"/></option>
+			<option value="1"><xsl:if test="$default='1'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if><xsl:value-of select="option[@name='1']/displayItem[@name='name']"/></option>
 		</select>
 	</xsl:template>
 
@@ -80,7 +80,7 @@
 			<xsl:otherwise>
 				<select name="{$ns}{@name}">
 					<xsl:for-each select="option">
-						<option value="{@name}"><xsl:if test="@name=$default"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="displayItem[@name='name']"/></option>
+						<option value="{@name}"><xsl:if test="@name=$default"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if><xsl:value-of select="displayItem[@name='name']"/></option>
 					</xsl:for-each>
 				</select>
 			</xsl:otherwise>
@@ -94,7 +94,7 @@
 		<select name="{$ns}{@name}" size="2">
 			<xsl:attribute name="multiple"></xsl:attribute>
 			<xsl:for-each select="option">
-				<option value="{@name}"><xsl:if test="contains($default, concat(',', @name, ','))"><xsl:attribute name="selected"></xsl:attribute></xsl:if><xsl:value-of select="displayItem[@name='name']"/></option>
+				<option value="{@name}"><xsl:if test="contains($default, concat(',', @name, ','))"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if><xsl:value-of select="displayItem[@name='name']"/></option>
 			</xsl:for-each>
 		</select>
 	</xsl:template>
