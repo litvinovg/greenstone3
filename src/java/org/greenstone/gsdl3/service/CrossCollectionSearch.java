@@ -47,6 +47,7 @@ public class CrossCollectionSearch extends ServiceRack
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.CrossCollectionSearch.class.getName());
 	protected static final String QUERY_PARAM = "query";
 	protected static final String COLLECTION_PARAM = "collection";
+	protected static final String GROUP_PARAM = "group";
   protected static final String MAXDOCS_PARAM = "maxDocs"; // matches standard maxDocs, but in this case, means max docs per collection
   protected static final String HITS_PER_PAGE_PARAM = "hitsPerPage";
   protected static final String MAXDOCS_DEFAULT = "20";
@@ -171,7 +172,6 @@ public class CrossCollectionSearch extends ServiceRack
 			logger.error("TextQuery request had no paramList.");
 			return result; // Return the empty result
 		}
-
 		// get the collection list
 		String[] colls_list = coll_ids_list_no_all;
 		Element coll_param = GSXML.getNamedElement(param_list, GSXML.PARAM_ELEM, GSXML.NAME_ATT, COLLECTION_PARAM);
@@ -183,6 +183,8 @@ public class CrossCollectionSearch extends ServiceRack
 				colls_list = coll_list.split(",");
 			}
 		}
+			
+		colls_list = mergeGroups(userContext, param_list, colls_list);
 		
 		String maxdocs = MAXDOCS_DEFAULT;
 		Element maxdocs_param = GSXML.getNamedElement(param_list, GSXML.PARAM_ELEM, GSXML.NAME_ATT, MAXDOCS_PARAM);
@@ -265,6 +267,9 @@ public class CrossCollectionSearch extends ServiceRack
 	//     {
 
 	//     }
+	
+	
+	
 	protected boolean initCollectionList(String lang)
 	{
 		UserContext userContext = new UserContext();
@@ -488,4 +493,73 @@ public class CrossCollectionSearch extends ServiceRack
 		}
 		return result;
 	}
+	
+	private String[] mergeGroups(UserContext userContext, Element paramList, String[] collArray){
+		Document doc = XMLConverter.newDOM();
+		Element groupParam = GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, GROUP_PARAM);
+		Element collParam = GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, COLLECTION_PARAM);
+		//Group param not null and coll param null or not 'all'
+		if (groupParam != null && (collParam == null || !GSXML.getValue(collParam).equals("all")))
+		{	
+			//GroupInfo service to get uniq collections
+			String uniqCollServiceName = "UniqueCollections";
+			Element infoResponse = getMRInfo(userContext);
+			Element serviceList = (Element) GSXML.getChildByTagName(infoResponse, GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+			if (serviceList == null) { 
+				logger.error("Service list is null!");
+				return collArray;
+			}
+			Element groupInfoService = GSXML.getNamedElement(serviceList, GSXML.SERVICE_ELEM, GSXML.NAME_ATT,	uniqCollServiceName);
+			if (groupInfoService == null){
+				logger.error("UniqueCollections service unavailable; Check your groupConfig.xml");
+				return collArray;
+			}
+			Element groupQueryMessage = doc.createElement(GSXML.MESSAGE_ELEM);
+			Element groupQueryRequest = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, uniqCollServiceName, userContext);
+			groupQueryMessage.appendChild(groupQueryRequest);
+			Element groupParamList = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+			groupQueryRequest.appendChild(groupParamList);
+			if (collParam != null){
+				groupParamList.appendChild(doc.importNode(GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, GSXML.COLLECTION_ELEM), true));	
+			}
+			groupParamList.appendChild(doc.importNode(GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, GSXML.GROUP_ELEM), true));
+			Element groupQueryResult = (Element) this.router.process(groupQueryMessage);
+			Element groupQueryResonse = (Element) GSXML.getChildByTagName(groupQueryResult, GSXML.RESPONSE_ELEM);
+			Element collList = (Element) GSXML.getChildByTagName(groupQueryResonse, GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
+			NodeList collections = GSXML.getChildrenByTagName(collList, GSXML.COLLECTION_ELEM);
+			collArray = new String[collections.getLength()];
+			for (int i = 0; i < collections.getLength(); i++){
+				String collName = ((Element) collections.item(i)).getAttribute(GSXML.NAME_ATT);
+				collArray[i] = collName;
+			}
+			return collArray;
+		}
+		return collArray;
+		
+	}
+	private Element getMRInfo(UserContext userContext){
+		Document doc = XMLConverter.newDOM();
+		Element infoMessage = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element infoRequest = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
+		Element paramList = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		infoRequest.appendChild(paramList);
+		GSXML.addParameterToList(paramList, GSXML.SUBSET_PARAM, GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		infoMessage.appendChild(infoRequest);
+		Element responseMessage = (Element) this.router.process(infoMessage);
+		if (responseMessage == null)
+		{
+			logger.error("couldn't query the message router!");
+			return null;
+		}
+		Element infoResponse = (Element) GSXML.getChildByTagName(responseMessage, GSXML.RESPONSE_ELEM);
+		if (infoResponse == null)
+		{
+			logger.error("response from message router is null!");
+			return null;
+		}
+		
+		return infoResponse;
+		
+	}
+	
 }
