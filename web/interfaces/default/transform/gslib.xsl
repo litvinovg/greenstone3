@@ -201,7 +201,6 @@
       <input type="hidden" name="s" value="{@name}"/>
 	  <xsl:choose>
 		<xsl:when test="/page/pageRequest/paramList/param[@name='group']/@value">
-			<input type="hidden" name="s1.collection" value="none" />
 			<input type="hidden" name="s1.group">
 				<xsl:attribute name="value">
       				<xsl:value-of select="/page/pageRequest/paramList/param[@name='group']/@value" />
