@@ -656,7 +656,11 @@ public class LibraryServlet extends BaseGreenstoneServlet
 			// the params from the current request and any others from the saved session
 			Element xml_param_list = msg_doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 			xml_request.appendChild(xml_param_list);
-
+			
+			if (queryMap.containsKey("s1.collection") || queryMap.containsKey("s1.group")){
+				table.remove("s1.collection");
+				table.remove("s1.group");
+			}
 			for (String name : queryMap.keySet())
 			{
 				if (!name.equals(GSParams.ACTION) && !name.equals(GSParams.SUBACTION) && !name.equals(GSParams.LANGUAGE) && !name.equals(GSParams.OUTPUT))
