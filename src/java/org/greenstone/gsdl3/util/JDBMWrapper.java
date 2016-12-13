@@ -216,6 +216,31 @@ public class JDBMWrapper implements FlatDatabaseWrapper
 		return true;
 	}
 
+    /** Returns all the keys of the database as Strings */
+    public ArrayList<String> getAllEntryKeys() {
+	
+	ArrayList<String> keys = new ArrayList<String>();
+	
+	try {
+	    FastIterator iter = hashtable_.keys();
+	    
+	    String key = (String) iter.next();
+	    
+	    while (key != null) {
+		keys.add(key);
+		key = (String) iter.next();
+	    }
+	    
+	    recman_.commit();
+	} catch (IOException e) {
+	    logger.error("Failed to get all keys from JDBM database");
+	    return null;
+	}
+	
+	return keys;
+    }
+    
+
 	/**
 	 * returns a string of key-value entries that can be printed for debugging
 	 * purposes
@@ -246,7 +271,7 @@ public class JDBMWrapper implements FlatDatabaseWrapper
 		}
 		catch (IOException e)
 		{
-			logger.error("Failed get all keys and values from JDBM database");
+			logger.error("Failed to get all keys and values from JDBM database");
 			return null;
 		}
 

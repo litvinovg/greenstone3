@@ -146,7 +146,18 @@ public class OAIXML {
    public static final String OAI_SET_LIST = "oaiSetList";
    public static final String OAI_SERVICE_UNAVAILABLE = "OAI service unavailable";
    public static final String OID = "OID";
-    
+
+    // The node id in the oai-inf database of the collection, which should contain all the OIDs in the db
+    public static final String OAI_INF_STATUS = "status"; // D = Deleted; E = Existing (PD = Provisionally Deleted but PD should not be present at this stage in the oai-inf database)
+    public static final String OAI_INF_TIMESTAMP = "timestamp"; // the time of deletion/last (re)indexing of doc
+    public static final String OAI_INF_DATESTAMP = "datestamp"; // date version of timestamp    
+    // oai-inf db values for OAI_INF_STATUS
+    public static final String OAI_INF_DELETED = "D";
+    public static final String OAI_INF_EXISTS = "E";
+    public static final String OAI_INF_PROVISIONALLY_DELETED = "PD";
+    // header values for ListRecords/GetRecord and listIdentifiers
+    public static final String HEADER_STATUS_ATTR_DELETED = "deleted";
+
   public static final String OAI_SERVICE_RACK = "OAIPMH";
   //system-dependent file separator, maybe '/' or '\'
   public static final String FILE_SEPARATOR = File.separator;

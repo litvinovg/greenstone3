@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 
 import java.io.UnsupportedEncodingException;
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * java wrapper class for gdbm - uses Java-GDBM written by Martin Pool replaces
@@ -260,6 +261,27 @@ public class GDBMWrapper implements FlatDatabaseWrapper
 
 		return true;
 	}
+
+    /** Returns all the keys of the database as Strings */
+    public ArrayList<String> getAllEntryKeys() {
+
+	ArrayList<String> keys = new ArrayList<String>();
+	
+	try {
+	    java.util.Enumeration e = db_.keys();
+	    while (e.hasMoreElements()) {
+		
+		Object key = e.nextElement();
+		keys.add((String)key);
+		
+	    }	 
+	} catch (Exception e) {
+	    logger.error("Exception encountered when trying to GDBMWrapper.getAllEntries():" + e);
+	}
+	
+	return keys;
+    }
+    
 
 	/**
 	 * returns a string of key-value entries that can be printed for debugging

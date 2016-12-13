@@ -57,6 +57,7 @@ public class OAIPMH extends ServiceRack {
   static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.OAIPMH.class.getName());
   
   protected SimpleCollectionDatabase coll_db = null;
+  protected SimpleCollectionDatabase oaiinf_db = null;
   
   protected String site_name = "";
   protected String coll_name = "";
@@ -75,6 +76,7 @@ public class OAIPMH extends ServiceRack {
   public void cleanUp() {
     super.cleanUp();//??
     this.coll_db.closeDatabase();
+    this.oaiinf_db.closeDatabase();
   }
   /** configure this service 
   info is the OAIPMH service rack from collectionConfig.xml, and 
@@ -113,7 +115,7 @@ public class OAIPMH extends ServiceRack {
     }
 
     if (index_stem == null || index_stem.equals("")) {
-      index_stem = this.cluster_name;
+	index_stem = this.cluster_name; // index_stem is the name of the db in indext/text, it is <colname>.<db>
     }
     if (infodb_type == null || infodb_type.equals("")) {
       infodb_type = "gdbm"; // the default
@@ -124,12 +126,25 @@ public class OAIPMH extends ServiceRack {
       logger.error("Couldn't create the collection database of type "+infodb_type);
       return false;
     }
+
+    oaiinf_db = new SimpleCollectionDatabase(infodb_type);
+    if (!oaiinf_db.databaseOK()) {
+      logger.error("Couldn't create the oai-inf database of type "+infodb_type);
+      oaiinf_db = null;
+      return false;
+    }
+
     
-    // Open database for querying
+    // Open databases for querying
     String coll_db_file = GSFile.collectionDatabaseFile(this.site_home, this.cluster_name, index_stem, infodb_type);
     if (!this.coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.READ)) {
       logger.error("Could not open collection database!");
       return false;
+    }
+    // the oaiinf_db is called oai-inf.<infodb_type_extension>
+    String oaiinf_db_file = GSFile.OAIInfoDatabaseFile(this.site_home, this.cluster_name, "oai-inf", infodb_type);
+    if (oaiinf_db != null && !this.oaiinf_db.openDatabase(oaiinf_db_file, SimpleCollectionDatabase.READ)) {
+      logger.warn("Could not open oai-inf database for collection + " + this.cluster_name + "!");
     }
     
     // work out what sets this collection has. Will usually contain the collection itself, optional super collection, and maybe subcolls if appropriate classifiers are present.
@@ -331,33 +346,55 @@ public class OAIPMH extends ServiceRack {
       logger.error("metadata prefix is not supported for collection "+this.coll_name);
       return OAIXML.createErrorResponse(OAIXML.CANNOT_DISSEMINATE_FORMAT, "");
     }
+
+    Document doc = XMLConverter.newDOM();
     
     String oid = param_map.get(OAIXML.OID); // TODO should this be identifier???
+    boolean OID_is_deleted = false;
+    long millis = -1;
+
+    DBInfo oai_info = null;
+    if(oaiinf_db != null) {
+	oai_info = this.oaiinf_db.getInfo(oid);
+	if (oai_info == null) {
+	    logger.warn("OID: " + oid + " is not present in the collection's oai-inf database.");
+	} else  {
+	    String oaiinf_status = oai_info.getInfo(OAIXML.OAI_INF_STATUS);
+	    if(oaiinf_status != null && oaiinf_status.equals(OAIXML.OAI_INF_DELETED)) {
+		OID_is_deleted = true;
+
+		// get the right timestamp for deletion: from oaiinf db
+		String timestamp = oai_info.getInfo(OAIXML.OAI_INF_TIMESTAMP); // in seconds presumably, like oailastmodified in the collection index db		
+		
+		millis = Long.parseLong(timestamp)*1000; // in milliseconds
+	    }
+	}
+    }
 
     //get a DBInfo object of the identifier; if this identifier is not present in the database,
     // null is returned.
     DBInfo info = this.coll_db.getInfo(oid);
     if (info == null) {
-      logger.error("OID: " + oid + " is not present in the database.");
-      return OAIXML.createErrorResponse(OAIXML.ID_DOES_NOT_EXIST, "");
+      logger.error("OID: " + oid + " is not present in the collection database.");
+      //return OAIXML.createErrorResponse(OAIXML.ID_DOES_NOT_EXIST, ""); // may exist as deleted in oai-inf db
     }
-
-    Document doc = XMLConverter.newDOM();
-    ArrayList<String> keys = new ArrayList<String>(info.getKeys());
-    long millis = getDateStampMillis(info);
-    String oailastmodified = ""; 
-    if (millis != -1) {
-      oailastmodified = OAIXML.getTime(millis);
+    else if (millis == -1) { // so !OID_is_deleted, get oailastmodified from collection's index db
+	ArrayList<String> keys = new ArrayList<String>(info.getKeys());	
+	millis = getDateStampMillis(info);	
     }
+    String oailastmodified = (millis == -1) ? "" : OAIXML.getTime(millis);
+    
 
     Element get_record_response = doc.createElement(GSXML.RESPONSE_ELEM);
     Element get_record = doc.createElement(OAIXML.GET_RECORD);
     get_record_response.appendChild(get_record);
     Element record = doc.createElement(OAIXML.RECORD);
     //compose the header element
-    record.appendChild(createHeaderElement(doc, oid, oailastmodified));      
-    //compose the metadata element
-    record.appendChild(createMetadataElement(doc, prefix, info));
+    record.appendChild(createHeaderElement(doc, oid, oailastmodified, OID_is_deleted));      
+    if(!OID_is_deleted) {
+	//compose the metadata element
+	record.appendChild(createMetadataElement(doc, prefix, info));
+    }
     get_record.appendChild(record);
     return get_record_response;
   }
@@ -420,9 +457,20 @@ public class OAIPMH extends ServiceRack {
       logger.error(prefix + " metadata prefix is not supported for collection "+this.coll_name);
       return OAIXML.createErrorResponse(OAIXML.CANNOT_DISSEMINATE_FORMAT, "");
     }
-    ArrayList<String> oid_list = getChildrenIds(OAIXML.BROWSELIST);
+
+    // get list of oids
+    ArrayList<String> oid_list = null;
+    if(oaiinf_db != null) { // try getting the OIDs from the oaiinf_db
+	oid_list = new ArrayList<String>(oaiinf_db.getAllKeys());
+    
+	if(oid_list == null) { // try getting the OIDs from the oai entries in the index db
+	    logger.warn("@@@@@@@@@@@@@ NO OIDs in oai-inf db for " + this.cluster_name);
+	    oid_list = getChildrenIds(OAIXML.BROWSELIST);
+	}
+    }
+
     if (oid_list == null) {
-      logger.error("No matched records found in collection: browselist is empty");
+      logger.error("No matched records found in collection: oai-inf and index db's browselist are empty");
       return OAIXML.createErrorResponse(OAIXML.NO_RECORDS_MATCH, "");
     }
     // all validation is done
@@ -437,49 +485,78 @@ public class OAIPMH extends ServiceRack {
 
     for(int i=0; i<oid_list.size(); i++) {
       String oid = oid_list.get(i);
-      DBInfo info = this.coll_db.getInfo(oid);
-      if (info == null) {
-        logger.error("Database does not contains information about oid: " +oid);
-        continue;
+      boolean OID_is_deleted = false;
+      long millis = -1;
+
+      DBInfo oai_info = null;
+      if(oaiinf_db != null) {
+	  oai_info = this.oaiinf_db.getInfo(oid);
+	  if (oai_info == null) {
+	      logger.warn("OID: " + oid + " is not present in the collection's oai-inf database.");
+	  } else  {
+	      String oaiinf_status = oai_info.getInfo(OAIXML.OAI_INF_STATUS);
+	      if(oaiinf_status != null && oaiinf_status.equals(OAIXML.OAI_INF_DELETED)) {
+		  OID_is_deleted = true;
+		  
+		  // get the right timestamp for deletion: from oaiinf db
+		  String timestamp = oai_info.getInfo(OAIXML.OAI_INF_TIMESTAMP); // in seconds presumably, like oailastmodified in the collection index db		
+		  
+		  millis = Long.parseLong(timestamp)*1000; // in milliseconds
+	      }
+	  }
       }
-      
-      long millis = getDateStampMillis(info);
+      DBInfo info = this.coll_db.getInfo(oid);
+      if (info == null) { // can happen if oid was deleted, in which case only oai_info keeps a record of it
+        logger.error("Collection database does not contain information about oid: " +oid);
+      }
+      else if (millis == -1) { // so !OID_is_deleted, get oailastmodified from collection's index db
+	  
+	  millis = getDateStampMillis(info);
+      }
+
       Date this_date = null;
       if (millis == -1) {
-	if (from_date != null || until_date !=null) {
-	  continue; // if this doc doesn't have a date for some reason, and
-	  // we are doing a date range, then don't include it.
-	}
+	  if (from_date != null || until_date !=null) {
+	      continue; // if this doc doesn't have a date for some reason, and
+	      // we are doing a date range, then don't include it.
+	  }
       } else {
-	this_date = new Date(millis);
-	if (from_date != null) {
-	  if(this_date.before(from_date)) {
-	    continue;
+	  this_date = new Date(millis);
+	  if (from_date != null) {
+	      if(this_date.before(from_date)) {
+		  continue;
+	      }
 	  }
-	}
-	if (until_date != null) {
-	  if (this_date.after(until_date)) {
-	    continue;
-	  }
-	}    
-      }  
- 
+	  if (until_date != null) {
+	      if (this_date.after(until_date)) {
+		  continue;
+	      }
+	  }    
+      }
+      
+      
+      // compose a record for adding header and metadata
+      Element record = doc.createElement(OAIXML.RECORD);
+      list_items.appendChild(record);
+      //compose the header element
+      record.appendChild(createHeaderElement(doc, oid, OAIXML.getTime(millis), OID_is_deleted));
+
+
       //Now check that this id has metadata for the required prefix.
-      if (documentContainsMetadata(info, set_of_elems)) {
-	// YES, it does have some metadata for this prefix
-	if (include_metadata) {
-	  // compose a record and add header and metadata
-	  Element record = doc.createElement(OAIXML.RECORD);
-	  list_items.appendChild(record);
-	  //compose the header element
-	  record.appendChild(createHeaderElement(doc, oid, OAIXML.getTime(millis)));      
-	  //compose the metadata element
-	  record.appendChild(createMetadataElement(doc, prefix, info));
- 	} else {
-	  //compose the header element and append it
-	  list_items.appendChild(createHeaderElement(doc, oid, OAIXML.getTime(millis)));      
-	}
-      } // otherwise we won't include this oid.
+      if (info != null && documentContainsMetadata(info, set_of_elems)) {
+	  // YES, it does have some metadata for this prefix	    
+	  
+	    if (include_metadata) {		
+		//compose the metadata element
+		record.appendChild(createMetadataElement(doc, prefix, info));
+	    } /*else {
+	      //compose the header element and append it
+	      list_items.appendChild(createHeaderElement(doc, oid, OAIXML.getTime(millis)));      
+	      }*/
+      } // otherwise we won't include this oid. with meta
+      
+      
+      
     }//end of for(int i=0; i<oid_list.size(); i++) of doing thru each record
     
     return list_items_response;        
@@ -619,9 +696,17 @@ public class OAIPMH extends ServiceRack {
 
 
   /** create a header element used when processing requests like ListRecords/GetRecord/ListIdentifiers
-   */
-  protected Element createHeaderElement(Document doc, String oid, String oailastmodified) {    
+   */  
+  protected Element createHeaderElement(Document doc, String oid, String oailastmodified, boolean deleted) {
+
         Element header = doc.createElement(OAIXML.HEADER);
+	
+	// if deleted, get the date and change oailastmodified to timestamp in oaiinfo
+	if(deleted) {
+	    header.setAttribute(OAIXML.OAI_INF_STATUS, OAIXML.HEADER_STATUS_ATTR_DELETED); // set the header status to deleted
+		// then the timestamp for deletion will be from oai-inf database 
+	}
+    
         Element identifier = doc.createElement(OAIXML.IDENTIFIER);
 	GSXML.setNodeText(identifier, coll_name + ":" + oid);
         header.appendChild(identifier);
@@ -647,6 +732,19 @@ public class OAIPMH extends ServiceRack {
       logger.error("No OID is present in the request.");
       return OAIXML.createErrorResponse(OAIXML.ID_DOES_NOT_EXIST, "");
     }
+
+    /*
+    ArrayList<String> oid_list = null;
+    if(oaiinf_db != null) { // try getting the OIDs from the oaiinf_db
+	oid_list = new ArrayList<String>(oaiinf_db.getAllKeys());
+	
+	if(oid_list == null) { // try getting the OIDs from the oai entries in the index db
+	    oid_list = getChildrenIds(OAIXML.BROWSELIST);
+	}
+    }
+    */
+    // assume meta formats are only for OIDs that have not been deleted
+    // so don't need to check oai-inf db, and can just check collection's index db for list of OIDs
     ArrayList<String> oid_list = getChildrenIds(OAIXML.BROWSELIST);
     if (oid_list == null || oid_list.contains(oid) == false) {
       logger.error("OID: " + oid + " is not present in the database.");
@@ -723,7 +821,7 @@ public class OAIPMH extends ServiceRack {
   /**method to check whether any of the 'metadata_names' is contained in the 'info'.
    * The name may be in the form: <name>,<mapped name>, in which the mapped name is
    * optional. The mapped name is looked up in the DBInfo; if not present, use the first
-   * name which is mendatory.
+   * name which is mandatory.
    */
   protected boolean containsMetadata(DBInfo info, String[] metadata_names) {
     if (metadata_names == null) return false;

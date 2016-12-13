@@ -18,6 +18,7 @@
  */
 package org.greenstone.gsdl3.util;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
@@ -214,6 +215,10 @@ public class SimpleCollectionDatabase implements OID.OIDTranslatable
 		}
 		return null;
 	}
+
+    public ArrayList<String> getAllKeys() {
+	return this.coll_db.getAllEntryKeys();
+    }
 
 	/**
 	 * converts a greenstone OID to an internal docnum, returning a Long -
