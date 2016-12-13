@@ -107,7 +107,7 @@ public class OAIReceptionist implements ModuleInterface {
   public boolean configure(Element config) {
     
     if (this.mr==null) {
-      logger.error(" message routers must be set  before calling oai configure");
+      logger.error(" message routers must be set before calling oai configure");
       return false;
     }
     if (config == null) {
@@ -156,7 +156,7 @@ public class OAIReceptionist implements ModuleInterface {
 	  String name = GSXML.getNodeText(set_spec);
 	  if (!name.equals("")) {
 	    this.super_coll_data.put(name, super_coll);
-	    logger.error("adding in super coll "+name);
+	    logger.info("adding in super coll "+name);
 	  }
 	}
       }
@@ -238,35 +238,35 @@ public class OAIReceptionist implements ModuleInterface {
     request.setAttribute(GSXML.TO_ATT, to.toString());
     // send to MR
     msg_node = mr.process(message);
-    logger.error(XMLConverter.getPrettyString(msg_node));
+    logger.info("*** " + XMLConverter.getPrettyString(msg_node));
     NodeList response_list =  ((Element)msg_node).getElementsByTagName(GSXML.RESPONSE_ELEM);
     for (int c=0; c<response_list.getLength(); c++) {
       // for each collection's response
       Element response = (Element)response_list.item(c);
       String coll_name = GSPath.getFirstLink(response.getAttribute(GSXML.FROM_ATT));
-      logger.error("coll from response "+coll_name);
+      logger.info("*** coll from response "+coll_name);
       NodeList set_list = response.getElementsByTagName(OAIXML.SET);
       for (int j=0; j<set_list.getLength(); j++) {
 	// now check if it a super collection
 	Element set = (Element)set_list.item(j);
 	String set_spec = GSXML.getNodeText((Element)GSXML.getChildByTagName(set, OAIXML.SET_SPEC));
-	logger.error("set spec = "+set_spec);
+	logger.info("*** set spec = "+set_spec);
 	// this may change if we add site name back in
 	// setSpecs will be collname or collname:subset or supercollname
 	if (set_spec.indexOf(":")==-1 && ! set_spec.equals(coll_name)) {
 	  // it must be a super coll spec
-	  logger.error("found super coll, "+set_spec);
+	  logger.info("*** found super coll, "+set_spec);
 	  // check that it is a valid one from config
 	  if (this.has_super_colls == true && this.super_coll_data.containsKey(set_spec)) {
 	    Vector <String> subcolls = this.super_coll_map.get(set_spec);
 	    if (subcolls == null) {
-	      logger.error("its new!!");
+	      logger.info("*** its new!!");
 	      // not in there yet
 	      subcolls = new Vector<String>();
 	      this.set_set.add(set_spec);
 	      this.super_coll_map.put(set_spec, subcolls);
 	      // the first time a supercoll is mentioned, add into the set list
-	      logger.error("finding the set info "+XMLConverter.getPrettyString(this.super_coll_data.get(set_spec)));
+	      logger.info("*** finding the set info "+XMLConverter.getPrettyString(this.super_coll_data.get(set_spec)));
 	      listsets_element.appendChild(GSXML.duplicateWithNewName(listsets_doc, this.super_coll_data.get(set_spec), OAIXML.SET, true));
 	    }
 	    // add this collection to the list for the super coll
@@ -294,7 +294,7 @@ public class OAIReceptionist implements ModuleInterface {
     system.setAttribute(GSXML.TYPE_ATT, GSXML.SYSTEM_TYPE_CONFIGURE);
 
     Element response = (Element) this.mr.process(mr_request_message);
-    logger.error("configure response = "+XMLConverter.getPrettyString(response));
+    logger.info("*** configure response = "+XMLConverter.getPrettyString(response));
   }
   /** process using strings - just calls process using Elements */
   public String process(String xml_in) {
@@ -318,10 +318,10 @@ public class OAIReceptionist implements ModuleInterface {
    * if something goes wrong, it returns null -
    */
   public Node process(Node message_node) {
-    logger.error("OAIReceptionist received request");
+    logger.info("*** OAIReceptionist received request");
 
     Element message = GSXML.nodeToElement(message_node);
-    logger.error(XMLConverter.getString(message));
+    logger.info("*** " + XMLConverter.getString(message));
 
     // check that its a correct message tag
     if (!message.getTagName().equals(GSXML.MESSAGE_ELEM)) {
@@ -394,7 +394,7 @@ public class OAIReceptionist implements ModuleInterface {
   private boolean areAllParamsValid(HashMap<String, String> param_map, HashSet<String> valid_strs) {
     ArrayList<String> param_list = new ArrayList<String>(param_map.keySet());
     for(int i=0; i<param_list.size(); i++) {
-      logger.error("param, key =  "+param_list.get(i)+", value = "+param_map.get(param_list.get(i)));
+      logger.info("*** param, key =  "+param_list.get(i)+", value = "+param_map.get(param_list.get(i)));
       if (valid_strs.contains(param_list.get(i)) == false) {
         return false;
       }
@@ -615,8 +615,8 @@ public class OAIReceptionist implements ModuleInterface {
       mr_req.setAttribute(GSXML.TO_ATT, current_coll+"/"+verb);
 
       Element result = (Element)mr.process(mr_msg);
-      logger.error(verb+ " result for coll "+current_coll);
-      logger.error(XMLConverter.getPrettyString(result));
+      logger.info("*** " + verb+ " result for coll "+current_coll);
+      logger.info("*** " + XMLConverter.getPrettyString(result));
       if (result == null) {
 	logger.info("message router returns null");
 	// do what??? carry on? fail??
@@ -664,7 +664,7 @@ public class OAIReceptionist implements ModuleInterface {
 	  else {
 	    // we have finished one collection and there are no more collection
 	    // if we need to send a resumption token (in this case, only because we started with one, then it will be empty
-	    logger.error("at end of list, need empty result token");
+	    logger.info("*** at end of list, need empty result token");
 	    empty_result_token = true;
 	  }
 	}
@@ -691,7 +691,7 @@ public class OAIReceptionist implements ModuleInterface {
     if (result_token_needed) {
       // we need a resumption token
       if (empty_result_token) {
-	logger.error("have empty result token");
+	logger.info("*** have empty result token");
 	token = "";
       } else {
 	if (token != null) {
