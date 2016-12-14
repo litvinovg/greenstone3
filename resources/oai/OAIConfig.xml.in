@@ -17,7 +17,7 @@
   collections all have 0 earliest datestamp, or if there are no collections. -->
   <earliestDatestamp>1970-01-01</earliestDatestamp>
   <!-- The manner in which the repository supports the notion of deleted records -->
-  <deletedRecord>no</deletedRecord>
+  <deletedRecord>persistent</deletedRecord>
   <!-- The granularity of the datestamp. May be YYYY-MM-DD (day granularity) or YYYY-MM-DDThh:mm:ssZ (seconds granularity) -->
   <granularity>YYYY-MM-DDThh:mm:ssZ</granularity>
   <!-- The repository maintainer email address. There can be more than one. -->
