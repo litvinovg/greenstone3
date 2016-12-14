@@ -130,7 +130,6 @@ public class OAIPMH extends ServiceRack {
     oaiinf_db = new SimpleCollectionDatabase(infodb_type);
     if (!oaiinf_db.databaseOK()) {
       logger.error("Couldn't create the oai-inf database of type "+infodb_type);
-      oaiinf_db = null;
       return false;
     }
 
@@ -143,8 +142,14 @@ public class OAIPMH extends ServiceRack {
     }
     // the oaiinf_db is called oai-inf.<infodb_type_extension>
     String oaiinf_db_file = GSFile.OAIInfoDatabaseFile(this.site_home, this.cluster_name, "oai-inf", infodb_type);
-    if (oaiinf_db != null && !this.oaiinf_db.openDatabase(oaiinf_db_file, SimpleCollectionDatabase.READ)) {
-      logger.warn("Could not open oai-inf database for collection + " + this.cluster_name + "!");
+    File oaiinfFile = new File(oaiinf_db_file);
+    
+    if(!oaiinfFile.exists()) {
+	logger.warn("oai-inf database for collection + " + this.cluster_name + " does not exist.");
+	oaiinf_db = null;
+    } else if (!this.oaiinf_db.openDatabase(oaiinf_db_file, SimpleCollectionDatabase.READ)) {
+	logger.warn("Could not open oai-inf database for collection + " + this.cluster_name + "!");
+	oaiinf_db = null;
     }
     
     // work out what sets this collection has. Will usually contain the collection itself, optional super collection, and maybe subcolls if appropriate classifiers are present.
