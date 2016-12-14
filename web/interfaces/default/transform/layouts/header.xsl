@@ -275,51 +275,54 @@
 	
 	<!-- ***** HOME HELP PREFERENCES LOGIN ***** -->
 	<xsl:template name="home-help-preferences">
-		<ul id="bannerLinks">
-
-		  <!-- RSS feed link can appear in a global format statement (where it has no type attribute) 
-		       or in section specific format statements, such as browse, search, display. 
-		       If it's present in any format statement, display the RSS link in the bannerlinks section. -->
-		  <xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search' or not(@type)]/gsf:option[@name='RSS']/@value = 'true'">
-			<li><gsf:link type="rss"><gsf:icon file="rssicon.png"/></gsf:link></li>
-		  </xsl:if>
-
-			<!-- preferences -->
-			<li>
-				<a href="{$library_name}/collection/{$collNameChecked}/page/pref">
-					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_tip')"/></xsl:attribute>
-					<span id="preferencesButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/></span>
-					<script type="text/javascript">
-						<xsl:text disable-output-escaping="yes">
-							$("#preferencesButton").button({icons:{primary:"ui-icon-wrench"}});
-							$("#preferencesButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
-						</xsl:text>
-					</script>
-				</a>
-			</li>
-
-			<!-- help -->
-			<!--<li>
-				<a href="{$library_name}/collection/{$collNameChecked}/page/help">
-					<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_tip')"/></xsl:attribute>
-					<span id="helpButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></span>
-					<script type="text/javascript">
-						<xsl:text disable-output-escaping="yes">
-							$("#helpButton").button({icons:{primary:"ui-icon-help"}});
-							$("#helpButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
-						</xsl:text>
-					</script>
-				</a>
-			</li>-->
-			
-			<!-- login/logout -->
-			<li id="userMenuButton">
-				<xsl:choose>
-					<xsl:when test="/page/pageRequest/userInformation/@username">
-						<a>
-							<xsl:attribute name="href">javascript:toggleUserMenu();</xsl:attribute>
-							<script type="text/javascript">
-								<xsl:text disable-output-escaping="yes">
+	  <ul id="bannerLinks">
+	    <li><xsl:call-template name="RSSLink"/></li>
+	    <li><xsl:call-template name="PrefsLink"/></li>
+	    <li><xsl:call-template name="HelpLink"/></li>
+	    <li id="userMenuButton"><xsl:call-template name="LoginoutLink"/></li>
+	    <li><xsl:call-template name="DebugLink"/></li>
+	    <xsl:call-template name="buttonStyling"/>
+	  </ul>
+	</xsl:template>	
+	
+	<xsl:template name="RSSLink">
+	  <!-- RSS feed link can appear in a global format statement (where it has no type attribute) 
+	       or in section specific format statements, such as browse, search, display. 
+	       If it's present in any format statement, display the RSS link in the bannerlinks section. -->
+	  <xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search' or not(@type)]/gsf:option[@name='RSS']/@value = 'true'">
+	    <gsf:link type="rss"><gsf:icon file="rssicon.png"/></gsf:link>
+	  </xsl:if>
+	</xsl:template>
+	
+	<xsl:template name="PrefsLink">
+	  <a href="{$library_name}/collection/{$collNameChecked}/page/pref">
+	    <xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_tip')"/></xsl:attribute>
+	    <span id="preferencesButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/></span>
+	    <script type="text/javascript">
+	      <xsl:text disable-output-escaping="yes">
+		//$("#preferencesButton").button({icons:{primary:"ui-icon-wrench"}});
+		//$("#preferencesButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+	      </xsl:text>
+	    </script>
+	  </a>
+	</xsl:template>
+	
+	<xsl:template name="HelpLink">
+	  <a href="{$library_name}/collection/{$collNameChecked}/page/help">
+	    <xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_tip')"/></xsl:attribute>
+	    <span id="helpButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></span>
+	    <script type="text/javascript">
+	      <xsl:text disable-output-escaping="yes">
+		//$("#helpButton").button({icons:{primary:"ui-icon-help"}});
+		//$("#helpButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+	      </xsl:text>
+	    </script>
+	  </a>
+	</xsl:template>
+	
+	<xsl:template name="toggleUserMenuScript">
+	  <script type="text/javascript">
+	    <xsl:text disable-output-escaping="yes">
 									function toggleUserMenu()
 									{
 										var button = $("#userMenuButton");
@@ -410,70 +413,106 @@
 										}
 									}
 								</xsl:text>
-							</script>
-							<span id="loginButton"><xsl:value-of select="/page/pageRequest/userInformation/@username"/></span>
-							<script type="text/javascript">
-								<xsl:text disable-output-escaping="yes">
-									$("#loginButton").button({icons:{primary:"ui-icon-unlocked"}});
-									$("#loginButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
-								</xsl:text>
-							</script>
-						</a>
-					</xsl:when>
-					<xsl:otherwise>
-						<a>
-							<xsl:attribute name="href">
-								<xsl:value-of select="$library_name"/>
-								<xsl:text>?a=p&amp;sa=login&amp;redirectURL=</xsl:text>
-								<xsl:value-of select="$library_name"/>
-								<xsl:text>%3F</xsl:text>
-								<xsl:if test="/page/pageRequest/@action">
-									<xsl:text>a=</xsl:text>
-									<xsl:value-of select="/page/pageRequest/@action"/>
-								</xsl:if>
-								<xsl:if test="/page/pageRequest/@subaction">
-									<xsl:text>%26sa=</xsl:text>
-									<xsl:value-of select="/page/pageRequest/@subaction"/>
-								</xsl:if>
-								<xsl:for-each select="/page/pageRequest/paramList/param">
-									<xsl:if test="@name != 'password' and @name != 's1.password' and @name != 's1.newPassword' and @name != 's1.oldPassword'">
-										<xsl:text>%26</xsl:text>
-										<xsl:value-of select="@name"/>
-										<xsl:text>=</xsl:text>
-										<xsl:value-of select="@value"/>
-									</xsl:if>
-								</xsl:for-each>
-							</xsl:attribute>
-							<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_tip')"/></xsl:attribute>
-							<span id="loginButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_b')"/></span>
-							<script type="text/javascript">
-								<xsl:text disable-output-escaping="yes">
-									$("#loginButton").button({icons:{primary:"ui-icon-locked"}});
-									$("#loginButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
-								</xsl:text>
-							</script>
-						</a>
-					</xsl:otherwise>
-				</xsl:choose>
-			</li>
-			<!-- debuginfo (doesn't use class="ui-state-error" since the text is not legible due to inherited text-colour) -->
-			<xsl:if test="/page/pageRequest/paramList/param[(@name='debug') and (@value='on' or @value='true' or @value='1' or @value='yes')]">
-				<li>
-					<a href="{$library_name}/collection/{$collNameChecked}/page/debug">
-						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo_tip')"/></xsl:attribute>
-						<span id="debugButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo_b')"/></span>
-						<script type="text/javascript">
-							<xsl:text disable-output-escaping="yes">
-								$("#debugButton").button({icons:{primary:"ui-icon-info"}});
-								$("#debugButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
-							</xsl:text>
-						</script>
-					</a>
-				</li>
-			</xsl:if>
-		</ul>
+	  </script>
+	  
+	</xsl:template>
+	<xsl:template name="generateLoginURL">
+	  <xsl:value-of select="$library_name"/>
+	  <xsl:text>?a=p&amp;sa=login&amp;redirectURL=</xsl:text>
+	  <xsl:value-of select="$library_name"/>
+	  <xsl:text>%3F</xsl:text>
+	  <xsl:if test="/page/pageRequest/@action">
+	    <xsl:text>a=</xsl:text>
+	    <xsl:value-of select="/page/pageRequest/@action"/>
+	  </xsl:if>
+	  <xsl:if test="/page/pageRequest/@subaction">
+	    <xsl:text>%26sa=</xsl:text>
+	    <xsl:value-of select="/page/pageRequest/@subaction"/>
+	  </xsl:if>
+	  <xsl:for-each select="/page/pageRequest/paramList/param">
+	    <xsl:if test="@name != 'password' and @name != 's1.password' and @name != 's1.newPassword' and @name != 's1.oldPassword'">
+	      <xsl:text>%26</xsl:text>
+	      <xsl:value-of select="@name"/>
+	      <xsl:text>=</xsl:text>
+	      <xsl:value-of select="@value"/>
+	    </xsl:if>
+	  </xsl:for-each>
+	  
 	</xsl:template>
 	
+	<xsl:template name="LoginoutLink">
+	  <!-- login/logout -->
+	  <xsl:choose>
+	    <xsl:when test="/page/pageRequest/userInformation/@username">
+	      <a>
+		<xsl:attribute name="href">javascript:toggleUserMenu();</xsl:attribute>
+		<xsl:call-template name="toggleUserMenuScript"/>
+		<span id="loginButton"><xsl:value-of select="/page/pageRequest/userInformation/@username"/></span>
+		<script type="text/javascript">
+		  <xsl:text disable-output-escaping="yes">
+		    //$("#loginButton").button({icons:{primary:"ui-icon-unlocked"}});
+		    //$("#loginButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+		  </xsl:text>
+		</script>
+	      </a>
+	    </xsl:when>
+	    <xsl:otherwise>
+	      <a>
+		<xsl:attribute name="href"><xsl:call-template name="generateLoginURL"/>
+		</xsl:attribute>
+		<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_tip')"/></xsl:attribute>
+		<span id="loginButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'login_b')"/></span>
+		<script type="text/javascript">
+		  <xsl:text disable-output-escaping="yes">
+		    //$("#loginButton").button({icons:{primary:"ui-icon-locked"}});
+		    //$("#loginButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+		  </xsl:text>
+		</script>
+	      </a>
+	    </xsl:otherwise>
+	  </xsl:choose>
+	</xsl:template>
+	
+	<xsl:template name="DebugLink">
+	  <!-- debuginfo (doesn't use class="ui-state-error" since the text is not legible due to inherited text-colour) -->
+	  <xsl:if test="/page/pageRequest/paramList/param[(@name='debug') and (@value='on' or @value='true' or @value='1' or @value='yes')]">
+	    <a href="{$library_name}/collection/{$collNameChecked}/page/debug">
+	      <xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo_tip')"/></xsl:attribute>
+	      <span id="debugButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo_b')"/></span>
+	      <script type="text/javascript">
+		<xsl:text disable-output-escaping="yes">
+		  //$("#debugButton").button({icons:{primary:"ui-icon-info"}});
+		  //$("#debugButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+		</xsl:text>
+	      </script>
+	    </a>
+	  </xsl:if>
+	</xsl:template>
+	
+	<xsl:template name="buttonStyling">
+	  <script type="text/javascript">
+	      <xsl:text disable-output-escaping="yes">
+		$("#preferencesButton").button({icons:{primary:"ui-icon-wrench"}});
+		$("#preferencesButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+		$("#helpButton").button({icons:{primary:"ui-icon-help"}});
+		$("#helpButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+		$("#debugButton").button({icons:{primary:"ui-icon-info"}});
+		$("#debugButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+	      </xsl:text>
+		<xsl:choose>
+		<xsl:when test="/page/pageRequest/userInformation/@username">
+		  <xsl:text disable-output-escaping="yes">$("#loginButton").button({icons:{primary:"ui-icon-unlocked"}});</xsl:text>
+		</xsl:when>
+		<xsl:otherwise>
+		  <xsl:text disable-output-escaping="yes">$("#loginButton").button({icons:{primary:"ui-icon-locked"}});</xsl:text>
+		</xsl:otherwise>
+	      </xsl:choose>
+	      <xsl:text disable-output-escaping="yes">
+		$("#loginButton .ui-button-text").css({"padding-top":"0px", "padding-bottom":"3px"});
+	      </xsl:text>
+	  </script>
+
+	</xsl:template>
 	<!-- ***** PAGE TITLE ***** -->
 	<xsl:template name="page-title-area">
 		<xsl:variable name="pageTitleVar"><xsl:call-template name="pageTitle"/></xsl:variable>
