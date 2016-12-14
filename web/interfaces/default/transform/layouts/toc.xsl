@@ -285,7 +285,7 @@
 				</xsl:if>
 				
 				<!-- Highlight on/off button -->
-				<xsl:if test="util:contains(/page/pageRequest/paramList/param[@name = 'p.s']/@value, 'Query') and not(metadataList/metadata[@name='NoText'])">
+				<xsl:if test="util:contains(/page/pageRequest/paramList/param[@name = 'p.s']/@value, 'Query') and not(metadataList/metadata[@name='NoText']) and not(/page/pageResponse/format[@type='display']/gsf:option[@name='disableSearchTermHighlighting']/@value='true')">
 					<li>
 						<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.highlightTooltip')"/></xsl:attribute>
 						<img onclick="swapHighlight(true);">

@@ -494,7 +494,7 @@
 	<!-- Highlight annotations if requested -->
 	<xsl:template name="displayAnnotation">
 		<xsl:choose>
-			<xsl:when test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'off'">
+			<xsl:when test="/page/pageRequest/paramList/param[@name = 'hl']/@value = 'off' or /page/pageResponse/format[@type='display']/gsf:option[@name='disableSearchTermHighlighting']/@value='true')">
 				<span class="noTermHighlight"><xsl:value-of select="."/></span>
 			</xsl:when>
 			<xsl:otherwise>
