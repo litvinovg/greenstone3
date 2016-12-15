@@ -511,7 +511,7 @@ public class OAIPMH extends ServiceRack {
 	  }
       }
       DBInfo info = this.coll_db.getInfo(oid);
-      if (info == null) { // can happen if oid was deleted, in which case only oai_info keeps a record of it
+      if (info == null) { // can happen if oid was deleted, in which case only oai_info keeps a record of the oid
         logger.error("Collection database does not contain information about oid: " +oid);
       }
       else if (millis == -1) { // so !OID_is_deleted, get oailastmodified from collection's index db
@@ -539,28 +539,25 @@ public class OAIPMH extends ServiceRack {
 	  }    
       }
       
-      
-      // compose a record for adding header and metadata
-      Element record = doc.createElement(OAIXML.RECORD);
-      list_items.appendChild(record);
-      //compose the header element
-      record.appendChild(createHeaderElement(doc, oid, OAIXML.getTime(millis), OID_is_deleted));
+      //compose the header element, which we'll be appending no matter what
+      Element header = createHeaderElement(doc, oid, OAIXML.getTime(millis), OID_is_deleted);
 
-
-      //Now check that this id has metadata for the required prefix.
-      if (info != null && documentContainsMetadata(info, set_of_elems)) {
-	  // YES, it does have some metadata for this prefix	    
-	  
-	    if (include_metadata) {		
-		//compose the metadata element
-		record.appendChild(createMetadataElement(doc, prefix, info));
-	    } /*else {
-	      //compose the header element and append it
-	      list_items.appendChild(createHeaderElement(doc, oid, OAIXML.getTime(millis)));      
-	      }*/
-      } // otherwise we won't include this oid. with meta
-      
-      
+      if (include_metadata) { // doing ListRecords
+	  // compose a record for adding header and metadata
+	  Element record = doc.createElement(OAIXML.RECORD);
+	  list_items.appendChild(record);
+	  //insert the header element
+	  record.appendChild(header);
+	  //Now check that this id has metadata for the required prefix.
+	  if (info != null && documentContainsMetadata(info, set_of_elems)) {
+	      // YES, it does have some metadata for this prefix	    
+	      //compose the metadata element
+	      record.appendChild(createMetadataElement(doc, prefix, info));
+	  } // otherwise the oid was 'deleted' and only in the oai-inf db and not in the info (collection index) db
+      } else { // doing ListIdentifiers
+	  //append the header element
+	  list_items.appendChild(header);      
+      }      
       
     }//end of for(int i=0; i<oid_list.size(); i++) of doing thru each record
     
