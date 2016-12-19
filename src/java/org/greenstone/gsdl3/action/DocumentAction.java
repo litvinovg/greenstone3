@@ -224,7 +224,7 @@ public class DocumentAction extends Action
 		}
 		if (document_type == null)
 		{
-		    logger.error("doctype is null!!!***********");
+		    logger.debug("doctype is null, setting to simple");
 		    document_type = GSXML.DOC_TYPE_SIMPLE;
 		}
 		
@@ -309,7 +309,7 @@ public class DocumentAction extends Action
 		}
 		else
 		{
-			// we dont need any structure
+		  // we dont need any structure
 		}
 
 		boolean has_dummy = false;
@@ -525,13 +525,11 @@ public class DocumentAction extends Action
 		{
 			dc_request.appendChild(basic_doc_list);
 		}
-		logger.debug("request = " + XMLConverter.getString(dc_message));
 		Element dc_response_message = (Element) this.mr.process(dc_message);
 		if (processErrorElements(dc_response_message, page_response))
 		{
 			return result;
 		}
-
 		Element dc_response_doc_list = (Element) GSXML.getNodeByPath(dc_response_message, path);
 
 		if (expand_document)
@@ -540,13 +538,15 @@ public class DocumentAction extends Action
 			NodeList dc_response_docs = dc_response_doc_list.getChildNodes();
 			for (int i = 0; i < doc_nodes.getLength(); i++)
 			{
-				Node content = GSXML.getChildByTagName((Element) dc_response_docs.item(i), "nodeContent");
+				Node content = GSXML.getChildByTagName((Element) dc_response_docs.item(i), GSXML.NODE_CONTENT_ELEM);
 				if (content != null)
 				{
 					if (highlight_query_terms)
 					{
-						content = highlightQueryTerms(request, (Element) content);
+					  String node_id = ((Element)doc_nodes.item(i)).getAttribute(GSXML.NODE_ID_ATT);
+					  content = highlightQueryTerms(request, node_id, (Element) content);
 					}
+					
 					doc_nodes.item(i).appendChild(doc.importNode(content, true));
 				}
 				//GSXML.mergeMetadataLists(doc_nodes.item(i), dm_response_docs.item(i));
@@ -596,7 +596,7 @@ public class DocumentAction extends Action
 			{
 				dc_response_doc.removeChild(dc_response_doc_content);
 
-				dc_response_doc_content = highlightQueryTerms(request, dc_response_doc_content);
+				dc_response_doc_content = highlightQueryTerms(request, null, dc_response_doc_content);
 				dc_response_doc.appendChild(dc_response_doc.getOwnerDocument().importNode(dc_response_doc_content, true));
 			}
 
@@ -838,7 +838,7 @@ public class DocumentAction extends Action
 	 * also doesn't handle phrases properly - just highlights all the terms
 	 * found in the text.
 	 */
-	protected Element highlightQueryTerms(Element request, Element dc_response_doc_content)
+  protected Element highlightQueryTerms(Element request, String current_node_id, Element dc_response_doc_content)
 	{
 		Document doc = request.getOwnerDocument();
 		
@@ -870,14 +870,17 @@ public class DocumentAction extends Action
 
 		Element query_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		GSXML.addParametersToList(query_param_list, service_params);
-		GSXML.addParameterToList(query_param_list, "hldocOID", (String) params.get(GSParams.DOCUMENT));
+		if (current_node_id != null) {
+		  GSXML.addParameterToList(query_param_list, "hldocOID", current_node_id);
+		} else {
+		  GSXML.addParameterToList(query_param_list, "hldocOID", (String) params.get(GSParams.DOCUMENT));
+		}
 		mr_query_request.appendChild(query_param_list);
-
 		// do the query
 		Element mr_query_response = (Element) this.mr.process(mr_query_message);
-				
 		String pathNode = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.NODE_CONTENT_ELEM);
 		Element highlighted_Node = (Element) GSXML.getNodeByPath(mr_query_response, pathNode);
+		// For SOLR, the above query may come back with a nodeContent element, which is the hldocOID section content, with search terms marked up. We send it back to the documnetContentRetrieve service so that resolveTextMacros can be applied, and it can be properly encased in documentNode etc elements
 		if (highlighted_Node != null)
 		{
 			// Build a request to process highlighted text
@@ -899,14 +902,13 @@ public class DocumentAction extends Action
 			current_doc.setAttribute(GSXML.NODE_ID_ATT, (String) params.get(GSParams.DOCUMENT));
 			//Append highlighted content to request for processing
 			dc_request.appendChild(doc.importNode(highlighted_Node, true));
-							
 			Element hl_response_message = (Element) this.mr.process(hl_message);
+		
 			//Get results
 			NodeList contentList = hl_response_message.getElementsByTagName(GSXML.NODE_CONTENT_ELEM);
 			Element content = (Element) contentList.item(0);	
 			return content;
 		}
-
 		String path = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.TERM_ELEM + GSXML.LIST_MODIFIER);
 		Element query_term_list_element = (Element) GSXML.getNodeByPath(mr_query_response, path);
 		if (query_term_list_element == null)
