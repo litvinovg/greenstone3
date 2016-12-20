@@ -219,10 +219,17 @@ public class CrossCollectionSearch extends ServiceRack
 		new_param_list.appendChild(GSXML.createParameter(msg_doc, MAXDOCS_PARAM, maxdocs));
 		new_param_list.appendChild(GSXML.createParameter(msg_doc, HITS_PER_PAGE_PARAM, maxdocs));
 		Element query_result = (Element) this.router.process(query_message);
-
 		// create the doc list for the response
 		Element doc_node_list = result_doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
 		result.appendChild(doc_node_list);
+		Element result_snippet_list = result_doc.createElement(GSXML.HL_SNIPPET_ELEM + GSXML.LIST_MODIFIER);
+		result.appendChild(result_snippet_list);
+		NodeList hl_snippet_list = query_result.getElementsByTagName(GSXML.HL_SNIPPET_ELEM);
+		if (hl_snippet_list != null){
+			for (int hls = 0; hls < hl_snippet_list.getLength(); hls++){
+				result_snippet_list.appendChild(result_doc.importNode(hl_snippet_list.item(hls), true));
+			}
+		}
 
 		NodeList responses = query_result.getElementsByTagName(GSXML.RESPONSE_ELEM);
 		int num_docs = 0;
@@ -239,6 +246,7 @@ public class CrossCollectionSearch extends ServiceRack
 			{
 				this_node = (Element) nodes.item(n);
 				this_node.setAttribute("collection", coll_name);
+	
 				if (k == 0)
 				{
 
