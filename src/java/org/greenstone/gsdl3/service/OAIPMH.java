@@ -76,7 +76,10 @@ public class OAIPMH extends ServiceRack {
   public void cleanUp() {
     super.cleanUp();//??
     this.coll_db.closeDatabase();
-    this.oaiinf_db.closeDatabase();
+    if (this.oaiinf_db != null){
+    	this.oaiinf_db.closeDatabase();
+    }
+    
   }
   /** configure this service 
   info is the OAIPMH service rack from collectionConfig.xml, and 
