@@ -10,6 +10,7 @@ import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -99,6 +100,7 @@ public class QueryAction extends Action
 			// have we been asked to return it as part of the response?
 			if (request_type.indexOf("d") != -1) {
 			  page_response.appendChild(service_description);
+			  addCollectionsHierarchy(page_response,userContext);
 			}
 			//}
 		boolean does_paging = false;
@@ -285,6 +287,57 @@ public class QueryAction extends Action
 		return page_response;
 	}
 
+	private void addCollectionsHierarchy(Element page_response, UserContext userContext) {
+		Document doc = page_response.getOwnerDocument();
+		String collectionsHierarchy = "CollectionsHierarchy";
+		if (checkServiceAvailable(userContext, collectionsHierarchy)){
+			Element groupQueryMessage = doc.createElement(GSXML.MESSAGE_ELEM);
+			Element groupQueryRequest = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, collectionsHierarchy, userContext);
+			groupQueryMessage.appendChild(groupQueryRequest);
+			Element groupQueryResult = (Element) this.mr.process(groupQueryMessage);
+			if (groupQueryResult == null){
+				return;
+			}
+			Element groupQueryResponse = (Element) GSXML.getChildByTagName(groupQueryResult, GSXML.RESPONSE_ELEM);
+			if (groupQueryResponse == null){
+				return;
+			}
+			Element hierarchy = (Element) GSXML.getChildByTagName(groupQueryResponse, GSXML.HIERARCHY_ELEM);
+			page_response.appendChild(doc.importNode(hierarchy, true));
+		}
+		
+		
+	}
+
+	private boolean checkServiceAvailable(UserContext userContext, String collectionsHierarchy) {
+		
+		Document doc = XMLConverter.newDOM();
+		Element infoMessage = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element infoRequest = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
+		Element paramList = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		infoRequest.appendChild(paramList);
+		GSXML.addParameterToList(paramList, GSXML.SUBSET_PARAM, GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		infoMessage.appendChild(infoRequest);
+		Element responseMessage = (Element) this.mr.process(infoMessage);
+		if (responseMessage == null)
+		{
+			logger.error("couldn't query the message router!");
+			return false;
+		}
+		NodeList serviceLists = responseMessage.getElementsByTagName(GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		if (serviceLists == null || serviceLists.getLength() == 0){
+			logger.error("No service List in response message from message router!");
+			return false;
+		}
+		Element serviceList = (Element) serviceLists.item(0);
+		Element groupInfoService = GSXML.getNamedElement(serviceList, GSXML.SERVICE_ELEM, GSXML.NAME_ATT, collectionsHierarchy);
+		if (groupInfoService == null){
+			logger.error("service " + collectionsHierarchy + " unavailable");
+			return false;
+		}
+		return true;
+	}
+
 	/** this filters out some of the doc results for result paging */
 	protected Element filterDocList(Document doc, HashMap<String, Serializable> params, HashMap service_params, Element orig_doc_list)
 	{
@@ -374,4 +427,5 @@ public class QueryAction extends Action
     }
     return true;
   }
+  
 }

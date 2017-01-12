@@ -532,8 +532,8 @@ public class CrossCollectionSearch extends ServiceRack
 			}
 			groupParamList.appendChild(doc.importNode(GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, GSXML.GROUP_ELEM), true));
 			Element groupQueryResult = (Element) this.router.process(groupQueryMessage);
-			Element groupQueryResonse = (Element) GSXML.getChildByTagName(groupQueryResult, GSXML.RESPONSE_ELEM);
-			Element collList = (Element) GSXML.getChildByTagName(groupQueryResonse, GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
+			Element groupQueryResponse = (Element) GSXML.getChildByTagName(groupQueryResult, GSXML.RESPONSE_ELEM);
+			Element collList = (Element) GSXML.getChildByTagName(groupQueryResponse, GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
 			NodeList collections = GSXML.getChildrenByTagName(collList, GSXML.COLLECTION_ELEM);
 			collArray = new String[collections.getLength()];
 			for (int i = 0; i < collections.getLength(); i++){
