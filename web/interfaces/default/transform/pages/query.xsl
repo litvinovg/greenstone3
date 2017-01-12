@@ -190,8 +190,15 @@
 						</xsl:attribute>
 					</input>
 					<input type="hidden" name="rt" value="rd"/>
-
+					
 					<xsl:variable name="ns">s1.</xsl:variable>
+					<xsl:choose>
+						<xsl:when test="/page/pageResponse/hierarchy">
+						 	<xsl:call-template name="hierarchy">
+						 		<xsl:with-param name="ns" select="$ns" />
+						 	</xsl:call-template>
+						</xsl:when>
+						<xsl:otherwise>
 					<xsl:for-each select="paramList/param">
 						<xsl:choose>
 							<xsl:when test="@type='multi'">
@@ -206,6 +213,8 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</xsl:for-each>
+						</xsl:otherwise>
+					</xsl:choose>
 					<br/>
 					<input type="submit">
 						<xsl:attribute name="value">
@@ -215,6 +224,102 @@
 				</div>
 			</form>
 		</xsl:for-each>
+	</xsl:template>
+
+	<xsl:template name="hierarchy">
+		<xsl:param name="ns" />
+		<div class="paramLabel">
+			<xsl:value-of
+				select="paramList/param[@name='collection']/displayItem[@name='name']/text()" />
+		</div>
+		<div class="paramValue">
+			<select multiple="" name="s1.collection" size='10'>
+				<xsl:for-each select="/page/pageResponse/hierarchy/*">
+					<xsl:call-template name="hierarchy-display">
+						<xsl:with-param name="padding">
+							0
+						</xsl:with-param>
+					</xsl:call-template>
+				</xsl:for-each>
+			</select>
+			<script type="text/javascript">
+				<xsl:text disable-output-escaping="yes">
+      			function selectChildren(group) {
+      			var value = $(group).attr("value");
+      			var name = value.substring(5);
+      			$("option[class^='"+name+"']").prop({selected: true});
+				}
+      		</xsl:text>
+			</script>
+		</div>
+		<br class="clear" />
+		<xsl:for-each select="paramList/param[@type='integer']">
+			<xsl:call-template name="param-display">
+				<xsl:with-param name="ns" select="$ns" />
+			</xsl:call-template>
+		</xsl:for-each>
+		<xsl:for-each select="paramList/param[@type='string']">
+			<xsl:call-template name="param-display">
+				<xsl:with-param name="ns" select="$ns" />
+			</xsl:call-template>
+		</xsl:for-each>
+	</xsl:template>
+
+	<xsl:template name="hierarchy-display">
+		<xsl:param name="padding" />
+		<xsl:param name="path" />
+		<xsl:choose>
+			<xsl:when test="name(.) = 'group'">
+				<option>
+					<xsl:attribute name="style">
+							<xsl:text>padding-left: </xsl:text>
+							<xsl:value-of select="concat($padding,'px')" />
+						</xsl:attribute>
+					<xsl:attribute name="disabled">
+							<xsl:text>disabled</xsl:text>
+						</xsl:attribute>
+					<xsl:attribute name="value">
+							<xsl:text>group</xsl:text>
+							<xsl:value-of select="$path" />
+							<xsl:text>_</xsl:text>
+							<xsl:value-of select="@name" />
+						</xsl:attribute>
+					<xsl:attribute name="onclick">
+							<xsl:text>selectChildren(this)</xsl:text>
+						</xsl:attribute>
+					<xsl:value-of select="@title"></xsl:value-of>
+					<xsl:for-each select="./*">
+						<xsl:call-template name="hierarchy-display">
+							<xsl:with-param name="padding">
+								<xsl:value-of select="$padding + 20" />
+							</xsl:with-param>
+							<xsl:with-param name="path">
+								<xsl:value-of select="$path" />
+								<xsl:text>_</xsl:text>
+								<xsl:value-of select="../@name" />
+							</xsl:with-param>
+						</xsl:call-template>
+					</xsl:for-each>
+				</option>
+			</xsl:when>
+			<xsl:otherwise>
+				<option>
+					<xsl:attribute name="style">
+							<xsl:text>padding-left: </xsl:text>
+							<xsl:value-of select="$padding" /> 
+							<xsl:text>px</xsl:text>
+						</xsl:attribute>
+					<xsl:attribute name="class">
+							<xsl:value-of select="$path" /> 
+						</xsl:attribute>
+					<xsl:attribute name="value">
+						<xsl:value-of select="current()/@name"></xsl:value-of>
+					</xsl:attribute>
+					<xsl:value-of
+						select="/page/pageResponse/service[@name = 'TextQuery']/paramList/param[@name = 'collection']/option[@name = current()/@name]/displayItem[@name = 'name']/text()"></xsl:value-of>
+				</option>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 
 	<xsl:template name="displayMatchDocs">
