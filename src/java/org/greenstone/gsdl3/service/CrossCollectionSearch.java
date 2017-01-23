@@ -504,47 +504,73 @@ public class CrossCollectionSearch extends ServiceRack
 	
 	private String[] mergeGroups(UserContext userContext, Element paramList, String[] collArray){
 		Document doc = XMLConverter.newDOM();
-		Element groupParam = GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, GROUP_PARAM);
+		
+		Element groupParamList = extractGroupParams(paramList, collArray, doc);		
+		
 		Element collParam = GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, COLLECTION_PARAM);
-		//Group param not null and coll param null or not 'all'
-		if (groupParam != null && (collParam == null || !GSXML.getValue(collParam).equals("all")))
+		boolean allSelected = GSXML.getValue(collParam).matches(".*\\ball\\b.*");
+		//Group param not empty and coll param null or not 'all'
+		if ( allSelected || !groupParamList.hasChildNodes())
 		{	
-			//GroupInfo service to get uniq collections
-			String uniqCollServiceName = "UniqueCollections";
-			Element infoResponse = getMRInfo(userContext);
-			Element serviceList = (Element) GSXML.getChildByTagName(infoResponse, GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
-			if (serviceList == null) { 
-				logger.error("Service list is null!");
-				return collArray;
-			}
-			Element groupInfoService = GSXML.getNamedElement(serviceList, GSXML.SERVICE_ELEM, GSXML.NAME_ATT,	uniqCollServiceName);
-			if (groupInfoService == null){
-				logger.error("UniqueCollections service unavailable; Check your groupConfig.xml");
-				return collArray;
-			}
-			Element groupQueryMessage = doc.createElement(GSXML.MESSAGE_ELEM);
-			Element groupQueryRequest = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, uniqCollServiceName, userContext);
-			groupQueryMessage.appendChild(groupQueryRequest);
-			Element groupParamList = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-			groupQueryRequest.appendChild(groupParamList);
-			if (collParam != null){
-				groupParamList.appendChild(doc.importNode(GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, GSXML.COLLECTION_ELEM), true));	
-			}
-			groupParamList.appendChild(doc.importNode(GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, GSXML.GROUP_ELEM), true));
-			Element groupQueryResult = (Element) this.router.process(groupQueryMessage);
-			Element groupQueryResponse = (Element) GSXML.getChildByTagName(groupQueryResult, GSXML.RESPONSE_ELEM);
-			Element collList = (Element) GSXML.getChildByTagName(groupQueryResponse, GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
-			NodeList collections = GSXML.getChildrenByTagName(collList, GSXML.COLLECTION_ELEM);
-			collArray = new String[collections.getLength()];
-			for (int i = 0; i < collections.getLength(); i++){
-				String collName = ((Element) collections.item(i)).getAttribute(GSXML.NAME_ATT);
-				collArray[i] = collName;
-			}
 			return collArray;
+		}
+		//GroupInfo service to get uniq collections
+		String uniqCollServiceName = "UniqueCollections";
+		Element infoResponse = getMRInfo(userContext);
+		Element serviceList = (Element) GSXML.getChildByTagName(infoResponse, GSXML.SERVICE_ELEM + GSXML.LIST_MODIFIER);
+		if (serviceList == null) { 
+			logger.error("Service list is null!");
+			return collArray;
+		}
+		Element groupInfoService = GSXML.getNamedElement(serviceList, GSXML.SERVICE_ELEM, GSXML.NAME_ATT,	uniqCollServiceName);
+		if (groupInfoService == null){
+			logger.error("UniqueCollections service unavailable; Check your groupConfig.xml");
+			return collArray;
+		}
+		Element groupQueryMessage = doc.createElement(GSXML.MESSAGE_ELEM);
+		Element groupQueryRequest = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, uniqCollServiceName, userContext);
+		groupQueryMessage.appendChild(groupQueryRequest);
+		groupQueryRequest.appendChild(groupParamList);
+		if (collParam != null){
+			groupParamList.appendChild(doc.importNode(GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, GSXML.COLLECTION_ELEM), true));	
+		}
+		Element groupQueryResult = (Element) this.router.process(groupQueryMessage);
+		Element groupQueryResponse = (Element) GSXML.getChildByTagName(groupQueryResult, GSXML.RESPONSE_ELEM);
+		Element collList = (Element) GSXML.getChildByTagName(groupQueryResponse, GSXML.COLLECTION_ELEM + GSXML.LIST_MODIFIER);
+		NodeList collections = GSXML.getChildrenByTagName(collList, GSXML.COLLECTION_ELEM);
+		collArray = new String[collections.getLength()];
+		for (int i = 0; i < collections.getLength(); i++){
+			String collName = ((Element) collections.item(i)).getAttribute(GSXML.NAME_ATT);
+			collArray[i] = collName;
 		}
 		return collArray;
 		
 	}
+
+	private Element extractGroupParams(Element paramList, String[] collArray, Document doc) {
+		Element groupParamList = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element groupParam = null;
+		Element groupNode = GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, GROUP_PARAM);
+		if (groupNode != null){
+			groupParam = (Element) doc.importNode(groupNode, true);
+			groupParamList.appendChild(groupParam);	
+		} else {
+			groupParam = doc.createElement(GSXML.PARAM_ELEM);
+			groupParam.setAttribute(GSXML.NAME_ATT, GSXML.GROUP_ELEM);
+			groupParamList.appendChild(groupParam);
+		}
+		String prefix = GSXML.GROUP_ELEM + "/";
+		for (int i = 0; i < collArray.length; i++) {
+			String collectionParam = collArray[i];
+			if (collectionParam.startsWith(prefix)){
+				String value = groupParam.getAttribute(GSXML.VALUE_ATT);
+				value += "," + collectionParam.substring(prefix.length() - 1 );
+				groupParam.setAttribute(GSXML.VALUE_ATT, value);
+			}
+		}
+		return groupParamList;
+	}
+	
 	private Element getMRInfo(UserContext userContext){
 		Document doc = XMLConverter.newDOM();
 		Element infoMessage = doc.createElement(GSXML.MESSAGE_ELEM);
