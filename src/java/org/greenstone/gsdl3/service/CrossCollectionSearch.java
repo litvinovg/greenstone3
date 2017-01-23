@@ -29,7 +29,6 @@ import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -504,11 +503,15 @@ public class CrossCollectionSearch extends ServiceRack
 	
 	private String[] mergeGroups(UserContext userContext, Element paramList, String[] collArray){
 		Document doc = XMLConverter.newDOM();
-		
+		boolean allSelected = false;
 		Element groupParamList = extractGroupParams(paramList, collArray, doc);		
-		
 		Element collParam = GSXML.getNamedElement(paramList, GSXML.PARAM_ELEM, GSXML.NAME_ATT, COLLECTION_PARAM);
-		boolean allSelected = GSXML.getValue(collParam).matches(".*\\ball\\b.*");
+		if (collParam != null) {
+			String collValue = GSXML.getValue(collParam);
+			if (collValue != null) {
+				allSelected = collValue.matches(".*\\ball\\b.*");
+			}
+		}
 		//Group param not empty and coll param null or not 'all'
 		if ( allSelected || !groupParamList.hasChildNodes())
 		{	
