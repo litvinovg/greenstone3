@@ -247,10 +247,26 @@ public class CollectionGroups extends ServiceRack {
 		sanitizeCurrentContent(currentContent, searchableCollectionList);
 		addGroupInfo(currentContent, currentPath);
 		addUngroupedCollections(currentContent, searchableCollectionList);
+		addAllOption(currentContent);
 		result.appendChild(doc.importNode(currentContent, true));
 		return result;
 	}
 	
+	private void addAllOption(Element currentContent) {
+		if (currentContent == null){
+			return;
+		}
+		Document doc = currentContent.getOwnerDocument();
+		Element allOption = doc.createElement(GSXML.COLLECTION_ELEM);
+		allOption.setAttribute(GSXML.NAME_ATT, "all");
+		if (currentContent.hasChildNodes()){
+			currentContent.insertBefore(allOption,currentContent.getFirstChild());	
+		} else 
+			currentContent.appendChild(allOption);
+		
+		
+	}
+
 	private void addGroupInfo(Element currentContent, String groupPath) {
 		NodeList groups = GSXML.getChildrenByTagName(currentContent,GSXML.GROUP_ELEM);
 		for (int i=0;i<groups.getLength();i++){
