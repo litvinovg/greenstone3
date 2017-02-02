@@ -187,7 +187,27 @@
   </xsl:template>
   
   <xsl:template name="selectACollectionTextBar">
-    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.select_a_collection')"/>
+    <xsl:choose>
+      <xsl:when test="/page/pageResponse/groupList/group and /page/pageResponse/collectionList/collection">
+      <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.select_a_collection_or_group')"/>
+      </xsl:when>
+      <xsl:when test="/page/pageResponse/groupList/group">
+	<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.select_a_group')"/>
+      </xsl:when>
+      <xsl:when test="/page/pageResponse/collectionList/collection">
+	<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.select_a_collection')"/>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:choose>
+	  <xsl:when test="/page/pageResponse/pathList/group">
+	    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.no_collections_group')"/>
+	  </xsl:when>
+	  <xsl:otherwise>
+	    <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.no_collections')"/>
+	  </xsl:otherwise>
+	</xsl:choose>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
   
   <xsl:template name="crossCollectionQuickSearchForm">
@@ -220,6 +240,20 @@
     </form>
   </xsl:template>
   
+  <xsl:template name="groupName">
+    <xsl:param name="path"/>
+    <xsl:value-of select="/page/pageResponse/pathList/group[@path=$path]/title"/>
+  </xsl:template>
+  <xsl:template name="groupDescription">
+    <xsl:param name="path"/>
+    <xsl:value-of select="/page/pageResponse/pathList/group[@path=$path]/description"/>
+  </xsl:template>
+
+  <xsl:template name="groupHref">
+    <xsl:param name="path"/>
+    <xsl:value-of select="$library_name"/>?a=p&amp;sa=home&amp;group=<xsl:value-of select="@path"/>
+  </xsl:template>
+
   <xsl:template name="groupLinkWithImage">
     <xsl:variable name="desc"><xsl:value-of select="description"/></xsl:variable>
     <xsl:variable name="group_href"><xsl:value-of select="$library_name"/>?a=p&amp;sa=home&amp;group=<xsl:value-of select="/page/pageRequest/paramList/param[@name='group']/@value"/>/<xsl:value-of select="@name"/></xsl:variable>
