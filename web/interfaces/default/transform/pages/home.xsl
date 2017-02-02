@@ -7,31 +7,30 @@
 	extension-element-prefixes="java util"
 	exclude-result-prefixes="java util">
 
+  <xsl:variable name="groupPath"><xsl:value-of select="/page/pageRequest/paramList/param[@name='group']/@value"/></xsl:variable>
+
+  
 	<!-- use the 'main' layout -->
 	<xsl:include href="layouts/main.xsl"/>
 
 	<!-- set page title -->
-	<xsl:template name="pageTitle"><gslib:siteName/></xsl:template>
+	<xsl:template name="pageTitle"><xsl:choose><xsl:when test="$groupPath"><gslib:groupName path="{$groupPath}"/></xsl:when><xsl:otherwise><gslib:siteName/></xsl:otherwise></xsl:choose></xsl:template>
 
 	<!-- set page breadcrumbs -->
 	<xsl:template name="breadcrumbs">
-		<xsl:if test="/page/pageRequest/paramList/param[@name='group']">
+		<xsl:if test="$groupPath">
 			<gslib:siteLink/>
 			<xsl:for-each select="/page/pageResponse/pathList/group">
 				<xsl:sort data-type="number" select="@position"/>
 				<gslib:rightArrow/>
-				<a>
-				<xsl:attribute name="href">
-				 	<xsl:value-of select="$library_name"/>
-				 	<xsl:text>?a=p&amp;sa=home&amp;group=</xsl:text>
-					<xsl:value-of select="@path"></xsl:value-of>
-				</xsl:attribute>
-				
-				<xsl:attribute name="title">
-					<xsl:value-of select="./title"></xsl:value-of>
-				</xsl:attribute>
-				<xsl:value-of select="./title"></xsl:value-of>
-				</a>
+				<xsl:if test="position() != last()">
+				  <!-- don't want the current group in the breadcrumbs -->
+				  <a>
+				    <xsl:attribute name="href"><gslib:groupHref path="{@path}"/></xsl:attribute>				
+				    <xsl:attribute name="title"><gslib:groupName path="{@path}"/></xsl:attribute>
+				    <gslib:groupName path="{@path}"/>
+				  </a>
+				</xsl:if>
 			</xsl:for-each>
 		</xsl:if>
 	</xsl:template>
@@ -56,7 +55,7 @@
                 </xsl:for-each>
 	
 	        <div style="clear: both; padding-top: 4px; padding-bottom: 4px;"><hr/></div>
-		<xsl:variable name="siteDesc"><gslib:siteDescription/></xsl:variable>
+		<xsl:variable name="siteDesc"><xsl:choose><xsl:when test="$groupPath"><gslib:groupDescription path="{$groupPath}"/></xsl:when><xsl:otherwise><gslib:siteDescription/></xsl:otherwise></xsl:choose></xsl:variable>
 		<xsl:if test="$siteDesc != ''">
 		  <xsl:value-of select="$siteDesc"/>
 		  <div style="clear: both; padding-top: 4px; padding-bottom: 4px;"><hr/></div>
@@ -74,32 +73,6 @@
 
 	</xsl:template>
 
-	<xsl:template name="groupLinks">
-		<div id="groupLinks">
-			<!-- <xsl:if test="count(groupList/group) = 0">
-				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.no_collections')"/>
-				<br/>
-			</xsl:if>
-			-->
-			<xsl:for-each select="groupList/group">
-				<gslib:groupLinkWithImage/>
-			</xsl:for-each>
-			<br class="clear"/>
-		</div>
-	</xsl:template>
-	
-	<xsl:template name="collectionLinks">
-		<div id="collectionLinks">
-			<xsl:if test="count(collectionList/collection) = 0">
-				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.no_collections')"/>
-				<br/>
-			</xsl:if>
-			<xsl:for-each select="collectionList/collection">
-				<gslib:collectionLinkWithImage/>
-			</xsl:for-each>
-			<br class="clear"/>
-		</div>
-	</xsl:template>
 
 	<xsl:template match="/page/xsltparams">
 	  <!-- suppress xsltparam block in page -->
