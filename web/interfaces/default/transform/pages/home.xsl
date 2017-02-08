@@ -14,11 +14,11 @@
 	<xsl:include href="layouts/main.xsl"/>
 
 	<!-- set page title -->
-	<xsl:template name="pageTitle"><xsl:choose><xsl:when test="$groupPath"><gslib:groupName path="{$groupPath}"/></xsl:when><xsl:otherwise><gslib:siteName/></xsl:otherwise></xsl:choose></xsl:template>
+	<xsl:template name="pageTitle"><xsl:choose><xsl:when test="$groupPath != ''"><gslib:groupName path="{$groupPath}"/></xsl:when><xsl:otherwise><gslib:siteName/></xsl:otherwise></xsl:choose></xsl:template>
 
 	<!-- set page breadcrumbs -->
 	<xsl:template name="breadcrumbs">
-		<xsl:if test="$groupPath">
+		<xsl:if test="$groupPath != ''">
 			<gslib:siteLink/>
 			<xsl:for-each select="/page/pageResponse/pathList/group">
 				<xsl:sort data-type="number" select="@position"/>
@@ -55,7 +55,7 @@
                 </xsl:for-each>
 	
 	        <div style="clear: both; padding-top: 4px; padding-bottom: 4px;"><hr/></div>
-		<xsl:variable name="siteDesc"><xsl:choose><xsl:when test="$groupPath"><gslib:groupDescription path="{$groupPath}"/></xsl:when><xsl:otherwise><gslib:siteDescription/></xsl:otherwise></xsl:choose></xsl:variable>
+		<xsl:variable name="siteDesc"><xsl:choose><xsl:when test="$groupPath != ''"><gslib:groupDescription path="{$groupPath}"/></xsl:when><xsl:otherwise><gslib:siteDescription/></xsl:otherwise></xsl:choose></xsl:variable>
 		<xsl:if test="$siteDesc != ''">
 		  <xsl:value-of select="$siteDesc"/>
 		  <div style="clear: both; padding-top: 4px; padding-bottom: 4px;"><hr/></div>
