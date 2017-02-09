@@ -276,11 +276,15 @@
   <!-- ***** HOME HELP PREFERENCES LOGIN ***** -->
   <xsl:template name="home-help-preferences">
     <ul id="bannerLinks">
-      <li><xsl:call-template name="RSSLink"/></li>
+      <xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search' or not(@type)]/gsf:option[@name='RSS']/@value = 'true'">
+     	<li><xsl:call-template name="RSSLink"/></li>
+      </xsl:if>
       <li><xsl:call-template name="PrefsLink"/></li>
       <li><xsl:call-template name="HelpLink"/></li>
       <li id="userMenuButton"><xsl:call-template name="LoginoutLink"/></li>
-      <li><xsl:call-template name="DebugLink"/></li>
+      <xsl:if test="/page/pageRequest/paramList/param[(@name='debug') and (@value='on' or @value='true' or @value='1' or @value='yes')]">
+      	<li><xsl:call-template name="DebugLink"/></li>
+      </xsl:if>
       <xsl:call-template name="buttonStyling"/>
     </ul>
   </xsl:template>	
