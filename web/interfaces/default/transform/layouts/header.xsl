@@ -276,11 +276,11 @@
   <!-- ***** HOME HELP PREFERENCES LOGIN ***** -->
   <xsl:template name="home-help-preferences">
     <ul id="bannerLinks">
-      <xsl:call-template name="RSSLink"/>
-      <xsl:call-template name="PrefsLink"/>
-      <xsl:call-template name="HelpLink"/>
-      <xsl:call-template name="LoginoutLink"/>
-      <xsl:call-template name="DebugLink"/>
+      <li><xsl:call-template name="RSSLink"/></li>
+      <li><xsl:call-template name="PrefsLink"/></li>
+      <li><xsl:call-template name="HelpLink"/></li>
+      <li id="userMenuButton"><xsl:call-template name="LoginoutLink"/></li>
+      <li><xsl:call-template name="DebugLink"/></li>
       <xsl:call-template name="buttonStyling"/>
     </ul>
   </xsl:template>	
@@ -290,28 +290,22 @@
 	 or in section specific format statements, such as browse, search, display. 
 	 If it's present in any format statement, display the RSS link in the bannerlinks section. -->
     <xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search' or not(@type)]/gsf:option[@name='RSS']/@value = 'true'">
-     <li>
       <gsf:link type="rss"><gsf:icon file="rssicon.png"/></gsf:link>
-     </li>
     </xsl:if>
   </xsl:template>
   
   <xsl:template name="PrefsLink">
-    <li>
     <a href="{$library_name}/collection/{$collNameChecked}/page/pref">
       <xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_tip')"/></xsl:attribute>
       <span id="preferencesButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'pref_b')"/></span>
     </a>
-    </li>
   </xsl:template>
   
   <xsl:template name="HelpLink">
-   <li>
     <a href="{$library_name}/collection/{$collNameChecked}/page/help">
       <xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_tip')"/></xsl:attribute>
       <span id="helpButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'help_b')"/></span>
     </a>
-   </li>
   </xsl:template>
   
   <xsl:template name="toggleUserMenuScript">
@@ -435,7 +429,6 @@
   </xsl:template>
   
   <xsl:template name="LoginoutLink">
-   <li id="userMenuButton">
     <!-- login/logout -->
     <xsl:choose>
       <xsl:when test="/page/pageRequest/userInformation/@username">
@@ -454,18 +447,15 @@
 	</a>
       </xsl:otherwise>
     </xsl:choose>
-   </li>
   </xsl:template>
   
   <xsl:template name="DebugLink">
     <!-- debuginfo (doesn't use class="ui-state-error" since the text is not legible due to inherited text-colour) -->
     <xsl:if test="/page/pageRequest/paramList/param[(@name='debug') and (@value='on' or @value='true' or @value='1' or @value='yes')]">
-     <li>
       <a href="{$library_name}/collection/{$collNameChecked}/page/debug">
 	<xsl:attribute name="title"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo_tip')"/></xsl:attribute>
 	<span id="debugButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'debuginfo_b')"/></span>
       </a>
-     </li>
     </xsl:if>
   </xsl:template>
   
