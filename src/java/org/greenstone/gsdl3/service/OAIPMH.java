@@ -384,7 +384,7 @@ public class OAIPMH extends ServiceRack {
     DBInfo info = this.coll_db.getInfo(oid);
     if (info == null) {
       logger.error("OID: " + oid + " is not present in the collection database.");
-      //return OAIXML.createErrorResponse(OAIXML.ID_DOES_NOT_EXIST, ""); // may exist as deleted in oai-inf db
+      //return OAIXML.createErrorResponse(OAIXML.ID_DOES_NOT_EXIST, ""); // not an error: may exist as deleted (marked 'D') in oai-inf db
     }
     else if (millis == -1) { // so !OID_is_deleted, get oailastmodified from collection's index db
 	ArrayList<String> keys = new ArrayList<String>(info.getKeys());	
