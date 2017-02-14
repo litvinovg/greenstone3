@@ -309,7 +309,51 @@ function focusSection(sectionID, level, tocDisabled)
 		focusSection(sectionID, level + 1, tocDisabled);
 	}
 }
-
+function focusAnchor(sectionID, level, tocDisabled, anchor)
+{
+	if(!level)
+	{
+		level = 0;
+	}
+	var parts = sectionID.split(".");
+	if(level >= parts.length)
+	{
+		var target = document.getElementById(anchor);
+		if (!target){
+			target = document.getElementsByName(anchor)[0];
+		}
+		var topVal = $(target).offset().top - 50;
+		$('html, body').stop().animate({scrollTop: topVal}, 1000);
+		window.location.hash = anchor;
+		return;
+	}
+	
+	var idToExpand = "";
+	for(var i = 0; i < level + 1; i++)
+	{
+		if(i > 0)
+		{
+			idToExpand += ".";
+		}
+	
+		idToExpand += parts[i];
+	}
+	
+	if(!isSectionExpanded(idToExpand))
+	{
+		toggleSection(idToExpand, function(success)
+		{
+			if(success)
+			{
+				focusAnchor(sectionID, level + 1, tocDisabled, anchor);
+			}
+		}, tocDisabled);
+	}
+	else
+	{
+		focusAnchor(sectionID, level + 1, tocDisabled, anchor);
+	}
+}
 function expandOrCollapseAll(expand)
 {
 	var divs = $("div");

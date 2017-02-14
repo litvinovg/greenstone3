@@ -238,6 +238,15 @@
 
 	<xsl:template name="javascriptForDocumentView">
 	    <script type="text/javascript" src="interfaces/{$interface_name}/js/document_scripts.js"><xsl:text> </xsl:text></script>
+	    <script type="text/javascript">
+	    	<xsl:text disable-output-escaping="yes">
+	    		function goToAnchor(sectionID,anchor)
+					{
+						var docIdentifier = '</xsl:text><xsl:value-of select="//documentNode[@nodeType = 'root']/@nodeID"/><xsl:text disable-output-escaping="yes">';
+						focusAnchor(docIdentifier + "."+ sectionID,0,1,anchor);
+					}
+	    	</xsl:text>
+	    </script>
         </xsl:template>
 	<xsl:template name="javascriptForDocumentEditing">
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
