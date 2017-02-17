@@ -271,45 +271,26 @@ function scrollToTop()
 
 function focusSection(sectionID, level, tocDisabled)
 {
-	if(!level)
-	{
-		level = 0;
-	}
-	var parts = sectionID.split(".");
-	if(level >= parts.length)
-	{
-		var topVal = $(document.getElementById("doc" + sectionID)).offset().top - 50;
-		$('html, body').stop().animate({scrollTop: topVal}, 1000);
-		return;
-	}
-	
-	var idToExpand = "";
-	for(var i = 0; i < level + 1; i++)
-	{
-		if(i > 0)
-		{
-			idToExpand += ".";
-		}
-	
-		idToExpand += parts[i];
-	}
-	
-	if(!isSectionExpanded(idToExpand))
-	{
-		toggleSection(idToExpand, function(success)
-		{
-			if(success)
+	expandAndExecute(sectionID, level, tocDisabled, function()
 			{
-				focusSection(sectionID, level + 1, tocDisabled);
-			}
-		}, tocDisabled);
-	}
-	else
-	{
-		focusSection(sectionID, level + 1, tocDisabled);
-	}
+				var topVal = $(document.getElementById("doc" + sectionID)).offset().top - 50;
+				$('html, body').stop().animate({scrollTop: topVal}, 1000);
+			});
 }
 function focusAnchor(sectionID, level, tocDisabled, anchor)
+{
+	expandAndExecute(sectionID, level, tocDisabled, function()
+		{
+			var target = document.getElementById(anchor);
+			if (!target){
+				target = document.getElementsByName(anchor)[0];
+			}
+			var topVal = $(target).offset().top - 50;
+			$('html, body').stop().animate({scrollTop: topVal}, 1000);
+			window.location.hash = anchor;
+		});
+}
+function expandAndExecute(sectionID, level, tocDisabled, executeAfter)
 {
 	if(!level)
 	{
@@ -318,13 +299,7 @@ function focusAnchor(sectionID, level, tocDisabled, anchor)
 	var parts = sectionID.split(".");
 	if(level >= parts.length)
 	{
-		var target = document.getElementById(anchor);
-		if (!target){
-			target = document.getElementsByName(anchor)[0];
-		}
-		var topVal = $(target).offset().top - 50;
-		$('html, body').stop().animate({scrollTop: topVal}, 1000);
-		window.location.hash = anchor;
+		executeAfter();
 		return;
 	}
 	
@@ -345,13 +320,13 @@ function focusAnchor(sectionID, level, tocDisabled, anchor)
 		{
 			if(success)
 			{
-				focusAnchor(sectionID, level + 1, tocDisabled, anchor);
+				expandAndExecute(sectionID, level + 1, tocDisabled, executeAfter);
 			}
 		}, tocDisabled);
 	}
 	else
 	{
-		focusAnchor(sectionID, level + 1, tocDisabled, anchor);
+		expandAndExecute(sectionID, level + 1, tocDisabled, executeAfter);
 	}
 }
 function expandOrCollapseAll(expand)
