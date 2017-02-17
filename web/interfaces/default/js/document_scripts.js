@@ -300,6 +300,7 @@ function expandAndExecute(sectionID, level, tocDisabled, executeAfter)
 	if(level >= parts.length)
 	{
 		executeAfter();
+		document.getElementById("gs_content").style.cursor = "default";
 		return;
 	}
 	
@@ -316,6 +317,7 @@ function expandAndExecute(sectionID, level, tocDisabled, executeAfter)
 	
 	if(!isSectionExpanded(idToExpand))
 	{
+		document.getElementById("gs_content").style.cursor = "progress";
 		toggleSection(idToExpand, function(success)
 		{
 			if(success)
