@@ -5,7 +5,7 @@
 	xmlns:util="xalan://org.greenstone.gsdl3.util.XSLTUtil"
 	xmlns:gslib="http://www.greenstone.org/skinning"
 	extension-element-prefixes="java util"
-	exclude-result-prefixes="java util">
+	exclude-result-prefixes="java util xsl gslib">
 
   <xsl:variable name="groupPath"><xsl:value-of select="/page/pageRequest/paramList/param[@name='group']/@value"/></xsl:variable>
 
