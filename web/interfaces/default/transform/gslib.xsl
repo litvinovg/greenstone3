@@ -5,8 +5,11 @@
   xmlns:gslib="http://www.greenstone.org/XSL/Library" 
   xmlns:gsf="http://www.greenstone.org/greenstone3/schema/ConfigFormat" 
   xmlns:util="http://org.greenstone.gsdl3.util.XSLTUtil" 
-  exclude-result-prefixes="util xalan gslib gsf xslt">
-
+  xmlns:gs3="http://www.greenstone.org/gs3"
+  xmlns:xlink="http://www.w3.org/1999/xlink" 
+  xmlns:gsvar="http://www.greenstone.org/skinning-var"
+   exclude-result-prefixes="util xalan gslib gsf xslt gs3 gsvar xlink">
+<!-- all namespaces used by greenstone should be defined here and listed in exclude-result-prefixes, including those in core/transform/preProcess.xsl, otherwise xmlns attributes will be included in the html output -->
 
   <!-- force lower priority on xsl:output, so other files like rss.xsl can override with their own xsl:output stmt 
     If other files don't specify any, gslib.xsl specifies html output as default and defines a loose DOCTYPE for it. -->
