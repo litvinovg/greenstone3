@@ -126,6 +126,7 @@ setlocal enabledelayedexpansion
 :: ---- Search for java ----
 set JAVA_MIN_VERSION=1.5.0_00
 set HINT=!CD!\packages\jre
+
 ::if search4j is present, use it
 set FOUNDJAVAHOME=
 set RUNJAVA=
@@ -134,27 +135,109 @@ if exist bin\search4j.exe (
   for /F "tokens=*" %%r in ('bin\search4j.exe -r -p "!HINT!" -m !JAVA_MIN_VERSION!') do set FOUNDJREHOME=%%r
 )
 
+
+echo.
+echo ********************************************************************
+
+rem Check if any Java found matches the bitness of the Greenstone installation's binaries
+rem The sort of output we want:
+:: Installed GS as 32 bit
+:: Detected java is 64 bit
+:: Changing to use the GS bundled 32 bit jre
+:: We've detected a mismatch, this will only affect MG/MGPP collections for searching and GDBM database collections
+
+:: 1. What bit-ness are this Greenstone installation's binaries?
+:: GNUfile: http://stackoverflow.com/questions/2689168/checking-if-file-is-32bit-or-64bit-on-windows
+:: http://gnuwin32.sourceforge.net/packages/file.htm
+:: using Cygwin's file utility:
+:: http://stackoverflow.com/questions/2062020/how-can-i-tell-if-im-running-in-64-bit-jvm-or-32-bit-jvm-from-within-a-program
+:: http://stackoverflow.com/questions/4089641/programatically-determine-if-native-exe-is-32-bit-or-64-bit
+:: http://cygwin.com/cgi-bin2/package-grep.cgi?grep=utility
+:: https://cygwin.com/licensing.html
+:: Messy way: http://superuser.com/questions/358434/how-to-check-if-a-binary-is-32-or-64-bit-on-windows
+
+:: "%GSDLHOME%\bin\windows\GNUfile\bin\file.exe" "%GSDLHOME%\bin\windows\wvWare.exe"
+
+:: See https://ss64.com/nt/for_cmd.html for using batch FOR to loop against the results of another command.
+:: Running
+::		for /f "usebackq delims=" %%G IN (`"gs2build\bin\windows\GNUfile\bin\file.exe" gs2build\bin\windows\wvWare.exe`) do echo %%G
+:: prints out the entire output, e.g.:
+:: 		gs2build\bin\windows\wvWare.exe; PE32 executable for MS Windows (console) Intel 80386 32-bit
+:: To just get the "PE32" part of that output, set the delimiter char to space and request only the 2nd token:
+:: Note: Using call before the command to allow 2 sets of double quotes, see 
+:: http://stackoverflow.com/questions/6474738/batch-file-for-f-doesnt-work-if-path-has-spaces
+:: Could use shortfilenames, see http://stackoverflow.com/questions/10227144/convert-long-filename-to-short-filename-8-3-using-cmd-exe
+for /f "usebackq tokens=2 delims= " %%G IN (`call "%GSDLHOME%\bin\windows\GNUfile\bin\file.exe" "%GSDLHOME%\bin\windows\wvWare.exe"`) do set bitness=%%G
+
+if "%bitness%" == "PE32+" (
+	set bitness=64
+	echo The installed Greenstone is 64 bit
+) else (
+	if "%bitness%" == "PE32" (
+		set bitness=32
+		echo The installed Greenstone is 32 bit
+	) else (
+		echo WARNING: Greenstone installation is of unknown bitness. "%bitness%" is neither 32 nor 64 bit& goto bundledjre
+		set bitness=UNKNOWN
+	)
+)
+
+:: 2. What bitness are any JAVA_HOME else JRE_HOME found by search4j?
+:: If you run the non-existent program "pinky" from batch or the DOS console, the exit value is 9009
+:: The same must be true if java is not installed and therefore not found. echo %errorlevel% produces 9009
+:: If java exists and is 32 bit, then running "java -d32 -version" has a return value of 1. echo %errorlevel% (1)
+:: If java exists and is 64 bit, then running "java -d32 -version" has a return value of 0. echo %errorlevel% (0)
+
+:testjavahome
+:: http://www.robvanderwoude.com/errorlevel.php
+:: https://ss64.com/nt/errorlevel.html
 if DEFINED FOUNDJAVAHOME  (
-  set JAVA_HOME=!FOUNDJAVAHOME!
-  set PATH=!FOUNDJAVAHOME!\bin;!PATH!
-  set RUNJAVA=!FOUNDJAVAHOME!\bin\java.exe
-  goto summaryThenEnd
+	echo *** Testing bitness of JAVA_HOME found at !FOUNDJAVAHOME!:
+	"!FOUNDJAVAHOME!\bin\java.exe" -d%bitness% -version 2> nul
+	if !ERRORLEVEL! equ 1 echo *** The detected system JDK java is an incompatible bit architecture& goto testjre	
+	if !ERRORLEVEL! equ 0 (
+		echo *** The detected system JDK java is a matching %bitness% bit
+		echo *** Using the system JAVA_HOME detected
+		set JAVA_HOME=!FOUNDJAVAHOME!
+		set PATH=!FOUNDJAVAHOME!\bin;!PATH!
+		set RUNJAVA=!FOUNDJAVAHOME!\bin\java.exe
+		goto summaryThenEnd
+	)	
 )
 
-if DEFINED FOUNDJREHOME (
-  set JRE_HOME=!FOUNDJREHOME!
-  set PATH=!FOUNDJREHOME!\bin;!PATH!
-  set RUNJAVA=!FOUNDJREHOME!\bin\java.exe
-  goto summaryThenEnd
+:testjre
+if DEFINED FOUNDJREHOME  (
+	echo *** Testing bitness of JRE_HOME found at !FOUNDJREHOME!:
+	"!FOUNDJREHOME!\bin\java.exe" -d%bitness% -version 2> nul
+	if !ERRORLEVEL! equ 1 echo *** The detected JRE java is an incompatible bit architecture& goto bundledjre
+	if !ERRORLEVEL! equ 0 (	
+		rem The JRE_HOME found by search4j may be the bundled JRE, overriding any system JRE_HOME,
+		rem because the bundled JRE_HOME was provided as HINT to search4j.		
+		echo *** The detected JRE java is a matching %bitness% bit
+		echo *** Using the JRE_HOME detected
+		set JRE_HOME=!FOUNDJREHOME!
+		set PATH=!FOUNDJREHOME!\bin;!PATH!
+		set RUNJAVA=!FOUNDJREHOME!\bin\java.exe
+		goto summaryThenEnd
+	)	
 )
 
+:: 3. Fall back to 32 bit JRE bundled with GS
+:bundledjre
+:: We bundled a 32 bit JRE, but what if GS was compiled with 64 bit Java?
+:: All but MG/MGPP and GDBM should still work with 64 bit java.
 if exist "!HINT!\bin\java.exe" (
+  echo *** Changing to use the GS bundled 32-bit jre.
   set JAVA_HOME=!HINT!
   set PATH=!JAVA_HOME!\bin;!PATH!
   set RUNJAVA=!JAVA_HOME!\bin\java.exe
   goto summaryThenEnd
 )
 
+:: 4. Last ditch effort: search4j couldn't find any java, but check any Java env vars set anyway
+echo *** Search4j could not find an appropriate JAVA or JRE.
+echo *** Attempting to use any JAVA_HOME else JRE_HOME in the environment...
+	
 if exist "!JAVA_HOME!\bin\java.exe" (
   set PATH=!JAVA_HOME!\bin;!PATH!
   set RUNJAVA=!JAVA_HOME!\bin\java.exe
@@ -162,6 +245,7 @@ if exist "!JAVA_HOME!\bin\java.exe" (
   echo WARNING: Greenstone has not checked the version number of this Java installation
   echo          The source distribution of Greenstone3 requires Java 1.5 or greater
   echo          SVN users may still use Java 1.4
+  echo.
   goto summaryThenEnd
 )
 
@@ -169,17 +253,31 @@ if exist "!JRE_HOME!\bin\java.exe" (
   set PATH=!JRE_HOME!\bin;!PATH!
   set RUNJAVA=!JRE_HOME!\bin\java.exe
   echo Using Java at !JRE_HOME!
-  echo WARNING: Greenstone has not checked the version number of this Java installation
+  echo WARNING: Greenstone has not checked the version number of this JRE installation
   echo          The source distribution of Greenstone3 requires Java 1.5 or greater
   echo          SVN users may still use Java 1.4
+  echo.
   goto summaryThenEnd
 )
 
 echo ERROR: Failed to locate Java
-echo        Please set JAVA_HOME or JRE_HOME to point to an appropriate Java
+echo        Please set JAVA_HOME or JRE_HOME to point to an appropriate %bitness% bit Java
 goto end
 
 :summaryThenEnd
+:: Check that the bitness of any Java found is appropriate and warn if it is not.
+"!RUNJAVA!" -d%bitness% -version 2> nul
+if !ERRORLEVEL! equ 1 (
+	echo *** WARNING: Detected mismatch between the bit-ness of your Greenstone installation ^(%bitness% bit^) and the Java found.
+	echo *** Continuing with this Java anyway:
+	echo *** This will only affect MG/MGPP collections for searching, and GDBM database collections
+	echo *** Else set JAVA_HOME or JRE_HOME to point to an appropriate %bitness%-bit Java
+	echo *** Or recompile GS with your system Java:
+	if exist "!JAVA_HOME!" ( echo *** JAVA_HOME at !JAVA_HOME! ) else ( echo *** JRE_HOME at !JRE_HOME! )
+)
+
+echo ********************************************************************
+echo.
 
 echo GSDL3SRCHOME : !GSDL3SRCHOME!
 echo GSDL3HOME    : !GSDL3HOME!
