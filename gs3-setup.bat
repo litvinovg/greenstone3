@@ -149,14 +149,13 @@ rem The sort of output we want:
 :: 1. What bit-ness are this Greenstone installation's binaries?
 :: GNUfile: http://stackoverflow.com/questions/2689168/checking-if-file-is-32bit-or-64bit-on-windows
 :: http://gnuwin32.sourceforge.net/packages/file.htm
-:: using Cygwin's file utility:
+:: Also http://stackoverflow.com/questions/4089641/programatically-determine-if-native-exe-is-32-bit-or-64-bit
 :: http://stackoverflow.com/questions/2062020/how-can-i-tell-if-im-running-in-64-bit-jvm-or-32-bit-jvm-from-within-a-program
-:: http://stackoverflow.com/questions/4089641/programatically-determine-if-native-exe-is-32-bit-or-64-bit
-:: http://cygwin.com/cgi-bin2/package-grep.cgi?grep=utility
-:: https://cygwin.com/licensing.html
 :: Messy way: http://superuser.com/questions/358434/how-to-check-if-a-binary-is-32-or-64-bit-on-windows
 
 :: "%GSDLHOME%\bin\windows\GNUfile\bin\file.exe" "%GSDLHOME%\bin\windows\wvWare.exe"
+:: But we'll test the bitness of gdbmjava.dll itself as it's guaranteed to be present in GS3 and is also dependent on JNI
+:: No need to have the right bitness for GS2, since it doesn't use JNI
 
 :: See https://ss64.com/nt/for_cmd.html for using batch FOR to loop against the results of another command.
 :: Running
@@ -167,7 +166,7 @@ rem The sort of output we want:
 :: Note: Using call before the command to allow 2 sets of double quotes, see 
 :: http://stackoverflow.com/questions/6474738/batch-file-for-f-doesnt-work-if-path-has-spaces
 :: Could use shortfilenames, see http://stackoverflow.com/questions/10227144/convert-long-filename-to-short-filename-8-3-using-cmd-exe
-for /f "usebackq tokens=2 delims= " %%G IN (`call "%GSDLHOME%\bin\windows\GNUfile\bin\file.exe" "%GSDLHOME%\bin\windows\wvWare.exe"`) do set bitness=%%G
+for /f "usebackq tokens=2 delims= " %%G IN (`call "%GSDLHOME%\bin\windows\GNUfile\bin\file.exe" "%GSDL3SRCHOME%\lib\jni\gdbmjava.dll"`) do set bitness=%%G
 
 if "%bitness%" == "PE32+" (
 	set bitness=64
