@@ -195,12 +195,8 @@ if DEFINED FOUNDJAVAHOME  (
 	"!FOUNDJAVAHOME!\bin\java.exe" -d%bitness% -version 2> nul
 	if !ERRORLEVEL! equ 1 echo *** The detected system JDK java is an incompatible bit architecture& goto testjre	
 	if !ERRORLEVEL! equ 0 (
-		echo *** The detected system JDK java is a matching %bitness% bit
-		echo *** Using the system JAVA_HOME detected
-		set JAVA_HOME=!FOUNDJAVAHOME!
-		set PATH=!FOUNDJAVAHOME!\bin;!PATH!
-		set RUNJAVA=!FOUNDJAVAHOME!\bin\java.exe
-		goto summaryThenEnd
+		echo *** The detected system JDK java is a matching %bitness% bit		
+		goto setupjavahome
 	)	
 )
 
@@ -212,12 +208,8 @@ if DEFINED FOUNDJREHOME  (
 	if !ERRORLEVEL! equ 0 (	
 		rem The JRE_HOME found by search4j may be the bundled JRE, overriding any system JRE_HOME,
 		rem because the bundled JRE_HOME was provided as HINT to search4j.		
-		echo *** The detected JRE java is a matching %bitness% bit
-		echo *** Using the JRE_HOME detected
-		set JRE_HOME=!FOUNDJREHOME!
-		set PATH=!FOUNDJREHOME!\bin;!PATH!
-		set RUNJAVA=!FOUNDJREHOME!\bin\java.exe
-		goto summaryThenEnd
+		echo *** The detected JRE java is a matching %bitness% bit			
+		goto setupjrehome
 	)	
 )
 
@@ -227,13 +219,34 @@ if DEFINED FOUNDJREHOME  (
 :: All but MG/MGPP and GDBM should still work with 64 bit java.
 if exist "!HINT!\bin\java.exe" (
   echo *** Changing to use the GS bundled 32-bit jre.
-  set JAVA_HOME=!HINT!
+  set JRE_HOME=!HINT!
   set PATH=!JAVA_HOME!\bin;!PATH!
   set RUNJAVA=!JAVA_HOME!\bin\java.exe
   goto summaryThenEnd
 )
 
-:: 4. Last ditch effort: search4j couldn't find any java, but check any Java env vars set anyway
+:: 4. If no bundled JRE exists either, we'd still need to check if search4j found a JAVA_HOME or JRE_HOME
+:: and use that even if there was a bitness mismatch btw GS3 and the Java found.
+:: Label summaryThenEnd will print out warnings on any mismatch
+:setupjavahome
+if DEFINED FOUNDJAVAHOME  (
+	echo *** Using the system JAVA_HOME detected at !FOUNDJAVAHOME!
+	set JAVA_HOME=!FOUNDJAVAHOME!
+	set PATH=!FOUNDJAVAHOME!\bin;!PATH!
+	set RUNJAVA=!FOUNDJAVAHOME!\bin\java.exe
+	goto summaryThenEnd
+)
+
+:setupjrehome
+if DEFINED FOUNDJREHOME (
+	echo *** Using the JRE_HOME detected at !FOUNDJREHOME!
+	set JRE_HOME=!FOUNDJREHOME!
+	set PATH=!FOUNDJREHOME!\bin;!PATH!
+	set RUNJAVA=!FOUNDJREHOME!\bin\java.exe
+	goto summaryThenEnd
+)
+
+:: 5. Last ditch effort: search4j couldn't find any java, but check any Java env vars set anyway
 echo *** Search4j could not find an appropriate JAVA or JRE.
 echo *** Attempting to use any JAVA_HOME else JRE_HOME in the environment...
 	
@@ -264,10 +277,11 @@ echo        Please set JAVA_HOME or JRE_HOME to point to an appropriate %bitness
 goto end
 
 :summaryThenEnd
-:: Check that the bitness of any Java found is appropriate and warn if it is not.
+:: 6. Check that the bitness of any Java found is appropriate and warn if it is not.
 "!RUNJAVA!" -d%bitness% -version 2> nul
 if !ERRORLEVEL! equ 1 (
-	echo *** WARNING: Detected mismatch between the bit-ness of your Greenstone installation ^(%bitness% bit^) and the Java found.
+	echo *** WARNING: Detected mismatch between the bit-ness of your Greenstone installation ^(%bitness% bit^)
+	echo *** and the Java found at %RUNJAVA%.
 	echo *** Continuing with this Java anyway:
 	echo *** This will only affect MG/MGPP collections for searching, and GDBM database collections
 	echo *** Else set JAVA_HOME or JRE_HOME to point to an appropriate %bitness%-bit Java
