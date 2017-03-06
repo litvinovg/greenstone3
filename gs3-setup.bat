@@ -193,9 +193,9 @@ if "%bitness%" == "PE32+" (
 if DEFINED FOUNDJAVAHOME  (
 	echo *** Testing bitness of JAVA_HOME found at !FOUNDJAVAHOME!:
 	"!FOUNDJAVAHOME!\bin\java.exe" -d%bitness% -version 2> nul
-	if !ERRORLEVEL! equ 1 echo *** The detected system JDK java is an incompatible bit architecture& goto testjre	
+	if !ERRORLEVEL! equ 1 echo *** The detected JDK java is an incompatible bit architecture& goto testjre	
 	if !ERRORLEVEL! equ 0 (
-		echo *** The detected system JDK java is a matching %bitness% bit		
+		echo *** The detected JDK java is a matching %bitness% bit		
 		goto setupjavahome
 	)	
 )
@@ -218,7 +218,7 @@ if DEFINED FOUNDJREHOME  (
 :: We bundled a 32 bit JRE, but what if GS was compiled with 64 bit Java?
 :: All but MG/MGPP and GDBM should still work with 64 bit java.
 if exist "!HINT!\bin\java.exe" (
-  echo *** Changing to use the GS bundled 32-bit jre.
+  echo *** Changing to use Greenstone's bundled 32-bit jre.
   set JRE_HOME=!HINT!
   set PATH=!JAVA_HOME!\bin;!PATH!
   set RUNJAVA=!JAVA_HOME!\bin\java.exe
@@ -230,7 +230,7 @@ if exist "!HINT!\bin\java.exe" (
 :: Label summaryThenEnd will print out warnings on any mismatch
 :setupjavahome
 if DEFINED FOUNDJAVAHOME  (
-	echo *** Using the system JAVA_HOME detected at !FOUNDJAVAHOME!
+	echo *** Using the JAVA_HOME detected at !FOUNDJAVAHOME!
 	set JAVA_HOME=!FOUNDJAVAHOME!
 	set PATH=!FOUNDJAVAHOME!\bin;!PATH!
 	set RUNJAVA=!FOUNDJAVAHOME!\bin\java.exe
@@ -247,7 +247,7 @@ if DEFINED FOUNDJREHOME (
 )
 
 :: 5. Last ditch effort: search4j couldn't find any java, but check any Java env vars set anyway
-echo *** Search4j could not find an appropriate JAVA or JRE.
+echo *** Search4j could not find an appropriate JDK or JRE java.
 echo *** Attempting to use any JAVA_HOME else JRE_HOME in the environment...
 	
 if exist "!JAVA_HOME!\bin\java.exe" (
