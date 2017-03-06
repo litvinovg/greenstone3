@@ -194,12 +194,77 @@ function checkJava() {
       fi
   fi
 
-  #if search4j is present, use it
+  echo "**********************************************"
+
+  # If the file utility exists, use it to determine the bitness of this GS3,
+  # particularly of this GS3's lib\jni\libgdbmjava.so (gdbmjava.dll), since we prefer a matching java
+  # If any executable doesn't exist, the return value is 127.
+  # If file utility exists, then 0 is returned on successful execution, 1 is an error exit code
+  # Running file without arg returns 1 therefore.
+
+  # Determine the bitness of this GS3 installation, by running:
+  # `file lib/jni/libgdbmjava.so`
+  # Output:
+  #    lib/jni/libgdbmjava.so: ELF 64-bit LSB  shared object, x86-64, version 1 (SYSV),
+  #    dynamically linked, BuildID[sha1]=5ae42cf69275408bdce97697d69e9e6fd481420d, not stripped
+  # On 32-bit linux, the output will contain "lib/jni/libgdbmjava.so: ELF 32-bit ..."
+  # Check output string contains bitness: http://stackoverflow.com/questions/229551/string-contains-in-bash
+
+  fileexists=`file 2&> /dev/null`
+
+  # Integer comparison, http://tldp.org/LDP/abs/html/comparison-ops.html
+  #    can also use double brackets:  if [[ $? > 1 ]]; then ...
+  if [ "$?" -gt "1" ]; then
+      echo "*** 'file' utility not found installed on this unix-based system."
+      echo "*** Unable to use 'file' utility to determine bitness of this GS3 to see if it matches that of any Java found."
+      bitness=-1
+  else
+      bitness=`file $GSDL3SRCHOME/lib/jni/libgdbmjava.so`
+      if [[ $bitness == *"64-bit"* ]]; then
+	  bitness=64
+	  echo "The installed Greenstone is $bitness bit"
+      elif [[ $bitness == *"32-bit"* ]]; then
+	  bitness=32
+	  echo "The installed Greenstone is $bitness bit"
+      else
+	  bitness=-1
+	  echo "WARNING: Greenstone installation is of unknown bitness. \"$bitness\" is neither 32 nor 64 bit"
+      fi
+  fi
+
+  # If search4j is present, use it to locate a java.
+  # If search4j finds a Java, then:
+  # - If its bitness doesn't match and there's a bundled jre, use the bundled jre instead.
+  # - If its bitness doesn't match and there's no bundled jre, use the java found by search4j anyway,
+  # we'll print a warning about this bitness mismatch at the end
+
   if [ -x bin/search4j ] ; then
     FOUNDJAVAHOME="`bin/search4j -p \"$HINT\" -m $java_min_version`"
     if [ "$?" == "0" ]; then
-      #found a suitable java
-      setupJavaAt "$FOUNDJAVAHOME"
+      checkJavaBitnessAgainstGSBitness "$FOUNDJAVAHOME" "$bitness"
+
+      if [ "$?" == "0" ]; then
+          #found a suitable java
+	  if [ "$bitness" != "-1" ]; then
+	      echo "*** The detected java is a matching $bitness bit"
+	  fi
+	  setupJavaAt "$FOUNDJAVAHOME"
+      else
+	  if [ "$bitness" != "-1" ]; then
+	      echo "*** The detected java is an incompatible bit architecture"
+	  fi
+
+	  # check any bundled JRE
+	  if [ -d "$HINT" ]; then	  
+	      # For linux, the bundled JRE will be of a bitness matching this OS.
+	      echo "*** Changing to use Greenstone's bundled $bitness-bit jre"
+	      setupJavaAt "$HINT" "JRE"
+	  else
+	      # go with the JAVA_HOME that search4j found
+	      echo "*** Using the Java detected: "
+	      setupJavaAt "$FOUNDJAVAHOME"
+	  fi
+      fi
     else
       #no suitable java exists
       echo "  - ERROR: Failed to locate java $java_min_version or greater"
@@ -207,31 +272,91 @@ function checkJava() {
       echo "           And add JAVA_HOME/bin or JRE_HOME/bin to your PATH"
     fi
 
-  #otherwise manually try the hint
+  #otherwise no search4j, manually try the hint (the bundled jre) if it exists
   elif [ -d "$HINT" ]; then
       #found a suitable java
-      setupJavaAt "$HINT"
+      setupJavaAt "$HINT" "JRE"
 
   #lastly, check if java already setup
-  elif [ "$JAVA_HOME" != "" ] && [ "`which java`" == "$JAVA_HOME/bin/java" ]; then
-    echo "  - Using java at $JAVA_HOME"
-    echo "  - WARNING: Greenstone has not checked the version number of this java installation"
-    echo "             The source distribution of Greenstone3 requires java 1.5 or greater"
-    echo "             (SVN users may still use java 1.4)"
-  elif [ "$JRE_HOME" != "" ] && [ "`which java`" == "$JRE_HOME/bin/java" ]; then
-    echo "  - Using java at $JRE_HOME"
-    echo "  - WARNING: Greenstone has not checked the version number of this java installation"
-    echo "             The source distribution of Greenstone3 requires java 1.5 or greater"
-    echo "             (SVN users may still use java 1.4)"
-
-  #failing all that, print a warning
   else
-    #no suitable java exists
-    echo "  - ERROR: Failed to locate java"
-    echo "           Please set JAVA_HOME or JRE_HOME to point to an appropriate java"
-    echo "           And add JAVA_HOME/bin or JRE_HOME/bin to your PATH"
+      echo "*** Could not find an appropriate JDK or JRE java"
+      echo "*** Attempting to use JAVA_HOME else JRE_HOME in the environment"
+
+      if [ "$JAVA_HOME" != "" ] && [ "`which java`" == "$JAVA_HOME/bin/java" ]; then
+	  echo "  - Using java at $JAVA_HOME"
+	  echo "  - WARNING: Greenstone has not checked the version number of this java installation"
+	  echo "             The source distribution of Greenstone3 requires java 1.5 or greater"
+	  echo "             (SVN users may still use java 1.4)"
+      elif [ "$JRE_HOME" != "" ] && [ "`which java`" == "$JRE_HOME/bin/java" ]; then
+	  echo "  - Using java at $JRE_HOME"
+	  echo "  - WARNING: Greenstone has not checked the version number of this java installation"
+	  echo "             The source distribution of Greenstone3 requires java 1.5 or greater"
+	  echo "             (SVN users may still use java 1.4)"
+	  
+      #failing all that, print a warning
+      else
+          #no suitable java exists
+	  echo "  - ERROR: Failed to locate java"
+	  echo "           Please set JAVA_HOME or JRE_HOME to point to an appropriate java"
+	  echo "           And add JAVA_HOME/bin or JRE_HOME/bin to your PATH"
+	  return
+      fi
   fi
+
+  # If we know the bitness of this GS3 installation, then warn if there's a mismatch
+  # with the bitness of the Java found
+
+  if [ "$bitness" != "-1" ]; then
+      if [ "$JAVA_HOME" != "" ]; then
+	  JAVA_FOUND=$JAVA_HOME
+      elif [ "$JRE_HOME" != "" ]; then
+	  JAVA_FOUND=$JRE_HOME
+      fi
+      checkJavaBitnessAgainstGSBitness "$JAVA_FOUND" "$bitness"
+      if [ "$?" == "1" ]; then
+	  echo "*** WARNING: Detected mismatch between the bit-ness of your GS installation ($bitness bit)"
+	  echo "*** and the Java found at $JAVA_FOUND/bin/java"
+	  echo "*** Continuing with this Java anyway:"
+	  echo "*** This will only affect MG/MGPP collections for searching, and GDBM database collections"
+	  echo "*** Else set JAVA_HOME or JRE_HOME to point to an appropriate $bitness bit Java"
+	  echo "*** Or recompile GS with your system Java:"
+	  if [ "$JAVA_HOME" != "" ]; then
+	      echo "*** JAVA_HOME at $JAVA_HOME"
+	  else
+	      echo "*** JRE_HOME at $JRE_HOME"
+	  fi
+      fi
+  fi
+
+  echo "**********************************************"
 }
+
+function checkJavaBitnessAgainstGSBitness() {
+#    echo "Checking bitness"
+    java_installation="$1"
+    bitness="$2"
+
+    # bitness can be -1 if the 'file' utility could not be found to determine bitness
+    # or if its output no longer prints "32-bit" or "64-bit". Should continue gracefully
+    if [ "$bitness" == "-1" ]; then
+	return 0
+    fi
+
+    # now we can actually work out if the java install's bitness matches that of GS ($bitness)
+    # java -d32 -version should return 0 if the Java is 32 bit, and 1 (failure) if the Java is 64 bit.
+    # Likewise, java -d64 -version will return 0 if the Java is 64 bit, and 1 (failure) if the Java is 32 bit.
+    `$java_installation/bin/java -d$bitness -version 2> /dev/null`
+
+    if [ "$?" == "0" ]; then
+	return 0
+    elif [ "$?" == "1" ]; then
+	return 1
+    else
+	echo "*** Problem determining bitness of java using java at $java_installation"
+	return $?
+    fi
+}
+
 
 function setupJavaAt() {
   export JAVA_HOME="$1"
