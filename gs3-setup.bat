@@ -220,8 +220,9 @@ if DEFINED FOUNDJREHOME  (
 if exist "!HINT!\bin\java.exe" (
   echo *** Changing to use Greenstone's bundled 32-bit jre.
   set JRE_HOME=!HINT!
-  set PATH=!JAVA_HOME!\bin;!PATH!
-  set RUNJAVA=!JAVA_HOME!\bin\java.exe
+  ::set JAVA_HOME=!HINT!
+  set PATH=!JRE_HOME!\bin;!PATH!
+  set RUNJAVA=!JRE_HOME!\bin\java.exe
   goto summaryThenEnd
 )
 
