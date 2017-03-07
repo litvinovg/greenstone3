@@ -167,7 +167,8 @@ rem The sort of output we want:
 :: Note: Using call before the command to allow 2 sets of double quotes, see 
 :: http://stackoverflow.com/questions/6474738/batch-file-for-f-doesnt-work-if-path-has-spaces
 :: Could use shortfilenames, see http://stackoverflow.com/questions/10227144/convert-long-filename-to-short-filename-8-3-using-cmd-exe
-for /f "usebackq tokens=2 delims= " %%G IN (`call "%GSDLHOME%\bin\windows\GNUfile\bin\file.exe" "%GSDL3SRCHOME%\bin\search4j.exe"`) do set bitness=%%G
+if not exist "!GSDL3SRCHOME!\lib\jni\gdbmjava.dll" set bitness=UNKNOWN& goto testjavahome
+for /f "usebackq tokens=2 delims= " %%G IN (`call "!GSDLHOME!\bin\windows\GNUfile\bin\file.exe" "!GSDL3SRCHOME!\lib\jni\gdbmjava.dll"`) do set bitness=%%G
 
 if "%bitness%" == "PE32+" (
 	set bitness=64
@@ -197,7 +198,7 @@ if DEFINED FOUNDJAVAHOME  (
 	"!FOUNDJAVAHOME!\bin\java.exe" -d%bitness% -version 2> nul
 	if !ERRORLEVEL! equ 1 echo *** The detected JDK java is incompatible with !bitness! bit GS& goto testjre	
 	if !ERRORLEVEL! equ 0 (
-		echo *** The detected JDK java is a matching %bitness% bit		
+		echo *** The detected JDK java is a matching %bitness% bit
 		goto setupjavahome
 	)	
 )
@@ -208,10 +209,10 @@ if DEFINED FOUNDJREHOME  (
 	echo *** Testing bitness of JRE_HOME found at !FOUNDJREHOME!:
 	"!FOUNDJREHOME!\bin\java.exe" -d%bitness% -version 2> nul
 	if !ERRORLEVEL! equ 1 echo *** The detected JRE java is incompatible with !bitness! bit GS& goto testbundledjre
-	if !ERRORLEVEL! equ 0 (	
+	if !ERRORLEVEL! equ 0 (
 		rem The JRE_HOME found by search4j may be the bundled JRE, overriding any system JRE_HOME,
-		rem because the bundled JRE_HOME was provided as HINT to search4j.		
-		echo *** The detected JRE java is a matching %bitness% bit			
+		rem because the bundled JRE_HOME was provided as HINT to search4j.
+		echo *** The detected JRE java is a matching %bitness% bit
 		goto setupjrehome
 	)	
 )
@@ -224,8 +225,8 @@ if exist "!BUNDLED_JRE!\bin\java.exe" (
 	echo *** Testing bitness of bundled JRE at !BUNDLED_JRE!:
 	"!BUNDLED_JRE!\bin\java.exe" -d%bitness% -version 2> nul
 	if !ERRORLEVEL! equ 1 echo *** The detected JRE java is incompatible with !bitness! bit& goto setupjavahome
-	if !ERRORLEVEL! equ 0 (	
-		echo *** The detected JRE java is a matching %bitness% bit			
+	if !ERRORLEVEL! equ 0 (
+		echo *** The detected JRE java is a matching %bitness% bit
 		goto bundledjre
 	)
 )
@@ -248,7 +249,7 @@ if exist "!BUNDLED_JRE!\bin\java.exe" (
 :setupjavahome
 if DEFINED FOUNDJAVAHOME  (
 	echo *** Using the JAVA_HOME detected at !FOUNDJAVAHOME!
-	set JAVA_HOME=!FOUNDJAVAHOME!	
+	set JAVA_HOME=!FOUNDJAVAHOME!
 	set PATH=!FOUNDJAVAHOME!\bin;!PATH!
 	set RUNJAVA=!FOUNDJAVAHOME!\bin\java.exe
 	goto summaryThenEnd
