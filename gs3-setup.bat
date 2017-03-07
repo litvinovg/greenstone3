@@ -232,7 +232,7 @@ if exist "!HINT!\bin\java.exe" (
 :setupjavahome
 if DEFINED FOUNDJAVAHOME  (
 	echo *** Using the JAVA_HOME detected at !FOUNDJAVAHOME!
-	set JAVA_HOME=!FOUNDJAVAHOME!
+	set JAVA_HOME=!FOUNDJAVAHOME!	
 	set PATH=!FOUNDJAVAHOME!\bin;!PATH!
 	set RUNJAVA=!FOUNDJAVAHOME!\bin\java.exe
 	goto summaryThenEnd
@@ -281,8 +281,8 @@ goto end
 :: 6. Check that the bitness of any Java found is appropriate and warn if it is not.
 "!RUNJAVA!" -d%bitness% -version 2> nul
 if !ERRORLEVEL! equ 1 (
-	echo *** WARNING: Detected mismatch between the bit-ness of your Greenstone installation ^(%bitness% bit^)
-	echo *** and the Java found at %RUNJAVA%.
+	echo *** WARNING: Detected mismatch between the bit-ness of your Greenstone installation ^(!bitness! bit^)
+	echo *** and the Java found at !RUNJAVA!.
 	echo *** Continuing with this Java anyway:
 	echo *** This will only affect MG/MGPP collections for searching, and GDBM database collections
 	echo *** Else set JAVA_HOME or JRE_HOME to point to an appropriate %bitness%-bit Java
