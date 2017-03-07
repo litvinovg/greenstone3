@@ -169,10 +169,6 @@ rem The sort of output we want:
 :: Could use shortfilenames, see http://stackoverflow.com/questions/10227144/convert-long-filename-to-short-filename-8-3-using-cmd-exe
 for /f "usebackq tokens=2 delims= " %%G IN (`call "%GSDLHOME%\bin\windows\GNUfile\bin\file.exe" "%GSDL3SRCHOME%\bin\search4j.exe"`) do set bitness=%%G
 
-echo JAVAHOME: %JAVA_HOME%
-if not "%FOUNDJAVAHOME%" == "" echo FOUNDJAVAHOME !FOUNDJAVAHOME!
-if not "%FOUNDJREHOME%" == "" echo FOUNDJAVAHOME !FOUNDJREHOME!
-
 if "%bitness%" == "PE32+" (
 	set bitness=64
 	echo The installed Greenstone is 64 bit
