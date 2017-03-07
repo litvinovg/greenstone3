@@ -125,7 +125,8 @@ setlocal enabledelayedexpansion
 
 :: ---- Search for java ----
 set JAVA_MIN_VERSION=1.5.0_00
-set HINT=!CD!\packages\jre
+set BUNDLED_JRE=!CD!\packages\jre
+set HINT=!BUNDLED_JRE!
 
 ::if search4j is present, use it
 set FOUNDJAVAHOME=
@@ -166,7 +167,11 @@ rem The sort of output we want:
 :: Note: Using call before the command to allow 2 sets of double quotes, see 
 :: http://stackoverflow.com/questions/6474738/batch-file-for-f-doesnt-work-if-path-has-spaces
 :: Could use shortfilenames, see http://stackoverflow.com/questions/10227144/convert-long-filename-to-short-filename-8-3-using-cmd-exe
-for /f "usebackq tokens=2 delims= " %%G IN (`call "%GSDLHOME%\bin\windows\GNUfile\bin\file.exe" "%GSDL3SRCHOME%\lib\jni\gdbmjava.dll"`) do set bitness=%%G
+for /f "usebackq tokens=2 delims= " %%G IN (`call "%GSDLHOME%\bin\windows\GNUfile\bin\file.exe" "%GSDL3SRCHOME%\bin\search4j.exe"`) do set bitness=%%G
+
+echo JAVAHOME: %JAVA_HOME%
+if not "%FOUNDJAVAHOME%" == "" echo FOUNDJAVAHOME !FOUNDJAVAHOME!
+if not "%FOUNDJREHOME%" == "" echo FOUNDJAVAHOME !FOUNDJREHOME!
 
 if "%bitness%" == "PE32+" (
 	set bitness=64
@@ -176,7 +181,7 @@ if "%bitness%" == "PE32+" (
 		set bitness=32
 		echo The installed Greenstone is 32 bit
 	) else (
-		echo WARNING: Greenstone installation is of unknown bitness. "%bitness%" is neither 32 nor 64 bit& goto bundledjre
+		echo WARNING: Greenstone installation is of unknown bitness. "%bitness%" is neither 32 nor 64 bit		
 		set bitness=UNKNOWN
 	)
 )
@@ -191,9 +196,10 @@ if "%bitness%" == "PE32+" (
 :: http://www.robvanderwoude.com/errorlevel.php
 :: https://ss64.com/nt/errorlevel.html
 if DEFINED FOUNDJAVAHOME  (
+	if "%bitness%" == "UNKNOWN" goto setupjavahome
 	echo *** Testing bitness of JAVA_HOME found at !FOUNDJAVAHOME!:
 	"!FOUNDJAVAHOME!\bin\java.exe" -d%bitness% -version 2> nul
-	if !ERRORLEVEL! equ 1 echo *** The detected JDK java is an incompatible bit architecture& goto testjre	
+	if !ERRORLEVEL! equ 1 echo *** The detected JDK java is incompatible with !bitness! bit GS& goto testjre	
 	if !ERRORLEVEL! equ 0 (
 		echo *** The detected JDK java is a matching %bitness% bit		
 		goto setupjavahome
@@ -202,9 +208,10 @@ if DEFINED FOUNDJAVAHOME  (
 
 :testjre
 if DEFINED FOUNDJREHOME  (
+	if "%bitness%" == "UNKNOWN" goto setupjrehome
 	echo *** Testing bitness of JRE_HOME found at !FOUNDJREHOME!:
 	"!FOUNDJREHOME!\bin\java.exe" -d%bitness% -version 2> nul
-	if !ERRORLEVEL! equ 1 echo *** The detected JRE java is an incompatible bit architecture& goto bundledjre
+	if !ERRORLEVEL! equ 1 echo *** The detected JRE java is incompatible with !bitness! bit GS& goto testbundledjre
 	if !ERRORLEVEL! equ 0 (	
 		rem The JRE_HOME found by search4j may be the bundled JRE, overriding any system JRE_HOME,
 		rem because the bundled JRE_HOME was provided as HINT to search4j.		
@@ -214,13 +221,26 @@ if DEFINED FOUNDJREHOME  (
 )
 
 :: 3. Fall back to 32 bit JRE bundled with GS
+:testbundledjre
+if exist "!BUNDLED_JRE!\bin\java.exe" (
+	if "%bitness%" == "UNKNOWN" goto bundledjre
+	
+	echo *** Testing bitness of bundled JRE at !BUNDLED_JRE!:
+	"!BUNDLED_JRE!\bin\java.exe" -d%bitness% -version 2> nul
+	if !ERRORLEVEL! equ 1 echo *** The detected JRE java is incompatible with !bitness! bit& goto setupjavahome
+	if !ERRORLEVEL! equ 0 (	
+		echo *** The detected JRE java is a matching %bitness% bit			
+		goto bundledjre
+	)
+)
+
 :bundledjre
 :: We bundled a 32 bit JRE, but what if GS was compiled with 64 bit Java?
 :: All but MG/MGPP and GDBM should still work with 64 bit java.
-if exist "!HINT!\bin\java.exe" (
-  echo *** Changing to use Greenstone's bundled 32-bit jre.
-  set JRE_HOME=!HINT!
-  ::set JAVA_HOME=!HINT!
+if exist "!BUNDLED_JRE!\bin\java.exe" (
+  echo *** Changing to use Greenstone's bundled jre.
+  set JRE_HOME=!BUNDLED_JRE!
+  ::set JAVA_HOME=!BUNDLED_JRE!
   set PATH=!JRE_HOME!\bin;!PATH!
   set RUNJAVA=!JRE_HOME!\bin\java.exe
   goto summaryThenEnd
@@ -246,6 +266,8 @@ if DEFINED FOUNDJREHOME (
 	set RUNJAVA=!FOUNDJREHOME!\bin\java.exe
 	goto summaryThenEnd
 )
+
+if exist "!BUNDLED_JRE!\bin\java.exe" goto bundledjre
 
 :: 5. Last ditch effort: search4j couldn't find any java, but check any Java env vars set anyway
 echo *** Search4j could not find an appropriate JDK or JRE java.
@@ -279,6 +301,7 @@ goto end
 
 :summaryThenEnd
 :: 6. Check that the bitness of any Java found is appropriate and warn if it is not.
+if "%bitness%" == "UNKNOWN" goto displayvars
 "!RUNJAVA!" -d%bitness% -version 2> nul
 if !ERRORLEVEL! equ 1 (
 	echo *** WARNING: Detected mismatch between the bit-ness of your Greenstone installation ^(!bitness! bit^)
@@ -290,6 +313,7 @@ if !ERRORLEVEL! equ 1 (
 	if exist "!JAVA_HOME!" ( echo *** JAVA_HOME at !JAVA_HOME! ) else ( echo *** JRE_HOME at !JRE_HOME! )
 )
 
+:displayvars
 echo ********************************************************************
 echo.
 
