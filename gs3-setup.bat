@@ -2,6 +2,8 @@
 
 setlocal enabledelayedexpansion
 
+set DEBUG=false
+
 set java_min_version=1.5.0_00
 
 if exist gs3-setup.bat goto prelim
@@ -89,7 +91,9 @@ set GS_CP_SET=yes
 :skipSetCp
 
 :: ---- if gs2build is there, run its setup.bat file ----
-endlocal & set RUNJAVA=%RUNJAVA%& set PATH=%PATH%& set GSDLOS=%GSDLOS%& set GSDLHOME=%GSDLHOME%& set GSDL3HOME=%GSDL3HOME%& set GSDL3SRCHOME=%GSDL3SRCHOME%& set JAVA_HOME=%JAVA_HOME%& set JRE_HOME=%JRE_HOME%& set ANT_HOME=%ANT_HOME%& set CLASSPATH=%CLASSPATH%
+:: http://stackoverflow.com/questions/69068/long-commands-split-over-multiple-lines-in-windows-vista-batch-bat-file
+endlocal & set DEBUG=%DEBUG%& set RUNJAVA=%RUNJAVA%& set PATH=%PATH%& set GSDLOS=%GSDLOS%& set GSDLHOME=%GSDLHOME%& set GSDL3HOME=%GSDL3HOME%^
+ & set GSDL3SRCHOME=%GSDL3SRCHOME%& set JAVA_HOME=%JAVA_HOME%& set JRE_HOME=%JRE_HOME%& set ANT_HOME=%ANT_HOME%& set CLASSPATH=%CLASSPATH%
 
 if exist gs2build\setup.bat (
   echo.
@@ -138,7 +142,7 @@ if exist bin\search4j.exe (
 
 
 echo.
-echo ********************************************************************
+if "%DEBUG%" == "true" echo ********************************************************************
 
 rem Check if any Java found matches the bitness of the Greenstone installation's binaries
 rem The sort of output we want:
@@ -164,10 +168,10 @@ rem The sort of output we want:
 :: prints out the entire output, e.g.:
 :: 		gs2build\bin\windows\wvWare.exe; PE32 executable for MS Windows (console) Intel 80386 32-bit
 :: To just get the "PE32" part of that output, set the delimiter char to space and request only the 2nd token:
-:: Note: Using call before the command to allow 2 sets of double quotes, see 
+:: Note: Using call before the command to allow 2 sets of double quotes, see
 :: http://stackoverflow.com/questions/6474738/batch-file-for-f-doesnt-work-if-path-has-spaces
 :: Could use shortfilenames, see http://stackoverflow.com/questions/10227144/convert-long-filename-to-short-filename-8-3-using-cmd-exe
-if not exist "!GSDL3SRCHOME!\lib\jni\gdbmjava.dll" set bitness=UNKNOWN& goto testjavahome
+if not exist "!GSDL3SRCHOME!\lib\jni\gdbmjava.dll" set bitness=UNKNOWN& goto setupjavahome
 for /f "usebackq tokens=2 delims= " %%G IN (`call "!GSDLHOME!\bin\windows\GNUfile\bin\file.exe" "!GSDL3SRCHOME!\lib\jni\gdbmjava.dll"`) do set bitness=%%G
 
 if "%bitness%" == "PE32+" (
@@ -178,7 +182,7 @@ if "%bitness%" == "PE32+" (
 		set bitness=32
 		echo The installed Greenstone is 32 bit
 	) else (
-		echo WARNING: Greenstone installation is of unknown bitness. "%bitness%" is neither 32 nor 64 bit		
+		echo WARNING: Greenstone installation is of unknown bitness. "%bitness%" is neither 32 nor 64 bit
 		set bitness=UNKNOWN
 	)
 )
@@ -194,39 +198,39 @@ if "%bitness%" == "PE32+" (
 :: https://ss64.com/nt/errorlevel.html
 if DEFINED FOUNDJAVAHOME  (
 	if "%bitness%" == "UNKNOWN" goto setupjavahome
-	echo *** Testing bitness of JAVA_HOME found at !FOUNDJAVAHOME!:
+	if "%DEBUG%" == "true" echo     Testing bitness of JAVA_HOME found at !FOUNDJAVAHOME!:
 	"!FOUNDJAVAHOME!\bin\java.exe" -d%bitness% -version 2> nul
-	if !ERRORLEVEL! equ 1 echo *** The detected JDK java is incompatible with !bitness! bit GS& goto testjre	
+	if !ERRORLEVEL! equ 1 if "%DEBUG%" == "true" echo     The detected JDK java is incompatible with !bitness! bit GS& goto testjre
 	if !ERRORLEVEL! equ 0 (
-		echo *** The detected JDK java is a matching %bitness% bit
+		if "%DEBUG%" == "true" echo     The detected JDK java is a matching %bitness% bit
 		goto setupjavahome
-	)	
+	)
 )
 
 :testjre
 if DEFINED FOUNDJREHOME  (
 	if "%bitness%" == "UNKNOWN" goto setupjrehome
-	echo *** Testing bitness of JRE_HOME found at !FOUNDJREHOME!:
+	if "%DEBUG%" == "true" echo     Testing bitness of JRE_HOME found at !FOUNDJREHOME!:
 	"!FOUNDJREHOME!\bin\java.exe" -d%bitness% -version 2> nul
-	if !ERRORLEVEL! equ 1 echo *** The detected JRE java is incompatible with !bitness! bit GS& goto testbundledjre
+	if !ERRORLEVEL! equ 1 if "%DEBUG%" == "true" echo     The detected JRE java is incompatible with !bitness! bit GS& goto testbundledjre
 	if !ERRORLEVEL! equ 0 (
 		rem The JRE_HOME found by search4j may be the bundled JRE, overriding any system JRE_HOME,
 		rem because the bundled JRE_HOME was provided as HINT to search4j.
-		echo *** The detected JRE java is a matching %bitness% bit
+		if "%DEBUG%" == "true" echo     The detected JRE java is a matching %bitness% bit
 		goto setupjrehome
-	)	
+	)
 )
 
 :: 3. Fall back to 32 bit JRE bundled with GS
 :testbundledjre
 if exist "!BUNDLED_JRE!\bin\java.exe" (
 	if "%bitness%" == "UNKNOWN" goto bundledjre
-	
-	echo *** Testing bitness of bundled JRE at !BUNDLED_JRE!:
+	if "%DEBUG%" == "true" echo     Testing bitness of bundled JRE at !BUNDLED_JRE!:
 	"!BUNDLED_JRE!\bin\java.exe" -d%bitness% -version 2> nul
-	if !ERRORLEVEL! equ 1 echo *** The detected JRE java is incompatible with !bitness! bit& goto setupjavahome
+	if !ERRORLEVEL! equ 1 if "%DEBUG%" == "true" echo     The bundled JRE java is incompatible with !bitness! bit& goto setupjavahome
 	if !ERRORLEVEL! equ 0 (
-		echo *** The detected JRE java is a matching %bitness% bit
+		if "%DEBUG%" == "true" echo     The bundled JRE java is a matching %bitness% bit
+		echo *** Changing to use Greenstone's bundled JRE.
 		goto bundledjre
 	)
 )
@@ -235,7 +239,6 @@ if exist "!BUNDLED_JRE!\bin\java.exe" (
 :: We bundled a 32 bit JRE, but what if GS was compiled with 64 bit Java?
 :: All but MG/MGPP and GDBM should still work with 64 bit java.
 if exist "!BUNDLED_JRE!\bin\java.exe" (
-  echo *** Changing to use Greenstone's bundled jre.
   set JRE_HOME=!BUNDLED_JRE!
   ::set JAVA_HOME=!BUNDLED_JRE!
   set PATH=!JRE_HOME!\bin;!PATH!
@@ -248,7 +251,7 @@ if exist "!BUNDLED_JRE!\bin\java.exe" (
 :: Label summaryThenEnd will print out warnings on any mismatch
 :setupjavahome
 if DEFINED FOUNDJAVAHOME  (
-	echo *** Using the JAVA_HOME detected at !FOUNDJAVAHOME!
+	echo Using the JAVA_HOME detected at !FOUNDJAVAHOME!
 	set JAVA_HOME=!FOUNDJAVAHOME!
 	set PATH=!FOUNDJAVAHOME!\bin;!PATH!
 	set RUNJAVA=!FOUNDJAVAHOME!\bin\java.exe
@@ -256,20 +259,27 @@ if DEFINED FOUNDJAVAHOME  (
 )
 
 :setupjrehome
-if DEFINED FOUNDJREHOME (
-	echo *** Using the JRE_HOME detected at !FOUNDJREHOME!
+if DEFINED FOUNDJREHOME  (
+	if "!FOUNDJREHOME!" == "!BUNDLED_JRE!" (
+		echo Using the bundled JRE detected at !FOUNDJREHOME!
+	) else (
+		echo Using the JRE detected at !FOUNDJREHOME!
+	)
 	set JRE_HOME=!FOUNDJREHOME!
 	set PATH=!FOUNDJREHOME!\bin;!PATH!
 	set RUNJAVA=!FOUNDJREHOME!\bin\java.exe
 	goto summaryThenEnd
 )
 
-if exist "!BUNDLED_JRE!\bin\java.exe" goto bundledjre
+if exist "!BUNDLED_JRE!\bin\java.exe" (
+	echo Using the bundled JRE detected at !FOUNDJREHOME!
+	goto bundledjre
+)
 
 :: 5. Last ditch effort: search4j couldn't find any java, but check any Java env vars set anyway
-echo *** Search4j could not find an appropriate JDK or JRE java.
-echo *** Attempting to use any JAVA_HOME else JRE_HOME in the environment...
-	
+echo     Search4j could not find an appropriate JDK or JRE java.
+echo     Attempting to use any JAVA_HOME else JRE_HOME in the environment...
+
 if exist "!JAVA_HOME!\bin\java.exe" (
   set PATH=!JAVA_HOME!\bin;!PATH!
   set RUNJAVA=!JAVA_HOME!\bin\java.exe
@@ -304,14 +314,14 @@ if !ERRORLEVEL! equ 1 (
 	echo *** WARNING: Detected mismatch between the bit-ness of your Greenstone installation ^(!bitness! bit^)
 	echo *** and the Java found at !RUNJAVA!.
 	echo *** Continuing with this Java anyway:
-	echo *** This will only affect MG/MGPP collections for searching, and GDBM database collections
-	echo *** Else set JAVA_HOME or JRE_HOME to point to an appropriate %bitness%-bit Java
-	echo *** Or recompile GS with your system Java:
+	echo *** This will only affect MG/MGPP collections for searching, and GDBM database collections.
+	echo *** Else set JAVA_HOME or JRE_HOME to point to an appropriate %bitness%-bit Java,
+	echo *** or recompile GS with your system Java:
 	if exist "!JAVA_HOME!" ( echo *** JAVA_HOME at !JAVA_HOME! ) else ( echo *** JRE_HOME at !JRE_HOME! )
 )
 
 :displayvars
-echo ********************************************************************
+if "%DEBUG%" == "true" echo ********************************************************************
 echo.
 
 echo GSDL3SRCHOME : !GSDL3SRCHOME!
@@ -331,8 +341,9 @@ echo.
 
 :done
 :: End localisation of variables that started with the set local/set enabledelayedexpansion command
-:: Restore global variables that would otherwise be lost at script's end due to their having been initialised in a 
+:: Restore global variables that would otherwise be lost at script's end due to their having been initialised in a
 :: set local/set enabledelayedexpansion section. See http://ss64.com/nt/endlocal.html
-endlocal & set RUNJAVA=%RUNJAVA%& set PATH=%PATH%& set GSDLOS=%GSDLOS%& set GSDLHOME=%GSDLHOME%& set GSDL3HOME=%GSDL3HOME%& set GSDL3SRCHOME=%GSDL3SRCHOME%& set JAVA_HOME=%JAVA_HOME%& set JRE_HOME=%JRE_HOME%& set ANT_HOME=%ANT_HOME%& set CLASSPATH=%CLASSPATH%
+endlocal & set RUNJAVA=%RUNJAVA%& set PATH=%PATH%& set GSDLOS=%GSDLOS%& set GSDLHOME=%GSDLHOME%& set GSDL3HOME=%GSDL3HOME%& set GSDL3SRCHOME=%GSDL3SRCHOME%^
+ & set JAVA_HOME=%JAVA_HOME%& set JRE_HOME=%JRE_HOME%& set ANT_HOME=%ANT_HOME%& set CLASSPATH=%CLASSPATH%
 
 :end
