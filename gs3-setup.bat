@@ -92,8 +92,8 @@ set GS_CP_SET=yes
 
 :: ---- if gs2build is there, run its setup.bat file ----
 :: http://stackoverflow.com/questions/69068/long-commands-split-over-multiple-lines-in-windows-vista-batch-bat-file
-endlocal & set DEBUG=%DEBUG%& set RUNJAVA=%RUNJAVA%& set PATH=%PATH%& set GSDLOS=%GSDLOS%& set GSDLHOME=%GSDLHOME%& set GSDL3HOME=%GSDL3HOME%^
- & set GSDL3SRCHOME=%GSDL3SRCHOME%& set JAVA_HOME=%JAVA_HOME%& set JRE_HOME=%JRE_HOME%& set ANT_HOME=%ANT_HOME%& set CLASSPATH=%CLASSPATH%
+endlocal & set DEBUG=%DEBUG%& set RUNJAVA=%RUNJAVA%& set PATH=%PATH%& set GSDLOS=%GSDLOS%& set GSDLHOME=%GSDLHOME%& set GSDL3HOME=%GSDL3HOME%& ^
+set GSDL3SRCHOME=%GSDL3SRCHOME%& set JAVA_HOME=%JAVA_HOME%& set JRE_HOME=%JRE_HOME%& set ANT_HOME=%ANT_HOME%& set CLASSPATH=%CLASSPATH%
 
 if exist gs2build\setup.bat (
   echo.
@@ -343,7 +343,7 @@ echo.
 :: End localisation of variables that started with the set local/set enabledelayedexpansion command
 :: Restore global variables that would otherwise be lost at script's end due to their having been initialised in a
 :: set local/set enabledelayedexpansion section. See http://ss64.com/nt/endlocal.html
-endlocal & set RUNJAVA=%RUNJAVA%& set PATH=%PATH%& set GSDLOS=%GSDLOS%& set GSDLHOME=%GSDLHOME%& set GSDL3HOME=%GSDL3HOME%& set GSDL3SRCHOME=%GSDL3SRCHOME%^
- & set JAVA_HOME=%JAVA_HOME%& set JRE_HOME=%JRE_HOME%& set ANT_HOME=%ANT_HOME%& set CLASSPATH=%CLASSPATH%
+endlocal & set RUNJAVA=%RUNJAVA%& set PATH=%PATH%& set GSDLOS=%GSDLOS%& set GSDLHOME=%GSDLHOME%& set GSDL3HOME=%GSDL3HOME%& set GSDL3SRCHOME=%GSDL3SRCHOME%& ^
+set JAVA_HOME=%JAVA_HOME%& set JRE_HOME=%JRE_HOME%& set ANT_HOME=%ANT_HOME%& set CLASSPATH=%CLASSPATH%
 
 :end
