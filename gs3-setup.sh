@@ -8,7 +8,7 @@
 
 # java_min_version gets passed to search4j as the minimum java version
 java_min_version=1.5.0_00
-DEBUG=true
+DEBUG=false
 
 function testSource(){
 
