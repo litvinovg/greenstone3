@@ -8,7 +8,7 @@
 
 # java_min_version gets passed to search4j as the minimum java version
 java_min_version=1.5.0_00
-DEBUG=false
+DEBUG=true
 
 function testSource(){
 
@@ -289,13 +289,13 @@ function checkJava() {
 
   # 3. check the bitness of any bundled JRE, and use if appropriate
   if [ "$javaset" != "true" ] && [ -d "$BUNDLED_JRE" ]; then
-      checkJavaBitnessAgainstGSBitness "$FOUNDJREHOME" "$bitness"
+      checkJavaBitnessAgainstGSBitness "$BUNDLED_JRE" "$bitness"
       
       # For linux, the bundled JRE ought to be of a bitness matching this OS.
       if [ "$?" == "0" ]; then
 	  if [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
 	      # bundled JRE matches GS bitness
-	      echo "*** Changing to use Greenstone's bundled $bitness-bit jre"
+	      echo "*** Changing to use Greenstone's bundled $bitness-bit jre at $BUNDLED_JRE"
 	  fi
 	  setupJavaAt "$BUNDLED_JRE" "JRE"
 	  javaset=true
