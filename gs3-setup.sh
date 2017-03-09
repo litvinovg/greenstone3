@@ -8,7 +8,7 @@
 
 # java_min_version gets passed to search4j as the minimum java version
 java_min_version=1.5.0_00
-
+DEBUG=false
 
 function testSource(){
 
@@ -179,7 +179,8 @@ function setGS3ENV() {
 function checkJava() {
 
   # we now include a JRE with Mac (Mountain) Lion too, because from Yosemite onwards there's no system Java on Macs
-  HINT="`pwd`/packages/jre"
+  BUNDLED_JRE="`pwd`/packages/jre"
+  HINT=$BUNDLED_JRE
   
   #if [ "$GSDLOS" = "darwin" ] && [ ! -d "$HINT" ]; then
   if [ "$GSDLOS" = "darwin" ]; then
@@ -194,7 +195,7 @@ function checkJava() {
       fi
   fi
 
-  echo "**********************************************"
+  if [ "$DEBUG" == "true" ]; then echo "**********************************************"; fi
 
   # If the file utility exists, use it to determine the bitness of this GS3,
   # particularly of this GS3's lib\jni\libgdbmjava.so (gdbmjava.dll), since we prefer a matching java
@@ -215,8 +216,13 @@ function checkJava() {
   # Integer comparison, http://tldp.org/LDP/abs/html/comparison-ops.html
   #    can also use double brackets:  if [[ $? > 1 ]]; then ...
   if [ "$?" -gt "1" ]; then
-      echo "*** 'file' utility not found installed on this unix-based system."
-      echo "*** Unable to use 'file' utility to determine bitness of this GS3 to see if it matches that of any Java found."
+      if [ "$DEBUG" == "true" ]; then 
+	  echo "    'file' utility not found installed on this unix-based system."
+	  echo "    Unable to use 'file' utility to determine bitness of this GS3 to see if it matches that of any Java found."
+      fi
+      bitness=-1
+  elif [ ! -f "$GSDL3SRCHOME/lib/jni/libgdbmjava.so" ]; then
+      # the file we want to test the bitness of, to determine GS3's bitness by, doesn't exist yet
       bitness=-1
   else
       bitness=`file $GSDL3SRCHOME/lib/jni/libgdbmjava.so`
@@ -238,47 +244,98 @@ function checkJava() {
   # - If its bitness doesn't match and there's no bundled jre, use the java found by search4j anyway,
   # we'll print a warning about this bitness mismatch at the end
 
+  javaset=false
   if [ -x bin/search4j ] ; then
-    FOUNDJAVAHOME="`bin/search4j -p \"$HINT\" -m $java_min_version`"
-    if [ "$?" == "0" ]; then
+      FOUNDJAVAHOME="`bin/search4j -d -p \"$HINT\" -m $java_min_version`"
+      javahome_retval=$?
+      FOUNDJREHOME="`bin/search4j -r -p \"$HINT\" -m $java_min_version`"
+      jrehome_retval=$?
+  fi
+
+  # 1. check the bitness of any JDK java found by search4j, and use if appropriate
+  if [ "$javahome_retval" == "0" ]; then
       checkJavaBitnessAgainstGSBitness "$FOUNDJAVAHOME" "$bitness"
 
       if [ "$?" == "0" ]; then
           #found a suitable java
-	  if [ "$bitness" != "-1" ]; then
-	      echo "*** The detected java is a matching $bitness bit"
+	  if [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
+	      echo "    The detected JDK at $FOUNDJAVAHOME is a matching $bitness bit"
 	  fi
-	  setupJavaAt "$FOUNDJAVAHOME"
-      else
-	  if [ "$bitness" != "-1" ]; then
-	      echo "*** The detected java is an incompatible bit architecture"
-	  fi
+	  setupJavaAt "$FOUNDJAVAHOME" "JDK"
+	  javaset=true
 
-	  # check any bundled JRE
-	  if [ -d "$HINT" ]; then	  
-	      # For linux, the bundled JRE will be of a bitness matching this OS.
-	      echo "*** Changing to use Greenstone's bundled $bitness-bit jre"
-	      setupJavaAt "$HINT" "JRE"
-	  else
-	      # go with the JAVA_HOME that search4j found
-	      echo "*** Using the Java detected: "
-	      setupJavaAt "$FOUNDJAVAHOME"
-	  fi
+      elif [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then	  
+	  echo "    The detected JDK java at $FOUNDJAVAHOME is an incompatible bit architecture"
       fi
-    else
-      #no suitable java exists
-      echo "  - ERROR: Failed to locate java $java_min_version or greater"
+  fi
+
+  # 2. check bitness of any JRE java found by search4j, and use if appropriate
+  # http://tldp.org/LDP/abs/html/comparison-ops.html
+  if [ "$javaset" != "true" ] && [ "$jrehome_retval" == "0" ]; then      
+      checkJavaBitnessAgainstGSBitness "$FOUNDJREHOME" "$bitness"
+      
+      if [ "$?" == "0" ]; then
+          #found a suitable jre
+	  if [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
+	      echo "    The detected JRE at $FOUNDJREHOME is a matching $bitness bit"
+	  fi
+	  setupJavaAt "$FOUNDJREHOME" "JRE"
+	  javaset=true
+	  
+      elif [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
+	  echo "    The detected JRE java at $FOUNDJREHOME is an incompatible bit architecture"
+      fi      
+  fi
+
+  # 3. check the bitness of any bundled JRE, and use if appropriate
+  if [ "$javaset" != "true" ] && [ -d "$BUNDLED_JRE" ]; then
+      checkJavaBitnessAgainstGSBitness "$FOUNDJREHOME" "$bitness"
+      
+      # For linux, the bundled JRE ought to be of a bitness matching this OS.
+      if [ "$?" == "0" ]; then
+	  if [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
+	      # bundled JRE matches GS bitness
+	      echo "*** Changing to use Greenstone's bundled $bitness-bit jre"
+	  fi
+	  setupJavaAt "$BUNDLED_JRE" "JRE"
+	  javaset=true
+
+      elif [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
+	  echo "    The bundled JRE java is an incompatible bit architecture"
+      fi
+  fi
+
+  # 4. None of the java found so far, if any (via search4j, bundled_jre), may have matched bitness wise
+  # So, fall back to using whichever is available in sequence anyway.
+  # We'll print a warning of bitness mismatch later
+
+  if [ "$javaset" != "true" ]; then
+      # go with any JAVA_HOME else JRE_HOME that search4j found, else with any bundled JRE if present
+      if [ "$javahome_retval" == "0" ]; then
+	  setupJavaAt "$FOUNDJAVAHOME" "JDK"
+	  javaset=true
+      elif [ "$jrehome_retval" == "0" ]; then
+	  setupJavaAt "$FOUNDJREHOME" "JRE"
+	  javaset=true
+      elif [ -d "$BUNDLED_JRE" ]; then
+	  # bundled JRE should be >= than minimum version of java required
+	  setupJavaAt "$BUNDLED_JRE" "JRE"
+	  javaset=true
+      fi
+  fi
+
+  # 5. lastly, check if java already setup
+  if [ "$javaset" != "true" ]; then
+
+    if [ -x bin/search4j ]; then
+
+      # no suitable java could be found by search4j
+      echo "  - ERROR: Failed to locate java $java_min_version or greater"	  
       echo "           Please set JAVA_HOME or JRE_HOME to point to an appropriate java"
       echo "           And add JAVA_HOME/bin or JRE_HOME/bin to your PATH"
-    fi
 
-  #otherwise no search4j, manually try the hint (the bundled jre) if it exists
-  elif [ -d "$HINT" ]; then
-      #found a suitable java
-      setupJavaAt "$HINT" "JRE"
-
-  #lastly, check if java already setup
-  else
+    else
+      # search4j wasn't present, and no bundled JRE, so check JAVA_HOME or JRE_HOME manually
       echo "*** Could not find an appropriate JDK or JRE java"
       echo "*** Attempting to use JAVA_HOME else JRE_HOME in the environment"
 
@@ -301,6 +358,7 @@ function checkJava() {
 	  echo "           And add JAVA_HOME/bin or JRE_HOME/bin to your PATH"
 	  return
       fi
+    fi
   fi
 
   # If we know the bitness of this GS3 installation, then warn if there's a mismatch
@@ -328,11 +386,13 @@ function checkJava() {
       fi
   fi
 
-  echo "**********************************************"
+  if [ "$DEBUG" == "true" ]; then echo "**********************************************"; fi
+
 }
 
+# if bitness (parameter #2) is -1, then this function returns 0 (generally meaning success).
 function checkJavaBitnessAgainstGSBitness() {
-#    echo "Checking bitness"
+#    if [ "$DEBUG" == "true" ]; then echo "Testing bitness of java found at $java_installation"; fi
     java_installation="$1"
     bitness="$2"
 
@@ -359,9 +419,25 @@ function checkJavaBitnessAgainstGSBitness() {
 
 
 function setupJavaAt() {
-  export JAVA_HOME="$1"
-  addtopath PATH "$JAVA_HOME/bin"
-  echo "  - Exported JAVA_HOME to $JAVA_HOME"
+
+  # check the second parameter if non-null
+  if [ -n "$2" ] && [ "$2" == "JRE" ]; then
+    export JRE_HOME="$1"
+    addtopath PATH "$JAVA_HOME/bin"
+
+    BUNDLED_JRE="`pwd`/packages/jre"    
+    if [[ "$JRE_HOME" == *"$BUNDLED_JRE"* ]]; then
+	msg="the bundled"
+    fi
+
+    echo "  - Exported JRE_HOME to $msg $JRE_HOME"
+  else
+    export JAVA_HOME="$1"
+    addtopath PATH "$JAVA_HOME/bin"
+    echo "  - Exported JAVA_HOME to $JAVA_HOME"
+  fi
+
+  
 }
 
 function pauseAndExit(){
