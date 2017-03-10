@@ -2,6 +2,10 @@
 #### information
 
 ## Tomcat installation
+
+# The protocol (http, https)
+server.protocol=http
+
 # Set this to the internet/intranet name of the machine that Tomcat is/will be 
 # run on. localhost is fine for accessing the server from the local machine, 
 # but not remotely
@@ -17,6 +21,10 @@ tomcat.installed.path=
 
 # The context name of your GS3 digital library. By default this will be "greenstone3". Ensure this has a value.
 greenstone.context=greenstone3
+
+# solr generally lives off /solr from the base greenstone URL
+solr.context=solr
+
 
 ## If creating a GS3 set up with a dispersed web folder ("web-dispersed" GS3), with GS3 in a read-only location, then 
 ## it will need a distinct user web folder for content (sites and collections), and need to run tomcat from TMP.

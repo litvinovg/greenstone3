@@ -834,8 +834,12 @@
   </target>
 
   <target name="get-default-servlet-url">
-    <echo>http://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet}</echo>
-  </target> 
+    <echo>${server.protocol}://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet}</echo>
+  </target>
+
+  <target name="get-solr-servlet-url">
+    <echo>${server.protocol}://${tomcat.server}:${tomcat.port}/${solr.context}</echo>
+  </target>
 
   <target name="check-derbyserver-running">
     <condition property="derby.isrunning" value="true" else="false">
@@ -924,9 +928,9 @@
       <echo>Perl  : ${full.perl.path}</echo>
     </if>
     <if><bool><isset property="install.flax"/></bool>
-        <property name="url" value="http://${tomcat.server}:${tomcat.port}${app.path}/flax"/>
+        <property name="url" value="${server.protocol}://${tomcat.server}:${tomcat.port}${app.path}/flax"/>
     <else>
-        <property name="url" value="http://${tomcat.server}:${tomcat.port}${app.path}/"/>
+        <property name="url" value="${server.protocol}://${tomcat.server}:${tomcat.port}${app.path}/"/>
     </else>
     </if>
     <echo>URL   : ${url}</echo>
@@ -1601,7 +1605,7 @@
     <waitfor maxwait="5" maxwaitunit="second">
       <and>
         <socket server="${tomcat.server}" port="${tomcat.port}"/>
-        <http url="http://${tomcat.server}:${tomcat.port}${app.path}/index.html"/>
+        <http url="${server.protocol}://${tomcat.server}:${tomcat.port}${app.path}/index.html"/>
       </and>
     </waitfor>
   </target>  
@@ -1610,7 +1614,7 @@
 
     <if><bool><istrue value="${tomcat.isstarted}"/></bool>
       <echo>**************************************</echo>
-      <echo>A WEB SERVER IS ALREADY RUNNING ON http://${tomcat.server}:${tomcat.port}. NOT STARTING.</echo>
+      <echo>A WEB SERVER IS ALREADY RUNNING ON ${server.protocol}://${tomcat.server}:${tomcat.port}. NOT STARTING.</echo>
       <echo>**************************************</echo>
       <else>
 	<antcall target="force-start-tomcat"/>
@@ -1666,7 +1670,7 @@
     <waitfor maxwait="5" maxwaitunit="second">
       <and>
         <socket server="${tomcat.server}" port="${tomcat.port}"/>
-        <http url="http://${tomcat.server}:${tomcat.port}${app.path}/index.html"/>
+        <http url="${server.protocol}://${tomcat.server}:${tomcat.port}${app.path}/index.html"/>
       </and>
     </waitfor>
 
@@ -1675,14 +1679,14 @@
   <!--ant task http: http://www.jajakarta.org/ant/ant-1.6.1/docs/ja/manual/api/org/apache/tools/ant/taskdefs/condition/Http.html-->
   <target name="reconfigure" description="Reconfigure the message router">
     <waitfor maxwait="5" maxwaitunit="second">
-      <http url="http://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet}?a=s&amp;sa=c"/>
+      <http url="${server.protocol}://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet}?a=s&amp;sa=c"/>
     </waitfor>
   </target>
 
   <!--Command-line args to Ant: http://www.jguru.com/faq/view.jsp?EID=471794-->
   <target name="reconfigure-collection" description="Reconfigure the collection">
     <waitfor maxwait="5" maxwaitunit="second">
-      <http url="http://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet}?a=s&amp;sa=c&amp;sc=${collection}"/>
+      <http url="${server.protocol}://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet}?a=s&amp;sa=c&amp;sc=${collection}"/>
     </waitfor>
   </target>
 
@@ -1715,8 +1719,8 @@
        fail sooner if the server has indeed been stopped. -->
   <target name="check-tomcat-running">
     <condition property="tomcat.isrunning">
-      <!--<http url="http://${tomcat.server}:${tomcat.port}${app.path}"/>-->
-      <http url="http://${tomcat.server}:${tomcat.port}"/>
+      <!--<http url="${server.protocol}://${tomcat.server}:${tomcat.port}${app.path}"/>-->
+      <http url="${server.protocol}://${tomcat.server}:${tomcat.port}"/>
     </condition>
   </target>
   
@@ -1725,7 +1729,7 @@
        an invocation with ant. So ant restart will need two properties to store each of the tomcat checks -->
   <target name="check-tomcat-started">
     <condition property="tomcat.isstarted">
-      <http url="http://${tomcat.server}:${tomcat.port}"/>
+      <http url="${server.protocol}://${tomcat.server}:${tomcat.port}"/>
     </condition>
   </target>
 
@@ -2022,7 +2026,7 @@
     <java classname="org.apache.axis.client.AdminClient">
       <classpath refid="compile.classpath"/>
       <arg value="-l"/>
-      <arg value="http://${tomcat.server}:${tomcat.port}${app.path}/servlet/AxisServlet"/>
+      <arg value="${server.protocol}://${tomcat.server}:${tomcat.port}${app.path}/servlet/AxisServlet"/>
       <arg file="${basedir}/resources/soap/deploy.wsdd"/>
     </java>
     <delete file="${basedir}/resources/soap/deploy.wsdd"/> <!--clean up, no longer used-->
@@ -2038,7 +2042,7 @@
     <java classname="org.apache.axis.client.AdminClient">
       <classpath refid="compile.classpath"/>
       <arg value="-l"/>
-      <arg value="http://${tomcat.server}:${tomcat.port}${app.path}/servlet/AxisServlet"/>
+      <arg value="${server.protocol}://${tomcat.server}:${tomcat.port}${app.path}/servlet/AxisServlet"/>
       <arg file="${basedir}/resources/soap/undeploy.wsdd"/>
     </java>
     <delete file="${basedir}/resources/soap/undeploy.wsdd"/> <!--clean up, no longer used-->
@@ -2070,7 +2074,7 @@ Press Enter for default:localsite</input>
 
   <target name="get-undeploy-service-name" unless="axis.undeploy.servicename">
     <input addproperty="axis.undeploy.servicename" defaultvalue="localsite">Please enter the full name of the service you wish to undeploy.
-To find out which web services you've got deployed, point your browser to http://HOST:PORT/greenstone3/services 
+To find out which web services you've got deployed, point your browser to ${server.protocol}://${tomcat.server}:${tomcat.port}/greenstone3/services 
 Or press Enter for undeploying the default:localsite /&gt;</input>
      <echo>Name of service to undeploy: ${axis.undeploy.servicename}</echo>
   </target>
@@ -3369,7 +3373,7 @@ Or press Enter for default:${base.webservice.name} /&gt;</input>
 				<echo>Testing @{testjar}</echo>
 				<java classname="org.junit.runner.JUnitCore" fork="true">
 					<arg value="gstests.TestClass"/>
-					<jvmarg value="-DSERVERURL=http://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet} "/>
+					<jvmarg value="-DSERVERURL=${server.protocol}://${tomcat.server}:${tomcat.port}${app.path}${server.default.servlet} "/>
 					<classpath>
 						<fileset dir="${basedir}/ext/testing/lib/java">
 							<include name="*.jar"/>
