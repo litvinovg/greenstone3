@@ -254,58 +254,25 @@ function checkJava() {
 
   # 1. check the bitness of any JDK java found by search4j, and use if appropriate
   if [ "$javahome_retval" == "0" ]; then
-      checkJavaBitnessAgainstGSBitness "$FOUNDJAVAHOME" "$bitness"
-
-      if [ "$?" == "0" ]; then
-          #found a suitable java
-	  if [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
-	      echo "    The detected JDK at $FOUNDJAVAHOME is a matching $bitness bit"
-	  fi
-	  setupJavaAt "$FOUNDJAVAHOME" "JDK"
-	  javaset=true
-
-      elif [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then	  
-	  echo "    The detected JDK java at $FOUNDJAVAHOME is an incompatible bit architecture"
-      fi
+      setJavaIfOK "$DEBUG" "$bitness" "$FOUNDJAVAHOME" "JDK"
+      if [ "$?" == "0" ]; then javaset="true"; fi
   fi
 
-  # 2. check bitness of any JRE java found by search4j, and use if appropriate
-  # http://tldp.org/LDP/abs/html/comparison-ops.html
-  if [ "$javaset" != "true" ] && [ "$jrehome_retval" == "0" ]; then      
-      checkJavaBitnessAgainstGSBitness "$FOUNDJREHOME" "$bitness"
-      
-      if [ "$?" == "0" ]; then
-          #found a suitable jre
-	  if [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
-	      echo "    The detected JRE at $FOUNDJREHOME is a matching $bitness bit"
-	  fi
-	  setupJavaAt "$FOUNDJREHOME" "JRE"
-	  javaset=true
-	  
-      elif [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
-	  echo "    The detected JRE java at $FOUNDJREHOME is an incompatible bit architecture"
-      fi      
+  # 2. check the bitness of any JRE java found by search4j, and use if appropriate
+  if [ "$javaset" != "true" ] && [ "$jrehome_retval" == "0" ]; then
+      setJavaIfOK "$DEBUG" "$bitness" "$FOUNDJREHOME" "JRE"
+      if [ "$?" == "0" ]; then javaset="true"; fi
   fi
-
+  
   # 3. check the bitness of any bundled JRE, and use if appropriate
+  # For linux, the bundled JRE ought to be of a bitness matching this OS.
   if [ "$javaset" != "true" ] && [ -d "$BUNDLED_JRE" ]; then
-      checkJavaBitnessAgainstGSBitness "$BUNDLED_JRE" "$bitness"
-      
-      # For linux, the bundled JRE ought to be of a bitness matching this OS.
-      if [ "$?" == "0" ]; then
-	  if [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
-	      # bundled JRE matches GS bitness
-	      echo "*** Changing to use Greenstone's bundled $bitness-bit jre at $BUNDLED_JRE"
-	  fi
-	  setupJavaAt "$BUNDLED_JRE" "JRE"
-	  javaset=true
-
-      elif [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
-	  echo "    The bundled JRE java is an incompatible bit architecture"
-      fi
+      setJavaIfOK "$DEBUG" "$bitness" "$BUNDLED_JRE" "bundled JRE"
+      if [ "$?" == "0" ]; then javaset="true"; fi
   fi
 
-  # 4. None of the java found so far, if any (via search4j, bundled_jre), may have matched bitness wise
+
+  # 4. None of the java found so far (via search4j, bundled_jre), if any, may have matched bitness wise
   # So, fall back to using whichever is available in sequence anyway.
   # We'll print a warning of bitness mismatch later
 
@@ -324,7 +291,7 @@ function checkJava() {
       fi
   fi
 
-  # 5. lastly, check if java already setup
+  # 5. lastly, manually check if java already setup. Could be the case if search4j didn't exist
   if [ "$javaset" != "true" ]; then
 
     if [ -x bin/search4j ]; then
@@ -388,6 +355,48 @@ function checkJava() {
 
   if [ "$DEBUG" == "true" ]; then echo "**********************************************"; fi
 
+}
+
+# http://www.linuxjournal.com/content/return-values-bash-functions
+function setJavaIfOK {
+
+    if [ "$DEBUG" == "true" ]; then echo "Testing java at $3"; fi
+
+    DEBUG=$1
+    bitness=$2
+    PATHTOJAVA=$3
+    JDKorJRE=$4
+
+    checkJavaBitnessAgainstGSBitness "$PATHTOJAVA" "$bitness"
+    
+    isjavaset=false
+
+    if [ "$?" == "0" ]; then
+	# http://tldp.org/LDP/abs/html/comparison-ops.html
+	if [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
+	    # java matches GS bitness
+	    if [[ "$JDKorJRE" == *"bundled"* ]]; then
+		echo "*** Changing to use Greenstone's $bitness-bit $JDKorJRE at $PATHTOJAVA"
+	    else
+		echo "    The detected $JDKorJRE at $PATHTOJAVA is a matching $bitness bit"
+	    fi 
+	fi
+	setupJavaAt "$PATHTOJAVA" "$JDKorJRE"
+	isjavaset=true
+	
+    elif [ "$bitness" != "-1" ] && [ "$DEBUG" == "true" ]; then
+	if [[ "$JDKorJRE" == *"bundled"* ]]; then
+	    echo "    The $JDKorJRE java is an incompatible bit architecture"
+	else
+	    echo "    The detected $JDKorJRE java is an incompatible bit architecture"
+	fi
+    fi
+    
+    if [ "$isjavaset" == "true" ]; then
+	return 0 # success
+    else
+	return 1
+    fi
 }
 
 # if bitness (parameter #2) is -1, then this function returns 0 (generally meaning success).
