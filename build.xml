@@ -268,7 +268,7 @@
   <property name="javadocs" value="${basedir}/docs/javadoc"/>
 
   <property name="app.name"      value="greenstone3"/>
-  <property name="app.path"      value="/${app.name}"/>
+  <property name="app.path"      value="/${greenstone.context}"/>
 
    <property name="admin.dir"      value="${basedir}/admin"/>
 
