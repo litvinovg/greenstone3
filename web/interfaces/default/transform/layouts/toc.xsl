@@ -109,7 +109,7 @@
 								</xsl:if>
 								</tbody></table>-->
 							</xsl:when>
-							<xsl:when test="not(/page/pageRequest/paramList/param[@name = 'ed']/@value = '1')">
+							<xsl:when test="not(/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or /page/pageRequest/paramList/param[@name = 'ec']/@value = '1')">
 								<div id="tableOfContents">
 									<div id="tocLoadingImage" style="text-align:center;">
 										<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.loading')"/><xsl:text>...</xsl:text>
@@ -125,13 +125,16 @@
 								</script>
 							</xsl:when>
 							<xsl:otherwise>
+							  <!-- *TODO *********-->
+							  <xsl:variable name="doc_url"><xsl:value-of select='$library_name'/>/collection/<xsl:value-of select='/page/pageResponse/collection/@name'/>/document/<xsl:value-of select='/page/pageResponse/document/documentNode/@nodeID'/>?<!--<xsl:value-of select='/page/pageRequest/@fullURL'/>--></xsl:variable>
 								<div id="tableOfContents">
 									<xsl:attribute name="class">
 										<xsl:choose>
-											<xsl:when test="count(//documentNode) > 1 and not(/page/pageResponse/format[@type='display']/gsf:option[@name='TOC']) or /page/pageResponse/format[@type='display']/gsf:option[@name='TOC']/@value='true'">visible</xsl:when>
+											<xsl:when test="count(//documentNode) > 1">visible</xsl:when>
 											<xsl:otherwise>hidden</xsl:otherwise>
 										</xsl:choose>
 									</xsl:attribute>
+									<table style="width:100%; text-align:center;"><tr><td><a href="{$doc_url}ed=1"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.expand_doc')"/></a></td><td><a href="{$doc_url}ed=0\"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.collapse_doc')"/></a></td></tr></table>
 									<xsl:for-each select="documentNode">
 										<xsl:call-template name="documentNodeTOC"/>
 									</xsl:for-each>

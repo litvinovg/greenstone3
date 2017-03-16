@@ -439,7 +439,8 @@ function retrieveFullTableOfContentsSuccess(newTOCElem)
     var newTOC = newTOCElem.substring(tocStart, tocEnd);
     
     //Add the "Expand document"/"Collapse document" links
-    newTOC = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">"+gs.text.doc.expand_doc+"</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">"+gs.text.doc.collapse_doc+"</a></td></tr></table>" + newTOC;
+    //newTOC = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">"+gs.text.doc.expand_doc+"</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">"+gs.text.doc.collapse_doc+"</a></td></tr></table>" + newTOC;
+    //newTOC = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\""+window.location.href+"?ed=1\">"+gs.text.doc.expand_doc+"</a></td><td><a href=\""+window.location.href+"?ed=0\">"+gs.text.doc.collapse_doc+"</a></td></tr></table>" + newTOC;
     
     //Collapse the TOC
     newTOC = newTOC.replace(/display:block/g, "display:none");
@@ -460,7 +461,7 @@ function retrieveFullTableOfContentsSuccessClientSideXSLT(newTOCElem)
 
 function retrieveFullTableOfContents()
 {
-	var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "?excerptid=tableOfContents&ed=1";
+	var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "?excerptid=tableOfContents&ec=1";
 	if(gs.cgiParams.d && gs.cgiParams.d.length > 0)
 	{
 		url += "&a=d&d=" + gs.cgiParams.d;
