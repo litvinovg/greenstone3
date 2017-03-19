@@ -125,8 +125,7 @@
 								</script>
 							</xsl:when>
 							<xsl:otherwise>
-							  <!-- *TODO *********-->
-							  <xsl:variable name="doc_url"><xsl:value-of select='$library_name'/>/collection/<xsl:value-of select='/page/pageResponse/collection/@name'/>/document/<xsl:value-of select='/page/pageResponse/document/documentNode/@nodeID'/>?<!--<xsl:value-of select='/page/pageRequest/@fullURL'/>--></xsl:variable>
+							  <xsl:variable name="doc_url"><xsl:value-of select='$library_name'/>/collection/<xsl:value-of select='/page/pageResponse/collection/@name'/>/document/<xsl:value-of select='/page/pageResponse/document/documentNode/@nodeID'/>?<xsl:if test="/page/pageRequest/paramList/param[@name='p.s']">p.s=<xsl:value-of select="/page/pageRequest/paramList/param[@name='p.s']/@value"/>&amp;</xsl:if></xsl:variable>
 								<div id="tableOfContents">
 									<xsl:attribute name="class">
 										<xsl:choose>
@@ -134,7 +133,7 @@
 											<xsl:otherwise>hidden</xsl:otherwise>
 										</xsl:choose>
 									</xsl:attribute>
-									<table style="width:100%; text-align:center;"><tr><td><a href="{$doc_url}ed=1"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.expand_doc')"/></a></td><td><a href="{$doc_url}ed=0\"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.collapse_doc')"/></a></td></tr></table>
+									<table style="width:100%; text-align:center;"><tr><td><a href="{$doc_url}ed=1"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.expand_doc')"/></a></td><td><a href="{$doc_url}ed=0"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.collapse_doc')"/></a></td></tr></table>
 									<xsl:for-each select="documentNode">
 										<xsl:call-template name="documentNodeTOC"/>
 									</xsl:for-each>

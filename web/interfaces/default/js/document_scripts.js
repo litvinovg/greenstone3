@@ -470,6 +470,10 @@ function retrieveFullTableOfContents()
 	{
 		url += "&a=d&d=&alb=1&rl=1&href=" + gs.cgiParams.href;
 	}
+    // later on we want this arg p.s so we can keep search term highlighting for expand document link
+    if (gs.cgiParams.p_s && gs.cgiParams.p_s.length > 0) {
+	url += "&p.s=" + gs.cgiParams.p_s;
+    }
     
     if (gs.xsltParams.use_client_side_xslt == "true") { // note xsltParams are of type string, so test needs to be in quotes
 	url += "&callback=retrieveFullTableOfContentsSuccessClientSideXSLT"; // used in client-side-xslt.js, in combination with 'excerptid'
