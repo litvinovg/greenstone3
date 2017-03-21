@@ -1,8 +1,10 @@
 
-function GSAjaxAPI(gwcgi,collect) 
+function GSAjaxAPI(gwcgi,collect,un,ky) 
 {
     var gwcgi_   = gwcgi;
     var collect_ = collect;
+    var un_ = un;
+    var ky_ = ky;
 
 
     this.fullDomainURL = function(localURL)
@@ -100,6 +102,13 @@ function GSAjaxAPI(gwcgi,collect)
 	    alert("Unrecognized type of callback value: " + typeof_callback);
 	}
 
+	if(un_ != null) {
+	    url += "&un=" + un_;
+	}
+	if(ky_ != null) {
+	    url += "&ky=" + ky_;
+	}
+
 	xmlHttp.open("GET",url,true);
 	xmlHttp.send(null);
     }
@@ -129,7 +138,14 @@ function GSAjaxAPI(gwcgi,collect)
            }
          }
        }
-    
+
+       if(un_ != null) {
+	   url += "&un=" + un_;
+       }
+       if(ky_ != null) {
+	   url += "&ky=" + ky_;
+       }
+
        xmlHttp.open("GET",url,false);
        xmlHttp.send(null);
 
@@ -137,10 +153,225 @@ function GSAjaxAPI(gwcgi,collect)
     
        return xmlHttp.responseText;
     }
-    
 
+//*********ADDITIONS TO BRING GS3 VERSION OF THIS FILE UP TO SPEED WITH GS2 VERSION********************//
+//*********BUT NOT USED BY GS3. SEE GS3's javascript-global-functions.js INSTEAD (UPCOMING CHANGES)
+//*********FOR THE PORTED VERSIONS OF THOSE FUNCTIONS AMONG THESE ADDITIONS THAT ARE NECESSARY FOR GS3.
+
+// New, an Ajax Synchronous Post method.
+// http://www.degraeve.com/reference/simple-ajax-example.php
+// Async vs Sync: http://www.w3schools.com/ajax/ajax_xmlhttprequest_send.asp 
+// Also:
+// http://stackoverflow.com/questions/6312447/in-an-ajax-post-do-i-need-to-urlencode-parameters-before-sending
+// http://api.jquery.com/jQuery.post/
+// http://www.w3schools.com/ajax/ajax_xmlhttprequest_send.asp
+    this.urlPostSync = function(scriptURL, params) {
+    var xmlHttp=false;
+       try {
+         // Firefox, Opera 8.0+, Safari
+         xmlHttp=new XMLHttpRequest();
+       }
+       catch (e) {
+         // Internet Explorer
+         try {
+           xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+         }
+         catch (e) {
+           try {
+             xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+           }
+           catch (e) {
+             alert("Your browser does not support AJAX!");
+             return false;
+           }
+         }
+       }
+
+    // e.g. scriptURL: /greenstone/cgi-bin/metadata-server.pl
+    xmlHttp.open('POST', scriptURL, false); // false means synchronous
+    xmlHttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     
+    if(un_ != null) {
+	params += "&un=" + un_;
+    }
+    if(ky_ != null) {
+	params += "&ky=" + ky_;
+    }
+
+    xmlHttp.send(params); // needs to be escaped/encoded
+
+    //alert(scriptURL + "?" + params);
+    //alert(xmlHttp.responseText); // if synchronous, process xmlHttp.responseText AFTER send() call
+    return xmlHttp.responseText;
+}
+
+    // New, an Ajax Asynchronous Post method.
+    // For helpful links, see the urlPostSync() method above
+    this.urlPostAsync = function(scriptURL, params, callback) {
+    var xmlHttp=false;
+       try {
+         // Firefox, Opera 8.0+, Safari
+         xmlHttp=new XMLHttpRequest();
+       }
+       catch (e) {
+         // Internet Explorer
+         try {
+           xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+         }
+         catch (e) {
+           try {
+             xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+           }
+           catch (e) {
+             alert("Your browser does not support AJAX!");
+             return false;
+           }
+         }
+       }
+
+
+
+    // e.g. scriptURL: /greenstone/cgi-bin/metadata-server.pl
+    xmlHttp.open('POST', scriptURL, true); // true means asynchronous
+    xmlHttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+
+    // If asynchronous:
+    // If the callback param is a function, we will set it up to get called when 
+    // the async post has finished (is ready)
+    // if the callback parameter isn't a function, the param represents a field 
+    // that we want to dynamically update when the async post process has finished
+
+	var typeof_callback = typeof(callback);
+	if ((typeof_callback == "string") || (typeof_callback == "number") || (typeof_callback == "boolean")) {
+	    var locid = callback;
+
+	    xmlHttp.onreadystatechange=function() {
+		if(xmlHttp.readyState==4) {
+		    if (locelem != null) {
+			var locelem = document.getElementById(locid);
+			
+			locelem.innerHTML = xmlHttp.responseText;
+		    }
+		}
+	    }
+	}
+	else if (typeof_callback == "function") {
+	    xmlHttp.onreadystatechange=function() {
+		if(xmlHttp.readyState==4) {
+		    callback(xmlHttp); // e.g. this might do: updatepage(xmlHttp.responseText);
+		}
+	    }
+	}
+	else {
+	    alert("Unrecognized type of callback value: " + typeof_callback);
+	}
     
+    if(un_ != null) {
+	params += "&un=" + un_;
+    }
+    if(ky_ != null) {
+	params += "&ky=" + ky_;
+    }
+    //alert("Posting Async: " + scriptURL + "?" + params);
+
+    xmlHttp.send(params); // needs to be escaped/encoded
+    // if synchronous, would process xmlHttp AFTER send() call, such as by
+    // accessing xmlHttp.responseText to return that to the caller at this point.
+}
+
+    // New
+    // The where parameter can be specified as one or more of: import, archives, index, live 
+    // separated by |. If null, it is assumed to be index which is the original default 
+    // behaviour of calling set-metadata. E.g. where=import|archives|index
+    this.setMetadata = function(docid,metaname,metapos,metavalue,metamode,where)
+    {
+        var mdserver = this.metadataserverURL();
+    
+        var params = "a=set-metadata";
+	if(where != null) {
+	    params += "&where=" + where; // if where not specified, meta-server will default to setting index meta
+	    //} else {
+	    //    params += "&where=import|archives|index";
+	}
+        params += "&c="+collect_;
+        params += "&d="+docid;
+        params += "&metaname=" + metaname;
+        if (metapos!=null) {
+            params += "&metapos=" + metapos;
+        }
+        params += "&metavalue=" + metavalue;
+	if (metamode!=null) {
+            params += "&metamode=" + metamode;
+	}
+	
+        //this.urlGetSync(mdserver + "?" + params);
+        this.urlPostSync(mdserver,params);
+    }
+
+    // New
+    // The where parameter can be specified as one or more of: import, archives, index, live 
+    // separated by |. If null, it is assumed to be index which is the original default 
+    // behaviour of calling set-metadata-array). E.g. where=import|archives|index
+    this.setMetadataArray = function(docArray,metamode,where) 
+    {
+	docArrayJSON = JSON.stringify(docArray);
+	
+	var mdserver = this.metadataserverURL();
+	
+	var params = "a=" + escape("set-metadata-array"); //"a=set-metadata-array";
+	if(where != null) {
+	    params += "&where=" + escape(where); // if where not specified, meta-server will default to setting index meta
+	    //} else {
+	    //    params += "&where=import|archives|index";
+	}
+	params += "&c="+escape(collect_);
+	params += "&json="+escape(docArrayJSON);
+	
+	if (metamode!=null) {
+	    params += "&metamode=" + escape(metamode);
+	}
+	
+	//this.urlGetSync(mdserver + "?" + params);
+	return this.urlPostSync(mdserver,params);	
+    }
+
+    // New
+    this.getArchivesMetadata = function(docoid,metaname,metapos)
+    {
+        var mdserver = this.metadataserverURL();
+    
+        var url = mdserver + "?a=get-archives-metadata";
+        url += "&c="+collect_;
+        url += "&d="+docoid;
+        url += "&metaname=" + metaname;
+        if (metapos!=null) {
+            url += "&metapos=" + metapos;
+        }
+
+	//alert("In getArchivesMeta. URL: " + url)
+        return this.urlGetSync(url); //Once this works, make it POST
+    }
+
+    this.getMetadataArray = function(docArray,where)
+    {
+	docArrayJSON = JSON.stringify(docArray);
+
+	var mdserver = this.metadataserverURL();
+	
+	var params = "a=" + escape("get-metadata-array"); //"a=set-metadata-array";
+	if(where != null) {
+	    params += "&where=" + escape(where); // if where not specified, meta-server will default to setting index meta
+	    //} else {
+	    //    params += "&where=import|archives|index";
+	}
+	params += "&c="+escape(collect_);
+	params += "&json="+escape(docArrayJSON);
+	
+	//this.urlGetSync(mdserver + "?" + params);
+	return this.urlPostSync(mdserver,params);	
+    }
+//*******END OF ADDITIONS TO BRING GS3 VERSION OF THIS FILE UP TO SPEED WITH GS2 VERSION********//
     
     this.setLiveMetadata = function(id,metaname,metavalue)
     {
@@ -154,7 +385,7 @@ function GSAjaxAPI(gwcgi,collect)
 
         this.urlGetSync(url);
     }
-    
+
     this._setMetadata = function(mode,docid,metaname,metapos,metavalue,metamode)
     {
         var mdserver = this.metadataserverURL();
@@ -167,32 +398,32 @@ function GSAjaxAPI(gwcgi,collect)
             params += "&metapos=" + metapos;
         }
         params += "&metavalue=" + metavalue;
-		if (metamode!=null) {
+	if (metamode!=null) {
             params += "&metamode=" + metamode;
-		}
+	}
 	
         this.urlGetSync(mdserver + "?" + params);
         //this.urlPostSync(mdserver,params);
     }
     
 	
-	this._setDocumentArrayMetadata = function(mode,docArray,metamode) 
-	{
-	    docArrayJSON = JSON.stringify(docArray);
-  
-		var mdserver = this.metadataserverURL();
-    
-        var params = "a=set" + mode + "-metadata-array";
-        params += "&c="+collect_;
-		params += "&json="+docArrayJSON;
+    this._setDocumentArrayMetadata = function(mode,docArray,metamode) 
+    {
+	docArrayJSON = JSON.stringify(docArray);
 	
-		if (metamode!=null) {
-            params += "&metamode=" + metamode;
-		}
-		
-		this.urlGetSync(mdserver + "?" + params);
-   
+	var mdserver = this.metadataserverURL();
+
+	var params = "a=set" + mode + "-metadata-array";
+	params += "&c="+collect_;
+	params += "&json="+docArrayJSON;
+	
+	if (metamode!=null) {
+	    params += "&metamode=" + metamode;
 	}
+	
+	this.urlGetSync(mdserver + "?" + params);
+	
+    }
 	
 	
     this.setDocumentMetadata = function(docid,metaname,metapos,metavalue)
@@ -209,13 +440,13 @@ function GSAjaxAPI(gwcgi,collect)
 	
     }
 
-	this.setDocumentArrayMetadata = function(docArray,metamode) 
-	{
-	    //showDialog('Greenstone Javascript API','This sequence of changes has been commited into the system.','success', 2);
+    this.setDocumentArrayMetadata = function(docArray,metamode) 
+    {
+	//showDialog('Greenstone Javascript API','This sequence of changes has been commited into the system.','success', 2);
 	
-		this._setDocumentArrayMetadata("",docArray,metamode);
-		this._setDocumentArrayMetadata("-archives",docArray,metamode);
-	}
+	this._setDocumentArrayMetadata("",docArray,metamode);
+	this._setDocumentArrayMetadata("-archives",docArray,metamode);
+    }
 	
     this.setNewDocumentMetadata = function(docid,metaname,metavalue)
     {
