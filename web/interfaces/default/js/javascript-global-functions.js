@@ -521,7 +521,7 @@ gs.functions.getImportMetadata = function(collection, site, documentID, metadata
 	var url = "cgi-bin/metadata-server.pl?a=get-import-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName;
 	callMetadataServer("getImportMetadata", url, function(responseText)
 	{
-		var metadata = new GSMetadata(collection, site, documentID, metadataName, null, responseText);
+	    var metadata = new GSMetadata(collection, site, documentID, metadataName, null, null, responseText);
 		if(responseFunction != null)
 		{
 			responseFunction(metadata);
@@ -539,7 +539,7 @@ gs.functions.getArchivesMetadata = function(collection, site, documentID, metada
 
 	callMetadataServer("getArchivesMetadata", url, function(responseText)
 	{
-		var metadata = new GSMetadata(collection, site, documentID, metadataName, metadataPosition, responseText);
+		var metadata = new GSMetadata(collection, site, documentID, metadataName, null, metadataPosition, responseText); // indexPos, archivesPos, metaval (responseText)
 		if(responseFunction != null)
 		{
 			responseFunction(metadata);
@@ -557,7 +557,7 @@ gs.functions.getIndexMetadata = function(collection, site, documentID, metadataN
 
 	callMetadataServer("getIndexMetadata", url, function(responseText)
 	{
-		var metadata = new GSMetadata(collection, site, documentID, metadataName, metadataPosition, responseText);
+		var metadata = new GSMetadata(collection, site, documentID, metadataName, metadataPosition, null, responseText); // indexPos, archivesPos, metaval (responseText)
 		
 		if(responseFunction != null)
 		{

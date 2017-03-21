@@ -26,7 +26,7 @@ function GSMetadata(collection, site, documentID, name, indexPosition, archivesP
 			{
 				if(_archivesPosition != null)
 				{
-					gs.functions.setArchivesMetadata(_collection, _site, _documentID, _name, _archivesPosition);
+				    gs.functions.setArchivesMetadata(_collection, _site, _documentID, _name, _archivesPosition, _value);
 				}
 				else
 				{
@@ -37,7 +37,7 @@ function GSMetadata(collection, site, documentID, name, indexPosition, archivesP
 			{
 				if(_indexPosition != null)
 				{
-					gs.functions.setIndexMetadata(_collection, _site, _documentID, _name, _indexPosition);
+				    gs.functions.setIndexMetadata(_collection, _site, _documentID, _name, _indexPosition, _value);
 				}
 				else
 				{
