@@ -43,9 +43,9 @@
 
 		<table class="navList" id="berryCheckoutOptions">
 			<tr>
-				<td id="fullview" class="current"><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'berry.view.full')"/></span></td>
-				<td id="textview"><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'berry.view.text')"/></span></td>
-				<td id="email"><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'berry.view.email')"/></span></td>
+				<td id="fullview" class="current"><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'berry.full_view')"/></span></td>
+				<td id="textview"><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'berry.text_view')"/></span></td>
+				<td id="email"><span><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'berry.email_view')"/></span></td>
 			</tr>
 			<div class="clear"><xsl:text> </xsl:text></div>
 		</table>
