@@ -710,7 +710,7 @@ berry basket function to the site
 	</div>
 	<div><a id="berryFullViewLink" style="display: none;"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'berry.full')"/></a></div>
 	<div id="berryHelpMsg"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'berry.help')"/></div>
-        </div>
+      </div>
      
     </xsl:if>
   </xsl:template>
@@ -891,4 +891,10 @@ used on the document page
 
   </xsl:template>
 
+  <xsl:template name="expandContractDocumentLinks">
+    <!--<xsl:if test="count(//documentNode) > 1">-->
+      <xsl:variable name="doc_url"><xsl:value-of select='$library_name'/>/collection/<xsl:value-of select='/page/pageResponse/collection/@name'/>/document/<xsl:value-of select='/page/pageResponse/document/documentNode/@nodeID'/>?<xsl:if test="/page/pageRequest/paramList/param[@name='p.s']">p.s=<xsl:value-of select="/page/pageRequest/paramList/param[@name='p.s']/@value"/>&amp;</xsl:if></xsl:variable>
+      <div id="expandContractLinks"><table style="width:100%; text-align:center;"><tr><td><a href="{$doc_url}ed=1"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.expand_doc')"/></a></td><td><a href="{$doc_url}ed=0"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.collapse_doc')"/></a></td></tr></table></div>
+    <!--</xsl:if>-->
+  </xsl:template>
 </xsl:stylesheet>
