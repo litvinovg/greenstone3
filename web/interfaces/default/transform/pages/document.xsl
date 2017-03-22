@@ -377,10 +377,11 @@
 		<xsl:choose>
 			<!-- NOTE: alb = ajax load bypass -->
 			<!-- 
-				If the docType is hierarchy and we want to bypass the ajax load then do this 
-				OR If the docType is hierarchy and we have asked for the expanded document OR we have asked for the top level document then do this 
+			     If we have asked for expanded document, then do this.
+			     OR If the docType is hierarchy and we want to bypass the ajax load then do this 
+			     OR If the docType is hierarchy and we have asked for the top level document then do this 
 			-->
-			<xsl:when test="/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or (/page/pageResponse/document/@docType = 'hierarchy' and (/page/pageRequest/paramList/param[@name = 'alb']/@value = '1' or (string-length(/page/pageRequest/paramList/param[@name = 'd']/@value) > 0 and (/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or not(util:contains(/page/pageResponse/document/@selectedNode, '.'))))))">
+			<xsl:when test="/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or (/page/pageResponse/document/@docType = 'hierarchy' and (/page/pageRequest/paramList/param[@name = 'alb']/@value = '1' or (string-length(/page/pageRequest/paramList/param[@name = 'd']/@value) > 0 and not(util:contains(/page/pageResponse/document/@selectedNode, '.')))))">
 				<div id="gs-document">
 					<xsl:call-template name="documentPre"/>
 					<div id="gs-document-text" class="documenttext" collection="{/page/pageResponse/collection/@name}"><!-- *** -->
