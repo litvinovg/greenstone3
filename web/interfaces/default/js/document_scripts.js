@@ -558,7 +558,7 @@ function extractFilteredPagesToOwnDocument()
 	sectionString += "]";
 	
 	var url = "cgi-bin/document-extract.pl?a=extract-archives-doc&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&json-sections=" + sectionString + "&site=" + gs.xsltParams.site_name;// + "&json-metadata=[{"metaname":"dc.Title","metavalue":"All Black Rugy Success","metamode":"accumulate"]"
-	$("#extractDocButton").attr("disabled", "disabled").html("Exracting document...");
+	$("#extractDocButton").attr("disabled", "disabled").html("Extracting document...");
 	$.ajax(url)
 	.success(function(response)
 	{
@@ -638,16 +638,17 @@ function retrieveTableOfContentsAndTitles()
 	ilt +=   '</xsl:for-each>';
 	ilt += '</xsl:template>';
 	
-	var url = gs.xsltParams.library_name + "?a=d&ed=1&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&ilt=" + ilt.replace(/ /g, "%20");
+	var url = gs.xsltParams.library_name + "?a=d&ec=1&c=" + gs.cgiParams.c + "&d=" + gs.cgiParams.d + "&ilt=" + ilt.replace(/ /g, "%20");
 
 	$.ajax(url)
 	.success(function(response)
 	{
-		$("#tableOfContents").html(response);
-		replaceLinksWithSlider();
-	    addExpandContractButtons();
-		var loading = $("#tocLoadingImage");
-		loading.remove();
+	    var tableOfContents = $("#tableOfContents");
+	    tableOfContents.append(response);
+	    replaceLinksWithSlider();
+	    
+	    var loading = $("#tocLoadingImage");
+	    loading.remove();
 	})
 	.error(function()
 	{
@@ -655,14 +656,7 @@ function retrieveTableOfContentsAndTitles()
 	});
 }
 
-function addExpandContractButtons() 
-{
-    var tableOfContents = $("#tableOfContents");
-    var table = "<table style=\"width:100%; text-align:center;\"><tr><td><a href=\"javascript:expandOrCollapseAll(true);\">"+gs.text.doc.expand_doc+"</a></td><td><a href=\"javascript:expandOrCollapseAll(false);\">"+gs.text.doc.collapse_doc+"</a></td></tr></table>" ;
-    
-   tableOfContents.prepend(table);
 
-}
 function replaceLinksWithSlider()
 {
 	var tableOfContents = $("#tableOfContents");
@@ -869,7 +863,7 @@ function SliderWidget(_links)
     {
       $(matchingTitles[i][1].cell).css("display", "table-cell");
     }
-}
+	}
 
 	var setUpFilterBox = function() 
 	{
