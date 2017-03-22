@@ -721,6 +721,16 @@ div.QuickSearch {
 	overflow:auto;
 }
 
+#expandContractLinks {
+  	margin: 0;
+	padding: 0;
+	font-size: 70%;
+}
+
+#expandContractLinks a {text-decoration: underline; color: #444 !important;}
+#expandContractLinks a:visited {text-decoration: underline; color: #444 !important;}
+#expandContractLinks a:link {text-decoration: underline; color: #444 !important;}
+
 #tableOfContents {
 	margin: 0;
 	padding: 0;
