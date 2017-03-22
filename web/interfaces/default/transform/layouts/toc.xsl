@@ -76,9 +76,10 @@
 				<tr><td>
 					<div id="contentsArea">	
 						<!-- show the berry basket if it's turned on -->
-						<gslib:berryBasket/>
-
-						<!-- the contents (if enabled) -->
+						<xsl:call-template name="berryBasket"/>
+						<!-- add in expand and contract document links -->
+						<xsl:call-template name="expandContractDocumentLinks"/>
+						<!-- dynamically get the contents (if enabled) -->
 						<xsl:choose>
 							<xsl:when test="/page/pageResponse/document/@docType = 'paged' or /page/pageResponse/document/@docType = 'pagedhierarchy'">
 								<gsf:image type="Thumb"/>
@@ -92,6 +93,7 @@
 										});
 									</xsl:text>
 								</script>
+								
 								<div id="tableOfContents"><xsl:text> </xsl:text></div>
 								<div id="tocLoadingImage" style="text-align:center;">
 									<img src="{util:getInterfaceText($interface_name, /page/@lang, 'loading_image')}"/><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.loading')"/><xsl:text>...</xsl:text>
@@ -100,14 +102,6 @@
 								<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true'">
 								  <a href="javascript:extractFilteredPagesToOwnDocument();"><button id="extractDocButton"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'de.extract_pages')"/></button></a>
 								</xsl:if>
-								  
-							<!--	<table style="width:100%;"><tbody><tr>
-									<td><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.filter_pages')"/><xsl:text>: </xsl:text><input id="filterText" type="text"/></td>
-								</tr>
-								<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true'">
-									<tr><td><a href="javascript:extractFilteredPagesToOwnDocument();"><button id="extractDocButton">Extract these pages to document</button></a></td></tr>
-								</xsl:if>
-								</tbody></table>-->
 							</xsl:when>
 							<xsl:when test="not(/page/pageRequest/paramList/param[@name = 'ed']/@value = '1' or /page/pageRequest/paramList/param[@name = 'ec']/@value = '1')">
 								<div id="tableOfContents">
@@ -125,15 +119,15 @@
 								</script>
 							</xsl:when>
 							<xsl:otherwise>
-							  <xsl:variable name="doc_url"><xsl:value-of select='$library_name'/>/collection/<xsl:value-of select='/page/pageResponse/collection/@name'/>/document/<xsl:value-of select='/page/pageResponse/document/documentNode/@nodeID'/>?<xsl:if test="/page/pageRequest/paramList/param[@name='p.s']">p.s=<xsl:value-of select="/page/pageRequest/paramList/param[@name='p.s']/@value"/>&amp;</xsl:if></xsl:variable>
+							 
 								<div id="tableOfContents">
-									<xsl:attribute name="class">
+								  <!-- if ed=1 or ec=1 then we have the complete section hierarchy in the page xml source, so we don't need an ajax call to get the table of contents, we just generate it from the list of nodes -->
+									<xsl:attribute name="class"> <!-- do we ever need this ?? -->
 										<xsl:choose>
 											<xsl:when test="count(//documentNode) > 1">visible</xsl:when>
 											<xsl:otherwise>hidden</xsl:otherwise>
 										</xsl:choose>
 									</xsl:attribute>
-									<table style="width:100%; text-align:center;"><tr><td><a href="{$doc_url}ed=1"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.expand_doc')"/></a></td><td><a href="{$doc_url}ed=0"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'doc.collapse_doc')"/></a></td></tr></table>
 									<xsl:for-each select="documentNode">
 										<xsl:call-template name="documentNodeTOC"/>
 									</xsl:for-each>
@@ -149,22 +143,13 @@
 	
 	<!-- This template is used to display the table of contents -->
 	<xsl:template name="documentNodeTOC">
-
-		<!-- check if this is the currently selected table of contents item -->
-		<xsl:variable name="isCurrent" select="nodeContent"/>
-
-		<!-- formulate the link -->
-		<xsl:variable name="contentsLink">
-			<xsl:value-of select='$library_name'/>?a=d&amp;c=<gslib:collectionNameShort/>&amp;d=<xsl:value-of select='@nodeID'/><xsl:if test="documentNode">.pr</xsl:if>&amp;sib=1
-		</xsl:variable>
-
 		<ul>
 			<table><tr>
 				<!-- The expand/collapse button (not displayed for the top level node) -->
 				<xsl:if test="util:hashToDepthClass(@nodeID) != 'sectionHeaderDepthTitle'">
 					<td>
 						<xsl:choose>
-							<xsl:when test="not(nodeContent and not(documentNode))">
+							<xsl:when test="documentNode">
 								<img id="ttoggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">
 									<xsl:attribute name="src">
 										<xsl:choose>
@@ -188,13 +173,13 @@
 				<!-- The chapter/page icon -->
 				<td>
 					<img>
-						<xsl:if test="nodeContent and not(documentNode)">
+						<xsl:if test="not(documentNode)">
 							<xsl:attribute name="class">leafNode</xsl:attribute>
 						</xsl:if>
 						
 						<xsl:attribute name="src">
 							<xsl:choose>
-								<xsl:when test="nodeContent and not(documentNode)">
+								<xsl:when test="not(documentNode)">
 									<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'page_image')"/> 
 								</xsl:when>
 								<xsl:otherwise>
