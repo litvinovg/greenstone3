@@ -408,6 +408,7 @@
     </script>
     
   </xsl:template>
+
   <xsl:template name="generateLoginURL">
     <xsl:value-of select="$library_name"/>
     <xsl:text>?a=p&amp;sa=login&amp;redirectURL=</xsl:text>
@@ -430,6 +431,36 @@
       </xsl:if>
     </xsl:for-each>
     
+  </xsl:template>
+
+  <!-- Writing the reverse of generateLoginURL since the toggleUserMenuScript does a lot more than I want. -->
+  <!-- https://www.w3schools.com/xml/xsl_functions.asp#string -->  
+  <xsl:template name="generateLogoutURL">
+    
+    <xsl:variable name="url" select="/page/pageRequest/@fullURL"/>
+    <xsl:variable name="tmpURL" select="substring-before($url, '&amp;amp;logout=')"/>
+    <xsl:variable name="beforeHash" select="substring-before($url, '#')"/>
+    <xsl:variable name="afterHash" select="substring-after($url, '#')"/>
+    <!-- Get rid of any lingering &amp;logout= already in the URL.
+	 Can't use fn:replace() as it's only been defined since XSLT 2.0. We use XSLT 1.x -->
+    <xsl:variable name="fullURL">
+      <xsl:choose>
+	<xsl:when test="$tmpURL != ''"><xsl:value-of select="$tmpURL" /></xsl:when>
+	<xsl:otherwise><xsl:value-of select="$url" /></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+
+    <!-- Output the logout link: the current page's URL (with any lingering logout suffix removed) 
+	 followed by ?logout= or &amp;logout= followed by any # portion of the current page's URL -->
+    <xsl:choose>
+      <xsl:when test="$beforeHash != ''"><xsl:value-of select="$beforeHash" /></xsl:when>
+      <xsl:otherwise><xsl:value-of select="$fullURL" /></xsl:otherwise>
+    </xsl:choose>
+    <xsl:choose>
+      <xsl:when test="contains($fullURL, '?')"><xsl:text>&amp;logout=</xsl:text></xsl:when>
+      <xsl:otherwise>?logout=</xsl:otherwise>
+    </xsl:choose>
+    <xsl:if test="$afterHash != ''">#<xsl:value-of select="$afterHash" /></xsl:if>   
   </xsl:template>
   
   <xsl:template name="LoginoutLink">

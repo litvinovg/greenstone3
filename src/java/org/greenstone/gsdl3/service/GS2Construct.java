@@ -28,6 +28,8 @@ import java.util.Map.Entry;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.build.GS2PerlConstructor;
@@ -41,6 +43,13 @@ import org.greenstone.gsdl3.util.OID;
 import org.greenstone.gsdl3.util.SimpleCollectionDatabase;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
+
+// https://developer.android.com/reference/org/json/JSONObject.html
+// https://developer.android.com/reference/org/json/JSONArray.html
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -310,10 +319,39 @@ public class GS2Construct extends ServiceRack
 
 	protected Element processModifyMetadata(Element request)
 	{
-	    if (!userHasCollectionEditPermissions(request)) {
+
+	    // There are two types of operations whereby metadata gets modified:
+	    // - document including document-meta editing: user needs document editing powers
+	    // - adding user comments: user just needs an account and needs to be logged in
+	    // We handle both cases in this service.
+
+	    Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+	    HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
+
+	    // If a user is only adding comments, they don't need to have editing powers over a collection
+	    // but they need to be logged in
+	    String[] docids = isAddingUserComments(request, params);
+	    boolean isAddingUserComments = (docids == null) ? false : true;
+
+	    if(isAddingUserComments) { // adding user comments, check if user logged in
+		UserContext context = new UserContext(request);
+
+		// A restricted set of metadata is modifiable when adding user comments:
+		// only the username, usertimestamp and usercomment metadata fields.
+		// If that's all that's being modified, isAddingUserComments() would have returned true,
+		// so finally check if the caller is logged in as a user.
+		if (context.getUsername().equals("")) { 
+		    Document result_doc = XMLConverter.newDOM();
+		    Element result = GSXML.createBasicResponse(result_doc, "processModifyMetadata");
+		    GSXML.addError(result, "Cannot add user comments if not logged in."); // or if attempting to set meta not related to user comments.
+		    return result; // not logged in
+		}
+
+	    }
+	    else if (!userHasCollectionEditPermissions(request, params)) {
 		Document result_doc = XMLConverter.newDOM();
 		Element result = GSXML.createBasicResponse(result_doc, "processModifyMetadata");
-		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
+		GSXML.addError(result, "This user does not have the required permissions to perform this action."); // also get here if user was attempting to set meta not related to user comments.
 		return result;
 	    }
 		
@@ -322,7 +360,7 @@ public class GS2Construct extends ServiceRack
 	
 		
 		// process
-		Element response = runCommand(request, GS2PerlConstructor.MODIFY_METADATA_SERVER);
+		Element response = runCommand(request, GS2PerlConstructor.MODIFY_METADATA_SERVER, docids);
 		
 		if (response.getElementsByTagName(GSXML.ERROR_ELEM).getLength() <= 0) // if no errors, wait for process to finish
 		{
@@ -665,10 +703,14 @@ public class GS2Construct extends ServiceRack
 		return true;
 	}
 
+	protected Element runCommand(Element request, int type) {
+		return runCommand(request, type, null);
+	}
+
 	/** returns a response element */
-	protected Element runCommand(Element request, int type)
+	protected Element runCommand(Element request, int type, String[] docids)
 	{
-	  Document result_doc = XMLConverter.newDOM();
+		Document result_doc = XMLConverter.newDOM();
 		// the response to send back
 		String name = GSPath.getFirstLink(request.getAttribute(GSXML.TO_ATT));
 		Element response = result_doc.createElement(GSXML.RESPONSE_ELEM);
@@ -756,19 +798,19 @@ public class GS2Construct extends ServiceRack
 		    Iterator<Map.Entry<String, Serializable>> i = entries.iterator();
 			
 		    String oid = null;
-		    
+
 		    while (i.hasNext()) {
 
 				Map.Entry<String, Serializable> entry = i.next();
 				String paramname = entry.getKey();
-				paramname = paramname.replace("s1.", ""); // replaces all
-															// occurrences
+				paramname = paramname.replace("s1.", ""); // replaces all occurrences
 				if (paramname.equals("collection")) {
 					paramname = "c";
 				}
 				if (paramname.equals("d")){
 					oid = (String) entry.getValue();
 				}
+				
 				String paramvalue = (String) entry.getValue();
 
 				querystring.append(paramname + "=" + paramvalue);
@@ -777,7 +819,22 @@ public class GS2Construct extends ServiceRack
 				}
 		    }
 		    
-		    markDocumentInFlatDatabase("R", coll_name, OID.getTop(oid));
+		    if(oid != null) { // if we have only one oid
+			markDocumentInFlatDatabase("R", coll_name, OID.getTop(oid));
+		    } else if (docids != null) { // check if we are dealing with many doc ids, as cold in theory happen when set-metadata-array is called
+			
+			for(int index = 0; index < docids.length; index++) {
+			    String docid = docids[index];
+			    markDocumentInFlatDatabase("R", coll_name, OID.getTop(docid));
+			}
+		    } else {
+			String msg = getTextString("general.no_valid_docid_error", lang);
+			logger.error("*** " + msg);
+			Text t = result_doc.createTextNode(msg);
+			status.appendChild(t);
+			status.setAttribute(GSXML.STATUS_ERROR_CODE_ATT, Integer.toString(GSStatus.ERROR));
+			return response;
+		    }
 		    
 		    constructor.setQueryString(querystring.toString());
 		}
@@ -964,18 +1021,102 @@ public class GS2Construct extends ServiceRack
 	}
 
 
+    protected String[] isAddingUserComments(Element request, HashMap<String, Serializable> params) {
+
+	String metaserver_command = (String) params.get("a"); // e.g. set-archives-metadata or set-metadata-array
+	// quickest test:
+	// if not calling set-metadata-array, then it definitely won't be a set-usercomments operation
+	if(!metaserver_command.equals("set-metadata-array")) {
+	    return null;
+	}
+
+	// Confirm that the set-meta-array operation is only attempting to modify user comments metadata
+
+	String[] docids = null;
+	String json_str = (String) params.get("json"); // will have a "json" field if doing set-meta-array
+	Pattern p = Pattern.compile("^(username|usertimestamp|usercomment)$");
+
+	// check that the name of each that's metadata to be set is one of username|usercomment|usertimestamp
+	// Anything else means something more than adding user comments is being attempted, which is invalid
+	try {
+	    
+	    JSONArray docInfoList = new JSONArray(json_str);
+	    docids = new String[docInfoList.length()];
+	    for(int index = 0; index < docInfoList.length(); index++) {
+		JSONObject docInfo = docInfoList.getJSONObject(index);
+		if(docInfo.has("metatable")) { // should exist for metadata arrays
+		    
+		    docids[index] = docInfo.getString("docid"); // should exist if metatable existed
+
+		    logger.info("@@@ Found docid: " + docids[index]);
+
+		    JSONArray metatable = docInfo.getJSONArray("metatable");
+		    for(int i = 0; i < metatable.length(); i++) {
+			JSONObject meta = metatable.getJSONObject(i);
+
+			String metaname = meta.getString("metaname");
+			logger.info("### metaname: " + metaname);
+			Matcher m = p.matcher(metaname);
+			if(!m.matches()) {
+			    logger.info("### metaname: " + metaname + " doesn't match");
+			    return null;
+			}
+		    }
+		}
+	    }
+	} catch(JSONException jsonex) {
+	    logger.error("Exception when parsing json string: " + json_str);
+	    logger.error(jsonex);
+	    
+	}
+	
+	// if we're here, then it means that the JSON only asked for username|usercomment|usertimestamp meta
+	// meaning that the setmeta operation was a valid user comment operation.
+	// In that case, we have a docid for which we need to add a user comment 
+	// set-metadata-array can take more docids, but doesn't happen for a user comment. And one comment
+	// is added at a time, but 3 meta fields are set for each comment: username, usercomment and timestamp
+	// hence the use of set-meta-array.
+	return docids;
+
+    }
+
     /** Copy from DebugService.userHasEditPermissions
      This function checks that the user is logged in and that the user 
      is in the right group to edit the collection */
     protected boolean userHasCollectionEditPermissions(Element request) {
 	Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 	HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
+
+	return userHasCollectionEditPermissions(request, params);
+
+    }
+
+    protected boolean userHasCollectionEditPermissions(Element request, HashMap<String, Serializable> params) {
 	String collection = (String) params.get(COL_PARAM); // could be null on newcoll operation
+
 
     UserContext context = new UserContext(request);
     if(collection == null) {
 	return !context.getUsername().equals("");
     }
+
+    // START DEBUG
+    Set<Map.Entry<String, Serializable>> entries = params.entrySet();
+    Iterator<Map.Entry<String, Serializable>> i = entries.iterator();
+    
+    StringBuffer parametersLine = new StringBuffer();
+    while (i.hasNext()) {
+	
+	Map.Entry<String, Serializable> entry = i.next();
+	String paramname = entry.getKey();
+	String paramvalue = (String) entry.getValue();
+	
+	parametersLine.append("\t" + paramname + ": " + paramvalue + "\n");
+    }
+    
+    logger.info("XXXXXXXXXXXXX PARAMETERS:\n" + parametersLine);
+    // END DEBUG
+
     for (String group : context.getGroups()) {
       // administrator always has permission
       if (group.equals("administrator")) {

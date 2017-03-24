@@ -1239,3 +1239,41 @@ width:100%
     	background-color:#eee;
 }
 
+/* User comments area: display of existing user comments and display of the form and of the add user/logout links */
+
+#usercomments, #usercommentform, #usercommentlink a, #usercommentlogoutlink a {
+    font-family: sans-serif;
+    font-size: 12px;
+}
+
+#usercomments {
+    margin: 10px 0;
+}
+
+.usercommentheading {
+    font-weight: bold;
+    color: #006666;
+    border-top: solid 1px black;
+}
+
+.usercomment {
+    margin: 10px 0;
+}
+
+#usercommentlink, #usercommentlogoutlink {
+    margin: 10px 0 20px 0;
+}
+
+#usercommentlink a, #usercommentlogoutlink a {
+ text-decoration: none;
+ font-weight: bold;
+ color: #006666;
+}
+#usercommentlink a:visited, #usercommentlogoutlink a:visited {
+    color: #006666;
+}
+
+.centrediv {
+    width:50%;
+    margin: 0 auto;
+}

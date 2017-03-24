@@ -11,6 +11,9 @@
 	<!-- use the 'main' layout -->
 	<xsl:import href="layouts/main.xsl"/>
 	<xsl:import href="layouts/toc.xsl"/>
+
+	<!-- templates for adding user comments -->
+	<xsl:import href="layouts/usercomments.xsl"/>
 	
 	<xsl:variable name="bookswitch">
 		<xsl:choose>
@@ -366,6 +369,7 @@
 			<xsl:when test="@docType='simple'">
 				<xsl:call-template name="documentHeading"/><br/>
 				<xsl:call-template name="documentContent"/>
+				<br /><xsl:call-template name="userCommentsSection"/>
 			</xsl:when>	
 			<xsl:otherwise> <!-- display the standard greenstone document -->
 				<xsl:call-template name="wrappedDocument"/>

@@ -421,7 +421,9 @@ gs.functions.hashString = function(str)
 	return convertNum(remainder);
 }
 
-function callMetadataServer(callingFunction, url, responseFunction)
+// No function overloading in JavaScript. Can pass a custom object, however, see
+// http://stackoverflow.com/questions/456177/function-overloading-in-javascript-best-practices
+function callMetadataServer(callingFunction, url, responseFunction, opts)
 {
     var async_setting = true; // Internal processing of 'read' operations (get meta) is not order dependent
 
@@ -444,24 +446,38 @@ function callMetadataServer(callingFunction, url, responseFunction)
 
     } // otherwise, such as for get- metadata operation, we proceed as before, which will not require authentication
 
+    if (opts != null && opts["forceSync"] != null) {
+	async_setting = (!opts["forceSync"]);
+    }
+
+    console.log("Away to call: " + url);
+    var ajaxResponse = null;
 
     $.ajax(url, {async: async_setting})
 	.success(function(response)
 	{
 		console.log("(" + callingFunction + ") Response received from server: " + response);
 
+	    ajaxResponse = response;
+
 		//var xml = $.parseXML(response);
 		//console.log(xml);
 		
 		if(responseFunction != null)
 		{
-			responseFunction(response);
+		    
+		    responseFunction(response);
 		}
 	})
 	.error(function()
 	{
 		console.log("(" + callingFunction + ") Failed");
 	});
+
+    console.log("Finished ajax call to: " + url);
+    
+    console.log("Got response: " + ajaxResponse);
+    return ajaxResponse;
 }
 
 /*************************
@@ -512,9 +528,72 @@ gs.functions.setMetadata = function(collection, site, documentID, metadataName, 
 	}
 }
 
+// New. Modified version of the GS2 version of this method in gsajaxapi.js.
+// The where parameter can be specified as one or more of: import, archives, index, live 
+// separated by |. If null, it is assumed to be index which is the original default 
+// behaviour of calling set-metadata-array. E.g. where=import|archives|index
+// THIS METHOD IS SYNCHRONOUS
+gs.functions.setMetadataArray = function(collection, site, docArray, metamode, where, responseFunction) 
+{
+    docArrayJSON = JSON.stringify(docArray);
+    
+    var params = "a=" + escape("set-metadata-array"); //"a=set-metadata-array";
+    if(where != null) {
+	params += "&where=" + escape(where); // if where not specified, meta-server will default to setting index meta
+	//} else {
+	//    params += "&where=import|archives|index";
+    }
+    params += "&c="+escape(collection);
+    params += "&site="+escape(site);
+    params += "&json="+escape(docArrayJSON);
+    
+    if (metamode!=null) {
+	params += "&metamode=" + escape(metamode);
+    }
+    
+
+    var response = callMetadataServer("Setting metadata in "+where, "cgi-bin/metadata-server.pl?"+params, responseFunction);
+
+    return response;
+    // return this.urlPostSync(mdserver,params); // gsajaxapi.js version for GS2
+}
+
+
 /*************************
 * GET METADATA FUNCTIONS *
 *************************/
+
+// New. Modified version of the GS2 version of this method in gsajaxapi.js.
+// See description for setMetadataArray above for information about the 'where' parameter.
+// THIS METHOD IS SYNCHRONOUS BY DEFAULT. Set forceSync to false to override this default behaviour
+gs.functions.getMetadataArray = function(collection, site, docArray, where, forceSync, responseFunction)
+{
+    docArrayJSON = JSON.stringify(docArray);
+	
+    var params = "a=" + escape("get-metadata-array"); //"a=set-metadata-array";
+    if(where != null) {
+	params += "&where=" + escape(where); // if where not specified, meta-server will default to setting index meta
+	//} else {
+	//    params += "&where=import|archives|index";
+    }
+    params += "&c="+escape(collection);
+    params += "&site="+escape(site);
+    params += "&json="+escape(docArrayJSON);
+        
+    // get operations are generally asynchronous, but allow calling function to force ajax call 
+    // to be synchronous or not. Default is synchronous, as it was for GS2
+    if(forceSync == null) {
+	forceSync = true;
+    }
+    // Objects/maps can use identifiers or strings for property names
+    // http://stackoverflow.com/questions/456177/function-overloading-in-javascript-best-practices
+    // https://www.w3schools.com/js/js_objects.asp
+    var response = callMetadataServer("Getting metadata from "+where, "cgi-bin/metadata-server.pl?"+params, responseFunction, {"forceSync":forceSync});
+
+    return response;
+    //return this.urlPostSync(mdserver,params);	// gsajaxapi.js version for GS2
+}
+
 
 gs.functions.getImportMetadata = function(collection, site, documentID, metadataName, responseFunction)
 {

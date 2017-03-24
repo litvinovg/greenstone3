@@ -109,13 +109,13 @@
 	     xslt:value-of="''" to ensure element doesn't become empty
 	     when the XSLT processes it (which would then result in it
 	     being changed into a self-closing element, which then is
-	     incorrectly rendered as HTML).  Doing thing with the
+	     incorrectly rendered as HTML).  Doing this with the
 	     value-of is better then injecting an xsl:comment in
 	     (another approach we have used in the past) as the
 	     comment approach then actually turns up in the final
 	     HTML.  This can lead to further complications if
 	     Javascript using the 'empty' div truely expects it to
-	     have no connent of any form. 
+	     have no content of any form. 
 	-->
 
 	<xsl:template match="gsf:div">
