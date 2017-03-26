@@ -242,8 +242,8 @@
 			</head> \
 			\
 			<body><xsl:call-template name="textDirectionAttribute"/><xsl:call-template name="actionClass"/> \
-				<div id="containerXX"> \
-					<div id="gs_contentXX"> \
+				<div id="container"> \
+					<div id="gs_content"> \
 						<xsl:apply-templates select="/page"/> \
 					</div> \
 				</div> \
