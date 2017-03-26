@@ -658,22 +658,16 @@
 	<!-- The list of other search types -->
 	<ul>
 	  <xsl:for-each select="/page/pageResponse/collection[@name=$collNameChecked]/serviceList/service[@type='query']">
-	    <li>
-	      <xsl:choose>
-		<xsl:when test="@name = /page/pageRequest/paramList/param[@name='s']/@value and not(/page/pageRequest/paramList/param[@name='qs']/@value = 1)">
-		  <xsl:attribute name="class">ui-state-default ui-corner-all ui-state-active</xsl:attribute>
-		</xsl:when>
-		<xsl:otherwise>
-		  <xsl:attribute name="class">ui-state-default ui-corner-all</xsl:attribute>
-		</xsl:otherwise>
-	      </xsl:choose>
-	      <a>
-		<xsl:attribute name="href">
-		  <xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="$collNameChecked"/>/search/<xsl:value-of select="@name"/>
-		</xsl:attribute>
-		<xsl:value-of select="displayItem[@name='name']"/>
-	      </a>
-	    </li>
+	    <xsl:if test="/page/pageRequest/paramList/param[@name='qs']/@value = 1 or not(@name = /page/pageRequest/paramList/param[@name='s']/@value)">
+	      <li class="ui-state-default ui-corner-all">
+		    <a>
+		      <xsl:attribute name="href">
+			<xsl:value-of select="$library_name"/>/collection/<xsl:value-of select="$collNameChecked"/>/search/<xsl:value-of select="@name"/>
+		      </xsl:attribute>
+		      <xsl:value-of select="displayItem[@name='name']"/>
+		    </a>
+	      </li>
+		</xsl:if>
 	  </xsl:for-each>
 	</ul>
       </div>
