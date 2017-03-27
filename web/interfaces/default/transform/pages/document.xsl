@@ -373,6 +373,7 @@
 			</xsl:when>	
 			<xsl:otherwise> <!-- display the standard greenstone document -->
 				<xsl:call-template name="wrappedDocument"/>
+				<br /><xsl:call-template name="userCommentsSection"/>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>

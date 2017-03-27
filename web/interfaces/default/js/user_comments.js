@@ -75,8 +75,21 @@ function loadUserComments() {
 
     var i = 0;
     var looping = true;
-    var print_heading = false; // UNUSED SECTION if(print_heading) below
+
     
+    // if there's at least one existing comment OR if the form is currently being displayed
+    // (regardless of whether previous comments exist), display a heading for the comments section
+    if(metatable[0].metavals[0] != undefined || document.getElementById("usercommentform") != undefined) {
+	var heading=document.createElement("div");
+	var attr=document.createAttribute("class");
+	attr.nodeValue="usercommentheading";
+	heading.setAttributeNode(attr);
+	var txt=document.createTextNode(gs.variables["textusercommentssection"]); ///"_textusercommentssection_");
+	heading.appendChild(txt);
+	usercommentdiv.appendChild(heading);
+    }
+    
+   
     // metatable[0] = list of usernames, metatable[1] = list of timestamps, metatable[2] = list of comments	
     // the 3 lists/arrays should be of even length. Assuming this, loop as long as there's another username
     while(looping) {
@@ -85,20 +98,6 @@ function loadUserComments() {
 	    looping = false;
 	    } 
 	else {
-	    
-// BEGIN UNUSED
-	    if(print_heading) {
-		var heading=document.createElement("div");
-		var attr=document.createAttribute("class");
-		attr.nodeValue="usercommentheading";
-		heading.setAttributeNode(attr);
-		var txt=document.createTextNode(gs.variables["textusercommentssection"]); ///"_textusercommentssection_");
-		heading.appendChild(txt);
-		usercommentdiv.appendChild(heading);
-		
- 		print_heading = false;
-	    }
-// END UNUSED
 	    
     	    var username = metaval_rec.metavalue;
 	    var timestamp = metatable[1].metavals[i].metavalue;  

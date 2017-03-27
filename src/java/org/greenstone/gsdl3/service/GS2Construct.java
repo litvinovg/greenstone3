@@ -330,7 +330,7 @@ public class GS2Construct extends ServiceRack
 
 	    // If a user is only adding comments, they don't need to have editing powers over a collection
 	    // but they need to be logged in
-	    String[] docids = isAddingUserComments(request, params);
+	    String[] docids = getDocIDsifAddingUserComments(params); //isAddingUserComments(request, params);
 	    boolean isAddingUserComments = (docids == null) ? false : true;
 
 	    if(isAddingUserComments) { // adding user comments, check if user logged in
@@ -1020,8 +1020,8 @@ public class GS2Construct extends ServiceRack
 		return false;
 	}
 
-
-    protected String[] isAddingUserComments(Element request, HashMap<String, Serializable> params) {
+    // getDocIdsWithOptFilter(JSONArray json, Pattern filterFields, boolean strictOrPermissible)
+    protected String[] getDocIDsifAddingUserComments(HashMap<String, Serializable> params) {
 
 	String metaserver_command = (String) params.get("a"); // e.g. set-archives-metadata or set-metadata-array
 	// quickest test:

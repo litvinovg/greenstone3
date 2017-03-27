@@ -26,8 +26,10 @@
   <!-- 3. Set up the User comments section in the HTML -->
   <div id="commentssection" class="centrediv">    
     <div id="usercomments">
-      <!-- The div that loads the user comments that were already submitted -->
-      <div class="usercommentheading"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'usercomments.heading')"/></div>
+      <!-- A heading for the comment section will be added here dynamically either if
+	   previously submitted comments exist, or if the form#usercommentform to add
+	   a new comment is displayed. Otherwise only the "Add Comments" link is shown. -->
+      <xsl:comment>Existing comments will be loaded dynamically loaded into this div#usercomments</xsl:comment>
     </div>
 
     <!-- If the user's logged in, show the comment form, else show the link to the login page -->

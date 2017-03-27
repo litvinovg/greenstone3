@@ -1252,7 +1252,7 @@ width:100%
 
 .usercommentheading {
     font-weight: bold;
-    color: #006666;
+    color: #3c8700;
     border-top: solid 1px black;
 }
 
@@ -1267,10 +1267,10 @@ width:100%
 #usercommentlink a, #usercommentlogoutlink a {
  text-decoration: none;
  font-weight: bold;
- color: #006666;
+ color: #3c8700;
 }
 #usercommentlink a:visited, #usercommentlogoutlink a:visited {
-    color: #006666;
+    color: #3c8700;
 }
 
 .centrediv {
