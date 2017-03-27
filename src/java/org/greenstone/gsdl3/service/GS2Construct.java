@@ -67,6 +67,9 @@ public class GS2Construct extends ServiceRack
 
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.service.GS2Construct.class.getName());
 
+    // default error message
+    private static final String NO_PERMISSIONS_ERROR = "This user does not have the required permissions to perform this action.";
+
 	// services offered
 	private static final String NEW_SERVICE = "NewCollection";
 	private static final String ADD_DOC_SERVICE = "AddDocument";
@@ -159,10 +162,7 @@ public class GS2Construct extends ServiceRack
 	protected Element processNewCollection(Element request)
 	{
 	    if (!userHasCollectionEditPermissions(request)) {
-		Document result_doc = XMLConverter.newDOM();
-		Element result = GSXML.createBasicResponse(result_doc, "processNewCollection");
-		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-		return result;
+		return errorResponse("processNewCollection", NO_PERMISSIONS_ERROR);
 	    }
 	    return runCommand(request, GS2PerlConstructor.NEW);
 	}
@@ -171,10 +171,7 @@ public class GS2Construct extends ServiceRack
 	protected Element processAddDocument(Element request)
 	{
 	    if (!userHasCollectionEditPermissions(request)) {
-		Document result_doc = XMLConverter.newDOM();
-		Element result = GSXML.createBasicResponse(result_doc, "processAddDocument");
-		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-		return result;
+		return errorResponse("processAddDocument", NO_PERMISSIONS_ERROR);
 	    }
 
 	  Document result_doc = XMLConverter.newDOM();
@@ -196,10 +193,7 @@ public class GS2Construct extends ServiceRack
 	{
 	    // check permissions
 	    if (!userHasCollectionEditPermissions(request)) {
-		    Document result_doc = XMLConverter.newDOM();
-		    Element result = GSXML.createBasicResponse(result_doc, "processBuildAndActivateCollection");
-		    GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-		    return result;
+		return errorResponse("processBuildAndActivateCollection", NO_PERMISSIONS_ERROR);
 	    }
 
 		    
@@ -238,10 +232,7 @@ public class GS2Construct extends ServiceRack
 	protected Element processImportCollection(Element request)
 	{
 	    if (!userHasCollectionEditPermissions(request)) {
-		Document result_doc = XMLConverter.newDOM();
-		Element result = GSXML.createBasicResponse(result_doc, "processImportCollection");
-		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-		return result;
+		return errorResponse("processImportCollection", NO_PERMISSIONS_ERROR);
 	    }
 
 		Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
@@ -308,10 +299,7 @@ public class GS2Construct extends ServiceRack
 	protected Element processBuildCollection(Element request)
 	{
 	    if (!userHasCollectionEditPermissions(request)) {
-		Document result_doc = XMLConverter.newDOM();
-		Element result = GSXML.createBasicResponse(result_doc, "processBuildCollection");
-		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-		return result;
+		return errorResponse("processBuildCollection", NO_PERMISSIONS_ERROR);
 	    }
 
 		return runCommand(request, GS2PerlConstructor.BUILD);
@@ -327,32 +315,55 @@ public class GS2Construct extends ServiceRack
 
 	    Element param_list = (Element) GSXML.getChildByTagName(request, GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 	    HashMap<String, Serializable> params = GSXML.extractParams(param_list, false);
+	    
+	    String metaserver_command = (String) params.get("a"); // e.g. set-archives-metadata or set-metadata-array
+	    boolean supportsSettingMultipleMeta = metaserver_command.equals("set-metadata-array") ? true : false;
+	    String json_str = (String) params.get("json"); // String or null if no param named "json"
 
-	    // If a user is only adding comments, they don't need to have editing powers over a collection
-	    // but they need to be logged in
-	    String[] docids = getDocIDsifAddingUserComments(params); //isAddingUserComments(request, params);
-	    boolean isAddingUserComments = (docids == null) ? false : true;
+	    String[] docids = null;
+	    
 
-	    if(isAddingUserComments) { // adding user comments, check if user logged in
+	    if (userHasCollectionEditPermissions(request, params)) { // means user can modify ANY metadata
+
+		// if dealing with an array of meta, then parse out the docids from the json
+		if(supportsSettingMultipleMeta) {
+		    docids = getDocIdsWithOptFilter(json_str, null);
+		} // else set-meta operation on single metadata field of single doc, 
+		  // and docid will be obtained in runCommand() where it's needed
+
+	    } else {
+		// check if user logged in
+		// shouldn't be able to do any meta modification if not logged in
+
 		UserContext context = new UserContext(request);
-
-		// A restricted set of metadata is modifiable when adding user comments:
-		// only the username, usertimestamp and usercomment metadata fields.
-		// If that's all that's being modified, isAddingUserComments() would have returned true,
-		// so finally check if the caller is logged in as a user.
-		if (context.getUsername().equals("")) { 
-		    Document result_doc = XMLConverter.newDOM();
-		    Element result = GSXML.createBasicResponse(result_doc, "processModifyMetadata");
-		    GSXML.addError(result, "Cannot add user comments if not logged in."); // or if attempting to set meta not related to user comments.
-		    return result; // not logged in
+		if (context.getUsername().equals("")) {
+		    
+		    return errorResponse("processModifyMetadata", "Cannot modify any metadata when not logged in.");
+		} else { // User is logged in at least, see whether they can do any restricted set-meta ops
+		    // that are open to regular users (those without permissions to edit this collection).
+		    // For now, there's only one restricted set-meta operation open to any logged in users
+		    // who don't otherwise have editing permissions for the collection: adding user comments.
+		    
+		    boolean isAddingUserComments = false;
+		    Pattern allowedMetaFieldsPattern = Pattern.compile("^(username|usertimestamp|usercomment)$");
+		    if(supportsSettingMultipleMeta) {
+			
+			docids = getDocIdsWithOptFilter(json_str, allowedMetaFieldsPattern);
+			if(docids != null) {
+			    isAddingUserComments = true;
+			}
+		    } else {
+			String metaname = (String) params.get("metaname");
+			if(isAllowedToSetMeta(metaname, allowedMetaFieldsPattern)) {
+			    isAddingUserComments = true;
+			}
+		    }
+		
+		    if(!isAddingUserComments) { // logged in user is attempting to set meta outside restricted set,
+			     // In this case, they're attempting to set meta not related to user comments
+			return errorResponse("processModifyMetadata", NO_PERMISSIONS_ERROR);
+		    }
 		}
-
-	    }
-	    else if (!userHasCollectionEditPermissions(request, params)) {
-		Document result_doc = XMLConverter.newDOM();
-		Element result = GSXML.createBasicResponse(result_doc, "processModifyMetadata");
-		GSXML.addError(result, "This user does not have the required permissions to perform this action."); // also get here if user was attempting to set meta not related to user comments.
-		return result;
 	    }
 		
 		// wait until we can reserve the collection for processing
@@ -399,10 +410,7 @@ public class GS2Construct extends ServiceRack
 	{
 
 	    if (!userHasCollectionEditPermissions(request)) {
-		Document result_doc = XMLConverter.newDOM();
-		Element result = GSXML.createBasicResponse(result_doc, "processActivateCollection");
-		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-		return result;
+		return errorResponse("processActivateCollection", NO_PERMISSIONS_ERROR);
 	    }
 
 		// this activates the collection on disk. but now we need to tell
@@ -477,10 +485,7 @@ public class GS2Construct extends ServiceRack
 	protected Element processDeleteCollection(Element request)
 	{
 	    if (!userHasCollectionEditPermissions(request)) {
-		Document result_doc = XMLConverter.newDOM();
-		Element result = GSXML.createBasicResponse(result_doc, "processDeleteCollection");
-		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-		return result;
+		return errorResponse("processDeleteCollection", NO_PERMISSIONS_ERROR);
 	    }
 
 	  Document result_doc = XMLConverter.newDOM();
@@ -541,10 +546,7 @@ public class GS2Construct extends ServiceRack
 	protected Element processReloadCollection(Element request)
 	{
 	    if (!userHasCollectionEditPermissions(request)) {
-		Document result_doc = XMLConverter.newDOM();
-		Element result = GSXML.createBasicResponse(result_doc, "processReloadCollection");
-		GSXML.addError(result, "This user does not have the required permissions to perform this action.");
-		return result;
+		return errorResponse("processReloadCollection", NO_PERMISSIONS_ERROR);
 	    }
 
 	  Document result_doc = XMLConverter.newDOM();
@@ -1020,24 +1022,34 @@ public class GS2Construct extends ServiceRack
 		return false;
 	}
 
-    // getDocIdsWithOptFilter(JSONArray json, Pattern filterFields, boolean strictOrPermissible)
-    protected String[] getDocIDsifAddingUserComments(HashMap<String, Serializable> params) {
-
-	String metaserver_command = (String) params.get("a"); // e.g. set-archives-metadata or set-metadata-array
-	// quickest test:
-	// if not calling set-metadata-array, then it definitely won't be a set-usercomments operation
-	if(!metaserver_command.equals("set-metadata-array")) {
+    protected boolean isAllowedToSetMeta(String metaname, Pattern allowedMetaFieldsPattern) 
+    {
+	if(metaname == null) {
+	    logger.info("### Can't check null metaname against pattern");
+	    return false;
+	}
+	
+	Matcher m = allowedMetaFieldsPattern.matcher(metaname);
+	if(!m.matches()) {
+	    logger.info("### metaname: " + metaname + " doesn't match allowed allowed fields: " + allowedMetaFieldsPattern.toString());
+	    return false;
+	} else {
+	    return true;
+	}
+    }
+    
+    protected String[] getDocIdsWithOptFilter(String json_str, Pattern filterFields) // boolean strictOrPermissible
+    {
+	if(json_str == null) {
+	    logger.error("### Shouldn't be happening: null json string");
 	    return null;
 	}
 
-	// Confirm that the set-meta-array operation is only attempting to modify user comments metadata
-
 	String[] docids = null;
-	String json_str = (String) params.get("json"); // will have a "json" field if doing set-meta-array
-	Pattern p = Pattern.compile("^(username|usertimestamp|usercomment)$");
 
-	// check that the name of each that's metadata to be set is one of username|usercomment|usertimestamp
-	// Anything else means something more than adding user comments is being attempted, which is invalid
+	// check that the name of each metadata being set matches the pattern filterFields.
+	// The presence of any other meta means something other than adding user comments is being attempted,
+	// which is invalid
 	try {
 	    
 	    JSONArray docInfoList = new JSONArray(json_str);
@@ -1056,9 +1068,8 @@ public class GS2Construct extends ServiceRack
 
 			String metaname = meta.getString("metaname");
 			logger.info("### metaname: " + metaname);
-			Matcher m = p.matcher(metaname);
-			if(!m.matches()) {
-			    logger.info("### metaname: " + metaname + " doesn't match");
+			
+			if(!isAllowedToSetMeta(metaname, filterFields)) {
 			    return null;
 			}
 		    }
@@ -1078,6 +1089,13 @@ public class GS2Construct extends ServiceRack
 	// hence the use of set-meta-array.
 	return docids;
 
+    }
+
+    protected Element errorResponse(String serviceName, String errorMsg) {
+	Document result_doc = XMLConverter.newDOM();
+	Element result = GSXML.createBasicResponse(result_doc, serviceName);
+	GSXML.addError(result, errorMsg);
+	return result;
     }
 
     /** Copy from DebugService.userHasEditPermissions
