@@ -20,6 +20,7 @@
   <gsf:variable name="textcommentsubmitted"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'usercomments.submitted')"/></gsf:variable>
 
   <!-- 2. Load the javascript, which will do stuff on window load/ready for which it needs the above gs.variables -->
+  <script type="text/javascript" src="interfaces/{$interface_name}/js/gsajaxapi.js"><xsl:text> </xsl:text></script>
   <script type="text/javascript" src="interfaces/{$interface_name}/js/user_comments.js"><xsl:text> </xsl:text></script>
 
   

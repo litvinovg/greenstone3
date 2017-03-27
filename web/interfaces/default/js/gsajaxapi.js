@@ -166,86 +166,86 @@ function GSAjaxAPI(gwcgi,collect,un,ky)
 // http://api.jquery.com/jQuery.post/
 // http://www.w3schools.com/ajax/ajax_xmlhttprequest_send.asp
     this.urlPostSync = function(scriptURL, params) {
-    var xmlHttp=false;
-       try {
-         // Firefox, Opera 8.0+, Safari
-         xmlHttp=new XMLHttpRequest();
-       }
-       catch (e) {
-         // Internet Explorer
-         try {
-           xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-         }
-         catch (e) {
-           try {
-             xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-           }
-           catch (e) {
-             alert("Your browser does not support AJAX!");
-             return false;
-           }
-         }
-       }
+	var xmlHttp=false;
+	try {
+            // Firefox, Opera 8.0+, Safari
+            xmlHttp=new XMLHttpRequest();
+	}
+	catch (e) {
+            // Internet Explorer
+            try {
+		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+            }
+            catch (e) {
+		try {
+		    xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		catch (e) {
+		    alert("Your browser does not support AJAX!");
+		    return false;
+		}
+            }
+	}
 
-    // e.g. scriptURL: /greenstone/cgi-bin/metadata-server.pl
-    xmlHttp.open('POST', scriptURL, false); // false means synchronous
-    xmlHttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    
-    if(un_ != null) {
-	params += "&un=" + un_;
+	// e.g. scriptURL: /greenstone/cgi-bin/metadata-server.pl
+	xmlHttp.open('POST', scriptURL, false); // false means synchronous
+	xmlHttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	
+	if(un_ != null) {
+	    params += "&un=" + un_;
+	}
+	if(ky_ != null) {
+	    params += "&ky=" + ky_;
+	}
+	
+	xmlHttp.send(params); // needs to be escaped/encoded
+	
+	//alert(scriptURL + "?" + params);
+	//alert(xmlHttp.responseText); // if synchronous, process xmlHttp.responseText AFTER send() call
+	return xmlHttp.responseText;
     }
-    if(ky_ != null) {
-	params += "&ky=" + ky_;
-    }
-
-    xmlHttp.send(params); // needs to be escaped/encoded
-
-    //alert(scriptURL + "?" + params);
-    //alert(xmlHttp.responseText); // if synchronous, process xmlHttp.responseText AFTER send() call
-    return xmlHttp.responseText;
-}
 
     // New, an Ajax Asynchronous Post method.
     // For helpful links, see the urlPostSync() method above
     this.urlPostAsync = function(scriptURL, params, callback) {
-    var xmlHttp=false;
-       try {
-         // Firefox, Opera 8.0+, Safari
-         xmlHttp=new XMLHttpRequest();
-       }
-       catch (e) {
-         // Internet Explorer
-         try {
-           xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
-         }
-         catch (e) {
-           try {
-             xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
-           }
-           catch (e) {
-             alert("Your browser does not support AJAX!");
-             return false;
-           }
-         }
-       }
-
-
-
-    // e.g. scriptURL: /greenstone/cgi-bin/metadata-server.pl
-    xmlHttp.open('POST', scriptURL, true); // true means asynchronous
-    xmlHttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-
-    // If asynchronous:
-    // If the callback param is a function, we will set it up to get called when 
-    // the async post has finished (is ready)
-    // if the callback parameter isn't a function, the param represents a field 
-    // that we want to dynamically update when the async post process has finished
-
+	var xmlHttp=false;
+	try {
+            // Firefox, Opera 8.0+, Safari
+            xmlHttp=new XMLHttpRequest();
+	}
+	catch (e) {
+            // Internet Explorer
+            try {
+		xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+            }
+            catch (e) {
+		try {
+		    xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		catch (e) {
+		    alert("Your browser does not support AJAX!");
+		    return false;
+		}
+            }
+	}
+	
+	
+	
+	// e.g. scriptURL: /greenstone/cgi-bin/metadata-server.pl
+	xmlHttp.open('POST', scriptURL, true); // true means asynchronous
+	xmlHttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	
+	
+	// If asynchronous:
+	// If the callback param is a function, we will set it up to get called when 
+	// the async post has finished (is ready)
+	// if the callback parameter isn't a function, the param represents a field 
+	// that we want to dynamically update when the async post process has finished
+	
 	var typeof_callback = typeof(callback);
 	if ((typeof_callback == "string") || (typeof_callback == "number") || (typeof_callback == "boolean")) {
 	    var locid = callback;
-
+	    
 	    xmlHttp.onreadystatechange=function() {
 		if(xmlHttp.readyState==4) {
 		    if (locelem != null) {
@@ -266,19 +266,19 @@ function GSAjaxAPI(gwcgi,collect,un,ky)
 	else {
 	    alert("Unrecognized type of callback value: " + typeof_callback);
 	}
-    
-    if(un_ != null) {
-	params += "&un=" + un_;
+	
+	if(un_ != null) {
+	    params += "&un=" + un_;
+	}
+	if(ky_ != null) {
+	    params += "&ky=" + ky_;
+	}
+	//alert("Posting Async: " + scriptURL + "?" + params);
+	
+	xmlHttp.send(params); // needs to be escaped/encoded
+	// if synchronous, would process xmlHttp AFTER send() call, such as by
+	// accessing xmlHttp.responseText to return that to the caller at this point.
     }
-    if(ky_ != null) {
-	params += "&ky=" + ky_;
-    }
-    //alert("Posting Async: " + scriptURL + "?" + params);
-
-    xmlHttp.send(params); // needs to be escaped/encoded
-    // if synchronous, would process xmlHttp AFTER send() call, such as by
-    // accessing xmlHttp.responseText to return that to the caller at this point.
-}
 
     // New
     // The where parameter can be specified as one or more of: import, archives, index, live 

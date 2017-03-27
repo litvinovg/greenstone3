@@ -423,7 +423,7 @@ gs.functions.hashString = function(str)
 
 // No function overloading in JavaScript. Can pass a custom object, however, see
 // http://stackoverflow.com/questions/456177/function-overloading-in-javascript-best-practices
-function callMetadataServer(callingFunction, url, responseFunction, opts)
+function callMetadataServerGET(callingFunction, url, responseFunction, opts)
 {
     var async_setting = true; // Internal processing of 'read' operations (get meta) is not order dependent
 
@@ -456,7 +456,7 @@ function callMetadataServer(callingFunction, url, responseFunction, opts)
     $.ajax(url, {async: async_setting})
 	.success(function(response)
 	{
-		console.log("(" + callingFunction + ") Response received from server: " + response);
+		console.log("(" + callingFunction + ") Response received from server: " + ajaxResponse);
 
 	    ajaxResponse = response;
 
@@ -479,6 +479,64 @@ function callMetadataServer(callingFunction, url, responseFunction, opts)
     console.log("Got response: " + ajaxResponse);
     return ajaxResponse;
 }
+
+
+// No function overloading in JavaScript. Can pass a custom object, however, see
+// http://stackoverflow.com/questions/456177/function-overloading-in-javascript-best-practices
+function callMetadataServer(callingFunction, url, responseFunction, opts)
+{
+    var async_setting = true; // Internal processing of 'read' operations (get meta) is not order dependent
+
+    // If doing set- or remove- (not get-) metadata, then rewrite URLs to call GS2Construct's ModfiyMetadata service instead (which will ensure this only works when authenticated). 
+    // From:
+    // <gs3server>/cgi-bin/metadata-server.pl?a=set-archives-metadata&c=smallcol&site=localsite&d=HASH01454f31011f6b6b26eaf8d7&metaname=Title&metavalue=Moo&prevmetavalue=Blabla&metamode=override
+    // To:
+    // <gs3server>/library?a=g&rt=r&ro=1&s=ModifyMetadata&s1.a=set-archives-metadata&s1.collection=smallcol&s1.site=localsite&s1.d=HASH01454f31011f6b6b26eaf8d7&s1.metaname=Title&s1.metavalue=Moo&s1.prevmetavalue=Blabla&s1.metamode=override
+
+    // if we're doing a set- or remove- metadata operations, then we'll be changing the URL to make sure we go through GS3's authentication
+    if(url.indexOf("set-") != -1 || url.indexOf("remove-") != -1) {
+	
+	url = url.replace("&c=",  "&collection="); // c is a special param name for GS2Construct
+	url = url.replace(/(&|\?)([^=]*=)/g, "$1"+"s1.$2"); // prefix param names with "s1."
+	url = url.replace("cgi-bin/metadata-server.pl?",  gs.xsltParams.library_name + "?a=g&rt=r&ro=1&s=ModifyMetadata&");
+	
+	//console.log("@@@@@ URL is " + url);
+
+	async_setting = false; // for 'write' operations (set/remove meta), we force sequential processing of the internal operation.
+
+    } // otherwise, such as for get- metadata operation, we proceed as before, which will not require authentication
+
+    if (opts != null) {
+	if(opts["forceSync"] != null) {
+	    async_setting = (!opts["forceSync"]);
+	}
+    }
+
+    console.log("Away to call: " + url);
+    var ajaxResponse = "No response received yet, async ajax request";
+
+    var splitURL = url.split("?");
+    url = splitURL[0];
+    var params = splitURL[1];
+    var gsapi = new GSAjaxAPI(url);
+
+    // ajax calls default to using method GET, we want to do POST operations for get-meta and set-meta requests
+    // since get-meta-array and especially set-meta-array can be large, e.g. for user comments.
+
+    if(async_setting) {
+	gsapi.urlPostAsync(url, params, responseFunction);
+    } else {
+	ajaxResponse = gsapi.urlPostSync(url, params);	
+    }
+
+    console.log("(" + callingFunction + ") Response received from server: " + ajaxResponse);
+
+    console.log("Finished ajax call to: " + url);
+    
+    console.log("Got response: " + ajaxResponse);
+    return ajaxResponse;
+}
+
 
 /*************************
 * SET METADATA FUNCTIONS *
