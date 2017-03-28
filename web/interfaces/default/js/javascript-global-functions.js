@@ -591,7 +591,7 @@ gs.functions.setMetadata = function(collection, site, documentID, metadataName, 
 // separated by |. If null, it is assumed to be index which is the original default 
 // behaviour of calling set-metadata-array. E.g. where=import|archives|index
 // THIS METHOD IS SYNCHRONOUS
-gs.functions.setMetadataArray = function(collection, site, docArray, metamode, where, responseFunction) 
+gs.functions.setMetadataArray = function(collection, site, docArray, metamode, where, responseFunction, forceSync) 
 {
     docArrayJSON = JSON.stringify(docArray);
     
@@ -609,8 +609,13 @@ gs.functions.setMetadataArray = function(collection, site, docArray, metamode, w
 	params += "&metamode=" + escape(metamode);
     }
     
+    // set operations are generally synchronous, but allow calling function to force ajax call 
+    // to be synchronous or not. Default is synchronous, as it was for GS2
+    if(forceSync == null) {
+	forceSync = true;
+    }
 
-    var response = callMetadataServer("Setting metadata in "+where, "cgi-bin/metadata-server.pl?"+params, responseFunction);
+    var response = callMetadataServer("Setting metadata in "+where, "cgi-bin/metadata-server.pl?"+params, responseFunction, {"forceSync": forceSync});
 
     return response;
     // return this.urlPostSync(mdserver,params); // gsajaxapi.js version for GS2
@@ -624,7 +629,7 @@ gs.functions.setMetadataArray = function(collection, site, docArray, metamode, w
 // New. Modified version of the GS2 version of this method in gsajaxapi.js.
 // See description for setMetadataArray above for information about the 'where' parameter.
 // THIS METHOD IS SYNCHRONOUS BY DEFAULT. Set forceSync to false to override this default behaviour
-gs.functions.getMetadataArray = function(collection, site, docArray, where, forceSync, responseFunction)
+gs.functions.getMetadataArray = function(collection, site, docArray, where, responseFunction, forceSync)
 {
     docArrayJSON = JSON.stringify(docArray);
 	

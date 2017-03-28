@@ -47,7 +47,7 @@
 	    <input type="hidden" name="d"><xsl:attribute name="value"><xsl:value-of select="/page/pageRequest/paramList/param[@name='d']/@value"/></xsl:attribute></input>
 	  </div>
 	  
-	  <input type="submit" onclick="addUserComment(document.AddUserCommentForm.username.value, document.AddUserCommentForm.comment.value, document.AddUserCommentForm.d.value, document); return false;"><xsl:attribute name="value"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'usercomments.submit')"/></xsl:attribute></input>
+	  <input type="submit" id="usercommentSubmitButton" onclick="addUserComment(document.AddUserCommentForm.username.value, document.AddUserCommentForm.comment.value, document.AddUserCommentForm.d.value, document); return false;"><xsl:attribute name="value"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'usercomments.submit')"/></xsl:attribute></input>
 	  <label id="usercommentfeedback"><xsl:comment>Text to prevent empty tags from becoming self-closing tags</xsl:comment></label>
 
 	  <div id="usercommentlogoutlink">

@@ -3,7 +3,7 @@
 // pass event to addEventListener onmouseover
 // http://stackoverflow.com/questions/256754/how-to-pass-arguments-to-addeventlistener-listener-function
 // http://stackoverflow.com/questions/8714472/cant-pass-event-to-addeventlistener-closure-issue
-
+// https://www.sitepoint.com/demystifying-javascript-closures-callbacks-iifes/
 
 /***************
 * USER COMMENTS
@@ -17,27 +17,32 @@ function formatTime(timestamp) {
 }
 
 function loadUserComments() {
-    /*
 
-    if(gs.variables) {
-	var listing = "";
-	for (prop in gs.variables) {
-	    listing = listing + prop.toString() + ": " + gs.variables[prop] + "\n";
-	}
-	alert ("gs variables:\n" + listing);
-    } else {
-	alert("LOADING USER COMMENTS - no gs.variables set");
-    }
-    */
-    
-    // don't bother loading comments if we're not on a document page (in which case there's no usercommentdiv)
-    var usercommentdiv = document.getElementById("usercomments");
-    if(usercommentdiv == undefined || usercommentdiv == null) {
+    // don't bother loading comments if we're not on a document page (in which case there's no docid)
+    var doc_id = gs.variables["d"]; ///"_cgiargdJssafe_"; //escape("cgiargd");
+
+    // stackoverflow.com/questions/36661748/what-is-the-exact-negation-of-ifvariable-in-javascript
+    if(!doc_id) { // vs http://stackoverflow.com/questions/784929/what-is-the-not-not-operator-in-javascript
+	
 	return;
     }
+
+    // Don't allow the user to add comments (which calls set-meta-array) until we've finished loading all 
+    // user comments (which calls get-meta-array). Since get-meta-array and set-meta-array are called 
+    // asynchronously, this is to help prevent any overlap in these functions' access of meta files in
+    // index|archives|import.
+    var submitButton = document.getElementById("usercommentSubmitButton");    
+    if(submitButton) { // there'll be no submitButton if the comment form is not displayed (user not logged in)
+	submitButton.disabled = true;
+    }
+
     
-    // else, if we have a usercommentdiv, we would have a docid. Get toplevel section of the docid
-    var doc_id = gs.variables["d"]; ///"_cgiargdJssafe_"; //escape("cgiargd");
+    // don't allow users to add comments (disable the submit button)
+    // until existing comments have been retrieved and displayed
+    //document.getElementById("usercommentSubmitButton").disabled = true;
+
+    // Since we have a docid, get toplevel section of the docid
+    
     var period = doc_id.indexOf(".");
     if(period != -1) {
 	doc_id = doc_id.substring(0, period);
@@ -66,16 +71,33 @@ function loadUserComments() {
     var docArray = [doc_rec];
     //alert(JSON.stringify(docArray));
 
-    var json_result_str = gs.functions.getMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "index");
+    //var json_result_str = gs.functions.getMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "index");
+
+    gs.functions.getMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "index", loadedUserComments, false); // false for asynchronous
+}
+
+function loadedUserComments(xmlHttpObj)
+{
+    // don't bother displaying comments if we're not on a document page
+    // (in which case there's no usercommentdiv).
+    // This shouldn't happen here, since we only call this from loadUserComments()
+    // and that first checks we're actually on a document page.
+    var usercommentdiv = document.getElementById("usercomments");
+    if(usercommentdiv == undefined || usercommentdiv == null) {
+	return;
+    }
+
+    var json_result_str = xmlHttpObj.responseText;
     //	alert(json_result_str);
+    console.log("Got to display: " + json_result_str);
     var result = JSON.parse(json_result_str);
     // result contains only one docrec (result[0]), since we asked for the usercomments of one docid
     var metatable = result[0].metatable;
     //	alert(JSON.stringify(metatable));
-
+    
     var i = 0;
     var looping = true;
-
+    
     
     // if there's at least one existing comment OR if the form is currently being displayed
     // (regardless of whether previous comments exist), display a heading for the comments section
@@ -89,14 +111,14 @@ function loadUserComments() {
 	usercommentdiv.appendChild(heading);
     }
     
-   
+    
     // metatable[0] = list of usernames, metatable[1] = list of timestamps, metatable[2] = list of comments	
     // the 3 lists/arrays should be of even length. Assuming this, loop as long as there's another username
     while(looping) {
 	var metaval_rec = metatable[0].metavals[i];
 	if(metaval_rec == undefined) {
 	    looping = false;
-	    } 
+	} 
 	else {
 	    
     	    var username = metaval_rec.metavalue;
@@ -116,7 +138,12 @@ function loadUserComments() {
 	    i++;
 	}		
     }
-
+    
+    var submitButton = document.getElementById("usercommentSubmitButton");
+    // Now we've finished loading all user comments, allow the user to add a comment
+    if(submitButton) {
+	submitButton.disabled = false;
+    }
 }
 
 
@@ -173,8 +200,8 @@ function addUserComment(_username, _comment, _docid, doc) {
     
     if(!trimmed_comment) { // || !trimmed_username
 	doc.AddUserCommentForm.comment.value = "";		      
-	//doc.AddUserCommentForm.username.value = "";
-	doc.getElementById("usercommentfeedback").innerHTML = gs.variables["textisempty"]; ///"_textisempty_";
+	//document.AddUserCommentForm.username.value = "";
+	document.getElementById("usercommentfeedback").innerHTML = gs.variables["textisempty"]; ///"_textisempty_";
 	return;
     }
     
@@ -247,12 +274,28 @@ function addUserComment(_username, _comment, _docid, doc) {
     
     //alert(JSON.stringify(docArray));
     
-    // GSAPI already knows the collection
-    var result = gs.functions.setMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "accumulate", "import|archives|index");
+    // Don't allow the user to submit further comments until the metadata has been updated
+    document.getElementById("usercommentSubmitButton").disabled = true;
+
     
+    //var result = gs.functions.setMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "accumulate", "import|archives|index");
+    gs.functions.setMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "accumulate", "import|archives|index", function(xmlHttpObj) { return doneUpdatingMetatada(xmlHttpObj, _username, _timestamp, _comment); }, false); // false for asynchronous, 
+    // this is ok since we're disabling the comment submit button, so no further set-meta-array calls can be
+    // made until the ajax call returns and the callback is called which re-enables the submit button
+    // But disabling submit does not protect against concurrent access such as someone else editing the 
+    // document (doing set-meta operations, updating archives/index/import) at the same time as someone else
+    // adding user comments (doing set-meta-array, updating archives|index|import).
+
+}
+
+function doneUpdatingMetatada(xmlHttpObj, _username, _timestamp, _comment)
+{
+    var result = xmlHttpObj.responseText;
+    //alert("Received post response to setMeta: " + result); // just the HTML page
+
     // clear the comment field as it has now been submitted, but not the username field
     // as the user is logged in, so they should be able to commit again under their username.
-    doc.AddUserCommentForm.comment.value = ""; 
+    document.AddUserCommentForm.comment.value = ""; 
     
     // check for locked collection error
     var errorIndex = result.indexOf("ERROR");
@@ -263,7 +306,7 @@ function addUserComment(_username, _comment, _docid, doc) {
 	var endIndex = result.indexOf("\\n");
 	var error = result.substring(errorIndex,endIndex);
 	errormessage="ERROR: Unable to add comment. " + error;
-	doc.getElementById("usercommentfeedback").innerHTML = errormessage;
+	document.getElementById("usercommentfeedback").innerHTML = errormessage;
 	//alert("Result: " + result);
     } 
     else if (responseErrorIndex != -1) {
@@ -271,22 +314,27 @@ function addUserComment(_username, _comment, _docid, doc) {
 	var startIndex = result.indexOf(">", responseErrorIndex+1);
 	var error = result.substring(startIndex+1,endIndex);
 	errormessage="ERROR: Unable to add comment. " + error;
-	doc.getElementById("usercommentfeedback").innerHTML = errormessage;
+	document.getElementById("usercommentfeedback").innerHTML = errormessage;
 	//alert("Result: " + result);
     }
     else { // success!
-	doc.getElementById("usercommentfeedback").innerHTML = gs.variables["textcommentsubmitted"]; ///"_textcommentsubmitted_";		
+	document.getElementById("usercommentfeedback").innerHTML = gs.variables["textcommentsubmitted"]; ///"_textcommentsubmitted_";		
 	
 	// update display of existing user comments to show the newly added comment
 	var usercommentdiv = document.getElementById("usercomments");
 	if(usercommentdiv != undefined) {
 	    displayInUserCommentList(usercommentdiv, _username, _timestamp, _comment);
      	}
-    }     
+    }
+
+    // whether there was an error or not, re-enable the submit button now
+    // that the set-meta-array operation has completed.
+    document.getElementById("usercommentSubmitButton").disabled = false;
 }
 
 function commentAreaSetup() {
     loadUserComments();
+
     //$("div#commentarea").html("<textarea required=\"required\" name=\"comment\" rows=\"10\" cols=\"64\" placeholder=\"Add your comment here...\"></textarea>");
     $("div#commentarea").html('<textarea required="required" name="comment" rows="10" cols="64" placeholder="Add your comment here..."></textarea>');
 
@@ -295,22 +343,7 @@ function commentAreaSetup() {
 
 // "Handlers added via $(document).ready() don't overwrite each other, but rather execute in turn"
 // as explained at http://stackoverflow.com/questions/15564029/adding-to-window-onload-event
-
+// This way we ensure we don't replace any other onLoad() functions, but append the loadUserComments() 
+// function to the existing set of eventhandlers called onDocReady
 $(document).ready(commentAreaSetup);
 
-/*
-// http://stackoverflow.com/questions/807878/javascript-that-executes-after-page-load
-// ensure we don't replace any other onLoad() functions, but append the loadUserComments() 
-// function to the existing onLoad handlers
-
-if(window.onload) {
-    var curronload = window.onload;
-    var newonload = function() {
-        curronload();
-        loadUserComments();
-    };
-    window.onload = newonload;
-} else {
-    window.onload = loadUserComments;
-}
-*/
