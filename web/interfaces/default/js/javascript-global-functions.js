@@ -593,7 +593,7 @@ gs.functions.setMetadata = function(collection, site, documentID, metadataName, 
 // THIS METHOD IS SYNCHRONOUS
 gs.functions.setMetadataArray = function(collection, site, docArray, metamode, where, responseFunction, forceSync) 
 {
-    docArrayJSON = JSON.stringify(docArray);
+    var docArrayJSON = JSON.stringify(docArray);
     
     var params = "a=" + escape("set-metadata-array"); //"a=set-metadata-array";
     if(where != null) {
@@ -631,7 +631,7 @@ gs.functions.setMetadataArray = function(collection, site, docArray, metamode, w
 // THIS METHOD IS SYNCHRONOUS BY DEFAULT. Set forceSync to false to override this default behaviour
 gs.functions.getMetadataArray = function(collection, site, docArray, where, responseFunction, forceSync)
 {
-    docArrayJSON = JSON.stringify(docArray);
+    var docArrayJSON = JSON.stringify(docArray);
 	
     var params = "a=" + escape("get-metadata-array"); //"a=set-metadata-array";
     if(where != null) {
