@@ -1025,7 +1025,7 @@ public class GS2Construct extends ServiceRack
     protected boolean isAllowedToSetMeta(String metaname, Pattern allowedMetaFieldsPattern) 
     {
 	if(allowedMetaFieldsPattern == null) { // null when user has edit permissions, so they can set any meta
-	    logger.info("### User has permissions ot set any meta.");
+	    logger.info("### User has permissions to set any meta.");
 	    return true;
 	}
 	if(metaname == null) {
