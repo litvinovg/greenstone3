@@ -106,7 +106,7 @@
 
 	<xsl:template match="classifierNode"><!-- priority="3"-->
 
-		<table id="title{@nodeID}"><tbody><tr>
+		<!--<table id="title{@nodeID}"><tbody><tr>-->
 			<!-- Bookshelf icon -->
 			<td>
 				<img>
@@ -119,10 +119,10 @@
 					<xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
 				</a>
 			</td>
-		</tr></tbody></table>
+		<!--</tr></tbody></table>-->
 	
 		<!-- Show any documents or sub-groups in this group -->
-		<xsl:if test="documentNode|classifierNode">
+	<!--	<xsl:if test="documentNode|classifierNode">
 			<div id="div{@nodeID}" class="classifierContainer">
 				<table>
 					<xsl:for-each select="documentNode|classifierNode">
@@ -132,7 +132,7 @@
 					</xsl:for-each>
 				</table>
 			</div>
-		</xsl:if>
+		</xsl:if>-->
 	</xsl:template>
 	
 	<xsl:template name="classifierPre">
