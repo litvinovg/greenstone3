@@ -76,7 +76,7 @@ function loadUserComments() {
     gs.functions.getMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "index", loadedUserComments, false); // false for asynchronous
 }
 
-function loadedUserComments(xmlHttpObj)
+function loadedUserComments(data)
 {
     // don't bother displaying comments if we're not on a document page
     // (in which case there's no usercommentdiv).
@@ -87,7 +87,14 @@ function loadedUserComments(xmlHttpObj)
 	return;
     }
 
-    var json_result_str = xmlHttpObj.responseText;
+    // data is xmlHttpRequest Object if gsajaxapi is used for the ajax call.
+    // And data is a string if jQuery AJAX was used.
+    // Using JavaScript's feature sensing to detect which of the two we're dealing with:
+    var json_result_str = (data.responseText) ? data.responseText : data; 
+        // http://stackoverflow.com/questions/6286542/how-can-i-check-if-a-var-is-a-string-in-javascript
+        //var json_result_str = (typeof data !== 'string') ? data.responseText : data;
+        //alert("Type of ajax get result: " + typeof (data));
+
     //	alert(json_result_str);
     console.log("Got to display: " + json_result_str);
     var result = JSON.parse(json_result_str);
@@ -279,7 +286,7 @@ function addUserComment(_username, _comment, _docid, doc) {
 
     
     //var result = gs.functions.setMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "accumulate", "import|archives|index");
-    gs.functions.setMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "accumulate", "import|archives|index", function(xmlHttpObj) { return doneUpdatingMetatada(xmlHttpObj, _username, _timestamp, _comment); }, false); // false for asynchronous, 
+    gs.functions.setMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "accumulate", "import|archives|index", function(ajaxResult) { return doneUpdatingMetatada(ajaxResult, _username, _timestamp, _comment); }, false); // false for asynchronous, 
     // this is ok since we're disabling the comment submit button, so no further set-meta-array calls can be
     // made until the ajax call returns and the callback is called which re-enables the submit button
     // But disabling submit does not protect against concurrent access such as someone else editing the 
@@ -288,9 +295,17 @@ function addUserComment(_username, _comment, _docid, doc) {
 
 }
 
-function doneUpdatingMetatada(xmlHttpObj, _username, _timestamp, _comment)
+function doneUpdatingMetatada(data, _username, _timestamp, _comment)
 {
-    var result = xmlHttpObj.responseText;
+
+    // data is xmlHttpRequest Object if gsajaxapi is used for the ajax call.
+    // And data is a string if jQuery AJAX was used.
+    // Using JavaScript's feature sensing to detect which of the two we're dealing with:
+    var result = (data.responseText) ? data.responseText : data;        
+        // http://stackoverflow.com/questions/6286542/how-can-i-check-if-a-var-is-a-string-in-javascript
+        //var result = (typeof data !== 'string') ? data.responseText : data;
+        // alert("Type of ajax set result: " + typeof(data));
+
     //alert("Received post response to setMeta: " + result); // just the HTML page
 
     // clear the comment field as it has now been submitted, but not the username field
