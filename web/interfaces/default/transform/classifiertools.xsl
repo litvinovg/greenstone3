@@ -7,7 +7,9 @@
 	extension-element-prefixes="java util"
 	exclude-result-prefixes="java util gsf">
 
-  
+  <xsl:import href="map-tools.xsl"/>
+  <xsl:import href="panorama-viewer-tools.xsl"/>
+
 	<xsl:template match="classifier">
 		<xsl:param name="collName"/>
 		<xsl:param name="serviceName"/>
@@ -49,6 +51,7 @@
 	</xsl:template>
 
 
+	<!-- is this ever used either??? -->
 	<xsl:template match="documentNode">
 		<xsl:param name="collName"/>
 		<xsl:param name="serviceName"/>
@@ -57,6 +60,7 @@
   
   
 	<!-- icon + title template-->
+	<!-- is this ever used??? -->
 	<xsl:template match="classifierNode">
 		<xsl:param name="collName"/>
 		<xsl:param name="serviceName"/>
@@ -204,20 +208,5 @@
 		</xsl:if>
 
 	</xsl:template>
-
-	<xsl:template name="mapFeaturesIcon">
-		<td style="padding-left:5px; padding-right:5px;" valign="top">
-			<a href="javascript:focusDocument('{@nodeID}');"><img src="interfaces/{$interface_name}/images/map_marker.png"/></a>
-		</td>
-	</xsl:template>
-
-
-	<xsl:template name="panoramaViewerFeaturesIcon">
-                <td style="padding-left:5px; padding-right:5px;" valign="top">
-                        <a href="javascript:switchPanorama('{@nodeID}');">
-                                <img src="interfaces/default/images/map_marker.png"/>
-                        </a>
-                </td>
-        </xsl:template>
 
 </xsl:stylesheet>
