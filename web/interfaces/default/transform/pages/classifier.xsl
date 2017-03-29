@@ -98,6 +98,12 @@
 	<!--
 	TEMPLATE FOR GROUPS OF DOCUMENTS
 	-->
+	<xsl:template match="classifierNode[@classifierStyle = 'HList']" >
+	  <gsf:link type="classifier">
+	    <xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
+	  </gsf:link>
+	</xsl:template>
+
 	<xsl:template match="classifierNode"><!-- priority="3"-->
 
 		<table id="title{@nodeID}"><tbody><tr>
