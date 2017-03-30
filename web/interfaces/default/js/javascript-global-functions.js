@@ -454,8 +454,8 @@ function callMetadataServer(callingFunction, payload, responseFunction, opts)
     // For gsajaxapi, payload to be transmitted over AJAX must be in URL form, whether GET or POST.
     // For jQuery, AJAX calls ended up as GET when the payload is in URL form.
     // Default used to be payload in url form. To get the default back, 
-    // set method = "GET" (above, but also in calling functions!) and set the default here below
-    // for _use_payload_in_data_not_url_form to false.    
+    // set method = "GET" (above, but also in calling functions that specify this optional parameter!)
+    // and set the default here below for _use_payload_in_data_not_url_form to false.
     var _use_payload_in_data_not_url_form = false;
 
     var _modifyingMeta  = false;
@@ -580,7 +580,7 @@ function callMetadataServer(callingFunction, payload, responseFunction, opts)
 // of the payload. Then calling functions, and the callMetadataServer() function they call, will control
 // and determine which of the two forms ultimately gets used.
 // UNUSED: http://stackoverflow.com/questions/8648892/convert-url-parameters-to-a-javascript-object
-function getBasicDataForMetadataServer(metaServerCommand, collection, site, documentID, metadataName, metamode, metadataValue, prevMetadataValue, metaPosition) {
+function getBasicDataForMetadataServer(metaServerCommand, collection, site, documentID, metadataName, metamode, metadataValue, prevMetadataValue, metadataPosition) {
 
     // if we're doing set- or remove- metadata operations,
     // then we need change the data params that will make up the query string
