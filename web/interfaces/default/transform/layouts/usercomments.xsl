@@ -9,7 +9,7 @@
 	exclude-result-prefixes="java util gsf">
 
 <xsl:template name="userCommentsSection">
-
+ <xsl:if test="/page/pageResponse/format[@type='display']/gsf:option[@name='UserComments']/@value='true'">
   <!-- 1. Make some variables available to javascript that the usercomments related js functions need -->
   <gsf:variable name="d"><xsl:value-of select="/page/pageRequest/paramList/param[@name='d']/@value"/></gsf:variable>
   <gsf:variable name="c"><xsl:value-of select="/page/pageRequest/paramList/param[@name='c']/@value"/></gsf:variable>
@@ -67,7 +67,7 @@
     </xsl:choose>
 
   </div>
-
+ </xsl:if>
 </xsl:template>
 
 </xsl:stylesheet>
