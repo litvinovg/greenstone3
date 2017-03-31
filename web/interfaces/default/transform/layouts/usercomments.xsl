@@ -41,7 +41,7 @@
 	  <input type="hidden" name="username"><xsl:attribute name="value"><xsl:value-of select="/page/pageRequest/userInformation/@username"/></xsl:attribute></input>
 	  <div>
 	    <p><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'usercomments.add')"/></p>
-	    <!-- The textarea will be added in by javascript into div#commentarea to avoid the problem of XML turning empty tags into self-closing ones and a self-closing text-area becomes invalid HTML -->
+	    <!-- The textarea will be added in by javascript into div#commentarea to avoid the problem of XML turning empty tags into self-closing ones and a self-closing text-area becomes invalid HTML. It will look like: -->
 	    <!--<textarea required="required" name="comment" rows="10" cols="64" placeholder="Add your comment here..."></textarea>-->
 	    <div id="commentarea">Comment area to appear here</div>
 	    <input type="hidden" name="d"><xsl:attribute name="value"><xsl:value-of select="/page/pageRequest/paramList/param[@name='d']/@value"/></xsl:attribute></input>

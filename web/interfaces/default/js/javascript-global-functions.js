@@ -466,9 +466,6 @@ gs.functions.callMetadataServer = function(callingFunction, payload, responseFun
 
     // check for any caller overrides
     if(opts != null) {
-	//if(opts["use_payload_in_data_not_url_form"] != null) {
-	  //  _use_payload_in_data_not_url_form = opts["use_payload_in_data_not_url_form"];
-	//}
 	if(opts["requestMethod"] != null) {
 	    method = opts["requestMethod"];
 	}
@@ -501,8 +498,6 @@ gs.functions.callMetadataServer = function(callingFunction, payload, responseFun
     // since we can't use gsajaxapi.js AJAX GET/POST calls without payload in URL form
     if(_use_payload_in_data_not_url_form) { // using data payload to do AJAX (regardless of request method)
 	
-	//method = "POST";
-
 	// for get-meta operations, go directly through metadata-server.pl
 	// for set-meta ops, should go via GS3 authentication, which is off the GS3 library servlet
 	url = (_modifyingMeta) ? gs.xsltParams.library_name : "cgi-bin/metadata-server.pl"; 	
@@ -518,7 +513,7 @@ gs.functions.callMetadataServer = function(callingFunction, payload, responseFun
 
     // finally, can do the AJAX call
 
-    console.log("*** Away to call: " + url);
+    //console.log("*** Away to call: " + url);
     var ajaxResponse = async_setting ? "*** No response received yet, async ajax request" : null;
 
 
@@ -528,7 +523,7 @@ gs.functions.callMetadataServer = function(callingFunction, payload, responseFun
 	$.ajax({url: url, async: async_setting, type: method, data: data})
 	    .success(function(response) {
 		ajaxResponse = response;
-		console.log("** (" + callingFunction + ") Response received from server: " + ajaxResponse);
+//		console.log("** (" + callingFunction + ") Response received from server: " + ajaxResponse);
 		
 		//var xml = $.parseXML(response);
 		//console.log(xml);
@@ -563,12 +558,12 @@ gs.functions.callMetadataServer = function(callingFunction, payload, responseFun
 	    ajaxResponse = ajaxResponse;
 	}
 	
-	console.log("*** (" + callingFunction + ") Response from server: " + ajaxResponse);
+//	console.log("*** (" + callingFunction + ") Response from server: " + ajaxResponse);
 
     }
     
-    console.log("*** Finished ajax call to: " + url);    
-    console.log("*** Got response: " + ajaxResponse);
+//    console.log("*** Finished ajax call to: " + url);    
+//    console.log("*** Got response: " + ajaxResponse);
 
     return ajaxResponse;
 }

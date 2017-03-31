@@ -9,11 +9,14 @@
 // http://stackoverflow.com/questions/874205/what-is-the-difference-between-an-array-and-an-object
 // http://stackoverflow.com/questions/33514915/what-s-the-difference-between-and-while-declaring-a-javascript-array
 // http://www.nfriedly.com/techblog/2009/06/advanced-javascript-objects-arrays-and-array-like-objects/
+// stackoverflow.com/questions/36661748/what-is-the-exact-negation-of-ifvariable-in-javascript
+// http://stackoverflow.com/questions/784929/what-is-the-not-not-operator-in-javascript
 
 /***************
 * USER COMMENTS
 ****************/
 
+// avoid making usercomments js functions global (which attaches them as properties to the window object)
 gs.usercomments = {};
 
 // http://stackoverflow.com/questions/6312993/javascript-seconds-to-time-with-format-hhmmss
@@ -27,11 +30,9 @@ gs.usercomments.formatTime = function(timestamp) {
 gs.usercomments.loadUserComments = function() {
 
     // don't bother loading comments if we're not on a document page (in which case there's no docid)
-    var doc_id = gs.variables["d"]; ///"_cgiargdJssafe_"; //escape("cgiargd");
+    var doc_id = gs.variables["d"]; ///"_cgiargdJssafe_" in GS2
 
-    // stackoverflow.com/questions/36661748/what-is-the-exact-negation-of-ifvariable-in-javascript
-    if(!doc_id) { // vs http://stackoverflow.com/questions/784929/what-is-the-not-not-operator-in-javascript
-	
+    if(!doc_id) {	
 	return;
     }
 
@@ -39,15 +40,12 @@ gs.usercomments.loadUserComments = function() {
     // user comments (which calls get-meta-array). Since get-meta-array and set-meta-array are called 
     // asynchronously, this is to help prevent any overlap in these functions' access of meta files in
     // index|archives|import.
+    // Prevent users from adding comments by disabling the submit button
+    // until existing comments have been retrieved and displayed
     var submitButton = document.getElementById("usercommentSubmitButton");    
     if(submitButton) { // there'll be no submitButton if the comment form is not displayed (user not logged in)
 	submitButton.disabled = true;
     }
-
-    
-    // don't allow users to add comments (disable the submit button)
-    // until existing comments have been retrieved and displayed
-    //document.getElementById("usercommentSubmitButton").disabled = true;
 
     // Since we have a docid, get toplevel section of the docid
     
@@ -77,7 +75,6 @@ gs.usercomments.loadUserComments = function() {
     };
 
     var docArray = [doc_rec];
-    //alert(JSON.stringify(docArray));
 
     //var json_result_str = gs.functions.getMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "index");
 
@@ -99,16 +96,12 @@ gs.usercomments.loadedUserComments = function(data)
     // And data is a string if jQuery AJAX was used.
     // Using JavaScript's feature sensing to detect which of the two we're dealing with:
     var json_result_str = (data.responseText) ? data.responseText : data; 
-        // http://stackoverflow.com/questions/6286542/how-can-i-check-if-a-var-is-a-string-in-javascript
-        //var json_result_str = (typeof data !== 'string') ? data.responseText : data;
-        //alert("Type of ajax get result: " + typeof (data));
 
-    //	alert(json_result_str);
-    console.log("Got to display: " + json_result_str);
+    //console.log("Got user comments to display: " + json_result_str);
+
     var result = JSON.parse(json_result_str);
     // result contains only one docrec (result[0]), since we asked for the usercomments of one docid
     var metatable = result[0].metatable;
-    //	alert(JSON.stringify(metatable));
     
     var i = 0;
     var looping = true;
@@ -121,7 +114,7 @@ gs.usercomments.loadedUserComments = function(data)
 	var attr=document.createAttribute("class");
 	attr.nodeValue="usercommentheading";
 	heading.setAttributeNode(attr);
-	var txt=document.createTextNode(gs.variables["textusercommentssection"]); ///"_textusercommentssection_");
+	var txt=document.createTextNode(gs.variables["textusercommentssection"]); ///"_textusercommentssection_" in GS2
 	heading.appendChild(txt);
 	usercommentdiv.appendChild(heading);
     }
@@ -140,8 +133,6 @@ gs.usercomments.loadedUserComments = function(data)
 	    var timestamp = metatable[1].metavals[i].metavalue;  
 	    var comment = metatable[2].metavals[i].metavalue; 
 	    
-	    //alert("Comment: " + username + " " + timestamp + " " + comment);
-	    
 	    // No need to sort by time, as the meta are already stored sorted 
 	    // and hence retrieved in the right order by using the i (metapos) counter
 	    // If sorting the array of comment records, which would be by timestamp, see
@@ -155,7 +146,8 @@ gs.usercomments.loadedUserComments = function(data)
     }
     
     var submitButton = document.getElementById("usercommentSubmitButton");
-    // Now we've finished loading all user comments, allow the user to add a comment
+    // Now we've finished loading all user comments,
+    // allow the user to add a comment by enabling the submit button again
     if(submitButton) {
 	submitButton.disabled = false;
     }
@@ -164,8 +156,6 @@ gs.usercomments.loadedUserComments = function(data)
 
 gs.usercomments.displayInUserCommentList = function(usercommentdiv, username, timestamp, comment) {
     
-    //alert("Comment: " + username + " " + timestamp + " " + comment);
-
     var divgroup=document.createElement("div");
     var attr=document.createAttribute("class");
     attr.nodeValue="usercomment";
@@ -197,14 +187,6 @@ gs.usercomments.displayInUserCommentList = function(usercommentdiv, username, ti
     
 }
 
-
-// Unused. Replaced in favour of call to escape() in setMetaArray function that calls urlPostSync
-// http://stackoverflow.com/questions/6020714/escape-html-using-jquery
-gs.usercomments.safeHTML = function(str) {
-    return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"',"&quot;").replace("'","&#x27;").replace("/", "&#x2F;"); //"\\""
-}
-
-
 gs.usercomments.addUserComment = function(_username, _comment, _docid, doc) {
     
     // don't add empty strings for name/comment		
@@ -213,10 +195,10 @@ gs.usercomments.addUserComment = function(_username, _comment, _docid, doc) {
     //var trimmed_username=_username.replace(/^\s+|\s+$/g, '');
     var trimmed_comment = _comment.replace(/^\s+|\s+$/g, '');
     
-    if(!trimmed_comment) { // || !trimmed_username
+    if(!trimmed_comment) {
 	doc.AddUserCommentForm.comment.value = "";		      
 	//document.AddUserCommentForm.username.value = "";
-	document.getElementById("usercommentfeedback").innerHTML = gs.variables["textisempty"]; ///"_textisempty_";
+	document.getElementById("usercommentfeedback").innerHTML = gs.variables["textisempty"]; ///"_textisempty_" in GS2
 	return;
     }
     
@@ -235,27 +217,11 @@ gs.usercomments.addUserComment = function(_username, _comment, _docid, doc) {
     // http://stackoverflow.com/questions/3830244/get-current-date-time-in-seconds
     var _timestamp = new Date().getTime(); // div by 1000 to get seconds. valueOf() may return string
     
-    //alert("username:" + _username
-    //+ "\\ncomment: " + _comment
-    //+ "\\ncollection: " + collection 
-    //+ "\\ndocid: " + _docid
-    //+ "\\ntimestamp: " + _timestamp); 
-    
-    
-    // Entity encode the values before storing (at least <, >, forward slash.
-    // And single and double quote, ampersand)
-    // http://stackoverflow.com/questions/6020714/escape-html-using-jquery
-    // setMetadataArray escapes the entire JSON, is that better than escaping individually here?
-    //_docid = escape(_docid);
-    //_timestamp = escape(_timestamp);
-    //_username = escape(_username); //safeHTML(_username);
-    //_comment = escape(_comment); //safeHTML(_comment);
-    
-    // Use this if making individual api calls to set username meta, then timestamp then comment meta
-    // GSAPI already knows the collection
-    //gsapi.setMetadata(_docid, "username", null, _username, "accumulate", "import|archives|index");
-    //gsapi.setMetadata(_docid, "usertimestamp", null, _timestamp, "accumulate", "import|archives|index");
-    //gsapi.setMetadata(_docid, "usercomment", null, _comment, "accumulate", "import|archives|index");
+    // setMetadataArray escapes the entire JSON, so we don't individually escape the fields here
+    // If we did, and called gsapi.setMetadata or gs.functions (in javascript-global-functions.js) instead,
+    // then resort to escaping first, e.g.
+    // _comment = escape(_comment);
+    // gsapi.setMetadata(_docid, "usercomment", null, _comment, "accumulate", "import|archives|index");
     
     
     // Use the new JSON metatable format to set username, timestamp and comment meta for docid in one go
@@ -287,8 +253,6 @@ gs.usercomments.addUserComment = function(_username, _comment, _docid, doc) {
     
     var docArray = [doc_rec];
     
-    //alert(JSON.stringify(docArray));
-    
     // Don't allow the user to submit further comments until the metadata has been updated
     document.getElementById("usercommentSubmitButton").disabled = true;
 
@@ -300,8 +264,8 @@ gs.usercomments.addUserComment = function(_username, _comment, _docid, doc) {
 	"import|archives|index",
 	function(ajaxResult) { return gs.usercomments.doneUpdatingMetatada(ajaxResult, _username, _timestamp, _comment); },
 	false); // false for asynchronous, 
-    // this is ok since we're disabling the comment submit button, so no further set-meta-array calls can be
-    // made until the ajax call returns and the callback is called which re-enables the submit button
+    // async here is ok since we're disabling the comment submit button, so no further set-meta-array calls
+    // can be made until the ajax call returns and the callback is called which re-enables the submit button
     // But disabling submit does not protect against concurrent access such as someone else editing the 
     // document (doing set-meta operations, updating archives/index/import) at the same time as someone else
     // adding user comments (doing set-meta-array, updating archives|index|import).
@@ -310,16 +274,10 @@ gs.usercomments.addUserComment = function(_username, _comment, _docid, doc) {
 
 gs.usercomments.doneUpdatingMetatada = function(data, _username, _timestamp, _comment)
 {
-
     // data is xmlHttpRequest Object if gsajaxapi is used for the ajax call.
     // And data is a string if jQuery AJAX was used.
     // Using JavaScript's feature sensing to detect which of the two we're dealing with:
     var result = (data.responseText) ? data.responseText : data;        
-        // http://stackoverflow.com/questions/6286542/how-can-i-check-if-a-var-is-a-string-in-javascript
-        //var result = (typeof data !== 'string') ? data.responseText : data;
-        // alert("Type of ajax set result: " + typeof(data));
-
-    //alert("Received post response to setMeta: " + result); // just the HTML page
 
     // clear the comment field as it has now been submitted, but not the username field
     // as the user is logged in, so they should be able to commit again under their username.
@@ -335,7 +293,6 @@ gs.usercomments.doneUpdatingMetatada = function(data, _username, _timestamp, _co
 	var error = result.substring(errorIndex,endIndex);
 	errormessage="ERROR: Unable to add comment. " + error;
 	document.getElementById("usercommentfeedback").innerHTML = errormessage;
-	//alert("Result: " + result);
     } 
     else if (responseErrorIndex != -1) {
 	var endIndex = result.indexOf("</error>");
@@ -343,10 +300,9 @@ gs.usercomments.doneUpdatingMetatada = function(data, _username, _timestamp, _co
 	var error = result.substring(startIndex+1,endIndex);
 	errormessage="ERROR: Unable to add comment. " + error;
 	document.getElementById("usercommentfeedback").innerHTML = errormessage;
-	//alert("Result: " + result);
     }
     else { // success!
-	document.getElementById("usercommentfeedback").innerHTML = gs.variables["textcommentsubmitted"]; ///"_textcommentsubmitted_";		
+	document.getElementById("usercommentfeedback").innerHTML = gs.variables["textcommentsubmitted"]; ///"_textcommentsubmitted_" in GS2
 	
 	// update display of existing user comments to show the newly added comment
 	var usercommentdiv = document.getElementById("usercomments");
@@ -363,7 +319,6 @@ gs.usercomments.doneUpdatingMetatada = function(data, _username, _timestamp, _co
 gs.usercomments.commentAreaSetup = function() {
     gs.usercomments.loadUserComments();
 
-    //$("div#commentarea").html("<textarea required=\"required\" name=\"comment\" rows=\"10\" cols=\"64\" placeholder=\"Add your comment here...\"></textarea>");
     $("div#commentarea").html('<textarea required="required" name="comment" rows="10" cols="64" placeholder="Add your comment here..."></textarea>');
 
 }
