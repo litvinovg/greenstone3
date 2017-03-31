@@ -4,19 +4,27 @@
 // http://stackoverflow.com/questions/256754/how-to-pass-arguments-to-addeventlistener-listener-function
 // http://stackoverflow.com/questions/8714472/cant-pass-event-to-addeventlistener-closure-issue
 // https://www.sitepoint.com/demystifying-javascript-closures-callbacks-iifes/
+// http://stackoverflow.com/questions/4869712/new-without-delete-on-same-variable-in-javascript
+// http://stackoverflow.com/questions/7375120/why-is-arr-faster-than-arr-new-array
+// http://stackoverflow.com/questions/874205/what-is-the-difference-between-an-array-and-an-object
+// http://stackoverflow.com/questions/33514915/what-s-the-difference-between-and-while-declaring-a-javascript-array
+// http://www.nfriedly.com/techblog/2009/06/advanced-javascript-objects-arrays-and-array-like-objects/
 
 /***************
 * USER COMMENTS
 ****************/
+
+gs.usercomments = {};
+
 // http://stackoverflow.com/questions/6312993/javascript-seconds-to-time-with-format-hhmmss
 // Call as: alert(timestamp.printTime());
-function formatTime(timestamp) {
+gs.usercomments.formatTime = function(timestamp) {
     var int_timestamp    = parseInt(timestamp, 10); // don't forget the second param
     var date = new Date(int_timestamp);
     return date.toLocaleDateString() + " " + date.toLocaleTimeString();   
 }
 
-function loadUserComments() {
+gs.usercomments.loadUserComments = function() {
 
     // don't bother loading comments if we're not on a document page (in which case there's no docid)
     var doc_id = gs.variables["d"]; ///"_cgiargdJssafe_"; //escape("cgiargd");
@@ -73,10 +81,10 @@ function loadUserComments() {
 
     //var json_result_str = gs.functions.getMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "index");
 
-    gs.functions.getMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "index", loadedUserComments, false); // false for asynchronous
+    gs.functions.getMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "index", gs.usercomments.loadedUserComments, false); // false for asynchronous
 }
 
-function loadedUserComments(data)
+gs.usercomments.loadedUserComments = function(data)
 {
     // don't bother displaying comments if we're not on a document page
     // (in which case there's no usercommentdiv).
@@ -140,7 +148,7 @@ function loadedUserComments(data)
 	    // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/sort
 	    
 	    // for each usercomment, create a child div with the username, timestamp and comment
-	    displayInUserCommentList(usercommentdiv, username, timestamp, comment);
+	    gs.usercomments.displayInUserCommentList(usercommentdiv, username, timestamp, comment);
 	    
 	    i++;
 	}		
@@ -154,7 +162,7 @@ function loadedUserComments(data)
 }
 
 
-function displayInUserCommentList(usercommentdiv, username, timestamp, comment) {
+gs.usercomments.displayInUserCommentList = function(usercommentdiv, username, timestamp, comment) {
     
     //alert("Comment: " + username + " " + timestamp + " " + comment);
 
@@ -173,7 +181,7 @@ function displayInUserCommentList(usercommentdiv, username, timestamp, comment) 
     divuser.appendChild(txt);
     
     divgroup.appendChild(divtime);
-    txt=document.createTextNode(formatTime(timestamp)); // format timestamp for date/time display
+    txt=document.createTextNode(gs.usercomments.formatTime(timestamp)); // format timestamp for date/time display
     divtime.appendChild(txt);
     
     // any quotes and colons in the fields would have been protected for transmitting as JSON
@@ -192,12 +200,12 @@ function displayInUserCommentList(usercommentdiv, username, timestamp, comment) 
 
 // Unused. Replaced in favour of call to escape() in setMetaArray function that calls urlPostSync
 // http://stackoverflow.com/questions/6020714/escape-html-using-jquery
-function safeHTML(str) {
+gs.usercomments.safeHTML = function(str) {
     return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"',"&quot;").replace("'","&#x27;").replace("/", "&#x2F;"); //"\\""
-} 
+}
 
 
-function addUserComment(_username, _comment, _docid, doc) {
+gs.usercomments.addUserComment = function(_username, _comment, _docid, doc) {
     
     // don't add empty strings for name/comment		
     
@@ -286,7 +294,12 @@ function addUserComment(_username, _comment, _docid, doc) {
 
     
     //var result = gs.functions.setMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "accumulate", "import|archives|index");
-    gs.functions.setMetadataArray(gs.variables["c"], gs.variables["site"], docArray, "accumulate", "import|archives|index", function(ajaxResult) { return doneUpdatingMetatada(ajaxResult, _username, _timestamp, _comment); }, false); // false for asynchronous, 
+    gs.functions.setMetadataArray(gs.variables["c"],
+	gs.variables["site"],
+	docArray, "accumulate",
+	"import|archives|index",
+	function(ajaxResult) { return gs.usercomments.doneUpdatingMetatada(ajaxResult, _username, _timestamp, _comment); },
+	false); // false for asynchronous, 
     // this is ok since we're disabling the comment submit button, so no further set-meta-array calls can be
     // made until the ajax call returns and the callback is called which re-enables the submit button
     // But disabling submit does not protect against concurrent access such as someone else editing the 
@@ -295,7 +308,7 @@ function addUserComment(_username, _comment, _docid, doc) {
 
 }
 
-function doneUpdatingMetatada(data, _username, _timestamp, _comment)
+gs.usercomments.doneUpdatingMetatada = function(data, _username, _timestamp, _comment)
 {
 
     // data is xmlHttpRequest Object if gsajaxapi is used for the ajax call.
@@ -338,7 +351,7 @@ function doneUpdatingMetatada(data, _username, _timestamp, _comment)
 	// update display of existing user comments to show the newly added comment
 	var usercommentdiv = document.getElementById("usercomments");
 	if(usercommentdiv != undefined) {
-	    displayInUserCommentList(usercommentdiv, _username, _timestamp, _comment);
+	    gs.usercomments.displayInUserCommentList(usercommentdiv, _username, _timestamp, _comment);
      	}
     }
 
@@ -347,8 +360,8 @@ function doneUpdatingMetatada(data, _username, _timestamp, _comment)
     document.getElementById("usercommentSubmitButton").disabled = false;
 }
 
-function commentAreaSetup() {
-    loadUserComments();
+gs.usercomments.commentAreaSetup = function() {
+    gs.usercomments.loadUserComments();
 
     //$("div#commentarea").html("<textarea required=\"required\" name=\"comment\" rows=\"10\" cols=\"64\" placeholder=\"Add your comment here...\"></textarea>");
     $("div#commentarea").html('<textarea required="required" name="comment" rows="10" cols="64" placeholder="Add your comment here..."></textarea>');
@@ -360,5 +373,5 @@ function commentAreaSetup() {
 // as explained at http://stackoverflow.com/questions/15564029/adding-to-window-onload-event
 // This way we ensure we don't replace any other onLoad() functions, but append the loadUserComments() 
 // function to the existing set of eventhandlers called onDocReady
-$(document).ready(commentAreaSetup);
+$(document).ready(gs.usercomments.commentAreaSetup);
 

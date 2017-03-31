@@ -5,7 +5,7 @@ var CONTINUING = 10;
 var COMPLETED = 11;
 var HALTED = 12;
 
-gs.functions = new Array();
+gs.functions = {};
 
 gs.jqGet = function(id)
 {
@@ -435,14 +435,14 @@ gs.functions.hashString = function(str)
 // determines which to use.
 // - opts param: No function overloading in JavaScript. Can pass a custom object, however can pass opts,
 // see http://stackoverflow.com/questions/456177/function-overloading-in-javascript-best-practices
-function callMetadataServer(callingFunction, payload, responseFunction, opts)
+gs.functions.callMetadataServer = function(callingFunction, payload, responseFunction, opts)
 {
 
     // async AJAX by default for get operations: because internal processing of 'read' operations (get meta) 
     // is not order dependent.
     // Set/remove operations will switch to synchronous AJAX, unless opt["forceSync"] is set otherwise
     var async_setting = true; 
-    var method = "GET"; // GET was the default before
+    var method = "POST"; // GET was the default before
     
     // Set to false if you wish to use the regular JavaScript AJAX way in gsajaxapi.js (will use payload.url)
     // Set to true if using jQuery AJAX (will use payload.data).
@@ -456,7 +456,7 @@ function callMetadataServer(callingFunction, payload, responseFunction, opts)
     // Default used to be payload in url form. To get the default back, 
     // set method = "GET" (above, but also in calling functions that specify this optional parameter!)
     // and set the default here below for _use_payload_in_data_not_url_form to false.
-    var _use_payload_in_data_not_url_form = false;
+    var _use_payload_in_data_not_url_form = true; // code will anyway set this to true for jQuery $.ajax() with POST
 
     var _modifyingMeta  = false;
 
@@ -480,8 +480,6 @@ function callMetadataServer(callingFunction, payload, responseFunction, opts)
 	_modifyingMeta  = true;
 	async_setting = false; // for 'write' operations (set/remove meta), we force sequential processing of the internal operation.
 
-	// for meta modification operatons, should we make the method=POST??????
-	// method = "POST";
     }
     // check for any overrides by calling code that knows what it's doing
     if (opts != null && opts["forceSync"] != null) {
@@ -579,9 +577,11 @@ function callMetadataServer(callingFunction, payload, responseFunction, opts)
 // These next 2 functions prepare both the URL version of the payload and the data object version of 
 // of the payload. Then calling functions, and the callMetadataServer() function they call, will control
 // and determine which of the two forms ultimately gets used.
-// UNUSED: http://stackoverflow.com/questions/8648892/convert-url-parameters-to-a-javascript-object
-function getBasicDataForMetadataServer(metaServerCommand, collection, site, documentID, metadataName, metamode, metadataValue, prevMetadataValue, metadataPosition) {
-
+// (Constructing both URL and data structure, as I could not successfully convert old URL way to data structure
+// http://stackoverflow.com/questions/8648892/convert-url-parameters-to-a-javascript-object)
+gs.functions.getBasicDataForMetadataServer = function(metaServerCommand, collection, site, documentID, metadataName,
+						       metamode, metadataValue, prevMetadataValue, metadataPosition)
+{
     // if we're doing set- or remove- metadata operations,
     // then we need change the data params that will make up the query string
     // to make sure we go through GS3's authentication
@@ -664,8 +664,8 @@ function getBasicDataForMetadataServer(metaServerCommand, collection, site, docu
 }
 
 // See description for getBasicDataForMetadataServer()
-function getComplexDataForMetadataServer(metaServerCommand, collection, site, docArray, metamode, where) {
-
+gs.functions.getComplexDataForMetadataServer = function(metaServerCommand, collection, site, docArray, metamode, where)
+{
     var docArrayJSON = JSON.stringify(docArray);
     
     // if we're doing set- or remove- metadata operations,
@@ -745,14 +745,12 @@ function getComplexDataForMetadataServer(metaServerCommand, collection, site, do
 * SET METADATA FUNCTIONS *
 *************************/
 
-// callMetadataServerURLMode("setImportMetadata", "cgi-bin/metadata-server.pl?a=set-import-metadata&c=" + collection + "&site=" + site + "&d=" + documentID + "&metaname=" + metadataName + "&metavalue=" + metadataValue + "&prevmetavalue=" + prevMetadataValue + "&metamode=" + metamode, responseFunction);
-
 gs.functions.setImportMetadata = function(collection, site, documentID, metadataName, metadataValue, prevMetadataValue, metamode, responseFunction)
 {    
 
-    callMetadataServer(
+    gs.functions.callMetadataServer(
 	"setImportMetadata", 
-	getBasicDataForMetadataServer("set-import-metadata", collection, site, documentID, metadataName, metamode, metadataValue, prevMetadataValue, null /*metapos*/), 
+	gs.functions.getBasicDataForMetadataServer("set-import-metadata", collection, site, documentID, metadataName, metamode, metadataValue, prevMetadataValue, null /*metapos*/), 
 	responseFunction);
     
 }
@@ -763,9 +761,9 @@ gs.functions.setArchivesMetadata = function(collection, site, documentID, metada
 	prevMetadataValue = null; // to force the same ultimate behaviour as in the old version of this code
     }
 
-    callMetadataServer(
+    gs.functions.callMetadataServer(
 	"setArchivesMetadata",
-	getBasicDataForMetadataServer("set-archives-metadata", collection, site, documentID, metadataName, metamode, metadataValue, prevMetadataValue, metadataPosition),
+	gs.functions.getBasicDataForMetadataServer("set-archives-metadata", collection, site, documentID, metadataName, metamode, metadataValue, prevMetadataValue, metadataPosition),
 	responseFunction);
 
 }
@@ -780,9 +778,9 @@ gs.functions.setIndexMetadata = function(collection, site, documentID, metadataN
     // or prevMetaValue had a value. So sticking to the same behaviour in rewriting this function.
     if(metadataPosition != null || prevMetadataValue != null) { 
     
-	callMetadataServer(
+	gs.functions.callMetadataServer(
 	    "setIndexMetadata",
-	    getBasicDataForMetadataServer("set-metadata", collection, site, documentID, metadataName, metamode, metadataValue, prevMetadataValue, metadataPosition),
+	    gs.functions.getBasicDataForMetadataServer("set-metadata", collection, site, documentID, metadataName, metamode, metadataValue, prevMetadataValue, metadataPosition),
 	    responseFunction);
     }
 }
@@ -796,9 +794,9 @@ gs.functions.setMetadata = function(collection, site, documentID, metadataName, 
 	{
 	    // previous version of this function did not allow setting metapos or prevMetavalue
 	    // so leaving the behaviour the same along with function signature.
-	    callMetadataServer(
+	    gs.functions.callMetadataServer(
 		nameArray[i],
-		getBasicDataForMetadataServer(functionArray[i], collection, site, documentID, metadataName, metamode, metadataValue, null /*prevMetadataValue*/, null /*metadataPosition*/),
+		gs.functions.getBasicDataForMetadataServer(functionArray[i], collection, site, documentID, metadataName, metamode, metadataValue, null /*prevMetadataValue*/, null /*metadataPosition*/),
 		responseFunction);
 	}
 }
@@ -811,7 +809,7 @@ gs.functions.setMetadata = function(collection, site, documentID, metadataName, 
 gs.functions.setMetadataArray = function(collection, site, docArray, metamode, where, responseFunction, forceSync) 
 {  
 
-    var payload = getComplexDataForMetadataServer("set-metadata-array", collection, site, docArray, metamode, where);
+    var payload = gs.functions.getComplexDataForMetadataServer("set-metadata-array", collection, site, docArray, metamode, where);
     
     // set operations are generally synchronous, but allow calling function to force ajax call 
     // to be synchronous or not. Default is synchronous, as it was for GS2
@@ -821,7 +819,7 @@ gs.functions.setMetadataArray = function(collection, site, docArray, metamode, w
     
     //console.log("cgi-bin/metadata-server.pl?"+params);
     
-    var response = callMetadataServer("Setting metadata in "+where, payload, responseFunction, {"forceSync": forceSync, "requestMethod": "POST"});
+    var response = gs.functions.callMetadataServer("Setting metadata in "+where, payload, responseFunction, {"forceSync": forceSync, "requestMethod": "POST"});
 	
     return response;
 }
@@ -836,7 +834,7 @@ gs.functions.setMetadataArray = function(collection, site, docArray, metamode, w
 // THIS METHOD IS SYNCHRONOUS BY DEFAULT. Set forceSync to false to override this default behaviour
 gs.functions.getMetadataArray = function(collection, site, docArray, where, responseFunction, forceSync)
 {
-    var payload = getComplexDataForMetadataServer("get-metadata-array", collection, site, docArray, null /*metamode*/, where);    
+    var payload = gs.functions.getComplexDataForMetadataServer("get-metadata-array", collection, site, docArray, null /*metamode*/, where);    
 
     // get operations are generally asynchronous, but allow calling function to force ajax call 
     // to be synchronous or not. Default for get-metadata-array is synchronous, as it was for GS2
@@ -846,7 +844,7 @@ gs.functions.getMetadataArray = function(collection, site, docArray, where, resp
     // Objects/maps can use identifiers or strings for property names
     // http://stackoverflow.com/questions/456177/function-overloading-in-javascript-best-practices
     // https://www.w3schools.com/js/js_objects.asp
-    var response = callMetadataServer("Getting metadata from "+where, payload, responseFunction, {"forceSync":forceSync, "requestMethod": "POST"});
+    var response = gs.functions.callMetadataServer("Getting metadata from "+where, payload, responseFunction, {"forceSync":forceSync, "requestMethod": "POST"});
 
     return response;
 }
@@ -854,8 +852,8 @@ gs.functions.getMetadataArray = function(collection, site, docArray, where, resp
 
 gs.functions.getImportMetadata = function(collection, site, documentID, metadataName, responseFunction)
 {
-    var payload = getBasicDataForMetadataServer("get-import-metadata", collection, site, documentID, metadataName);
-    callMetadataServer("getImportMetadata", payload, function(responseText) {
+    var payload = gs.functions.getBasicDataForMetadataServer("get-import-metadata", collection, site, documentID, metadataName);
+    gs.functions.callMetadataServer("getImportMetadata", payload, function(responseText) {
 	    var metadata = new GSMetadata(collection, site, documentID, metadataName, null, null, responseText);
 		if(responseFunction != null)
 		{
@@ -866,9 +864,9 @@ gs.functions.getImportMetadata = function(collection, site, documentID, metadata
 
 gs.functions.getArchivesMetadata = function(collection, site, documentID, metadataName, metadataPosition, responseFunction)
 {
-    var payload = getBasicDataForMetadataServer("get-archives-metadata", collection, site, documentID, metadataName, null /*metamode*/, null /*metavalue*/, null /*prevmetavalue*/, metadataPosition);
+    var payload = gs.functions.getBasicDataForMetadataServer("get-archives-metadata", collection, site, documentID, metadataName, null /*metamode*/, null /*metavalue*/, null /*prevmetavalue*/, metadataPosition);
 
-    callMetadataServer("getArchivesMetadata", payload, function(responseText) {
+    gs.functions.callMetadataServer("getArchivesMetadata", payload, function(responseText) {
 	var metadata = new GSMetadata(collection, site, documentID, metadataName, null, metadataPosition, responseText); // indexPos, archivesPos, metaval (responseText)
 	if(responseFunction != null)
 	{
@@ -879,9 +877,9 @@ gs.functions.getArchivesMetadata = function(collection, site, documentID, metada
 
 gs.functions.getIndexMetadata = function(collection, site, documentID, metadataName, metadataPosition, responseFunction)
 {
-    var payload = getBasicDataForMetadataServer("get-metadata", collection, site, documentID, metadataName, null /*metamode*/, null /*metavalue*/, null /*prevmetavalue*/, metadataPosition);
+    var payload = gs.functions.getBasicDataForMetadataServer("get-metadata", collection, site, documentID, metadataName, null /*metamode*/, null /*metavalue*/, null /*prevmetavalue*/, metadataPosition);
 
-    callMetadataServer("getIndexMetadata", payload, function(responseText) {
+    gs.functions.callMetadataServer("getIndexMetadata", payload, function(responseText) {
 	var metadata = new GSMetadata(collection, site, documentID, metadataName, metadataPosition, null, responseText); // indexPos, archivesPos, metaval (responseText)
 	
 	if(responseFunction != null)
@@ -897,9 +895,9 @@ gs.functions.getIndexMetadata = function(collection, site, documentID, metadataN
 
 gs.functions.removeImportMetadata = function(collection, site, documentID, metadataName, metadataValue, responseFunction)
 {
-    callMetadataServer(
+    gs.functions.callMetadataServer(
 	"removeImportMetadata", 
-	getBasicDataForMetadataServer("remove-import-metadata", collection, site, documentID, metadataName, null /*metamode*/, metadataValue, null /*prevmetavalue*/, null /*metapos*/), 
+	gs.functions.getBasicDataForMetadataServer("remove-import-metadata", collection, site, documentID, metadataName, null /*metamode*/, metadataValue, null /*prevmetavalue*/, null /*metapos*/), 
 	responseFunction);
 }
 
@@ -909,9 +907,9 @@ gs.functions.removeArchivesMetadata = function(collection, site, documentID, met
 	metadataValue = null; // retaining behaviour of previous version of this function removeArchivesMetadata()
     }
 
-    callMetadataServer(
+    gs.functions.callMetadataServer(
 	"removeArchiveMetadata", 
-	getBasicDataForMetadataServer("remove-archives-metadata", collection, site, documentID, metadataName, null /*metamode*/, metadataValue, null /*prevmetavalue*/, metadataPosition), 
+	gs.functions.getBasicDataForMetadataServer("remove-archives-metadata", collection, site, documentID, metadataName, null /*metamode*/, metadataValue, null /*prevmetavalue*/, metadataPosition), 
 	responseFunction);
 }
 
@@ -921,9 +919,9 @@ gs.functions.removeIndexMetadata = function(collection, site, documentID, metada
 	metadataValue = null; // retaining behaviour of previous version of this function removeIndexMetadata()
     }
 
-    callMetadataServer(
+    gs.functions.callMetadataServer(
 	"removeIndexMetadata", 
-	getBasicDataForMetadataServer("remove-metadata", collection, site, documentID, metadataName, null /*metamode*/, metadataValue, null /*prevmetavalue*/, metadataPosition), 
+	gs.functions.getBasicDataForMetadataServer("remove-metadata", collection, site, documentID, metadataName, null /*metamode*/, metadataValue, null /*prevmetavalue*/, metadataPosition), 
 	responseFunction);
 }
 
@@ -934,9 +932,10 @@ gs.functions.removeMetadata = function(collection, site, documentID, metadataNam
 	
 	for(var i = 0; i < nameArray.length; i++)
 	{
-	    callMetadataServer(
+	    gs.functions.callMetadataServer(
 		nameArray[i],
-		getBasicDataForMetadataServer(functionArray[i], collection, site, documentID, metadataName, null /*metamode*/, metadataValue, null /*prevmetavalue*/, null /*metapos*/),
+		gs.functions.getBasicDataForMetadataServer(functionArray[i], collection, site, documentID, metadataName, null /*metamode*/, metadataValue, null /*prevmetavalue*/, null /*metapos*/),
 		responseFunction);
 	}
 }
+
