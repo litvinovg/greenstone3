@@ -48,6 +48,10 @@
 			<dd>
 				<xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.skinandlibdoc')"/>
 			</dd>
+			<dt>o=skinandlibdocfinal</dt>
+			<dd>
+				<xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.skinandlibdocfinal')"/>
+			</dd>
 			<dt>formatedit=on</dt>
 			<dd>
 				<xsl:value-of select="util:getInterfaceText($debug_property_file, /page/@lang, 'debuginfo.formatedit')"/>
