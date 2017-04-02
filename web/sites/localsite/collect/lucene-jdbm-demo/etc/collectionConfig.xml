@@ -95,7 +95,8 @@
   <browse>
     <classifier name="List">
       <option name="-metadata" value="dc.Title"/>
-      <option name="-partition_type_within_level" value="constant_size"/>
+      <option name="-partition_type_within_level" value="per_letter"/>
+      <option name="-use_hlist_for" value="dc.Title"/>
     </classifier>
     <classifier name="Hierarchy">
       <option name="-metadata" value="dc.Subject"/>
@@ -111,19 +112,12 @@
     <classifier name="List">
       <option name="-metadata" value="dls.Keyword"/>
       <option name="-buttonname" value="Howto"/>
-      <option name="-partition_type_within_level" value="constant_size"/>
+      <option name="-partition_type_within_level" value="none"/>
       <format> <!-- format statement specific to this classifier -->
 	<gsf:template match="documentNode">
 	  <td>
 	    <gsf:link type="document">
 	      <gsf:metadata name="dls.Keyword"/>
-	    </gsf:link>
-	  </td>
-	</gsf:template>
-	<gsf:template match="classifierNode">
-	  <td>
-	    <gsf:link type="classifier">
-	      <gsf:metadata name="Title"/>
 	    </gsf:link>
 	  </td>
 	</gsf:template>
@@ -146,19 +140,22 @@
       </gsf:template>
       <gsf:template match="classifierNode[@classifierStyle = 'VList']">
 	<td valign="top">
-	  <gsf:link type="classifier">
+	  <gsf:link type="classifier" style="static">
 	    <gsf:icon type="classifier"/>
 	  </gsf:link>
 	</td>
 	<td valign="top">
-	  <gsf:metadata name="Title"/>
+	  <gsf:link type="classifier">
+	    <gsf:metadata name="Title"/>
+	  </gsf:link>
 	</td>
       </gsf:template>
       <gsf:template match="classifierNode[@classifierStyle = 'HList']">
 	<gsf:link type="classifier">
 	  <gsf:metadata name="Title"/>
 	</gsf:link>
-      </gsf:template>
+       </gsf:template>
+    <gsf:option name="turnstyleClassifiers" value="true"/>
     </format>
   </browse>
   <display>
@@ -183,9 +180,8 @@
       <!--<oaiSuperSet name="xxx"/>-->
       <ListMetadataFormats>
 	<!--What metadata sets to support for this collection. You can select any set that is specified in OAIConfig.xml. To use a new set, you need to add a set definition in OAIConfig.xml, then reference it here, like:
-		 <metadataFormat metadataPrefix="prefix"/> -->
-	<metadataFormat metadataPrefix="oai_dc">
-	  <!--   a custom mapping as this collection doesn't have exclusive dc metadata --><!-- this will replace the dc:publisher element from the main set -->
+	    <metadataFormat metadataPrefix="prefix"/> -->
+	<metadataFormat metadataPrefix="oai_dc"><!--   a custom mapping as this collection doesn't have exclusive dc metadata --><!-- this will replace the dc:publisher element from the main set -->
 	  <element name="dc:publisher">
 	    <mapping elements="dls.Organization"/>
 	  </element>
