@@ -21,6 +21,7 @@
 
   <!-- optional cgi-params for links to document pages -->
   <xsl:variable name="opt-doc-link-args"></xsl:variable>
+
   <!-- the page content -->
   <xsl:template match="/page/pageResponse">
     <xsl:call-template name="classifierPre"/>
@@ -153,7 +154,7 @@
 		  <table id="title{@nodeID}"><tr>
 		    <xsl:if test="not(/page/pageResponse/format[@type='browse']/gsf:option[@name='turnstyleClassifiers']) or /page/pageResponse/format[@type='browse']/gsf:option[@name='turnstyleClassifiers']/@value='true'">
 		      <td class="headerTD">
-			<img id="toggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon">			
+			<img id="toggle{@nodeID}" onclick="toggleSection('{@nodeID}');" class="icon turnstyleicon">			
 			  <xsl:attribute name="src">
 			    <xsl:choose>
 			      <xsl:when test="classifierNode or documentNode">
@@ -278,42 +279,49 @@
       TEMPLATE FOR GROUPS OF DOCUMENTS
   -->
   <xsl:template match="classifierNode[@classifierStyle = 'HList']" >
-    <gsf:link type="classifier">
+    <gsf:link type="classifier" style="static">
       <xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
     </gsf:link>
   </xsl:template>
 
-  <xsl:template match="classifierNode"><!-- priority="3"-->
-
-    <!--<table id="title{@nodeID}"><tbody><tr>-->
+  <xsl:template match="classifierNode">
     <!-- Bookshelf icon -->
     <td>
+      <gsf:link type="classifier" style="static">
       <img>
 	<xsl:attribute name="src"><xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'bookshelf_image')"/></xsl:attribute>
       </img>
+      </gsf:link>
     </td>
     <!-- Link title -->
     <td>
-      <a href="javascript:toggleSection('{@nodeID}');">
+      <gsf:link type="classifier">
 	<xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
-      </a>
+      </gsf:link>
     </td>
-    <!--</tr></tbody></table>-->
-    
-    <!-- Show any documents or sub-groups in this group -->
-    <!--	<xsl:if test="documentNode|classifierNode">
-	<div id="div{@nodeID}" class="classifierContainer">
-	<table>
-	<xsl:for-each select="documentNode|classifierNode">
-	<tr>
-	<xsl:apply-templates select="."/>
-	</tr>
-	</xsl:for-each>
-	</table>
-	</div>
-	</xsl:if>-->
   </xsl:template>
   
+  <xsl:template name="classifierNodeLink">
+    <xsl:param name="link-type">dynamic</xsl:param>
+    <xsl:param name="node-id"></xsl:param>
+    <xsl:variable name="final-link-type">
+      <xsl:choose>
+	<xsl:when test="$link-type='static'">static</xsl:when>
+	<xsl:when test="$link-type='javascript'">javascript</xsl:when>
+	<xsl:when test="@classifierStyle = 'HList'">static</xsl:when>
+	<xsl:when test="not(/page/pageResponse/format[@type='browse']/gsf:option[@name='turnstyleClassifiers']) or /page/pageResponse/format[@type='browse']/gsf:option[@name='turnstyleClassifiers']/@value='true'">javascript</xsl:when>
+	<xsl:otherwise>static</xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:choose>
+      <xsl:when test="$final-link-type='static'">
+	<xsl:value-of select='$library_name'/>/collection/<xsl:value-of select='/page/pageResponse/collection/@name'/>/browse/<xsl:choose><xsl:when test="$node-id"><xsl:value-of select="$node-id"/></xsl:when><xsl:otherwise><xsl:value-of select='util:replace(@nodeID, ".", "/")'/></xsl:otherwise></xsl:choose>
+      </xsl:when>
+      <xsl:otherwise>javascript:toggleSection('<xsl:value-of select="@nodeID"/>');</xsl:otherwise>
+    </xsl:choose>	
+  </xsl:template>
+
+
   <xsl:template name="classifierPre">
     <xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
       <xsl:call-template name="mapFeaturesJSONNodes"/>
@@ -334,34 +342,9 @@
     </xsl:if>
   </xsl:template>
   
-  
-  <xsl:template name="bookshelfimg">
-    <xsl:param name="alt"/>
-    <xsl:param name="title"/>
-    <img border="0" width="20" height="16" src="interfaces/default/images/bshelf.gif" alt="{$alt}" title="{$title}"/>
-  </xsl:template>
-
-
   <xsl:template match="/page/xsltparams">
     <!-- suppress xsltparam block in page -->
   </xsl:template>
-
-  <!-- is this ever used? copied from classifier tools and renamed xxxOld -->
-  <xsl:template match="documentNodeOld">
-    <xsl:param name="collName"/>
-    <xsl:param name="serviceName"/>
-    <a href="{$library_name}?a=d&amp;c={$collName}&amp;d={@nodeID}&amp;dt={@docType}&amp;p.a=b&amp;p.s={$serviceName}"><xsl:apply-templates select="." mode="displayNodeIcon"/></a><xsl:value-of disable-output-escaping="yes"  select="metadataList/metadata[@name='Title']"/>
-  </xsl:template>
-  
-  
-  <!-- icon + title template-->
-  <!-- is this ever used??? copied from classifier tools and renamed xxxOld???  -->
-  <xsl:template match="classifierNodeOld">
-    <xsl:param name="collName"/>
-    <xsl:param name="serviceName"/>
-    <a><xsl:attribute name='href'><xsl:value-of select='$library_name'/>?a=b&amp;rt=r&amp;s=<xsl:value-of select='$serviceName'/>&amp;c=<xsl:value-of select='$collName'/>&amp;cl=<xsl:value-of select='@nodeID'/><xsl:if test="classifierNode|documentNode">.pr</xsl:if></xsl:attribute><xsl:call-template name="bookshelfimg"/></a><xsl:value-of disable-output-escaping="yes" select="metadataList/metadata[@name='Title']"/>
-  </xsl:template>
-  
 
 </xsl:stylesheet>
 

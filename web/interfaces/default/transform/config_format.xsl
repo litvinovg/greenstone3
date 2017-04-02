@@ -230,19 +230,7 @@
 					  </xsl:attribute>   
 					</xsl:if>
 
-					<xslt:attribute name='href'>
-						<xslt:value-of select='$library_name'/>
-						<xsl:text>/collection/</xsl:text>
-						<xslt:value-of select='/page/pageResponse/collection/@name'/>
-						<xsl:text>/browse/</xsl:text>
-						<xsl:choose>
-							<xsl:when test="@nodeID">
-								<xsl:value-of select="@nodeID"/>
-							</xsl:when>
-							<xsl:otherwise>
-								<xslt:value-of select='util:replace(@nodeID, ".", "/")'/>
-							</xsl:otherwise>
-						</xsl:choose>
+					<xslt:attribute name='href'><xslt:call-template name="classifierNodeLink"><xsl:if test="@style"><xslt:with-param name="link-type"><xsl:value-of select="@style"/></xslt:with-param></xsl:if><xsl:if test="@nodeID"><xslt:with-param name="node-id" select="@nodeID"/></xsl:if></xslt:call-template>
 					</xslt:attribute>
 					<xsl:copy-of select="$opt-title"/>
 					<xsl:apply-templates/>
