@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 
 import org.apache.log4j.*;
 
+// The LogStreamGobbler class, despite the name, is not connected to Input- and OutputStreamGobbler
+// classes. This class has to do with logging and not with thread based input/output streams. 
 class LogStreamGobbler{
     static Logger logger = Logger.getLogger(org.greenstone.util.LogStreamGobbler.class.getName());
     
