@@ -27,7 +27,7 @@ public abstract class CollectionConstructor extends Thread
 	protected boolean cancel = false;
 	/** Stores the name of the manifest file (if one is needed) */
 	protected String manifest_file = null;
-    /** The URL params constructed as a query string, representing the CGI QUERY_STRING to */
+    /** The URL params constructed as a query string, representing the CGI QUERY_STRING to the process */
     protected String query_string = null;
 
 	public CollectionConstructor(String name)
@@ -44,6 +44,8 @@ public abstract class CollectionConstructor extends Thread
 		return true;
 	}
 
+    // this method never gets called. And, the way subclass GS2PerlConstructor.runPerlCommand() was originally
+    // coded, setting cancel to true never had any effect anyway in stopping any perl command that was run.
 	public void stopAction()
 	{
 		this.cancel = true;

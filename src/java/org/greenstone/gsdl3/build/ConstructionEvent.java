@@ -9,9 +9,9 @@ public class ConstructionEvent
 	not reserved*/
     private static final int EVENT_ID = RESERVED_ID_MAX+77;
     /** The status associated with the event. */
-    private int status = -1;
+    private final int status;
     /** Any message associated with this event. */
-    private String message = null;
+    private final String message;
     /* Constructor.
      * @param source The <strong>CollectionConstructor</strong> that fired this message.
      * @param status The status code for this event          
