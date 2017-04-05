@@ -34,7 +34,28 @@ import java.net.URLConnection;
 
 /** contains miscellaneous functions */
 public class Misc {
+
+    // Can initialise static final vars on declaration or in static initialisation code block
+    // http://stackoverflow.com/questions/2339932/java-can-final-variables-be-initialized-in-static-initialization-block
+    // Initialise object member final vars on declaration or in constructors
+    public static final String NEWLINE;
     
+    // Before Java 7, no System.lineSeparator() or System.getProperty("line.separator")
+    // And on local linux, am compiling with JDK 6, so need this.
+    // http://stackoverflow.com/questions/207947/how-do-i-get-a-platform-dependent-new-line-character
+
+    static {
+	// http://stackoverflow.com/questions/2591083/getting-java-version-at-runtime
+	// https://www.tutorialspoint.com/java/lang/package_getspecificationversion.htm
+	
+	double java_version = Double.parseDouble(System.getProperty("java.specification.version"));
+	if(java_version >= 1.7) { // https://docs.oracle.com/javase/tutorial/essential/environment/sysprop.html
+	    NEWLINE = System.getProperty("line.separator");
+	} else {
+	    NEWLINE = isWindows() ? "\r\n" : "\n";
+	}	
+    }
+
     public static void printHash(HashMap map) {
 	Set entries = map.entrySet();
 	Iterator i = entries.iterator();
