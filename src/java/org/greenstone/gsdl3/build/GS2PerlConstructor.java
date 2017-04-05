@@ -4,6 +4,7 @@ package org.greenstone.gsdl3.build;
 import org.greenstone.gsdl3.util.*;
 import org.greenstone.util.Misc;
 import org.greenstone.util.GlobalProperties;
+import org.greenstone.util.SafeProcess;
 
 // xml classes
 import org.w3c.dom.Element;
@@ -26,7 +27,7 @@ import org.apache.log4j.*;
  * CollectionConstructor class for greenstone 2 compatible building it uses the
  * perl scripts to do the building stuff
  */
-public class GS2PerlConstructor extends CollectionConstructor
+public class GS2PerlConstructor extends CollectionConstructor implements SafeProcess.ExceptionHandler
 {
 	static Logger logger = Logger.getLogger(org.greenstone.gsdl3.build.GS2PerlConstructor.class.getName());
 
@@ -373,8 +374,145 @@ public class GS2PerlConstructor extends CollectionConstructor
     protected boolean runPerlCommand(String[] command) {
 	return runPerlCommand(command, null, null);
     }
+
+    	
+    protected boolean runPerlCommand(String[] command, String[] envvars, File dir)
+    {
+	boolean success = true;
 	
-	protected boolean runPerlCommand(String[] command, String[] envvars, File dir)
+	int sepIndex = this.gsdl3home.lastIndexOf(File.separator);
+	String srcHome = this.gsdl3home.substring(0, sepIndex);
+	
+	ArrayList<String> args = new ArrayList<String>();
+	args.add("GSDLHOME=" + this.gsdl2home);
+	args.add("GSDL3HOME=" + this.gsdl3home);
+	args.add("GSDL3SRCHOME=" + srcHome);
+	args.add("GSDLOS=" + this.gsdlos);
+	args.add("GSDL-RUN-SETUP=true");
+	args.add("PERL_PERTURB_KEYS=0");
+	
+	if(envvars != null) {
+	    for(int i = 0; i < envvars.length; i++) {
+		args.add(envvars[i]);
+	    }
+	}
+	
+	for (String a : System.getenv().keySet()) {
+	    args.add(a + "=" + System.getenv(a));
+	}
+	
+	String command_str = "";
+	for (int i = 0; i < command.length; i++) {
+	    command_str = command_str + command[i] + " ";
+	}
+	
+	sendMessage(new ConstructionEvent(this, GSStatus.INFO, "command = " + command_str));
+	
+	
+	logger.info("### Running command = " + command_str);
+
+	// This is where we create and run our perl process safely
+	SafeProcess perlProcess 
+	    = new SafeProcess(command, args.toArray(new String[args.size()]), dir); //  dir can be null
+	
+	
+	sendProcessBegun(new ConstructionEvent(this, GSStatus.ACCEPTED, "starting"));
+	
+	File logDir = new File(GSFile.collectDir(this.site_home) + File.separator + this.collection_name + File.separator + "log");
+	if (!logDir.exists()) {
+	    logDir.mkdir();
+	}
+	
+	// Only from Java 7+: Try-with-Resources block will safely close the BufferedWriter
+	// https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html
+	BufferedWriter bw = null;
+	try {
+	    bw = new BufferedWriter(new FileWriter(GSFile.collectDir(this.site_home) + File.separator + this.collection_name + File.separator + "log" + File.separator + "build_log." + (System.currentTimeMillis()) + ".txt"));		
+	
+	    bw.write("Document Editor Build \n");		
+	    bw.write("Command = " + command_str + "\n");
+	    
+	    // handle each incoming line from stdout and stderr streams, and any exceptions that occur then
+	    SynchronizedProcessLineByLineHandler outLineByLineHandler
+		= new SynchronizedProcessLineByLineHandler(bw, SynchronizedProcessLineByLineHandler.STDOUT);
+	    SynchronizedProcessLineByLineHandler errLineByLineHandler
+		= new SynchronizedProcessLineByLineHandler(bw, SynchronizedProcessLineByLineHandler.STDERR);
+	    perlProcess.setStdOutLineByLineHandler(outLineByLineHandler);
+	    perlProcess.setStdErrLineByLineHandler(errLineByLineHandler);
+	    
+	    // GS2PerlConstructor will do further handling of exceptions that may occur during the perl
+	    // process (including if writing something to the process' inputstream, not that we're doing that for this perlProcess)
+	    perlProcess.setExceptionHandler(this); 
+	    
+	    // finally, execute the process
+	    
+	    // Captures the std err of a program and pipes it into
+	    // std in of java, as before.
+
+	    logger.info("**** BEFORE runProcess.");
+	    perlProcess.runProcess();
+	    logger.info("**** AFTER runProcess:");
+	    
+	// The original runPerlCommand() code had an ineffective check for whether the cmd had been cancelled
+	// midway through executing the perl, as condition of a while loop reading from stderr and stdout.
+	// We don't include the cancel check here, as superclass CollectionConstructor.stopAction(), which set
+	// this.cancel to true, never got called anywhere.
+	// But I think a proper cancel of our perl process launched by this GS2PerlConstructor Thread object
+	// and of the worker threads it launches, could be implemented with interrupts. See:
+	// http://stackoverflow.com/questions/6859681/better-way-to-signal-other-thread-to-stop
+	// https://docs.oracle.com/javase/tutorial/essential/concurrency/interrupt.html
+	// https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#interrupted()
+	// https://praveer09.github.io/technology/2015/12/06/understanding-thread-interruption-in-java/
+	// The code that calls GS2PerlConstructor.stopAction() should also call GSPerlConstructor.interrupt()
+	// Then in SafeProcess.runProcess(), I think the waitFor() will throw an InterruptedException()
+	// This can be caught and interrupt() called on SafeProcess' workerthreads, 
+	// Any workerthreads' run() methods that block (IO, loops) can test this.isInterrupted() 
+	// and can break out of any loops and release resources in finally.
+	// Back in SafeProcess.runProcess, the InterruptedException catch block will be followed by finally
+	// that will clear up any further resources and destroy the process forcibly if it hadn't been ended.
+
+	} catch(IOException e) {
+	    e.printStackTrace();
+	    sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Exception occurred " + e.toString()));
+	} finally {
+	    SafeProcess.closeResource(bw);
+	}
+
+	if (!this.cancel) {
+	    // Now display final message based on exit value		    
+	    
+	    if (perlProcess.getExitValue() == 0) {	
+		//status = OK;
+		sendProcessStatus(new ConstructionEvent(this, GSStatus.CONTINUING, "Success"));
+		
+		success = true;
+	    } else {
+		//status = ERROR;
+		sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Failure"));
+		
+		//return false;
+		success = false;
+		
+	    }
+	} else { // cancelled
+	    
+	    // I need to somehow kill the child process. Unfortunately Thread.stop() and Process.destroy() both fail to do this. But now, thankx to the magic of Michaels 'close the stream suggestion', it works fine.
+	    sendProcessStatus(new ConstructionEvent(this, GSStatus.HALTED, "killing the process"));
+	    //prcs.getOutputStream().close();
+	    //prcs.destroy();
+	    ////status = ERROR;
+	    
+	    //return false;
+	    success = false;
+	}
+	// we're done, but we don't send a process complete message here cos there might be stuff to do after this has finished.
+	//return true;		
+	return success;
+    }
+	
+
+    // this method is blocking again, on Windows when adding user comments
+    protected boolean old_runPerlCommand(String[] command, String[] envvars, File dir)
 	{
 		boolean success = true;
 	
@@ -405,6 +543,8 @@ public class GS2PerlConstructor extends CollectionConstructor
 		{
 			command_str = command_str + command[i] + " ";
 		}
+
+logger.info("### old runPerlCmd, command = " + command_str);
 
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "command = " + command_str));
 		Process prcs = null;
@@ -453,7 +593,7 @@ public class GS2PerlConstructor extends CollectionConstructor
 					sendProcessStatus(new ConstructionEvent(this, GSStatus.CONTINUING, stdinline));
 				}
 			}
-			closeResource(bw); 
+			SafeProcess.closeResource(bw); 
 			
 			if (!this.cancel)
 			{
@@ -499,30 +639,97 @@ public class GS2PerlConstructor extends CollectionConstructor
 			// http://mark.koli.ch/leaky-pipes-remember-to-close-your-streams-when-using-javas-runtimegetruntimeexec
 		
 			 if( prcs != null ) {
-				closeResource(prcs.getErrorStream());
-				closeResource(prcs.getOutputStream());
-				closeResource(prcs.getInputStream());
+				SafeProcess.closeResource(prcs.getErrorStream());
+				SafeProcess.closeResource(prcs.getOutputStream());
+				SafeProcess.closeResource(prcs.getInputStream());
 				prcs.destroy();
 			}
 		
-			closeResource(ebr);
-			closeResource(stdinbr);
+			SafeProcess.closeResource(ebr);
+			SafeProcess.closeResource(stdinbr);
 		}
 
 		// we're done, but we don't send a process complete message here cos there might be stuff to do after this has finished.
 		//return true;		
 		return success;
 	}
-	
-	public static void closeResource(Closeable resourceHandle) {
-		try {
-			if(resourceHandle != null) {
-				resourceHandle.close();
-				resourceHandle = null;
-			}
-		} catch(Exception e) {
-			System.err.println("Exception closing resource: " + e.getMessage());
-			e.printStackTrace();
-		}
+
+
+    // From interface SafeProcess.ExceptionHandler
+    // Called when an exception happens during the running of our perl process. However,
+    // exceptions when reading from our perl process' stderr and stdout streams are handled by
+    // SynchronizedProcessLineByLineHandler.gotException() below.
+    public void gotException(Exception e) {
+
+	// do what original runPerlCommand() code always did when an exception occurred
+	// when running the perl process:
+	e.printStackTrace();
+	sendProcessStatus(new ConstructionEvent(this,GSStatus.ERROR, 
+						"Exception occurred " + e.toString())); // atomic
     }
+    
+    // This class deals with each incoming line from the perl process' stderr or stdout streams. One
+    // instance of this class for each stream. However, since multiple instances of this LineByLineHandler 
+    // could be (and in fact, are) writing to the same file in their own threads, the writer object needs 
+    // to be made threadsafe.
+    // This class also handles exceptions during the running of the perl process.
+    // The runPerlCommand code originally would do a sendProcessStatus on each exception, so we ensure
+    // we do that here too, to continue original behaviour.
+    protected class SynchronizedProcessLineByLineHandler implements SafeProcess.LineByLineHandler
+    {
+	public static final int STDERR = 0;
+	public static final int STDOUT = 1;
+
+	private final int source;
+	private final BufferedWriter bwHandle; // needs to be final to synchronize on the object
+		
+
+	public SynchronizedProcessLineByLineHandler(BufferedWriter bw, int src) {
+	    this.bwHandle = bw;
+	    this.source = src; // STDERR or STDOUT
+	}
+
+	public void gotLine(String line) {
+	    //if(this.source == STDERR) {
+		///System.err.println("ERROR: " + line);
+	    //} else {
+		///System.err.println("OUT: " + line);
+	    //}
+
+	    // BufferedWriter writes may not be atomic
+	    // http://stackoverflow.com/questions/9512433/is-writer-an-atomic-method
+	    // Choosing to put try-catch outside of sync block, since it's okay to give up lock on exception
+	    // http://stackoverflow.com/questions/14944551/it-is-better-to-have-a-synchronized-block-inside-a-try-block-or-a-try-block-insi
+	    // "All methods on Logger are multi-thread safe", see
+	    // http://stackoverflow.com/questions/14211629/java-util-logger-write-synchronization
+
+	    try {
+		synchronized(bwHandle) { // get a lock on the writer handle, then write
+		
+		    bwHandle.write(line + "\n");
+		} 
+	    } catch(IOException ioe) {
+		String msg = (source == STDERR) ? "stderr" : "stdout";
+		msg = "Exception when writing out a line read from perl process' " + msg + " stream.";
+		GS2PerlConstructor.logger.error(msg, ioe);
+	    }
+	    
+	    // this next method is thread safe since only synchronized methods are invoked.
+	    // and only immutable (final) vars are used.
+	    sendProcessStatus(new ConstructionEvent(GS2PerlConstructor.this, GSStatus.CONTINUING, line));
+	}	
+
+	// This is called when we get an exception during the processing of a perl's
+	// input-, err- or output stream
+	public void gotException(Exception e) {
+	    String msg = (source == STDERR) ? "stderr" : "stdout";
+	    msg = "Got exception when processing the perl process' " + msg + " stream.";
+
+	    // now do what the original runPerlCommand() code always did:
+	    e.printStackTrace();
+	    sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Exception occurred " + e.toString())); // atomic
+	}
+
+    } // end inner class SynchronizedProcessLineByLineHandler
+
 }
