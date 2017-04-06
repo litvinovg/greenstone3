@@ -308,7 +308,7 @@ public static class InputStreamGobbler extends Thread
 		outputstr.append(line);
 		
 		if(split_newlines) {
-		    outputstr.append(Utility.NEWLINE); // "\n" is system dependent (Win must be "\r\n")
+		    outputstr.append(Misc.NEWLINE); // "\n" is system dependent (Win must be "\r\n")
 		}
 
 		if(lineByLineHandler != null) { // let handler deal with newlines
