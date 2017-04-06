@@ -128,11 +128,11 @@ public class SafeProcess {
 	    
 	    // monitor for any error messages
             errorGobbler // ReaderFromProcessOutputStream
-		= new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), splitStdOutputNewLines);
+		= new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), splitStdErrorNewLines);
 
             // monitor for the expected std output line(s)
             outputGobbler
-		= new SafeProcess.InputStreamGobbler(prcs.getInputStream(), splitStdErrorNewLines);
+		= new SafeProcess.InputStreamGobbler(prcs.getInputStream(), splitStdOutputNewLines);
 	                
 	    // register line by line handlers, if any were set, for the process stderr and stdout streams
 	    if(this.outLineByLineHandler != null) {

@@ -150,9 +150,12 @@ public class OAIPMH extends ServiceRack {
     if(!oaiinfFile.exists()) {
 	logger.warn("oai-inf database for collection + " + this.cluster_name + " does not exist.");
 	oaiinf_db = null;
-    } else if (!this.oaiinf_db.openDatabase(oaiinf_db_file, SimpleCollectionDatabase.READ)) {
-	logger.warn("Could not open oai-inf database for collection + " + this.cluster_name + "!");
-	oaiinf_db = null;
+    } else {
+	logger.info("Going to try opening oai-inf database for collection " + this.cluster_name);
+	if (!this.oaiinf_db.openDatabase(oaiinf_db_file, SimpleCollectionDatabase.READ)) {
+	    logger.warn("Could not open oai-inf database for collection " + this.cluster_name + "!");
+	    oaiinf_db = null;
+	}
     }
     
     // work out what sets this collection has. Will usually contain the collection itself, optional super collection, and maybe subcolls if appropriate classifiers are present.
