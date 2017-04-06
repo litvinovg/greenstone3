@@ -657,7 +657,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
     // Called when an exception happens during the running of our perl process. However,
     // exceptions when reading from our perl process' stderr and stdout streams are handled by
     // SynchronizedProcessLineByLineHandler.gotException() below.
-    public void gotException(Exception e) {
+    public synchronized void gotException(Exception e) {
 
 	// do what original runPerlCommand() code always did when an exception occurred
 	// when running the perl process:
@@ -687,7 +687,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	    this.source = src; // STDERR or STDOUT
 	}
 
-	public void gotLine(String line) {
+	public synchronized void gotLine(String line) {
 	    //if(this.source == STDERR) {
 		///System.err.println("ERROR: " + line);
 	    //} else {
@@ -700,12 +700,10 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	    // http://stackoverflow.com/questions/14944551/it-is-better-to-have-a-synchronized-block-inside-a-try-block-or-a-try-block-insi
 	    // "All methods on Logger are multi-thread safe", see
 	    // http://stackoverflow.com/questions/14211629/java-util-logger-write-synchronization
-
-	    try {
-		synchronized(bwHandle) { // get a lock on the writer handle, then write
+	    
+	    try {		
+		bwHandle.write(line + "\n");
 		
-		    bwHandle.write(line + "\n");
-		} 
 	    } catch(IOException ioe) {
 		String msg = (source == STDERR) ? "stderr" : "stdout";
 		msg = "Exception when writing out a line read from perl process' " + msg + " stream.";
@@ -715,11 +713,11 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	    // this next method is thread safe since only synchronized methods are invoked.
 	    // and only immutable (final) vars are used.
 	    sendProcessStatus(new ConstructionEvent(GS2PerlConstructor.this, GSStatus.CONTINUING, line));
-	}	
+	}
 
 	// This is called when we get an exception during the processing of a perl's
 	// input-, err- or output stream
-	public void gotException(Exception e) {
+	public synchronized void gotException(Exception e) {
 	    String msg = (source == STDERR) ? "stderr" : "stdout";
 	    msg = "Got exception when processing the perl process' " + msg + " stream.";
 
