@@ -22,14 +22,16 @@ public class SafeProcess {
 
     static Logger logger = Logger.getLogger(org.greenstone.util.SafeProcess.class.getName());
 
+    // input to SafeProcess and initialising it
+    private String command = null;
     private String[] command_args = null;
     private String[] envp = null;
     private File dir = null;
     private String inputStr = null;
 
+    // output from running SafeProcess.runProcess()
     private String outputStr = ""; 
     private String errorStr = "";
-
     private int exitValue = -1;
 
     // user can write custom LineByLineHandler to deal with stdout lines as they come out one line at a time
@@ -48,6 +50,12 @@ public class SafeProcess {
     public SafeProcess(String[] cmd_args)
     {
 	command_args = cmd_args;
+    }
+
+    // cmd string version
+    public SafeProcess(String cmdStr)
+    {
+	command = cmdStr;
     }
 
     // cmd args with env version, launchDir can be null.
@@ -95,7 +103,7 @@ public class SafeProcess {
     }
 
 //***************** Copied from gli's gui/FormatConversionDialog.java *************//
-    public void runProcess() {
+    public int runProcess() {
 
 	Process prcs = null;
 	SafeProcess.OutputStreamGobbler inputGobbler = null;
@@ -104,21 +112,26 @@ public class SafeProcess {
 
 	try {	    
 	    Runtime rt = Runtime.getRuntime();	    
-	    
-	    // http://stackoverflow.com/questions/5283444/convert-array-of-strings-into-a-string-in-java
-	    //logger.info("Running process: " + Arrays.toString(command_args));
+	    if(this.command != null) {
+		prcs = rt.exec(this.command);
+	    }
+	    else { // at least command_args must be set now
 
-	    if(this.envp == null) {
-		prcs = rt.exec(this.command_args);
-	    } else { // launch process using cmd str with env params		
+		// http://stackoverflow.com/questions/5283444/convert-array-of-strings-into-a-string-in-java
+		///logger.info("SafeProcess running: " + Arrays.toString(command_args));
 
-		if(this.dir == null) {
-		    //logger.info("\twith: " + Arrays.toString(this.envp));
-		    prcs = rt.exec(this.command_args, this.envp);
-		} else {
-		    //logger.info("\tfrom directory: " + this.dir);
-		    //logger.info("\twith: " + Arrays.toString(this.envp));
-		    prcs = rt.exec(this.command_args, this.envp, this.dir);
+		if(this.envp == null) { 
+		    prcs = rt.exec(this.command_args);
+		} else { // launch process using cmd str with env params		
+		    
+		    if(this.dir == null) {
+			logger.info("\twith: " + Arrays.toString(this.envp));
+			prcs = rt.exec(this.command_args, this.envp);
+		    } else {
+			logger.info("\tfrom directory: " + this.dir);
+			logger.info("\twith: " + Arrays.toString(this.envp));
+			prcs = rt.exec(this.command_args, this.envp, this.dir);
+		    }
 		}
 	    }
 
@@ -170,15 +183,22 @@ public class SafeProcess {
 	    prcs = null;
        
 	} catch(IOException ioe) {
-	    logger.error("IOexception: " + ioe.getMessage(), ioe);
-	    //System.err.println("IOexception " + ioe.getMessage());
-	    //ioe.printStackTrace();
-	    if(exceptionHandler != null) exceptionHandler.gotException(ioe);
+	    if(exceptionHandler != null) {
+		exceptionHandler.gotException(ioe);
+	    } else {
+		logger.error("IOexception: " + ioe.getMessage(), ioe);
+		//System.err.println("IOexception " + ioe.getMessage());
+		//ioe.printStackTrace();
+	    }
 	} catch(InterruptedException ie) {
-	    logger.error("Process InterruptedException: " + ie.getMessage(), ie);
-	    //System.err.println("Process InterruptedException " + ie.getMessage());
-	    //ie.printStackTrace();
-	    if(exceptionHandler != null) exceptionHandler.gotException(ie);
+	    if(exceptionHandler != null) {
+		exceptionHandler.gotException(ie);
+	    } else {
+		logger.error("Process InterruptedException: " + ie.getMessage(), ie);
+		//System.err.println("Process InterruptedException " + ie.getMessage());
+		//ie.printStackTrace(); // an interrupt here is not an error, it can be a cancel action
+	    }
+
 
 	    // propagate interrupts to worker threads here?
 	    // unless the interrupt emanated from any of them in any join()...
@@ -217,6 +237,7 @@ public class SafeProcess {
 	    }
 	}
 
+	return this.exitValue;
     }
     
 
@@ -285,8 +306,9 @@ public static class InputStreamGobbler extends Thread
 
 		//System.out.println("@@@ GOT LINE: " + line);
 		outputstr.append(line);
+		
 		if(split_newlines) {
-		    outputstr.append(Misc.NEWLINE); // "\n" is system dependent (Win must be "\r\n")
+		    outputstr.append(Utility.NEWLINE); // "\n" is system dependent (Win must be "\r\n")
 		}
 
 		if(lineByLineHandler != null) { // let handler deal with newlines
@@ -294,9 +316,13 @@ public static class InputStreamGobbler extends Thread
 		}		
 	    }
 	} catch (IOException ioe) {
-	    logger.error("Exception when reading from a process' stdout/stderr stream: ", ioe);
-	    if(lineByLineHandler != null) lineByLineHandler.gotException(ioe);
-	    //ioe.printStackTrace();  
+	    if(lineByLineHandler != null) {
+		lineByLineHandler.gotException(ioe);
+	    } else {
+		logger.error("Exception when reading from a process' stdout/stderr stream: ", ioe);
+		//ioe.printStackTrace();
+	    }
+	    
 	} finally {
 	    SafeProcess.closeResource(br);
 	}
@@ -316,6 +342,10 @@ public static class OutputStreamGobbler extends Thread
     OutputStream os = null;
     String inputstr = "";
     ExceptionHandler exceptionHandler = null;
+
+    public OutputStreamGobbler(OutputStream os) {
+	this.os = os;
+    }
 
     public OutputStreamGobbler(OutputStream os, String inputstr)
     {
@@ -354,10 +384,12 @@ public static class OutputStreamGobbler extends Thread
 	      osw.flush();
 	    */
 	} catch (IOException ioe) {
-	    logger.error("Exception writing to SafeProcess' inputstream: ", ioe);	    
-	    //ioe.printStackTrace();
-
-	    if (this.exceptionHandler != null) this.exceptionHandler.gotException(ioe);
+	    if (this.exceptionHandler != null) {
+		this.exceptionHandler.gotException(ioe);
+	    } else {
+		logger.error("Exception writing to SafeProcess' inputstream: ", ioe);	    
+		//ioe.printStackTrace();
+	    }
 	    
 	} finally {
 	    SafeProcess.closeResource(osw);
