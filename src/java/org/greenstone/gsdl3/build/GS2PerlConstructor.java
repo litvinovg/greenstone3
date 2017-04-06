@@ -35,7 +35,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	public static final int IMPORT = 1;
 	public static final int BUILD = 2;
 	public static final int ACTIVATE = 3;
-    public static final int MODIFY_METADATA_SERVER = 4;
+	public static final int MODIFY_METADATA_SERVER = 4;
 
 	/**
 	 * gsdlhome for greenstone 2 - we use the perl modules and building scripts
@@ -48,6 +48,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	protected String gsdlos = null;
 	/** the path environment variable */
 	protected String path = null;
+
 
 	public GS2PerlConstructor(String name)
 	{
@@ -408,8 +409,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	
 	sendMessage(new ConstructionEvent(this, GSStatus.INFO, "command = " + command_str));
 	
-	
-	logger.info("### Running command = " + command_str);
+	//logger.info("### Running command = " + command_str);
 
 	// This is where we create and run our perl process safely
 	SafeProcess perlProcess 
@@ -449,9 +449,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	    // Captures the std err of a program and pipes it into
 	    // std in of java, as before.
 
-	    logger.info("**** BEFORE runProcess.");
 	    perlProcess.runProcess();
-	    logger.info("**** AFTER runProcess:");
 	    
 	// The original runPerlCommand() code had an ineffective check for whether the cmd had been cancelled
 	// midway through executing the perl, as condition of a while loop reading from stderr and stdout.
@@ -544,7 +542,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 			command_str = command_str + command[i] + " ";
 		}
 
-logger.info("### old runPerlCmd, command = " + command_str);
+		// logger.info("### old runPerlCmd, command = " + command_str);
 
 		sendMessage(new ConstructionEvent(this, GSStatus.INFO, "command = " + command_str));
 		Process prcs = null;

@@ -24,11 +24,11 @@ public abstract class CollectionConstructor extends Thread
 	/** the list of listeners for the process */
 	protected EventListenerList listeners = null;
 	/** A flag used to determine if this process has been asked to cancel. */
-	protected boolean cancel = false;
+	protected boolean cancel = false; // Not really used (in any way that works)
 	/** Stores the name of the manifest file (if one is needed) */
 	protected String manifest_file = null;
-    /** The URL params constructed as a query string, representing the CGI QUERY_STRING to the process */
-    protected String query_string = null;
+	/** The URL params constructed as a query string, representing the CGI QUERY_STRING to the process */
+	protected String query_string = null;
 
 	public CollectionConstructor(String name)
 	{

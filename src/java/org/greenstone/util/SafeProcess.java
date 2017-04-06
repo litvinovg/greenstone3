@@ -96,53 +96,43 @@ public class SafeProcess {
 
 //***************** Copied from gli's gui/FormatConversionDialog.java *************//
     public void runProcess() {
+
 	Process prcs = null;
 	SafeProcess.OutputStreamGobbler inputGobbler = null;
 	SafeProcess.InputStreamGobbler errorGobbler = null;
 	SafeProcess.InputStreamGobbler outputGobbler = null;
 
 	try {	    
-	    
 	    Runtime rt = Runtime.getRuntime();	    
 	    
-	    
 	    // http://stackoverflow.com/questions/5283444/convert-array-of-strings-into-a-string-in-java
-	    logger.info("Running process: " + Arrays.toString(command_args));
+	    //logger.info("Running process: " + Arrays.toString(command_args));
 
 	    if(this.envp == null) {
 		prcs = rt.exec(this.command_args);
 	    } else { // launch process using cmd str with env params		
 
 		if(this.dir == null) {
-		    logger.info("\twith: " + Arrays.toString(this.envp));
+		    //logger.info("\twith: " + Arrays.toString(this.envp));
 		    prcs = rt.exec(this.command_args, this.envp);
 		} else {
-		    logger.info("\tfrom directory: " + this.dir);
-		    logger.info("\twith: " + Arrays.toString(this.envp));
+		    //logger.info("\tfrom directory: " + this.dir);
+		    //logger.info("\twith: " + Arrays.toString(this.envp));
 		    prcs = rt.exec(this.command_args, this.envp, this.dir);
 		}
 	    }
 
-	    logger.info("### Before creating ProcessInGobbler");
-
-	   
 	    // send inputStr to process. The following constructor can handle inputStr being null
 	    inputGobbler = // WriterToProcessInputStream
 		new SafeProcess.OutputStreamGobbler(prcs.getOutputStream(), this.inputStr);
-	    
-	    logger.info("### Before creating ProcessErrGobbler");
 	    
 	    // monitor for any error messages
             errorGobbler // ReaderFromProcessOutputStream
 		= new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), splitStdOutputNewLines);
 
-	    logger.info("### Before creating ProcessOutGobbler");
-
             // monitor for the expected std output line(s)
             outputGobbler
 		= new SafeProcess.InputStreamGobbler(prcs.getInputStream(), splitStdErrorNewLines);
-
-	    logger.info("### Before setting handlers on ProcessGobblers");
 	                
 	    // register line by line handlers, if any were set, for the process stderr and stdout streams
 	    if(this.outLineByLineHandler != null) {
@@ -155,21 +145,13 @@ public class SafeProcess {
 		inputGobbler.setExceptionHandler(this.exceptionHandler);
 	    }	    
 
-	    logger.info("### Before streamgobblers.start()");
-
             // kick off the stream gobblers
             inputGobbler.start();
             errorGobbler.start();
             outputGobbler.start();
-
-	    logger.info("### After streamgobblers.start() - before waitFor");
                                     
             // any error???
             this.exitValue = prcs.waitFor(); // can throw an InterruptedException if process did not terminate	    	    
-            logger.info("ExitValue: " + exitValue); 
-
-	    logger.info("### Before streamgobblers.join()");
-
 	    // From the comments of 
 	    // http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
 	    // To avoid running into nondeterministic failures to get the process output
@@ -179,20 +161,10 @@ public class SafeProcess {
 	    errorGobbler.join();
 	    inputGobbler.join(); 
 	    
-	    logger.info("### After streamgobblers.join()");
-
 	    // set the variables the code that created a SafeProcess object may want to inspect
 	    this.outputStr = outputGobbler.getOutput();
 	    this.errorStr = errorGobbler.getOutput();
 
-	    // the calling code should handle errorStr, not us, so can leave out the following code
-	    /*
-	      if(!this.errorStr.equals("")) {
-	      logger.info("*** Process errorstream: \n" + this.errorStr + "\n****");
-	      //System.err.println("*** Process errorstream: \n" + this.errorStr + "\n****");
-	      }
-	    */
-	    
 	    // Since we didn't have an exception, process should have terminated now (waitFor blocks until then)
 	    // Set process to null so we don't forcibly terminate it below with process.destroy()
 	    prcs = null;
