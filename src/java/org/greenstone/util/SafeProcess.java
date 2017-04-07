@@ -115,6 +115,7 @@ public class SafeProcess {
 	    else { // at least command_args must be set now
 
 		// http://stackoverflow.com/questions/5283444/convert-array-of-strings-into-a-string-in-java
+		///System.err.println("SafeProcess running: " + Arrays.toString(command_args));
 		logger.info("SafeProcess running: " + Arrays.toString(command_args));
 
 		if(this.envp == null) { 
@@ -122,11 +123,14 @@ public class SafeProcess {
 		} else { // launch process using cmd str with env params		
 		    
 		    if(this.dir == null) {
-			//logger.info("\twith: " + Arrays.toString(this.envp));
+			///logger.info("\twith: " + Arrays.toString(this.envp));
+			///System.err.println("\twith: " + Arrays.toString(this.envp));
 			prcs = rt.exec(this.command_args, this.envp);
 		    } else {
-			//logger.info("\tfrom directory: " + this.dir);
-			//logger.info("\twith: " + Arrays.toString(this.envp));
+			///logger.info("\tfrom directory: " + this.dir);
+			///logger.info("\twith: " + Arrays.toString(this.envp));
+			///System.err.println("\tfrom directory: " + this.dir);
+			///System.err.println("\twith: " + Arrays.toString(this.envp));
 			prcs = rt.exec(this.command_args, this.envp, this.dir);
 		    }
 		}
@@ -264,7 +268,10 @@ public static interface ExceptionHandler {
     public void gotException(Exception e);
 }
 
-// write your own run() body for any StreamGobbler
+// Write your own run() body for any StreamGobbler. You need to create an instance of a class
+// implementing CustomProcessHandler for EACH IOSTREAM of the process that you want to handle.
+// Do not create a single CustomProcessHandler instance and reuse it for all three streams,
+// i.e. don't call SafeProcess' runProcess(x, x, x); It should be runProcess(x, y, z).
 // Make sure your implementation is threadsafe if you're sharing immutable objects between the threaded streams
 // example implementation is in the GS2PerlConstructor.SynchronizedProcessHandler class.
 public static interface CustomProcessHandler {
