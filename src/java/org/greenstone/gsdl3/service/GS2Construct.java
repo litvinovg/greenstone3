@@ -1025,17 +1025,17 @@ public class GS2Construct extends ServiceRack
     protected boolean isAllowedToSetMeta(String metaname, Pattern allowedMetaFieldsPattern) 
     {
 	if(allowedMetaFieldsPattern == null) { // null when user has edit permissions, so they can set any meta
-	    logger.info("### User has permissions to set any meta.");
+	    ///logger.info("### User has permissions to set any meta.");
 	    return true;
 	}
 	if(metaname == null) {
-	    logger.info("### Can't check null metaname against pattern");
+	    ///logger.info("### Can't check null metaname against pattern");
 	    return false;
 	}
 	
 	Matcher m = allowedMetaFieldsPattern.matcher(metaname);
 	if(!m.matches()) {
-	    logger.info("### metaname: " + metaname + " doesn't match allowed allowed fields: " + allowedMetaFieldsPattern.toString());
+	    ///logger.info("### metaname: " + metaname + " doesn't match allowed allowed fields: " + allowedMetaFieldsPattern.toString());
 	    return false;
 	} else {
 	    return true;
@@ -1064,14 +1064,14 @@ public class GS2Construct extends ServiceRack
 		    
 		    docids[index] = docInfo.getString("docid"); // should exist if metatable existed
 
-		    logger.info("@@@ Found docid: " + docids[index]);
+		    ///logger.info("@@@ Found docid: " + docids[index]);
 
 		    JSONArray metatable = docInfo.getJSONArray("metatable");
 		    for(int i = 0; i < metatable.length(); i++) {
 			JSONObject meta = metatable.getJSONObject(i);
 
 			String metaname = meta.getString("metaname");
-			logger.info("### metaname: " + metaname);
+			///logger.info("### metaname: " + metaname);
 			
 			if(!isAllowedToSetMeta(metaname, filterFields)) {
 			    return null;
@@ -1122,7 +1122,8 @@ public class GS2Construct extends ServiceRack
 	return !context.getUsername().equals("");
     }
 
-    // START DEBUG
+    /* 
+    // FOR DEBUGGING
     Set<Map.Entry<String, Serializable>> entries = params.entrySet();
     Iterator<Map.Entry<String, Serializable>> i = entries.iterator();
     
@@ -1137,7 +1138,7 @@ public class GS2Construct extends ServiceRack
     }
     
     logger.info("XXXXXXXXXXXXX PARAMETERS:\n" + parametersLine);
-    // END DEBUG
+    */
 
     for (String group : context.getGroups()) {
       // administrator always has permission

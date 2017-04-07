@@ -122,17 +122,15 @@ public class SafeProcess {
 		} else { // launch process using cmd str with env params		
 		    
 		    if(this.dir == null) {
-			logger.info("\twith: " + Arrays.toString(this.envp));
+			//logger.info("\twith: " + Arrays.toString(this.envp));
 			prcs = rt.exec(this.command_args, this.envp);
 		    } else {
-			logger.info("\tfrom directory: " + this.dir);
-			logger.info("\twith: " + Arrays.toString(this.envp));
+			//logger.info("\tfrom directory: " + this.dir);
+			//logger.info("\twith: " + Arrays.toString(this.envp));
 			prcs = rt.exec(this.command_args, this.envp, this.dir);
 		    }
 		}
 	    }
-
-	    logger.info("### Before creating ProcessInGobbler");
 
 	    // Create the streamgobblers and set any specified handlers on them
 
@@ -145,8 +143,6 @@ public class SafeProcess {
 		inputGobbler = new SafeProcess.OutputStreamGobbler(prcs.getOutputStream(), procInHandler);
 	    }
 
-	    logger.info("### Before creating ProcessErrGobbler");
-	    
 	    // PROC ERR STREAM to monitor for any error messages or expected output in the process' stderr
 	    if(procErrHandler == null) {
 		errorGobbler // ReaderFromProcessOutputStream
@@ -155,8 +151,6 @@ public class SafeProcess {
 		errorGobbler
 		    = new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), procErrHandler);
 	    }
-
-	    logger.info("### Before creating ProcessOutGobbler");
 
             // PROC OUT STREAM to monitor for the expected std output line(s)
 	    if(procOutHandler == null) {
@@ -168,21 +162,15 @@ public class SafeProcess {
 	    }
 
 	    
-	    logger.info("### Before streamgobblers.start()");
-
             // kick off the stream gobblers
             inputGobbler.start();
             errorGobbler.start();
             outputGobbler.start();
 
-	    logger.info("### After streamgobblers.start() - before waitFor");
-                                    
             // any error???
             this.exitValue = prcs.waitFor(); // can throw an InterruptedException if process did not terminate
 
-            logger.info("Process exitValue: " + exitValue); 
-
-	    logger.info("### Before streamgobblers.join()");
+            ///logger.info("Process exitValue: " + exitValue); 
 
 	    // From the comments of 
 	    // http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
@@ -193,7 +181,6 @@ public class SafeProcess {
 	    errorGobbler.join();
 	    inputGobbler.join(); 
 	    
-	    logger.info("### After streamgobblers.join()");
 
 	    // set the variables the code that created a SafeProcess object may want to inspect
 	    this.outputStr = outputGobbler.getOutput();

@@ -334,7 +334,6 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 
 		// http://www.cgi101.com/class/ch3/text.html
 		// setenv QUERY_STRING and REQUEST_METHOD = GET.
-		// Run the perl command as a simple process: no logging to the collection's build log
 		if (runPerlCommand(command_str, envvars, new File(cgi_directory)))
 				   //new File(GlobalProperties.getGSDL3Home() + File.separator + "WEB-INF" + File.separator + "cgi")))
 		{
@@ -401,7 +400,8 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	return perlProcess;
     }
 
-    // ModifyMetadata operations call runSimplePerlCommand which produces no output in build log
+    // If you want to run a Perl command without doing GS2PerlConstructor's custom logging in the build log
+    // The use the runSimplePerlCommand() versions, which use the default behaviour of running a SafeProcess
     protected boolean runSimplePerlCommand(String[] command) {	
 	return runSimplePerlCommand(command, null, null);
     }
@@ -416,7 +416,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	
 	sendMessage(new ConstructionEvent(this, GSStatus.INFO, "command = " + command_str));
 	
-	logger.info("### Running simple command = " + command_str);
+	///logger.info("### Running simple command = " + command_str);
 
 	// This is where we create and run our perl process safely
 	SafeProcess perlProcess = createPerlProcess(command, envvars, dir); //  dir can be null
@@ -458,7 +458,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	
 	sendMessage(new ConstructionEvent(this, GSStatus.INFO, "command = " + command_str));
 	
-	logger.info("### Running logged command = " + command_str);
+	///logger.info("### Running logged command = " + command_str);
 
 	// This is where we create and run our perl process safely
 	SafeProcess perlProcess = createPerlProcess(command, envvars, dir); //  dir can be null
@@ -525,28 +525,22 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	if (!this.cancel) {
 	    // Now display final message based on exit value		    
 	    
-	    if (perlProcess.getExitValue() == 0) {	
-		//status = OK;
+	    if (perlProcess.getExitValue() == 0) { //status = OK;
+		
 		sendProcessStatus(new ConstructionEvent(this, GSStatus.CONTINUING, "Success"));
-		
 		success = true;
-	    } else {
-		//status = ERROR;
+
+	    } else { //status = ERROR;
 		sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Failure"));
-		
-		//return false;
 		success = false;
 		
 	    }
-	} else { // cancelled
+	} else { // cancelled. The code would never come here, including in the old version of runPerlCommand
+	    // but leaving this here for an exact port of the old runPerlCommand to the new one which
+	    // uses SafeProcess. Also to allow the cancel functionality in future
 	    
 	    // I need to somehow kill the child process. Unfortunately Thread.stop() and Process.destroy() both fail to do this. But now, thankx to the magic of Michaels 'close the stream suggestion', it works fine.
 	    sendProcessStatus(new ConstructionEvent(this, GSStatus.HALTED, "killing the process"));
-	    //prcs.getOutputStream().close();
-	    //prcs.destroy();
-	    ////status = ERROR;
-	    
-	    //return false;
 	    success = false;
 	}
 	// we're done, but we don't send a process complete message here cos there might be stuff to do after this has finished.
@@ -751,8 +745,8 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 			break; // will go to finally block
 		    }
 		    
-///		    System.out.println("@@@ GOT LINE: " + line);
-///		    GS2PerlConstructor.logger.info("@@@ GOT LINE: " + line + " STDOUT=1: " + source);
+		    ///System.out.println("@@@ GOT LINE: " + line);
+
 
 		    //if(this.source == STDERR) {
 		    ///System.err.println("ERROR: " + line);
@@ -813,7 +807,6 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	    try {					    
 		bwHandle.write(line + "\n");	
 	    
-///		System.out.println("@@@ WROTE LINE: " + line);
 ///		GS2PerlConstructor.logger.info("@@@ WROTE LINE: " + line);
 
 		// this next method is thread safe since only synchronized methods are invoked.
