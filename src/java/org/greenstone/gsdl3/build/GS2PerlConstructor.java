@@ -17,6 +17,7 @@ import java.io.Closeable;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.File;
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -333,6 +334,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 
 		// http://www.cgi101.com/class/ch3/text.html
 		// setenv QUERY_STRING and REQUEST_METHOD = GET.
+		// Run the perl command as a simple process: no logging to the collection's build log
 		if (runPerlCommand(command_str, envvars, new File(cgi_directory)))
 				   //new File(GlobalProperties.getGSDL3Home() + File.separator + "WEB-INF" + File.separator + "cgi")))
 		{
@@ -371,16 +373,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 		return args;
 	}
 
-	/** returns true if completed correctly, false otherwise */
-    protected boolean runPerlCommand(String[] command) {
-	return runPerlCommand(command, null, null);
-    }
-
-    	
-    protected boolean runPerlCommand(String[] command, String[] envvars, File dir)
-    {
-	boolean success = true;
-	
+    protected SafeProcess createPerlProcess(String[] command, String[] envvars, File dir) {
 	int sepIndex = this.gsdl3home.lastIndexOf(File.separator);
 	String srcHome = this.gsdl3home.substring(0, sepIndex);
 	
@@ -401,6 +394,20 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	for (String a : System.getenv().keySet()) {
 	    args.add(a + "=" + System.getenv(a));
 	}
+
+	SafeProcess perlProcess 
+	    = new SafeProcess(command, args.toArray(new String[args.size()]), dir); //  dir can be null
+	
+	return perlProcess;
+    }
+
+    // ModifyMetadata operations call runSimplePerlCommand which produces no output in build log
+    protected boolean runSimplePerlCommand(String[] command) {	
+	return runSimplePerlCommand(command, null, null);
+    }
+    
+    protected boolean runSimplePerlCommand(String[] command, String[] envvars, File dir) {
+	boolean success = false;	
 	
 	String command_str = "";
 	for (int i = 0; i < command.length; i++) {
@@ -409,12 +416,52 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	
 	sendMessage(new ConstructionEvent(this, GSStatus.INFO, "command = " + command_str));
 	
-	//logger.info("### Running command = " + command_str);
+	logger.info("### Running simple command = " + command_str);
 
 	// This is where we create and run our perl process safely
-	SafeProcess perlProcess 
-	    = new SafeProcess(command, args.toArray(new String[args.size()]), dir); //  dir can be null
+	SafeProcess perlProcess = createPerlProcess(command, envvars, dir); //  dir can be null
 	
+	perlProcess.setExceptionHandler(this);
+
+	sendProcessBegun(new ConstructionEvent(this, GSStatus.ACCEPTED, "starting"));
+
+	int exitVal = perlProcess.runProcess(); // uses default processing of the perl process' iostreams provided by SafeProcess
+
+	if (exitVal == 0) {
+	    success = true;
+	    sendProcessStatus(new ConstructionEvent(this, GSStatus.CONTINUING, "Success"));
+	} else {
+	    sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Failure"));	    
+	    success = false; // explicit
+	}
+	
+	return success;
+    }
+
+
+    /** returns true if completed correctly, false otherwise 
+     * Building operations call runPerlCommand which sends build output to collect/log/build_log.#*.txt
+     */
+    protected boolean runPerlCommand(String[] command) {
+	return runPerlCommand(command, null, null);
+    }
+
+    	
+    protected boolean runPerlCommand(String[] command, String[] envvars, File dir)
+    {
+	boolean success = true;
+	
+	String command_str = "";
+	for (int i = 0; i < command.length; i++) {
+	    command_str = command_str + command[i] + " ";
+	}
+	
+	sendMessage(new ConstructionEvent(this, GSStatus.INFO, "command = " + command_str));
+	
+	logger.info("### Running logged command = " + command_str);
+
+	// This is where we create and run our perl process safely
+	SafeProcess perlProcess = createPerlProcess(command, envvars, dir); //  dir can be null
 	
 	sendProcessBegun(new ConstructionEvent(this, GSStatus.ACCEPTED, "starting"));
 	
@@ -427,18 +474,17 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	// https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html
 	BufferedWriter bw = null;
 	try {
-	    bw = new BufferedWriter(new FileWriter(GSFile.collectDir(this.site_home) + File.separator + this.collection_name + File.separator + "log" + File.separator + "build_log." + (System.currentTimeMillis()) + ".txt"));		
+
+	    bw = new BufferedWriter(new FileWriter(new File(logDir, "build_log." + (System.currentTimeMillis()) + ".txt")));
 	
 	    bw.write("Document Editor Build \n");		
 	    bw.write("Command = " + command_str + "\n");
 	    
 	    // handle each incoming line from stdout and stderr streams, and any exceptions that occur then
-	    SynchronizedProcessLineByLineHandler outLineByLineHandler
-		= new SynchronizedProcessLineByLineHandler(bw, SynchronizedProcessLineByLineHandler.STDOUT);
-	    SynchronizedProcessLineByLineHandler errLineByLineHandler
-		= new SynchronizedProcessLineByLineHandler(bw, SynchronizedProcessLineByLineHandler.STDERR);
-	    perlProcess.setStdOutLineByLineHandler(outLineByLineHandler);
-	    perlProcess.setStdErrLineByLineHandler(errLineByLineHandler);
+	    SafeProcess.CustomProcessHandler processOutHandler
+		= new SynchronizedProcessHandler(bw, SynchronizedProcessHandler.STDOUT);
+	    SafeProcess.CustomProcessHandler processErrHandler
+		= new SynchronizedProcessHandler(bw, SynchronizedProcessHandler.STDERR);
 	    
 	    // GS2PerlConstructor will do further handling of exceptions that may occur during the perl
 	    // process (including if writing something to the process' inputstream, not that we're doing that for this perlProcess)
@@ -449,7 +495,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	    // Captures the std err of a program and pipes it into
 	    // std in of java, as before.
 
-	    perlProcess.runProcess();
+	    perlProcess.runProcess(null, processOutHandler, processErrHandler); // use default procIn handling
 	    
 	// The original runPerlCommand() code had an ineffective check for whether the cmd had been cancelled
 	// midway through executing the perl, as condition of a while loop reading from stderr and stdout.
@@ -656,24 +702,27 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
     // From interface SafeProcess.ExceptionHandler
     // Called when an exception happens during the running of our perl process. However,
     // exceptions when reading from our perl process' stderr and stdout streams are handled by
-    // SynchronizedProcessLineByLineHandler.gotException() below.
+    // SynchronizedProcessHandler.gotException() below, since they happen in separate threads
+    // from this one (the ine from which the perl process is run).
     public synchronized void gotException(Exception e) {
 
 	// do what original runPerlCommand() code always did when an exception occurred
 	// when running the perl process:
 	e.printStackTrace();
 	sendProcessStatus(new ConstructionEvent(this,GSStatus.ERROR, 
-						"Exception occurred " + e.toString())); // atomic
+						"Exception occurred " + e.toString()));
     }
     
+    // Each instance of this class is run in its own thread by class SafeProcess.InputGobbler.
     // This class deals with each incoming line from the perl process' stderr or stdout streams. One
-    // instance of this class for each stream. However, since multiple instances of this LineByLineHandler 
-    // could be (and in fact, are) writing to the same file in their own threads, the writer object needs 
-    // to be made threadsafe.
+    // instance of this class for each stream. However, since multiple instances of this CustomProcessHandler
+    // could be (and in fact, are) writing to the same file in their own threads, several objects, not just
+    // the bufferedwriter object, needed to be made threadsafe.
     // This class also handles exceptions during the running of the perl process.
     // The runPerlCommand code originally would do a sendProcessStatus on each exception, so we ensure
-    // we do that here too, to continue original behaviour.
-    protected class SynchronizedProcessLineByLineHandler implements SafeProcess.LineByLineHandler
+    // we do that here too, to continue original behaviour. These calls are also synchronized to make their
+    // use of the EventListeners threadsafe.
+    protected class SynchronizedProcessHandler implements SafeProcess.CustomProcessHandler
     {
 	public static final int STDERR = 0;
 	public static final int STDOUT = 1;
@@ -682,50 +731,107 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	private final BufferedWriter bwHandle; // needs to be final to synchronize on the object
 		
 
-	public SynchronizedProcessLineByLineHandler(BufferedWriter bw, int src) {
-	    this.bwHandle = bw;
+	public SynchronizedProcessHandler(BufferedWriter bw, int src) {
+	    this.bwHandle = bw; // caller will close bw, since many more than one
+	                        // SynchronizedProcessHandlers are using it
 	    this.source = src; // STDERR or STDOUT
 	}
 
-	public synchronized void gotLine(String line) {
-	    //if(this.source == STDERR) {
-		///System.err.println("ERROR: " + line);
-	    //} else {
-		///System.err.println("OUT: " + line);
-	    //}
+	public void run(Closeable inputStream) {
+	    InputStream is = (InputStream) inputStream;
+
+	    BufferedReader br = null;
+	    try {
+		br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+		String line=null;
+		while ( (line = br.readLine()) != null ) {
+		    
+		    if(Thread.currentThread().isInterrupted()) { // should we not instead check if SafeProcess thread was interrupted?
+			System.err.println("Got interrupted when reading lines from process err/out stream.");
+			break; // will go to finally block
+		    }
+		    
+///		    System.out.println("@@@ GOT LINE: " + line);
+///		    GS2PerlConstructor.logger.info("@@@ GOT LINE: " + line + " STDOUT=1: " + source);
+
+		    //if(this.source == STDERR) {
+		    ///System.err.println("ERROR: " + line);
+		    //} else {
+		    ///System.err.println("OUT: " + line);
+		    //}	
+		    
+
+		    this.gotLine(line); // synchronized
+		    
+		    /*
+		    try {
+			synchronized(bwHandle) { // get a lock on the writer handle, then write
+			    
+			    bwHandle.write(line + "\n");
+			} 
+		    } catch(IOException ioe) {
+			String msg = (source == STDERR) ? "stderr" : "stdout";
+			msg = "Exception when writing out a line read from perl process' " + msg + " stream.";
+			GS2PerlConstructor.logger.error(msg, ioe);
+		    }
+		    
+		    // this next method is thread safe since only synchronized methods are invoked.
+		    // and only immutable (final) vars are used. 
+		    // NO, What about the listeners???
+		    sendProcessStatus(new ConstructionEvent(GS2PerlConstructor.this, GSStatus.CONTINUING, line));		    
+		    */
+		}
+	    } catch (IOException ioe) { // problem with reading in from process with BufferedReader br
+
+		String msg = (source == STDERR) ? "stderr" : "stdout";
+		msg = "Got exception when processing the perl process' " + msg + " stream.";
+		GS2PerlConstructor.logger.error(msg, ioe);
+		// now do what the original runPerlCommand() code always did:
+		ioe.printStackTrace();
+		logException(ioe); // synchronized
+
+	    } catch (Exception e) { // problem with BufferedWriter bwHandle on processing each line
+		e.printStackTrace();
+		logException(e); // synchronized
+	    } finally {
+		SafeProcess.closeResource(br);
+	    }
+	}
+
+	// trying to keep synchronized methods as short as possible
+	private synchronized void logException(Exception e) {
+	    sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Exception occurred " + e.toString()));
+	}
+
+	// trying to keep synchronized methods as short as possible
+	private synchronized void gotLine(String line) throws Exception {
 
 	    // BufferedWriter writes may not be atomic
 	    // http://stackoverflow.com/questions/9512433/is-writer-an-atomic-method
 	    // Choosing to put try-catch outside of sync block, since it's okay to give up lock on exception
 	    // http://stackoverflow.com/questions/14944551/it-is-better-to-have-a-synchronized-block-inside-a-try-block-or-a-try-block-insi
-	    // "All methods on Logger are multi-thread safe", see
-	    // http://stackoverflow.com/questions/14211629/java-util-logger-write-synchronization
+	    try {					    
+		bwHandle.write(line + "\n");	
 	    
-	    try {		
-		bwHandle.write(line + "\n");
+///		System.out.println("@@@ WROTE LINE: " + line);
+///		GS2PerlConstructor.logger.info("@@@ WROTE LINE: " + line);
+
+		// this next method is thread safe since only synchronized methods are invoked.
+		// and only immutable (final) vars are used.
+		sendProcessStatus(new ConstructionEvent(GS2PerlConstructor.this, GSStatus.CONTINUING, line));
+	    
+	    } catch(IOException ioe) { // can't throw Exceptions, but are forced to handle Exceptions here
+		// since our method definition doesn't specify a throws list.
+		// "All methods on Logger are multi-thread safe", see
+		// http://stackoverflow.com/questions/14211629/java-util-logger-write-synchronization
 		
-	    } catch(IOException ioe) {
 		String msg = (source == STDERR) ? "stderr" : "stdout";
-		msg = "Exception when writing out a line read from perl process' " + msg + " stream.";
-		GS2PerlConstructor.logger.error(msg, ioe);
-	    }
-	    
-	    // this next method is thread safe since only synchronized methods are invoked.
-	    // and only immutable (final) vars are used.
-	    sendProcessStatus(new ConstructionEvent(GS2PerlConstructor.this, GSStatus.CONTINUING, line));
+		msg = "IOException when writing out a line read from perl process' " + msg + " stream.";
+		msg += "\nGot line: " + line + "\n";
+		throw new Exception(msg, ioe);
+	    }		    
 	}
 
-	// This is called when we get an exception during the processing of a perl's
-	// input-, err- or output stream
-	public synchronized void gotException(Exception e) {
-	    String msg = (source == STDERR) ? "stderr" : "stdout";
-	    msg = "Got exception when processing the perl process' " + msg + " stream.";
-
-	    // now do what the original runPerlCommand() code always did:
-	    e.printStackTrace();
-	    sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Exception occurred " + e.toString())); // atomic
-	}
-
-    } // end inner class SynchronizedProcessLineByLineHandler
+    } // end inner class SynchronizedProcessHandler
 
 }

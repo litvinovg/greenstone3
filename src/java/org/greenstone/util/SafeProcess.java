@@ -34,10 +34,7 @@ public class SafeProcess {
     private String errorStr = "";
     private int exitValue = -1;
 
-    // user can write custom LineByLineHandler to deal with stdout lines as they come out one line at a time
-    // and stderr lines as they come out one at a time
-    private LineByLineHandler errLineByLineHandler = null;
-    private LineByLineHandler outLineByLineHandler = null;
+    // allow callers to process exceptions of the main process thread if they want
     private ExceptionHandler exceptionHandler = null;
 
     // whether std/err output should be split at new lines
@@ -78,16 +75,6 @@ public class SafeProcess {
 	inputStr = sendStr;
     }
 
-    // register a handler whose gotLine() method will get called as each line is read from the process' stdout
-    public void setStdOutLineByLineHandler(LineByLineHandler out_lbl_handler) {
-	outLineByLineHandler = out_lbl_handler;
-    }
-
-    // register a handler whose gotLine() method will get called as each line is read from the process' stderr
-    public void setStdErrLineByLineHandler(LineByLineHandler err_lbl_handler) {
-	errLineByLineHandler = err_lbl_handler;
-    }
-
     // register a SafeProcess ExceptionHandler whose gotException() method will
     // get called for each exception encountered
     public void setExceptionHandler(ExceptionHandler exception_handler) {
@@ -103,22 +90,32 @@ public class SafeProcess {
     }
 
 //***************** Copied from gli's gui/FormatConversionDialog.java *************//
-    public int runProcess() {
 
+    public int runProcess() {
+	return runProcess(null, null, null); // use default processing of all 3 of the process' iostreams
+    }
+
+    public int runProcess(CustomProcessHandler procInHandler,
+			   CustomProcessHandler procOutHandler,
+			   CustomProcessHandler procErrHandler)
+    {
 	Process prcs = null;
 	SafeProcess.OutputStreamGobbler inputGobbler = null;
 	SafeProcess.InputStreamGobbler errorGobbler = null;
 	SafeProcess.InputStreamGobbler outputGobbler = null;
 
 	try {	    
+	    
 	    Runtime rt = Runtime.getRuntime();	    
+	    
+	    
 	    if(this.command != null) {
 		prcs = rt.exec(this.command);
 	    }
 	    else { // at least command_args must be set now
 
 		// http://stackoverflow.com/questions/5283444/convert-array-of-strings-into-a-string-in-java
-		///logger.info("SafeProcess running: " + Arrays.toString(command_args));
+		logger.info("SafeProcess running: " + Arrays.toString(command_args));
 
 		if(this.envp == null) { 
 		    prcs = rt.exec(this.command_args);
@@ -135,36 +132,58 @@ public class SafeProcess {
 		}
 	    }
 
-	    // send inputStr to process. The following constructor can handle inputStr being null
-	    inputGobbler = // WriterToProcessInputStream
-		new SafeProcess.OutputStreamGobbler(prcs.getOutputStream(), this.inputStr);
-	    
-	    // monitor for any error messages
-            errorGobbler // ReaderFromProcessOutputStream
-		= new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), splitStdErrorNewLines);
+	    logger.info("### Before creating ProcessInGobbler");
 
-            // monitor for the expected std output line(s)
-            outputGobbler
-		= new SafeProcess.InputStreamGobbler(prcs.getInputStream(), splitStdOutputNewLines);
-	                
-	    // register line by line handlers, if any were set, for the process stderr and stdout streams
-	    if(this.outLineByLineHandler != null) {
-		outputGobbler.setLineByLineHandler(this.outLineByLineHandler);
+	    // Create the streamgobblers and set any specified handlers on them
+
+	    // PROC INPUT STREAM
+	    if(procInHandler == null) {
+		// send inputStr to process. The following constructor can handle inputStr being null
+		inputGobbler = // WriterToProcessInputStream
+		    new SafeProcess.OutputStreamGobbler(prcs.getOutputStream(), this.inputStr);
+	    } else { // user will do custom handling of process' InputStream 
+		inputGobbler = new SafeProcess.OutputStreamGobbler(prcs.getOutputStream(), procInHandler);
 	    }
-	    if(this.errLineByLineHandler != null) {
-		errorGobbler.setLineByLineHandler(this.errLineByLineHandler);
+
+	    logger.info("### Before creating ProcessErrGobbler");
+	    
+	    // PROC ERR STREAM to monitor for any error messages or expected output in the process' stderr
+	    if(procErrHandler == null) {
+		errorGobbler // ReaderFromProcessOutputStream
+		    = new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), splitStdErrorNewLines);		
+	    } else {
+		errorGobbler
+		    = new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), procErrHandler);
 	    }
-	    if(this.exceptionHandler != null) {
-		inputGobbler.setExceptionHandler(this.exceptionHandler);
-	    }	    
+
+	    logger.info("### Before creating ProcessOutGobbler");
+
+            // PROC OUT STREAM to monitor for the expected std output line(s)
+	    if(procOutHandler == null) {
+		outputGobbler
+		    = new SafeProcess.InputStreamGobbler(prcs.getInputStream(), splitStdOutputNewLines);
+	    } else {
+		outputGobbler
+		    = new SafeProcess.InputStreamGobbler(prcs.getInputStream(), procOutHandler);
+	    }
+
+	    
+	    logger.info("### Before streamgobblers.start()");
 
             // kick off the stream gobblers
             inputGobbler.start();
             errorGobbler.start();
             outputGobbler.start();
+
+	    logger.info("### After streamgobblers.start() - before waitFor");
                                     
             // any error???
-            this.exitValue = prcs.waitFor(); // can throw an InterruptedException if process did not terminate	    	    
+            this.exitValue = prcs.waitFor(); // can throw an InterruptedException if process did not terminate
+
+            logger.info("Process exitValue: " + exitValue); 
+
+	    logger.info("### Before streamgobblers.join()");
+
 	    // From the comments of 
 	    // http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
 	    // To avoid running into nondeterministic failures to get the process output
@@ -174,10 +193,12 @@ public class SafeProcess {
 	    errorGobbler.join();
 	    inputGobbler.join(); 
 	    
+	    logger.info("### After streamgobblers.join()");
+
 	    // set the variables the code that created a SafeProcess object may want to inspect
 	    this.outputStr = outputGobbler.getOutput();
 	    this.errorStr = errorGobbler.getOutput();
-
+	    
 	    // Since we didn't have an exception, process should have terminated now (waitFor blocks until then)
 	    // Set process to null so we don't forcibly terminate it below with process.destroy()
 	    prcs = null;
@@ -191,14 +212,14 @@ public class SafeProcess {
 		//ioe.printStackTrace();
 	    }
 	} catch(InterruptedException ie) {
+
 	    if(exceptionHandler != null) {
 		exceptionHandler.gotException(ie);
 	    } else {
 		logger.error("Process InterruptedException: " + ie.getMessage(), ie);
 		//System.err.println("Process InterruptedException " + ie.getMessage());
-		//ie.printStackTrace(); // an interrupt here is not an error, it can be a cancel action
+		///ie.printStackTrace(); // an interrupt here is not an error, it can be a cancel action
 	    }
-
 
 	    // propagate interrupts to worker threads here?
 	    // unless the interrupt emanated from any of them in any join()...
@@ -236,7 +257,7 @@ public class SafeProcess {
 		prcs.destroy();
 	    }
 	}
-
+	
 	return this.exitValue;
     }
     
@@ -256,11 +277,11 @@ public static interface ExceptionHandler {
     public void gotException(Exception e);
 }
 
-// When reading from a process' stdout or stderr stream, you can create a LineByLineHandler
-// to do something on a line by line basis, such as sending the line to a log
-public static interface LineByLineHandler {
-    public void gotLine(String line);
-    public void gotException(Exception e); // for when an exception occurs instead of getting a line
+// write your own run() body for any StreamGobbler
+// Make sure your implementation is threadsafe if you're sharing immutable objects between the threaded streams
+// example implementation is in the GS2PerlConstructor.SynchronizedProcessHandler class.
+public static interface CustomProcessHandler {
+    public void run(Closeable stream); //InputStream or OutputStream
 }
 
 
@@ -269,15 +290,15 @@ public static interface LineByLineHandler {
 // streams of a Process, Process.getInputStream() and Process.getErrorSream()
 public static class InputStreamGobbler extends Thread
 {
-    InputStream is = null;
-    StringBuffer outputstr = new StringBuffer();
-    boolean split_newlines = false;
-    LineByLineHandler lineByLineHandler = null;
-    
+    private InputStream is = null;
+    private StringBuffer outputstr = new StringBuffer();
+    private boolean split_newlines = false;
+    private CustomProcessHandler customHandler = null;
+
     public InputStreamGobbler(InputStream is)
     {
 	this.is = is;
-	split_newlines = false;
+	this.split_newlines = false;
     }
     
     public InputStreamGobbler(InputStream is, boolean split_newlines)
@@ -286,12 +307,14 @@ public static class InputStreamGobbler extends Thread
 	this.split_newlines = split_newlines;
     }
     
-    public void setLineByLineHandler(LineByLineHandler lblHandler) {
-	lineByLineHandler = lblHandler;
+    public InputStreamGobbler(InputStream is, CustomProcessHandler customHandler)
+    {
+	this.is = is;
+	this.customHandler = customHandler;
     }
 
-
-    public void run()
+    // default run() behaviour
+    public void runDefault()
     {
 	BufferedReader br = null;
 	try {
@@ -306,28 +329,32 @@ public static class InputStreamGobbler extends Thread
 
 		//System.out.println("@@@ GOT LINE: " + line);
 		outputstr.append(line);
-		
 		if(split_newlines) {
 		    outputstr.append(Misc.NEWLINE); // "\n" is system dependent (Win must be "\r\n")
 		}
-
-		if(lineByLineHandler != null) { // let handler deal with newlines
-		    lineByLineHandler.gotLine(line);
-		}		
 	    }
-	} catch (IOException ioe) {
-	    if(lineByLineHandler != null) {
-		lineByLineHandler.gotException(ioe);
-	    } else {
-		logger.error("Exception when reading from a process' stdout/stderr stream: ", ioe);
-		//ioe.printStackTrace();
-	    }
+	} catch (IOException ioe) {	    
+	    logger.error("Exception when reading from a process' stdout/stderr stream: ", ioe);
+	    //System.err.println("Exception when reading from a process' stdout/stderr stream: ");
+	    //ioe.printStackTrace();  
 	    
 	} finally {
 	    SafeProcess.closeResource(br);
 	}
     }
     
+    public void runCustom() {
+	this.customHandler.run(is);
+    }
+    
+    public void run() {
+	if(this.customHandler == null) {
+	    runDefault();
+	} else {
+	    runCustom();
+	}
+    }
+
     public String getOutput() { 
 	return outputstr.toString(); // implicit toString() call anyway. //return outputstr; 
     }
@@ -339,9 +366,9 @@ public static class InputStreamGobbler extends Thread
 // Process.getOutputStream()
 public static class OutputStreamGobbler extends Thread
 {
-    OutputStream os = null;
-    String inputstr = "";
-    ExceptionHandler exceptionHandler = null;
+    private OutputStream os = null;
+    private String inputstr = "";
+    private CustomProcessHandler customHandler = null;
 
     public OutputStreamGobbler(OutputStream os) {
 	this.os = os;
@@ -352,19 +379,21 @@ public static class OutputStreamGobbler extends Thread
 	this.os = os;
 	this.inputstr = inputstr;
     }
-    
-    public void setExceptionHandler(ExceptionHandler eHandler) {
-	exceptionHandler = eHandler;
+
+    public OutputStreamGobbler(OutputStream os, CustomProcessHandler customHandler) {
+	this.os = os;
+	this.customHandler = customHandler;
     }
 
-    public void run()
-    {	
+    // default run() behaviour
+    public void runDefault() {
+	
 	if (inputstr == null) {
 		return;
 	}
 	
 	BufferedWriter osw = null;
-	try	{
+	try {
 	    osw = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
 	    //System.out.println("@@@ SENDING LINE: " + inputstr);
 	    osw.write(inputstr, 0, inputstr.length());
@@ -384,16 +413,27 @@ public static class OutputStreamGobbler extends Thread
 	      osw.flush();
 	    */
 	} catch (IOException ioe) {
-	    if (this.exceptionHandler != null) {
-		this.exceptionHandler.gotException(ioe);
-	    } else {
-		logger.error("Exception writing to SafeProcess' inputstream: ", ioe);	    
-		//ioe.printStackTrace();
-	    }
-	    
+	    logger.error("Exception writing to SafeProcess' inputstream: ", ioe);
+	    //System.err.println("Exception writing to SafeProcess' inputstream: ");
+	    //ioe.printStackTrace();	
 	} finally {
 	    SafeProcess.closeResource(osw);
 	}
+    }
+
+    // call the user's custom handler for the run() method
+    public void runCustom() {
+	this.customHandler.run(os);	
+    }
+
+    public void run()
+    {
+	if(this.customHandler == null) {
+	    runDefault();
+	} else {
+	    runCustom();
+	}
+
     }	
 } // end static inner class OutputStreamGobbler
 

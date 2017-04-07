@@ -1186,16 +1186,26 @@ public class GS2Construct extends ServiceRack
 		}
 		// now we know we have an archives folder
 		String old_value = coll_db.getValue(oid);
-		String new_value = old_value.replace("<index-status>B", "<index-status>" + mark);
+		String new_value = "<index-status>" + mark;
+		if(old_value == null) {
+		    logger.error("### null old_value in flat DB for oid " + oid);
+		} else {
+		    new_value = old_value.replace("<index-status>B", "<index-status>" + mark);
+		    logger.info("### Replacing db entry for oid " + oid + " which has old_value " + old_value);
+		    logger.info("### with new value " + new_value);
+				    
+		}
 		// Close database for reading
 		coll_db.closeDatabase();
+
 		if (!coll_db.openDatabase(coll_db_file, SimpleCollectionDatabase.WRITE))
-		{
+		    {
 			logger.error("Could not open collection archives database. Somebody already using this database!");
 			return;
-		}
-		coll_db.setValue(oid, new_value);
-		coll_db.closeDatabase();
+		    }
 		
+		coll_db.setValue(oid, new_value);
+		
+		coll_db.closeDatabase();		
 	}
 }
