@@ -1,85 +1,84 @@
 <siteConfig xmlns:gsf='http://www.greenstone.org/greenstone3/schema/ConfigFormat' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>
-	<metadataList xmlns:gsf="http://www.greenstone.org/greenstone3/schema/MetadataFormat" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-		<metadata name="siteAdmin">admin@example.com</metadata>
-	</metadataList>
-	<displayItemList>
-		<displayItem name="siteName" lang="en">My Greenstone Library</displayItem>
-		<displayItem name="siteName" key="siteName" dictionary="siteConfig"/>
-		<displayItem name="siteDescription" lang="en">This is a digital library built using the open-source Greenstone Digital Library software, version 3. Edit the site name and description in web/sites/localsite/siteConfig.xml or web/sites/localsite/resources/siteConfig_xx.properties.</displayItem>
-		<displayItem name="siteDescription" key="siteDescription" dictionary="siteConfig"/>
-	  
-	</displayItemList>
-	<siteList/>
-	<serviceRackList>
-		<!-- uncomment to provide the GATE tagging service -->	
-		<!--<serviceRack name="GATEServices"/>-->
-		<!-- uncomment to provide the Authentication service -->
-		<serviceRack name='Authentication'>
-			<!-- Go to https://www.google.com/recaptcha/admin/create and replace these keys when you deploy your site -->
-			<recaptcha name="public_key" value="6LckI88SAAAAACUYjj97WMcnz5HPjVp3lI-x-ue8"/>
-			<recaptcha name="private_key" value="6LckI88SAAAAAGnGy1PwuXYZzIMXZYoPxN51bWWG"/>
-		</serviceRack>
-		
-		<serviceRack name="ArchiveIO"/>
-		<serviceRack name="CollectionGroups"/>
-		<serviceRack name="DocumentMaker"/>
-		<serviceRack name="DocXMLUtil"/>
-		<serviceRack name="DocumentBasket"/>
-		<serviceRack name="BerryBasket"/>
-		<serviceRack name="GS2Construct"/>
-		<serviceRack name="DebugService"/>
-		<serviceRack name="UserTracker"/>
-		<serviceRack name="CrossCollectionSearch">
-			<format>
-				<!-- this format is used for the search results -->
-				<gsf:template match="documentNode">
+  <metadataList xmlns:gsf="http://www.greenstone.org/greenstone3/schema/MetadataFormat" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <metadata name="siteAdmin">admin@example.com</metadata>
+  </metadataList>
+  <displayItemList>
+    <displayItem name="siteName" lang="en">My Greenstone Library</displayItem>
+    <displayItem name="siteName" key="siteName" dictionary="siteConfig"/>
+    <displayItem name="siteDescription" lang="en">This is a digital library built using the open-source Greenstone Digital Library software, version 3. Edit the site name and description in web/sites/localsite/siteConfig.xml or web/sites/localsite/resources/siteConfig_xx.properties.</displayItem>
+    <displayItem name="siteDescription" key="siteDescription" dictionary="siteConfig"/>
+  </displayItemList>
+  <siteList/>
+  <serviceRackList>
+    <!-- uncomment to provide the GATE tagging service -->	
+    <!--<serviceRack name="GATEServices"/>-->
+    <!-- uncomment to provide the Authentication service -->
+    <serviceRack name='Authentication'>
+      <!-- Go to https://www.google.com/recaptcha/admin/create and replace these keys when you deploy your site -->
+      <recaptcha name="public_key" value="6LckI88SAAAAACUYjj97WMcnz5HPjVp3lI-x-ue8"/>
+      <recaptcha name="private_key" value="6LckI88SAAAAAGnGy1PwuXYZzIMXZYoPxN51bWWG"/>
+    </serviceRack>
+    
+    <serviceRack name="ArchiveIO"/>
+    <serviceRack name="CollectionGroups"/>
+    <serviceRack name="DocumentMaker"/>
+    <serviceRack name="DocXMLUtil"/>
+    <serviceRack name="DocumentBasket"/>
+    <serviceRack name="BerryBasket"/>
+    <serviceRack name="GS2Construct"/>
+    <serviceRack name="DebugService"/>
+    <serviceRack name="UserTracker"/>
+    <serviceRack name="CrossCollectionSearch">
+      <format>
+	<!-- this format is used for the search results -->
+	<gsf:template match="documentNode">
 	  <xsl:variable name="collname" select="@collection"/>
-					<td><a><xsl:attribute name='href'><xsl:value-of select="$library_name"/>/collection/<xsl:value-of select='@collection'/>/document/<xsl:value-of select='@nodeID'/></xsl:attribute><gsf:icon/></a></td>
-					<td><gsf:metadata name='Title'/></td>
-					<td><a href='{$library_name}/collection/{$collname}/page/about'><xsl:value-of select="/page/pageResponse/service/paramList/param[@name='collection']/option[@name=$collname]/displayItem[@name='name']"/> </a></td>
-				</gsf:template>
-			</format>
-		</serviceRack>
-	</serviceRackList>
-	<serviceClusterList/>
-	<!-- this is a global replace list for all collections. At this stage it only applies to greenstone 2 collections. It will attempt to resolve most of the common macros that appear in metadata. You can add more items here if you want them to apply to all collections. To turn this on/off for a particular collection, add <replaceListRef id='xx'/> into the collectionConfig for each set that you want to use -->
+	  <td><a><xsl:attribute name='href'><xsl:value-of select="$library_name"/>/collection/<xsl:value-of select='@collection'/>/document/<xsl:value-of select='@nodeID'/></xsl:attribute><gsf:icon/></a></td>
+	  <td><gsf:metadata name='Title'/></td>
+	  <td><a href='{$library_name}/collection/{$collname}/page/about'><xsl:value-of select="/page/pageResponse/service/paramList/param[@name='collection']/option[@name=$collname]/displayItem[@name='name']"/> </a></td>
+	</gsf:template>
+      </format>
+    </serviceRack>
+  </serviceRackList>
+  <serviceClusterList/>
+  <!-- this is a global replace list for all collections. At this stage it only applies to greenstone 2 collections. It will attempt to resolve most of the common macros that appear in metadata. You can add more items here if you want them to apply to all collections. To turn this on/off for a particular collection, add <replaceListRef id='xx'/> into the collectionConfig for each set that you want to use -->
   <!-- replace elements can look like: 
-  <replace macro="original text" scope="text|metadata|all" text="replacement text"/>
-  <replace macro="original text" scope="text|metadata|all" metadata="metadata element value to replace with"/>
-  <replace macro="original text" scope="text|metadata|all" key="dictionary key" bundle="dictionary name"/> -->
-	<replaceList  id="gs2-standard">
-		<replace macro="_iconpdf_" scope="metadata" text="&lt;img src='interfaces/default/images/ipdf.gif' border='0'/&gt;" resolve="false"/>
-		<replace macro="_icondoc_" scope="metadata" text="&lt;img src='interfaces/default/images/imsword.gif' border='0'/&gt;" resolve="false"/>
-		<replace macro="_iconps_" scope="metadata" text="&lt;img src='interfaces/default/images/ips.gif' border='0'/&gt;" resolve="false"/>
-		<replace macro="_iconrtf_" scope="metadata" text="&lt;img src='interfaces/default/images/irtf.gif' border='0'/&gt;" resolve="false"/>
-		<replace macro="_iconxls_" scope="metadata" text="&lt;img src='interfaces/default/images/iexcel.gif' border='0'/&gt;" resolve="false"/>
-		<replace macro="_iconppt_" scope="metadata" text="&lt;img src='interfaces/default/images/ippt.gif' border='0'/&gt;" resolve="false"/>
-		<replace macro="_icontext_" scope="metadata" text="&lt;img src='interfaces/default/images/itext.gif' border='0'/&gt;" resolve="false"/>
-		<replace macro="_iconblanktext_" scope="metadata" text="&lt;img src='interfaces/default/images/ibtext.gif' border='0'/&gt;" resolve="false"/>     
-		<replace macro="_iconmp3_" scope="metadata" text="&lt;img src='interfaces/default/images/imp3.gif' border='0'/&gt;" resolve="false"/>
-		<replace macro="_iconmidi_" scope="metadata" text="&lt;img src='interfaces/default/images/imidi.gif' border='0'/&gt;" resolve="false"/>
-		<replace macro="_iconworld_" scope="metadata" text="&lt;img src='interfaces/default/images/iworld.gif' border='0'/&gt;" resolve="false"/>
-		<replace macro="_iconunknown_" scope="metadata" text="&lt;img src='interfaces/default/images/iunknown.gif' border='0'/&gt;" resolve="false"/>
+       <replace macro="original text" scope="text|metadata|all" text="replacement text"/>
+       <replace macro="original text" scope="text|metadata|all" metadata="metadata element value to replace with"/>
+       <replace macro="original text" scope="text|metadata|all" key="dictionary key" bundle="dictionary name"/> -->
+  <replaceList  id="gs2-standard">
+    <replace macro="_iconpdf_" scope="metadata" text="&lt;img src='interfaces/default/images/ipdf.gif' border='0'/&gt;" resolve="false"/>
+    <replace macro="_icondoc_" scope="metadata" text="&lt;img src='interfaces/default/images/imsword.gif' border='0'/&gt;" resolve="false"/>
+    <replace macro="_iconps_" scope="metadata" text="&lt;img src='interfaces/default/images/ips.gif' border='0'/&gt;" resolve="false"/>
+    <replace macro="_iconrtf_" scope="metadata" text="&lt;img src='interfaces/default/images/irtf.gif' border='0'/&gt;" resolve="false"/>
+    <replace macro="_iconxls_" scope="metadata" text="&lt;img src='interfaces/default/images/iexcel.gif' border='0'/&gt;" resolve="false"/>
+    <replace macro="_iconppt_" scope="metadata" text="&lt;img src='interfaces/default/images/ippt.gif' border='0'/&gt;" resolve="false"/>
+    <replace macro="_icontext_" scope="metadata" text="&lt;img src='interfaces/default/images/itext.gif' border='0'/&gt;" resolve="false"/>
+    <replace macro="_iconblanktext_" scope="metadata" text="&lt;img src='interfaces/default/images/ibtext.gif' border='0'/&gt;" resolve="false"/>     
+    <replace macro="_iconmp3_" scope="metadata" text="&lt;img src='interfaces/default/images/imp3.gif' border='0'/&gt;" resolve="false"/>
+    <replace macro="_iconmidi_" scope="metadata" text="&lt;img src='interfaces/default/images/imidi.gif' border='0'/&gt;" resolve="false"/>
+    <replace macro="_iconworld_" scope="metadata" text="&lt;img src='interfaces/default/images/iworld.gif' border='0'/&gt;" resolve="false"/>
+    <replace macro="_iconunknown_" scope="metadata" text="&lt;img src='interfaces/default/images/iunknown.gif' border='0'/&gt;" resolve="false"/>
 
-		<replace macro="[archivedir]" scope="all" metadata="assocfilepath" resolve="false"/>
-		<replace macro="[assocfilepath]" scope="all" metadata="assocfilepath" resolve="false"/>
-		<replace macro="[srcurl]" scope="metadata" metadata="srcurl" resolve="false"/>
-		<replace macro="[SourceFile]" scope="metadata" metadata="SourceFile" resolve="false"/>
-		<!-- _httpsite_ and _clustername_ are macros that are defined in the java code -->
-		<replace macro="_httpcollection_" scope="metadata" text="_httpsite_/collect/_clustername_" resolve="true"/>
-		<replace macro="_httpprefix_" scope="metadata" text="_httpsite_" resolve="true"/>
-		<replace macro="_httpdocimg_" scope="text" text="_httpsite_/collect/_clustername_/index/assoc/[assocfilepath]/" resolve="true"/>
-		<replace macro="_httpsamepagelink_" scope="text" text="_libraryname_/collection/_clustername_/document/[DocOID]" resolve="true"/>
-		<replace macro="[collection]" scope="all" text="_clustername_" resolve="true"/>
-		<replace macro="_httpextlink_" scope="all" text="_libraryname_?el=&amp;a=d&amp;c=_clustername_&amp;d=" resolve="true"/>
-	</replaceList>
-	<replaceList id="gs2-image"> 
-		<replace macro="[Image]" scope="metadata" metadata="Image" resolve="false"/> 
-		<replace macro="[Thumb]" scope="metadata" metadata="Thumb" resolve="false"/> 
-		<replace macro="[ThumbWidth]" scope="metadata" metadata="ThumbWidth" resolve="false"/> 
-		<replace macro="[ThumbHeight]" scope="metadata" metadata="ThumbHeight" resolve="false"/> 
-		<replace macro="[Screen]" scope="metadata" metadata="Screen" resolve="false"/> 
-		<replace macro="[ScreenWidth]" scope="metadata" metadata="ScreenWidth" resolve="false"/> 
-		<replace macro="[ScreenHeight]" scope="metadata" metadata="ScreenHeight" resolve="false"/> 
-	</replaceList> 
+    <replace macro="[archivedir]" scope="all" metadata="assocfilepath" resolve="false"/>
+    <replace macro="[assocfilepath]" scope="all" metadata="assocfilepath" resolve="false"/>
+    <replace macro="[srcurl]" scope="metadata" metadata="srcurl" resolve="false"/>
+    <replace macro="[SourceFile]" scope="metadata" metadata="SourceFile" resolve="false"/>
+    <!-- _httpsite_ and _clustername_ are macros that are defined in the java code -->
+    <replace macro="_httpcollection_" scope="metadata" text="_httpsite_/collect/_clustername_" resolve="true"/>
+    <replace macro="_httpprefix_" scope="metadata" text="_httpsite_" resolve="true"/>
+    <replace macro="_httpdocimg_" scope="text" text="_httpsite_/collect/_clustername_/index/assoc/[assocfilepath]/" resolve="true"/>
+    <replace macro="_httpsamepagelink_" scope="text" text="_libraryname_/collection/_clustername_/document/[DocOID]" resolve="true"/>
+    <replace macro="[collection]" scope="all" text="_clustername_" resolve="true"/>
+    <replace macro="_httpextlink_" scope="all" text="_libraryname_?el=&amp;a=d&amp;c=_clustername_&amp;d=" resolve="true"/>
+  </replaceList>
+  <replaceList id="gs2-image"> 
+    <replace macro="[Image]" scope="metadata" metadata="Image" resolve="false"/> 
+    <replace macro="[Thumb]" scope="metadata" metadata="Thumb" resolve="false"/> 
+    <replace macro="[ThumbWidth]" scope="metadata" metadata="ThumbWidth" resolve="false"/> 
+    <replace macro="[ThumbHeight]" scope="metadata" metadata="ThumbHeight" resolve="false"/> 
+    <replace macro="[Screen]" scope="metadata" metadata="Screen" resolve="false"/> 
+    <replace macro="[ScreenWidth]" scope="metadata" metadata="ScreenWidth" resolve="false"/> 
+    <replace macro="[ScreenHeight]" scope="metadata" metadata="ScreenHeight" resolve="false"/> 
+  </replaceList> 
 </siteConfig>
