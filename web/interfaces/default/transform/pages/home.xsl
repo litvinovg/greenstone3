@@ -43,17 +43,8 @@
 		</div>
 
 		<h2><gslib:selectACollectionTextBar/></h2>
+		<xsl:call-template name="collectionAndGroupLinks"/>
 
-		<xsl:for-each select="collectionList/collection|groupList/group">
-                	<xsl:sort data-type="number" select="@position"/>
-			<xsl:if test="name() = 'collection'">
-                                <gslib:collectionLinkWithImage/>
-			</xsl:if>
-			<xsl:if test="name() = 'group'">
-                                <gslib:groupLinkWithImage/>
-			</xsl:if>			
-                </xsl:for-each>
-	
 	        <div style="clear: both; padding-top: 4px; padding-bottom: 4px;"><hr/></div>
 		<xsl:variable name="siteDesc"><xsl:choose><xsl:when test="$groupPath != ''"><gslib:groupDescription path="{$groupPath}"/></xsl:when><xsl:otherwise><gslib:siteDescription/></xsl:otherwise></xsl:choose></xsl:variable>
 		<xsl:if test="$siteDesc != ''">
@@ -74,6 +65,18 @@
 	</xsl:template>
 
 
+	<xsl:template name="collectionAndGroupLinks">
+	  <xsl:for-each select="collectionList/collection|groupList/group">
+            <xsl:sort data-type="number" select="@position"/>
+	    <xsl:if test="name() = 'collection'">
+              <gslib:collectionLinkWithImage/>
+	    </xsl:if>
+	    <xsl:if test="name() = 'group'">
+              <gslib:groupLinkWithImage/>
+	    </xsl:if>			
+          </xsl:for-each>
+	  
+	</xsl:template>
 	<xsl:template match="/page/xsltparams">
 	  <!-- suppress xsltparam block in page -->
 	</xsl:template>
