@@ -323,10 +323,12 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 		command.add(cgi_directory + File.separator + "metadata-server.pl");
 		
 		// Need to set QUERY_STRING and REQUEST_METHOD=GET in environment
+		// Also set GS3_AUTHENTICATED, to allow running metadata-server.pl with mod (set and remove) commands
 		// http://www.cgi101.com/class/ch3/text.html
 		String[] envvars = {
 		    "QUERY_STRING=" + this.query_string,
-		    "REQUEST_METHOD=GET"
+		    "REQUEST_METHOD=GET",
+		    "GS3_AUTHENTICATED=true" // how do we set the env var without having to assign it a value?
 		};
 
 		String[] command_str = {};
