@@ -99,8 +99,8 @@ public class SafeProcess {
 	else { // at least command_args must be set now
 	    
 	    // http://stackoverflow.com/questions/5283444/convert-array-of-strings-into-a-string-in-java
-	    ///System.err.println("SafeProcess running: " + Arrays.toString(command_args));
 	    logger.info("SafeProcess running: " + Arrays.toString(command_args));
+	    //System.err.println("SafeProcess running: " + Arrays.toString(command_args));
 	    
 	    if(this.envp == null) { 
 		prcs = rt.exec(this.command_args);
@@ -140,6 +140,7 @@ public class SafeProcess {
             this.exitValue = prcs.waitFor(); // can throw an InterruptedException if process did not terminate
 
             ///logger.info("Process exitValue: " + exitValue); 
+	    ///System.err.println("Process exitValue: " + exitValue); 
 
 	    // From the comments of 
 	    // http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
@@ -491,6 +492,7 @@ public static class InputStreamGobbler extends Thread
 
 		if(this.isInterrupted()) { // should we not instead check if SafeProcess thread was interrupted?
 		    logger.info("Got interrupted when reading lines from process err/out stream.");
+		    //System.err.println("InputStreamGobbler.runDefault() Got interrupted when reading lines from process err/out stream.");
 		    break; // will go to finally block
 		}
 
