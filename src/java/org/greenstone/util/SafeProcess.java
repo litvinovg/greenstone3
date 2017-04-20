@@ -89,11 +89,82 @@ public class SafeProcess {
 	splitStdErrorNewLines = split;
     }
 
-//***************** Copied from gli's gui/FormatConversionDialog.java *************//
+    private Process doRuntimeExec() throws IOException {
+	Process prcs = null;
+	Runtime rt = Runtime.getRuntime();
+	
+	if(this.command != null) {
+	    prcs = rt.exec(this.command);
+	}
+	else { // at least command_args must be set now
+	    
+	    // http://stackoverflow.com/questions/5283444/convert-array-of-strings-into-a-string-in-java
+	    ///System.err.println("SafeProcess running: " + Arrays.toString(command_args));
+	    logger.info("SafeProcess running: " + Arrays.toString(command_args));
+	    
+	    if(this.envp == null) { 
+		prcs = rt.exec(this.command_args);
+	    } else { // launch process using cmd str with env params		
+		
+		if(this.dir == null) {
+		    ///logger.info("\twith: " + Arrays.toString(this.envp));
+		    ///System.err.println("\twith: " + Arrays.toString(this.envp));
+		    prcs = rt.exec(this.command_args, this.envp);
+		} else {
+		    ///logger.info("\tfrom directory: " + this.dir);
+		    ///logger.info("\twith: " + Arrays.toString(this.envp));
+		    ///System.err.println("\tfrom directory: " + this.dir);
+		    ///System.err.println("\twith: " + Arrays.toString(this.envp));
+			prcs = rt.exec(this.command_args, this.envp, this.dir);
+		}
+	    }
+	}
+
+	return prcs;
+    }
+
+
+    // no reading from or writing to Process' iostreams, just exec process and wait for it to return
+    public int runBasicProcess() {
+	Process prcs = null;
+	try {
+	    prcs = doRuntimeExec();
+	    this.exitValue = prcs.waitFor();
+
+	    
+	} catch(IOException ioe) {
+	    if(exceptionHandler != null) {
+		exceptionHandler.gotException(ioe);
+	    } else {
+		logger.error("IOException: " + ioe.getMessage(), ioe);
+		//System.err.println("IOException " + ioe.getMessage());
+		//ioe.printStackTrace();
+	    }
+	} catch(InterruptedException ie) {
+
+	    if(exceptionHandler != null) {
+		exceptionHandler.gotException(ie);
+	    } else {
+		logger.error("Process InterruptedException: " + ie.getMessage(), ie);
+		//System.err.println("Process InterruptedException " + ie.getMessage());
+		///ie.printStackTrace(); // an interrupt here is not an error, it can be a cancel action
+	    }
+	    
+	    Thread.currentThread().interrupt();
+	} finally { 
+
+	    if( prcs != null ) {
+		prcs.destroy(); // see runProcess() below
+	    }
+	}
+	return this.exitValue;
+    }
 
     public int runProcess() {
 	return runProcess(null, null, null); // use default processing of all 3 of the process' iostreams
     }
+
+//***************** Copied from gli's gui/FormatConversionDialog.java *************//
 
     public int runProcess(CustomProcessHandler procInHandler,
 			   CustomProcessHandler procOutHandler,
@@ -104,37 +175,9 @@ public class SafeProcess {
 	SafeProcess.InputStreamGobbler errorGobbler = null;
 	SafeProcess.InputStreamGobbler outputGobbler = null;
 
-	try {	    
+	try {
+	    prcs = doRuntimeExec();
 	    
-	    Runtime rt = Runtime.getRuntime();	    
-	    
-	    
-	    if(this.command != null) {
-		prcs = rt.exec(this.command);
-	    }
-	    else { // at least command_args must be set now
-
-		// http://stackoverflow.com/questions/5283444/convert-array-of-strings-into-a-string-in-java
-		///System.err.println("SafeProcess running: " + Arrays.toString(command_args));
-		logger.info("SafeProcess running: " + Arrays.toString(command_args));
-
-		if(this.envp == null) { 
-		    prcs = rt.exec(this.command_args);
-		} else { // launch process using cmd str with env params		
-		    
-		    if(this.dir == null) {
-			///logger.info("\twith: " + Arrays.toString(this.envp));
-			///System.err.println("\twith: " + Arrays.toString(this.envp));
-			prcs = rt.exec(this.command_args, this.envp);
-		    } else {
-			///logger.info("\tfrom directory: " + this.dir);
-			///logger.info("\twith: " + Arrays.toString(this.envp));
-			///System.err.println("\tfrom directory: " + this.dir);
-			///System.err.println("\twith: " + Arrays.toString(this.envp));
-			prcs = rt.exec(this.command_args, this.envp, this.dir);
-		    }
-		}
-	    }
 
 	    // Create the streamgobblers and set any specified handlers on them
 
@@ -165,7 +208,7 @@ public class SafeProcess {
 		    = new SafeProcess.InputStreamGobbler(prcs.getInputStream(), procOutHandler);
 	    }
 
-	    
+
             // kick off the stream gobblers
             inputGobbler.start();
             errorGobbler.start();
