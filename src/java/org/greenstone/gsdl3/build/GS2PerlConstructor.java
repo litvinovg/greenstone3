@@ -484,9 +484,9 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	    
 	    // handle each incoming line from stdout and stderr streams, and any exceptions that occur then
 	    SafeProcess.CustomProcessHandler processOutHandler
-		= new SynchronizedProcessHandler(bw, SynchronizedProcessHandler.STDOUT);
+		= new SynchronizedProcessHandler(bw, SafeProcess.STDOUT);
 	    SafeProcess.CustomProcessHandler processErrHandler
-		= new SynchronizedProcessHandler(bw, SynchronizedProcessHandler.STDERR);
+		= new SynchronizedProcessHandler(bw, SafeProcess.STDERR);
 	    
 	    // GS2PerlConstructor will do further handling of exceptions that may occur during the perl
 	    // process (including if writing something to the process' inputstream, not that we're doing that for this perlProcess)
@@ -699,7 +699,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
     // Called when an exception happens during the running of our perl process. However,
     // exceptions when reading from our perl process' stderr and stdout streams are handled by
     // SynchronizedProcessHandler.gotException() below, since they happen in separate threads
-    // from this one (the ine from which the perl process is run).
+    // from this one (the one from which the perl process is run).
     public synchronized void gotException(Exception e) {
 
 	// do what original runPerlCommand() code always did when an exception occurred
@@ -718,19 +718,14 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
     // The runPerlCommand code originally would do a sendProcessStatus on each exception, so we ensure
     // we do that here too, to continue original behaviour. These calls are also synchronized to make their
     // use of the EventListeners threadsafe.
-    protected class SynchronizedProcessHandler implements SafeProcess.CustomProcessHandler
+    protected class SynchronizedProcessHandler extends SafeProcess.CustomProcessHandler
     {
-	public static final int STDERR = 0;
-	public static final int STDOUT = 1;
-
-	private final int source;
 	private final BufferedWriter bwHandle; // needs to be final to synchronize on the object
 		
-
 	public SynchronizedProcessHandler(BufferedWriter bw, int src) {
+	    super(src); // will set this.source to STDERR or STDOUT
 	    this.bwHandle = bw; // caller will close bw, since many more than one
 	                        // SynchronizedProcessHandlers are using it
-	    this.source = src; // STDERR or STDOUT
 	}
 
 	public void run(Closeable inputStream) {
@@ -750,7 +745,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 		    ///System.out.println("@@@ GOT LINE: " + line);
 
 
-		    //if(this.source == STDERR) {
+		    //if(this.source == SafeProcess.STDERR) {
 		    ///System.err.println("ERROR: " + line);
 		    //} else {
 		    ///System.err.println("OUT: " + line);
@@ -766,7 +761,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 			    bwHandle.write(line + "\n");
 			} 
 		    } catch(IOException ioe) {
-			String msg = (source == STDERR) ? "stderr" : "stdout";
+			String msg = (this.source == SafeProcess.STDERR) ? "stderr" : "stdout";
 			msg = "Exception when writing out a line read from perl process' " + msg + " stream.";
 			GS2PerlConstructor.logger.error(msg, ioe);
 		    }
@@ -779,7 +774,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 		}
 	    } catch (IOException ioe) { // problem with reading in from process with BufferedReader br
 
-		String msg = (source == STDERR) ? "stderr" : "stdout";
+		String msg = (this.source == SafeProcess.STDERR) ? "stderr" : "stdout";
 		msg = "Got exception when processing the perl process' " + msg + " stream.";
 		GS2PerlConstructor.logger.error(msg, ioe);
 		// now do what the original runPerlCommand() code always did:
@@ -820,7 +815,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 		// "All methods on Logger are multi-thread safe", see
 		// http://stackoverflow.com/questions/14211629/java-util-logger-write-synchronization
 		
-		String msg = (source == STDERR) ? "stderr" : "stdout";
+		String msg = (this.source == SafeProcess.STDERR) ? "stderr" : "stdout";
 		msg = "IOException when writing out a line read from perl process' " + msg + " stream.";
 		msg += "\nGot line: " + line + "\n";
 		throw new Exception(msg, ioe);

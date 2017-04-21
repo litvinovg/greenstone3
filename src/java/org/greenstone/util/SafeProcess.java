@@ -19,6 +19,10 @@ import org.apache.log4j.*;
 // to avoid blocking problems that can arise from a Process' input and output streams.
 
 public class SafeProcess {
+    
+    public static final int STDERR = 0;
+    public static final int STDOUT = 1;
+    public static final int STDIN = 2;    
 
     static Logger logger = Logger.getLogger(org.greenstone.util.SafeProcess.class.getName());
 
@@ -203,13 +207,14 @@ public class SafeProcess {
 	return this.exitValue;
     }
 
-    // Runs a process with default stream processing
+    // Runs a process with default stream processing. Returns the exitValue
     public int runProcess() {
 	return runProcess(null, null, null); // use default processing of all 3 of the process' iostreams
     }
 
     // Run a process with custom stream processing (any custom handlers passed in that are null
-    // will use the default stream processing)
+    // will use the default stream processing). 
+    // Returns the exitValue from running the Process
     public int runProcess(CustomProcessHandler procInHandler,
 			   CustomProcessHandler procOutHandler,
 			   CustomProcessHandler procErrHandler)
@@ -238,7 +243,7 @@ public class SafeProcess {
 	    // PROC ERR STREAM to monitor for any error messages or expected output in the process' stderr
 	    if(procErrHandler == null) {
 		errorGobbler // ReaderFromProcessOutputStream
-		    = new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), splitStdErrorNewLines);		
+		    = new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), splitStdErrorNewLines);
 	    } else {
 		errorGobbler
 		    = new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), procErrHandler);
@@ -413,7 +418,7 @@ public class SafeProcess {
     }
 
 
-//******************** Inner class interface definitions ********************//
+//******************** Inner class and interface definitions ********************//
 // Static inner classes can be instantiated without having to instantiate an object of the outer class first
 
 // Can have public static interfaces too,
@@ -422,28 +427,45 @@ public class SafeProcess {
 // http://stackoverflow.com/questions/14520814/why-synchronized-method-is-not-included-in-interface
 public static interface ExceptionHandler {
 
-    // SHOULD I DECLARE THIS SYNCHRONIZED?
-    // It ends up being thread safe for the particular instance I'm using it for, but that doesn't
-    // make it future proof...
-    public void gotException(Exception e);
+    // when implementing ExceptionHandler.gotException(), if it manipulates anything that's
+    // not threadsafe, declare gotException() as a synchronized method to ensure thread safety
+    public void gotException(Exception e); // can't declare as synchronized in interface method declaration
 }
 
 // Write your own run() body for any StreamGobbler. You need to create an instance of a class
-// implementing CustomProcessHandler for EACH IOSTREAM of the process that you want to handle.
+// extending CustomProcessHandler for EACH IOSTREAM of the process that you want to handle.
 // Do not create a single CustomProcessHandler instance and reuse it for all three streams,
 // i.e. don't call SafeProcess' runProcess(x, x, x); It should be runProcess(x, y, z).
 // Make sure your implementation is threadsafe if you're sharing immutable objects between the threaded streams
 // example implementation is in the GS2PerlConstructor.SynchronizedProcessHandler class.
-public static interface CustomProcessHandler {
-    public void run(Closeable stream); //InputStream or OutputStream
+// CustomProcessHandler is made an abstract class instead of an interface to force classes that want
+// to use a CustomProcessHandler to create a separate class that extends CustomProcessHandler, rather than
+// that the classes that wish to use it "implementing" the CustomProcessHandler interface itself: the
+// CustomProcessHandler.run() method may then be called in the major thread from which the Process is being
+// executed, rather than from the individual threads that deal with each iostream of the Process.
+public static abstract class CustomProcessHandler {
+
+    protected final int source;
+
+    protected CustomProcessHandler(int src) {
+	this.source = src; // STDERR or STDOUT or STDIN
+    }
+    
+    public abstract void run(Closeable stream); //InputStream or OutputStream
 }
 
-// When using the default stream processing to read from a process' stdout or stderr stream,
-// you can create a LineByLineHandler for the process' err and out streams
+// When using the default stream processing to read from a process' stdout or stderr stream, you can
+// create a class extending LineByLineHandler for the process' err stream and one for its output stream
 // to do something on a line by line basis, such as sending the line to a log
-public static interface LineByLineHandler {
-    public void gotLine(String line);
-    public void gotException(Exception e); // for when an exception occurs instead of getting a line
+public static abstract class LineByLineHandler {
+    protected final int source;
+
+    protected LineByLineHandler(int src) {
+	this.source = src; // STDERR or STDOUT
+    }
+
+    public abstract void gotLine(String line); // first non-null line
+    public abstract void gotException(Exception e); // for when an exception occurs instead of getting a line
 }
 
 //**************** StreamGobbler Inner class definitions (stream gobblers copied from GLI) **********//
