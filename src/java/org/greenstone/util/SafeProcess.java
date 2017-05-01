@@ -9,20 +9,25 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-
 import java.util.Arrays;
 
 import org.apache.log4j.*;
+
+//import org.greenstone.gatherer.DebugStream;
 
 // Use this class to run a Java Process. It follows the good and safe practices at
 // http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
 // to avoid blocking problems that can arise from a Process' input and output streams.
 
 public class SafeProcess {
-    
+    //public static int DEBUG = 0;
+
     public static final int STDERR = 0;
     public static final int STDOUT = 1;
-    public static final int STDIN = 2;    
+    public static final int STDIN = 2;
+
+    // charset for reading process stderr and stdout streams
+    //public static final String UTF8 = "UTF-8";    
 
     static Logger logger = Logger.getLogger(org.greenstone.util.SafeProcess.class.getName());
 
@@ -32,11 +37,13 @@ public class SafeProcess {
     private String[] envp = null;
     private File dir = null;
     private String inputStr = null;
+    private Process process = null;
 
     // output from running SafeProcess.runProcess()
     private String outputStr = ""; 
     private String errorStr = "";
     private int exitValue = -1;
+    //private String charset = null;
 
     // allow callers to process exceptions of the main process thread if they want
     private ExceptionHandler exceptionHandler = null;
@@ -73,7 +80,8 @@ public class SafeProcess {
     public String getStdError() { return errorStr; }
     public int getExitValue() { return exitValue; }
 
-    
+    //public void setStreamCharSet(String charset) { this.charset = charset; } 
+
     // set any string to send as input to the process spawned by SafeProcess
     public void setInputString(String sendStr) {
 	inputStr = sendStr;
@@ -98,28 +106,25 @@ public class SafeProcess {
 	Runtime rt = Runtime.getRuntime();
 	
 	if(this.command != null) {
+	    log("SafeProcess running: " + command);
 	    prcs = rt.exec(this.command);
 	}
 	else { // at least command_args must be set now
 	    
 	    // http://stackoverflow.com/questions/5283444/convert-array-of-strings-into-a-string-in-java
-	    logger.info("SafeProcess running: " + Arrays.toString(command_args));
-	    //System.err.println("SafeProcess running: " + Arrays.toString(command_args));
+	    log("SafeProcess running: " + Arrays.toString(command_args));
 	    
 	    if(this.envp == null) { 
 		prcs = rt.exec(this.command_args);
 	    } else { // launch process using cmd str with env params		
 		
 		if(this.dir == null) {
-		    ///logger.info("\twith: " + Arrays.toString(this.envp));
-		    ///System.err.println("\twith: " + Arrays.toString(this.envp));
+		    //log("\twith: " + Arrays.toString(this.envp));
 		    prcs = rt.exec(this.command_args, this.envp);
 		} else {
-		    ///logger.info("\tfrom directory: " + this.dir);
-		    ///logger.info("\twith: " + Arrays.toString(this.envp));
-		    ///System.err.println("\tfrom directory: " + this.dir);
-		    ///System.err.println("\twith: " + Arrays.toString(this.envp));
-			prcs = rt.exec(this.command_args, this.envp, this.dir);
+		    //log("\tfrom directory: " + this.dir);
+		    //log("\twith: " + Arrays.toString(this.envp));		    
+		    prcs = rt.exec(this.command_args, this.envp, this.dir);
 		}
 	    }
 	}
@@ -128,80 +133,123 @@ public class SafeProcess {
     }
 
     // Copied from gli's gui/FormatConversionDialog.java
-    private int waitForWithStreams(Process prcs,
-				   SafeProcess.OutputStreamGobbler inputGobbler,
+    private int waitForWithStreams(SafeProcess.OutputStreamGobbler inputGobbler,
 				   SafeProcess.InputStreamGobbler outputGobbler,
 				   SafeProcess.InputStreamGobbler errorGobbler)
 	throws IOException, InterruptedException
     {
 
-            // kick off the stream gobblers
-            inputGobbler.start();
-            errorGobbler.start();
-            outputGobbler.start();
+	
+	// kick off the stream gobblers
+	inputGobbler.start();
+	errorGobbler.start();
+	outputGobbler.start();
+	
+	// any error???
+	try {
+	    this.exitValue = process.waitFor(); // can throw an InterruptedException if process did not terminate
+	} catch(InterruptedException ie) {
+	    log("*** Process interrupted (InterruptedException). Expected to be a Cancel operation.");
+	        // don't print stacktrace: an interrupt here is not an error, it's expected to be a cancel action
+	    if(exceptionHandler != null) {		
+		exceptionHandler.gotException(ie);
+	    }	        
+	    
+	    // propagate interrupts to worker threads here
+	    // unless the interrupt emanated from any of them in any join(),
+	    // which will be caught by caller's catch on InterruptedException.
+	    // Only if the thread that SafeProcess runs in was interrupted
+	    // should we propagate the interrupt to the worker threads.
+	    // http://stackoverflow.com/questions/2126997/who-is-calling-the-java-thread-interrupt-method-if-im-not
+	    // "I know that in JCiP it is mentioned that you should never interrupt threads you do not own"
+	    // But SafeProcess owns the worker threads, so it has every right to interrupt them
+	    // Also read http://stackoverflow.com/questions/13623445/future-cancel-method-is-not-working?noredirect=1&lq=1
+	    
+	    // http://stackoverflow.com/questions/3976344/handling-interruptedexception-in-java
+	    // http://stackoverflow.com/questions/4906799/why-invoke-thread-currentthread-interrupt-when-catch-any-interruptexception
+	    // "Only code that implements a thread's interruption policy may swallow an interruption request. General-purpose task and library code should never swallow interruption requests."
+	    // Does that mean that since this code implements this thread's interruption policy, it's ok
+	    // to swallow the interrupt this time and not let it propagate by commenting out the next line?
+	    //Thread.currentThread().interrupt(); // re-interrupt the thread
 
-            // any error???
-            this.exitValue = prcs.waitFor(); // can throw an InterruptedException if process did not terminate
+	    inputGobbler.interrupt();
+	    errorGobbler.interrupt();
+	    outputGobbler.interrupt();
 
-            ///logger.info("Process exitValue: " + exitValue); 
-	    ///System.err.println("Process exitValue: " + exitValue); 
-
+	    // even after the interrupts, we want to proceed to calling join() on all the worker threads
+	    // in order to wait for each of them to die before attempting to destroy the process if it
+	    // still hasn't terminated after all that.
+	} finally {		
+	    
+	    //log("Process exitValue: " + exitValue);
+	    
 	    // From the comments of 
 	    // http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
 	    // To avoid running into nondeterministic failures to get the process output
 	    // if there's no waiting for the threads, call join() on each Thread (StreamGobbler) object.
 	    // From Thread API: join() "Waits for this thread (the thread join() is invoked on) to die."
+	    
+	    // Wait for each of the threads to die, before attempting to destroy the process
+	    // Any of these can throw InterruptedExceptions too
+	    // and will be processed by the calling function's catch on InterruptedException.
+	    // However, no one besides us will interrupting these threads I think...
+	    // and we won't be throwing the InterruptedException from within the threads...
+	    // So if any streamgobbler.join() call throws an InterruptedException, that would be unexpected
+
 	    outputGobbler.join(); 
 	    errorGobbler.join();
-	    inputGobbler.join(); 
+	    inputGobbler.join();
 	    
-
-	    // set the variables the code that created a SafeProcess object may want to inspect
+	    
+	    // set the variables that the code which created a SafeProcess object may want to inspect
 	    this.outputStr = outputGobbler.getOutput();
 	    this.errorStr = errorGobbler.getOutput();
 	    
 	    // Since we didn't have an exception, process should have terminated now (waitFor blocks until then)
 	    // Set process to null so we don't forcibly terminate it below with process.destroy()
-	    prcs = null;
+	    this.process = null;	    
+	}
 
-	    return this.exitValue;
+	// Don't return from finally, it's considered an abrupt completion and exceptions are lost, see
+	// http://stackoverflow.com/questions/18205493/can-we-use-return-in-finally-block
+	return this.exitValue;
     }
 
+
+    public synchronized boolean processRunning() {
+	if(process == null) return false;
+	return SafeProcess.processRunning(this.process);
+    }
 
     // Run a very basic process: with no reading from or writing to the Process' iostreams,
     // this just execs the process and waits for it to return
     public int runBasicProcess() {
-	Process prcs = null;
 	try {
 	    // 1. create the process
-	    prcs = doRuntimeExec();
+	    process = doRuntimeExec();
 	    // 2. basic waitFor the process to finish
-	    this.exitValue = prcs.waitFor();
+	    this.exitValue = process.waitFor();
 
 	    
 	} catch(IOException ioe) {
 	    if(exceptionHandler != null) {
 		exceptionHandler.gotException(ioe);
 	    } else {
-		logger.error("IOException: " + ioe.getMessage(), ioe);
-		//System.err.println("IOException " + ioe.getMessage());
-		//ioe.printStackTrace();
+		log("IOException: " + ioe.getMessage(), ioe);
 	    }
 	} catch(InterruptedException ie) {
 
 	    if(exceptionHandler != null) {
 		exceptionHandler.gotException(ie);
-	    } else {
-		logger.error("Process InterruptedException: " + ie.getMessage(), ie);
-		//System.err.println("Process InterruptedException " + ie.getMessage());
-		///ie.printStackTrace(); // an interrupt here is not an error, it can be a cancel action
+	    } else { // Unexpected InterruptedException, so printstacktrace
+		log("Process InterruptedException: " + ie.getMessage(), ie);
 	    }
 	    
 	    Thread.currentThread().interrupt();
 	} finally { 
 
-	    if( prcs != null ) {
-		prcs.destroy(); // see runProcess() below
+	    if( process != null ) {
+		process.destroy(); // see runProcess() below
 	    }
 	}
 	return this.exitValue;
@@ -219,14 +267,13 @@ public class SafeProcess {
 			   CustomProcessHandler procOutHandler,
 			   CustomProcessHandler procErrHandler)
     {
-	Process prcs = null;
 	SafeProcess.OutputStreamGobbler inputGobbler = null;
 	SafeProcess.InputStreamGobbler errorGobbler = null;
 	SafeProcess.InputStreamGobbler outputGobbler = null;
 
 	try {
 	    // 1. get the Process object
-	    prcs = doRuntimeExec();
+	    process = doRuntimeExec();
 	    
 
 	    // 2. create the streamgobblers and set any specified handlers on them
@@ -235,86 +282,62 @@ public class SafeProcess {
 	    if(procInHandler == null) {
 		// send inputStr to process. The following constructor can handle inputStr being null
 		inputGobbler = // WriterToProcessInputStream
-		    new SafeProcess.OutputStreamGobbler(prcs.getOutputStream(), this.inputStr);
+		    new SafeProcess.OutputStreamGobbler(process.getOutputStream(), this.inputStr);
 	    } else { // user will do custom handling of process' InputStream 
-		inputGobbler = new SafeProcess.OutputStreamGobbler(prcs.getOutputStream(), procInHandler);
+		inputGobbler = new SafeProcess.OutputStreamGobbler(process.getOutputStream(), procInHandler);
 	    }
 
 	    // PROC ERR STREAM to monitor for any error messages or expected output in the process' stderr
 	    if(procErrHandler == null) {
 		errorGobbler // ReaderFromProcessOutputStream
-		    = new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), splitStdErrorNewLines);
+		    = new SafeProcess.InputStreamGobbler(process.getErrorStream(), splitStdErrorNewLines);
 	    } else {
 		errorGobbler
-		    = new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), procErrHandler);
+		    = new SafeProcess.InputStreamGobbler(process.getErrorStream(), procErrHandler);
 	    }
 
             // PROC OUT STREAM to monitor for the expected std output line(s)
 	    if(procOutHandler == null) {
 		outputGobbler
-		    = new SafeProcess.InputStreamGobbler(prcs.getInputStream(), splitStdOutputNewLines);
+		    = new SafeProcess.InputStreamGobbler(process.getInputStream(), splitStdOutputNewLines);
 	    } else {
 		outputGobbler
-		    = new SafeProcess.InputStreamGobbler(prcs.getInputStream(), procOutHandler);
+		    = new SafeProcess.InputStreamGobbler(process.getInputStream(), procOutHandler);
 	    }
 
 
             // 3. kick off the stream gobblers
-	    this.exitValue = waitForWithStreams(prcs, inputGobbler, outputGobbler, errorGobbler);
+	    this.exitValue = waitForWithStreams(inputGobbler, outputGobbler, errorGobbler);
        
 	} catch(IOException ioe) {
 	    if(exceptionHandler != null) {
 		exceptionHandler.gotException(ioe);
 	    } else {
-		logger.error("IOexception: " + ioe.getMessage(), ioe);
-		//System.err.println("IOexception " + ioe.getMessage());
-		//ioe.printStackTrace();
+		log("IOexception: " + ioe.getMessage(), ioe);
 	    }
-	} catch(InterruptedException ie) {
-
+	} catch(InterruptedException ie) { // caused during any of the gobblers.join() calls, this is unexpected so print stack trace
+	    
 	    if(exceptionHandler != null) {
 		exceptionHandler.gotException(ie);
+		log("@@@@ Unexpected InterruptedException when waiting for process stream gobblers to die");
 	    } else {
-		logger.error("Process InterruptedException: " + ie.getMessage(), ie);
-		//System.err.println("Process InterruptedException " + ie.getMessage());
-		///ie.printStackTrace(); // an interrupt here is not an error, it can be a cancel action
+		log("*** Unexpected InterruptException when waiting for process stream gobblers to die:" + ie.getMessage(), ie);
 	    }
 
-	    // propagate interrupts to worker threads here?
-	    // unless the interrupt emanated from any of them in any join()...
-	    // Only if the thread SafeProcess runs in was interrupted
-	    // do we propagate the interrupt to the worker threads.
-	    // http://stackoverflow.com/questions/2126997/who-is-calling-the-java-thread-interrupt-method-if-im-not
-	    // "I know that in JCiP it is mentioned that you should never interrupt threads you do not own"
-	    // But SafeProcess owns the worker threads, so it have every right to interrupt them
-	    // Also read http://stackoverflow.com/questions/13623445/future-cancel-method-is-not-working?noredirect=1&lq=1
-	    if(Thread.currentThread().isInterrupted()) {
-		inputGobbler.interrupt();
-		errorGobbler.interrupt();
-		outputGobbler.interrupt();	    
-	    }
-
-	    // On catchingInterruptedException, re-interrupt the thread.
-	    // This is just how InterruptedExceptions tend to be handled
-	    // See also http://stackoverflow.com/questions/4906799/why-invoke-thread-currentthread-interrupt-when-catch-any-interruptexception
-	    // and https://praveer09.github.io/technology/2015/12/06/understanding-thread-interruption-in-java/
-
-	    // http://stackoverflow.com/questions/3976344/handling-interruptedexception-in-java
-	    // http://stackoverflow.com/questions/4906799/why-invoke-thread-currentthread-interrupt-when-catch-any-interruptexception
-	    // "Only code that implements a thread's interruption policy may swallow an interruption request. General-purpose task and library code should never swallow interruption requests."
-	    // Does that mean that since this code implements this thread's interruption policy, it's ok
-	    // to swallow the interrupt this time and not let it propagate by commenting out the next line?
-	    Thread.currentThread().interrupt(); // re-interrupt the thread - which thread? Infinite loop?
+	    // see comments in other runProcess()
+	    Thread.currentThread().interrupt();
+	
 	} finally { 
+	    //String cmd = (this.command == null) ? Arrays.toString(this.command_args) : this.command;
+	    //log("*** In finally of SafeProcess.runProcess(3 params): " + cmd);
 
-	    // Moved into here from GS2PerlConstructor which said
-	    // "I need to somehow kill the child process. Unfortunately Thread.stop() and Process.destroy() both fail to do this. But now, thankx to the magic of Michaels 'close the stream suggestion', it works fine."
-	    // http://steveliles.github.io/invoking_processes_from_java.html
-	    // http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
-	    // http://mark.koli.ch/leaky-pipes-remember-to-close-your-streams-when-using-javas-runtimegetruntimeexec	    
-	    if( prcs != null ) {		
-		prcs.destroy();
+	    if( process != null ) {
+		log("*** Going to call process.destroy 2");
+		process.destroy();
+		process = null;
+		log("*** Have called process.destroy 2");
 	    }
+	    
 	}
 	
 	return this.exitValue;
@@ -322,14 +345,13 @@ public class SafeProcess {
     
     public int runProcess(LineByLineHandler outLineByLineHandler, LineByLineHandler errLineByLineHandler)
     {
-	Process prcs = null;
 	SafeProcess.OutputStreamGobbler inputGobbler = null;
 	SafeProcess.InputStreamGobbler errorGobbler = null;
 	SafeProcess.InputStreamGobbler outputGobbler = null;
 
 	try {
 	    // 1. get the Process object
-	    prcs = doRuntimeExec();
+	    process = doRuntimeExec();
 	    
 
 	    // 2. create the streamgobblers and set any specified handlers on them
@@ -337,14 +359,14 @@ public class SafeProcess {
 	    // PROC INPUT STREAM
 	    // send inputStr to process. The following constructor can handle inputStr being null
 	    inputGobbler = // WriterToProcessInputStream
-		new SafeProcess.OutputStreamGobbler(prcs.getOutputStream(), this.inputStr);
+		new SafeProcess.OutputStreamGobbler(process.getOutputStream(), this.inputStr);
 
 	    // PROC ERR STREAM to monitor for any error messages or expected output in the process' stderr    
 	    errorGobbler // ReaderFromProcessOutputStream
-		    = new SafeProcess.InputStreamGobbler(prcs.getErrorStream(), splitStdErrorNewLines);		
+		    = new SafeProcess.InputStreamGobbler(process.getErrorStream(), splitStdErrorNewLines);		
             // PROC OUT STREAM to monitor for the expected std output line(s)
 	    outputGobbler
-		= new SafeProcess.InputStreamGobbler(prcs.getInputStream(), splitStdOutputNewLines);
+		= new SafeProcess.InputStreamGobbler(process.getInputStream(), splitStdOutputNewLines);
 
 
 	    // 3. register line by line handlers, if any were set, for the process stderr and stdout streams
@@ -357,60 +379,46 @@ public class SafeProcess {
 
 
             // 4. kick off the stream gobblers
-	    this.exitValue = waitForWithStreams(prcs, inputGobbler, outputGobbler, errorGobbler);
+	    this.exitValue = waitForWithStreams(inputGobbler, outputGobbler, errorGobbler);
        
 	} catch(IOException ioe) {
 	    if(exceptionHandler != null) {
 		exceptionHandler.gotException(ioe);
 	    } else {
-		logger.error("IOexception: " + ioe.getMessage(), ioe);
-		//System.err.println("IOexception " + ioe.getMessage());
-		//ioe.printStackTrace();
+		log("IOexception: " + ioe.getMessage(), ioe);		
 	    }
-	} catch(InterruptedException ie) {
-
+	} catch(InterruptedException ie) { // caused during any of the gobblers.join() calls, this is unexpected so log it
+	    
 	    if(exceptionHandler != null) {
 		exceptionHandler.gotException(ie);
+		log("@@@@ Unexpected InterruptedException when waiting for process stream gobblers to die");
 	    } else {
-		logger.error("Process InterruptedException: " + ie.getMessage(), ie);
-		//System.err.println("Process InterruptedException " + ie.getMessage());
-		///ie.printStackTrace(); // an interrupt here is not an error, it can be a cancel action
+		log("*** Unexpected InterruptException when waiting for process stream gobblers to die: " + ie.getMessage(), ie);
 	    }
-
-	    // propagate interrupts to worker threads here?
-	    // unless the interrupt emanated from any of them in any join()...
-	    // Only if the thread SafeProcess runs in was interrupted
-	    // do we propagate the interrupt to the worker threads.
-	    // http://stackoverflow.com/questions/2126997/who-is-calling-the-java-thread-interrupt-method-if-im-not
-	    // "I know that in JCiP it is mentioned that you should never interrupt threads you do not own"
-	    // But SafeProcess owns the worker threads, so it have every right to interrupt them
-	    // Also read http://stackoverflow.com/questions/13623445/future-cancel-method-is-not-working?noredirect=1&lq=1
-	    if(Thread.currentThread().isInterrupted()) {
-		inputGobbler.interrupt();
-		errorGobbler.interrupt();
-		outputGobbler.interrupt();	    
-	    }
-
-	    // On catchingInterruptedException, re-interrupt the thread.
+	    // We're not causing any interruptions that may occur when trying to stop the worker threads
+	    // So resort to default behaviour in this catch?
+	    // "On catching InterruptedException, re-interrupt the thread."
 	    // This is just how InterruptedExceptions tend to be handled
 	    // See also http://stackoverflow.com/questions/4906799/why-invoke-thread-currentthread-interrupt-when-catch-any-interruptexception
 	    // and https://praveer09.github.io/technology/2015/12/06/understanding-thread-interruption-in-java/
-
-	    // http://stackoverflow.com/questions/3976344/handling-interruptedexception-in-java
-	    // http://stackoverflow.com/questions/4906799/why-invoke-thread-currentthread-interrupt-when-catch-any-interruptexception
-	    // "Only code that implements a thread's interruption policy may swallow an interruption request. General-purpose task and library code should never swallow interruption requests."
-	    // Does that mean that since this code implements this thread's interruption policy, it's ok
-	    // to swallow the interrupt this time and not let it propagate by commenting out the next line?
 	    Thread.currentThread().interrupt(); // re-interrupt the thread - which thread? Infinite loop?
+	
 	} finally { 
 
-	    // Moved into here from GS2PerlConstructor which said
-	    // "I need to somehow kill the child process. Unfortunately Thread.stop() and Process.destroy() both fail to do this. But now, thankx to the magic of Michaels 'close the stream suggestion', it works fine."
+	    // Moved into here from GS2PerlConstructor and GShell.runLocal() which said
+	    // "I need to somehow kill the child process. Unfortunately Thread.stop() and Process.destroy() both fail to do this. But now, thankx to the magic of Michaels 'close the stream suggestion', it works fine (no it doesn't!)"
 	    // http://steveliles.github.io/invoking_processes_from_java.html
 	    // http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
 	    // http://mark.koli.ch/leaky-pipes-remember-to-close-your-streams-when-using-javas-runtimegetruntimeexec	    
-	    if( prcs != null ) {		
-		prcs.destroy();
+	    
+	    //String cmd = (this.command == null) ? Arrays.toString(this.command_args) : this.command;
+	    //log("*** In finally of SafeProcess.runProcess(2 params): " + cmd);
+
+	    if( process != null ) {
+		log("*** Going to call process.destroy 1");
+		process.destroy();
+		process = null;
+		log("*** Have called process.destroy 1");
 	    }
 	}
 	
@@ -450,6 +458,10 @@ public static abstract class CustomProcessHandler {
     protected CustomProcessHandler(int src) {
 	this.source = src; // STDERR or STDOUT or STDIN
     }
+
+    public String getThreadNamePrefix() {
+	return SafeProcess.streamToString(this.source); 
+    }
     
     public abstract void run(Closeable stream); //InputStream or OutputStream
 }
@@ -464,9 +476,14 @@ public static abstract class LineByLineHandler {
 	this.source = src; // STDERR or STDOUT
     }
 
+    public String getThreadNamePrefix() {
+	return SafeProcess.streamToString(this.source); 
+    }
+
     public abstract void gotLine(String line); // first non-null line
     public abstract void gotException(Exception e); // for when an exception occurs instead of getting a line
 }
+
 
 //**************** StreamGobbler Inner class definitions (stream gobblers copied from GLI) **********//
 
@@ -481,26 +498,40 @@ public static class InputStreamGobbler extends Thread
     private CustomProcessHandler customHandler = null;
     private LineByLineHandler lineByLineHandler = null;
 
+    protected InputStreamGobbler() {
+	super("InputStreamGobbler");
+    }
+
     public InputStreamGobbler(InputStream is)
     {
+	this(); // sets thread name
 	this.is = is;
 	this.split_newlines = false;
     }
     
     public InputStreamGobbler(InputStream is, boolean split_newlines)
     {
+	this(); // sets thread name
 	this.is = is;
 	this.split_newlines = split_newlines;
     }
     
     public InputStreamGobbler(InputStream is, CustomProcessHandler customHandler)
     {
+	this(); // thread name
 	this.is = is;
 	this.customHandler = customHandler;
+	this.adjustThreadName(customHandler.getThreadNamePrefix());
+    }
+
+    
+    private void adjustThreadName(String prefix) {	
+	this.setName(prefix + this.getName());
     }
 
     public void setLineByLineHandler(LineByLineHandler lblHandler) {
 	this.lineByLineHandler = lblHandler;
+	this.adjustThreadName(lblHandler.getThreadNamePrefix());
     }
 
     // default run() behaviour
@@ -510,15 +541,9 @@ public static class InputStreamGobbler extends Thread
 	try {
 	    br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 	    String line=null;
-	    while ( (line = br.readLine()) != null ) {
+	    while ( !this.isInterrupted() && (line = br.readLine()) != null ) {
 
-		if(this.isInterrupted()) { // should we not instead check if SafeProcess thread was interrupted?
-		    logger.info("Got interrupted when reading lines from process err/out stream.");
-		    //System.err.println("InputStreamGobbler.runDefault() Got interrupted when reading lines from process err/out stream.");
-		    break; // will go to finally block
-		}
-
-		//System.out.println("@@@ GOT LINE: " + line);
+		//log("@@@ GOT LINE: " + line);
 		outputstr.append(line);
 		if(split_newlines) {
 		    outputstr.append(Misc.NEWLINE); // "\n" is system dependent (Win must be "\r\n")
@@ -528,15 +553,17 @@ public static class InputStreamGobbler extends Thread
 		    lineByLineHandler.gotLine(line);
 		}
 	    }
+
 	} catch (IOException ioe) {
 	    if(lineByLineHandler != null) {
 		lineByLineHandler.gotException(ioe);
 	    } else {
-		logger.error("Exception when reading from a process' stdout/stderr stream: ", ioe);
-		//System.err.println("Exception when reading from a process' stdout/stderr stream: ");
-		//ioe.printStackTrace();  
+		log("Exception when reading process stream with " + this.getName() + ": ", ioe);
 	    }
 	} finally {
+	    if(this.isInterrupted()) {
+		log("@@@ Successfully interrupted " + this.getName() + ".");
+	    }
 	    SafeProcess.closeResource(br);
 	}
     }
@@ -568,17 +595,24 @@ public static class OutputStreamGobbler extends Thread
     private String inputstr = "";
     private CustomProcessHandler customHandler = null;
 
+    protected OutputStreamGobbler() {
+	super("stdinOutputStreamGobbler"); // thread name
+    }
+
     public OutputStreamGobbler(OutputStream os) {
+	this(); // set thread name
 	this.os = os;
     }
 
     public OutputStreamGobbler(OutputStream os, String inputstr)
     {
+	this(); // set thread name
 	this.os = os;
 	this.inputstr = inputstr;
     }
 
     public OutputStreamGobbler(OutputStream os, CustomProcessHandler customHandler) {
+	this(); // set thread name
 	this.os = os;
 	this.customHandler = customHandler;
     }
@@ -588,6 +622,12 @@ public static class OutputStreamGobbler extends Thread
 	
 	if (inputstr == null) {
 		return;
+	}
+
+	// also quit if the process was interrupted before we could send anything to its stdin
+	if(this.isInterrupted()) {
+	    log(this.getName() + " thread was interrupted.");
+	    return;
 	}
 	
 	BufferedWriter osw = null;
@@ -611,9 +651,7 @@ public static class OutputStreamGobbler extends Thread
 	      osw.flush();
 	    */
 	} catch (IOException ioe) {
-	    logger.error("Exception writing to SafeProcess' inputstream: ", ioe);
-	    //System.err.println("Exception writing to SafeProcess' inputstream: ");
-	    //ioe.printStackTrace();	
+	    log("Exception writing to SafeProcess' inputstream: ", ioe);
 	} finally {
 	    SafeProcess.closeResource(osw);
 	}
@@ -631,10 +669,61 @@ public static class OutputStreamGobbler extends Thread
 	} else {
 	    runCustom();
 	}
-
     }	
 } // end static inner class OutputStreamGobbler
 
+//**************** Static methods **************//
+
+
+    // logger and DebugStream print commands are synchronized, therefore thread safe.
+    public static void log(String msg) {
+	logger.info(msg);
+
+	//System.err.println(msg);
+
+	//DebugStream.println(msg);
+    }
+
+    public static void log(String msg, Exception e) { // Print stack trace on the exception
+	logger.error(msg, e);
+
+	//System.err.println(msg);
+	//e.printStackTrace();
+
+	//DebugStream.println(msg);
+	//DebugStream.printStackTrace(e);
+    }
+
+    public static void log(Exception e) {
+	logger.error(e);
+
+	//e.printStackTrace();
+
+	//DebugStream.printStackTrace(e);
+    }
+
+    public static void log(String msg, Exception e, boolean printStackTrace) {
+	if(printStackTrace) { 
+	    log(msg, e);
+	} else {
+	    log(msg);
+	}
+    }
+
+    public static String streamToString(int src) {
+	String stream;
+	switch(src) {
+	case STDERR:
+	    stream = "stderr"; 
+	    break;
+	case STDOUT:
+	    stream = "stdout";
+	    break;
+	default:
+	    stream = "stdin";
+	}
+	return stream;
+    }
 
 //**************** Useful static methods. Copied from GLI's Utility.java ******************
     // For safely closing streams/handles/resources. 
@@ -650,9 +739,7 @@ public static class OutputStreamGobbler extends Thread
 		success = true;
 	    }
 	} catch(Exception e) {
-	    logger.error("Exception closing resource: ", e);
-	    //System.err.println("Exception closing resource: " + e.getMessage());
-	    //e.printStackTrace();
+	    log("Exception closing resource: " + e.getMessage(), e);
 	    resourceHandle = null;
 	    success = false;
 	} finally {
@@ -669,6 +756,26 @@ public static class OutputStreamGobbler extends Thread
 	    prcs.destroy(); 
 	}
 	return success;
+    }
+
+// Moved from GShell.java
+    /** Determine if the given process is still executing. It does this by attempting to throw an exception - not the most efficient way, but the only one as far as I know
+     * @param process the Process to test
+     * @return true if it is still executing, false otherwise
+     */
+    static public boolean processRunning(Process process) {
+	boolean process_running = false;
+
+	try {
+	    process.exitValue(); // This will throw an exception if the process hasn't ended yet.
+	}
+	catch(IllegalThreadStateException itse) {
+	    process_running = true;
+	}
+	catch(Exception exception) {
+	    log(exception); // DebugStream.printStackTrace(exception);
+	}
+	return process_running;
     }
 
 } // end class SafeProcess
