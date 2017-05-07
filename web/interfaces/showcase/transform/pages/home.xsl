@@ -15,12 +15,33 @@
 				<br/>
 			</xsl:if>
 			<p>These collections demonstrate different aspects of Greenstone3. Click on a collection to see its description.</p>
-			<xsl:for-each select="collectionList/collection[@name = 'paradise-gardens' or @name = 'image-demo' or @name = 'twso' or @name = 'paged-image' or @name = 'fedora' or @name= 'editdemo' or @name = 'kjcoll' or @name='niupepa']">
+			<xsl:for-each select="collectionList/collection[@name = 'paradise-gardens']">
+			<gslib:collectionLinkWithImage/>
+			</xsl:for-each>		 
+			<xsl:for-each select="collectionList/collection[@name='niupepa']">
+			<gslib:collectionLinkWithImage/>
+			</xsl:for-each>		 
+			<xsl:for-each select="collectionList/collection[@name = 'image-demo']">
+			<gslib:collectionLinkWithImage/>
+			</xsl:for-each>		 
+			<xsl:for-each select="collectionList/collection[@name = 'kjcoll']">
+			<gslib:collectionLinkWithImage/>
+			</xsl:for-each>		 
+			<xsl:for-each select="collectionList/collection[@name= 'editdemo']">
 			<gslib:collectionLinkWithImage/>
 			</xsl:for-each>		 
 			<br class="clear"/>
 			<p>The next collections all use a different indexing tool, but otherwise have the same content. Do some searches to see the what the different tools offer.</p>
-			<xsl:for-each select="collectionList/collection[@name = 'lucene-jdbm-demo' or @name = 'solr-jdbm-demo' or @name = 'gs2mgppdemo' or @name='gs2mgdemo']">
+			<xsl:for-each select="collectionList/collection[@name = 'lucene-jdbm-demo']">
+			  <gslib:collectionLinkWithImage/>
+			</xsl:for-each>
+			<xsl:for-each select="collectionList/collection[@name = 'solr-jdbm-demo']">
+			  <gslib:collectionLinkWithImage/>
+			</xsl:for-each>
+			<xsl:for-each select="collectionList/collection[@name = 'gs2mgppdemo']">
+			  <gslib:collectionLinkWithImage/>
+			</xsl:for-each>
+			<xsl:for-each select="collectionList/collection[@name='gs2mgdemo']">
 			  <gslib:collectionLinkWithImage/>
 			</xsl:for-each>
 			<br class="clear"/>
