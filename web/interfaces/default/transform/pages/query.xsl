@@ -14,7 +14,6 @@
 	<xsl:import href="map-tools.xsl"/>
 	<xsl:import href="panorama-viewer-tools.xsl"/>
 
-	<xsl:include href="query-common.xsl"/>
 	<!-- set page title -->
 	<xsl:template name="pageTitle">
 		<gslib:serviceName/>
