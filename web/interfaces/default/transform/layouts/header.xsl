@@ -8,7 +8,7 @@
 		extension-element-prefixes="java util"
 		exclude-result-prefixes="java util gsf">
   
-  <xsl:include href="../query-common.xsl"/>
+  <xsl:include href="../shared-templates.xsl"/>
   <xsl:include href="../javascript-global-setup.xsl"/>
   
   <!-- If the c parameter is empty then use the p.c parameter for the collection name-->
