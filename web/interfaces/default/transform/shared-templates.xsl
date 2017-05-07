@@ -170,7 +170,7 @@
 	</xsl:template>
 
   <xsl:template name="classifierNodeLink">
-    <xsl:param name="link-type">dynamic</xsl:param>
+    <xsl:param name="link-type">javascript</xsl:param>
     <xsl:param name="node-id"></xsl:param>
     <xsl:variable name="final-link-type">
       <xsl:choose>
