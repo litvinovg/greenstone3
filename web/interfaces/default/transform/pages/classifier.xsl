@@ -301,26 +301,6 @@
     </td>
   </xsl:template>
   
-  <xsl:template name="classifierNodeLink">
-    <xsl:param name="link-type">dynamic</xsl:param>
-    <xsl:param name="node-id"></xsl:param>
-    <xsl:variable name="final-link-type">
-      <xsl:choose>
-	<xsl:when test="$link-type='static'">static</xsl:when>
-	<xsl:when test="$link-type='javascript'">javascript</xsl:when>
-	<xsl:when test="@classifierStyle = 'HList'">static</xsl:when>
-	<xsl:when test="not(/page/pageResponse/format[@type='browse']/gsf:option[@name='turnstyleClassifiers']) or /page/pageResponse/format[@type='browse']/gsf:option[@name='turnstyleClassifiers']/@value='true'">javascript</xsl:when>
-	<xsl:otherwise>static</xsl:otherwise>
-      </xsl:choose>
-    </xsl:variable>
-    <xsl:choose>
-      <xsl:when test="$final-link-type='static'">
-	<xsl:value-of select='$library_name'/>/collection/<xsl:value-of select='/page/pageResponse/collection/@name'/>/browse/<xsl:choose><xsl:when test="$node-id"><xsl:value-of select="$node-id"/></xsl:when><xsl:otherwise><xsl:value-of select='util:replace(@nodeID, ".", "/")'/></xsl:otherwise></xsl:choose>
-      </xsl:when>
-      <xsl:otherwise>javascript:toggleSection('<xsl:value-of select="@nodeID"/>');</xsl:otherwise>
-    </xsl:choose>	
-  </xsl:template>
-
 
   <xsl:template name="classifierPre">
     <xsl:if test="/page/pageResponse/format[@type='display' or @type='browse' or @type='search']/gsf:option[@name='mapEnabled']/@value = 'true'">
