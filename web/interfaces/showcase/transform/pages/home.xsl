@@ -8,7 +8,7 @@
 	exclude-result-prefixes="java util">
 
 	<!-- the custom list of collections -->
-	<xsl:template name="collectionLinks">
+	<xsl:template name="collectionAndGroupLinks">
 		<div id="collectionLinks">
 			<xsl:if test="count(collectionList/collection) = 0">
 				<xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.no_collections')"/>
@@ -26,5 +26,6 @@
 			<br class="clear"/>
 		</div>
 	</xsl:template>
+
 
 </xsl:stylesheet>
