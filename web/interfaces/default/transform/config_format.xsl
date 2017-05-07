@@ -230,7 +230,7 @@
 					  </xsl:attribute>   
 					</xsl:if>
 
-					<xslt:attribute name='href'><xslt:call-template name="classifierNodeLink"><xsl:if test="@style"><xslt:with-param name="link-type"><xsl:value-of select="@style"/></xslt:with-param></xsl:if><xsl:if test="@nodeID"><xslt:with-param name="node-id" select="@nodeID"/></xsl:if></xslt:call-template>
+					<xslt:attribute name='href'><xslt:call-template name="classifierNodeLink"><xsl:if test="@style"><xslt:with-param name="link-type"><xsl:value-of select="@style"/></xslt:with-param></xsl:if><xsl:if test="@nodeID"><xslt:with-param name="node-id"><xsl:value-of select="@nodeID"/></xslt:with-param></xsl:if></xslt:call-template>
 					</xslt:attribute>
 					<xsl:copy-of select="$opt-title"/>
 					<xsl:apply-templates/>
