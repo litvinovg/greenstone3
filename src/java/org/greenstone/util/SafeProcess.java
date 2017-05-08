@@ -10,6 +10,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
+import java.util.Scanner;
+import java.util.Stack;
+
+import com.sun.jna.*;
+import com.sun.jna.platform.win32.Kernel32;
+import com.sun.jna.platform.win32.WinNT;
+
+import java.lang.reflect.Field;
+//import java.lang.reflect.Method;
 
 import org.apache.log4j.*;
 
@@ -19,13 +28,19 @@ import org.apache.log4j.*;
 // http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
 // to avoid blocking problems that can arise from a Process' input and output streams.
 
+// On Windows, Perl could launch processes as proper ProcessTrees: http://search.cpan.org/~gsar/libwin32-0.191/
+// Then killing the root process will kill child processes naturally.
+
 public class SafeProcess {
-    //public static int DEBUG = 0;
+    public static int DEBUG = 0;
 
     public static final int STDERR = 0;
     public static final int STDOUT = 1;
     public static final int STDIN = 2;
-
+    // can't make this variable final and init in a static block, because it needs to use other SafeProcess static methods which rely on this in turn:
+    public static String WIN_KILL_CMD; 
+		
+	
     // charset for reading process stderr and stdout streams
     //public static final String UTF8 = "UTF-8";    
 
@@ -38,7 +53,8 @@ public class SafeProcess {
     private File dir = null;
     private String inputStr = null;
     private Process process = null;
-
+    private boolean forciblyTerminateProcess = false;
+	
     // output from running SafeProcess.runProcess()
     private String outputStr = ""; 
     private String errorStr = "";
@@ -101,6 +117,12 @@ public class SafeProcess {
 	splitStdErrorNewLines = split;
     }
 
+    // In future, think of changing the method doRuntimeExec() over to using ProcessBuilder
+    // instead of Runtime.exec(). ProcessBuilder seems to have been introduced from Java 5.
+    // https://docs.oracle.com/javase/7/docs/api/java/lang/ProcessBuilder.html
+    // https://zeroturnaround.com/rebellabs/how-to-deal-with-subprocesses-in-java/
+    // which suggests using Apache Common Exec to launch processes and says what will be forthcoming in Java 9
+    
     private Process doRuntimeExec() throws IOException {
 	Process prcs = null;
 	Runtime rt = Runtime.getRuntime();
@@ -112,7 +134,14 @@ public class SafeProcess {
 	else { // at least command_args must be set now
 	    
 	    // http://stackoverflow.com/questions/5283444/convert-array-of-strings-into-a-string-in-java
-	    log("SafeProcess running: " + Arrays.toString(command_args));
+	    //log("SafeProcess running:" + Arrays.toString(command_args));
+	    StringBuffer cmdDisplay = new StringBuffer();
+	    for(int i = 0; i < command_args.length; i++) {
+		cmdDisplay.append(" ").append(command_args[i]);
+	    }
+	    log("SafeProcess running: [" + cmdDisplay + "]");
+	    cmdDisplay = null; // let the GC have it    
+	    
 	    
 	    if(this.envp == null) { 
 		prcs = rt.exec(this.command_args);
@@ -138,8 +167,6 @@ public class SafeProcess {
 				   SafeProcess.InputStreamGobbler errorGobbler)
 	throws IOException, InterruptedException
     {
-
-	
 	// kick off the stream gobblers
 	inputGobbler.start();
 	errorGobbler.start();
@@ -175,7 +202,12 @@ public class SafeProcess {
 	    inputGobbler.interrupt();
 	    errorGobbler.interrupt();
 	    outputGobbler.interrupt();
-
+	    
+	    // Since we have been cancelled (InterruptedException), or on any Exception, we need
+	    // to forcibly terminate process eventually after the finally code first waits for each worker thread
+	    // to die off. Don't set process=null until after we've forcibly terminated it if needs be.
+	    this.forciblyTerminateProcess = true; 
+	    
 	    // even after the interrupts, we want to proceed to calling join() on all the worker threads
 	    // in order to wait for each of them to die before attempting to destroy the process if it
 	    // still hasn't terminated after all that.
@@ -203,11 +235,7 @@ public class SafeProcess {
 	    
 	    // set the variables that the code which created a SafeProcess object may want to inspect
 	    this.outputStr = outputGobbler.getOutput();
-	    this.errorStr = errorGobbler.getOutput();
-	    
-	    // Since we didn't have an exception, process should have terminated now (waitFor blocks until then)
-	    // Set process to null so we don't forcibly terminate it below with process.destroy()
-	    this.process = null;	    
+	    this.errorStr = errorGobbler.getOutput();	    
 	}
 
 	// Don't return from finally, it's considered an abrupt completion and exceptions are lost, see
@@ -222,16 +250,24 @@ public class SafeProcess {
     }
 
     // Run a very basic process: with no reading from or writing to the Process' iostreams,
-    // this just execs the process and waits for it to return
+    // this just execs the process and waits for it to return.
+    // Don't call this method but the zero-argument runProcess() instead if your process will
+    // output stuff to its stderr and stdout streams but you don't need to monitory these.
+    // Because, as per a comment in GLI's GS3ServerThread.java,
+    // in Java 6, it wil block if you don't handle a process' streams when the process is
+    // outputting something. (Java 7+ won't block if you don't bother to handle the output streams)
     public int runBasicProcess() {
 	try {
+	    this.forciblyTerminateProcess = true;
+	    
 	    // 1. create the process
 	    process = doRuntimeExec();
 	    // 2. basic waitFor the process to finish
 	    this.exitValue = process.waitFor();
 
-	    
-	} catch(IOException ioe) {
+	    this.forciblyTerminateProcess = false;
+	} catch(IOException ioe) {		
+		
 	    if(exceptionHandler != null) {
 		exceptionHandler.gotException(ioe);
 	    } else {
@@ -248,9 +284,11 @@ public class SafeProcess {
 	    Thread.currentThread().interrupt();
 	} finally { 
 
-	    if( process != null ) {
-		process.destroy(); // see runProcess() below
+	    if( this.forciblyTerminateProcess ) {
+		destroyProcess(process); // see runProcess() below		
 	    }
+	    process = null;
+	    this.forciblyTerminateProcess = false; // reset
 	}
 	return this.exitValue;
     }
@@ -272,6 +310,8 @@ public class SafeProcess {
 	SafeProcess.InputStreamGobbler outputGobbler = null;
 
 	try {
+	    this.forciblyTerminateProcess = false;
+		
 	    // 1. get the Process object
 	    process = doRuntimeExec();
 	    
@@ -290,7 +330,7 @@ public class SafeProcess {
 	    // PROC ERR STREAM to monitor for any error messages or expected output in the process' stderr
 	    if(procErrHandler == null) {
 		errorGobbler // ReaderFromProcessOutputStream
-		    = new SafeProcess.InputStreamGobbler(process.getErrorStream(), splitStdErrorNewLines);
+		    = new SafeProcess.InputStreamGobbler(process.getErrorStream(), this.splitStdErrorNewLines);
 	    } else {
 		errorGobbler
 		    = new SafeProcess.InputStreamGobbler(process.getErrorStream(), procErrHandler);
@@ -299,7 +339,7 @@ public class SafeProcess {
             // PROC OUT STREAM to monitor for the expected std output line(s)
 	    if(procOutHandler == null) {
 		outputGobbler
-		    = new SafeProcess.InputStreamGobbler(process.getInputStream(), splitStdOutputNewLines);
+		    = new SafeProcess.InputStreamGobbler(process.getInputStream(), this.splitStdOutputNewLines);
 	    } else {
 		outputGobbler
 		    = new SafeProcess.InputStreamGobbler(process.getInputStream(), procOutHandler);
@@ -310,13 +350,16 @@ public class SafeProcess {
 	    this.exitValue = waitForWithStreams(inputGobbler, outputGobbler, errorGobbler);
        
 	} catch(IOException ioe) {
+	    this.forciblyTerminateProcess = true;
+
 	    if(exceptionHandler != null) {
 		exceptionHandler.gotException(ioe);
 	    } else {
 		log("IOexception: " + ioe.getMessage(), ioe);
 	    }
 	} catch(InterruptedException ie) { // caused during any of the gobblers.join() calls, this is unexpected so print stack trace
-	    
+	    this.forciblyTerminateProcess = true;
+		
 	    if(exceptionHandler != null) {
 		exceptionHandler.gotException(ie);
 		log("@@@@ Unexpected InterruptedException when waiting for process stream gobblers to die");
@@ -331,13 +374,13 @@ public class SafeProcess {
 	    //String cmd = (this.command == null) ? Arrays.toString(this.command_args) : this.command;
 	    //log("*** In finally of SafeProcess.runProcess(3 params): " + cmd);
 
-	    if( process != null ) {
+	    if( this.forciblyTerminateProcess ) {
 		log("*** Going to call process.destroy 2");
-		process.destroy();
-		process = null;
+		destroyProcess(process);				
 		log("*** Have called process.destroy 2");
 	    }
-	    
+	    process = null;
+	    this.forciblyTerminateProcess = false; // reset
 	}
 	
 	return this.exitValue;
@@ -350,6 +393,8 @@ public class SafeProcess {
 	SafeProcess.InputStreamGobbler outputGobbler = null;
 
 	try {
+	    this.forciblyTerminateProcess = false;
+		
 	    // 1. get the Process object
 	    process = doRuntimeExec();
 	    
@@ -378,17 +423,20 @@ public class SafeProcess {
 	    }	    
 
 
-            // 4. kick off the stream gobblers
+	    // 4. kick off the stream gobblers
 	    this.exitValue = waitForWithStreams(inputGobbler, outputGobbler, errorGobbler);
        
 	} catch(IOException ioe) {
+	    this.forciblyTerminateProcess = true;
+		
 	    if(exceptionHandler != null) {
 		exceptionHandler.gotException(ioe);
 	    } else {
 		log("IOexception: " + ioe.getMessage(), ioe);		
 	    }
 	} catch(InterruptedException ie) { // caused during any of the gobblers.join() calls, this is unexpected so log it
-	    
+	    this.forciblyTerminateProcess = true;
+		
 	    if(exceptionHandler != null) {
 		exceptionHandler.gotException(ie);
 		log("@@@@ Unexpected InterruptedException when waiting for process stream gobblers to die");
@@ -414,18 +462,298 @@ public class SafeProcess {
 	    //String cmd = (this.command == null) ? Arrays.toString(this.command_args) : this.command;
 	    //log("*** In finally of SafeProcess.runProcess(2 params): " + cmd);
 
-	    if( process != null ) {
+	    if( this.forciblyTerminateProcess ) {
 		log("*** Going to call process.destroy 1");
-		process.destroy();
-		process = null;
+		destroyProcess(process); 	
 		log("*** Have called process.destroy 1");
 	    }
+	    process = null;
+	    this.forciblyTerminateProcess = false; //reset		
 	}
 	
 	return this.exitValue;
     }
 
+/*
 
+ On Windows, p.destroy() terminates process p that Java launched,
+ but does not terminate any processes that p may have launched. Presumably since they didn't form a proper process tree.
+    https://social.msdn.microsoft.com/Forums/windowsdesktop/en-US/e3cb7532-87f6-4ae3-9d80-a3afc8b9d437/how-to-kill-a-process-tree-in-cc-on-windows-platform?forum=vclanguage
+    https://msdn.microsoft.com/en-us/library/windows/desktop/ms684161(v=vs.85).aspx
+
+ Searching for: "forcibly terminate external process launched by Java on Windows"	
+ Not possible: stackoverflow.com/questions/1835885/send-ctrl-c-to-process-open-by-java 
+ But can use taskkill or tskill or wmic commands to terminate a process by processID
+ stackoverflow.com/questions/912889/how-to-send-interrupt-key-sequence-to-a-java-process
+ Taskkill command can kill by Image Name, such as all running perl, e.g. taskkill /f /im perl.exe
+ But what if we kill perl instances not launched by GS?
+    /f Specifies to forcefully terminate the process(es). We need this flag switched on to kill childprocesses.
+    /t Terminates the specified process and any child processes which were started by it. 
+			/t didn't work to terminate subprocesses. Maybe since the process wasn't launched as 
+			a properly constructed processtree.
+    /im is the image name (the name of the program), see Image Name column in Win Task Manager.
+	
+ We don't want to kill all perl running processes. 
+ Another option is to use wmic, available since Windows XP, to kill a process based on its command
+ which we sort of know (SafeProcess.command) and which can be seen in TaskManager under the 
+ "Command Line" column of the Processes tab.
+    https://superuser.com/questions/52159/kill-a-process-with-a-specific-command-line-from-command-line	
+ The following works kill any Command Line that matches -site localsite lucene-jdbm-demo
+    C:>wmic PATH win32_process Where "CommandLine like '%-site%localsite%%lucene-jdbm-demo%'" Call Terminate
+ "WMIC Wildcard Search using 'like' and %"
+    https://codeslammer.wordpress.com/2009/02/21/wmic-wildcard-search-using-like-and/
+ However, we're not even guaranteed that every perl command GS launches will contain the collection name
+ Nor do we want to kill all perl processes that GS launches with bin\windows\perl\bin\perl, though this works:
+    wmic PATH win32_process Where "CommandLine like '%bin%windows%perl%bin%perl%'" Call Terminate
+ The above could kill GS perl processes we don't intend to terminate, as they're not spawned by the particular
+ Process we're trying to terminate from the root down.
+	
+ Solution: We can use taskkill or the longstanding tskill or wmic to kill a process by ID. Since we can
+ kill an external process that SafeProcess launched OK, and only have trouble killing any child processes
+ it launched, we need to know the pids of the child processes. 
+ 
+ We can use Windows' wmic to discover the childpids of a process whose id we know.
+ And we can use JNA to get the process ID of the external process that SafeProcess launched.
+ 
+ To find the processID of the process launched by SafeProcess,
+ need to use Java Native Access (JNA) jars, available jna.jar and jna-platform.jar.
+    http://stackoverflow.com/questions/4750470/how-to-get-pid-of-process-ive-just-started-within-java-program
+    http://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id
+    http://www.golesny.de/p/code/javagetpid
+    https://github.com/java-native-access/jna/blob/master/www/GettingStarted.md
+ We're using JNA v 4.1.0, https://mvnrepository.com/artifact/net.java.dev.jna/jna
+  
+ WMIC can show us a list of parent process id and process id of running processes, and then we can
+ kill those child processes with a specific process id.
+    https://superuser.com/questions/851692/track-which-program-launches-a-certain-process
+    http://stackoverflow.com/questions/7486717/finding-parent-process-id-on-windows
+ WMIC can get us the pids of all childprocesses launched by parent process denoted by parent pid.
+ And vice versa:
+    if you know the parent pid and want to know all the pids of the child processes spawned:
+        wmic process where (parentprocessid=596) get processid
+    if you know a child process id and want to know the parent's id:
+        wmic process where (processid=180) get parentprocessid
+ 
+ The above is the current solution.
+ 
+ Eventually, instead of running a windows command to kill the process ourselves, consider changing over to use
+    https://github.com/flapdoodle-oss/de.flapdoodle.embed.process/blob/master/src/main/java/de/flapdoodle/embed/process/runtime/Processes.java 
+ (works with Apache license, http://www.apache.org/licenses/LICENSE-2.0)
+ This is a Java class that uses JNA to terminate processes. It also has the getProcessID() method. 
+ 
+ Linux ps equivalent on Windows is "tasklist", see
+    http://stackoverflow.com/questions/4750470/how-to-get-pid-of-process-ive-just-started-within-java-program
+
+*/
+
+// http://stackoverflow.com/questions/4750470/how-to-get-pid-of-process-ive-just-started-within-java-program
+// Uses Java Native Access, JNA
+public static long getProcessID(Process p)
+{
+    long pid = -1;
+    try	{
+	//for windows
+	if (p.getClass().getName().equals("java.lang.Win32Process") ||
+	    p.getClass().getName().equals("java.lang.ProcessImpl")) 
+	    {
+		Field f = p.getClass().getDeclaredField("handle");
+		f.setAccessible(true);              
+		long handl = f.getLong(p);
+		Kernel32 kernel = Kernel32.INSTANCE;
+		WinNT.HANDLE hand = new WinNT.HANDLE();
+		hand.setPointer(Pointer.createConstant(handl));
+		pid = kernel.GetProcessId(hand);
+		f.setAccessible(false);
+	    }
+	//for unix based operating systems
+	else if (p.getClass().getName().equals("java.lang.UNIXProcess")) 
+	    {
+		Field f = p.getClass().getDeclaredField("pid");
+		f.setAccessible(true);
+		pid = f.getLong(p);
+		f.setAccessible(false);
+	    }
+
+    } catch(Exception ex) {
+	log("SafeProcess.getProcessID(): Exception when attempting to get process ID for process " + ex.getMessage(), ex);	
+	pid = -1;
+    }
+    return pid;
+}
+    
+
+// stackoverflow.com/questions/1835885/send-ctrl-c-to-process-open-by-java	
+// (Taskkill command can kill all running perl. But what if we kill perl instances not launched by GS?)
+// stackoverflow.com/questions/912889/how-to-send-interrupt-key-sequence-to-a-java-process
+// Searching for: "forcibly terminate external process launched by Java on Windows"	
+static void killWinProcessWithID(long processID) {
+    
+    String cmd = SafeProcess.getWinProcessKillCmd(processID);
+    if (cmd == null) return;
+    
+    try {		
+	log("\tAttempting to terminate Win subprocess with pid: " + processID);
+	SafeProcess proc = new SafeProcess(cmd);			
+	int exitValue = proc.runProcess(); // no IOstreams for Taskkill, but for "wmic process pid delete"
+	// there is output that needs flushing, so don't use runBasicProcess()
+			
+    } catch(Exception e) {
+	log("@@@ Exception attempting to stop perl " + e.getMessage(), e);		
+    }
+}
+
+
+// On linux and mac, p.destroy() suffices to kill processes launched by p as well.
+// On Windows we need to do more work, since otherwise processes launched by p remain around executing until they naturally terminate.
+// e.g. full-import.pl may be terminated with p.destroy(), but it launches import.pl which is left running until it naturally terminates.
+static void destroyProcess(Process p) {
+    // If it isn't windows, process.destroy() terminates any child processes too
+    if(!Misc.isWindows()) {
+	p.destroy();
+	return;
+    }	
+    
+    if(!SafeProcess.isAvailable("wmic")) {
+	log("wmic, used to kill subprocesses, is not available. Unable to terminate subprocesses...");
+	log("Kill them manually from the TaskManager or they will proceed to run to termination");
+	
+	// At least we can get rid of the top level process we launched
+	p.destroy();
+	return;
+    }	
+    
+    // get the process id of the process we launched,
+    // so we can use it to find the pids of any subprocesses it launched in order to terminate those too.
+    
+    long processID = SafeProcess.getProcessID(p);		
+    log("Attempting to terminate sub processes of Windows process with pid " + processID);
+    terminateSubProcessesRecursively(processID, p);
+    
+}
+
+// Helper function. Only for Windows.
+// Counterintuitively, we're be killing all parent processess and then all child procs and all their descendants
+// as soon as we discover any further process each (sub)process has launched. The parent processes are killed
+// first in each case for 2 reasons: 
+// 1. on Windows, killing the parent process leaves the child running as an orphan anyway, so killing the
+// parent is an independent action, the child process is not dependent on the parent;
+// 2. Killing a parent process prevents it from launching further processes while we're killing off each child process
+private static void terminateSubProcessesRecursively(long parent_pid, Process p) {
+	
+    // Use Windows wmic to find the pids of any sub processes launched by the process denoted by parent_pid	
+    SafeProcess proc = new SafeProcess("wmic process where (parentprocessid="+parent_pid+") get processid");
+    proc.setSplitStdOutputNewLines(true); // since this is windows, splits lines by \r\n
+    int exitValue = proc.runProcess(); // exitValue (%ERRORLEVEL%) is 0 either way.	
+    //log("@@@@ Return value from proc: " + exitValue);
+    
+    // need output from both stdout and stderr: stderr will say there are no pids, stdout will contain pids
+    String stdOutput = proc.getStdOutput();
+    String stdErrOutput = proc.getStdError();
+    
+    
+    // Now we know the pids of the immediate subprocesses, we can get rid of the parent process
+    // We know the children remain running: since the whole problem on Windows is that these
+    // child processes remain running as orphans after the parent is forcibly terminated.
+    if(p != null) { // we're the top level process, terminate the java way
+	p.destroy();
+    } else { // terminate windows way		
+	SafeProcess.killWinProcessWithID(parent_pid); // get rid off current pid		
+    }
+    
+    // parse the output to get the sub processes' pids	
+    // Output looks like:
+    // ProcessId
+    // 6040
+    // 180
+    // 4948
+    // 1084
+    // 6384
+    // If no children, then STDERR output starts with the following, possibly succeeded by empty lines:
+    // No Instance(s) Available.
+    
+    // base step of the recursion
+    if(stdErrOutput.indexOf("No Instance(s) Available.") != -1) { 
+	//log("@@@@ Got output on stderr: " + stdErrOutput);
+	// No further child processes. And we already terminated the parent process, so we're done
+	return;
+    } else {
+	//log("@@@@ Got output on stdout:\n" + stdOutput);
+	
+	// http://stackoverflow.com/questions/691184/scanner-vs-stringtokenizer-vs-string-split	
+	
+	// find all childprocesses for that pid and terminate them too:
+	Stack<Long> subprocs = new Stack<Long>();
+	Scanner sc = new Scanner(stdOutput);
+	while (sc.hasNext()) {
+	    if(!sc.hasNextLong()) {
+		sc.next(); // discard the current token since it's not a Long
+	    } else {
+		long child_pid = sc.nextLong();
+		subprocs.push(new Long(child_pid));			
+	    }
+	}
+	sc.close();		
+	
+	// recursion step if subprocs is not empty (but if it is empty, then it's another base step)
+	if(!subprocs.empty()) {
+	    long child_pid = subprocs.pop().longValue();
+	    terminateSubProcessesRecursively(child_pid, null);
+	}	
+    }
+}
+
+// This method should only be called on a Windows OS
+private static String getWinProcessKillCmd(Long processID) {
+    // check if we first need to init WIN_KILL_CMD. We do this only once, but can't do it in a static codeblock
+    
+    if(WIN_KILL_CMD == null) {		
+	if(SafeProcess.isAvailable("wmic")) {
+	    // https://isc.sans.edu/diary/Windows+Command-Line+Kung+Fu+with+WMIC/1229
+	    WIN_KILL_CMD = "wmic process _PROCID_ delete"; // like "kill -9" on Windows
+	}
+	else if(SafeProcess.isAvailable("taskkill")) { // check if we have taskkill or else use the longstanding tskill
+	    
+	    WIN_KILL_CMD = "taskkill /f /t /PID _PROCID_"; // need to forcefully /f terminate the process				
+	        //  /t "Terminates the specified process and any child processes which were started by it."
+	        // But despite the /T flag, the above doesn't kill subprocesses.
+	}
+	else { //if(SafeProcess.isAvailable("tskill")) { can't check availability since "which tskill" doesn't ever succeed
+	    WIN_KILL_CMD = "tskill _PROCID_"; // https://ss64.com/nt/tskill.html
+	}		
+    }
+    
+    if(WIN_KILL_CMD == null) { // can happen if none of the above cmds were available
+	return null;
+    }
+    return WIN_KILL_CMD.replace( "_PROCID_", Long.toString(processID) );
+}
+
+
+// Run `which` on a program to find out if it is available. which.exe is included in winbin.
+// On Windows, can use where or which. GLI's file/FileAssociationManager.java used which, so we stick to the same.
+// where is not part of winbin. where is a system command on windows, but only since 2003, https://ss64.com/nt/where.html
+// There is no `where` on Linux/Mac, must use which for them.
+// On windows, "which tskill" fails but "which" succeeds on taskkill|wmic|browser names.
+public static boolean isAvailable(String program) {		
+    try {
+	// On linux `which bla` does nothing, prompt is returned; on Windows, it prints "which: no bla in"
+	// `which grep` returns a line of output with the path to grep. On windows too, the location of the program is printed
+	SafeProcess prcs = new SafeProcess("which " + program);		
+	prcs.runProcess();
+	String output = prcs.getStdOutput();
+	if(output.equals("")) {
+	    return false;
+	}
+	//System.err.println("*** 'which " + program + "' returned: " + output);
+	return true;
+    } catch (Exception exc) {
+	return false;
+    }
+}	
+	
+// Google Java external process destroy kill subprocesses
+// https://zeroturnaround.com/rebellabs/how-to-deal-with-subprocesses-in-java/	
+	
 //******************** Inner class and interface definitions ********************//
 // Static inner classes can be instantiated without having to instantiate an object of the outer class first
 
@@ -514,6 +842,7 @@ public static class InputStreamGobbler extends Thread
 	this(); // sets thread name
 	this.is = is;
 	this.split_newlines = split_newlines;
+	
     }
     
     public InputStreamGobbler(InputStream is, CustomProcessHandler customHandler)
@@ -643,7 +972,7 @@ public static class OutputStreamGobbler extends Thread
 	    // Flushing the write handle and/or closing the resource seems 
 	    // to already send EOF silently.
 	    
-	    /*if(Utility.isWindows()) {
+	    /*if(Misc.isWindows()) {
 	      osw.write("\032"); // octal for Ctrl-Z, EOF on Windows
 	      } else { // EOF on Linux/Mac is Ctrl-D
 	      osw.write("\004"); // octal for Ctrl-D, see http://www.unix-manuals.com/refs/misc/ascii-table.html
@@ -677,6 +1006,7 @@ public static class OutputStreamGobbler extends Thread
 
     // logger and DebugStream print commands are synchronized, therefore thread safe.
     public static void log(String msg) {
+	if(DEBUG == 0) return;
 	logger.info(msg);
 
 	//System.err.println(msg);
@@ -685,6 +1015,7 @@ public static class OutputStreamGobbler extends Thread
     }
 
     public static void log(String msg, Exception e) { // Print stack trace on the exception
+	if(DEBUG == 0) return;
 	logger.error(msg, e);
 
 	//System.err.println(msg);
@@ -695,6 +1026,7 @@ public static class OutputStreamGobbler extends Thread
     }
 
     public static void log(Exception e) {
+	if(DEBUG == 0) return;		
 	logger.error(e);
 
 	//e.printStackTrace();
