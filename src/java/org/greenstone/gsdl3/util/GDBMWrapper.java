@@ -28,6 +28,8 @@ import java.io.UnsupportedEncodingException;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.greenstone.util.SafeProcess;
+
 /**
  * java wrapper class for gdbm - uses Java-GDBM written by Martin Pool replaces
  * gdbmclass in the old version
@@ -112,7 +114,19 @@ public class GDBMWrapper implements FlatDatabaseWrapper
 								// On Linux, the output of the test goes to STDOUT so redirect it to STDERR
 								String cmdTest = "perl -v 2>&1";
 								//String cmdTest = "echo %PATH%";
-								int returnValue = Processing.runProcess(cmdTest);
+								
+								//int returnValue = Processing.runProcess(cmdTest);
+
+								// replace Processing.java with SafeProcess.java
+								// so retain the same behaviour (logging)
+								SafeProcess process = new SafeProcess(cmdTest);
+								logger.error("executing command "+cmdTest);
+								int returnValue = process.runProcess();
+								// do something with the messages
+								logger.error("err>"+process.getStdError());
+								logger.error("out>"+process.getStdOutput());
+								process = null;
+								
 								if (returnValue != 0)
 								{
 									logger.error("Tried to find Perl. Return exit value of running " + cmdTest + ": " + returnValue + ", (expected this to be 0)");
@@ -121,7 +135,18 @@ public class GDBMWrapper implements FlatDatabaseWrapper
 								}
 
 								String cmd = "perl -S txtgz-to-gdbm.pl \"" + txtgzFilename + "\" \"" + filename + "\"";
-								returnValue = Processing.runProcess(cmd);
+								//returnValue = Processing.runProcess(cmd);
+
+								// replace Processing.java with SafeProcess.java
+								// so retain the same behaviour (logging)
+								process = new SafeProcess(cmd);
+								logger.error("executing command "+cmd);
+								returnValue = process.runProcess();
+								// do something with the messages
+								logger.error("err>"+process.getStdError());
+								logger.error("out>"+process.getStdOutput());
+								process = null;
+
 								// For some reason, launching this command with gsdl_system() still returns 1
 								// even when it returns 0 when run from the command-line. We can check whether
 								// we succeeded by looking at whether the output database file was created.

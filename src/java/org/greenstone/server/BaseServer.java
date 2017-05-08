@@ -85,7 +85,7 @@ public abstract class BaseServer
 	} else {
 	    if (configure_required_){
 		server_control_.displayMessage(dictionary.get("ServerControl.Configuring"));
-		int state = runTarget(CONFIGURE_CMD);
+		int state = run(CONFIGURE_CMD);
 		
 		if (state != RunTarget.SUCCESS){
 		    recordError(CONFIGURE_CMD);
@@ -113,6 +113,16 @@ public abstract class BaseServer
     protected void initLogger() {}
 
     protected abstract int runTarget(String cmd);
+
+    protected int run(String cmd) {
+	int result = runTarget(cmd);
+	server_control_.repaint();
+	// from Java 7, can just call revalidate() instead of invalidate() and validate():
+	server_control_.invalidate();
+	server_control_.validate();
+	return result;
+    }
+
     public abstract String getBrowserURL();
     public abstract void reload(); // reload properties, since they may have changed
     protected void preStop() {}
@@ -135,7 +145,7 @@ public abstract class BaseServer
   	// reconfigure if necessary
         if (configure_required_){
 	    server_control_.displayMessage(dictionary.get("ServerControl.Configuring"));
-	    state = runTarget(CONFIGURE_CMD);
+	    state = run(CONFIGURE_CMD);
 	    
 	   if (state != RunTarget.SUCCESS){
 	       recordError(CONFIGURE_CMD);
@@ -152,7 +162,7 @@ public abstract class BaseServer
 	} catch(Exception e) {
 	    logger_.error("Exception trying to sleep: " + e);
 	}
-        state = runTarget(START_CMD);
+        state = run(START_CMD);
 	
 	if (state != RunTarget.SUCCESS){
 	    recordError(START_CMD);
@@ -238,7 +248,7 @@ public abstract class BaseServer
 	if(!silent) {
 	    server_control_.displayMessage(dictionary.get("ServerControl.Stopping"));
 	}
-	int state = runTarget(STOP_CMD);
+	int state = run(STOP_CMD);
 	
         if (state != RunTarget.SUCCESS){
 	    recordError(STOP_CMD);

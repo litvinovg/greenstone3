@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 
 import org.greenstone.server.BaseProperty;
 import org.greenstone.util.Misc;
+import org.greenstone.util.SafeProcess;
 import org.apache.log4j.*;
 
 public class BrowserLauncher 
@@ -49,7 +50,7 @@ public class BrowserLauncher
 	} else {
 	     // we try to look for a browser
  	    for (int i=0; i<default_browsers.length; i++) {
- 		if (isAvailable(default_browsers[i])) {
+ 		if (SafeProcess.isAvailable(default_browsers[i])) {
  		    this.command = default_browsers[i] + " %1";
  		    break;
  		}
@@ -59,6 +60,8 @@ public class BrowserLauncher
 	this.command = this.command.replaceAll("%1",this.url);
     }
 
+    // Replaced by SafeProcess.isAvailable(program)
+    /*
     protected boolean isAvailable(String program) {
 	try {
              Runtime run = Runtime.getRuntime();
@@ -75,7 +78,7 @@ public class BrowserLauncher
 	} catch (Exception e) {
 	    return false;
 	}
-    }
+    }*/
 
     public  int getBrowserState(){
 	return state;
@@ -99,25 +102,33 @@ public class BrowserLauncher
 		String new_command = prog_name +" -raise -remote openURL("+url+",new-tab)";
 		logger.info(new_command);
 		Runtime rt = Runtime.getRuntime();
-		Process process = rt.exec(new_command);
+		//Process process = rt.exec(new_command);
                	state = LAUNCHSUCCESS;
-		exitCode = process.waitFor();
+		//exitCode = process.waitFor();
+		SafeProcess process = new SafeProcess(new_command);
+		exitCode = process.runProcess();
+		process = null;
 		logger.info("ExitCode:" + exitCode);              
 		if (exitCode != 0) { // if Netscape or mozilla was not open
 		    logger.info("couldn't do remote, trying original command");
                     logger.info(this.command);
-		    process = rt.exec(this.command); // try the original command
+		    //process = rt.exec(this.command); // try the original command
                     state = LAUNCHSUCCESS;
 		    //for some reason the following part is not executed sometimes.
-                    exitCode = process.waitFor();
+                    //exitCode = process.waitFor();
+		    process = new SafeProcess(this.command);
+		    exitCode = process.runProcess();
+		    process = null;
 		}
 	    } else {
 		logger.info(this.command);
                 Runtime rt = Runtime.getRuntime();
-		Process process = rt.exec(this.command);
+		//Process process = rt.exec(this.command);
                 state = LAUNCHSUCCESS;
               	//for some reason the following part is not executed sometimes.
-              	exitCode = process.waitFor();
+              	//exitCode = process.waitFor();
+		SafeProcess process = new SafeProcess(this.command);
+		exitCode = process.runProcess();
 	    }
 
 	    logger.info("ExitCode:" + exitCode);

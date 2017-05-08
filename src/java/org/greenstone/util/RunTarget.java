@@ -2,6 +2,7 @@ package org.greenstone.util;
 
 import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -27,11 +28,11 @@ public abstract class RunTarget extends Thread
 	 
 	 try {
 	     state = -1;
-	     Runtime run = Runtime.getRuntime();
-
 	     String targetCmd = getTargetCmd();
 	     logger.info("Target: " + targetCmd);
 
+	     /*
+	     Runtime run = Runtime.getRuntime();
              Process process = run.exec(targetCmd);
 	     BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
 	     String line = null;
@@ -54,7 +55,32 @@ public abstract class RunTarget extends Thread
 	     }
 	     
 	     br.close();
+	     */
+	     
+	     
+	     SafeProcess process = new SafeProcess(targetCmd);
+	     process.setSplitStdOutputNewLines(true);
+	     process.runProcess();	     
+	     String output = process.getStdOutput();
+	     String[] lines = output.split("[\\r\\n]+"); // http://stackoverflow.com/questions/454908/split-java-string-by-new-line
+	     for(int i = 0; i < lines.length; i++) {
+		 //System.err.println("*** Got line:|" + lines[i] + "|***");
+		 String line = lines[i].trim();
+		 if (line.equals(targetSuccess)){
+		     state = 0;
+		 }
+		 
+		 if (line.equals(targetFailed)){
+		     state = 1; 
+		 }
 
+		 if(line.startsWith(targetFinished)){
+		     break;		 
+		 }
+	     }
+	     //System.err.println("\n\n");
+
+	     
 	     if(state < 0) {
 		 logger.info("Unexpected end of input when running target: " + targetCmd);
 	     }

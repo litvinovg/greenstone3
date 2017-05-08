@@ -32,7 +32,7 @@ import org.apache.log4j.*;
 // Then killing the root process will kill child processes naturally.
 
 public class SafeProcess {
-    public static int DEBUG = 0;
+    public static int DEBUG = 1;
 
     public static final int STDERR = 0;
     public static final int STDOUT = 1;
@@ -740,8 +740,12 @@ public static boolean isAvailable(String program) {
 	// `which grep` returns a line of output with the path to grep. On windows too, the location of the program is printed
 	SafeProcess prcs = new SafeProcess("which " + program);		
 	prcs.runProcess();
-	String output = prcs.getStdOutput();
+	String output = prcs.getStdOutput().trim();	
+	///System.err.println("*** 'which " + program + "' returned: |" + output + "|");
 	if(output.equals("")) {
+	    return false;
+	} else if(output.indexOf("no "+program) !=-1) { // from GS3's org.greenstone.util.BrowserLauncher.java's isAvailable(program)
+	    log("@@@ SafeProcess.isAvailable(): " + program + "is not available");
 	    return false;
 	}
 	//System.err.println("*** 'which " + program + "' returned: " + output);
@@ -1009,7 +1013,7 @@ public static class OutputStreamGobbler extends Thread
 	if(DEBUG == 0) return;
 	logger.info(msg);
 
-	//System.err.println(msg);
+	System.err.println(msg);
 
 	//DebugStream.println(msg);
     }
@@ -1018,8 +1022,8 @@ public static class OutputStreamGobbler extends Thread
 	if(DEBUG == 0) return;
 	logger.error(msg, e);
 
-	//System.err.println(msg);
-	//e.printStackTrace();
+	System.err.println(msg);
+	e.printStackTrace();
 
 	//DebugStream.println(msg);
 	//DebugStream.printStackTrace(e);
@@ -1029,7 +1033,7 @@ public static class OutputStreamGobbler extends Thread
 	if(DEBUG == 0) return;		
 	logger.error(e);
 
-	//e.printStackTrace();
+	e.printStackTrace();
 
 	//DebugStream.printStackTrace(e);
     }

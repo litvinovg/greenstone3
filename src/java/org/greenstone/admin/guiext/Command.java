@@ -12,6 +12,8 @@ import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JOptionPane;
 
+import org.greenstone.util.SafeProcess;
+
 public class Command implements Runnable
 {
     HashMap<String, String> _osCommands = new HashMap<String, String>();
@@ -56,12 +58,12 @@ public class Command implements Runnable
 	}
 		
 	File workingDirectory = new File(_parent.getParent().getParent().getExtensionDirectory());
-	Process commandLineProc = null;
+	SafeProcess commandLineProc = null;
 	try{
 	    commandLineProc = null;
+	    String[] args = new String[3];
 	    
 	    if(System.getProperty("os.name").contains("Windows")){
-		String[] args = new String[3];
 		args[0] = "cmd.exe";
 		args[1] = "/C";
 		args[2] = command;
@@ -74,10 +76,9 @@ public class Command implements Runnable
 
 		messageArea.append("\nExecuting \"" + allArgs + "\" on the command line\n");
 
-		commandLineProc = Runtime.getRuntime().exec(args, null, workingDirectory);
+		//commandLineProc = Runtime.getRuntime().exec(args, null, workingDirectory);
 	    }
 	    else{
-		String[] args = new String[3];
 		args[0] = "sh";
 		args[1] = "-c";
 		args[2] = command;
@@ -89,9 +90,12 @@ public class Command implements Runnable
 		}
 
 		messageArea.append("\nExecuting \"" + allArgs + "\" on the command line\n");
-		commandLineProc = Runtime.getRuntime().exec(args, null, workingDirectory);
+		//commandLineProc = Runtime.getRuntime().exec(args, null, workingDirectory);
 	    }
-	    
+
+	    commandLineProc = new SafeProcess(args, null, workingDirectory); 
+
+	    /*
 	    BufferedReader stdInput = new BufferedReader(new InputStreamReader(commandLineProc.getInputStream()));
 
 	    Thread stdPrinter = new PrinterThread(messageArea, stdInput);
@@ -103,7 +107,14 @@ public class Command implements Runnable
 	    errPrinter.start();
 	    
 	    int success = commandLineProc.waitFor();
-	    
+	    */
+
+	    // Replacing the above and its use of the PrinterThread inner class with SafeProcess.java:
+	    SafeProcess.LineByLineHandler outLineHandler = new ProcessLineHandler(messageArea, SafeProcess.STDOUT);
+	    SafeProcess.LineByLineHandler errLineHandler = new ProcessLineHandler(messageArea, SafeProcess.STDERR);		    
+
+	    int success = commandLineProc.runProcess(outLineHandler, errLineHandler);
+
 	    if(success != 0){
 		System.err.println("Command line process \"" + command  + "\" returned unsuccessfully with the value \"" + success + "\"");
 		_parent.threadError();
@@ -147,6 +158,7 @@ public class Command implements Runnable
 	return _osCommands.get("default");
     }
 
+    /*
     public class PrinterThread extends Thread
     {
 	JTextArea _messageArea = null;
@@ -172,5 +184,32 @@ public class Command implements Runnable
 		ex.printStackTrace();
 	    }
 	}
+    }*/
+
+    public class ProcessLineHandler extends SafeProcess.LineByLineHandler
+    {
+	// These members need to be final in order to synchronize on them
+	private final JTextArea _messageArea;
+
+	public ProcessLineHandler(JTextArea messageArea, int src)
+	{
+	    super(src); // will set this.source to STDERR or STDOUT
+	    _messageArea = messageArea;
+	}
+
+	public void gotLine(String line) { // first non-null line
+
+	    // messageArea needs to be synchronized, since both the process'
+	    // stderr and stdout will be attempting to append to it
+
+	    synchronized(_messageArea) {
+		_messageArea.append(line + "\n");
+		_messageArea.setSelectionEnd(_messageArea.getDocument().getLength());
+	    }
+	}
+	public void gotException(Exception e) {
+	    e.printStackTrace();
+	}
+
     }
 }

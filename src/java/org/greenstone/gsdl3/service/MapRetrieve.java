@@ -22,6 +22,7 @@ import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSPath;
 import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.XMLConverter;
+import org.greenstone.util.SafeProcess;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -458,11 +459,18 @@ public class MapRetrieve extends ServiceRack
 
 					// get the map size
 					String get_size[] = { "identify", "-size", "10000", temp_image_file };
+					/*
 					Process proc;
 					proc = Runtime.getRuntime().exec(get_size);
 					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 					img_size = br.readLine();
 					proc.waitFor();
+					*/
+					SafeProcess proc = new SafeProcess(get_size);
+					proc.runProcess();
+					img_size = proc.getStdOutput();
+					proc = null;
+
 					img_size = img_size.substring(img_size.indexOf("JPEG") + 5, img_size.indexOf(" ", img_size.indexOf("JPEG") + 5));
 					width = Integer.parseInt(img_size.substring(0, img_size.indexOf("x")));
 					height = Integer.parseInt(img_size.substring(img_size.indexOf("x") + 1, img_size.length()));
@@ -540,22 +548,31 @@ public class MapRetrieve extends ServiceRack
 					//file for converting image    
 					BufferedWriter bw = new BufferedWriter(new FileWriter(this.temp_files_dir + "add_x_" + uid));
 					;
-					Process proc;
+					SafeProcess proc;
 
 					// if a new search
 					if (doc_id.indexOf("```") != -1)
 					{
 						// copy requested map to temp.jpg
-						proc = Runtime.getRuntime().exec("cp " + this.files_home_dir + "maps" + File.separator + img_num + ".jpg " + temp_image_file);
-						proc.waitFor();
+						/*proc = Runtime.getRuntime().exec("cp " + this.files_home_dir + "maps" + File.separator + img_num + ".jpg " + temp_image_file);
+						  proc.waitFor();*/
+					    proc = new SafeProcess("cp " + this.files_home_dir + "maps" + File.separator + img_num + ".jpg " + temp_image_file);
+					    proc.runProcess();
+					    proc = null;					    
 					}
 
 					//get the image size
 					String get_size[] = { "identify", "-size", "10000", temp_image_file };
-					proc = Runtime.getRuntime().exec(get_size);
+					/*proc = Runtime.getRuntime().exec(get_size);				
 					BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 					img_size = br.readLine();
 					proc.waitFor();
+					*/
+					proc = new SafeProcess(get_size);
+					proc.runProcess();
+					img_size = proc.getStdOutput();
+					proc = null;
+
 					img_size = img_size.substring(img_size.indexOf("JPEG") + 5, img_size.indexOf(" ", img_size.indexOf("JPEG") + 5));
 					if (img_size.indexOf("+") != -1)
 					{
@@ -753,8 +770,11 @@ public class MapRetrieve extends ServiceRack
 							buf.flush();
 							buf.close();
 							// execute the command for the legend image
-							proc = Runtime.getRuntime().exec("sh " + this.temp_files_dir + "add_l_" + uid);
-							proc.waitFor();
+							/*proc = Runtime.getRuntime().exec("sh " + this.temp_files_dir + "add_l_" + uid);
+							  proc.waitFor();*/
+							proc = new SafeProcess("sh " + this.temp_files_dir + "add_l_" + uid);
+							proc.runProcess();
+							proc = null;
 						}
 						inType.close();
 					}
@@ -762,8 +782,12 @@ public class MapRetrieve extends ServiceRack
 					bw.close();
 
 					// execute the convert commands etc.
-					proc = Runtime.getRuntime().exec("sh " + this.temp_files_dir + "add_x_" + uid);
+					/*proc = Runtime.getRuntime().exec("sh " + this.temp_files_dir + "add_x_" + uid);
 					proc.waitFor();
+					*/
+					proc = new SafeProcess("sh " + this.temp_files_dir + "add_x_" + uid);
+					proc.runProcess();
+					proc = null;
 
 				}
 				catch (Exception ioe)
