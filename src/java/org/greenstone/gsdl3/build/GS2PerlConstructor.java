@@ -772,6 +772,8 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	}
 
 	// helper method, deals with things in a thread-safe manner
+	// When to use synchronized blocks vs methods
+	// http://stackoverflow.com/questions/574240/is-there-an-advantage-to-use-a-synchronized-method-instead-of-a-synchronized-blo
 	private void gotLine(String line) throws Exception {
 
 	    // BufferedWriter writes may not be atomic
