@@ -200,7 +200,7 @@ public class Command implements Runnable
 	public void gotLine(String line) { // first non-null line
 
 	    // messageArea needs to be synchronized, since both the process'
-	    // stderr and stdout will be attempting to append to it
+	    // stderr and stdout will be attempting to append to it from their own threads
 
 	    synchronized(_messageArea) {
 		_messageArea.append(line + "\n");

@@ -120,7 +120,7 @@ public abstract class CollectionConstructor extends Thread
 		}
 	}
 
-	protected void sendProcessStatus(ConstructionEvent evt)
+	protected synchronized void sendProcessStatus(ConstructionEvent evt)
 	{
 
 		Object[] concerned = this.listeners.getListenerList();

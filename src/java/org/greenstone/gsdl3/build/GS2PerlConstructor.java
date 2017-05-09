@@ -737,7 +737,8 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 		String line=null;
 		while ( (line = br.readLine()) != null ) {
 		    
-		    if(Thread.currentThread().isInterrupted()) { // should we not instead check if SafeProcess thread was interrupted?
+		    // check if we got cancelled
+		    if(Thread.currentThread().isInterrupted()) { // Did the SafeProcess thread interrupt us? Then break out of loop pre-maturely and finish up
 			System.err.println("Got interrupted when reading lines from process err/out stream.");
 			break; // will go to finally block
 		    }
@@ -751,26 +752,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 		    ///System.err.println("OUT: " + line);
 		    //}	
 		    
-
-		    this.gotLine(line); // synchronized
-		    
-		    /*
-		    try {
-			synchronized(bwHandle) { // get a lock on the writer handle, then write
-			    
-			    bwHandle.write(line + "\n");
-			} 
-		    } catch(IOException ioe) {
-			String msg = (this.source == SafeProcess.STDERR) ? "stderr" : "stdout";
-			msg = "Exception when writing out a line read from perl process' " + msg + " stream.";
-			GS2PerlConstructor.logger.error(msg, ioe);
-		    }
-		    
-		    // this next method is thread safe since only synchronized methods are invoked.
-		    // and only immutable (final) vars are used. 
-		    // NO, What about the listeners???
-		    sendProcessStatus(new ConstructionEvent(GS2PerlConstructor.this, GSStatus.CONTINUING, line));		    
-		    */
+		    this.gotLine(line); // behaves threadsafe
 		}
 	    } catch (IOException ioe) { // problem with reading in from process with BufferedReader br
 
@@ -779,39 +761,40 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 		GS2PerlConstructor.logger.error(msg, ioe);
 		// now do what the original runPerlCommand() code always did:
 		ioe.printStackTrace();
-		logException(ioe); // synchronized
+		sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Exception occurred " + ioe.toString())); // now synchronized
 
 	    } catch (Exception e) { // problem with BufferedWriter bwHandle on processing each line
 		e.printStackTrace();
-		logException(e); // synchronized
+		sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Exception occurred " + e.toString())); // now synchronized
 	    } finally {
 		SafeProcess.closeResource(br);
 	    }
 	}
 
-	// trying to keep synchronized methods as short as possible
-	private synchronized void logException(Exception e) {
-	    sendProcessStatus(new ConstructionEvent(this, GSStatus.ERROR, "Exception occurred " + e.toString()));
-	}
-
-	// trying to keep synchronized methods as short as possible
-	private synchronized void gotLine(String line) throws Exception {
+	// helper method, deals with things in a thread-safe manner
+	private void gotLine(String line) throws Exception {
 
 	    // BufferedWriter writes may not be atomic
 	    // http://stackoverflow.com/questions/9512433/is-writer-an-atomic-method
 	    // Choosing to put try-catch outside of sync block, since it's okay to give up lock on exception
 	    // http://stackoverflow.com/questions/14944551/it-is-better-to-have-a-synchronized-block-inside-a-try-block-or-a-try-block-insi
-	    try {					    
-		bwHandle.write(line + "\n");	
+	    try {
+
+		// try to keep synchronized methods and synchronized blocks as short as possible
+		synchronized(bwHandle) { // get a lock on the writer handle, then write		    
+		    bwHandle.write(line + "\n"); // can throw IOException
+		} 
 	    
 ///		GS2PerlConstructor.logger.info("@@@ WROTE LINE: " + line);
 
 		// this next method is thread safe since only synchronized methods are invoked.
-		// and only immutable (final) vars are used.
+		// and only immutable (final) vars are used. NO, What about the listeners???
+		// So have made this next method synchronized, which synchronizes on the GS2PerlConstructor
+		// and consequently its member variables are protected against concurrent access
+		// by multiple threads.
 		sendProcessStatus(new ConstructionEvent(GS2PerlConstructor.this, GSStatus.CONTINUING, line));
 	    
-	    } catch(IOException ioe) { // can't throw Exceptions, but are forced to handle Exceptions here
-		// since our method definition doesn't specify a throws list.
+	    } catch(IOException ioe) {
 		// "All methods on Logger are multi-thread safe", see
 		// http://stackoverflow.com/questions/14211629/java-util-logger-write-synchronization
 		
