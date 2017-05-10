@@ -448,7 +448,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	return runPerlCommand(command, null, null);
     }
 
-    	
+
     protected boolean runPerlCommand(String[] command, String[] envvars, File dir)
     {
 	boolean success = true;
@@ -699,8 +699,10 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
     // Called when an exception happens during the running of our perl process. However,
     // exceptions when reading from our perl process' stderr and stdout streams are handled by
     // SynchronizedProcessHandler.gotException() below, since they happen in separate threads
-    // from this one (the one from which the perl process is run).
-    public synchronized void gotException(Exception e) {
+    // from this one (the one from which the perl process is run). So this method's operations
+    // have been made thread-safe, rather than synchronizing on the method itself which locks
+    // *this* object and which isn't actually useful for what I want to do.
+    public void gotException(Exception e) {
 
 	// do what original runPerlCommand() code always did when an exception occurred
 	// when running the perl process:
@@ -790,10 +792,8 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 ///		GS2PerlConstructor.logger.info("@@@ WROTE LINE: " + line);
 
 		// this next method is thread safe since only synchronized methods are invoked.
-		// and only immutable (final) vars are used. NO, What about the listeners???
-		// So have made this next method synchronized, which synchronizes on the GS2PerlConstructor
-		// and consequently its member variables are protected against concurrent access
-		// by multiple threads.
+		// and only immutable (final) vars are used. And the listeners of this class have
+		// now been made threadsafe by using CopyOnWriteArrayList in place of EventListenerList.
 		sendProcessStatus(new ConstructionEvent(GS2PerlConstructor.this, GSStatus.CONTINUING, line));
 	    
 	    } catch(IOException ioe) {

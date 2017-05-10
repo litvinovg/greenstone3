@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.greenstone.gsdl3.util.*;
 //import java.util.Thread
-import javax.swing.event.EventListenerList;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.w3c.dom.Element;
 
 /** base class for collection construction */
@@ -21,8 +21,16 @@ public abstract class CollectionConstructor extends Thread
 	protected int process_type = -1;
 	/** other arguments/parameters for the construction process - in a paramList */
 	protected Element process_params = null;
-	/** the list of listeners for the process */
-	protected EventListenerList listeners = null;
+	/** the list of listeners for the process. We need it to be threadsafe. 
+	 * see http://stackoverflow.com/questions/8259479/should-i-synchronize-listener-notifications-or-not
+	 * https://docs.oracle.com/javase/6/docs/api/java/util/concurrent/CopyOnWriteArrayList.html
+	 * "A thread-safe variant of ArrayList in which all mutative operations (add, set, and so on) are
+	 * implemented by making a fresh copy of the underlying array.
+	 * This is ordinarily too costly, but may be more efficient than alternatives when traversal operations
+	 * vastly outnumber mutations, and is useful when you cannot or don't want to synchronize traversals,
+	 * yet need to preclude interference among concurrent threads."
+	 */
+	protected final CopyOnWriteArrayList<ConstructionListener> listeners;
 	/** A flag used to determine if this process has been asked to cancel. */
 	protected boolean cancel = false; // Not really used (in any way that works)
 	/** Stores the name of the manifest file (if one is needed) */
@@ -33,7 +41,7 @@ public abstract class CollectionConstructor extends Thread
 	public CollectionConstructor(String name)
 	{
 		super(name);
-		this.listeners = new EventListenerList();
+		this.listeners = new CopyOnWriteArrayList<ConstructionListener>();
 	}
 
 	/**
@@ -86,64 +94,47 @@ public abstract class CollectionConstructor extends Thread
 
 	public boolean addListener(ConstructionListener listener)
 	{
-		this.listeners.add(ConstructionListener.class, listener);
-		return true;
+	    this.listeners.add(listener);
+	    return true;
 	}
 
 	public boolean removeListener(ConstructionListener listener)
-	{
-		this.listeners.remove(ConstructionListener.class, listener);
-		return true;
+	{	    
+	    this.listeners.remove(listener);
+	    return true;
 	}
 
 	protected void sendProcessBegun(ConstructionEvent evt)
 	{
-		Object[] concerned = this.listeners.getListenerList();
-		for (int i = 0; i < concerned.length; i += 2)
-		{
-			if (concerned[i] == ConstructionListener.class)
-			{
-				((ConstructionListener) concerned[i + 1]).processBegun(evt);
-			}
-		}
+	    // See http://stackoverflow.com/questions/8259479/should-i-synchronize-listener-notifications-or-not
+	    for (ConstructionListener l: this.listeners) {
+		l.processBegun(evt);
+	    }
 	}
 
 	protected void sendProcessComplete(ConstructionEvent evt)
 	{
-		Object[] concerned = this.listeners.getListenerList();
-		for (int i = 0; i < concerned.length; i += 2)
-		{
-			if (concerned[i] == ConstructionListener.class)
-			{
-				((ConstructionListener) concerned[i + 1]).processComplete(evt);
-			}
-		}
+	    for (ConstructionListener l: this.listeners) {
+		l.processComplete(evt);
+	    }
 	}
 
-	protected synchronized void sendProcessStatus(ConstructionEvent evt)
+    // Method doesn't need to be synchronized any more, since it uses the ThreadSafe CopyOnWriteArrayList
+    // for listeners list.
+    // See http://stackoverflow.com/questions/8259479/should-i-synchronize-listener-notifications-or-not
+    // See http://stackoverflow.com/questions/574240/is-there-an-advantage-to-use-a-synchronized-method-instead-of-a-synchronized-blo
+	protected void sendProcessStatus(ConstructionEvent evt)
 	{
-
-		Object[] concerned = this.listeners.getListenerList();
-		for (int i = 0; i < concerned.length; i += 2)
-		{
-			if (concerned[i] == ConstructionListener.class)
-			{
-				((ConstructionListener) concerned[i + 1]).processStatus(evt);
-			}
-		}
+	    for (ConstructionListener l: this.listeners) {
+		l.processStatus(evt);
+	    }
 	}
 
 	protected void sendMessage(ConstructionEvent evt)
 	{
-
-		Object[] concerned = this.listeners.getListenerList();
-		for (int i = 0; i < concerned.length; i += 2)
-		{
-			if (concerned[i] == ConstructionListener.class)
-			{
-				((ConstructionListener) concerned[i + 1]).message(evt);
-			}
-		}
+	    for (ConstructionListener l: this.listeners) {
+		l.message(evt);
+	    }
 	}
 
 	abstract public void run();
