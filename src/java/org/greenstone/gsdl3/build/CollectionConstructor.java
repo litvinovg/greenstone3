@@ -98,6 +98,13 @@ public abstract class CollectionConstructor extends Thread
 	    return true;
 	}
 
+    // We never call removeListener. If we do start calling removeListener() change the listeners list
+    // over to type ConcurrentLinkedQueue, for reasons explained at
+    // http://stackoverflow.com/questions/8259479/should-i-synchronize-listener-notifications-or-not
+    // The current listeners list type is CopyOnWriteArrayList, which provides thread safety. But it
+    // can still send off events to listeners just as they're being unregistered, and that could be a
+    // problem if we were specifically removing the listener because we wanted to cease it from
+    // listening and responding to subsequent events.
 	public boolean removeListener(ConstructionListener listener)
 	{	    
 	    this.listeners.remove(listener);
