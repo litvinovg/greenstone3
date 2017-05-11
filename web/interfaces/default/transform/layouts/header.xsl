@@ -438,16 +438,20 @@
   <xsl:template name="generateLogoutURL">
     
     <xsl:variable name="url" select="/page/pageRequest/@fullURL"/>
-    <xsl:variable name="tmpURL" select="substring-before($url, '&amp;amp;logout=')"/>
+    <xsl:variable name="beforeLogout" select="substring-before($url, '&amp;amp;logout=')"/>
+	<xsl:variable name="tmpAfter" select="substring-after($url, '&amp;amp;logout=')"/>
+	<xsl:variable name="afterLogout" select="substring-after($tmpAfter, '&amp;amp;')"/>
     <xsl:variable name="beforeHash" select="substring-before($url, '#')"/>
     <xsl:variable name="afterHash" select="substring-after($url, '#')"/>
     <!-- Get rid of any lingering &amp;logout= already in the URL.
-	 Can't use fn:replace() as it's only been defined since XSLT 2.0. We use XSLT 1.x -->
+		But retain anything before and after it (the after portion would start with &).
+		Can't use fn:replace() as it's only been defined since XSLT 2.0. We use XSLT 1.x -->
     <xsl:variable name="fullURL">
       <xsl:choose>
-	<xsl:when test="$tmpURL != ''"><xsl:value-of select="$tmpURL" /></xsl:when>
-	<xsl:otherwise><xsl:value-of select="$url" /></xsl:otherwise>
-      </xsl:choose>
+		<xsl:when test="$beforeLogout != ''"><xsl:value-of select="$beforeLogout" /></xsl:when>
+		<xsl:otherwise><xsl:value-of select="$url" /></xsl:otherwise>
+      </xsl:choose>	  
+      <xsl:if test="$afterLogout != ''">&amp;<xsl:value-of select="$afterLogout" /></xsl:if>      
     </xsl:variable>
 
     <!-- Output the logout link: the current page's URL (with any lingering logout suffix removed) 
