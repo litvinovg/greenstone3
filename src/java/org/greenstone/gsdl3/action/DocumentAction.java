@@ -1192,6 +1192,7 @@ public class DocumentAction extends Action
 			for (int p = 0; p < phrase_query_term_variants_hierarchy.size(); p++)
 			{
 				ArrayList phrase_query_p_term_variants_list = phrase_query_term_variants_hierarchy.get(p);
+				if (phrase_query_p_term_variants_list.size()>0) {
 				HashSet phrase_query_p_term_1_variants = (HashSet) phrase_query_p_term_variants_list.get(0);
 				if (phrase_query_p_term_1_variants.contains(word_match.word))
 				{
@@ -1206,6 +1207,7 @@ public class DocumentAction extends Action
 					{
 						partial_phrase_matches.add(new PartialPhraseMatch(word_match.start_position, p));
 					}
+				}
 				}
 			}
 		}
