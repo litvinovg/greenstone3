@@ -503,19 +503,20 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 	// midway through executing the perl, as condition of a while loop reading from stderr and stdout.
 	// We don't include the cancel check here, as superclass CollectionConstructor.stopAction(), which set
 	// this.cancel to true, never got called anywhere.
-	// But I think a proper cancel of our perl process launched by this GS2PerlConstructor Thread object
-	// and of the worker threads it launches, could be implemented with interrupts. See:
+	// But a proper cancel of our perl process launched by this GS2PerlConstructor Thread object
+	// and of the worker threads it launches is now implemented in SafeProcess.cancelRunningProcess()
+	// with interrupts. See:
 	// http://stackoverflow.com/questions/6859681/better-way-to-signal-other-thread-to-stop
 	// https://docs.oracle.com/javase/tutorial/essential/concurrency/interrupt.html
 	// https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#interrupted()
 	// https://praveer09.github.io/technology/2015/12/06/understanding-thread-interruption-in-java/
-	// The code that calls GS2PerlConstructor.stopAction() should also call GSPerlConstructor.interrupt()
-	// Then in SafeProcess.runProcess(), I think the waitFor() will throw an InterruptedException()
-	// This can be caught and interrupt() called on SafeProcess' workerthreads, 
-	// Any workerthreads' run() methods that block (IO, loops) can test this.isInterrupted() 
-	// and can break out of any loops and release resources in finally.
-	// Back in SafeProcess.runProcess, the InterruptedException catch block will be followed by finally
-	// that will clear up any further resources and destroy the process forcibly if it hadn't been ended.
+	// If cancel is to be implemented for GS2PerlConstructor, then the code that calls
+	// GS2PerlConstructor.stopAction() should also call or result in a call to the SafeProcess instance's
+	// cancelRunningProcess() method.
+	// For a simple example of the use of SafeProcess' cancel feature, see GLI's GShell. For a more
+	// complicated example, see GLI's DownloadJob.java, which implements SafeProcess.MainHandler to do
+	// additional work when a process is cancelled while still running (and therefore has to be prematurely
+	// terminated) a.o.t. a process that's cancelled when it's already terminated naturally.
 
 	} catch(IOException e) {
 	    e.printStackTrace();

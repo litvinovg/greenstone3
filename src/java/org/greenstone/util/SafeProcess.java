@@ -9,16 +9,18 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.Socket;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Stack;
+import javax.swing.SwingUtilities;
+
 
 import com.sun.jna.*;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinNT;
 
 import java.lang.reflect.Field;
-//import java.lang.reflect.Method;
 
 import org.apache.log4j.*;
 
@@ -38,8 +40,15 @@ public class SafeProcess {
     public static final int STDOUT = 1;
     public static final int STDIN = 2;
     // can't make this variable final and init in a static block, because it needs to use other SafeProcess static methods which rely on this in turn:
-    public static String WIN_KILL_CMD; 
-		
+    public static String WIN_KILL_CMD;
+
+	/**
+	 * Boolean interruptible is used to mark any sections of blocking code that should not be interrupted
+	 * with an InterruptedExceptions. At present only the cancelRunningProcess() attempts to do such a thing
+	 * and avoids doing so when interruptible is false.
+	 * Note that interruptible is also used as a lock, so remember to synchronize on it when using it!
+	*/
+    public Boolean interruptible = Boolean.TRUE; 
 	
     // charset for reading process stderr and stdout streams
     //public static final String UTF8 = "UTF-8";    
@@ -54,6 +63,9 @@ public class SafeProcess {
     private String inputStr = null;
     private Process process = null;
     private boolean forciblyTerminateProcess = false;
+
+    /** a ref to the thread in which the Process is being executed (the thread wherein Runtime.exec() is called) */
+    private Thread theProcessThread = null;
 	
     // output from running SafeProcess.runProcess()
     private String outputStr = ""; 
@@ -63,6 +75,10 @@ public class SafeProcess {
 
     // allow callers to process exceptions of the main process thread if they want
     private ExceptionHandler exceptionHandler = null;
+	/** allow callers to implement hooks that get called during the main phases of the internal
+	 * process' life cycle, such as before and after process.destroy() gets called
+	*/
+    private MainProcessHandler mainHandler = null;
 
     // whether std/err output should be split at new lines
     private boolean splitStdOutputNewLines = false;
@@ -109,6 +125,13 @@ public class SafeProcess {
 	exceptionHandler = exception_handler;	
     }
 
+    /** to set a handler that will handle the main (SafeProcess) thread,
+	 * implementing the hooks that will get called during the internal process' life cycle,
+     * such as before and after process.destroy() is called */
+    public void setMainHandler(MainProcessHandler handler) {
+	this.mainHandler = handler;
+    }
+
     // set if you want the std output or err output to have \n at each newline read from the stream
     public void setSplitStdOutputNewLines(boolean split) {
 	splitStdOutputNewLines = split;
@@ -117,10 +140,87 @@ public class SafeProcess {
 	splitStdErrorNewLines = split;
     }
 
+	
+    /*
+    public boolean canInterrupt() {
+	boolean canInterrupt;
+	synchronized(interruptible) {
+	    canInterrupt = interruptible.booleanValue();
+	}
+	return canInterrupt;
+    }
+    */
+
+    /**
+	 * Call this method when you want to prematurely and safely terminate any process
+	 * that SafeProcess may be running.
+	 * You may want to implement the SafeProcess.MainHandler interface to write code
+	 * for any hooks that will get called during the process' life cycle.
+     * @return false if process has already terminated or if it was already terminating
+     * when cancel was called. In such cases no interrupt is sent. Returns boolean sentInterrupt.
+     */
+    public synchronized boolean cancelRunningProcess() {
+	// on interrupt:
+	// - forciblyTerminate will be changed to true if the interrupt came in when the process was
+	// still running (and so before the process' streams were being joined)
+	// - and forciblyTerminate will still remain false if the interrupt happens when the process'
+	// streams are being/about to be joined (hence after the process naturally terminated).
+	// So we don't touch the value of this.forciblyTerminate here.
+	// The value of forciblyTerminate determines whether Process.destroy() and its associated before
+	// and after handlers are called or not: we don't bother destroying the process if it came to
+	// a natural end.
+
+	// no process to interrupt, so we're done
+	if(this.process == null) {
+	    log("@@@ No Java process to interrupt.");
+	    return false;
+	}
+	
+	boolean sentInterrupt = false;
+
+	// can't interrupt when SafeProcess is joining (cleanly terminating) worker threads
+	// have to wait until afterward	    
+	if (interruptible) {
+	    // either way, we can now interrupt the thread - if we have one (we should)
+	    if(this.theProcessThread != null) { // we're told which thread should be interrupted
+		this.theProcessThread.interrupt();
+		log("@@@ Successfully sent interrupt to process.");
+		sentInterrupt = true;
+	    }
+	}
+	else { // wait for join()s to finish.
+	    // During and after joining(), there's no need to interrupt any more anyway: no calls
+	    // subsequent to joins() block, so everything thereafter is insensitive to InterruptedExceptions.
+
+	    if(SwingUtilities.isEventDispatchThread()) {
+		log("#### Event Dispatch thread, returning");
+		return false;
+	    }
+
+	    while(!interruptible) {
+
+		log("######### Waiting for process to become interruptible...");
+		
+		// https://docs.oracle.com/javase/tutorial/essential/concurrency/guardmeth.html
+		// wait will release lock on this object, and regain it when loop condition interruptible is true
+		try {
+		    this.wait(); // can't interrupt when SafeProcess is joining (cleanly terminating) worker threads, so wait
+		} catch(Exception e) {
+		    log("@@@ Interrupted exception while waiting for SafeProcess' worker threads to finish joining on cancelling process");
+		}
+	    }
+
+	    // now the process is sure to have ended as the worker threads would have been joined
+	}
+
+	return sentInterrupt;
+    }
+
+	
     // In future, think of changing the method doRuntimeExec() over to using ProcessBuilder
     // instead of Runtime.exec(). ProcessBuilder seems to have been introduced from Java 5.
     // https://docs.oracle.com/javase/7/docs/api/java/lang/ProcessBuilder.html
-    // https://zeroturnaround.com/rebellabs/how-to-deal-with-subprocesses-in-java/
+    // See also https://zeroturnaround.com/rebellabs/how-to-deal-with-subprocesses-in-java/
     // which suggests using Apache Common Exec to launch processes and says what will be forthcoming in Java 9
     
     private Process doRuntimeExec() throws IOException {
@@ -158,6 +258,7 @@ public class SafeProcess {
 	    }
 	}
 
+	this.theProcessThread = Thread.currentThread(); // store a ref to the thread wherein the Process is being run
 	return prcs;
     }
 
@@ -172,9 +273,8 @@ public class SafeProcess {
 	errorGobbler.start();
 	outputGobbler.start();
 	
-	// any error???
 	try {
-	    this.exitValue = process.waitFor(); // can throw an InterruptedException if process did not terminate
+	    this.exitValue = process.waitFor(); // can throw an InterruptedException if process was cancelled/prematurely terminated
 	} catch(InterruptedException ie) {
 	    log("*** Process interrupted (InterruptedException). Expected to be a Cancel operation.");
 	        // don't print stacktrace: an interrupt here is not an error, it's expected to be a cancel action
@@ -184,7 +284,7 @@ public class SafeProcess {
 	    
 	    // propagate interrupts to worker threads here
 	    // unless the interrupt emanated from any of them in any join(),
-	    // which will be caught by caller's catch on InterruptedException.
+	    // which will be caught by the calling method's own catch on InterruptedException.
 	    // Only if the thread that SafeProcess runs in was interrupted
 	    // should we propagate the interrupt to the worker threads.
 	    // http://stackoverflow.com/questions/2126997/who-is-calling-the-java-thread-interrupt-method-if-im-not
@@ -207,13 +307,14 @@ public class SafeProcess {
 	    // to forcibly terminate process eventually after the finally code first waits for each worker thread
 	    // to die off. Don't set process=null until after we've forcibly terminated it if needs be.
 	    this.forciblyTerminateProcess = true; 
-	    
+		
 	    // even after the interrupts, we want to proceed to calling join() on all the worker threads
 	    // in order to wait for each of them to die before attempting to destroy the process if it
 	    // still hasn't terminated after all that.
 	} finally {		
 	    
 	    //log("Process exitValue: " + exitValue);
+	    ///log("@@@@ Before join phase. Forcibly terminating: " + this.forciblyTerminateProcess);
 	    
 	    // From the comments of 
 	    // http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
@@ -224,18 +325,61 @@ public class SafeProcess {
 	    // Wait for each of the threads to die, before attempting to destroy the process
 	    // Any of these can throw InterruptedExceptions too
 	    // and will be processed by the calling function's catch on InterruptedException.
-	    // However, no one besides us will interrupting these threads I think...
-	    // and we won't be throwing the InterruptedException from within the threads...
-	    // So if any streamgobbler.join() call throws an InterruptedException, that would be unexpected
 
-	    outputGobbler.join(); 
+
+	    // Thread.joins() below are blocking calls, same as Process.waitFor(), and a cancel action could
+	    // send an interrupt during any Join: the InterruptedException ensuing will then break out of the
+	    // joins() section. We don't want that to happen: by the time the joins() start happening, the
+	    // actual process has finished in some way (naturally terminated or interrupted), and nothing
+	    // should interrupt the joins() (nor ideally any potential p.destroy after that).
+	    // So we mark the join() section as an un-interruptible section, and make anyone who's seeking
+	    // to interrupt just then first wait for this Thread (in which SafeProcess runs) to become
+	    // interruptible again. Thos actually assumes anything interruptible can still happen thereafter
+	    // when in reality, none of the subsequent actions after the joins() block. So they nothing
+	    // thereafter, which is the cleanup phase, will actually respond to an InterruptedException.
+
+	    
+	    if(this.mainHandler != null) {
+		// this method can unset forcible termination flag
+		// if the process had already naturally terminated by this stage:
+		this.forciblyTerminateProcess = mainHandler.beforeWaitingForStreamsToEnd(this.forciblyTerminateProcess);
+	    }
+
+	    ///log("@@@@ After beforeJoin Handler. Forcibly terminating: " + this.forciblyTerminateProcess);
+
+	    // Anyone could interrupt/cancel during waitFor() above,
+	    // but no one should interrupt while the worker threads come to a clean close,
+	    // so make anyone wanting to cancel the process at this stage wait()
+	    // until we're done with the join()s:
+	    synchronized(interruptible) {
+		interruptible = Boolean.FALSE;
+	    }
+	    //Thread.sleep(5000); // Uncomment to test this uninterruptible section, also comment out block checking for
+			// EventDispatchThread in cancelRunningProcess() and 2 calls to progress.enableCancelJob() in DownloadJob.java
+	    outputGobbler.join();
 	    errorGobbler.join();
-	    inputGobbler.join();
-	    
-	    
+	    inputGobbler.join(); 
+
+	    synchronized(interruptible) {
+		interruptible = Boolean.TRUE;
+	    }
+
+	    ///log("@@@@ Join phase done...");
+
+	    // notify any of those waiting to interrupt this thread, that they may feel free to do so again
+	    // https://docs.oracle.com/javase/tutorial/essential/concurrency/guardmeth.html
+	    synchronized(this) {
+		this.notify();
+	    }
+
 	    // set the variables that the code which created a SafeProcess object may want to inspect
 	    this.outputStr = outputGobbler.getOutput();
-	    this.errorStr = errorGobbler.getOutput();	    
+	    this.errorStr = errorGobbler.getOutput();
+	    
+	    // call the after join()s hook
+	    if(this.mainHandler != null) {
+		this.forciblyTerminateProcess = mainHandler.afterStreamsEnded(this.forciblyTerminateProcess);
+	    }
 	}
 
 	// Don't return from finally, it's considered an abrupt completion and exceptions are lost, see
@@ -259,7 +403,7 @@ public class SafeProcess {
     public int runBasicProcess() {
 	try {
 	    this.forciblyTerminateProcess = true;
-	    
+		
 	    // 1. create the process
 	    process = doRuntimeExec();
 	    // 2. basic waitFor the process to finish
@@ -282,13 +426,9 @@ public class SafeProcess {
 	    }
 	    
 	    Thread.currentThread().interrupt();
-	} finally { 
-
-	    if( this.forciblyTerminateProcess ) {
-		destroyProcess(process); // see runProcess() below		
-	    }
-	    process = null;
-	    this.forciblyTerminateProcess = false; // reset
+	} finally {
+	    
+	    cleanUp("SafeProcess.runBasicProcess");
 	}
 	return this.exitValue;
     }
@@ -346,7 +486,7 @@ public class SafeProcess {
 	    }
 
 
-            // 3. kick off the stream gobblers
+	    // 3. kick off the stream gobblers
 	    this.exitValue = waitForWithStreams(inputGobbler, outputGobbler, errorGobbler);
        
 	} catch(IOException ioe) {
@@ -364,23 +504,15 @@ public class SafeProcess {
 		exceptionHandler.gotException(ie);
 		log("@@@@ Unexpected InterruptedException when waiting for process stream gobblers to die");
 	    } else {
-		log("*** Unexpected InterruptException when waiting for process stream gobblers to die:" + ie.getMessage(), ie);
+		log("*** Unexpected InterruptException when waiting for process stream gobblers to die: " + ie.getMessage(), ie);
 	    }
 
 	    // see comments in other runProcess()
 	    Thread.currentThread().interrupt();
 	
-	} finally { 
-	    //String cmd = (this.command == null) ? Arrays.toString(this.command_args) : this.command;
-	    //log("*** In finally of SafeProcess.runProcess(3 params): " + cmd);
-
-	    if( this.forciblyTerminateProcess ) {
-		log("*** Going to call process.destroy 2");
-		destroyProcess(process);				
-		log("*** Have called process.destroy 2");
-	    }
-	    process = null;
-	    this.forciblyTerminateProcess = false; // reset
+	} finally {
+	    
+	    cleanUp("SafeProcess.runProcess(3 params)");
 	}
 	
 	return this.exitValue;
@@ -423,7 +555,7 @@ public class SafeProcess {
 	    }	    
 
 
-	    // 4. kick off the stream gobblers
+	    // 3. kick off the stream gobblers
 	    this.exitValue = waitForWithStreams(inputGobbler, outputGobbler, errorGobbler);
        
 	} catch(IOException ioe) {
@@ -451,27 +583,43 @@ public class SafeProcess {
 	    // and https://praveer09.github.io/technology/2015/12/06/understanding-thread-interruption-in-java/
 	    Thread.currentThread().interrupt(); // re-interrupt the thread - which thread? Infinite loop?
 	
-	} finally { 
-
-	    // Moved into here from GS2PerlConstructor and GShell.runLocal() which said
-	    // "I need to somehow kill the child process. Unfortunately Thread.stop() and Process.destroy() both fail to do this. But now, thankx to the magic of Michaels 'close the stream suggestion', it works fine (no it doesn't!)"
-	    // http://steveliles.github.io/invoking_processes_from_java.html
-	    // http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
-	    // http://mark.koli.ch/leaky-pipes-remember-to-close-your-streams-when-using-javas-runtimegetruntimeexec	    
+	} finally {
 	    
-	    //String cmd = (this.command == null) ? Arrays.toString(this.command_args) : this.command;
-	    //log("*** In finally of SafeProcess.runProcess(2 params): " + cmd);
-
-	    if( this.forciblyTerminateProcess ) {
-		log("*** Going to call process.destroy 1");
-		destroyProcess(process); 	
-		log("*** Have called process.destroy 1");
-	    }
-	    process = null;
-	    this.forciblyTerminateProcess = false; //reset		
+	    cleanUp("SafeProcess.runProcess(2 params)");	
 	}
 	
 	return this.exitValue;
+    }
+
+    private void cleanUp(String callingMethod) {
+	
+	// Moved into here from GS2PerlConstructor and GShell.runLocal() which said
+	// "I need to somehow kill the child process. Unfortunately Thread.stop() and Process.destroy() both fail to do this. But now, thankx to the magic of Michaels 'close the stream suggestion', it works fine (no it doesn't!)"
+	// http://steveliles.github.io/invoking_processes_from_java.html
+	// http://www.javaworld.com/article/2071275/core-java/when-runtime-exec---won-t.html?page=2
+	// http://mark.koli.ch/leaky-pipes-remember-to-close-your-streams-when-using-javas-runtimegetruntimeexec	    
+
+	//String cmd = (this.command == null) ? Arrays.toString(this.command_args) : this.command;
+	//log("*** In finally of " + callingMethod + ": " + cmd);
+
+	// if we're forcibly terminating the process, call the before- and afterDestroy hooks
+	// besides actually destroying the process
+	if( this.forciblyTerminateProcess ) {
+	    log("*** Going to call process.destroy from " + callingMethod);
+
+	    if(mainHandler != null) mainHandler.beforeProcessDestroy();
+	    SafeProcess.destroyProcess(process); // see runProcess(2 args/3 args)
+	    if(mainHandler != null) mainHandler.afterProcessDestroy();
+
+	    log("*** Have called process.destroy from " + callingMethod);
+	}	
+
+	process = null;
+	this.theProcessThread = null; // let the process thread ref go too
+	boolean wasForciblyTerminated = this.forciblyTerminateProcess;
+	this.forciblyTerminateProcess = false; // reset
+	
+	if(mainHandler != null) mainHandler.doneCleanup(wasForciblyTerminated);
     }
 
 /*
@@ -607,6 +755,8 @@ static void killWinProcessWithID(long processID) {
 // On Windows we need to do more work, since otherwise processes launched by p remain around executing until they naturally terminate.
 // e.g. full-import.pl may be terminated with p.destroy(), but it launches import.pl which is left running until it naturally terminates.
 static void destroyProcess(Process p) {
+    log("### in SafeProcess.destroyProcess(Process p)");
+
     // If it isn't windows, process.destroy() terminates any child processes too
     if(!Misc.isWindows()) {
 	p.destroy();
@@ -625,9 +775,13 @@ static void destroyProcess(Process p) {
     // get the process id of the process we launched,
     // so we can use it to find the pids of any subprocesses it launched in order to terminate those too.
     
-    long processID = SafeProcess.getProcessID(p);		
-    log("Attempting to terminate sub processes of Windows process with pid " + processID);
-    terminateSubProcessesRecursively(processID, p);
+    long processID = SafeProcess.getProcessID(p);
+    if(processID == -1) { // the process doesn't exist or no longer exists (terminated naturally?)
+	p.destroy(); // minimum step, do this anyway, at worst there's no process and this won't have any effect
+    } else {
+	log("Attempting to terminate sub processes of Windows process with pid " + processID);
+	terminateSubProcessesRecursively(processID, p);
+    }
     
 }
 
@@ -705,7 +859,8 @@ private static void terminateSubProcessesRecursively(long parent_pid, Process p)
 // This method should only be called on a Windows OS
 private static String getWinProcessKillCmd(Long processID) {
     // check if we first need to init WIN_KILL_CMD. We do this only once, but can't do it in a static codeblock
-    
+    // because of a cyclical dependency regarding this during static initialization
+
     if(WIN_KILL_CMD == null) {		
 	if(SafeProcess.isAvailable("wmic")) {
 	    // https://isc.sans.edu/diary/Windows+Command-Line+Kung+Fu+with+WMIC/1229
@@ -733,14 +888,14 @@ private static String getWinProcessKillCmd(Long processID) {
 // On Windows, can use where or which. GLI's file/FileAssociationManager.java used which, so we stick to the same.
 // where is not part of winbin. where is a system command on windows, but only since 2003, https://ss64.com/nt/where.html
 // There is no `where` on Linux/Mac, must use which for them.
-// On windows, "which tskill" fails but "which" succeeds on taskkill|wmic|browser names.
+// On windows, "which tskill" fails (and "where tskill" works), but "which" succeeds on taskkill|wmic|browser names.
 public static boolean isAvailable(String program) {		
     try {
 	// On linux `which bla` does nothing, prompt is returned; on Windows, it prints "which: no bla in"
 	// `which grep` returns a line of output with the path to grep. On windows too, the location of the program is printed
 	SafeProcess prcs = new SafeProcess("which " + program);		
 	prcs.runProcess();
-	String output = prcs.getStdOutput().trim();	
+	String output = prcs.getStdOutput().trim();
 	///System.err.println("*** 'which " + program + "' returned: |" + output + "|");
 	if(output.equals("")) {
 	    return false;
@@ -748,7 +903,6 @@ public static boolean isAvailable(String program) {
 	    log("@@@ SafeProcess.isAvailable(): " + program + "is not available");
 	    return false;
 	}
-	//System.err.println("*** 'which " + program + "' returned: " + output);
 	return true;
     } catch (Exception exc) {
 	return false;
@@ -767,9 +921,64 @@ public static boolean isAvailable(String program) {
 // http://stackoverflow.com/questions/14520814/why-synchronized-method-is-not-included-in-interface
 public static interface ExceptionHandler {
 
-    // when implementing ExceptionHandler.gotException(), if it manipulates anything that's
-    // not threadsafe, declare gotException() as a synchronized method to ensure thread safety
-    public void gotException(Exception e); // can't declare as synchronized in interface method declaration
+    /**
+     * Called whenever an exception occurs during the execution of the main thread of SafeProcess
+     * (the thread in which the Process is run).
+     * Since this method can't be declared as synchronized in this interface method declaration,
+     * when implementing ExceptionHandler.gotException(), if it manipulates anything that's
+     * not threadsafe, declare gotException() as a synchronized method to ensure thread safety
+     */
+    public void gotException(Exception e);
+}
+
+/** On interrupting (cancelling) a process, 
+ * if the class that uses SafeProcess wants to do special handling 
+ * either before and after join() is called on all the worker threads,
+ * or, only on forcible termination, before and after process.destroy() is to be called,
+ * then that class can implement this MainProcessHandler interface
+ */
+public static interface MainProcessHandler {
+    /** 
+     * Called before the streamgobbler join()s.
+     * If not overriding, the default implementation should be:
+     * public boolean beforeWaitingForStreamsToEnd(boolean forciblyTerminating) { return forciblyTerminating; }
+     * When overriding:
+     * @param forciblyTerminating is true if currently it's been decided that the process needs to be
+     * forcibly terminated. Return false if you don't want it to be. For a basic implementation,
+     * return the parameter.
+     * @return true if the process is still running and therefore still needs to be destroyed, or if
+     * you can't determine whether it's still running or not. Process.destroy() will then be called.
+     * @return false if the process has already naturally terminated by this stage. Process.destroy()
+     * won't be called, and neither will the before- and after- processDestroy methods of this class.
+    */
+    public boolean beforeWaitingForStreamsToEnd(boolean forciblyTerminating);
+    /** 
+     * Called after the streamgobbler join()s have finished.
+     * If not overriding, the default implementation should be:
+     * public boolean afterStreamsEnded(boolean forciblyTerminating) { return forciblyTerminating; }
+     * When overriding:
+     * @param forciblyTerminating is true if currently it's been decided that the process needs to be
+     * forcibly terminated. Return false if you don't want it to be. For a basic implementation,
+     * return the parameter (usual case).
+     * @return true if the process is still running and therefore still needs to be destroyed, or if
+     * can't determine whether it's still running or not. Process.destroy() will then be called.
+     * @return false if the process has already naturally terminated by this stage. Process.destroy()
+     * won't be called, and neither will the before- and after- processDestroy methods of this class.
+    */
+    public boolean afterStreamsEnded(boolean forciblyTerminating);
+    /**
+     * called after join()s and before process.destroy()/destroyProcess(Process), iff forciblyTerminating
+     */
+    public void beforeProcessDestroy(); 
+    /**
+     * Called after process.destroy()/destroyProcess(Process), iff forciblyTerminating
+     */
+    public void afterProcessDestroy();
+
+    /** 
+     * Always called after process ended: whether it got destroyed or not
+     */
+    public void doneCleanup(boolean wasForciblyTerminated);
 }
 
 // Write your own run() body for any StreamGobbler. You need to create an instance of a class
@@ -1013,7 +1222,7 @@ public static class OutputStreamGobbler extends Thread
 	if(DEBUG == 0) return;
 	logger.info(msg);
 
-	System.err.println(msg);
+	//System.err.println(msg);
 
 	//DebugStream.println(msg);
     }
@@ -1022,8 +1231,8 @@ public static class OutputStreamGobbler extends Thread
 	if(DEBUG == 0) return;
 	logger.error(msg, e);
 
-	System.err.println(msg);
-	e.printStackTrace();
+	//System.err.println(msg);
+	//e.printStackTrace();
 
 	//DebugStream.println(msg);
 	//DebugStream.printStackTrace(e);
@@ -1033,7 +1242,7 @@ public static class OutputStreamGobbler extends Thread
 	if(DEBUG == 0) return;		
 	logger.error(e);
 
-	e.printStackTrace();
+	//e.printStackTrace();
 
 	//DebugStream.printStackTrace(e);
     }
@@ -1067,6 +1276,24 @@ public static class OutputStreamGobbler extends Thread
     // http://docs.oracle.com/javase/tutorial/essential/exceptions/finally.html
     // http://stackoverflow.com/questions/481446/throws-exception-in-finally-blocks
     public static boolean closeResource(Closeable resourceHandle) {
+	boolean success = false;
+	try {
+	    if(resourceHandle != null) {
+		resourceHandle.close();
+		resourceHandle = null;
+		success = true;
+	    }
+	} catch(Exception e) {
+	    log("Exception closing resource: " + e.getMessage(), e);
+	    resourceHandle = null;
+	    success = false;
+	} finally {
+	    return success;
+	}
+    }
+
+    // in Java 6, Sockets don't yet implement Closeable
+    public static boolean closeSocket(Socket resourceHandle) {
 	boolean success = false;
 	try {
 	    if(resourceHandle != null) {
