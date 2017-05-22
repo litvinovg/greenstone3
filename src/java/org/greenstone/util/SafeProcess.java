@@ -903,6 +903,7 @@ public static boolean isAvailable(String program) {
 	    log("@@@ SafeProcess.isAvailable(): " + program + "is not available");
 	    return false;
 	}
+	//System.err.println("*** 'which " + program + "' returned: " + output);
 	return true;
     } catch (Exception exc) {
 	return false;
