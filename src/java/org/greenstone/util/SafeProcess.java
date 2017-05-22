@@ -34,7 +34,7 @@ import org.apache.log4j.*;
 // Then killing the root process will kill child processes naturally.
 
 public class SafeProcess {
-    public static int DEBUG = 1;
+    public static int DEBUG = 0;
 
     public static final int STDERR = 0;
     public static final int STDOUT = 1;
