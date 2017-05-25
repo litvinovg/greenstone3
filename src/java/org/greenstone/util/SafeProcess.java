@@ -802,17 +802,17 @@ static boolean killUnixProcessWithID(long processID, boolean force, boolean kill
 	    log("@@@ Successfully sent SIGTERM to unix process tree rooted at " + processID);
 	}
 	return true;
-    } else if(!Misc.isMac() && exitValue == 1) {
+    } else if(exitValue == 1 && proc.getStdOutput().trim().equals("") && proc.getStdError().trim().equals("")) {
 	// https://stackoverflow.com/questions/28332888/return-value-of-kill
 	// "kill returns an exit code of 0 (true) if the process still existed it and was killed.
 	// kill returns an exit code of 1 (false) if the kill failed, probably because the process was no longer running."
 	// On Linux, interrupting the process and its worker threads and closing resources already successfully terminates
 	// the process and its subprocesses (don't need to call this method at all to terminate the processes: the processes
 	// aren't running when we get to this method)
-	log("@@@ Sending termination signal returned exit value 1. On linux this happens when the process has already been terminated");
+	log("@@@ Sending termination signal returned exit value 1. On unix this happens when the process has already been terminated.");
 	return true;
     } else {
-	log("@@@ Not able to successfully terminate process, got exitvalue " + exitValue);
+	log("@@@ Not able to successfully terminate process. Got exitvalue: " + exitValue);
 	log("@@@ Got output: |" + proc.getStdOutput() + "|"); 
 	log("@@@ Got err output: |" + proc.getStdError() + "|");
 	// caller can try again with kill -KILL, by setting force parameter to true
