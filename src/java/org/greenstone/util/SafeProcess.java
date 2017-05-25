@@ -608,7 +608,8 @@ public class SafeProcess {
 	    log("*** Going to call process.destroy from " + callingMethod);
 
 	    if(mainHandler != null) mainHandler.beforeProcessDestroy();
-	    SafeProcess.destroyProcess(process); // see runProcess(2 args/3 args)
+	    boolean noNeedToDestroyIfOnLinux = true; // Interrupt handling suffices to cleanup process and subprocesses on Linux
+	    SafeProcess.destroyProcess(process, noNeedToDestroyIfOnLinux); // see runProcess(2 args/3 args)
 	    if(mainHandler != null) mainHandler.afterProcessDestroy();
 
 	    log("*** Have called process.destroy from " + callingMethod);
@@ -730,7 +731,7 @@ public static long getProcessID(Process p)
 }
     
 
-// stackoverflow.com/questions/1835885/send-ctrl-c-to-process-open-by-java	
+// Can't artificially send Ctrl-C: stackoverflow.com/questions/1835885/send-ctrl-c-to-process-open-by-java
 // (Taskkill command can kill all running perl. But what if we kill perl instances not launched by GS?)
 // stackoverflow.com/questions/912889/how-to-send-interrupt-key-sequence-to-a-java-process
 // Searching for: "forcibly terminate external process launched by Java on Windows"	
@@ -750,39 +751,193 @@ static void killWinProcessWithID(long processID) {
     }
 }
 
+// Kill signals, their names and numerical equivalents: http://www.faqs.org/qa/qa-831.html
+// https://stackoverflow.com/questions/8533377/why-child-process-still-alive-after-parent-process-was-killed-in-linux
+// Didn't work for when build scripts run from GLI: kill -TERM -pid
+// but the other suggestion did work: pkill -TERM -P pid did work
+// More reading:
+// https://linux.die.net/man/1/kill (manual)
+// https://unix.stackexchange.com/questions/117227/why-pidof-and-pgrep-are-behaving-differently
+// https://unix.stackexchange.com/questions/67635/elegantly-get-list-of-children-processes
+// https://stackoverflow.com/questions/994033/mac-os-x-quickest-way-to-kill-quit-an-entire-process-tree-from-within-a-cocoa-a
+// https://unix.stackexchange.com/questions/132224/is-it-possible-to-get-process-group-id-from-proc
+// https://unix.stackexchange.com/questions/99112/default-exit-code-when-process-is-terminated
 
-// On linux and mac, p.destroy() suffices to kill processes launched by p as well.
-// On Windows we need to do more work, since otherwise processes launched by p remain around executing until they naturally terminate.
+/**
+ * On Unix, will kill the process denoted by processID and any subprocessed this launched. Tested on a Mac, where this is used.
+ * @param force if true will send the -KILL (-9) signal, which may result in abrupt termination without cleanup
+ * if false, will send the -TERM (-15) signal, which will allow cleanup before termination. Sending a SIGTERM is preferred.
+ * @param killEntireTree if false, will terminate only the process denoted by processID, otherwise all descendants/subprocesses too.
+ * @return true if running the kill process returned an exit value of 0 or if it had already been terminated
+*/
+static boolean killUnixProcessWithID(long processID, boolean force, boolean killEntireTree) {
+    
+    String signal = force ? "KILL" : "TERM"; // kill -KILL (kill -9) vs preferred kill -TERM (kill -15)
+    String cmd;
+    if(killEntireTree) { // kill the process denoted by processID and any subprocesses this launched
+
+	if(Misc.isMac()) { 
+	    // this cmd works on Mac (tested Snow Leopard), but on Linux this cmd only terminates toplevel process
+	    // when doing full-import, and doesn't always terminate subprocesses when doing full-buildcol.pl
+	    cmd = "pkill -"+signal + " -P " + processID; // e.g. "pkill -TERM -P pid"
+	} 
+	else { // other unix
+	    // this cmd works on linux, not recognised on Mac (tested Snow Leopard):
+	    cmd = "kill -"+signal + " -"+processID; // e.g. "kill -TERM -pid"
+	                                            // note the hyphen before pid to terminate subprocesses too
+	}
+
+    } else { // kill only the process represented by the processID.
+	cmd = "kill -"+signal + " " + processID; // e.g. "kill -TERM pid"
+    } 
+
+    SafeProcess proc = new SafeProcess(cmd);
+    int exitValue = proc.runProcess();
+    
+    
+    if(exitValue == 0) {
+	if(force) {
+	    log("@@@ Successfully sent SIGKILL to unix process tree rooted at " + processID);
+	} else { 
+	    log("@@@ Successfully sent SIGTERM to unix process tree rooted at " + processID);
+	}
+	return true;
+    } else if(!Misc.isMac() && exitValue == 1) {
+	// https://stackoverflow.com/questions/28332888/return-value-of-kill
+	// "kill returns an exit code of 0 (true) if the process still existed it and was killed.
+	// kill returns an exit code of 1 (false) if the kill failed, probably because the process was no longer running."
+	// On Linux, interrupting the process and its worker threads and closing resources already successfully terminates
+	// the process and its subprocesses (don't need to call this method at all to terminate the processes: the processes
+	// aren't running when we get to this method)
+	log("@@@ Sending termination signal returned exit value 1. On linux this happens when the process has already been terminated");
+	return true;
+    } else {
+	log("@@@ Not able to successfully terminate process, got exitvalue " + exitValue);
+	log("@@@ Got output: |" + proc.getStdOutput() + "|"); 
+	log("@@@ Got err output: |" + proc.getStdError() + "|");
+	// caller can try again with kill -KILL, by setting force parameter to true
+	return false;
+    }
+}
+
+public static void destroyProcess(Process p) {
+    // A cancel action results in an interruption to the process thread, which in turn interrupts
+    // the SafeProcess' worker threads, all which clean up after themselves.
+    // On linux, this suffices to cleanly terminate a Process and any subprocesses that may have launched
+    // so we don't need to do extra work in such a case. But the interrupts happen only when SafeProcess calls
+    // destroyProcess() on the Process it was running internally, and not if anyone else tries to end a 
+    // Process by calling SafeProcess.destroyProcess(p). In such cases, the Process needs to be actively terminated:
+    boolean canSkipExtraWorkIfLinux = true;
+    SafeProcess.destroyProcess(p, !canSkipExtraWorkIfLinux);
+}
+
+// On linux, the SafeProcess code handling an Interruption suffices to successfully and cleanly terminate
+// the process and any subprocesses launched by p as well (and not even an extra p.destroy() is needed).
+// On Windows, and Mac too, we need to do more work, since otherwise processes launched by p remain
+// around executing until they naturally terminate.
 // e.g. full-import.pl may be terminated with p.destroy(), but it launches import.pl which is left running until it naturally terminates.
-static void destroyProcess(Process p) {
+private static void destroyProcess(Process p, boolean canSkipExtraWorkIfLinux) {
     log("### in SafeProcess.destroyProcess(Process p)");
 
     // If it isn't windows, process.destroy() terminates any child processes too
-    if(!Misc.isWindows()) {
-	p.destroy();
-	return;
-    }	
-    
-    if(!SafeProcess.isAvailable("wmic")) {
-	log("wmic, used to kill subprocesses, is not available. Unable to terminate subprocesses...");
-	log("Kill them manually from the TaskManager or they will proceed to run to termination");
+    if(Misc.isWindows()) {
 	
-	// At least we can get rid of the top level process we launched
-	p.destroy();
+	if(!SafeProcess.isAvailable("wmic")) {
+	    log("wmic, used to kill subprocesses, is not available. Unable to terminate subprocesses...");
+	    log("Kill them manually from the TaskManager or they will proceed to run to termination");
+	    
+	    // At least we can get rid of the top level process we launched
+	    p.destroy();
+	    return;
+	}	
+	
+	// get the process id of the process we launched,
+	// so we can use it to find the pids of any subprocesses it launched in order to terminate those too.
+	
+	long processID = SafeProcess.getProcessID(p);
+	if(processID == -1) { // the process doesn't exist or no longer exists (terminated naturally?)
+	    p.destroy(); // minimum step, do this anyway, at worst there's no process and this won't have any effect
+	} else {
+	    log("Attempting to terminate sub processes of Windows process with pid " + processID);
+	    terminateSubProcessesRecursively(processID, p);
+	}
 	return;
-    }	
-    
-    // get the process id of the process we launched,
-    // so we can use it to find the pids of any subprocesses it launched in order to terminate those too.
-    
-    long processID = SafeProcess.getProcessID(p);
-    if(processID == -1) { // the process doesn't exist or no longer exists (terminated naturally?)
-	p.destroy(); // minimum step, do this anyway, at worst there's no process and this won't have any effect
+	
+    }
+    else { // linux or mac
+
+	// if we're on linux and would have already terminated by now (in which case canSkipExtraWorkForLinux would be true),
+	// then there's nothing much left to do. This would only be the case if SafeProcess is calling this method on its
+	// internal process, since it would have successfully cleaned up on Interruption and there would be no process left running
+	if(!Misc.isMac() && canSkipExtraWorkIfLinux) {
+	    log("@@@ Linux: Cancelling a SafeProcess instance does not require any complicated system destroy operation");
+	    p.destroy(); // vestigial: this will have no effect if the process had already terminated, which is the case in this block
+	    return;
+	}
+	// else we're on a Mac or an external caller (not SafeProcess) has requested explicit termination on Linux
+	
+	long pid = SafeProcess.getProcessID(p);
+	/*
+	// On Macs (all Unix?) can't get the child processes of a process once it's been destroyed
+	macTerminateSubProcessesRecursively(pid, p); // pid, true)	
+	*/
+	
+	if(pid == -1) {
+	    p.destroy(); // at minimum, will have no effect if the process had already terminated 
+	} else {
+	    boolean forceKill = true;
+	    boolean killEntireProcessTree = true;
+	    
+	    if(!killUnixProcessWithID(pid, !forceKill, killEntireProcessTree)) { // send sig TERM (kill -15 or kill -TERM)
+		killUnixProcessWithID(pid, forceKill, killEntireProcessTree); // send sig KILL (kill -9 or kill -KILL)
+	    }	    
+	}
+	
+	return;
+    }    
+}
+
+
+// UNUSED and INCOMPLETE
+// But if this method is needed, then need to parse childpids printed by "pgrep -P pid" and write recursive step
+// The childpids are probably listed one per line, see https://unix.stackexchange.com/questions/117227/why-pidof-and-pgrep-are-behaving-differently
+private static void macTerminateSubProcessesRecursively(long parent_pid, Process p) { //boolean isTopLevelProcess) {
+    log("@@@ Attempting to terminate mac process recursively");
+
+    // https://unix.stackexchange.com/questions/67635/elegantly-get-list-of-children-processes
+    SafeProcess proc = new SafeProcess("pgrep -P "+parent_pid);
+    int exitValue = proc.runProcess();
+    String stdOutput = proc.getStdOutput();
+    String stdErrOutput = proc.getStdError();
+
+    // now we have the child processes, can terminate the parent process
+    if(p != null) { // top level process, can just be terminated the java way with p.destroy()
+	p.destroy();
     } else {
-	log("Attempting to terminate sub processes of Windows process with pid " + processID);
-	terminateSubProcessesRecursively(processID, p);
+	boolean forceKill = true;
+	boolean killSubprocesses = true;
+	// get rid of process denoted by the current pid (but not killing subprocesses it may have launched,
+	// since we'll deal with them recursively)
+	if(!SafeProcess.killUnixProcessWithID(parent_pid, !forceKill, !killSubprocesses)) { // send kill -TERM, kill -15
+	    SafeProcess.killUnixProcessWithID(parent_pid, forceKill, !killSubprocesses); // send kill -9, kill -KILL
+	}
     }
     
+    /*
+    // get rid of any process with current pid
+    if(!isTopLevelProcess && !SafeProcess.killUnixProcessWithID(parent_pid, false)) { // send kill -TERM, kill -15
+	SafeProcess.killUnixProcessWithID(parent_pid, true); // send kill -9, kill -KILL
+    }
+    */
+
+    if(stdOutput.trim().equals("") && stdErrOutput.trim().equals("") && exitValue == 1) {
+	log("No child processes");
+	// we're done
+	return;
+    } else {
+	log("Got childpids on STDOUT: " + stdOutput);
+	log("Got childpids on STDERR: " + stdErrOutput);
+    }
 }
 
 // Helper function. Only for Windows.
@@ -811,7 +966,7 @@ private static void terminateSubProcessesRecursively(long parent_pid, Process p)
     if(p != null) { // we're the top level process, terminate the java way
 	p.destroy();
     } else { // terminate windows way		
-	SafeProcess.killWinProcessWithID(parent_pid); // get rid off current pid		
+	SafeProcess.killWinProcessWithID(parent_pid); // get rid of process with current pid
     }
     
     // parse the output to get the sub processes' pids	
