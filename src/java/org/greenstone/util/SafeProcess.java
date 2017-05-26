@@ -42,12 +42,12 @@ public class SafeProcess {
     // can't make this variable final and init in a static block, because it needs to use other SafeProcess static methods which rely on this in turn:
     public static String WIN_KILL_CMD;
 
-	/**
-	 * Boolean interruptible is used to mark any sections of blocking code that should not be interrupted
-	 * with an InterruptedExceptions. At present only the cancelRunningProcess() attempts to do such a thing
-	 * and avoids doing so when interruptible is false.
-	 * Note that interruptible is also used as a lock, so remember to synchronize on it when using it!
-	*/
+    /**
+     * Boolean interruptible is used to mark any sections of blocking code that should not be interrupted
+     * with an InterruptedExceptions. At present only the cancelRunningProcess() attempts to do such a thing
+     * and avoids doing so when interruptible is false.
+     * Note that interruptible is also used as a lock, so remember to synchronize on it when using it!
+     */
     public Boolean interruptible = Boolean.TRUE; 
 	
     // charset for reading process stderr and stdout streams
@@ -75,9 +75,9 @@ public class SafeProcess {
 
     // allow callers to process exceptions of the main process thread if they want
     private ExceptionHandler exceptionHandler = null;
-	/** allow callers to implement hooks that get called during the main phases of the internal
-	 * process' life cycle, such as before and after process.destroy() gets called
-	*/
+    /** allow callers to implement hooks that get called during the main phases of the internal
+     * process' life cycle, such as before and after process.destroy() gets called
+     */
     private MainProcessHandler mainHandler = null;
 
     // whether std/err output should be split at new lines
@@ -126,7 +126,7 @@ public class SafeProcess {
     }
 
     /** to set a handler that will handle the main (SafeProcess) thread,
-	 * implementing the hooks that will get called during the internal process' life cycle,
+     * implementing the hooks that will get called during the internal process' life cycle,
      * such as before and after process.destroy() is called */
     public void setMainHandler(MainProcessHandler handler) {
 	this.mainHandler = handler;
@@ -151,15 +151,46 @@ public class SafeProcess {
     }
     */
 
+
     /**
-	 * Call this method when you want to prematurely and safely terminate any process
-	 * that SafeProcess may be running.
-	 * You may want to implement the SafeProcess.MainHandler interface to write code
-	 * for any hooks that will get called during the process' life cycle.
-     * @return false if process has already terminated or if it was already terminating
-     * when cancel was called. In such cases no interrupt is sent. Returns boolean sentInterrupt.
+     * If calling this method from a GUI thread when the SafeProcess is in the uninterruptible
+     * phase of natural termination, then this method will return immediately before that phase
+     * has ended. To force the caller to wait until the natural termination phase has ended,
+     * call the other variant of this method with param forceWaitUntilInterruptible set to true:
+     * cancelRunningProcess(true).
+     * @return false if process has already terminated or if it was already terminating when
+     * cancel was called. In such cases no interrupt is sent.
+     * This method returns a boolean that you can call sentInterrupt.  
      */
-    public synchronized boolean cancelRunningProcess() {
+    public boolean cancelRunningProcess() {	
+
+	boolean forceWaitUntilInterruptible = true;
+	// by default, event dispatch threads may not want to wait for any joins() taking
+	// place at the time of cancel to be completed.
+	// So don't wait until the SafeProcess becomes interruptible
+	return this.cancelRunningProcess(!forceWaitUntilInterruptible);
+    }
+
+    /**
+     * Call this method when you want to prematurely and safely terminate any process
+     * that SafeProcess may be running.
+     * You may want to implement the SafeProcess.MainHandler interface to write code
+     * for any hooks that will get called during the process' life cycle.
+     * @param forceWaitUntilInterruptible if set to true by a calling GUI thread, then this method
+     * won't return until the running process is interruptible, even if SafeProcess is in the phase
+     * of naturally terminating, upon which no interrupts will be sent to the SafeProcess
+     * thread anyway. The join() calls within SafeProcess.runProcess() are blocking calls and are
+     * therefore sensitive to InterruptedExceptions. But the join() calls are part of the cleanup
+     * phase and shouldn't be interrupted, and nothing thereafter can be interrupted anyway.
+     * This method tends to be called with the param set to false. In that case, if the SafeProcess
+     * is in an uninterruptible phase (as can then only happen during clean up of natural
+     * termination) then a calling GUI thread will just return immediately. Meaning, the GUI thread
+     * won't wait for the SafeProcess thread to finish cleaning up.
+     * @return false if process has already terminated or if it was already terminating when
+     * cancel was called. In such cases no interrupt is sent.
+     * This method returns a boolean that you can call sentInterrupt.
+     */
+    public synchronized boolean cancelRunningProcess(boolean forceWaitUntilInterruptible) {
 	// on interrupt:
 	// - forciblyTerminate will be changed to true if the interrupt came in when the process was
 	// still running (and so before the process' streams were being joined)
@@ -181,18 +212,23 @@ public class SafeProcess {
 	// can't interrupt when SafeProcess is joining (cleanly terminating) worker threads
 	// have to wait until afterward	    
 	if (interruptible) {
-	    // either way, we can now interrupt the thread - if we have one (we should)
-	    if(this.theProcessThread != null) { // we're told which thread should be interrupted
+	    // either way, we can now interrupt the thread that SafeProcess.runProcess() is running in
+	    if(this.theProcessThread != null) { // we stored a ref to the main thread that's to be interrupted
 		this.theProcessThread.interrupt();
 		log("@@@ Successfully sent interrupt to process.");
 		sentInterrupt = true;
 	    }
 	}
-	else { // wait for join()s to finish.
+	else { // wait for join()s to finish, if we've been asked to wait
+	    
 	    // During and after joining(), there's no need to interrupt any more anyway: no calls
-	    // subsequent to joins() block, so everything thereafter is insensitive to InterruptedExceptions.
+	    // subsequent to joins() block, so everything thereafter is insensitive to InterruptedExceptions
+	    // and everything from the joins() onward are cleanup on natural process termination, so no
+	    // interrupt is needed after the joins(). 
+	    // Still, even if the caller is a GUI thread, they can decide if they want to wait until this
+	    // method's end: until the SafeProcess becomes interruptible again
 
-	    if(SwingUtilities.isEventDispatchThread()) {
+	    if(!forceWaitUntilInterruptible && SwingUtilities.isEventDispatchThread()) {
 		log("#### Event Dispatch thread, returning");
 		return false;
 	    }
@@ -756,6 +792,8 @@ static void killWinProcessWithID(long processID) {
 // Didn't work for when build scripts run from GLI: kill -TERM -pid
 // but the other suggestion did work: pkill -TERM -P pid did work
 // More reading:
+// https://superuser.com/questions/343031/sigterm-with-a-keyboard-shortcut
+// Ctrl-C sends a SIGNINT, not SIGTERM or SIGKILL. And on Ctrl-C, "the signal is sent to the foreground *process group*."
 // https://linux.die.net/man/1/kill (manual)
 // https://unix.stackexchange.com/questions/117227/why-pidof-and-pgrep-are-behaving-differently
 // https://unix.stackexchange.com/questions/67635/elegantly-get-list-of-children-processes
@@ -764,7 +802,7 @@ static void killWinProcessWithID(long processID) {
 // https://unix.stackexchange.com/questions/99112/default-exit-code-when-process-is-terminated
 
 /**
- * On Unix, will kill the process denoted by processID and any subprocessed this launched. Tested on a Mac, where this is used.
+ * On Unix, will kill the process denoted by processID and any subprocesses this launched. Tested on a Mac, where this is used.
  * @param force if true will send the -KILL (-9) signal, which may result in abrupt termination without cleanup
  * if false, will send the -TERM (-15) signal, which will allow cleanup before termination. Sending a SIGTERM is preferred.
  * @param killEntireTree if false, will terminate only the process denoted by processID, otherwise all descendants/subprocesses too.
@@ -809,7 +847,7 @@ static boolean killUnixProcessWithID(long processID, boolean force, boolean kill
 	// On Linux, interrupting the process and its worker threads and closing resources already successfully terminates
 	// the process and its subprocesses (don't need to call this method at all to terminate the processes: the processes
 	// aren't running when we get to this method)
-	log("@@@ Sending termination signal returned exit value 1. On unix this happens when the process has already been terminated.");
+	log("@@@ Sending termination signal returned exit value 1. On unix this can happen when the process has already been terminated.");
 	return true;
     } else {
 	log("@@@ Not able to successfully terminate process. Got exitvalue: " + exitValue);
