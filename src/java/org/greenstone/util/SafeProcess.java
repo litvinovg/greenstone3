@@ -917,11 +917,11 @@ private static void destroyProcess(Process p, boolean canSkipExtraWorkIfLinux) {
 	long pid = SafeProcess.getProcessID(p);
 	/*
 	// On Macs (all Unix?) can't get the child processes of a process once it's been destroyed
-	macTerminateSubProcessesRecursively(pid, p); // pid, true)	
+	macTerminateSubProcessesRecursively(pid, p);
 	*/
 	
 	if(pid == -1) {
-	    p.destroy(); // at minimum, will have no effect if the process had already terminated 
+	    p.destroy(); // at minimum. Will have no effect if the process had already terminated 
 	} else {
 	    boolean forceKill = true;
 	    boolean killEntireProcessTree = true;
@@ -936,7 +936,7 @@ private static void destroyProcess(Process p, boolean canSkipExtraWorkIfLinux) {
 }
 
 
-// UNUSED and INCOMPLETE
+// UNUSED and INCOMPLETE METHOD
 // But if this method is needed, then need to parse childpids printed by "pgrep -P pid" and write recursive step
 // The childpids are probably listed one per line, see https://unix.stackexchange.com/questions/117227/why-pidof-and-pgrep-are-behaving-differently
 private static void macTerminateSubProcessesRecursively(long parent_pid, Process p) { //boolean isTopLevelProcess) {
@@ -1422,7 +1422,6 @@ public static class OutputStreamGobbler extends Thread
     }
 
     public static void log(String msg, Exception e) { // Print stack trace on the exception
-	if(DEBUG == 0) return;
 	logger.error(msg, e);
 
 	//System.err.println(msg);
@@ -1433,7 +1432,6 @@ public static class OutputStreamGobbler extends Thread
     }
 
     public static void log(Exception e) {
-	if(DEBUG == 0) return;		
 	logger.error(e);
 
 	//e.printStackTrace();
