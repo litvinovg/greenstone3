@@ -444,7 +444,8 @@ public class SafeProcess {
 	    process = doRuntimeExec();
 	    // 2. basic waitFor the process to finish
 	    this.exitValue = process.waitFor();
-
+	    
+	    // 3. if we managed to get here, the process naturally terminated (wasn't interrupted):
 	    this.forciblyTerminateProcess = false;
 	} catch(IOException ioe) {		
 		
@@ -789,8 +790,8 @@ static void killWinProcessWithID(long processID) {
 
 // Kill signals, their names and numerical equivalents: http://www.faqs.org/qa/qa-831.html
 // https://stackoverflow.com/questions/8533377/why-child-process-still-alive-after-parent-process-was-killed-in-linux
-// Didn't work for when build scripts run from GLI: kill -TERM -pid
-// but the other suggestion did work: pkill -TERM -P pid did work
+// Works on Linux but not Mac when build scripts run from GLI: kill -TERM -pid
+// Works on Macs but not Linux: pkill -TERM -P pid
 // More reading:
 // https://superuser.com/questions/343031/sigterm-with-a-keyboard-shortcut
 // Ctrl-C sends a SIGNINT, not SIGTERM or SIGKILL. And on Ctrl-C, "the signal is sent to the foreground *process group*."
