@@ -162,7 +162,7 @@ public class SafeProcess {
      * cancel was called. In such cases no interrupt is sent.
      * This method returns a boolean that you can call sentInterrupt.  
      */
-    public boolean cancelRunningProcess() {	
+    public boolean cancelRunningProcess() {
 
 	boolean forceWaitUntilInterruptible = true;
 	// by default, event dispatch threads may not want to wait for any joins() taking
@@ -921,7 +921,7 @@ private static void destroyProcess(Process p, boolean canSkipExtraWorkIfLinux) {
 	macTerminateSubProcessesRecursively(pid, p);
 	*/
 	
-	if(pid == -1) {
+	if(pid == -1) { // if the process has already terminated, or we can't get the pid for any reason:
 	    p.destroy(); // at minimum. Will have no effect if the process had already terminated 
 	} else {
 	    boolean forceKill = true;
@@ -929,7 +929,9 @@ private static void destroyProcess(Process p, boolean canSkipExtraWorkIfLinux) {
 	    
 	    if(!killUnixProcessWithID(pid, !forceKill, killEntireProcessTree)) { // send sig TERM (kill -15 or kill -TERM)
 		killUnixProcessWithID(pid, forceKill, killEntireProcessTree); // send sig KILL (kill -9 or kill -KILL)
-	    }	    
+	    }
+	    // if both kill commands failed for whatever reason, can still at least end the top level process:
+	    p.destroy(); // no effect if the process has already terminated.    
 	}
 	
 	return;
