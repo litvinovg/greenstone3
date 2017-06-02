@@ -618,6 +618,7 @@ public class SafeProcess {
 	    // This is just how InterruptedExceptions tend to be handled
 	    // See also http://stackoverflow.com/questions/4906799/why-invoke-thread-currentthread-interrupt-when-catch-any-interruptexception
 	    // and https://praveer09.github.io/technology/2015/12/06/understanding-thread-interruption-in-java/
+	    // http://michaelscharf.blogspot.co.nz/2006/09/dont-swallow-interruptedexception-call.html
 	    Thread.currentThread().interrupt(); // re-interrupt the thread - which thread? Infinite loop?
 	
 	} finally {
