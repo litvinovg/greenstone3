@@ -555,7 +555,8 @@ public class BerryBasket extends ServiceRack
 		username = GlobalProperties.getProperty("mail.smtp.username");
 		password = GlobalProperties.getProperty("mail.smtp.password");
 		String from = GlobalProperties.getProperty("mail.from");
-
+		String port = GlobalProperties.getProperty("mail.smtp.port");
+		String mail_security = GlobalProperties.getProperty("mail.security");
 		String mailer = "msgsend";
 
 		try
@@ -579,11 +580,34 @@ public class BerryBasket extends ServiceRack
 				props.put("mail.from", from);
 			}
 
+
+			if (port != null && !port.trim().equals("")) {
+			    props.put("mail.smtp.port", port);
+			}
+			
+			if (mail_security != null) {
+			    mail_security = mail_security.trim();
+			    if (mail_security.equals("ssl")) {
+				props.put("mail.smtp.ssl.enable", "true"); 
+			    } else if (mail_security.equals("tls")) {
+				props.put("mail.smtp.starttls.enable", "true");
+			    }
+			    else if (mail_security.equals("")) {
+				logger.error("unknown security protocol "+mail_security +", should be ssl or tls");
+			    }
+			}
+
+			// this doesn't seem to matter having this when
+			// username and password are empty
+			props.put("mail.smtp.auth", "true");
+
 			//setup username and password to the smtp server
+			
 			if (username == null || username.trim().equals(""))
 				username = "";
 			if (password == null || password.trim().equals(""))
 				password = "";
+			
 			Authenticator auth = new Authenticator()
 			{
 				protected PasswordAuthentication getPasswordAuthentication()
@@ -618,8 +642,9 @@ public class BerryBasket extends ServiceRack
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
-			result.appendChild(result_doc.createTextNode(e.getMessage()));
+		    logger.error("Error sending mail!");
+		    e.printStackTrace();
+		    result.appendChild(result_doc.createTextNode(e.getMessage()));
 		}
 
 		return result;
