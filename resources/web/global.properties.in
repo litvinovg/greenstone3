@@ -31,11 +31,20 @@ proxy.user=
 # A password to use when talking to the proxy server 
 proxy.password=
 
-#outgoing mail setup
-#mail.smtp.host=smtp.myisp.com
-#mail.smtp.username=ispusername
-#mail.smtp.password=isppassword
-#mail.from=ispusername@myisp.com
+#outgoing mail setup.
+#  by default it will use port 25 on localhost. Uncomment and modify 
+# these settings to use another mail server
+# sample values are for gmail setup
+# Note for gmail, you will need to enable account access for less secure apps
+# for this to work. https://www.google.com/settings/security/lesssecureapps
+#mail.smtp.host=smtp.gmail.com
+#mail.smtp.username=xxx@gmail.com
+#mail.smtp.password=xxxpassword
+# port number,  eg for gmail: 465 (ssl) 587 (tls)
+#mail.smtp.port=587
+#mail.from=xxx@gmail.com
+# set the following to ssl or tls
+#mail.security=tls
 
 # flax auxiliary external server url for collocation retrieval
 flax.aux.server=flax.nzdl.org/greenstone3/flax
