@@ -10,7 +10,7 @@
 	<!-- the page content -->
 	<xsl:template match="/page/pageResponse">
 					<!-- SLIDER -->
-							<xsl:if test="collectionList/collection/displayItem[@name='smallicon']">
+							<xsl:if test="collectionList/collection/displayItemList/displayItem[@name='smallicon']">
 			<div class="slider-wrapper theme-halftone">
 	            <div id="slider" class="nivoSlider">
 					<xsl:call-template name="collSlider"/>
@@ -36,12 +36,12 @@
 	
 <xsl:template name="collSlider">
 <xsl:for-each select="./collectionList/collection">
-<xsl:variable name="homeImage" select="displayItem[@name='smallicon']"/>
+<xsl:variable name="homeImage" select="displayItemList/displayItem[@name='smallicon']"/>
 
 <xsl:choose>
 <xsl:when test="$homeImage">
 <xsl:variable name="collectionFolder" select="@name"/>
-<xsl:variable name="collectionName" select="displayItem[@name='name']"/>
+<xsl:variable name="collectionName" select="displayItemList/displayItem[@name='name']"/>
 
 <a href="{$library_name}/collection/{$collectionFolder}/page/about">
 <img src="sites/{$site_name}/collect/{$collectionFolder}/images/{$homeImage}" title="{$collectionName}" />
@@ -56,8 +56,8 @@
 <xsl:template name="collList">
 <xsl:for-each select="./collectionList/collection">
 <xsl:variable name="collectionFolder" select="@name"/>
-<xsl:variable name="collectionName" select="displayItem[@name='name']"/>
-<xsl:variable name="homeImage" select="displayItem[@name='smallicon']"/>
+<xsl:variable name="collectionName" select="displayItemList/displayItem[@name='name']"/>
+<xsl:variable name="homeImage" select="displayItemList/displayItem[@name='smallicon']"/>
 
 <li>
 	<a href="{$library_name}/collection/{$collectionFolder}/page/about" class="thumb" >
