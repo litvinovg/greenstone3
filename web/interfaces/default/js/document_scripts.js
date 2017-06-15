@@ -810,21 +810,20 @@ function SliderWidget(_links)
     {
       var currentValue = values[l].replace(/^ +/g, "").replace(/ +$/g, "");
       if (numeric_match) {
-	var isRange = (currentValue.search(/\d+-\d+/) != -1);
+	var isRange = (currentValue.search(/^\d+-\d+$/) != -1);
 	if (isRange) {
-	  var firstNumber = currentValue.replace(/(\d+)-\d+/, "$1");
-	  var secondNumber = currentValue.replace(/\d+-(\d+)/, "$1");
-	  
+	    var firstNumber = Number(currentValue.replace(/(\d+)-\d+/, "$1"));
+	    var secondNumber = Number(currentValue.replace(/\d+-(\d+)/, "$1"));
 	  if(firstNumber <= secondNumber)
 	    {
 	      for(var i = firstNumber; i <= secondNumber; i++)
 		{
 		  var numString = i + "";
 		  for(var j = 0; j < _titles.length; j++) {
-		    
 		    var currentTitle = _titles[j];
 		    if(currentTitle[index] == numString) {
-		      matchingTitles.push(currentTitle);
+			matchingTitles.push(currentTitle);
+			break; // assume no titles are the same
 		    }
 		  }
 		}
@@ -834,6 +833,7 @@ function SliderWidget(_links)
 	  for(var j = 0; j < _titles.length; j++) {
 	    if (_titles[j][index]==currentValue) {
 	      matchingTitles.push(_titles[j]);
+		break; // assume no titles are the same
 	    }
 	  }
 
@@ -863,7 +863,7 @@ function SliderWidget(_links)
     {
       $(matchingTitles[i][1].cell).css("display", "table-cell");
     }
-	}
+	} // end doFiltering() function
 
 	var setUpFilterBox = function() 
 	{
