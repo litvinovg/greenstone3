@@ -432,7 +432,7 @@ function setupJavaAt() {
   # check the second parameter if non-null
   if [ -n "$2" ] && [ "$2" == "JRE" ]; then
     export JRE_HOME="$1"
-    addtopath PATH "$JAVA_HOME/bin"
+    addtopath PATH "$JRE_HOME/bin"
 
     BUNDLED_JRE="`pwd`/packages/jre"    
     if [[ "$JRE_HOME" == *"$BUNDLED_JRE"* ]]; then
