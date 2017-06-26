@@ -250,8 +250,9 @@
 	    </script>
         </xsl:template>
 	<xsl:template name="javascriptForDocumentEditing">
-			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>
-			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts_util.js"><xsl:text> </xsl:text></script>
+	<!--		<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>-->
+			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentedit_scripts.js"><xsl:text> </xsl:text></script>
+			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentedit_scripts_util.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/hierarchy.js"><xsl:text> </xsl:text></script>
 			<script type="text/javascript">
 				<xsl:text disable-output-escaping="yes">
@@ -307,7 +308,7 @@
 			<div id="bookdiv" style="visibility:hidden; height:0px; display:inline;"><xsl:text> </xsl:text></div>
 		
 			<div id="float-anchor" style="width: 30%; min-width:180px; float:right; margin: 0 0 10px 20px;">		
-			<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true' and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
+	                <xsl:if test="$canDoEditing = 'true'">
 				<xsl:call-template name="editBar"/>
 			</xsl:if>
 			<xsl:if test="not(/page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']) or /page/pageResponse/format[@type='display']/gsf:option[@name='sideBar']/@value='true'">
