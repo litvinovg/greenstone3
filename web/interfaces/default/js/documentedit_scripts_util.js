@@ -1,3 +1,6 @@
+/** Javascript file containing useful functions used by both documentedit_scripts.js and documentmaker_scripts.js */
+
+
 //Some "constants" to match the server constants
 var SUCCESS = 1;
 var ACCEPTED = 2;
@@ -5,6 +8,16 @@ var ERROR = 3;
 var CONTINUING = 10;
 var COMPLETED = 11;
 var HALTED = 12;
+
+var _transactions = new Array();
+var _collectionsToBuild = new Array();
+var _allContents = new Array();
+var _deletedSections = new Array();
+var _deletedMetadata = new Array();
+var _undoOperations = new Array();
+var _baseURL;
+var _statusBar;
+var _metadataSetList = new Array();
 
 function encodeDelimiters(meta_value) {
 

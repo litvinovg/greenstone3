@@ -1,14 +1,19 @@
-var _transactions = new Array();
-var _collectionsToBuild = new Array();
-var _allContents = new Array();
+/** Javascript file for the document maker, which is where you can split documents up etc. Not used at the moment until we work out exactly what it does. */
+/** requires documentedit_scripts_util.js and documentmaker_scripts_util.js */
+/** does it also need documentedit_scripts.js?? */
+
+
+//var _transactions = new Array();
+//var _collectionsToBuild = new Array();
+//var _allContents = new Array();
 var _idCounter = 0;
 var _indexCounter = 0;
-var _deletedSections = new Array();
-var _deletedMetadata = new Array();
-var _undoOperations = new Array();
-var _baseURL;
-var _statusBar;
-var _metadataSetList = new Array();
+//var _deletedSections = new Array();
+//var _deletedMetadata = new Array();
+//var _undoOperations = new Array();
+//var _baseURL;
+//var _statusBar;
+//var _metadataSetList = new Array();
 
 function initDocumentMaker()
 {
