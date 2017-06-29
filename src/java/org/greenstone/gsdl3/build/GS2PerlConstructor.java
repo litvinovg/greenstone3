@@ -288,7 +288,7 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 		command.add("-collectdir");
 		command.add(GSFile.collectDir(this.site_home));
 //		command.add("-removeold"); // saves some seconds processing time when this flag's added in explicitly. Shouldn't be added for incremental building
-		command.add("-skipactivation"); // gsdl3/util/GS2Construct does the activation and reactivation
+		command.add("-skipactivation"); // gsdl3/service/GS2Construct does the activation and reactivation
 		command.addAll(extractParameters(this.process_params));
 		command.add(this.collection_name);
 
