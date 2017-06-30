@@ -785,6 +785,7 @@ public class GS2Construct extends ServiceRack
 		}
 
 		constructor.setSiteHome(this.site_home);
+		constructor.setLibraryName(this.library_name);
 		constructor.setCollectionName(coll_name);
 		constructor.setActionType(type);
 		constructor.setProcessParams(other_params);

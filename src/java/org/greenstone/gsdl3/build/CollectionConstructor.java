@@ -15,6 +15,8 @@ public abstract class CollectionConstructor extends Thread
 	protected String site_home = null;
 	/** the name of the site */
 	protected String site_name = null;
+  /** the library (servlet) name of the site */
+  protected String library_name = null;
 	/** the name of the collection */
 	protected String collection_name = null;
 	/** the stage of construction */
@@ -72,6 +74,9 @@ public abstract class CollectionConstructor extends Thread
 		this.site_name = siteHomeFile.getName();
 	}
 
+  public void setLibraryName(String library_name) {
+    this.library_name = library_name;
+  }
 	public void setCollectionName(String coll_name)
 	{
 		this.collection_name = coll_name;

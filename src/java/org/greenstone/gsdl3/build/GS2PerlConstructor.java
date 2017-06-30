@@ -213,6 +213,8 @@ public class GS2PerlConstructor extends CollectionConstructor implements SafePro
 		command.add(this.site_name);
 		command.add("-collectdir");
 		command.add(GSFile.collectDir(this.site_home));
+		command.add("-library_name");
+		command.add(this.library_name);
 //		command.add("-removeold"); // saves some seconds processing time when this flag's added in explicitly
 		command.addAll(extractParameters(this.process_params));
 		command.add(this.collection_name);
