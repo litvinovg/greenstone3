@@ -5,6 +5,8 @@
 /* some vars for document editing */
 /* if true, will look through all the metadata for the document, and add each namespace into the list of metadata sets. If set to false, will only add in the ones defined in setStaticMetadataSets function (defined below) - override this function to make a custom list of sets */
 var dynamic_metadata_set_list = true;
+/* if false, will hide the metadata list selector. So the user will only get to see the default metadata set. */
+var display_metadata_set_selector = true;
 /* if true, will make the editing controls stay visible even on page scrolling */
 var keep_editing_controls_visible = true;
 /* Here you can choose which save buttons you like. Choose from 'save', 'rebuild', 'saveandrebuild' */
@@ -26,6 +28,7 @@ for example
 var autocompleteMetadata = ["dc.Subject"];
 var dcSubject_values = ["Kings", "Queens", "others"];
 */
+
 
 /************************
 * METADATA EDIT SCRIPTS *
@@ -100,8 +103,9 @@ function setEditingFeaturesVisible(visible)
 	}
 	
 	var visibility = (visible ? "" : "none");
+    if (display_metadata_set_selector == true) {
 	$("#metadataListLabel, #metadataSetList").css("display", visibility);
-	
+    }
 	$(".editMetadataButton").each(function()
 	{
 		$(this).css("display", visibility);
@@ -152,15 +156,21 @@ function readyPageForEditing()
 	//setTimeout(function(){ $(".sectionText").each(function(){addEditableState(this,editableInitStates);}); }, 500);	
 	var editBar = $("#editBarLeft");
 	
+
 	var visibleMetadataList = $("<select>", {"id": "metadataSetList", "class": "ui-state-default"});
 	setStaticMetadataSets(visibleMetadataList);
-
+    
+    if (display_metadata_set_selector == true) {
 	var metadataListLabel = $("<span>", {"id": "metadataListLabel", "style": "margin-left:20px;"});
-    metadataListLabel.html(gs.text.de.visible_metadata); 
+	metadataListLabel.html(gs.text.de.visible_metadata); 
 	editBar.append(metadataListLabel);
+    } else {
+	visibleMetadataList.css ("display", "none");
+    }
 	editBar.append(visibleMetadataList);
 	visibleMetadataList.change(onVisibleMetadataSetChange);
 	editBar.append("<br>");
+    
 	for (var i=0; i< save_and_rebuild_buttons.length; i++) {
 	  var button_type = save_and_rebuild_buttons[i];
 	  if (button_type == "save") {
