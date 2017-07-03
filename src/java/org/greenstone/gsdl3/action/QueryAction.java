@@ -75,13 +75,12 @@ public class QueryAction extends Action
 
 		// get the format info - there may be global format info in the collection that searching needs
 		Element format_elem = getFormatInfo(to, userContext);
-		// set the format type
-		format_elem.setAttribute(GSXML.TYPE_ATT, "search");
-		// for now just add to the response
-		page_response.appendChild(doc.importNode(format_elem, true));
-
-		//if (request_type.indexOf("d") != -1)
-		//{
+		if (format_elem != null) {
+		  // set the format type
+		  format_elem.setAttribute(GSXML.TYPE_ATT, "search");
+		  // for now just add to the response
+		  page_response.appendChild(doc.importNode(format_elem, true));
+		}
 		// get the service description
 			// we have been asked for the service description
 			Element mr_info_message = doc.createElement(GSXML.MESSAGE_ELEM);
@@ -90,32 +89,41 @@ public class QueryAction extends Action
 
 			// process the message
 			Element mr_info_response = (Element) this.mr.process(mr_info_message);
-			// the response
 
+			boolean does_paging = false;
+
+			// the response
 			Element service_response = (Element) GSXML.getChildByTagName(mr_info_response, GSXML.RESPONSE_ELEM);
 
-			Element service_description = (Element) doc.importNode(GSXML.getChildByTagName(service_response, GSXML.SERVICE_ELEM), true);
+			Element service_description = (Element)GSXML.getChildByTagName(service_response, GSXML.SERVICE_ELEM);
+			if (service_description != null) {
+			  service_description = (Element) doc.importNode(service_description, true);
+
+			  Element meta_list =(Element) GSXML.getChildByTagName(service_description, GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
+			  if (meta_list != null) {
+			    String value = GSXML.getMetadataValue(meta_list, "does_paging");
+			    if (value.equals("true")) {
+			      does_paging = true;
+			    }
+			  }
+			  
+			  if (does_paging == false) {
+			    // we will do the paging, so lets add in a hitsPerPage param to the service
+			    addHitsParamToService(doc, service_description, lang);
+			  }
+			}
+			//Element service_description = (Element) doc.importNode(GSXML.getChildByTagName(service_response, GSXML.SERVICE_ELEM), true);
 
 
-			// have we been asked to return it as part of the response?
+			// have we been asked to return the service description
+			// as part of the response?
 			if (request_type.indexOf("d") != -1) {
-			  page_response.appendChild(service_description);
+			  if (service_description != null) {
+			    page_response.appendChild(service_description);
+			  }
 			  addCollectionsHierarchy(page_response,userContext);
 			}
-			//}
-		boolean does_paging = false;
-		Element meta_list =(Element) GSXML.getChildByTagName(service_description, GSXML.METADATA_ELEM+GSXML.LIST_MODIFIER);
-		if (meta_list != null) {
-		  String value = GSXML.getMetadataValue(meta_list, "does_paging");
-		  if (value.equals("true")) {
-		    does_paging = true;
-		  }
-		}
 
-		if (does_paging == false) {
-		  // we will do the paging, so lets add in a hitsPerPage param to the service
-		  addHitsParamToService(doc, service_description, lang);
-		}
 		if (request_type.indexOf("r") == -1)
 		{
 			// just a display request, no actual processing to do
