@@ -92,11 +92,14 @@
 	<xsl:template name="wrappedSectionText">
 		<br /><br />
 		<div id="text{@nodeID}" class="sectionText"><!-- *** -->
-			<xsl:if test="/page/pageRequest/paramList/param[(@name='docEdit') and (@value='on' or @value='true' or @value='1')]">
+		  <xsl:choose>
+			<xsl:when test="/page/pageRequest/paramList/param[(@name='docEdit') and (@value='on' or @value='true' or @value='1')]">
             			<xsl:attribute name="contenteditable">
 					<xsl:text>true</xsl:text>
 				</xsl:attribute>
-		        </xsl:if>
+			<xsl:call-template name="documentNodeTextForEditing"/>
+		        </xsl:when>
+			<xsl:otherwise>
 			<xsl:attribute name="style">
 				<xsl:choose>
 					<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
@@ -107,8 +110,10 @@
 					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:attribute>
-
 			<xsl:call-template name="documentNodeText"/>
+
+			</xsl:otherwise>
+		  </xsl:choose>
 		</div>
 	</xsl:template>
 	
@@ -621,6 +626,24 @@
 		<xsl:text> </xsl:text>
 	</xsl:template>
 
+	<!-- The default template for displaying the document node text in
+	editing mode -->
+	<!-- equivalent to gsf:text -->
+	<xsl:template name="documentNodeTextForEditing">
+	  <!-- Section text -->
+	  <xsl:for-each select="nodeContent">
+	    <xsl:for-each select="node()">
+	      <xsl:choose>
+		<xsl:when test="not(name())">
+		  <xsl:value-of select="." disable-output-escaping="yes"/>
+		</xsl:when>
+		<xsl:otherwise>
+		  <xsl:apply-templates/>
+		</xsl:otherwise>
+	      </xsl:choose>
+	    </xsl:for-each>
+	  </xsl:for-each>
+	</xsl:template>
 	<!-- Used to produce a version of the page in a format that can be read by the realistic books plugin -->
 	<xsl:template name="documentNodeFlashXML">
 		<xsl:text disable-output-escaping="yes">
