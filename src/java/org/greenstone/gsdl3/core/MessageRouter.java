@@ -261,7 +261,6 @@ public class MessageRouter implements ModuleInterface
 		// Note: if you add an element to another node in the same document, it
 		// gets removed from where it was. This changes the node list - you cant iterate over the node list in a normal manner if you are moving elements out of it
 		int num_requests = requests.getLength();
-		logger.info("**** num requests = "+num_requests);
 		for (int i = 0; i < num_requests; i++)
 		{
 			Node result = null;
@@ -645,7 +644,7 @@ public class MessageRouter implements ModuleInterface
 		File collectDir = new File(GSFile.collectDir(this.site_home));
 		if (collectDir.exists())
 		{
-			logger.info("Reading thru directory " + collectDir.getPath() + " to find collections.");
+			logger.info("Reading thru directory " + collectDir.getPath() + " to find collections for activation.");
 			File[] contents = collectDir.listFiles();
 			for (int i = 0; i < contents.length; i++)
 			{
