@@ -97,7 +97,8 @@
       <xsl:for-each select='classifierNode'>
 	<li>
 	  <xsl:attribute name="class">
-	    <xsl:if test="@nodeID = /page/pageRequest/paramList/param[@name = 'cl']/@value">selectedHorizontalClassifierNode </xsl:if>
+	    <!--<xsl:if test="@nodeID = /page/pageRequest/paramList/param[@name = 'cl']/@value">selectedHorizontalClassifierNode </xsl:if>-->
+	    <xsl:if test="starts-with(/page/pageRequest/paramList/param[@name = 'cl']/@value, @nodeID)">selectedHorizontalClassifierNode </xsl:if>
 	    <xsl:text>horizontalClassifierNode</xsl:text>
 	  </xsl:attribute>
 	  <xsl:apply-templates select='.'>
@@ -107,14 +108,27 @@
 	</li>
       </xsl:for-each>
     </ul>
-    <table id="classifiernodelist">
-      <xsl:for-each select='classifierNode'>
-	<xsl:call-template name="processNodeChildren">
-	  <xsl:with-param name='collName' select='$collName'/>
-	  <xsl:with-param name='serviceName' select='$serviceName'/>
-	</xsl:call-template>
-      </xsl:for-each>
-    </table>
+    <xsl:choose>
+      <!-- if the children are HLists-->
+      <xsl:when test="classifierNode[@childType = 'HList']">
+	<xsl:for-each select='classifierNode'><!-- there should be only one-->
+	  <xsl:call-template name="HList">
+	    <xsl:with-param name='collName' select='$collName'/>
+	    <xsl:with-param name='serviceName' select='$serviceName'/>
+	  </xsl:call-template>
+	</xsl:for-each>
+	</xsl:when>
+	<xsl:otherwise>
+	<table id="classifiernodelist">
+	  <xsl:for-each select='classifierNode'>
+	    <xsl:call-template name="processNodeChildren">
+	      <xsl:with-param name='collName' select='$collName'/>
+	      <xsl:with-param name='serviceName' select='$serviceName'/>
+	    </xsl:call-template>
+	  </xsl:for-each>
+	</table>
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>	
 
   <xsl:template name="processNodeChildren">
