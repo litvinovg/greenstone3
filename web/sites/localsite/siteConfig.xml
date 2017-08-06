@@ -81,5 +81,19 @@
     <replace macro="[Screen]" scope="metadata" metadata="Screen" resolve="false"/> 
     <replace macro="[ScreenWidth]" scope="metadata" metadata="ScreenWidth" resolve="false"/> 
     <replace macro="[ScreenHeight]" scope="metadata" metadata="ScreenHeight" resolve="false"/> 
-  </replaceList> 
+  </replaceList>
+  <replaceList id="gs2-months">
+    <replace macro="_textmonth01_" scope="metadata" resolve="false" bundle="interface_default" key="textmonth01"/>
+    <replace macro="_textmonth02_" scope="metadata" resolve="false" bundle="interface_default" key="textmonth02"/>
+    <replace macro="_textmonth03_" scope="metadata" resolve="false" bundle="interface_default" key="textmonth03"/>
+    <replace macro="_textmonth04_" scope="metadata" resolve="false" bundle="interface_default" key="textmonth04"/>
+    <replace macro="_textmonth05_" scope="metadata" resolve="false" bundle="interface_default" key="textmonth05"/>
+    <replace macro="_textmonth06_" scope="metadata" resolve="false" bundle="interface_default" key="textmonth06"/>
+    <replace macro="_textmonth07_" scope="metadata" resolve="false" bundle="interface_default" key="textmonth07"/>
+    <replace macro="_textmonth08_" scope="metadata" resolve="false" bundle="interface_default" key="textmonth08"/>
+    <replace macro="_textmonth09_" scope="metadata" resolve="false" bundle="interface_default" key="textmonth09"/>
+    <replace macro="_textmonth10_" scope="metadata" resolve="false" bundle="interface_default" key="textmonth10"/>
+    <replace macro="_textmonth11_" scope="metadata" resolve="false" bundle="interface_default" key="textmonth11"/>
+    <replace macro="_textmonth12_" scope="metadata" resolve="false" bundle="interface_default" key="textmonth12"/>
+  </replaceList>
 </siteConfig>
