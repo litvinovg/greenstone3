@@ -269,12 +269,13 @@ public class PageAction extends Action
 			logger.error(GSXML.COLLECTION_ELEM + " element is null");
 		}
 
-		NodeList paramList = request.getElementsByTagName(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
-		if (paramList.getLength() != 0)
+		// adding a ct param to paramlist. only needed for gs2 interface, not default
+		NodeList paramList_list = request.getElementsByTagName(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		if (paramList_list.getLength() != 0)
 		{
-			for (int i = 0; i < paramList.getLength(); i++)
+			for (int i = 0; i < paramList_list.getLength(); i++)
 			{
-				Element e = (Element) paramList.item(i);
+				Element e = (Element) paramList_list.item(i);
 				Element ct = GSXML.createParameter(request.getOwnerDocument(), GSParams.COLLECTION_TYPE, col_type.equalsIgnoreCase("mg") ? "0" : "1");
 				e.appendChild(ct);
 			}
