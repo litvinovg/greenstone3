@@ -744,8 +744,8 @@ public class TransformingReceptionist extends Receptionist
 		}
 
 		// Passing in the pretty string here means it needs to be generated even when not debugging; so use custom function to return blank when debug is off
-		logger.debug("page before transforming:");
-		logger.debug(this.converter.getPrettyStringLogger(page, logger));
+		//logger.debug("page before transforming:");
+		//logger.debug(this.converter.getPrettyStringLogger(page, logger));
 
 		String action = request.getAttribute(GSXML.ACTION_ATT);
 		String subaction = request.getAttribute(GSXML.SUBACTION_ATT);
