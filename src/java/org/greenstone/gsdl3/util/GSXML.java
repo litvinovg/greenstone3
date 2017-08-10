@@ -867,6 +867,21 @@ public class GSXML
       }
     }
 
+  /* Have an element with a set of children, attributes name="x". Replace the specified item in the list with new_item. */
+  /* this assumes we only have children of the same node name. if going tro have mixed lists, need to test on node name as well */
+  public static void replaceNamedItemInList(Element item_list, String item_node_name, String name_att, String item_name, Element new_item) {
+    Node child = item_list.getFirstChild();
+    while(child != null) {
+      if (child.getNodeName().equals(item_node_name) && ((Element)child).getAttribute(name_att).equals(item_name)) {
+	//replace the element
+	item_list.insertBefore(item_list.getOwnerDocument().importNode(new_item, true), child);
+	item_list.removeChild(child);
+	return;
+      }
+      child = child.getNextSibling();
+    }
+
+  }
  	/**
 	 * Given a Node representing an Element or Document, will return the
 	 * Element/docroot Element. Returns null if the Node was not an element.
