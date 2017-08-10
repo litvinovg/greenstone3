@@ -379,7 +379,7 @@ public class CollectionGroups extends ServiceRack {
 		hierarchy = (Element) GSXML.getChildByTagName(content, GSXML.HIERARCHY_ELEM);
 		groupDesc = (Element) GSXML.getChildByTagName(content, GSXML.GROUP_DESC_ELEM);
 		if (hierarchy == null || groupDesc == null){
-			logger.error("Error processing groups configuration. Check groupConfig.xml");
+			logger.error("Error processing groups configuration. <groupConfig> should have both <hierarchy> and <groupDescriptions> elements. Check groupConfig.xml");
 			return false;
 		}
 		verifyGroupDescription();
