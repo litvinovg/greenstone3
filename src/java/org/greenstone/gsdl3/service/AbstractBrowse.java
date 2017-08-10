@@ -78,6 +78,7 @@ public abstract class AbstractBrowse extends ServiceRack
 	/** constructor */
 	protected AbstractBrowse()
 	{
+
 	}
 
 	/** configure this service */
@@ -565,11 +566,14 @@ public abstract class AbstractBrowse extends ServiceRack
 					Element current = (Element) classifierElements.item(j);
 					Node parentNode = current.getParentNode();
 
-					if (parentNode == null)
+					if (parentNode == null || !parentNode.getNodeName().equals(GSXML.CLASS_NODE_ELEM))
 					{
-						continue;
+					  String this_style = getThisType(current.getAttribute(GSXML.NODE_ID_ATT));
+					  if (this_style != null) {
+					    current.setAttribute(GSXML.CLASSIFIER_STYLE_ATT, this_style);
 					}
-
+					}
+					else {
 					Element parent = (Element) parentNode;
 					String childType = parent.getAttribute(GSXML.CHILD_TYPE_ATT);
 					if (childType == null || childType.length() == 0)
@@ -578,6 +582,7 @@ public abstract class AbstractBrowse extends ServiceRack
 					}
 
 					current.setAttribute(GSXML.CLASSIFIER_STYLE_ATT, childType);
+					}
 				}
 			} // if want structure
 		} // for each doc
@@ -774,7 +779,9 @@ public abstract class AbstractBrowse extends ServiceRack
 
 	/** Gets the type of list a classifier is (e.g. VList or HList) */
 	abstract protected String getChildType(String node_id);
-
+  
+  /** Gets the type of list this current node is part of */ 
+  abstract protected String getThisType(String node_id);
 	/**
 	 * returns the document type of the doc that the specified node belongs to.
 	 * should be one of GSXML.DOC_TYPE_SIMPLE, GSXML.DOC_TYPE_PAGED,

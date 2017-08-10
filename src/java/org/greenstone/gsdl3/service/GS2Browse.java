@@ -50,7 +50,7 @@ public class GS2Browse extends AbstractBrowse
   BasicDocumentDatabase gs_doc_db = null;
 	public GS2Browse()
 	{
-	  this.macro_resolver = new GS2MacroResolver(this.coll_db, this.class_loader);
+	  this.macro_resolver = new GS2MacroResolver();
 	}
 
 	public void cleanUp()
@@ -117,6 +117,12 @@ public class GS2Browse extends AbstractBrowse
 			return false;
 		}
 		this.gs_doc = gs_doc_db;
+		
+		// we need to set the database for our GS2 macro resolver
+		GS2MacroResolver gs2_macro_resolver = (GS2MacroResolver) this.macro_resolver;
+		gs2_macro_resolver.setDB(this.coll_db);
+		// set the class loader in case we have collection specific properties files
+		gs2_macro_resolver.setClassLoader(this.class_loader);
 
 	
 		return true;
@@ -138,7 +144,19 @@ public class GS2Browse extends AbstractBrowse
 		return info.getInfo("childtype");
 	}
 
-
+  /** the type of a node is the same as teh child type of its parent */
+  protected String getThisType(String node_id) {
+    String parent_id = OID.getParent(node_id);
+    if (parent_id.equals(node_id)) {
+      return null; // no parent so doesn't have a thistype
+    }
+    DBInfo info = this.coll_db.getInfo(parent_id);
+    if (info == null)
+      {
+	return null;
+      }
+    return info.getInfo("childtype");
+  }
 
 
 	protected String getMetadata(String node_id, String key)
