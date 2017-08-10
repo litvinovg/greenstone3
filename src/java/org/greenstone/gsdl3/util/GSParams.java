@@ -68,6 +68,10 @@ public class GSParams
 	public static final String DOC_EDIT = "docEdit";
 	public static final String AJAX_LOAD_BYPASS = "alb";
 
+  // document display args
+  public static final String EXPAND_DOCUMENT = "ed";
+  public static final String EXPAND_CONTENTS = "ec";
+  public static final String NO_TEXT = "noText";
 	//Administration
 	public static final String PASSWORD = "password";
 	public static final String S_PASSWORD = "s1.password";
@@ -120,6 +124,9 @@ public class GSParams
 		addParameter(INLINE_TEMPLATE, false);
 		addParameter(DISPLAY_METADATA, false);
 		addParameter(AJAX_LOAD_BYPASS, false);
+		addParameter(EXPAND_DOCUMENT, false);
+		addParameter(EXPAND_CONTENTS, false);
+		addParameter(NO_TEXT, false);
 		addParameter(DOC_EDIT, false);
 		addParameter(PASSWORD, false);
 		addParameter(S_PASSWORD, false);
