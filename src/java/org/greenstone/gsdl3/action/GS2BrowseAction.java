@@ -11,6 +11,7 @@ import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.OID;
 import org.greenstone.gsdl3.util.UserContext;
+import org.greenstone.gsdl3.util.XMLConverter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -214,14 +215,19 @@ public class GS2BrowseAction extends Action
 			logger.error("classifier structure request returned no structure");
 			return page_response;
 		}
+		Document cl_struct_doc = cl_structure.getOwnerDocument();
 
-		//If the user is viewing a horizontal classifier then we need to get extra information
+		//If the user is viewing a horizontal classifier then we need to get extra information - siblings along the horizontal
+
+		// cl_structure is the classifier structure containing ancestors and children of current node.
+		// this test means that we won't do the right thing if we happened to have an HList inside a VList. Should really be testing to see if any nodes are HLists...
 		if (cl_structure.getAttribute(GSXML.CHILD_TYPE_ATT).equals(GSXML.HLIST))
 		{
+	  
 			//If we have a horizontal classifier and we have had the top-level node requested (e.g. CL1, CL2 etc.)
 			//then we want to get the children of the first classifier node (e.g. the children of CL2.1) 
-			if (OID.isTop(classifier_node))
-			{
+		  if (OID.isTop(classifier_node)) {
+			
 				boolean firstChildIsClassifierNode = false;
 				NodeList classifierChildrenNodes = GSXML.getChildrenByTagName(cl_structure, GSXML.CLASS_NODE_ELEM);
 				for (int i = 0; i < classifierChildrenNodes.getLength(); i++)
@@ -235,20 +241,10 @@ public class GS2BrowseAction extends Action
 
 				if (firstChildIsClassifierNode)
 				{
-					Element childStructure = getClassifierStructureFromID(doc, classifier_node + ".1", request, collection, service_name);
+				  // get the children of the first child
+					Element childStructure = getClassifierChildrenFromID(doc, classifier_node + ".1", request, collection, service_name);
 
-					Element replacementElem = null;
-					NodeList childClassifierNodes = childStructure.getElementsByTagName(GSXML.CLASS_NODE_ELEM);
-					for (int i = 0; i < childClassifierNodes.getLength(); i++)
-					{
-						Element currentElem = (Element) childClassifierNodes.item(i);
-						if (currentElem.getAttribute(GSXML.NODE_ID_ATT).equals(classifier_node + ".1"))
-						{
-							replacementElem = currentElem;
-							break;
-						}
-					}
-
+					// and now insert it into the structure we already have
 					NodeList nodesToSearch = cl_structure.getElementsByTagName(GSXML.CLASS_NODE_ELEM);
 					for (int i = 0; i < nodesToSearch.getLength(); i++)
 					{
@@ -256,53 +252,65 @@ public class GS2BrowseAction extends Action
 						if (currentElem.getAttribute(GSXML.NODE_ID_ATT).equals(classifier_node + ".1"))
 						{
 							Element parent = (Element) currentElem.getParentNode();
-							parent.insertBefore(parent.getOwnerDocument().importNode(replacementElem, true), currentElem); // wrong doc node!!!
+							parent.insertBefore(cl_struct_doc.importNode(childStructure, true), currentElem); 
 							parent.removeChild(currentElem);
 							break;
 						}
 					}
 				}
-			}
+		  } // if OID.isTop(classifier_node)
 			//If we have a horizontal classifier and we have NOT had the top-level node requested then we need to 
 			//make sure we get the full list of top-level children to display (e.g. if the user has requested
 			//CL2.1.1 we also need to make sure we have CL2.2, CL2.3, CL2.4 etc.)
-			else
-			{
-				Element childStructure = getClassifierStructureFromID(doc, OID.getTop(classifier_node), request, collection, service_name);
+		  else
+		    {
+		      // we need to get siblings of any HList nodes so the HLists remain expanded in the display
+		      // start at the bottom (the specified element) and work up teh list of parents expanding any that have hlists
+		      NodeList elems = GSXML.getNamedElements(cl_structure, GSXML.CLASS_NODE_ELEM, GSXML.NODE_ID_ATT, classifier_node);
+		      Element current_node = null;
+		      String current_id = classifier_node;
+		      if (elems != null) {
+			// there should only be one node in the list
+			current_node = (Element)elems.item(0);
+		      }
+		      if (current_node != null) {
+			Element parent_node = (Element)current_node.getParentNode();
+			while(parent_node != null && parent_node.getNodeName().equals(GSXML.CLASS_NODE_ELEM)) {
+			  if (((Element)parent_node).getAttribute(GSXML.CHILD_TYPE_ATT).equals(GSXML.HLIST)) {
+			    // get the children of the parent
+			    Element new_parent_elem = getClassifierChildrenFromID(cl_struct_doc, parent_node.getAttribute(GSXML.NODE_ID_ATT), request, collection, service_name);
 
-				String[] idParts = classifier_node.split("\\.");
-				String idToSearchFor = idParts[0] + "." + idParts[1];
+			    // put current node into this new structure
+			    Element to_be_replaced = GSXML.getNamedElement(new_parent_elem, GSXML.CLASS_NODE_ELEM, GSXML.NODE_ID_ATT, current_id);
+			    if (to_be_replaced != null) {
+			      new_parent_elem.insertBefore(current_node, to_be_replaced);
+			      new_parent_elem.removeChild(to_be_replaced);
+			      if (OID.isTop(parent_node.getAttribute(GSXML.NODE_ID_ATT))) {
+				// we can't go up any further.
+				cl_structure = new_parent_elem;
+				parent_node = null;
 
-				Element replacementElem = null;
-				NodeList childClassifierNodes = cl_structure.getElementsByTagName(GSXML.CLASS_NODE_ELEM);
-				for (int i = 0; i < childClassifierNodes.getLength(); i++)
-				{
-					Element currentElem = (Element) childClassifierNodes.item(i);
-					if (currentElem.getAttribute(GSXML.NODE_ID_ATT).equals(idToSearchFor))
-					{
-						replacementElem = currentElem;
-						break;
-					}
-				}
-
-				if (replacementElem != null)
-				{
-					NodeList nodesToSearch = childStructure.getElementsByTagName(GSXML.CLASS_NODE_ELEM);
-					for (int i = 0; i < nodesToSearch.getLength(); i++)
-					{
-						Element currentElem = (Element) nodesToSearch.item(i);
-						if (currentElem.getAttribute(GSXML.NODE_ID_ATT).equals(idToSearchFor))
-						{
-							Element parent = (Element) currentElem.getParentNode();
-							parent.insertBefore(parent.getOwnerDocument().importNode(replacementElem,true), currentElem);
-							parent.removeChild(currentElem);
-							break;
-						}
-					}
-
-					cl_structure = childStructure;
-				}
+			      } else {
+				Element next_parent = (Element)parent_node.getParentNode();
+				next_parent.insertBefore(new_parent_elem, parent_node );
+				next_parent.removeChild(parent_node);
+				current_node = new_parent_elem;
+				current_id = current_node.getAttribute(GSXML.NODE_ID_ATT);
+				parent_node = next_parent;
+			      }
+			    } else {
+			      // something went wrong, we'll stop this
+			      parent_node = null;
+			    }
+			  } else {
+			    current_node = parent_node;
+			    current_id = current_node.getAttribute(GSXML.NODE_ID_ATT);
+			    parent_node = (Element)current_node.getParentNode();
+			  }
 			}
+		      } // if current_node != null
+		      
+		    }
 		}
 
 		Element page_classifier = null;
@@ -433,30 +441,31 @@ public class GS2BrowseAction extends Action
 		return page_response;
 	}
 
-	private Element getClassifierStructureFromID(Document doc, String id, Element request, String collection, String service_name)
+	private Element getClassifierChildrenFromID(Document doc, String id, Element request, String collection, String service_name)
 	{
 		UserContext userContext = new UserContext(request);
 		String to = GSPath.appendLink(collection, service_name);
 
-		Element firstClassifierNodeChildrenMessage = doc.createElement(GSXML.MESSAGE_ELEM);
-		Element firstClassifierNodeChildrenRequest = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		Document msg_doc = XMLConverter.newDOM();
+		Element firstClassifierNodeChildrenMessage = msg_doc.createElement(GSXML.MESSAGE_ELEM);
+		Element firstClassifierNodeChildrenRequest = GSXML.createBasicRequest(msg_doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
 		firstClassifierNodeChildrenMessage.appendChild(firstClassifierNodeChildrenRequest);
 
-		Element paramList = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
+		Element paramList = msg_doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 		firstClassifierNodeChildrenRequest.appendChild(paramList);
 
-		Element ancestorParam = doc.createElement(GSXML.PARAM_ELEM);
-		paramList.appendChild(ancestorParam);
-		ancestorParam.setAttribute(GSXML.NAME_ATT, "structure");
-		ancestorParam.setAttribute(GSXML.VALUE_ATT, "ancestors");
+		// Element ancestorParam = doc.createElement(GSXML.PARAM_ELEM);
+		// paramList.appendChild(ancestorParam);
+		// ancestorParam.setAttribute(GSXML.NAME_ATT, "structure");
+		// ancestorParam.setAttribute(GSXML.VALUE_ATT, "ancestors");
 
-		Element childrenParam = doc.createElement(GSXML.PARAM_ELEM);
+		Element childrenParam = msg_doc.createElement(GSXML.PARAM_ELEM);
 		paramList.appendChild(childrenParam);
 		childrenParam.setAttribute(GSXML.NAME_ATT, "structure");
 		childrenParam.setAttribute(GSXML.VALUE_ATT, "children");
 
-		Element classifierToGetList = doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
-		Element classifierToGet = doc.createElement(GSXML.CLASS_NODE_ELEM);
+		Element classifierToGetList = msg_doc.createElement(GSXML.CLASS_NODE_ELEM + GSXML.LIST_MODIFIER);
+		Element classifierToGet = msg_doc.createElement(GSXML.CLASS_NODE_ELEM);
 		classifierToGet.setAttribute(GSXML.NODE_ID_ATT, id);
 		classifierToGetList.appendChild(classifierToGet);
 		firstClassifierNodeChildrenRequest.appendChild(classifierToGetList);
@@ -468,8 +477,7 @@ public class GS2BrowseAction extends Action
 		nsPath = GSPath.appendLink(GSXML.CLASS_NODE_ELEM, GSXML.NODE_STRUCTURE_ELEM);
 		nsPath = GSPath.appendLink(nsPath, GSXML.CLASS_NODE_ELEM);
 		Element childStructure = (Element) GSXML.getNodeByPath(topClassifierNode, nsPath);
-
-		return childStructure;
+		return (Element)doc.importNode(childStructure, true);
 	}
 
 	protected void extractMetadataNames(Element new_format, HashSet<String> doc_meta_names, HashSet<String> class_meta_names)
