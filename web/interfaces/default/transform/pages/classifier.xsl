@@ -93,12 +93,12 @@
   <xsl:template name="HList">
     <xsl:param name="collName"/>
     <xsl:param name="serviceName"/>
+    <xsl:variable name="selectedNode"><xsl:value-of select="/page/pageRequest/paramList/param[@name = 'cl']/@value"/></xsl:variable>
     <ul class="horizontalContainer">
       <xsl:for-each select='classifierNode'>
 	<li>
 	  <xsl:attribute name="class">
-	    <!--<xsl:if test="@nodeID = /page/pageRequest/paramList/param[@name = 'cl']/@value">selectedHorizontalClassifierNode </xsl:if>-->
-	    <xsl:if test="starts-with(/page/pageRequest/paramList/param[@name = 'cl']/@value, @nodeID)">selectedHorizontalClassifierNode </xsl:if>
+	    <xsl:if test="starts-with($selectedNode, @nodeID) or (not(contains($selectedNode, '.')) and @nodeID = concat($selectedNode, '.1'))">selectedHorizontalClassifierNode </xsl:if>
 	    <xsl:text>horizontalClassifierNode</xsl:text>
 	  </xsl:attribute>
 	  <xsl:apply-templates select='.'>
@@ -144,7 +144,7 @@
 	      <xsl:when test="name()='documentNode'">
 		<xsl:if test="../@childType = 'DateList'">
 		  <xsl:variable name="prevMonth"><xsl:value-of select="util:getString('prevMonth')"/></xsl:variable>
-		  <xsl:variable name="currentDate"><gsf:metadata name="Date"/></xsl:variable>
+		  <xsl:variable name="currentDate"><gsf:metadata name="Date" pos="1"/></xsl:variable> <!-- note pos=1 won't work if a document can be included in a datelist multiple times. currently only the first date is used...-->
 		  <xsl:variable name="currentMonth"><xsl:value-of select="util:getDetailFromDate($currentDate, 'month', /page/@lang)"/></xsl:variable>
 		  <xsl:value-of select="util:storeString('prevMonth', $currentMonth)"/>
 		  <td>
