@@ -569,6 +569,11 @@ public class XSLTUtil
 		{
 			in_pattern = "yyyyMM";
 		}
+		// remove the 00
+		else if (date.length() == 8 && date.endsWith("00")) {
+		  date = date.substring(0,6);
+		  in_pattern = "yyyyMM";
+		}
 
 		SimpleDateFormat formatter = new SimpleDateFormat(in_pattern, new Locale(lang));
 		try
