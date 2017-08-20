@@ -55,6 +55,12 @@ public class RSSAction extends Action
 		
 		Element rss_response = (Element) this.mr.process(mr_request_message);
 		rss_response = (Element) GSXML.getChildByTagName(rss_response, GSXML.RESPONSE_ELEM); // just the response tag
+		if (rss_response == null) {
+		  //RSS service not available
+		  rss_response = doc.createElement(GSXML.RESPONSE_ELEM);
+		  
+		  GSXML.addError(rss_response, "RSS service not available for this collection");
+		}
 		// NEED ERROR PROCESSING ?
 
 		// siteMeta and interfaceOptions are unnecessary, as rss.xsl is going to remove it anyway
