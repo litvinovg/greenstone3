@@ -18,8 +18,19 @@
        </xsl:template>
     -->
 
- <xsl:template match="/page">
-    <xsl:apply-templates select="pageResponse/rss"/>
+  <xsl:template match="/page">
+    <xsl:choose>
+      <xsl:when test="pageResponse/rss">
+	<xsl:apply-templates select="pageResponse/rss"/>
+      </xsl:when>
+      <xsl:when test="descendant::error">
+	  <div id="error">
+            <xsl:apply-templates select="descendant::error"/>
+	  </div>
+      </xsl:when>
+      <xsl:otherwise><!-- do what?-->
+      </xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
   <!--Identity template, copies all content of matching template(s) into the output -->
