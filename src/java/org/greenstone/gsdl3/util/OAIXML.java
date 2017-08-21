@@ -77,7 +77,11 @@ public class OAIXML {
   public static final String OAI_PMH = "OAI-PMH";
   public static final String RESPONSE_DATE = "responseDate";
   public static final String REQUEST = "request";
-  
+
+  // internal "OID" identifiers in the oai-inf db
+  /** represents the timestamp of the OAI collection (when its oai-inf db was first created) */
+  public static final String OAI_EARLIEST_TIMESTAMP_OID = "_earliesttimestamp";  
+    
   // Identify data
   public static final String ADMIN_EMAIL = "adminEmail";
   public static final String BASE_URL = "baseURL";

@@ -367,14 +367,17 @@ public class OAIPMH extends ServiceRack {
 	if (oai_info == null) {
 	    logger.warn("OID: " + oid + " is not present in the collection's oai-inf database.");
 	} else  {
+
+	    // indexdb doesn't have info on deleted docs, only oaiinf db does.
+	    // So only oaiinfdb has timestamps for deleted docs
+	    // For non-deleted doc ids: also obtain timestamp from oaiinf db, 
+	    // but if the oaiinf db doesn't exist, resort to oailastmodified fields of indexdb.
+	    String timestamp = oai_info.getInfo(OAIXML.OAI_INF_TIMESTAMP); // stored in seconds, like oailastmodified in the collection index db
+	    millis = Long.parseLong(timestamp)*1000; // in milliseconds	    
+	    
 	    String oaiinf_status = oai_info.getInfo(OAIXML.OAI_INF_STATUS);
 	    if(oaiinf_status != null && oaiinf_status.equals(OAIXML.OAI_INF_DELETED)) {
 		OID_is_deleted = true;
-
-		// get the right timestamp for deletion: from oaiinf db
-		String timestamp = oai_info.getInfo(OAIXML.OAI_INF_TIMESTAMP); // in seconds presumably, like oailastmodified in the collection index db		
-		
-		millis = Long.parseLong(timestamp)*1000; // in milliseconds
 	    }
 	}
     }
@@ -383,11 +386,12 @@ public class OAIPMH extends ServiceRack {
     // null is returned.
     DBInfo info = this.coll_db.getInfo(oid);
     if (info == null) {
-      logger.error("OID: " + oid + " is not present in the collection database.");
-      //return OAIXML.createErrorResponse(OAIXML.ID_DOES_NOT_EXIST, ""); // not an error: may exist as deleted (marked 'D') in oai-inf db
+	if(!OID_is_deleted) { // we don't expect to find entries for deleted docs in index db.
+	    logger.error("OID: " + oid + " is not present in the collection index database.");
+	    return OAIXML.createErrorResponse(OAIXML.ID_DOES_NOT_EXIST, "");
+	} // if doc deleted, id missing in indexdb is not an error: doc id would exist only in oai-inf db, marked as deleted 'D'
     }
-    else if (millis == -1) { // so !OID_is_deleted, get oailastmodified from collection's index db
-	ArrayList<String> keys = new ArrayList<String>(info.getKeys());	
+    else if (millis == -1) { // so couldn't get doc lastmod from oaiinf db, get oailastmodified from collection's index db
 	millis = getDateStampMillis(info);	
     }
     String oailastmodified = (millis == -1) ? "" : OAIXML.getTime(millis);
@@ -493,6 +497,11 @@ public class OAIPMH extends ServiceRack {
 
     for(int i=0; i<oid_list.size(); i++) {
       String oid = oid_list.get(i);
+
+      if(oid.equals(OAIXML.OAI_EARLIEST_TIMESTAMP_OID)) { // internal id not doc id, so skip
+	  continue;
+      }
+      
       boolean OID_is_deleted = false;
       long millis = -1;
 
@@ -502,27 +511,34 @@ public class OAIPMH extends ServiceRack {
 	  if (oai_info == null) {
 	      logger.warn("OID: " + oid + " is not present in the collection's oai-inf database.");
 	  } else  {
+	      
+	      // indexdb doesn't have info on deleted docs, only oaiinf db does.
+	      // So only oaiinfdb has timestamps for deleted docs
+	      // For non-deleted doc ids: also obtain timestamp from oaiinf db, 
+	      // but if the oaiinf db doesn't exist, resort to oailastmodified fields of indexdb.
+	      String timestamp = oai_info.getInfo(OAIXML.OAI_INF_TIMESTAMP); // stored in seconds like oailastmodified in the collection index db	      
+	      millis = Long.parseLong(timestamp)*1000; // in milliseconds
+		  
 	      String oaiinf_status = oai_info.getInfo(OAIXML.OAI_INF_STATUS);
 	      if(oaiinf_status != null && oaiinf_status.equals(OAIXML.OAI_INF_DELETED)) {
 		  OID_is_deleted = true;
-		  
-		  // get the right timestamp for deletion: from oaiinf db
-		  String timestamp = oai_info.getInfo(OAIXML.OAI_INF_TIMESTAMP); // in seconds presumably, like oailastmodified in the collection index db		
-		  
-		  millis = Long.parseLong(timestamp)*1000; // in milliseconds
 	      }
 	  }
       }
       DBInfo info = this.coll_db.getInfo(oid);
       if (info == null) { // can happen if oid was deleted, in which case only oai_info keeps a record of the oid
-        logger.error("Collection database does not contain information about oid: " +oid);
+	  if(!OID_is_deleted) { // we don't expect to find entries for deleted docs in index db.
+	      logger.error("Collection database does not contain information about oid: " +oid);
+	  }
       }
-      else if (millis == -1) { // so !OID_is_deleted, get oailastmodified from collection's index db
+      else if (millis == -1) { // so couldn't get doc lastmod from oaiinf db, get oailastmodified from collection's index db
 	  
 	  millis = getDateStampMillis(info);
       }
 
       Date this_date = null;
+      String oailastmodified = (millis == -1) ? "" : OAIXML.getTime(millis);
+      
       if (millis == -1) {
 	  if (from_date != null || until_date !=null) {
 	      continue; // if this doc doesn't have a date for some reason, and
@@ -543,7 +559,7 @@ public class OAIPMH extends ServiceRack {
       }
       
       //compose the header element, which we'll be appending no matter what
-      Element header = createHeaderElement(doc, oid, OAIXML.getTime(millis), OID_is_deleted);
+      Element header = createHeaderElement(doc, oid, oailastmodified, OID_is_deleted);
 
       if (include_metadata) { // doing ListRecords
 	  // compose a record for adding header and metadata
