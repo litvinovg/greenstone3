@@ -19,6 +19,9 @@ var save_and_rebuild_buttons = ["saveandrebuild"];
    autocomplete: a text input box with a list of suggestions to choose from (provided by the availableMetadataElements list). Allows additional input other than the fixed list 
 */
 var new_metadata_field_input_type = "plain";
+/* add all metadata button? only valid with fixedlist or autocomplete metadata element selection */
+var enable_add_all_metadata_button = true;
+
 /* Metadata elements to be used in the fixedlist/autocomplete options above */
 var availableMetadataElements = ["dc.Title", "dc.Subject"];
 /* metadata elements that have a list of values/suggestions */
@@ -29,7 +32,6 @@ var autocompleteMetadata = ["dc.Subject"];
 var dcSubject_values = ["Kings", "Queens", "others"];
 */
 
-
 /************************
 * METADATA EDIT SCRIPTS *
 ************************/
@@ -39,7 +41,6 @@ function addEditMetadataLink(cell)
 	cell = $(cell);
 	var id = cell.attr("id").substring(6);
 	var metaTable = gs.jqGet("meta" + id);
-
 	var row = cell.parent();
 	var newCell = $("<td>", {"style": "font-size:0.7em; padding:0px 10px", "class": "editMetadataButton"});
 	var linkSpan = $("<span>", {"class": "ui-state-default ui-corner-all", "style": "padding: 2px; float:left;"});
@@ -67,7 +68,10 @@ function addEditMetadataLink(cell)
 			linkIcon.attr("class", "ui-icon ui-icon-folder-open");
 			metaTable.css("display", "block");
 			metaTable.metaNameField.css("display", "inline");
-			metaTable.addRowButton.css("display", "inline");
+		    metaTable.addRowButton.css("display", "inline");
+		    if (enable_add_all_metadata_button == true) {
+			metaTable.addAllButton.css("display", "inline");
+		    }
 		}
 		else
 		{
@@ -75,7 +79,10 @@ function addEditMetadataLink(cell)
 			linkIcon.attr("class", "ui-icon ui-icon-folder-collapsed");
 			metaTable.css("display", "none");
 			metaTable.metaNameField.css("display", "none");
-			metaTable.addRowButton.css("display", "none");
+		    metaTable.addRowButton.css("display", "none");
+		    if (enable_add_all_metadata_button == true) {
+			metaTable.addAllButton.css("display", "none");
+		    }
 		}
 	});
 
@@ -86,7 +93,10 @@ function addEditMetadataLink(cell)
 	
 	addFunctionalityToTable(metaTable);
 	metaTable.metaNameField.css("display", "none");
-	metaTable.addRowButton.css("display", "none");
+    metaTable.addRowButton.css("display", "none");
+    if (enable_add_all_metadata_button == true) {
+	metaTable.addAllButton.css("display", "none");
+    }
 }
 
 function setEditingFeaturesVisible(visible)
@@ -119,7 +129,10 @@ function setEditingFeaturesVisible(visible)
 		{
 			$(this).css("display", "none");
 			$(this.metaNameField).css("display", "none");
-			$(this.addRowButton).css("display", "none");
+		    $(this.addRowButton).css("display", "none");
+		    if (enable_add_all_metadata_button == true) {
+			$(this.addAllButton).css("display", "none");
+		    }
 		}
 	});
 }
@@ -136,7 +149,6 @@ function readyPageForEditing()
     CKEDITOR.on('instanceReady', function(evt) {
 	addCKEEditableState(evt,editableInitStates);
     });
-
 	if($("#metadataSetList").length)
 	{
 		var setList = $("#metadataSetList");
@@ -377,6 +389,12 @@ function isNodeChanged(StateToCheck){
 	    }
 	
 	}
-	return true;
+    // if get here, this must be a new node, as wasn't in init states
+    // make sure its not empty - we won't add empty nodes.
+    if (StateToCheck.initHTML == "") {
+	return false;
+    } 
+    return true;
+    
 }
 

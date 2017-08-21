@@ -829,7 +829,17 @@ function addFunctionalityToTable(table)
 	table.after(metaNameField);
 	table.metaNameField = metaNameField;
 	
-	var addRowButton = $("<button>",{"class": "ui-state-default ui-corner-all", "style": "margin: 5px;"});
+    /* add the buttons */
+    // check enable_add_all_button - only valid for fixedlist and autocomplete
+    if (enable_add_all_metadata_button == true) {
+	if (new_metadata_field_input_type != "fixedlist" && new_metadata_field_input_type != "autocomplete") {
+	    enable_add_all_metadata_button = false;
+	}
+    }
+
+    // add single metadata button
+    var addRowButton = $("<button>",{"class": "ui-state-default ui-corner-all", "style": "margin: 5px;"});
+
 	addRowButton.html(gs.text.de.add_new_metadata);
 	addRowButton.click(function() 
 	{ 
@@ -839,43 +849,65 @@ function addFunctionalityToTable(table)
 			console.log(gs.text.de.no_meta_name_given);
 			return;
 		}
-	        var clean_name = name.replace(/[\.-]/g, "");
-		var newRow = $("<tr>", {"style": "display: table-row;"});
-		var nameCell = $("<td>" + name + "</td>");
-		nameCell.attr("class", "metaTableCellName");
-		var valueCell = $("<td>", {"class": "metaTableCell"}); 	
-	        var textValue = $("<textarea>", {"class": "metaTableCellArea "+ clean_name}); 
-	    
-	    if (jQuery.inArray(name, autocompleteMetadata) != -1) {
-		    var source_obje = window[clean_name +"_values"];
-		    if (source_obje) {
-			textValue.autocomplete({
-			    minLength: 0,
-			    source: source_obje
-			});
-		    }
-		}
-		valueCell.append(textValue);
-		newRow.append(nameCell);
-		newRow.append(valueCell);
-		addRemoveLinkToRow(newRow.get(0));
-		table.append(newRow);
-		
-		var undo = new Array();
-		undo.op = "delMeta";
-		undo.srcElem = newRow;
-		undo.removeTransaction = false;
-		_undoOperations.push(undo);
-		if ( hierarchyStorage && hierarchyStorage[name])
-                {
-                        setHierarchyEventsWrappers(name);
-                }
+	    addNewMetadataRow(table, name);
 
 		
 	});
-	table.addRowButton = addRowButton;
-	metaNameField.after(addRowButton);
+    table.addRowButton = addRowButton;
+    metaNameField.after(addRowButton);
 
+    // add all metadata button
+    if (enable_add_all_metadata_button == true) {
+	var addAllButton = $("<button>",{"class": "ui-state-default ui-corner-all", "style": "margin: 5px;"});
+	addAllButton.html(gs.text.de.add_all_metadata);
+	addAllButton.click(function()
+			   {
+			       for(var i=0; i<availableMetadataElements.length; i++) {
+				   
+			           addNewMetadataRow(table, availableMetadataElements[i])
+			       }
+			       
+			   });
+	table.addAllButton = addAllButton;
+	addRowButton.after(addAllButton);
+    
+    }
+
+}
+
+function addNewMetadataRow(table, name) {
+
+    var clean_name = name.replace(/[\.-]/g, "");
+    var newRow = $("<tr>", {"style": "display: table-row;"});
+    var nameCell = $("<td>" + name + "</td>");
+    nameCell.attr("class", "metaTableCellName");
+    var valueCell = $("<td>", {"class": "metaTableCell"}); 	
+    var textValue = $("<textarea>", {"class": "metaTableCellArea "+ clean_name}); 
+    
+    if (jQuery.inArray(name, autocompleteMetadata) != -1) {
+	var source_obje = window[clean_name +"_values"];
+	if (source_obje) {
+	    textValue.autocomplete({
+		minLength: 0,
+		source: source_obje
+	    });
+	}
+    }
+    valueCell.append(textValue);
+    newRow.append(nameCell);
+    newRow.append(valueCell);
+    addRemoveLinkToRow(newRow.get(0));
+    table.append(newRow);
+    
+    var undo = new Array();
+    undo.op = "delMeta";
+    undo.srcElem = newRow;
+    undo.removeTransaction = false;
+    _undoOperations.push(undo);
+    if ( hierarchyStorage && hierarchyStorage[name])
+    {
+        setHierarchyEventsWrappers(name);
+    }
 }
 
 function addRemoveLinkToRow(row)
