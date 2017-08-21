@@ -232,6 +232,27 @@ public class OAIPMH extends ServiceRack {
     return true;
   }
 
+    /**
+     * @return the associated OAICollection's OAI_EARLIEST_TIMESTAMP_OID record's 
+     * OAI_INF_TIMESTAMP field from the collection's oai-inf.db IN MILLISECONDS
+     */
+    public long getEarliestTimestamp() {
+	long timestamp = -1;
+	
+	DBInfo oai_info = null;
+	if(oaiinf_db != null) {
+	    // get internal record containing the earliest timestamp of the collection
+	    oai_info = this.oaiinf_db.getInfo(OAIXML.OAI_EARLIEST_TIMESTAMP_OID);
+	    if (oai_info == null) {
+		logger.warn("Can't get collection " + this.cluster_name + "'s earliest timestamp from oai-inf db. No entry for 'OID' " + OAIXML.OAI_EARLIEST_TIMESTAMP_OID + " in the db.");		
+	    } else {
+		timestamp = Long.parseLong(oai_info.getInfo(OAIXML.OAI_INF_TIMESTAMP)) * 1000; // stored in seconds, so x1000 to  convert to milliseconds
+		//logger.info("@@@ found earliest OAI timestamp for collection " + this.coll_name + ": " + timestamp + " (ms)");
+	    }
+	}
+	return timestamp;
+    }
+    
   protected Element findNamedMetadataFormat(Element list_meta_formats, String prefix) {
     NodeList formats = list_meta_formats.getElementsByTagName(OAIXML.METADATA_FORMAT);
     for (int i=0; i<formats.getLength(); i++) {

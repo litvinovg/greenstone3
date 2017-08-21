@@ -160,7 +160,7 @@ public class OAIResumptionToken {
     // take off the set/cursor parts to check for the main key
     if (token.indexOf(":") != -1) {
       token = token.substring(0, token.indexOf(":"));
-      logger.error("looking up "+token);
+      logger.info("looking up "+token);
     }
     if (stored_tokens.containsKey(token)) {
       return true;
@@ -173,11 +173,11 @@ public class OAIResumptionToken {
     String base_name = token;
     if (token.indexOf(":") != -1) {
       base_name = token.substring(0, token.indexOf(":"));
-      logger.error("getting data for "+base_name);
+      logger.info("getting data for "+base_name);
     }
     HashMap<String, String> data = new HashMap<String, String>(stored_tokens.get(base_name));
     if (data == null) { 
-      logger.error("data was null!!");
+      logger.warn("data was null!!");
       return null;
     }
     // add in cursor, etc from the token name    
@@ -210,21 +210,21 @@ public class OAIResumptionToken {
     Set<Map.Entry<String,Long>> token_set = expiration_data.entrySet();
     Iterator<Map.Entry<String,Long>> i = token_set.iterator();
     int size = expiration_data.size();
-    logger.error("start tokens "+size);
+    logger.info("start tokens "+size);
     Long time_now = System.currentTimeMillis();
     while (i.hasNext()==true) {
       Map.Entry<String,Long> entry = i.next();
       String key = entry.getKey();
       Long exp = entry.getValue();
       if (exp < time_now) {
-	logger.error("token "+key+" is expired, "+ OAIXML.getTime(exp));
+	logger.info("token "+key+" is expired, "+ OAIXML.getTime(exp));
 	i.remove();
 	// also remove the token from the stored tokens
 	stored_tokens.remove(key);
       }
     }
     size = expiration_data.size();
-    logger.error("end tokens "+size);
+    logger.info("end tokens "+size);
   }
 
   protected static boolean findOrCreateTokenFile() {
@@ -241,7 +241,7 @@ public class OAIResumptionToken {
 	}
       }
     } catch (Exception e) {
-      logger.error("couldn't find or ResumptionToken.xml "+e.getMessage());
+      logger.error("couldn't find or work with ResumptionToken.xml "+e.getMessage());
     }
     // if we have got here, have't managed to load file via class loader -
     // it may not exist yet.
@@ -286,7 +286,7 @@ public class OAIResumptionToken {
   public static boolean saveTokensToFile() {
     clearExpiredTokens();
     if (resumption_token_file == null) {
-      logger.error("no available resumption token file, not storing tokens");
+      logger.warn("no available resumption token file, not storing tokens");
       return false;
     }
     

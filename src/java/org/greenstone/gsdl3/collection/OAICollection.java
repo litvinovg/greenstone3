@@ -149,6 +149,19 @@ public class OAICollection extends Collection
 	  this.oai_service_rack.setMessageRouter(this.router);
 	  // pass the xml node to the service for configuration
 	  if (this.oai_service_rack.configure(oai_service_xml, extra_info)) {
+
+	      // once we've configured the OAIPMH service, we can use the OAIPMH service to
+	      // retrieve the earliest timestamp of the collection from the oai-inf db and
+	      // overwrite Collection.earliestDatestamp with it.
+	      long earliestTimestamp = this.oai_service_rack.getEarliestTimestamp();
+	      if(earliestTimestamp == -1) {
+		  //this.earliestDatestamp = -1;
+		  logger.warn("No OAI timestamp for collection " + this.cluster_name
+			      + ". Falling back to using its earliestDatestamp from build config: " + this.earliestDatestamp);
+	      } else {
+		  this.earliestDatestamp = earliestTimestamp; // milliseconds
+	      }
+	      
 	    
 	    // find out the supported service types for this service module
 	    Node types = this.oai_service_rack.process(message);

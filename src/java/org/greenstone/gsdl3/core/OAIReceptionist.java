@@ -238,7 +238,7 @@ public class OAIReceptionist implements ModuleInterface {
     request.setAttribute(GSXML.TO_ATT, to.toString());
     // send to MR
     msg_node = mr.process(message);
-    logger.info("*** " + XMLConverter.getPrettyString(msg_node));
+    //logger.info("*** " + XMLConverter.getPrettyString(msg_node));
     NodeList response_list =  ((Element)msg_node).getElementsByTagName(GSXML.RESPONSE_ELEM);
     for (int c=0; c<response_list.getLength(); c++) {
       // for each collection's response
