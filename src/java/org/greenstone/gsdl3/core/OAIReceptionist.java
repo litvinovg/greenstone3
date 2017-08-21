@@ -857,9 +857,6 @@ public class OAIReceptionist implements ModuleInterface {
     Node result_node = mr.process(message);
     return GSXML.nodeToElement(result_node);
   }
-  
-    
-
 
   private void copyNamedElementfromConfig(Element to_elem, String element_name) {
     Element original_element = (Element)GSXML.getChildByTagName(oai_config, element_name);
@@ -1039,10 +1036,12 @@ public class OAIReceptionist implements ModuleInterface {
     // the earliestDatestamp is now stored as a metadata element in the collection's buildConfig.xml file
     // we get the earliestDatestamp among the collections
     for(int i=0; i<oai_coll_size; i++) {
-      long coll_earliestDatestamp = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.EARLIEST_DATESTAMP));
+	String collName = collection_name_list.get(i);
+	long coll_earliestDatestamp = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.EARLIEST_DATESTAMP)); // Taken from oai-inf db's OAI_EARLIEST_TIMESTAMP_OID entry, else falls back to earliest datestamp field in buildcfg
       if (coll_earliestDatestamp == 0) {
 	// try last modified
 	coll_earliestDatestamp = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.LAST_MODIFIED));
+	//logger.info("@@@ Falling back to using collection " + collName + "'s lastmodified date as its earliest timestamp: " + coll_earliestDatestamp);
       }
       if (coll_earliestDatestamp > 0) {
 	earliestDatestamp = (earliestDatestamp > coll_earliestDatestamp)? coll_earliestDatestamp : earliestDatestamp;
