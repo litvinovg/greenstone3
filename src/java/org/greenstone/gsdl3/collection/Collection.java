@@ -72,7 +72,7 @@ public class Collection extends ServiceCluster
 	protected String db_type = "";
 	/** time when this collection was built Used by RSS */
 	protected long lastmodified = 0;
-	/** earliestDatestamp of this collection. Used by OAI/RSS */
+	/** earliestDatestamp of this collection. Used by RSS and as fallback by OAI */
         protected long earliestDatestamp = 0;
 
 	/** Stores the default accessibility of guest users */
@@ -186,13 +186,13 @@ public class Collection extends ServiceCluster
 		return is_public;
 	}
 
-	// Used by OAI Receptionist and RSSRetrieve 
+	// Used by OAI Receptionist (as second fallback) and RSSRetrieve 
 	public long getLastmodified()
 	{
 		return lastmodified;
 	}
 
-	// used by the OAIReceptionist and RSSRetrieve
+	// used by the OAIReceptionist (as fallback) and RSSRetrieve
 	public long getEarliestDatestamp()
 	{
 		return earliestDatestamp;

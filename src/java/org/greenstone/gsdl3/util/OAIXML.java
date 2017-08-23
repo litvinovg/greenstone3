@@ -88,7 +88,8 @@ public class OAIXML {
   public static final String COMPRESSION = "compression";
   public static final String DELETED_RECORD = "deletedRecord";
   public static final String DESCRIPTION = "description";
-  public static final String EARLIEST_DATESTAMP = "earliestDatestamp";
+  public static final String EARLIEST_DATESTAMP = "earliestDatestamp"; // taken from buildconfig used as publishing date by RSS service
+  public static final String EARLIEST_OAI_DATESTAMP = "earliestOAIDatestamp"; // earliest timestamp of an OAI collection stored in oai-inf db
   public static final String GRANULARITY = "granularity";
   public static final String LAST_MODIFIED = "lastmodified";
   public static final String PROTOCOL_VERSION = "protocolVersion";

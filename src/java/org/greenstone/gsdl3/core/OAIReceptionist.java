@@ -1037,16 +1037,36 @@ public class OAIReceptionist implements ModuleInterface {
     // we get the earliestDatestamp among the collections
     for(int i=0; i<oai_coll_size; i++) {
 	String collName = collection_name_list.get(i);
-	long coll_earliestDatestamp = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.EARLIEST_DATESTAMP)); // Taken from oai-inf db's OAI_EARLIEST_TIMESTAMP_OID entry, else falls back to earliest datestamp field in buildcfg
-      if (coll_earliestDatestamp == 0) {
-	// try last modified
-	coll_earliestDatestamp = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.LAST_MODIFIED));
-	//logger.info("@@@ Falling back to using collection " + collName + "'s lastmodified date as its earliest timestamp: " + coll_earliestDatestamp);
-      }
-      if (coll_earliestDatestamp > 0) {
-	earliestDatestamp = (earliestDatestamp > coll_earliestDatestamp)? coll_earliestDatestamp : earliestDatestamp;
-      }
+	long coll_earliestDatestamp = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.EARLIEST_OAI_DATESTAMP)); // Taken from oai-inf db's OAI_EARLIEST_TIMESTAMP_OID entry, -1 if not found
+
+	if (coll_earliestDatestamp > 0 && earliestDatestamp > coll_earliestDatestamp) {
+	    earliestDatestamp = coll_earliestDatestamp;
+	    //logger.info("@@@ Found earlier timestamp: " + earliestDatestamp + " ms");
+	}
     }
+
+    // we're no longer trying fallbacks for earliestDatestamp (other than the extreme fallback of
+    // unix epoch time) because, going forward, all collections will have oai-inf db containing
+    // an entry for earliesttimestamp. And all OAICollections will moreover have them stored and
+    // will return them upon calling getEarliestOAIDatestamp().
+    /*    
+    if(earliestDatestamp == current_time) {
+	logger.info("Can't determine earliesttimestamp from oai-inf.db for any OAI collection. Trying timestamps in build config...");
+	for(int i=0; i<oai_coll_size; i++) {
+	    String collName = collection_name_list.get(i);
+	    long coll_earliestDatestamp = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.EARLIEST_DATESTAMP)); // Taken from the earliest datestamp field in buildcfg
+	    if (coll_earliestDatestamp == 0) {
+		// try last modified
+		coll_earliestDatestamp = Long.parseLong(((Element)oai_coll.item(i)).getAttribute(OAIXML.LAST_MODIFIED));
+		//logger.info("@@@ Falling back to using collection " + collName + "'s lastmodified date as its earliest timestamp: " + coll_earliestDatestamp);
+	    }
+	    if (coll_earliestDatestamp > 0) {
+		earliestDatestamp = (earliestDatestamp > coll_earliestDatestamp)? coll_earliestDatestamp : earliestDatestamp;
+	    }
+	}
+    }
+    */
+    
     if (earliestDatestamp == current_time) {
       logger.info("no collection had a real datestamp, using value from OAIConfig");
       return config_datestamp;

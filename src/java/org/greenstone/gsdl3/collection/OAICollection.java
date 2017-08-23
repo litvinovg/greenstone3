@@ -60,8 +60,11 @@ public class OAICollection extends Collection
 	/** does this collection provide the OAI service */
 	protected boolean has_oai = false;
 
-  /** a reference to the OAIPMH service rack */
-  protected OAIPMH oai_service_rack = null;
+	/** earliest datestamp of an OAI collection. Also used to work out the earliest datetimestamp of the entire OAI repository */
+	protected long earliestOAIDatestamp = 0;
+
+	/** a reference to the OAIPMH service rack */
+	protected OAIPMH oai_service_rack = null;
 
 	/**
 	 * Configures the collection.
@@ -119,6 +122,15 @@ public class OAICollection extends Collection
 		return has_oai;
 	}
 
+	/**
+	 * The earliesttimestamp entry in the oai-inf.db representing when the collection was created.
+	 * Used by the OAIReceptionist
+	*/   
+	public long getEarliestOAIDatestamp()
+	{
+		return earliestOAIDatestamp;
+	}
+    
   /** add any extra info for collection from OAIConfig.xml */
   public boolean configureOAI(Element oai_config) {
     // just pass the element to each service - should only be one
@@ -151,15 +163,15 @@ public class OAICollection extends Collection
 	  if (this.oai_service_rack.configure(oai_service_xml, extra_info)) {
 
 	      // once we've configured the OAIPMH service, we can use the OAIPMH service to
-	      // retrieve the earliest timestamp of the collection from the oai-inf db and
-	      // overwrite Collection.earliestDatestamp with it.
+	      // retrieve the earliest timestamp of this OAI collection from the oai-inf db
 	      long earliestTimestamp = this.oai_service_rack.getEarliestTimestamp();
 	      if(earliestTimestamp == -1) {
-		  //this.earliestDatestamp = -1;
-		  logger.warn("No OAI timestamp for collection " + this.cluster_name
-			      + ". Falling back to using its earliestDatestamp from build config: " + this.earliestDatestamp);
+		  this.earliestOAIDatestamp = -1;
+		  logger.warn("No OAI timestamp for collection " + this.cluster_name);
+		  //logger.warn("No OAI timestamp for collection " + this.cluster_name
+		  //+ ". Falling back to using its earliestDatestamp from build config: " + this.earliestDatestamp);
 	      } else {
-		  this.earliestDatestamp = earliestTimestamp; // milliseconds
+		  this.earliestOAIDatestamp = earliestTimestamp; // milliseconds
 	      }
 	      
 	    

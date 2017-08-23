@@ -148,6 +148,7 @@ public class OAIMessageRouter extends MessageRouter
 		e.setAttribute(GSXML.NAME_ATT, col_name);
 		e.setAttribute(OAIXML.LASTMODIFIED, "" + c.getLastmodified());
 		e.setAttribute(OAIXML.EARLIEST_DATESTAMP, "" + c.getEarliestDatestamp());
+		e.setAttribute(OAIXML.EARLIEST_OAI_DATESTAMP, "" + c.getEarliestOAIDatestamp());
 		this.collection_list.appendChild(e);
 		return true;
 		
