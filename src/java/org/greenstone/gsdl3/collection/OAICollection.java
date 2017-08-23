@@ -168,8 +168,6 @@ public class OAICollection extends Collection
 	      if(earliestTimestamp == -1) {
 		  this.earliestOAIDatestamp = -1;
 		  logger.warn("No OAI timestamp for collection " + this.cluster_name);
-		  //logger.warn("No OAI timestamp for collection " + this.cluster_name
-		  //+ ". Falling back to using its earliestDatestamp from build config: " + this.earliestDatestamp);
 	      } else {
 		  this.earliestOAIDatestamp = earliestTimestamp; // milliseconds
 	      }
