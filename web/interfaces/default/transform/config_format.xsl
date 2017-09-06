@@ -201,7 +201,7 @@
 					    <xsl:value-of select='@target'/>
 					  </xsl:attribute>   
 					</xsl:if>
-
+					  
 					<xslt:attribute name='href'>
 						<xslt:value-of select='$library_name'/>
 						<xsl:text>/collection/</xsl:text>
@@ -247,6 +247,13 @@
 						</xslt:otherwise>
 					</xslt:choose>						
 				</xslt:variable>
+				<xsl:variable name="image_meta">
+				  <xsl:choose>
+				    <xsl:when test="@source_meta"><xsl:value-of select="@source_meta"/>
+				    </xsl:when>
+				    <xsl:otherwise>srclinkFile</xsl:otherwise>
+				  </xsl:choose>
+				</xsl:variable>
 				<a>
 				    <xsl:if test="@target">
 					  <xsl:attribute name='target'>
@@ -257,7 +264,7 @@
 						<xslt:value-of 
 				   disable-output-escaping="yes" select="/page/pageResponse/collection/metadataList/metadata[@name='httpPath']" />/index/assoc/<xslt:value-of 
 				   disable-output-escaping="yes" select="$thisAssocfilepath" />/<xslt:value-of 
-				   disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='srclinkFile']" />
+				   disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='{$image_meta}']" />
 					</xslt:attribute>
 					<xsl:copy-of select="$opt-title"/>
 					<xsl:apply-templates/>
