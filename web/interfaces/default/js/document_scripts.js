@@ -52,7 +52,7 @@ function getTextForSection(sectionID, callback)
 		}
 	}
 	
-	var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + sectionID + "?hl=" + hl + "&p.s=TextQuery&ilt=" + template.replace(" ", "%20");
+	var url = gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/document/" + sectionID + "?ed=1&hl=" + hl + "&p.s=TextQuery&ilt=" + template.replace(" ", "%20");
 	
 	$.ajax(url)
 	.success(function(response)
