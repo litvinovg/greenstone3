@@ -73,7 +73,7 @@
 						</a>
 					</td>
 				</tr>
-				<tr><td>
+				<tr><td id="tdContentsArea">
 					<div id="contentsArea">	
 						<!-- show the berry basket if it's turned on -->
 						<xsl:call-template name="berryBasket"/>
