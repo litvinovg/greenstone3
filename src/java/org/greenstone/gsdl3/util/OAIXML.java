@@ -305,6 +305,7 @@ public class OAIXML {
 	return meta_fmt;
   }
 
+
   public static long getTokenExpiration() {
     return token_expiration*1000; // in milliseconds
   }
@@ -525,27 +526,54 @@ public class OAIXML {
     return oai;
   }
 
-  public static Element getMetadataPrefixElement(Document doc, String prefix, String version) {
-    if (prefix.equals(META_FORMAT_DC)) {
-      //examples of tag_name: dc, oai_dc:dc, etc.
-      String tag_name = getMetadataTagName(prefix, version);
-      Element oai = doc.createElement(tag_name);
-      if (version.equals(OAI_VERSION2)) {
-	oai.setAttribute("xmlns:oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc/");
-	oai.setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
-	oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-	oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/2.0/oai_dc/ \n http://www.openarchives.org/OAI/2.0/oai_dc.xsd");
-      } else {
-	oai.setAttribute("xmlns", "http://www.openarchives.com/OAI/1.1/");
-	oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-	oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/1.1/" + tag_name + ".xsd");        
-      }
-      return oai;
+  public static Element getMetadataPrefixElement(Document doc, String prefix, Element meta_format) {
+
+    Element ns_elem = (Element)GSXML.getChildByTagName(meta_format, METADATA_NAMESPACE);
+    String namespace = null;
+    if (ns_elem != null) {
+      namespace = GSXML.getNodeText(ns_elem);
     }
-    return null;
+    if (namespace == null || namespace.equals("")) {
+      logger.error("No namespace URI found in metadataFormat elemnt for "+prefix);
+      logger.error(XMLConverter.getPrettyString(meta_format));
+      return null;
+    }
+
+    Element sc_elem = (Element)GSXML.getChildByTagName(meta_format, SCHEMA);
+    String schema = null;
+    if (sc_elem != null) {
+      schema = GSXML.getNodeText(sc_elem);
+    }
+    if (schema == null || schema.equals("")) {
+      logger.error("No schema found in metadataFormat element for "+prefix);
+      logger.error(XMLConverter.getPrettyString(meta_format));
+      return null;
+    }
+      
+    String tag_name = getMetadataTagName(prefix, oai_version);
+    Element oai = doc.createElement(tag_name);
+    oai.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    
+    if (oai_version.equals(OAI_VERSION2)) {
+      oai.setAttribute("xmlns:"+prefix, namespace);
+      if (prefix.equals(META_FORMAT_DC)) {
+	// there seems to be an extra one for dc
+	oai.setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
+      }
+      oai.setAttribute("xsi:schemaLocation", namespace+" \n "+schema);
+    } else {
+      oai.setAttribute("xmlns", "http://www.openarchives.com/OAI/1.1/");
+      if (prefix.equals(META_FORMAT_DC)) {
+	oai.setAttribute("xsi:schemaLocation", "http://www.openarchives.org/OAI/1.1/" + tag_name + ".xsd");
+      } else {
+	oai.setAttribute("xsi:schemaLocation", schema);
+      }
+    }
+
+    return oai;
     
   }
-
+ 
   public static String getMetadataTagName(String prefix, String oai_version) {
     if (prefix.equals(META_FORMAT_DC)) {
       if (oai_version.equals(OAI_VERSION2)) {
