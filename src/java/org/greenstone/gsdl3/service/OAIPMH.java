@@ -68,6 +68,8 @@ public class OAIPMH extends ServiceRack {
   protected Element meta_formats_definition = null;
   protected HashMap<String, HashSet<String>> format_elements_map = null;
   protected HashMap<String, Element> format_response_map = null;
+  protected HashMap<String, Element> format_meta_elem_map = null;
+  
   /** constructor */
   public OAIPMH() {
 
@@ -191,6 +193,7 @@ public class OAIPMH extends ServiceRack {
     this.meta_formats_definition = this.desc_doc.createElement(OAIXML.LIST_METADATA_FORMATS);
     this.format_response_map = new HashMap<String, Element>();
     this.format_elements_map = new HashMap<String, HashSet<String>>();
+    this.format_meta_elem_map = new HashMap<String, Element>();
 
     // for now, all we want is the metadata prefix description and the mapping list
     Element main_lmf_elem = (Element) GSXML.getChildByTagName(oai_config_elem, OAIXML.LIST_METADATA_FORMATS);
@@ -203,6 +206,7 @@ public class OAIPMH extends ServiceRack {
       logger.error("no metadataFormat elements found in OAIPMH serviceRack element");
       return false;
     }
+    
     boolean found_meta_format = false;
     for(int i=0; i<meta_formats_list.getLength(); i++) {
       Element mf = (Element) meta_formats_list.item(i);
@@ -217,6 +221,7 @@ public class OAIPMH extends ServiceRack {
 	logger.error("Couldn't find metadataFormat named "+prefix+" in OAIConfig.xml");
 	continue;
       }
+      
       // copy the format definition into our stored Element
       Element collection_version_format = (Element) this.desc_doc.importNode(meta_format, true);
       collection_version_format.setAttribute(GSXML.NAME_ATT, prefix); // for convenience
@@ -227,6 +232,7 @@ public class OAIPMH extends ServiceRack {
       addCollectionMappings(collection_version_format, mf);
       // now set up a list of all collection elements for reverse lookup of the mapping
       format_elements_map.put(prefix, getAllCollectionElements(collection_version_format));
+      format_meta_elem_map.put(prefix, OAIXML.getMetadataPrefixElement(this.desc_doc, prefix, collection_version_format));
       
     }
     return true;
@@ -649,9 +655,9 @@ public class OAIPMH extends ServiceRack {
     // the <metadata> element
     Element metadata = doc.createElement(OAIXML.METADATA);
     // the <oai:dc namespace...> element
-    Element prfx_str_elem = OAIXML.getMetadataPrefixElement(doc, prefix, OAIXML.oai_version);
+    Element prfx_str_elem = (Element)doc.importNode(this.format_meta_elem_map.get(prefix), true); 
     metadata.appendChild(prfx_str_elem);
-
+    
     Element meta_format_element = GSXML.getNamedElement(this.meta_formats_definition, OAIXML.METADATA_FORMAT, GSXML.NAME_ATT, prefix);
     NodeList elements = meta_format_element.getElementsByTagName(OAIXML.ELEMENT);
     // for each element in the definition
