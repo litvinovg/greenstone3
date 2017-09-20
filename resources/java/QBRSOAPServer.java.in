@@ -85,12 +85,12 @@ public class QBRSOAPServer@sitename@ {
 	protected MessageRouter mr = null;
 	
 	/** Container Document to create XML Nodes */
-	protected Document doc=null;
+  //	protected Document doc=null;
 	/** A converter class to parse XML and create Docs */
-	protected XMLConverter converter=null;
+  //	protected XMLConverter converter=null;
 
 	/** The Logger for this class */
-	private static Logger LOG = Logger.getLogger(QBRSOAPServer@sitename@.class);
+  private static Logger LOG = Logger.getLogger(org.greenstone.gsdl3.QBRSOAPServer@sitename@.class.getName());
 	
 	/** Error message loading helpFile. Remains at "" if everything is fine */
 	protected static String helpErrormessage = "";
@@ -160,8 +160,8 @@ public class QBRSOAPServer@sitename@ {
 		    	+" doesn't exist. Can't initialize the SOAP Server.");
 		    return;
 		} 
-		this.converter = new XMLConverter();
-		this.doc = this.converter.newDOM();
+		//this.converter = new XMLConverter();
+		//this.doc = this.converter.newDOM();
 		
 		mr = new MessageRouter();
 		mr.setSiteName(this.site_name);
@@ -261,11 +261,16 @@ public class QBRSOAPServer@sitename@ {
 	protected String describe(String to, String lang, 
 			String subsetOption, String validSubsetOptions)
 	{
+	  Document doc = XMLConverter.newDOM();
 		// Create message element: <message></message>
-		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
 		// <message><request lang="en" to="" type="describe" uid="" /></message>
+		UserContext uc = new UserContext();
+		uc.setLanguage(lang);
+                uc.setUserID("");
+
 		Element request = GSXML.createBasicRequest(
-				this.doc, GSXML.REQUEST_TYPE_DESCRIBE, to, new UserContext(lang, ""));
+				doc, GSXML.REQUEST_TYPE_DESCRIBE, to, uc);
 		
 		// Check if only a subset of this Module Interface's data is asked
 		// to be described
@@ -278,14 +283,14 @@ public class QBRSOAPServer@sitename@ {
 			
 			// else, append <paramList>
 			// <param name="subset" value="subsetOption" /></paramList>
-			Element paramList = this.doc.createElement(
+			Element paramList = doc.createElement(
 					GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 			// append <param name="subset" value=paramValue />
 			// createParam(Document, name, value); 
 			// Name needs to be "subset", but this can be either GSXML.SUBSET_PARAM
 			// or GSXML.SYSTEM_SUBSET_ATT. It's the first one probably.
 			paramList.appendChild(GSXML.createParameter(
-							this.doc, GSXML.SUBSET_PARAM, subsetOption));
+							doc, GSXML.SUBSET_PARAM, subsetOption));
 			request.appendChild(paramList);
 		}
 		message.appendChild(request);
@@ -311,9 +316,10 @@ public class QBRSOAPServer@sitename@ {
 	*/
 	public String query(String collection, String service, 
 			String lang, Map nameToValsMap) 
-	{ 	
+	{
+	  Document doc = XMLConverter.newDOM();
 		// <paramList></paramList>
-		Element paramList = this.doc.createElement(
+		Element paramList = doc.createElement(
 				GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 		// <param>s: creating parameters of (name, value) pairs
 		Set entrySet = nameToValsMap.entrySet();
@@ -323,13 +329,17 @@ public class QBRSOAPServer@sitename@ {
 			String name = (String)entry.getKey();
 			String value = (String)entry.getValue();
 			paramList.appendChild(GSXML.createParameter(
-					this.doc, name, value));
+					doc, name, value));
 		}
 
-		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
+		UserContext uc = new UserContext();
+		uc.setLanguage(lang);
+                uc.setUserID("");
+
 		Element request = GSXML.createBasicRequest(
-				this.doc, GSXML.REQUEST_TYPE_PROCESS, 
-				collection+"/"+service, new UserContext(lang, ""));
+				doc, GSXML.REQUEST_TYPE_PROCESS, 
+				collection+"/"+service, uc);
 		
 		request.appendChild(paramList);
 		message.appendChild(request);
@@ -358,7 +368,7 @@ public class QBRSOAPServer@sitename@ {
 				collection, queryService, "en", "paramList"); // just get paramList
 		//System.out.println(queryDescription);
 		
-		Document doc = this.converter.getDOM(queryDescription);
+		Document doc = XMLConverter.getDOM(queryDescription);
 		NodeList nl = doc.getElementsByTagName(
 				GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 		
@@ -407,21 +417,26 @@ public class QBRSOAPServer@sitename@ {
 	public String retrieveDocumentContent(
 			String collection, String lang, String[] docNodeIDs) 
 	{
+	  Document doc = XMLConverter.newDOM();
 		// creating <documentNodeList></documentNodeList>
-		Element docNodeList = this.doc.createElement(
+		Element docNodeList = doc.createElement(
 				GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
 		
 		// creating subelements: <documentNode nodeID="..." />
 		for(int i = 0; i < docNodeIDs.length; i++) {
-			Element docNode = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+			Element docNode = doc.createElement(GSXML.DOC_NODE_ELEM);
 			docNode.setAttribute(GSXML.NODE_ID_ATT, docNodeIDs[i]);
 			docNodeList.appendChild(docNode);
 		}
 
 		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
+		UserContext uc = new UserContext();
+		uc.setLanguage(lang);
+                uc.setUserID("");
+
 		Element request = GSXML.createBasicRequest(
 				doc, GSXML.REQUEST_TYPE_PROCESS, 
-				collection+"/DocumentContentRetrieve", new UserContext(lang, ""));
+				collection+"/DocumentContentRetrieve", uc);
 		
 		// create an empty <paramlist /> element (as example in manual)
 		Element paramlist = doc.createElement(
@@ -469,19 +484,24 @@ public class QBRSOAPServer@sitename@ {
 	public String retrieveDocumentStructure(String collection, String lang,
 			String[] docNodeIDs, String[] structure, String[] info)
 	{
+	  Document doc = XMLConverter.newDOM();
 		// creating subelements: <documentNode nodeID="..." />
-		Element docNodeList = this.doc.createElement(
+		Element docNodeList = doc.createElement(
 				GSXML.DOC_NODE_ELEM+GSXML.LIST_MODIFIER);
 		for(int i = 0; i < docNodeIDs.length; i++) {
-			Element docNode = this.doc.createElement(GSXML.DOC_NODE_ELEM);
+			Element docNode = doc.createElement(GSXML.DOC_NODE_ELEM);
 			docNode.setAttribute(GSXML.NODE_ID_ATT, docNodeIDs[i]);
 			docNodeList.appendChild(docNode);
 		} 
 		
 		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
+		UserContext uc = new UserContext();
+		uc.setLanguage(lang);
+                uc.setUserID("");
+
 		Element request = GSXML.createBasicRequest(
 				doc, GSXML.REQUEST_TYPE_PROCESS, 
-				collection+"/DocumentStructureRetrieve", new UserContext(lang, ""));
+				collection+"/DocumentStructureRetrieve", uc);
 		
 		// Create the <paramlist></paramlist> element of param elements,
 		// if any; and only if values are legal (that is, if they occur in  
@@ -495,7 +515,7 @@ public class QBRSOAPServer@sitename@ {
 			for(int i = 0; i < structure.length; i++) {
 				if(structureOptions.indexOf(structure[i]) != -1) {
 					paramList.appendChild(GSXML.createParameter(
-							this.doc, "structure", structure[i]));					
+							doc, "structure", structure[i]));					
 				}
 			} 
 		}
@@ -503,7 +523,7 @@ public class QBRSOAPServer@sitename@ {
 			for(int i = 0; i < info.length; i++) {
 				if(structureInfoOptions.indexOf(info[i]) != -1) {
 					paramList.appendChild(GSXML.createParameter(
-							this.doc, "info", info[i]));
+							doc, "info", info[i]));
 				}
 			}
 		}
@@ -611,28 +631,33 @@ public class QBRSOAPServer@sitename@ {
 	protected String metadataRetrieve(String to, String lang, 
 			String[] nodeIDs, String[] metaNames, final String NODE_ELEM)
 	{
+	  Document doc = XMLConverter.newDOM();
 		// create the <paramlist></paramlist> element of param elements:  
 		// <param name="metadata" value = "metaName[i]">
-		Element metadataParamList = this.doc.createElement(
+		Element metadataParamList = doc.createElement(
 				GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 		for(int i = 0; i < metaNames.length; i++) {
 			metadataParamList.appendChild(GSXML.createParameter(
-					this.doc, GSXML.METADATA_ELEM, metaNames[i]));
+					doc, GSXML.METADATA_ELEM, metaNames[i]));
 		}
 		
 		// creating subelements: <documentNode nodeID="..." />
 		// or <classifierNode nodeID="..." />
-		Element nodeList = this.doc.createElement(
+		Element nodeList = doc.createElement(
 				NODE_ELEM+GSXML.LIST_MODIFIER);
 		for(int i = 0; i < nodeIDs.length; i++) {
-			Element docNode = this.doc.createElement(NODE_ELEM);
+			Element docNode = doc.createElement(NODE_ELEM);
 			docNode.setAttribute(GSXML.NODE_ID_ATT, nodeIDs[i]);
 			nodeList.appendChild(docNode);
 		} 
 		
 		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
+		UserContext uc = new UserContext();
+		uc.setLanguage(lang);
+                uc.setUserID("");
+
 		Element request = GSXML.createBasicRequest(doc, 
-				GSXML.REQUEST_TYPE_PROCESS, to, new UserContext(lang, ""));
+				GSXML.REQUEST_TYPE_PROCESS, to, uc);
 		
 		request.appendChild(metadataParamList);
 		request.appendChild(nodeList);
@@ -687,21 +712,26 @@ public class QBRSOAPServer@sitename@ {
 	{
 		if(browseService.equals(""))
 			browseService = "ClassifierBrowse";
-		
+
+		Document doc = XMLConverter.newDOM();
 		// Create message element: <message></message>
-		Element message = this.doc.createElement(GSXML.MESSAGE_ELEM);
+		Element message = doc.createElement(GSXML.MESSAGE_ELEM);
 		// <message><request lang="en" to="" type="process" uid="" /></message>
-		Element request = GSXML.createBasicRequest(this.doc,
-			GSXML.REQUEST_TYPE_PROCESS, collection+"/"+browseService, new UserContext(lang, ""));
+		UserContext uc = new UserContext();
+		uc.setLanguage(lang);
+                uc.setUserID("");
+		
+		Element request = GSXML.createBasicRequest(doc,
+			GSXML.REQUEST_TYPE_PROCESS, collection+"/"+browseService, uc);
 		
 		// <param name="structure" value = "structureParams[i]">
-		Element paramList = this.doc.createElement(
+		Element paramList = doc.createElement(
 				GSXML.PARAM_ELEM+GSXML.LIST_MODIFIER);
 		for(int i = 0; i < structureParams.length; i++) {
 			// check it is a valid structure parameter
 			if(structureOptions.indexOf(structureParams[i]) != -1) {
 				paramList.appendChild(GSXML.createParameter(
-						this.doc, "structure", structureParams[i]));
+						doc, "structure", structureParams[i]));
 			}
 		}
 
@@ -709,7 +739,7 @@ public class QBRSOAPServer@sitename@ {
 		    for(int i = 0; i < infoParams.length; i++) {
 			if(structureInfoOptions.indexOf(infoParams[i]) != -1) {
 			    paramList.appendChild(GSXML.createParameter(
-						this.doc, "info", infoParams[i]));
+						doc, "info", infoParams[i]));
 			}
 		    }
 		}
@@ -717,10 +747,10 @@ public class QBRSOAPServer@sitename@ {
 		// <classifierNodeList><classifier nodeID="CLx" />
 		// 		<classifier nodeID="CLy" /></classifierNodeList> 
 		// where CLx and CLy are given in the parameter classifierNodeIDs
-		Element classifierNodeList = this.doc.createElement(
+		Element classifierNodeList = doc.createElement(
 				GSXML.CLASS_NODE_ELEM+GSXML.LIST_MODIFIER);
 		for(int i = 0; i < classifierNodeIDs.length; i++) {
-			Element classifier = this.doc.createElement(GSXML.CLASS_NODE_ELEM);
+			Element classifier = doc.createElement(GSXML.CLASS_NODE_ELEM);
 			classifier.setAttribute(GSXML.NODE_ID_ATT, classifierNodeIDs[i]);
 			classifierNodeList.appendChild(classifier);
 		}
@@ -741,16 +771,16 @@ public class QBRSOAPServer@sitename@ {
 	protected String processInternal(Element message) {
 	        if(LOG.isDebugEnabled()) { // or LOG.isEnabledFor(Level.DEBUG). 
 		                           // Testing for this improves efficiency
-		    LOG.debug(this.converter.getPrettyString(message));
+		    LOG.debug(XMLConverter.getPrettyString(message));
 		}
 		
 		// Let the messagerouter process the request message and get the response
-		Element response = XMLConverter.nodeToElement(mr.process(message)); 
+		Element response = GSXML.nodeToElement(mr.process(message)); 
 		      // won't be null except when Node returned is not an element
 		      // otherwise, MR always returns some response
 
 		// Return it as a String formatted for display
-		String responseMsg = this.converter.getPrettyString(response); 
+		String responseMsg = XMLConverter.getPrettyString(response); 
 		                  // this.converter.getString(response);
 
 		// In order to avoid "Content is not allowed in prolog" exception on the 
