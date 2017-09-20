@@ -1,5 +1,5 @@
 /*
- *    SOAPServer.java.in: a template for a new SOAPServer
+ *    SOAPServerlocalsite.java: a SOAPServer for localsite site
  *    Copyright (C) 2002 New Zealand Digital Library, http://www.nzdl.org
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,6 @@ import java.io.File;
 /**
  * The server side of a SOAP connection
  *
- * @author Katherine Don
  * @see <a href="http://www.w3.org/TR/SOAP/">Simple Object Access Protocol (SOAP) 1.1 </a>
  */
 
