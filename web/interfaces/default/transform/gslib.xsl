@@ -60,13 +60,25 @@
   <!-- template to get the name of the current collection -->
   <xsl:template name="collectionName">
     <xsl:choose>
+      <xsl:when test="/page/pageResponse/collection/displayItemList/displayItem[@name='name']">
+        <xsl:value-of select="/page/pageResponse/collection/displayItemList/displayItem[@name='name']"/>
+      </xsl:when>
+      <xsl:when test="/page/pageResponse/collection/@name">
+	<xsl:value-of select="/page/pageResponse/collection/@name"/>
+      </xsl:when>
+    </xsl:choose>
+  </xsl:template>
+
+    <!-- template to get the name of the current collection or 'all collections' if not in a specific collection -->
+    <xsl:template name="collectionNameOrAll">
+    <xsl:choose>
       <xsl:when test="/page/pageResponse/collection">
         <xsl:value-of select="/page/pageResponse/collection/displayItemList/displayItem[@name='name']"/>
       </xsl:when>
       <xsl:otherwise>All Collections</xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template name="collectionNameShort">
     <xsl:value-of select="/page/pageResponse/collection/@name"/>
   </xsl:template>
@@ -369,6 +381,7 @@
 		</div>
     </xsl:for-each>
   </xsl:template>
+
 
   <xsl:template name="libraryInterfaceLink">
     <li>
