@@ -38,8 +38,11 @@
       </xsl:attribute>
     </base>
     <xsl:comment>[if lte IE 6]&gt;&lt;/base&gt;&lt;![endif]</xsl:comment>
-    
-    <title><xsl:call-template name="pageTitle"/> :: <xsl:call-template name="siteName"/></title>
+
+    <xsl:variable name="page"><xsl:call-template name="pageTitle"/></xsl:variable>
+    <xsl:variable name="collection"><xsl:call-template name="collectionName"/></xsl:variable>
+    <xsl:variable name="site"><xsl:call-template name="siteName"/></xsl:variable>
+    <title><xsl:value-of select="$page"/><xsl:if test="$collection != '' and $page != $collection"> :: <xsl:value-of select="$collection"/></xsl:if><xsl:if test="$page != $site"> :: <xsl:value-of select="$site"/></xsl:if></title>
     
     <xsl:if test="/page/pageRequest/@action ='d'">
       
