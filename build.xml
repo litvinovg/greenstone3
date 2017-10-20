@@ -1724,6 +1724,24 @@
     </condition>
   </target>
   
+  <!--
+      <target name="verbose-check-tomcat-running">
+      <condition property="tomcat.isrunning" value="true" else="false">
+      <http url="${server.protocol}://${tomcat.server}:${tomcat.port}"/>
+      </condition>
+      <echo>Tomcat is running: ${tomcat.isrunning}</echo>
+      </target>
+  -->
+  <target name="verbose-check-tomcat-running" depends="check-tomcat-running">   
+    <if>
+      <bool>
+	<istrue value="${tomcat.isrunning}"/>
+      </bool>      
+      <echo>Tomcat is running: ${tomcat.isrunning}</echo>
+      <else><echo>Tomcat is running: false</echo></else><!-- tomcat.isrunning not set -->
+    </if>
+  </target>  
+  
   <!-- Need a copy of the check-tomcat-running target with a distinct property, because ant restart runs 
        both stop and start, both of which need to do tomcat checks. Each property can be set only once during 
        an invocation with ant. So ant restart will need two properties to store each of the tomcat checks -->
