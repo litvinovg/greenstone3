@@ -88,18 +88,24 @@
 		<xsl:call-template name="wrappedSectionImage"/>
 		<xsl:call-template name="wrappedSectionText"/>
 	</xsl:template>
-	
-	<xsl:template name="wrappedSectionText">
+	<xsl:template name="sectionContentForEditing">
+		<xsl:call-template name="wrappedSectionImage"/>
+		<xsl:call-template name="wrappedSectionTextForEditing"/>
+	</xsl:template>
+
+	<xsl:template name="wrappedSectionTextForEditing">
 		<br /><br />
 		<div id="text{@nodeID}" class="sectionText"><!-- *** -->
-		  <xsl:choose>
-			<xsl:when test="/page/pageRequest/paramList/param[(@name='docEdit') and (@value='on' or @value='true' or @value='1')]">
             			<xsl:attribute name="contenteditable">
 					<xsl:text>true</xsl:text>
 				</xsl:attribute>
 			<xsl:call-template name="documentNodeTextForEditing"/>
-		        </xsl:when>
-			<xsl:otherwise>
+		</div>
+	</xsl:template>
+
+	<xsl:template name="wrappedSectionText">
+		<br /><br />
+		<div id="text{@nodeID}" class="sectionText"><!-- *** -->
 			<xsl:attribute name="style">
 				<xsl:choose>
 					<xsl:when test="/page/pageRequest/paramList/param[@name = 'view']/@value = 'image'">
@@ -111,9 +117,6 @@
 				</xsl:choose>
 			</xsl:attribute>
 			<xsl:call-template name="documentNodeText"/>
-
-			</xsl:otherwise>
-		  </xsl:choose>
 		</div>
 	</xsl:template>
 	
@@ -202,7 +205,8 @@
 				</xsl:otherwise>
 			</xsl:choose>
 		
-			<xsl:if test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true' and /page/pageRequest/paramList/param[@name='docEdit']/@value = '1'  and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
+			<xsl:choose>
+			  <xsl:when test="/page/pageRequest/userInformation and /page/pageRequest/userInformation/@editEnabled = 'true' and /page/pageRequest/paramList/param[@name='docEdit']/@value = '1'  and (util:contains(/page/pageRequest/userInformation/@groups, 'administrator') or util:contains(/page/pageRequest/userInformation/@groups, 'all-collections-editor') or util:contains(/page/pageRequest/userInformation/@groups, $thisCollectionEditor))">
 				<table id="meta{@nodeID}">
 					<xsl:attribute name="style">
 						<xsl:choose>
@@ -223,7 +227,9 @@
 							</tr>
 					</xsl:for-each>
 				</table>
-			</xsl:if>
+				<xsl:call-template name="sectionContentForEditing"/>
+			</xsl:when>
+			<xsl:otherwise>
 			<xsl:choose>
 				<xsl:when test="../../document">
 					<xsl:call-template name="topLevelSectionContent"/>
@@ -231,6 +237,8 @@
 				<xsl:otherwise>
 					<xsl:call-template name="sectionContent"/>
 				</xsl:otherwise>
+			</xsl:choose>
+			</xsl:otherwise>
 			</xsl:choose>
 			<xsl:if test="documentNode">
 				<xsl:for-each select="documentNode">
@@ -648,6 +656,7 @@
 	    </xsl:for-each>
 	  </xsl:for-each>
 	</xsl:template>
+	
 	<!-- Used to produce a version of the page in a format that can be read by the realistic books plugin -->
 	<xsl:template name="documentNodeFlashXML">
 		<xsl:text disable-output-escaping="yes">
