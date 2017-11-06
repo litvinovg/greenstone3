@@ -19,6 +19,30 @@ var _baseURL;
 var _statusBar;
 var _metadataSetList = new Array();
 
+
+// If the user is attempting to leave the page, check if there are unsaved changes
+// and if so, display an "Are you sure you want to leave" message.
+// https://stackoverflow.com/questions/7080269/javascript-before-leaving-the-page
+// Newer versions of Firefox/Chrome don't display custom message (security feature):
+// https://stackoverflow.com/questions/22776544/why-is-jquery-onbeforeunload-not-working-in-chrome-and-firefox
+// and http://jsfiddle.net/XZAWS/
+// jquery bind() is deprecated: https://stackoverflow.com/questions/33654716/is-jquery-bind-deprecated
+$(window).on("beforeunload", function(event) {
+    if(gs.cgiParams.docEdit == "1") { // like document.xsl, which checks the same var upon onload
+	// shouldn't check for whether changes are saved unless on Doc Editing page (DocEdit=1)
+	// else the following pop up always ends up appearing when attempting
+	// to leave a doc view page in Doc Editing Mode (when not yet actually Doc Editing)
+	var changes = changesToUpdate();
+	
+	if(changes.length > 0) {
+	    return "The collection hasn't yet been saved after editing. Are you sure you want to leave?";	
+	}
+
+    }
+
+});
+
+
 function encodeDelimiters(meta_value) {
 
     var new_value = meta_value.replace(/;/g, "%253B");
@@ -217,8 +241,18 @@ function rebuildCurrentCollection() {
 
   var collectionsArray = new Array();
   collectionsArray.push(collection);
-  buildCollections(collectionsArray);
+  buildCollections(collectionsArray, null, reloadUponRebuild); // passing in callback to reload the page after build, as requested by Kathy
 }
+
+
+function reloadUponRebuild() {
+   // finished rebuilding - reload the page after rebuild, but first
+   // clear transactions array of saved changes, now that we're done processing these changes during rebuild,
+   // since we don't want the "are you sure to leave page" popup which appears on _transactions array being non-empty
+    _transactions = null;    
+    location.reload(true); // force reload, not from cache, https://www.w3schools.com/jsref/met_loc_reload.asp 
+}
+
 
 function saveAndRebuild(rebuild) 
 {
@@ -275,10 +309,14 @@ function saveAndRebuild(rebuild)
 					_statusBar.removeStatus(statusID);
 				}
 				if (rebuild) {
-				  buildCollections(_collectionsToBuild);
+				    buildCollections(_collectionsToBuild, null, reloadUponRebuild);
 				} else {
 				  // reset the save button here
-				  enableSaveButtons(true);
+				    enableSaveButtons(true);
+				    // saving to archives is now done, clear the transactions
+				    // that were keeping track of the full text changes that have now
+				    // been performed to archives (no member var keeps track of meta changes, only a local var)
+				    _transactions = new Array();
 				}
 			}
 		}
