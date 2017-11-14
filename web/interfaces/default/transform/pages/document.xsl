@@ -259,7 +259,13 @@
 					}
 	    	</xsl:text>
 	    </script>
+	    <xsl:call-template name="customJavascriptForDocumentView"/>
         </xsl:template>
+	
+	<!-- Use this to add in extra javascript/files for an interface, site, collection -->
+	<xsl:template name="customJavascriptForDocumentView">
+	</xsl:template>
+	
 	<xsl:template name="javascriptForDocumentEditing">
 	<!--		<script type="text/javascript" src="interfaces/{$interface_name}/js/documentmaker_scripts.js"><xsl:text> </xsl:text></script>-->
 			<script type="text/javascript" src="interfaces/{$interface_name}/js/documentedit_scripts.js"><xsl:text> </xsl:text></script>
@@ -286,7 +292,11 @@
                                 <xsl:text disable-output-escaping="yes">});</xsl:text>
 
 			</script>
-	  
+	  <xsl:call-template name="customJavascriptForDocumentEditing"/>
+	</xsl:template>
+	
+	<!-- Use this to add in extra javascript/files for an interface, site, collection -->
+	<xsl:template name="customJavascriptForDocumentEditing">
 	</xsl:template>
 
 	<!-- the page content -->
@@ -310,7 +320,6 @@
 	  </xsl:variable>
 	  <xsl:if test="$canDoEditing = 'true'">
 	    <xsl:call-template name="javascriptForDocumentEditing"/>
-	    <gsf:metadata name="all"/>
 	    <gslib:langfrag name="dse"/>
 	    <gslib:langfrag name="de"/>
 	  </xsl:if>
