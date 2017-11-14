@@ -51,7 +51,9 @@ public class DocumentAction extends Action
 	public static final String EXPAND_DOCUMENT_ARG = "ed";
 	public static final String EXPAND_CONTENTS_ARG = "ec";
 	public static final String REALISTIC_BOOK_ARG = "book";
-
+        public static final String NO_TEXT_ARG = "noText";
+        public static final String DOC_EDIT_ARG = "docEdit";
+  
 	/**
 	 * if this is set to true, when a document is displayed, any annotation type
 	 * services (enrich) will be offered to the user as well
@@ -81,7 +83,7 @@ public class DocumentAction extends Action
 		// for now, no subaction eventually we may want to have subactions such as text assoc or something ?
 
 		Element message = GSXML.nodeToElement(message_node);
-		Document doc = message.getOwnerDocument();
+		Document doc = XMLConverter.newDOM(); //message.getOwnerDocument();
 		
 		// the response
 		Element result = doc.createElement(GSXML.MESSAGE_ELEM);
@@ -145,6 +147,52 @@ public class DocumentAction extends Action
 		    }
 		  }
 		}
+
+
+		boolean editing_document = false;
+		String doc_edit = (String) params.get(DOC_EDIT_ARG);
+		if (doc_edit != null && doc_edit.equals("1")) {
+		  editing_document = true;
+		}
+
+		// are we editing mode? just get the archive document, convert to our internal doc format, and return it
+		if (editing_document) {
+
+		  // call get archive doc
+		  Element dx_message = doc.createElement(GSXML.MESSAGE_ELEM);
+		  String to = "DocXMLGetSection";
+		  Element dx_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
+		  dx_message.appendChild(dx_request);
+		  Element dx_section = doc.createElement(GSXML.DOCXML_SECTION_ELEM);
+		  dx_section.setAttribute(GSXML.NODE_ID_ATT, document_id);
+		  dx_section.setAttribute(GSXML.COLLECTION_ATT, collection);
+		  dx_request.appendChild(dx_section);
+
+		  Element dx_response_message = (Element) this.mr.process(dx_message);
+		  if (processErrorElements(dx_response_message, page_response))
+		    {
+		      return result;
+		    }
+
+		  // get the section out
+		  String path = GSPath.appendLink(GSXML.RESPONSE_ELEM, GSXML.DOCXML_SECTION_ELEM);
+		  Element section = (Element) GSXML.getNodeByPath(dx_response_message, path);
+		  if (section == null) {
+		    logger.error("no archive doc returned for "+document_id);
+		    return result;
+		  }
+		  // convert the archive format into the internal format that the page response requires
+
+		  Element doc_elem = doc.createElement(GSXML.DOCUMENT_ELEM);
+		  page_response.appendChild(doc_elem);
+		  section.setAttribute(GSXML.NODE_ID_ATT, document_id);
+
+		  Element transformed_section = transformArchiveToDocument(section);
+		  doc_elem.appendChild(doc.importNode(transformed_section, true));
+		  logger.error("dx result = "+XMLConverter.getPrettyString(result));
+		  return result;
+		}
+
 		String document_type = (String) params.get(GSParams.DOCUMENT_TYPE);
 		if (document_type != null && document_type.equals(""))
 		{
@@ -188,15 +236,17 @@ public class DocumentAction extends Action
 			}
 		}
 
-		// UserContext userContext = new UserContext(request);
-
-		// //append site metadata
-		// addSiteMetadata(page_response, userContext);
-		// addInterfaceOptions(page_response);
-
-		// // get the additional data needed for the page
-		// getBackgroundData(page_response, collection, userContext);
-		// Element format_elem = (Element) GSXML.getChildByTagName(page_response, GSXML.FORMAT_ELEM);
+		// do we want text content? Not if no_text=1.
+		// expand_document overrides this. - should it??
+		boolean get_text = true;
+		String nt_arg = (String) params.get(NO_TEXT_ARG);
+		
+		if (!expand_document && nt_arg!=null && nt_arg.equals("1")) {
+		  logger.error("SETTING GET TEXT TO FALSE");
+		  get_text = false;
+		} else {
+		  logger.error("GET TEXT REMAINS TRUE");
+		}
 
 		// the_document is where all the doc info - structure and metadata etc
 		// is added into, to be returned in the page
@@ -499,6 +549,12 @@ public class DocumentAction extends Action
 		Element doc_meta_response = (Element) dm_response_message.getElementsByTagName(GSXML.RESPONSE_ELEM).item(1);
 		Element top_doc_node = (Element) GSXML.getNodeByPath(doc_meta_response, "documentNodeList/documentNode");
 		GSXML.mergeMetadataLists(the_document, top_doc_node);
+
+		// do we want doc text content? If not, we are done.
+		if (!get_text) {
+		  // don't get text
+		  return result;
+		}
 
 		// Build a request to obtain some document content
 		Element dc_message = doc.createElement(GSXML.MESSAGE_ELEM);
@@ -829,6 +885,37 @@ public class DocumentAction extends Action
 		}
 		return null;
 	}
+
+  /** run the XSLT transform which converts from doc.xml format to our internal document format */
+    protected Element transformArchiveToDocument(Element section) {
+    
+    String stylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), "", (String) this.config_params.get(GSConstants.INTERFACE_NAME), null, "archive2document.xsl");
+    Document stylesheet_doc = XMLConverter.getDOM(new File(stylesheet_file));
+    if (stylesheet_doc == null) {
+      logger.error("Couldn't load in stylesheet "+stylesheet_file);
+      return section;
+    }
+
+    Document section_doc = XMLConverter.newDOM();
+    section_doc.appendChild(section_doc.importNode(section, true));
+    Node result = this.transformer.transform(stylesheet_doc, section_doc);
+    logger.error("transform result = "+XMLConverter.getPrettyString(result));
+
+    Element new_element;
+    if (result.getNodeType() == Node.DOCUMENT_NODE)
+      {
+	new_element = ((Document) result).getDocumentElement();
+      }
+    else
+      {
+	new_element = (Element) result;
+      }
+
+    
+    return new_element;
+
+  }
+
 
 	/**
 	 * this involves a bit of a hack to get the equivalent query terms - has to
