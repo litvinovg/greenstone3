@@ -157,6 +157,7 @@ public class DocumentAction extends Action
 		}
 		// what if it is null here?? Anu to check...
 
+
 		boolean editing_document = false;
 		String doc_edit = (String) params.get(DOC_EDIT_ARG);
 		if (doc_edit != null && doc_edit.equals("1")) {
@@ -191,17 +192,39 @@ public class DocumentAction extends Action
 		  }
 		  // convert the archive format into the internal format that the page response requires
 
-		  Element doc_elem = doc.createElement(GSXML.DOCUMENT_ELEM);
+		  // work out doctype
+		  // create a basic doc list containing the current node
+		  Element basic_doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		  Element current_doc = doc.createElement(GSXML.DOC_NODE_ELEM);
+		  basic_doc_list.appendChild(current_doc);
+		  current_doc.setAttribute(GSXML.NODE_ID_ATT, document_id);		
+		  basic_doc_list.appendChild(current_doc);
+		  if (document_type == null) {
+		      document_type = getDocumentType(basic_doc_list, collection, userContext, page_response);
+		  }
+		  if (document_type == null) {
+		      logger.debug("@@@ doctype is null, setting to simple");
+		      document_type = GSXML.DOC_TYPE_SIMPLE;
+		  }		  
+		  
+		  Element doc_elem = doc.createElement(GSXML.DOCUMENT_ELEM);		  
 		  doc_elem.setAttribute(GSXML.DOC_TYPE_ATT, document_type);
 		  page_response.appendChild(doc_elem);
 		  section.setAttribute(GSXML.NODE_ID_ATT, document_id);
 
+		
 		  Element transformed_section = transformArchiveToDocument(section);
+		  // In docEdit mode, we obtain the text from archives, from doc.xml
+		  // Now the transformation has replaced <Section> with <documentNode>
+		  // Need to add nodeID, nodeType and docType attributes to each docNode
+		  // as doc.xml doesn't store that.
+		  insertDocNodeAttributes(transformed_section, document_type, null);		  
 		  doc_elem.appendChild(doc.importNode(transformed_section, true));
-		  logger.error("dx result = "+XMLConverter.getPrettyString(result));
+		  logger.debug("dx result = "+XMLConverter.getPrettyString(result));
+
 		  return result;
 		}
-
+		
 		//whether to retrieve siblings or not
 		boolean get_siblings = false;
 		String sibs = (String) params.get(SIBLING_ARG);
@@ -245,10 +268,10 @@ public class DocumentAction extends Action
 		String nt_arg = (String) params.get(NO_TEXT_ARG);
 		
 		if (!expand_document && nt_arg!=null && nt_arg.equals("1")) {
-		  logger.error("SETTING GET TEXT TO FALSE");
+		  logger.debug("SETTING GET TEXT TO FALSE");
 		  get_text = false;
 		} else {
-		  logger.error("GET TEXT REMAINS TRUE");
+		  logger.debug("GET TEXT REMAINS TRUE");
 		}
 
 		// the_document is where all the doc info - structure and metadata etc
@@ -270,20 +293,19 @@ public class DocumentAction extends Action
 			// do we need this??
 			current_doc.setAttribute(GSXML.ID_MOD_ATT, doc_id_modifier);
 		}
-
+		
 		if (document_type == null)
 		{
 			document_type = getDocumentType(basic_doc_list, collection, userContext, page_response);
 		}
 		if (document_type == null)
 		{
-		    logger.debug("doctype is null, setting to simple");
+		    logger.debug("##### doctype is null, setting to simple");
 		    document_type = GSXML.DOC_TYPE_SIMPLE;
 		}
 		
 		the_document.setAttribute(GSXML.DOC_TYPE_ATT, document_type);
 		
-
 		// Create a parameter list to specify the required structure information
 		Element ds_param_list = doc.createElement(GSXML.PARAM_ELEM + GSXML.LIST_MODIFIER);
 
@@ -889,6 +911,42 @@ public class DocumentAction extends Action
 		return null;
 	}
 
+    // Recursive method to set the docType, nodeType and nodeID attributes of each docNode
+    // The docType remains constant as in parameter document_type
+    // The nodeID for the first (root) docNode is already set. For all children, the rootNode id
+    // is updated to be <parent-id>.<num-child>, where the first parent-id is rootNode id. 
+    // The nodeType is root if rootNode, internal if there are children and leaf if no children
+    protected void insertDocNodeAttributes(Element docNode, String document_type, String id) {
+
+	boolean isRoot =  false;
+	if(id == null) { // rootNode, get the root nodeID to work with recursively
+	    id = docNode.getAttribute(GSXML.NODE_ID_ATT);
+	    isRoot = true;
+	} else { // for all but the root node, need to still set the nodeID
+	    docNode.setAttribute(GSXML.NODE_ID_ATT, id);
+	}
+	
+	docNode.setAttribute(GSXML.DOC_TYPE_ATT, document_type);
+	
+	NodeList docNodes = GSXML.getChildrenByTagName(docNode, GSXML.DOC_NODE_ELEM);
+	if(docNodes.getLength() > 0) {	    
+	    docNode.setAttribute(GSXML.NODE_TYPE_ATT, GSXML.NODE_TYPE_INTERNAL);
+	    for(int i = 0; i < docNodes.getLength(); i++) {
+		Element childDocNode = (Element)docNodes.item(i);
+		
+		// work out the child docNode's nodeID based on current id
+		String nodeID = id + "." + (i+1);		
+		insertDocNodeAttributes(childDocNode, document_type, nodeID); //recursion step
+	    }
+	} else {
+	    docNode.setAttribute(GSXML.NODE_TYPE_ATT, GSXML.NODE_TYPE_LEAF);
+	}
+
+	// rootNode's nodeType is a special case: it's "root", not "leaf" or "internal"
+	if(isRoot) docNode.setAttribute(GSXML.NODE_TYPE_ATT, GSXML.NODE_TYPE_ROOT);
+	
+    }
+
   /** run the XSLT transform which converts from doc.xml format to our internal document format */
     protected Element transformArchiveToDocument(Element section) {
     
@@ -902,17 +960,14 @@ public class DocumentAction extends Action
     Document section_doc = XMLConverter.newDOM();
     section_doc.appendChild(section_doc.importNode(section, true));
     Node result = this.transformer.transform(stylesheet_doc, section_doc);
-    logger.error("transform result = "+XMLConverter.getPrettyString(result));
+    logger.debug("transform result = "+XMLConverter.getPrettyString(result));
 
     Element new_element;
-    if (result.getNodeType() == Node.DOCUMENT_NODE)
-      {
+    if (result.getNodeType() == Node.DOCUMENT_NODE) {
 	new_element = ((Document) result).getDocumentElement();
-      }
-    else
-      {
+    } else {
 	new_element = (Element) result;
-      }
+    }
 
     
     return new_element;
