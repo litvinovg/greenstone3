@@ -21,6 +21,7 @@ package org.greenstone.gsdl3.action;
 // Greenstone classes
 import org.greenstone.gsdl3.core.ModuleInterface;
 import org.greenstone.gsdl3.util.*;
+import org.greenstone.util.GlobalProperties;
 
 // XML classes
 import org.w3c.dom.Document;
