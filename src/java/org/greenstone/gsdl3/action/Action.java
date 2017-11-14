@@ -13,6 +13,7 @@ import org.greenstone.gsdl3.util.GSXML;
 import org.greenstone.gsdl3.util.GSXSLT;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
+import org.greenstone.gsdl3.util.XMLTransformer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -28,6 +29,8 @@ abstract public class Action
 	
 	/** a converter class to parse XML and create Docs */
 	protected XMLConverter converter = null;
+  /** a transformer class in case the action wants to run XSLT itself */
+  protected XMLTransformer transformer = null;
 	/**
 	 * a reference to the message router that it must talk to to get info. it
 	 * may be a communicator acting as a proxy, but it doesn't care about that
@@ -39,6 +42,7 @@ abstract public class Action
 	public Action()
 	{
 		this.converter = new XMLConverter();
+		this.transformer = new XMLTransformer();
 	}
 
 	/** the config variables must be set before configure is called */
