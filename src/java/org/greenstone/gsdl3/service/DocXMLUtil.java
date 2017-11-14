@@ -344,11 +344,13 @@ public class DocXMLUtil extends ServiceRack
 			String oid = currentSection.getAttribute(GSXML.NODE_ID_ATT);
 			String collection = currentSection.getAttribute(GSXML.COLLECTION_ATT);
 
-			_GSDM.documentXMLGetSection(oid, collection, userContext);
+			Element section = _GSDM.documentXMLGetSection(oid, collection, userContext);
 			if(_GSDM.checkError(result, DOC_XML_GET_SECTION))
 			{
+			  logger.error("there was an error getting the archive section for " +oid);
 				return result;
 			}
+			result.appendChild(result_doc.importNode(section,true));
 		}
 		return result;
 	}
