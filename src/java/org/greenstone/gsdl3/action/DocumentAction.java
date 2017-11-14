@@ -149,6 +149,13 @@ public class DocumentAction extends Action
 		  }
 		}
 
+		String document_type = (String) params.get(GSParams.DOCUMENT_TYPE);
+		if (document_type != null && document_type.equals(""))
+		{
+			//document_type = "hierarchy";
+			document_type = null; // we'll get it later if not already specified
+		}
+		// what if it is null here?? Anu to check...
 
 		boolean editing_document = false;
 		String doc_edit = (String) params.get(DOC_EDIT_ARG);
@@ -185,6 +192,7 @@ public class DocumentAction extends Action
 		  // convert the archive format into the internal format that the page response requires
 
 		  Element doc_elem = doc.createElement(GSXML.DOCUMENT_ELEM);
+		  doc_elem.setAttribute(GSXML.DOC_TYPE_ATT, document_type);
 		  page_response.appendChild(doc_elem);
 		  section.setAttribute(GSXML.NODE_ID_ATT, document_id);
 
@@ -194,12 +202,6 @@ public class DocumentAction extends Action
 		  return result;
 		}
 
-		String document_type = (String) params.get(GSParams.DOCUMENT_TYPE);
-		if (document_type != null && document_type.equals(""))
-		{
-			//document_type = "hierarchy";
-			document_type = null; // we'll get it later if not already specified
-		}
 		//whether to retrieve siblings or not
 		boolean get_siblings = false;
 		String sibs = (String) params.get(SIBLING_ARG);
