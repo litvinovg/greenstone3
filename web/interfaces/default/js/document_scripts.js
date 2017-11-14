@@ -880,7 +880,7 @@ function SliderWidget(_links)
 		template +=   '</html>';
 		template += '</xsl:template>';
 
-		var url = href + "?ilt=" + template.replace(" ", "%20");
+		var url = href + "?noText=1&ilt=" + template.replace(" ", "%20");
 		$.ajax(url)
 		.success(function(text)
 		{
