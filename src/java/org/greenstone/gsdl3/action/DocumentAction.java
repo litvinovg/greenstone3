@@ -193,27 +193,42 @@ public class DocumentAction extends Action
 		  // convert the archive format into the internal format that the page response requires
 
 		  // work out doctype
+		  // NOTE: this will be coming from collection database in index
+		  // the archive file doesn't store this. So we have to assume
+		  // that the doc type will not be changing with any
+		  // modifications happening to archives.
+		  
+		  // if doc type is null, then we need to work it out.
 		  // create a basic doc list containing the current node
-		  Element basic_doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
-		  Element current_doc = doc.createElement(GSXML.DOC_NODE_ELEM);
-		  basic_doc_list.appendChild(current_doc);
-		  current_doc.setAttribute(GSXML.NODE_ID_ATT, document_id);		
-		  basic_doc_list.appendChild(current_doc);
+
 		  if (document_type == null) {
-		      document_type = getDocumentType(basic_doc_list, collection, userContext, page_response);
+		    Element basic_doc_list = doc.createElement(GSXML.DOC_NODE_ELEM + GSXML.LIST_MODIFIER);
+		    Element current_doc = doc.createElement(GSXML.DOC_NODE_ELEM);
+		    basic_doc_list.appendChild(current_doc);
+		    current_doc.setAttribute(GSXML.NODE_ID_ATT, document_id);
+		    basic_doc_list.appendChild(current_doc);
+		    document_type = getDocumentType(basic_doc_list, collection, userContext, page_response);
 		  }
+		  
 		  if (document_type == null) {
 		      logger.debug("@@@ doctype is null, setting to simple");
 		      document_type = GSXML.DOC_TYPE_SIMPLE;
 		  }		  
-		  
-		  Element doc_elem = doc.createElement(GSXML.DOCUMENT_ELEM);		  
+
+		  Element doc_elem = doc.createElement(GSXML.DOCUMENT_ELEM);	 
 		  doc_elem.setAttribute(GSXML.DOC_TYPE_ATT, document_type);
 		  page_response.appendChild(doc_elem);
-		  section.setAttribute(GSXML.NODE_ID_ATT, document_id);
 
-		
 		  Element transformed_section = transformArchiveToDocument(section);
+		  if (document_type ==  GSXML.DOC_TYPE_SIMPLE) {
+		    // simple doc, only returning a single document node, which is the top level section.
+		    doc_elem.setAttribute(GSXML.NODE_ID_ATT, document_id);
+		    GSXML.mergeElements(doc_elem, transformed_section);
+		    return result;
+		  }
+
+		  // multi sectioned document.
+		  transformed_section.setAttribute(GSXML.NODE_ID_ATT, document_id);		  
 		  // In docEdit mode, we obtain the text from archives, from doc.xml
 		  // Now the transformation has replaced <Section> with <documentNode>
 		  // Need to add nodeID, nodeType and docType attributes to each docNode
