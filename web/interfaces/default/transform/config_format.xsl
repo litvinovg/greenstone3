@@ -142,7 +142,14 @@
 		<xslt:variable name="thisAssocfilepath">					
 		  <xslt:choose>
 		    <xslt:when test="/page/pageResponse/document">
-		      <xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name='assocfilepath']" />
+		      <xslt:choose>
+			<xslt:when test="/page/pageResponse/document/metadataList/metadata[@name='assocfilepath']">
+			  <xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name='assocfilepath']" />
+			</xslt:when>
+			<xslt:otherwise>
+			  <xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/documentNode[@nodeType='root']/metadataList/metadata[@name='assocfilepath']" />
+			</xslt:otherwise>
+		      </xslt:choose>
 		    </xslt:when>
 		    <xslt:otherwise>
 		      <xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='root_assocfilepath']" />
@@ -237,15 +244,22 @@
 				</a>
 			</xsl:when>
 			<xsl:when test="@type='source'">
-				<xslt:variable name="thisAssocfilepath">					
-					<xslt:choose>
-						<xslt:when test="/page/pageResponse/document">
-							<xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name='assocfilepath']" />
-						</xslt:when>
-						<xslt:otherwise>
-							<xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='root_assocfilepath']" />
-						</xslt:otherwise>
-					</xslt:choose>						
+			  <xslt:variable name="thisAssocfilepath">					
+			    <xslt:choose>
+			      <xslt:when test="/page/pageResponse/document">
+				<xslt:choose>
+				  <xslt:when test="/page/pageResponse/document/metadataList/metadata[@name='assocfilepath']">
+				    <xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/metadataList/metadata[@name='assocfilepath']" />
+				  </xslt:when>
+				  <xslt:otherwise>
+				    <xslt:value-of disable-output-escaping="yes" select="/page/pageResponse/document/documentNode[@nodeType='root']/metadataList/metadata[@name='assocfilepath']" />
+				  </xslt:otherwise>
+				</xslt:choose>
+			      </xslt:when>
+			      <xslt:otherwise>
+				<xslt:value-of disable-output-escaping="yes" select="(.//metadataList)[last()]/metadata[@name='root_assocfilepath']" />
+			      </xslt:otherwise>
+			    </xslt:choose>						
 				</xslt:variable>
 				<xsl:variable name="image_meta">
 				  <xsl:choose>
