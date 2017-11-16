@@ -24,6 +24,10 @@
   <xsl:template match="Description">
     <metadataList><xsl:apply-templates select="@*|node()" /></metadataList>
   </xsl:template>
+  <!-- rename Metadata to metadata -->
+  <xsl:template match="Metadata">
+    <metadata><xsl:apply-templates select="@*|node()" /></metadata>
+  </xsl:template>
   <!-- rename Content to nodeContent -->
     <xsl:template match="Content">
     <nodeContent><xsl:apply-templates select="@*|node()" /></nodeContent>
