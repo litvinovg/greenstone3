@@ -1,5 +1,7 @@
 /** Javascript file for viewing documents */
 
+/** NOTE, this file uses inline templates which look for httpPath, assocfilepath, Source, Thumb, Title metadata. These need to be added into any xsl file that uses this javascript (using <gsf:metadata name="xx" hidden="true"/> if they are not already being collected. */
+
 var _imageZoomEnabled = false;
 // Choose which types of filtering you want: sectionnum, or sectiontitle or both
 var _filter_on_types = ["sectiontitle", "sectionnum"];
@@ -854,7 +856,7 @@ function SliderWidget(_links)
 	}
 	
 	var getImage = function(page, attemptNumber)
-	{
+    {
 		var href = page.getAttribute("href");
 		var startHREF = href.indexOf("'") + 1;
 		var endHREF = href.indexOf("'", startHREF);
@@ -863,7 +865,6 @@ function SliderWidget(_links)
 		
 		var template = '';
 		template += '<xsl:template match="/">';
-		template +=   '<gsf:metadata name=\"Thumb\"/>';
 		template +=   '<html>';
 		template +=     '<img>';
 		template +=       '<xsl:attribute name="src">';
@@ -883,7 +884,7 @@ function SliderWidget(_links)
 		var url = href + "?noText=1&ilt=" + template.replace(" ", "%20");
 		$.ajax(url)
 		.success(function(text)
-		{
+			 {
 			var hrefStart = text.indexOf("src=\"") + 5;
 			if(hrefStart == -1)
 			{

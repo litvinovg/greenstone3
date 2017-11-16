@@ -250,6 +250,7 @@
 
 	<xsl:template name="javascriptForDocumentView">
 	    <script type="text/javascript" src="interfaces/{$interface_name}/js/document_scripts.js"><xsl:text> </xsl:text></script>
+	  <gsf:metadata name="Thumb" hidden="true"/>
 	    <script type="text/javascript">
 	    	<xsl:text disable-output-escaping="yes">
 	    		function goToAnchor(sectionID,anchor)
