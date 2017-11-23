@@ -335,7 +335,6 @@ function saveAndRebuild(rebuild)
 
   var metadataChanges = new Array();
   if (_deletedMetadata.length > 0) {
-    addCollectionToBuild(collection);
 
     for(var i = 0; i < _deletedMetadata.length; i++) {
       
@@ -352,7 +351,11 @@ function saveAndRebuild(rebuild)
       var name = nameCell.innerHTML;
       var valueCell = cells[1];
       var value = valueCell.getElementsByTagName("TEXTAREA")[0].value;
-      metadataChanges.push({type:'delete', docID:docID, name:name, value:value});
+	if (value.length) {
+	    // check for non empty value, in case all they have done is add a field then deleted it.
+	    metadataChanges.push({type:'delete', docID:docID, name:name, value:value});
+	    addCollectionToBuild(collection);
+	}
       removeFromParent(currentRow);
     }
   }
