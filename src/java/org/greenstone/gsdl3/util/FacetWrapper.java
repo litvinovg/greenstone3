@@ -30,11 +30,22 @@ import java.util.HashMap;
 public abstract class FacetWrapper
 {
 	protected String _name = null;
+        protected String _display_name = null;
+  
 	
 	public String getName()
 	{
 		return _name;
 	}
-	
+
+  public String getDisplayName()
+  {
+    return _display_name;
+  }
+
+  public void setDisplayName(String dname) {
+    _display_name = dname;
+  }
+  
 	public abstract HashMap<String, Long> getCounts();
 }
