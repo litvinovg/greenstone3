@@ -28,7 +28,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 
-/** various methods for handling displayItems and choosing the right one for the speicifed language */
+/** various methods for handling displayItems and choosing the right one for the specified language */
 
 public class DisplayItemUtil
 {
