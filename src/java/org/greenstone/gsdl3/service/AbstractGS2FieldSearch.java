@@ -771,7 +771,8 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 
 		if(does_faceting)
 		{
-			ArrayList<FacetWrapper> facets = getFacets(query_result);
+		  String lang = request.getAttribute(GSXML.LANG_ATT);
+		  ArrayList<FacetWrapper> facets = getFacets(query_result, lang);
 			if(facets != null)
 			{
 				Element facet_list = result_doc.createElement(GSXML.FACET_ELEM + GSXML.LIST_MODIFIER);
@@ -781,6 +782,10 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 				{
 					Element facet_elem = result_doc.createElement(GSXML.FACET_ELEM);
 					facet_elem.setAttribute(GSXML.NAME_ATT, currentFacet.getName());
+					String display_name = currentFacet.getDisplayName();
+					if (display_name != null && !display_name.equals("")) {
+					  facet_elem.appendChild(GSXML.createDisplayTextElement(result_doc, GSXML.DISPLAY_TEXT_NAME, display_name));
+					}
 					facet_list.appendChild(facet_elem);
 					
 					HashMap<String, Long> countMap = currentFacet.getCounts();
@@ -823,7 +828,7 @@ abstract public class AbstractGS2FieldSearch extends AbstractGS2TextSearch
 	abstract protected String[] getDocRanks(Object query_result);
 	
 	/** get the list of facets */
-	abstract protected ArrayList<FacetWrapper> getFacets(Object query_result);
+  abstract protected ArrayList<FacetWrapper> getFacets(Object query_result, String lang);
 	
 	/** get the map of highlighting snippets */
 	abstract protected Map<String, Map<String, List<String>>> getHighlightSnippets(Object query_result);
