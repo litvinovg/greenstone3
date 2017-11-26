@@ -352,7 +352,7 @@ public class GS2MGPPSearch extends AbstractGS2FieldSearch
 		return temp.toString();
 	}
 
-	protected ArrayList<FacetWrapper> getFacets(Object query_result)
+  protected ArrayList<FacetWrapper> getFacets(Object query_result, String lang)
 	{
 		return null;
 	}

@@ -296,7 +296,7 @@ public class GS2LuceneSearch extends SharedSoleneGS2FieldSearch
 		return true;
 	}
 	
-	protected ArrayList<FacetWrapper> getFacets(Object query_result)
+  protected ArrayList<FacetWrapper> getFacets(Object query_result, String lang)
 	{
 		return null;
 	}
