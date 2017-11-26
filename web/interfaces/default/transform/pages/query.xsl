@@ -98,14 +98,7 @@
 							</xsl:variable>
 
 							<li class="ui-widget-header" style="text-transform:capitalize; text-align:center;">
-								<xsl:choose>
-									<xsl:when test="/page/pageResponse/collection/serviceList/service[@name = $serviceName]/paramList/param[@name = 'index']">
-										<xsl:value-of select="/page/pageResponse/collection/serviceList/service[@name = $serviceName]/paramList/param[@name = 'index']/option[@name = $indexShortName]/displayItem"/>
-									</xsl:when>
-									<xsl:when test="/page/pageResponse/collection/serviceList/service[@name = $serviceName]/paramList/param[@name = 'complexField']/param[@name = 'fqf']">
-										<xsl:value-of select="/page/pageResponse/collection/serviceList/service[@name = $serviceName]/paramList/param[@name = 'complexField']/param[@name = 'fqf']/option[@name = $indexShortName]/displayItem"/>
-									</xsl:when>
-								</xsl:choose>
+							  <xsl:value-of select="displayItem[@name='name']"/>
 							</li>
 							<xsl:for-each select="count">
 								<li>
