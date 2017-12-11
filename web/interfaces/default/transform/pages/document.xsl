@@ -95,7 +95,7 @@
 
 	<xsl:template name="wrappedSectionTextForEditing">
 		<br /><br />
-		<div id="text{@nodeID}" class="sectionText"><!-- *** -->
+		<div id="text{@nodeID}" class="sectionText" style="display:block;"><!-- *** -->
             			<xsl:attribute name="contenteditable">
 					<xsl:text>true</xsl:text>
 				</xsl:attribute>
@@ -559,7 +559,7 @@
 				
 					<div id="wrap{util:replace(@nodeID, '.', '_')}" class="zoomImage" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
 						<div id="small{util:replace(@nodeID, '.', '_')}" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
-							<gsf:link type="source"><gsf:image type="screen"/></gsf:link>
+							<gsf:link type="source" target="_blank"><gsf:image type="screen"/></gsf:link>
 						</div>
 						<div id="mover{util:replace(@nodeID, '.', '_')}" style="border: 1px solid green; position: absolute; top: 0; left: 0; width: 598px; height: 598px; overflow: hidden; z-index: 100; background: white; display: none;">
 							<div id="overlay{util:replace(@nodeID, '.', '_')}" style="width: 600px; height: 600px; position: absolute; top: 0; left: 0; z-index: 200;">
@@ -650,10 +650,12 @@
 
 	<!-- The default template for displaying the document node text in
 	editing mode -->
+	<!-- Note: we need to put some content in if the nodeContent is empty, otherwise you end up with an empty div, it gets changed to <div> and the ckeditor ends up being attached to everything else afterwards. -->
 	<!-- equivalent to gsf:text -->
 	<xsl:template name="documentNodeTextForEditing">
 	  <!-- Section text -->
 	  <xsl:for-each select="nodeContent">
+	    <xsl:if test="not(node())"><gsf:space/></xsl:if>
 	    <xsl:for-each select="node()">
 	      <xsl:choose>
 		<xsl:when test="not(name())">
