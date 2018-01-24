@@ -27,7 +27,9 @@ function performRefinedSearch()
 		var countsStringBuffer = "";
 		for(var i = 0; i < counts.length; i++)
 		{
-			countsStringBuffer += "\"" + encodeURI(counts[i]) + "\"";
+		    // escape any apostrophes in facet query terms
+		    // (ext/solr's Greenstone3SearchHandler does the other half of handling them)
+		    countsStringBuffer += "\"" + encodeURI(counts[i]).replace(/'/g, "%2527") + "\"";
 			if(i < counts.length - 1)
 			{
 				countsStringBuffer += ", ";
@@ -38,7 +40,7 @@ function performRefinedSearch()
 	}
 	
 	console.log("STRING IS " + countsString)
-	
+    
 	$.ajax(gs.xsltParams.library_name + "/collection/" + gs.cgiParams.c + "/search/" + gs.cgiParams.s + "?" + searchString + countsString + "excerptid=resultsArea")
 		.done(function(response)
 		{
