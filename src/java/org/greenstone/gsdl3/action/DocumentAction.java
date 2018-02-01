@@ -965,10 +965,15 @@ public class DocumentAction extends Action
   /** run the XSLT transform which converts from doc.xml format to our internal document format */
     protected Element transformArchiveToDocument(Element section) {
     
-    String stylesheet_file = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), "", (String) this.config_params.get(GSConstants.INTERFACE_NAME), null, "archive2document.xsl");
-    Document stylesheet_doc = XMLConverter.getDOM(new File(stylesheet_file));
+      String stylesheet_filename = GSFile.stylesheetFile(GlobalProperties.getGSDL3Home(), (String) this.config_params.get(GSConstants.SITE_NAME), "", (String) this.config_params.get(GSConstants.INTERFACE_NAME), (ArrayList<String>) this.config_params.get(GSConstants.BASE_INTERFACES), "archive2document.xsl");
+      if (stylesheet_filename == null) {
+	logger.error("Couldn't find stylesheet archive2document.xsl");
+	return section;
+      }
+         
+    Document stylesheet_doc = XMLConverter.getDOM(new File(stylesheet_filename));
     if (stylesheet_doc == null) {
-      logger.error("Couldn't load in stylesheet "+stylesheet_file);
+      logger.error("Couldn't load in stylesheet "+stylesheet_filename);
       return section;
     }
 
