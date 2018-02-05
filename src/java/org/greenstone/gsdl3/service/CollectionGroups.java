@@ -5,6 +5,7 @@ import java.io.File;
 import org.apache.log4j.Logger;
 import org.greenstone.gsdl3.util.GSFile;
 import org.greenstone.gsdl3.util.GSXML;
+import org.greenstone.gsdl3.util.Request;
 import org.greenstone.gsdl3.util.UserContext;
 import org.greenstone.gsdl3.util.XMLConverter;
 import org.w3c.dom.Document;
@@ -276,7 +277,12 @@ public class CollectionGroups extends ServiceRack {
 			group.setAttribute(GSXML.PATH_ATT, newPath);
 			Element groupDescription = getGroupDescription(name);
 			Element titleEl = (Element) GSXML.getChildByTagName(groupDescription, GSXML.TITLE_ELEM);
-			String title = titleEl.getTextContent();
+			String title;
+			if (titleEl != null) {
+				 title = titleEl.getTextContent();	
+			} else {
+				title = name;
+			}
 			group.setAttribute(GSXML.TITLE_ELEM, title	);
 			addGroupInfo(group, newPath);
 		}
@@ -481,15 +487,12 @@ public class CollectionGroups extends ServiceRack {
 	private Element getAvailableCollectionList(UserContext userContext){
 		Document doc = XMLConverter.newDOM();
 		// Get the message router info
-		Element mr_info_message = doc.createElement(GSXML.MESSAGE_ELEM);
-		Element mr_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_DESCRIBE, "", userContext);
-		mr_info_message.appendChild(mr_request);
-		Element mr_info_response_message = (Element) this.router.process(mr_info_message);
-		if (mr_info_response_message == null) {
+		Element inforesponseMessage = new Request(doc, userContext, router, GSXML.REQUEST_TYPE_DESCRIBE).send();
+		if (inforesponseMessage == null) {
 			logger.error(" couldn't query the message router!");
 			return null;
 		}
-		Element mr_info_response = (Element) GSXML.getChildByTagName(mr_info_response_message, GSXML.RESPONSE_ELEM);
+		Element mr_info_response = (Element) GSXML.getChildByTagName(inforesponseMessage, GSXML.RESPONSE_ELEM);
 		if (mr_info_response == null) {
 			logger.error("Message router response is null!");
 			return null;
