@@ -555,7 +555,8 @@
 			<xsl:when test="metadataList/metadata[@name = 'Screen'] and metadataList/metadata[@name = 'SourceFile'] and ($imageWidth div $screenImageWidth > 1.2) and (not(/page/pageResponse/format[@type='display']/gsf:option[@name='disableZoom']) or /page/pageResponse/format[@type='display']/gsf:option[@name='disableZoom']/@value='false')">
 				
 				<div id="image{@nodeID}">
-				<xsl:if test="/page/pageRequest/paramList/param[@name = 'ed']/@value='1'">
+				  <!-- when we ask for an individual section content we set ed=1. putting this test here prevents downloading all the screen and full images for each section of the document when we are just looking at teh contents list -->
+				  <xsl:if test="/page/pageRequest/paramList/param[@name = 'ed']/@value='1'">
 				
 					<div id="wrap{util:replace(@nodeID, '.', '_')}" class="zoomImage" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
 						<div id="small{util:replace(@nodeID, '.', '_')}" style="position:relative; width: {$screenImageWidth}px; height: {$screenImageHeight}px;">
