@@ -954,7 +954,12 @@ function addNewMetadataRow(table, name) {
 
     var clean_name = name.replace(/[\.-]/g, "");
     var newRow = $("<tr>", {"style": "display: table-row;"});
-    var nameCell = $("<td>" + name + "</td>");
+    var nameCell;
+    if (jQuery.inArray(name, multiValuedMetadata) != -1) {
+	nameCell = $("<td>" + name + " <span title='"+gs.text.de.multi_valued_tooltip + "' style='float:right;'>"+mvm_delimiter+"</span></td>");
+    } else {
+	nameCell = $("<td>" + name + "</td>");
+    }
     nameCell.attr("class", "metaTableCellName");
     var valueCell = $("<td>", {"class": "metaTableCell"}); 	
     var textValue = $("<textarea>", {"class": "metaTableCellArea "+ clean_name}); 
