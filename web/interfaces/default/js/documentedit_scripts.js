@@ -32,6 +32,11 @@ var autocompleteMetadata = ["dc.Subject"];
 var dcSubject_values = ["Kings", "Queens", "others"];
 */
 
+/* The metadata specified in multiValuedMetadata array will be treated as a delimited list, using mvm_delimiter. On saving, the values will be separated and saved individually */
+
+var multiValuedMetadata = new Array(); // eg ["xx.Person", "xx.Location"];
+var mvm_delimiter = ";";
+
 /************************
 * METADATA EDIT SCRIPTS *
 ************************/

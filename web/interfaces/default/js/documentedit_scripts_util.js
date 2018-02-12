@@ -335,6 +335,7 @@ function saveAndRebuild(rebuild)
 
   var metadataChanges = new Array();
   if (_deletedMetadata.length > 0) {
+    //addCollectionToBuild(collection);
 
     for(var i = 0; i < _deletedMetadata.length; i++) {
       
@@ -347,10 +348,11 @@ function saveAndRebuild(rebuild)
       
       //Get metadata name
       var cells = currentRow.getElementsByTagName("TD");
-      var nameCell = cells[0];
-      var name = nameCell.innerHTML;
+	var nameCell = cells[0];
+	// metadata name cell might have the multivalue indicator in it, so just want the first word
+	var name = nameCell.innerHTML.split(" ")[0];
       var valueCell = cells[1];
-      var value = valueCell.getElementsByTagName("TEXTAREA")[0].value;
+	var value = valueCell.getElementsByTagName("TEXTAREA")[0].value;
 	if (value.length) {
 	    // check for non empty value, in case all they have done is add a field then deleted it.
 	    metadataChanges.push({type:'delete', docID:docID, name:name, value:value});
@@ -373,12 +375,13 @@ function saveAndRebuild(rebuild)
 			var currentElem = changedElem;
 			while((currentElem = currentElem.parentNode).tagName != "TABLE");
 			var docID = currentElem.getAttribute("id").substring(4);
-
+		    
 			//Get metadata name
 			var row = changedElem.parentNode.parentNode;
 			var cells = row.getElementsByTagName("TD");
-			var nameCell = cells[0];
-			var name = nameCell.innerHTML;
+		    var nameCell = cells[0];
+		    // metadata name cell might have the multivalue indicator in it, so just want the first word
+		    var name = nameCell.innerHTML.split(" ")[0];
 			var value = changedElem.value;
 			value = value.replace(/&nbsp;/g, " ");
 
@@ -386,7 +389,28 @@ function saveAndRebuild(rebuild)
 			if (orig) {
 			  orig = orig.replace(/&nbsp;/g, " ");
 			}
+		    if (jQuery.inArray(name, multiValuedMetadata) != -1) {
+
+			// split the values
+			var values_list = value.split(mvm_delimiter);
+			var orig_list;
+			var num_orig;
+			if (orig) {
+			    orig_list = orig.split(mvm_delimiter);
+			    num_orig = orig_list.length;
+			}
+
+			for(var i = 0; i < values_list.length; i++) {
+			    var val = values_list[i];
+			    var ori =null;
+			    if (orig && i<num_orig) {
+				    ori = orig_list[i];
+				}
+			    metadataChanges.push({collection:collection, docID:docID, name:name, value:val, orig:ori});
+			}
+		    } else {
 			metadataChanges.push({collection:collection, docID:docID, name:name, value:value, orig:orig});
+		    }
 			changedElem.originalValue = changedElem.value;
 			addCollectionToBuild(collection);
 		}
@@ -749,8 +773,9 @@ function changeVisibleMetadata(metadataSetName)
 				}
 				else
 				{
-					var cells = rows[j].getElementsByTagName("TD");
-					var cellName = cells[0].innerHTML;
+				    var cells = rows[j].getElementsByTagName("TD");
+				    // metadata name cell might have the multivalue indicator in it, so just want the first word
+				    var cellName = cells[0].innerHTML.split(" ")[0];
 					
 					if(cellName.indexOf(".") == -1)
 					{
@@ -828,7 +853,7 @@ function addFunctionalityToTable(table)
 	{
 		var cells = $(this).find("td");
 		var metadataName = $(cells[0]).html();
-		
+
 		if(dynamic_metadata_set_list == true && metadataName.indexOf(".") != -1)
 		{
 			var metadataSetName = metadataName.substring(0, metadataName.lastIndexOf("."));
@@ -851,7 +876,14 @@ function addFunctionalityToTable(table)
 		}
 			
 		asyncRegisterEditSection(cells[1].getElementsByTagName("textarea")[0]);
-		addRemoveLinkToRow(this);
+	    addRemoveLinkToRow(this);
+
+	    // add multivalued indicator if needed
+	     if (jQuery.inArray(metadataName, multiValuedMetadata) != -1) {
+	    //if (multiValuedMetadata.includes(metadataName)){
+		$(cells[0]).html(metadataName + " <span title='"+gs.text.de.multi_valued_tooltip + "' style='float:right;'>"+mvm_delimiter+"</span>"); //Multi-valued metadata. Separate values with semi-colon ;
+	    }
+	    
 	});
 
     // set up autocomplete values
@@ -866,6 +898,8 @@ function addFunctionalityToTable(table)
 	    });
 	}
     }
+
+    // add metadata field selector
         var metaNameField = createMetadataElementSelector(); 	
 	table.after(metaNameField);
 	table.metaNameField = metaNameField;
