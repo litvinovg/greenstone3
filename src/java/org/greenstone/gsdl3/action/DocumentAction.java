@@ -526,7 +526,14 @@ public class DocumentAction extends Action
 
 			// Add the documentNode to the list
 			Element dm_doc_node = doc.createElement(GSXML.DOC_NODE_ELEM);
-			dm_doc_list.appendChild(dm_doc_node);
+			if (needSectionContent(params)) {
+				if (doc_node_id.equals(document_id)) {
+					dm_doc_list.appendChild(dm_doc_node);
+				} 
+			} else {
+				dm_doc_list.appendChild(dm_doc_node);
+			}
+			//dm_doc_list.appendChild(dm_doc_node);
 			dm_doc_node.setAttribute(GSXML.NODE_ID_ATT, doc_node_id);
 			dm_doc_node.setAttribute(GSXML.NODE_TYPE_ATT, doc_node.getAttribute(GSXML.NODE_TYPE_ATT));
 			if (document_id == null){
@@ -534,7 +541,6 @@ public class DocumentAction extends Action
 				}
 
 		}
-
 		// we also want a metadata request to the top level document to get
 		// assocfilepath - this could be cached too
 		Element doc_meta_request = GSXML.createBasicRequest(doc, GSXML.REQUEST_TYPE_PROCESS, to, userContext);
@@ -583,7 +589,9 @@ public class DocumentAction extends Action
 		NodeList dm_response_docs = dm_response_doc_list.getChildNodes();
 		for (int i = 0; i < doc_nodes.getLength(); i++)
 		{
-			GSXML.mergeMetadataLists(doc_nodes.item(i), dm_response_docs.item(i));
+			String node_idd = ((Element)doc_nodes.item(i)).getAttribute(GSXML.NODE_ID_ATT);
+			Node dcNode = GSXML.getNamedElement(dm_response_doc_list, "documentNode", GSXML.NODE_ID_ATT, node_idd);
+			GSXML.mergeMetadataLists(doc_nodes.item(i), dcNode);
 		}
 		// get the top level doc metadata out
 		Element doc_meta_response = (Element) dm_response_message.getElementsByTagName(GSXML.RESPONSE_ELEM).item(1);
@@ -622,9 +630,11 @@ public class DocumentAction extends Action
 			dc_request.appendChild(basic_doc_list);
 		}
 		Element dc_response_message = (Element) this.mr.process(dc_message);
+
 		if (processErrorElements(dc_response_message, page_response))
 		{
 			return result;
+			
 		}
 		Element dc_response_doc_list = (Element) GSXML.getNodeByPath(dc_response_message, path);
 
@@ -634,12 +644,15 @@ public class DocumentAction extends Action
 			NodeList dc_response_docs = dc_response_doc_list.getChildNodes();
 			for (int i = 0; i < doc_nodes.getLength(); i++)
 			{
-				Node content = GSXML.getChildByTagName((Element) dc_response_docs.item(i), GSXML.NODE_CONTENT_ELEM);
+				String node_id = ((Element)doc_nodes.item(i)).getAttribute(GSXML.NODE_ID_ATT);
+				//Node content = GSXML.getChildByTagName((Element) dc_response_docs.item(i), GSXML.NODE_CONTENT_ELEM);
+				Node docNode = GSXML.getNamedElement(dc_response_doc_list, "documentNode", GSXML.NODE_ID_ATT, node_id);
+				Node content = GSXML.getChildByTagName(docNode, GSXML.NODE_CONTENT_ELEM);
 				if (content != null)
 				{
 					if (highlight_query_terms)
 					{
-					  String node_id = ((Element)doc_nodes.item(i)).getAttribute(GSXML.NODE_ID_ATT);
+					  
 					  content = highlightQueryTerms(request, node_id, (Element) content);
 					}
 					
@@ -798,7 +811,17 @@ public class DocumentAction extends Action
 
 		return true;
 	}
-
+	
+	private boolean needSectionContent(HashMap<String, Serializable> params) {
+		String document_id = (String) params.get(GSParams.DOCUMENT);
+		String ilt = (String) params.get(GSParams.INLINE_TEMPLATE);
+		String iltPrefix = "<xsl:template match=\"/\"><text><xsl:for-each select=\"/page/pageResponse/document//documentNode[@nodeID =";
+		if (ilt != null && ilt.startsWith(iltPrefix) && document_id != null) {
+			return true;
+		}
+	
+		return false;
+	}
 	/**
 	 * this method gets the collection description, the format info, the list of
 	 * enrich services, etc - stuff that is needed for the page, but is the same
