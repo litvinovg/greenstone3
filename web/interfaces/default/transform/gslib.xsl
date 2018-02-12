@@ -384,11 +384,11 @@
 
 
   <xsl:template name="libraryInterfaceLink">
-    <li>
+    <!--<li>-->
       <a href="{$library_name}?a=p&amp;sa=gli4gs3">
         <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.librarian_interface')"/>
       </a>
-    </li>
+    <!--</li>-->
   </xsl:template>
   
   <xsl:template name="greenstoneLogoAlternateText">

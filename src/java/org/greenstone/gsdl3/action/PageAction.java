@@ -410,11 +410,12 @@ public class PageAction extends Action
 
 		Element applet_elem = doc.createElement("Applet");
 		page_response.appendChild(applet_elem);
-		applet_elem.setAttribute("ARCHIVE", "SignedGatherer.jar");
+		applet_elem.setAttribute("ARCHIVE", "SignedGatherer.jar"); // SignedGatherer.jar should be placed in web/applet. 
 		applet_elem.setAttribute("CODE", "org.greenstone.gatherer.GathererApplet");
-		applet_elem.setAttribute("CODEBASE", "applet");
+		applet_elem.setAttribute("CODEBASE", "applet"); // SignedGatherer.jar is in web/applet. But CODEBASE is the *URL* path to the (jar) file containing the main class, and is relative to documentroot "web".
 		applet_elem.setAttribute("HEIGHT", "50");
 		applet_elem.setAttribute("WIDTH", "380");
+		
 		Element gwcgi_param_elem = doc.createElement("PARAM");
 		gwcgi_param_elem.setAttribute("name", "gwcgi");
 		String library_name = GlobalProperties.getGSDL3WebAddress();
@@ -425,7 +426,10 @@ public class PageAction extends Action
 		gsdl3_param_elem.setAttribute("name", "gsdl3");
 		gsdl3_param_elem.setAttribute("value", "true");
 		applet_elem.appendChild(gsdl3_param_elem);
-
+		
+		Node default_text = doc.createTextNode("GLI applet");
+		applet_elem.appendChild(default_text);
+		
 		return page_response;
 	}
 }
