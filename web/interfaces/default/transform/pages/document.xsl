@@ -64,7 +64,8 @@
 	<xsl:template name="documentHeading">
 		<b><xsl:text> </xsl:text><gsf:metadata name="Title"/></b><br/>
 	</xsl:template>
-	
+
+	<!-- content of a simple document. Will not be used for editing mode -->
 	<xsl:template name="documentContent">
 		<div id="gs-document">
 			<xsl:call-template name="documentPre"/>
