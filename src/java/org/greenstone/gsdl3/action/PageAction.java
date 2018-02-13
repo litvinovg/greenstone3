@@ -429,10 +429,10 @@ public class PageAction extends Action
 				
 		// When an applet doesn't work in the browser, set the default display text to provide a link to the JNLP file to run with Java Web Start
 		// The display text will be:
-		// 		Applets don't seem to work in your browser. In place of the GLI Applet, try running its alternative <a href="applet/GLIapplet.jnlp">Java Web Start (JNLP) version</a>
+		// 		Applets don't seem to work in your browser. In place of the GLI Applet, try running its alternative <a href="applet/GLIappWebStart.jnlp">Java Web Start (JNLP) version</a>
 		Node default_text = doc.createTextNode("Applets don't seem to work in your browser. In place of the GLI Applet, try running its alternative ");
 		Element link_to_jnlp = doc.createElement("a");
-		link_to_jnlp.setAttribute("href", "applet/GLIapplet.jnlp");
+		link_to_jnlp.setAttribute("href", "applet/GLIappWebStart.jnlp");
 		Node anchor_text = doc.createTextNode("Java Web Start (JNLP) version");
 		link_to_jnlp.appendChild(anchor_text);		
 		applet_elem.appendChild(default_text);
