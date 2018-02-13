@@ -411,7 +411,7 @@ public class PageAction extends Action
 		Element applet_elem = doc.createElement("Applet");
 		page_response.appendChild(applet_elem);
 		applet_elem.setAttribute("ARCHIVE", "SignedGatherer.jar"); // SignedGatherer.jar should be placed in web/applet. 
-		applet_elem.setAttribute("CODE", "org.greenstone.gatherer.GathererApplet");
+		applet_elem.setAttribute("CODE", "org.greenstone.gatherer.WebGatherer");
 		applet_elem.setAttribute("CODEBASE", "applet"); // SignedGatherer.jar is in web/applet. But CODEBASE is the *URL* path to the (jar) file containing the main class, and is relative to documentroot "web".
 		applet_elem.setAttribute("HEIGHT", "50");
 		applet_elem.setAttribute("WIDTH", "380");
