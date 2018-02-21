@@ -384,11 +384,18 @@
 
 
   <xsl:template name="libraryInterfaceLink">
-    <!--<li>-->
-      <a href="{$library_name}?a=p&amp;sa=gli4gs3">
+    <div class="paramLabel">
+	  <!-- 
+		Using HTML5 download attribute to anchor tag, providing download-as-filename value, so Gli App JNLP file downloads.
+		Seems we don't need to set the MIME type for downloaded JNLP to launch, if program associations are correctly set up.
+	  -->
+      <a href="{$library_name}?a=p&amp;sa=gli4gs3" download="GLIappWebStart.jnlp">
         <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.librarian_interface')"/>
       </a>
-    <!--</li>-->
+    </div>
+	<div class="paramValue">
+	  <xsl:value-of select="util:getInterfaceText($interface_name, /page/@lang, 'home.gliapp_webstart')"/>
+	</div>
   </xsl:template>
   
   <xsl:template name="greenstoneLogoAlternateText">
