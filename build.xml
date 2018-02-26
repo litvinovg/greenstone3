@@ -648,15 +648,29 @@
     <pathelement location="${web.writablelib}/derby.jar"/>
   </path>
 
-
-  <path id="local.tomcat.path">
-    <pathelement location="${basedir}/bin/script"/>
-    <pathelement location="${basedir}/bin"/>
-    <pathelement location="${lib.jni}"/>
-    <pathelement path="${env.PATH}"/>
-    <pathelement path="${env.Path}"/>
-    <pathelement path="${wn.home}/bin"/>
-  </path>
+  
+	<if><bool><isset property="env.PATH"/></bool>
+	  <path id="local.tomcat.path">
+		<pathelement location="${basedir}/bin/script"/>
+		<pathelement location="${basedir}/bin"/>
+		<pathelement location="${lib.jni}"/>	
+		<pathelement path="${env.PATH}"/>
+		<pathelement path="${wn.home}/bin"/>
+	  </path>
+	  <!-- Windows can be case sensitive about env.PATH, preferring env.Path. See https://ant.apache.org/manual/Tasks/property.html  -->
+	  <else><if><bool><isset property="env.Path"/></bool>
+		<path id="local.tomcat.path">
+		  <pathelement location="${basedir}/bin/script"/>
+		  <pathelement location="${basedir}/bin"/>
+		  <pathelement location="${lib.jni}"/>
+		  <pathelement path="${env.Path}"/>
+		  <pathelement path="${wn.home}/bin"/>
+		</path>
+	  <!-- else print error about no path set -->
+	  <else>
+		<echo>No env.PATH (or env.Path) set. Unable to set local.tomcat.path property</echo>
+	  </else></if></else>	
+	</if>	
 
   <target name="test-setup">
     <echo>ant java version=${ant.java.version}</echo>
@@ -665,6 +679,8 @@
     <echo>is unixnotmac : ${current.os.isunixnotmac}</echo>
     <echo>is windows : ${current.os.iswindows}</echo>
     <echo>os.unix: ${os.unix}</echo>
+	<echo>env.PATH: ${env.PATH}</echo>
+	<echo>env.Path: ${env.Path}</echo>	
   </target>
 
   <target name="needs-gs3-setup">
