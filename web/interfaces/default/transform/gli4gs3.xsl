@@ -37,8 +37,9 @@
 	  -->
 	  <jnlp
 		  spec="1.0+"		  
-		  href="GLIappWebStart.jnlp"><!--codebase="http://localhost:8383/greenstone3/applet"-->
-		  <xsl:attribute name="codebase"><xsl:value-of select='/page/pageRequest/@baseURL'/>applet</xsl:attribute>
+		  href=""><!-- don't set href to GLIappWebStart.jnlp, because when downloading it will then expect a static file by that name to exist in the location given by codebase-->
+		  <xsl:attribute name="codebase"><xsl:value-of select='/page/pageRequest/@baseURL'/>applet</xsl:attribute><!--set codebase to location of jar file-->
+		  
 		  <information>
 			<title>Greenstone Librarian Interface</title>
 			<vendor>New Zealand Digital Library</vendor>
