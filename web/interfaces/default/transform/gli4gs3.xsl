@@ -36,9 +36,9 @@
 		 */
 	  -->
 	  <jnlp
-		  spec="1.0+"
-		  codebase="http://localhost:8383/greenstone3/applet"
-		  href="GLIappWebStart.jnlp">
+		  spec="1.0+"		  
+		  href="GLIappWebStart.jnlp"><!--codebase="http://localhost:8383/greenstone3/applet"-->
+		  <xsl:attribute name="codebase"><xsl:value-of select='/page/pageRequest/@baseURL'/>applet</xsl:attribute>
 		  <information>
 			<title>Greenstone Librarian Interface</title>
 			<vendor>New Zealand Digital Library</vendor>
