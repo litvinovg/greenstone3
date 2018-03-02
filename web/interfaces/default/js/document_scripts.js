@@ -12,6 +12,7 @@ var _filter_title_numeric = false;
 var _linkCellMap = new Array();
 var _onCells = new Array();
 
+var curHLNum = 0;
 
 /*Array to store init states of metadata fields and text*/
 var editableInitStates = new Array();
@@ -247,6 +248,50 @@ function toggleSection(sectionID, callback, tocDisabled)
 function scrollToTop()
 {
 	$('html, body').stop().animate({scrollTop: 0}, 1000);
+}
+
+function scrollNextHightlight()
+{
+    if (curHLNum == null)
+    {
+        curHLNum = 0;
+    } else 
+    {
+        curHLNum++;
+    }
+    var hlNode = $("span[class$='ermHighlight']:eq(" + curHLNum + ")");
+    if (hlNode.length == 0)
+    {
+        curHLNum = 0;
+        hlNode = $("span[class$='ermHighlight']:eq(" + curHLNum + ")");
+    }
+    if (hlNode.length != 0)
+    {
+        var topVal = $(hlNode).offset().top - 50;
+        $('html, body').stop().animate({scrollTop: topVal}, 1000);
+    }
+}
+
+function scrollPrevHightlight()
+{
+    if (curHLNum == null)
+    {
+        curHLNum = $("span[class$='ermHighlight']").length - 1;
+    } else 
+    {
+        curHLNum--;
+    }
+    var hlNode = $("span[class$='ermHighlight']:eq(" + curHLNum + ")");
+    if (hlNode.length == 0)
+    {
+        curHLNum = $("span[class$='ermHighlight']").length - 1;
+        hlNode = $("span[class$='ermHighlight']:eq(" + curHLNum + ")");
+    }
+    if (hlNode.length != 0)
+    {
+        var topVal = $(hlNode).offset().top - 50;
+        $('html, body').stop().animate({scrollTop: topVal}, 1000);
+    }
 }
 
 function focusSection(sectionID, level, tocDisabled)
